@@ -1,0 +1,12 @@
+{
+  "name": "L9 Nightly",
+  "description": "Nightly scheduled validation and dependency freshness check. Calls l9-ci-core kernel; do not add logic here.",
+  "iconName": "clock",
+  "categories": [
+    "Python",
+    "CI"
+  ],
+  "filePatterns": [
+    "**/*.py"
+  ]
+}

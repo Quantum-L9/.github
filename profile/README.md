@@ -1,26 +1,47 @@
-<!-- profile/README.md — Quantum-L9 Org Profile -->
 # Quantum-L9
 
-**Compliance-grade AI DevOps infrastructure, governed by law.**
+> **Distributed intelligence infrastructure for autonomous AI constellation systems.**
 
-[![l9-ci-core CI](https://github.com/Quantum-L9/l9-ci-core/actions/workflows/l9-self-ci.yml/badge.svg)](https://github.com/Quantum-L9/l9-ci-core/actions/workflows/l9-self-ci.yml)
+[![CI](https://github.com/Quantum-L9/l9-ci-core/actions/workflows/l9-self-ci.yml/badge.svg)](https://github.com/Quantum-L9/l9-ci-core/actions/workflows/l9-self-ci.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Quantum-L9/l9-ci-core/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Quantum-L9/l9-ci-core)
-[![Governance: CANONICAL_LAW](https://img.shields.io/badge/governance-CANONICAL__LAW-blue)](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md)
+[![Governance](https://img.shields.io/badge/governance-CANONICAL__LAW.md-blue)](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md)
 
-## Org Architecture
+---
 
-| Repo | Role | Entry Point |
-|------|------|-------------|
-| [Cursor-Governance](https://github.com/Quantum-L9/Cursor-Governance) | GlobalCommands SSOT — AI session lifecycle, canonical law, skills, rules, commands, Graphiti memory layer | [CANONICAL_LAW.md](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md) |
-| [l9-ci-core](https://github.com/Quantum-L9/l9-ci-core) | CI/security kernel — 8 reusable workflow kernels callable by all org repos via `workflow_call` | [.github/workflows/](https://github.com/Quantum-L9/l9-ci-core/tree/main/.github/workflows) |
-| [l9-assurance](https://github.com/Quantum-L9/l9-assurance) | 51-package TypeScript compliance platform — CI/CD governance, testkit primitives, release evidence, redteam, frontier trust | [MANIFEST.md](https://github.com/Quantum-L9/l9-assurance/blob/main/MANIFEST.md) |
+## Architecture
+
+| Repository | Role | Entry Point |
+|---|---|---|
+| [`Cursor-Governance`](https://github.com/Quantum-L9/Cursor-Governance) | Policy SSOT — CANONICAL_LAW.md §1–§9, symlink wiring, GlobalCommands | `CANONICAL_LAW.md` |
+| [`l9-ci-core`](https://github.com/Quantum-L9/l9-ci-core) | Reusable CI kernel library — 8 `workflow_call` kernels | `.github/workflows/pr-pipeline.yml@v1` |
+| [`l9-assurance`](https://github.com/Quantum-L9/l9-assurance) | 51-package TypeScript governance assurance monorepo | `packages/` |
+| [`.github`](https://github.com/Quantum-L9/.github) | Org backbone — health files, starter templates, workflow registry | `workflow-interface-registry.yml` |
+
+---
+
+## CI Kernel API
+
+All repositories consume `l9-ci-core` kernels via thin caller workflows.  
+See [`workflow-interface-registry.yml`](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml) for the machine-readable CI API contract.
+
+| Kernel | Purpose |
+|---|---|
+| `pr-pipeline.yml@v1` | Lint, type-check, test, security gates on every PR |
+| `release-publish.yml@v1` | Versioned release build and publish |
+| `nightly.yml@v1` | Scheduled nightly validation |
+| `pre-commit-ci.yml@v1` | Pre-commit hook enforcement |
+| `trio-governance.yml@v1` | Three-tier separation governance check |
+| `security.yml@v1` | Gitleaks, Bandit/Semgrep, pip-audit/npm audit |
+| `scorecard.yml@v1` | OpenSSF Scorecard analysis |
+| `sbom.yml@v1` | SBOM generation (SPDX-JSON via Syft) |
+
+---
 
 ## Contributing
 
-All contributors must complete the **[governance setup checklist](https://github.com/Quantum-L9/.github/blob/main/CONTRIBUTING.md#governance-setup)** before opening a PR. This wires your workspace to the CANONICAL_LAW.md symlink contract (§2 and §8).
+1. Read [`CONTRIBUTING.md`](https://github.com/Quantum-L9/.github/blob/main/CONTRIBUTING.md) — governance setup checklist is mandatory.
+2. Clone `Cursor-Governance` and run `setup_workspace_symlinks.sh` before committing to any repo.
+3. All PRs require CI green + CODEOWNERS approval (2 reviewers for blast-radius files).
 
-CI in every repo runs via **l9-ci-core kernels** — starter workflows are available in every repo's Actions tab under **New workflow → By Quantum-L9**.
-
-## Security
-
-See [SECURITY.md](https://github.com/Quantum-L9/.github/blob/main/SECURITY.md) for the vulnerability disclosure policy. Security testing is powered by l9-assurance's `l9-agent-security-testkit` and `l9-security-testkit` packages.
+See [`SECURITY.md`](https://github.com/Quantum-L9/.github/blob/main/SECURITY.md) to report vulnerabilities.  
+Security packages: [`l9-agent-security-testkit`](https://github.com/Quantum-L9/l9-assurance/tree/main/packages/l9-agent-security-testkit), [`l9-security-testkit`](https://github.com/Quantum-L9/l9-assurance/tree/main/packages/l9-security-testkit).

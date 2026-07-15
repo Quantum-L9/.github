@@ -1,0 +1,12 @@
+{
+  "name": "L9 Pre-Commit CI",
+  "description": "Pre-commit hook enforcement in CI (ruff, mypy, hooks). Calls l9-ci-core kernel; do not add logic here.",
+  "iconName": "verified",
+  "categories": [
+    "Python",
+    "CI"
+  ],
+  "filePatterns": [
+    ".pre-commit-config.yaml"
+  ]
+}

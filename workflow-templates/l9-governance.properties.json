@@ -1,7 +1,12 @@
 {
-  "name": "L9 Governance Trio Gate",
-  "description": "Validates governance thresholds, rule-mode policy, trio token separation, PR classification, and marker integrity against CANONICAL_LAW.md.",
-  "iconName": "octicon shield-lock",
-  "categories": ["Python", "Compliance"],
-  "filePatterns": [".github/governance/*"]
+  "name": "L9 Governance Trio",
+  "description": "Three-tier separation enforcement (model/service/interface). Calls l9-ci-core kernel; do not add logic here.",
+  "iconName": "shield",
+  "categories": [
+    "Python",
+    "Governance"
+  ],
+  "filePatterns": [
+    "**/*.py"
+  ]
 }

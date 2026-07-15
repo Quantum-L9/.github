@@ -1,0 +1,10 @@
+{
+  "name": "L9 SBOM Generator",
+  "description": "SBOM generation (SPDX-JSON via Syft). Calls l9-ci-core kernel; do not add logic here.",
+  "iconName": "package",
+  "categories": [
+    "Security",
+    "Supply Chain"
+  ],
+  "filePatterns": []
+}

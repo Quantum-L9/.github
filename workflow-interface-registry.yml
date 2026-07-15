@@ -1,77 +1,172 @@
-# workflow-interface-registry.yml — Quantum-L9 CI API Contract
-# Source of truth: Quantum-L9/l9-ci-core .github/workflows/
 schema_version: "1.0"
 kernel_provider: "Quantum-L9/l9-ci-core"
 current_ref: "v1"
 current_sha: "2b330a5aab90cd7781bef08f14c5e7904b61bc56"
+last_audited: "2026-07-05"
+
+# TAG DISCIPLINE:
+# v1.0.0 — immutable annotated tag, protected via GitHub tag protection rules
+# v1      — moving tag, force-updated by platform team on backward-compatible changes
+# v2      — cut for breaking changes (new required inputs, removed outputs, renamed jobs)
+# Never reference @main from thin callers. Always use @v1.
 
 kernels:
   - name: pr-pipeline
     file: ".github/workflows/pr-pipeline.yml"
-    ref: "v1"
-    description: "PR quality gate: validate, lint, semgrep, test, security, SBOM, Scorecard."
-    minimum_permissions:
-      contents: read
-      security-events: write
-      pull-requests: read
-      id-token: write
+    classification: KERNEL
+    description: "Full PR validation pipeline: lint, type-check, tests, security gates"
     inputs:
-      required: []
-      optional:
-        - name: python-version
-          type: string
-          default: "3.12"
-        - name: source-dir
-          type: string
-          default: "."
-        - name: test-dir
-          type: string
-          default: "tests/"
-        - name: requirements-file
-          type: string
-          default: "requirements-ci.txt"
+      - name: python-version
+        type: string
+        required: false
+        default: "3.12"
+        description: "Python version for the pipeline"
+      - name: run-security
+        type: boolean
+        required: false
+        default: true
+        description: "Whether to run security sub-steps"
+      - name: working-directory
+        type: string
+        required: false
+        default: "."
+        description: "Working directory for all steps"
+    outputs:
+      - name: test-results
+        description: "Path to pytest XML results"
     secrets:
-      mode: inherit
-    gate_job_name: "CI Gate"
-    semantic_version: "1.0.0"
+      - name: inherit
+        description: "All repo secrets inherited via secrets: inherit"
+
+  - name: release-publish
+    file: ".github/workflows/release-publish.yml"
+    classification: KERNEL
+    description: "Versioned release build, changelog generation, and PyPI/registry publish"
+    inputs:
+      - name: python-version
+        type: string
+        required: false
+        default: "3.12"
+      - name: publish-to-pypi
+        type: boolean
+        required: false
+        default: true
+      - name: tag-name
+        type: string
+        required: false
+        default: "${{ github.ref_name }}"
+    outputs:
+      - name: release-url
+        description: "GitHub Release URL"
+    secrets:
+      - name: inherit
+
+  - name: nightly
+    file: ".github/workflows/nightly.yml"
+    classification: KERNEL
+    description: "Scheduled nightly validation: extended test suite, dependency freshness check"
+    inputs:
+      - name: python-version
+        type: string
+        required: false
+        default: "3.12"
+      - name: run-extended-tests
+        type: boolean
+        required: false
+        default: true
+    outputs: []
+    secrets:
+      - name: inherit
+
+  - name: pre-commit-ci
+    file: ".github/workflows/pre-commit-ci.yml"
+    classification: KERNEL
+    description: "Runs pre-commit hooks in CI: ruff, mypy, trailing-whitespace, etc."
+    inputs:
+      - name: python-version
+        type: string
+        required: false
+        default: "3.12"
+    outputs: []
+    secrets:
+      - name: inherit
 
   - name: trio-governance
     file: ".github/workflows/trio-governance.yml"
-    ref: "v1"
-    description: "Governance trio: threshold validation, rule-mode analysis, and marker integrity."
-    minimum_permissions:
-      contents: read
+    classification: KERNEL
+    description: "Three-tier separation enforcement per CANONICAL_LAW.md §3: model/service/interface must not cross-import"
     inputs:
-      required: []
-      optional:
-        - name: python-version
-          type: string
-          default: "3.12"
-        - name: policy-path
-          type: string
-          default: ".github/governance/audit-policy.yml"
+      - name: src-directory
+        type: string
+        required: false
+        default: "src"
+    outputs:
+      - name: violations-found
+        description: "true if trio separation violations detected"
     secrets:
-      mode: inherit
-    gate_job_name: "trio-governance-passed"
-    semantic_version: "1.0.0"
+      - name: inherit
 
   - name: security
     file: ".github/workflows/security.yml"
-    ref: "v1"
-    description: "Secret scan, dependency auditing, SAST checking, and dependency reviews."
-    minimum_permissions:
-      contents: read
-      security-events: write
+    classification: KERNEL
+    description: "Security scan pipeline: gitleaks, Bandit, Semgrep, pip-audit/npm audit"
     inputs:
-      required: []
-      optional:
-        - name: python-version
-          type: string
-          default: "3.12"
-        - name: source-dir
-          type: string
-          default: "."
+      - name: python-version
+        type: string
+        required: false
+        default: "3.12"
+      - name: run-npm-audit
+        type: boolean
+        required: false
+        default: false
+        description: "Set true for Node/TS repos"
+    outputs:
+      - name: sarif-path
+        description: "Path to SARIF output uploaded to GitHub Security tab"
     secrets:
-      mode: inherit
-    gate_job_name: "security"
-    semantic_version: "1.0.0"
+      - name: inherit
+
+  - name: scorecard
+    file: ".github/workflows/scorecard.yml"
+    classification: KERNEL
+    description: "OpenSSF Scorecard analysis, uploads results to GitHub Security tab"
+    inputs:
+      - name: scorecard-token
+        type: string
+        required: false
+        description: "Override token for Scorecard API (uses GITHUB_TOKEN by default)"
+    outputs:
+      - name: scorecard-score
+        description: "Numeric Scorecard result"
+    secrets:
+      - name: inherit
+
+  - name: sbom
+    file: ".github/workflows/sbom.yml"
+    classification: KERNEL
+    description: "SBOM generation via Syft/Anchore, SPDX-JSON format, uploaded to GitHub release"
+    inputs:
+      - name: image-ref
+        type: string
+        required: false
+        description: "Container image ref for SBOM generation (leave blank for filesystem scan)"
+    outputs:
+      - name: sbom-path
+        description: "Path to generated SPDX-JSON SBOM artifact"
+    secrets:
+      - name: inherit
+
+  # INLINE ONLY — not a reusable kernel
+  - name: l9-self-ci
+    file: ".github/workflows/l9-self-ci.yml"
+    classification: INLINE_ONLY
+    description: "l9-ci-core self-validation CI. Must remain on: [pull_request, push]."
+    rationale: |
+      l9-self-ci.yml must NOT use workflow_call. Reason: l9-ci-core is the kernel provider.
+      If kernels called themselves via workflow_call, this would create a circular dependency
+      (a kernel calling itself to validate itself). Dogfood isolation requires the self-CI
+      to run inline, not through the kernel dispatch system.
+      This is intentional and must never be changed.
+    inputs: []
+    outputs: []
+    secrets: []

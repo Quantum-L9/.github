@@ -1,0 +1,12 @@
+{
+  "name": "L9 PR Pipeline",
+  "description": "Full PR validation pipeline (lint, type-check, tests, security). Calls l9-ci-core kernel; do not add logic here.",
+  "iconName": "beaker",
+  "categories": [
+    "Python",
+    "CI"
+  ],
+  "filePatterns": [
+    "**/*.py"
+  ]
+}

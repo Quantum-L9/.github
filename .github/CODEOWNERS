@@ -1,18 +1,28 @@
-# .github/CODEOWNERS — Quantum-L9/.github
-# Strict control over organizational templates and health files.
-# Two approvers required for any structural changes.
+# Quantum-L9/.github CODEOWNERS
+# All changes require review from platform team.
+# Blast-radius paths require cryptoxdog as additional reviewer.
 
-* @Quantum-L9/platform
+# Default — platform team owns everything
+*                              @Quantum-L9/platform
 
-# Core templates and auto-discovery files
-/workflow-templates/ @Quantum-L9/platform @cryptoxdog
-/profile/ @Quantum-L9/platform @cryptoxdog
-/ISSUE_TEMPLATE/ @Quantum-L9/platform @cryptoxdog
+# Workflow starter templates — highest blast-radius: surface in every repo's Actions tab
+/workflow-templates/           @Quantum-L9/platform @cryptoxdog
 
-# Canonical fallback files
-CONTRIBUTING.md @Quantum-L9/platform @cryptoxdog
-SECURITY.md @Quantum-L9/platform @cryptoxdog
-CODE_OF_CONDUCT.md @Quantum-L9/platform @cryptoxdog
-PULL_REQUEST_TEMPLATE.md @Quantum-L9/platform @cryptoxdog
-SUPPORT.md @Quantum-L9/platform @cryptoxdog
-workflow-interface-registry.yml @Quantum-L9/platform @cryptoxdog
+# Community health files — propagate org-wide
+/CONTRIBUTING.md               @Quantum-L9/platform @cryptoxdog
+/SECURITY.md                   @Quantum-L9/platform @cryptoxdog
+/CODE_OF_CONDUCT.md            @Quantum-L9/platform @cryptoxdog
+/SUPPORT.md                    @Quantum-L9/platform @cryptoxdog
+/PULL_REQUEST_TEMPLATE.md      @Quantum-L9/platform @cryptoxdog
+
+# Org profile — public-facing landing page
+/profile/                      @Quantum-L9/platform @cryptoxdog
+
+# CI API contract — machine-readable, downstream consumers depend on it
+/workflow-interface-registry.yml  @Quantum-L9/platform @cryptoxdog
+
+# Issue templates
+/.github/ISSUE_TEMPLATE/       @Quantum-L9/platform @cryptoxdog
+
+# Operational scripts — tag creation, branch protection, SHA pinning
+/ops/                          @Quantum-L9/platform @cryptoxdog

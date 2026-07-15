@@ -1,0 +1,12 @@
+{
+  "name": "L9 Release",
+  "description": "Versioned release build and PyPI publish. Calls l9-ci-core kernel; do not add logic here.",
+  "iconName": "tag",
+  "categories": [
+    "Python",
+    "CD"
+  ],
+  "filePatterns": [
+    "**/*.py"
+  ]
+}

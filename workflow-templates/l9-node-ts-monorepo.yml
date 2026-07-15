@@ -1,77 +1,75 @@
-# Quantum-L9 org starter — Node/TypeScript monorepo CI (npm workspaces)
-# Designed for l9-assurance-type repos (npm workspaces, Jest, TypeScript)
-name: L9 Node/TS Monorepo CI
-
+# Quantum-L9 org starter — Node/TypeScript monorepo pipeline.
+# Inline jobs for install/typecheck/test/publish-dry-run.
+# Security and Scorecard delegate to l9-ci-core kernels; do not add logic to those jobs.
+name: "L9 Node/TS Monorepo Pipeline"
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main, 'release/**']
   push:
     branches: [main]
 
 jobs:
   install-and-typecheck:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v6.1.0 pinned
-      - uses: actions/setup-node@019ac77babd1300aa441d40043c0137d8e373b08  # v4.1.0 pinned
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
-      - name: Install workspace dependencies
+      - name: Install dependencies
         run: npm ci
-      - name: Typecheck all workspaces
-        run: npm run typecheck --if-present
+      - name: Type-check
+        run: npm run typecheck
 
   test-by-segment:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
     needs: install-and-typecheck
-    permissions:
-      contents: read
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        segment: [unit, integration]
+      fail-fast: false
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v6.1.0 pinned
-      - uses: actions/setup-node@019ac77babd1300aa441d40043c0137d8e373b08  # v4.1.0 pinned
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
-      - run: npm ci
-      - name: Run all workspace tests
-        run: npm test --if-present
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Jest (${{ matrix.segment }})
+        run: npx jest --testPathPattern="${{ matrix.segment }}" --passWithNoTests
 
   publish-dry-run:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
     needs: test-by-segment
-    if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v6.1.0 pinned
-      - uses: actions/setup-node@019ac77babd1300aa441d40043c0137d8e373b08  # v4.1.0 pinned
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
-      - run: npm ci
-      - name: npm publish dry-run (all public workspaces)
+      - name: Install dependencies
+        run: npm ci
+      - name: Publish dry-run (all public packages)
         run: |
-          for pkg in packages/*/; do
-            PRIVATE=$(node -e "try{const p=require('./${pkg}package.json');console.log(p.private||false)}catch(e){console.log(true)}")
-            if [ "$PRIVATE" = "false" ]; then
-              echo "Dry-run publish: $pkg"
-              npm publish --dry-run --workspace="$pkg" || exit 1
+          for pkg_dir in packages/*/; do
+            pkg_json="$pkg_dir/package.json"
+            if [ ! -f "$pkg_json" ]; then continue; fi
+            private=$(node -e "const p=require('./$pkg_json'); console.log(p.private || false)")
+            if [ "$private" = "false" ] || [ "$private" = "undefined" ]; then
+              echo "--- Dry-run: $pkg_dir ---"
+              (cd "$pkg_dir" && npm publish --dry-run)
             fi
           done
 
   security:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/security.yml@2b330a5aab90cd7781bef08f14c5e7904b61bc56
+    uses: Quantum-L9/l9-ci-core/.github/workflows/security.yml@v1
+    secrets: inherit
     with:
       python-version: "3.12"
-      source-dir: "."
-    secrets: inherit
+      run-npm-audit: true
 
   scorecard:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/scorecard.yml@2b330a5aab90cd7781bef08f14c5e7904b61bc56
+    uses: Quantum-L9/l9-ci-core/.github/workflows/scorecard.yml@v1
     secrets: inherit

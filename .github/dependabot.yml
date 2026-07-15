@@ -1,15 +1,37 @@
-# .github/dependabot.yml — Quantum-L9
-# Automatically maintains SHA pins for starter workflows.
 version: 2
 updates:
+  # SHA-pin maintenance for workflow starter templates
   - package-ecosystem: "github-actions"
     directory: "/workflow-templates"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/New_York"
+    reviewers:
+      - "Quantum-L9/platform"
+    assignees:
+      - "cryptoxdog"
+    commit-message:
+      prefix: "chore(deps)"
     labels:
       - "dependencies"
-      - "supply-chain"
+      - "github-actions"
+    open-pull-requests-limit: 10
+
+  # SHA-pin maintenance for operational scripts (uses GitHub CLI, ratchet)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/New_York"
     reviewers:
       - "Quantum-L9/platform"
     commit-message:
       prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    open-pull-requests-limit: 5

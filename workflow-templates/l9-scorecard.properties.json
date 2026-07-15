@@ -1,7 +1,10 @@
 {
   "name": "L9 OpenSSF Scorecard",
-  "description": "Runs OpenSSF Scorecard analysis and uploads SARIF results to GitHub Security tab.",
-  "iconName": "octicon verified",
-  "categories": ["Security", "Compliance"],
+  "description": "OpenSSF Scorecard analysis. Calls l9-ci-core kernel; do not add logic here.",
+  "iconName": "graph",
+  "categories": [
+    "Security",
+    "Supply Chain"
+  ],
   "filePatterns": []
 }

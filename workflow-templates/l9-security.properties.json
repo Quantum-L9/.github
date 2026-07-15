@@ -1,7 +1,14 @@
 {
   "name": "L9 Security Scan",
-  "description": "Gitleaks secret scan, pip-audit, Bandit SAST, and PR dependency review via l9-ci-core security kernel.",
-  "iconName": "octicon alert",
-  "categories": ["Security"],
-  "filePatterns": ["requirements*.txt", "pyproject.toml", "*.py"]
+  "description": "Security scan pipeline (gitleaks, Bandit, Semgrep, pip-audit). Calls l9-ci-core kernel; do not add logic here.",
+  "iconName": "lock",
+  "categories": [
+    "Security",
+    "CI"
+  ],
+  "filePatterns": [
+    "**/*.py",
+    "**/*.js",
+    "**/*.ts"
+  ]
 }
