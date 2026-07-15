@@ -1,14 +1,16 @@
 # Quantum-L9 org starter — Security Scan
 name: L9 Security Scan
+
 on:
   pull_request:
   push:
     branches: [main]
   schedule:
-    - cron: "0 6 * * 1"  # Weekly Monday 06:00 UTC
+    - cron: "0 6 * * 1"
+
 jobs:
   security:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/security.yml@v1
+    uses: Quantum-L9/l9-ci-core/.github/workflows/security.yml@2b330a5aab90cd7781bef08f14c5e7904b61bc56
     with:
       python-version: "3.12"
       source-dir: "."

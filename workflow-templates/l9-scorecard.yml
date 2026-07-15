@@ -1,11 +1,13 @@
 # Quantum-L9 org starter — OpenSSF Scorecard
 name: L9 OpenSSF Scorecard
+
 on:
   schedule:
-    - cron: "0 12 * * 1"  # Weekly Monday 12:00 UTC
+    - cron: "0 12 * * 1"
   push:
     branches: [main]
+
 jobs:
   scorecard:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/scorecard.yml@v1
+    uses: Quantum-L9/l9-ci-core/.github/workflows/scorecard.yml@2b330a5aab90cd7781bef08f14c5e7904b61bc56
     secrets: inherit

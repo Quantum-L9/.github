@@ -4,9 +4,7 @@ labels: ["governance", "priority"]
 body:
   - type: markdown
     attributes:
-      value: |
-        Report violations of CANONICAL_LAW.md §7 Anti-Patterns.
-        CI should catch these automatically — if it did not, this report also documents the CI gap.
+      value: "Report violations of [CANONICAL_LAW.md §7 Anti-Patterns](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md#7-anti-patterns)."
   - type: input
     id: repo
     attributes:
@@ -16,22 +14,10 @@ body:
   - type: dropdown
     id: violation-type
     attributes:
-      label: Anti-Pattern Type (CANONICAL_LAW.md §7)
+      label: Anti-Pattern Type
       options:
-        - "Second GlobalCommands tree in repo (.cursor/governance/GlobalCommands, .cursor/skills, etc.)"
+        - "Second GlobalCommands tree in repo"
         - "Hard-reset or force-push of SSOT clone"
-        - "Committed .cursor-commands symlink content (not the symlink itself)"
-        - "Other §7 violation"
+        - "Committed .cursor-commands symlink content"
     validations:
       required: true
-  - type: textarea
-    id: location
-    attributes:
-      label: File Path(s) and Evidence
-    validations:
-      required: true
-  - type: input
-    id: ci-detection
-    attributes:
-      label: Was this caught by CI?
-      placeholder: "Yes / No — if No, explain the gap"

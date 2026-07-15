@@ -4,7 +4,7 @@ labels: ["bug"]
 body:
   - type: markdown
     attributes:
-      value: "Before submitting, check RUNBOOK.md for known issues."
+      value: "Before submitting, check [RUNBOOK.md](https://github.com/Quantum-L9/l9-assurance/blob/main/RUNBOOK.md) for known issues."
   - type: input
     id: repo
     attributes:
@@ -16,28 +16,5 @@ body:
     id: description
     attributes:
       label: Bug Description
-      description: What happened vs. what you expected
-    validations:
-      required: true
-  - type: textarea
-    id: reproduce
-    attributes:
-      label: Steps to Reproduce
-    validations:
-      required: true
-  - type: input
-    id: ci-run
-    attributes:
-      label: CI Run URL (if CI-related)
-      placeholder: "https://github.com/Quantum-L9/.../actions/runs/..."
-  - type: dropdown
-    id: severity
-    attributes:
-      label: Severity
-      options:
-        - "Critical (blocks all CI)"
-        - "High"
-        - "Medium"
-        - "Low"
     validations:
       required: true

@@ -1,11 +1,13 @@
 # Quantum-L9 org starter — Governance Trio Gate
 name: L9 Governance Trio
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
 jobs:
   governance:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/trio-governance.yml@v1
+    uses: Quantum-L9/l9-ci-core/.github/workflows/trio-governance.yml@2b330a5aab90cd7781bef08f14c5e7904b61bc56
     with:
       python-version: "3.12"
       policy-path: ".github/governance/audit-policy.yml"

@@ -1,11 +1,13 @@
 # Quantum-L9 org starter — Node/TypeScript monorepo CI (npm workspaces)
 # Designed for l9-assurance-type repos (npm workspaces, Jest, TypeScript)
 name: L9 Node/TS Monorepo CI
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
+
 jobs:
   install-and-typecheck:
     runs-on: ubuntu-latest
@@ -13,8 +15,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v6.1.0 pinned
+      - uses: actions/setup-node@019ac77babd1300aa441d40043c0137d8e373b08  # v4.1.0 pinned
         with:
           node-version: "20"
           cache: "npm"
@@ -30,8 +32,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v6.1.0 pinned
+      - uses: actions/setup-node@019ac77babd1300aa441d40043c0137d8e373b08  # v4.1.0 pinned
         with:
           node-version: "20"
           cache: "npm"
@@ -47,8 +49,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v6.1.0 pinned
+      - uses: actions/setup-node@019ac77babd1300aa441d40043c0137d8e373b08  # v4.1.0 pinned
         with:
           node-version: "20"
           cache: "npm"
@@ -64,12 +66,12 @@ jobs:
           done
 
   security:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/security.yml@v1
+    uses: Quantum-L9/l9-ci-core/.github/workflows/security.yml@2b330a5aab90cd7781bef08f14c5e7904b61bc56
     with:
       python-version: "3.12"
       source-dir: "."
     secrets: inherit
 
   scorecard:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/scorecard.yml@v1
+    uses: Quantum-L9/l9-ci-core/.github/workflows/scorecard.yml@2b330a5aab90cd7781bef08f14c5e7904b61bc56
     secrets: inherit

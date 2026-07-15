@@ -1,17 +1,18 @@
 # .github/CODEOWNERS — Quantum-L9/.github
-# This repo is the org-wide blast-radius repo. 2 reviewers required for any change.
+# Strict control over organizational templates and health files.
+# Two approvers required for any structural changes.
 
-*                           @Quantum-L9/platform
+* @Quantum-L9/platform
 
-# Workflow starters — changes affect all repos' Actions tab
-/workflow-templates/        @Quantum-L9/platform @cryptoxdog
+# Core templates and auto-discovery files
+/workflow-templates/ @Quantum-L9/platform @cryptoxdog
+/profile/ @Quantum-L9/platform @cryptoxdog
+/ISSUE_TEMPLATE/ @Quantum-L9/platform @cryptoxdog
 
-# Health files — changes propagate org-wide
-/CONTRIBUTING.md            @Quantum-L9/platform @cryptoxdog
-/SECURITY.md                @Quantum-L9/platform @cryptoxdog
-/CODE_OF_CONDUCT.md         @Quantum-L9/platform @cryptoxdog
-/PULL_REQUEST_TEMPLATE.md   @Quantum-L9/platform @cryptoxdog
-/ISSUE_TEMPLATE/            @Quantum-L9/platform @cryptoxdog
-
-# Org profile
-/profile/                   @Quantum-L9/platform @cryptoxdog
+# Canonical fallback files
+CONTRIBUTING.md @Quantum-L9/platform @cryptoxdog
+SECURITY.md @Quantum-L9/platform @cryptoxdog
+CODE_OF_CONDUCT.md @Quantum-L9/platform @cryptoxdog
+PULL_REQUEST_TEMPLATE.md @Quantum-L9/platform @cryptoxdog
+SUPPORT.md @Quantum-L9/platform @cryptoxdog
+workflow-interface-registry.yml @Quantum-L9/platform @cryptoxdog
