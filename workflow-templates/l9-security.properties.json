@@ -1,0 +1,7 @@
+{
+  "name": "L9 Security Scan",
+  "description": "Gitleaks secret scan, pip-audit, Bandit SAST, and PR dependency review via l9-ci-core security kernel.",
+  "iconName": "octicon alert",
+  "categories": ["Security"],
+  "filePatterns": ["requirements*.txt", "pyproject.toml", "*.py"]
+}

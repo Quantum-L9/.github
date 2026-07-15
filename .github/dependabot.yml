@@ -1,0 +1,13 @@
+# Quantum-L9/.github/dependabot.yml
+# Maintains SHA pins across all starter workflows
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/workflow-templates"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "supply-chain"]
+    reviewers:
+      - "Quantum-L9/platform"
+    commit-message:
+      prefix: "chore(deps)"

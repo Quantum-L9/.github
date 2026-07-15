@@ -1,0 +1,7 @@
+{
+  "name": "L9 Node/TS Monorepo CI",
+  "description": "Full npm workspace pipeline: install, typecheck, per-workspace Jest, publish dry-run gate, security scan, Scorecard.",
+  "iconName": "octicon terminal",
+  "categories": ["Node.js", "TypeScript", "CI"],
+  "filePatterns": ["package.json", "tsconfig*.json", "jest.config*"]
+}

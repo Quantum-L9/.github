@@ -1,0 +1,75 @@
+# Quantum-L9 org starter — Node/TypeScript monorepo CI (npm workspaces)
+# Designed for l9-assurance-type repos (npm workspaces, Jest, TypeScript)
+name: L9 Node/TS Monorepo CI
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+jobs:
+  install-and-typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - name: Install workspace dependencies
+        run: npm ci
+      - name: Typecheck all workspaces
+        run: npm run typecheck --if-present
+
+  test-by-segment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: install-and-typecheck
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - name: Run all workspace tests
+        run: npm test --if-present
+
+  publish-dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: test-by-segment
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - name: npm publish dry-run (all public workspaces)
+        run: |
+          for pkg in packages/*/; do
+            PRIVATE=$(node -e "try{const p=require('./${pkg}package.json');console.log(p.private||false)}catch(e){console.log(true)}")
+            if [ "$PRIVATE" = "false" ]; then
+              echo "Dry-run publish: $pkg"
+              npm publish --dry-run --workspace="$pkg" || exit 1
+            fi
+          done
+
+  security:
+    uses: Quantum-L9/l9-ci-core/.github/workflows/security.yml@v1
+    with:
+      python-version: "3.12"
+      source-dir: "."
+    secrets: inherit
+
+  scorecard:
+    uses: Quantum-L9/l9-ci-core/.github/workflows/scorecard.yml@v1
+    secrets: inherit

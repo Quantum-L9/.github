@@ -1,0 +1,43 @@
+name: Bug Report
+description: Report a defect in a Quantum-L9 repo
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Before submitting, check RUNBOOK.md for known issues."
+  - type: input
+    id: repo
+    attributes:
+      label: Affected Repository
+      placeholder: "Quantum-L9/l9-assurance"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: What happened vs. what you expected
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+    validations:
+      required: true
+  - type: input
+    id: ci-run
+    attributes:
+      label: CI Run URL (if CI-related)
+      placeholder: "https://github.com/Quantum-L9/.../actions/runs/..."
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - "Critical (blocks all CI)"
+        - "High"
+        - "Medium"
+        - "Low"
+    validations:
+      required: true

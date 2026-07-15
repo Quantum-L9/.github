@@ -1,0 +1,14 @@
+# Quantum-L9 org starter — Governance Trio Gate
+name: L9 Governance Trio
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+jobs:
+  governance:
+    uses: Quantum-L9/l9-ci-core/.github/workflows/trio-governance.yml@v1
+    with:
+      python-version: "3.12"
+      policy-path: ".github/governance/audit-policy.yml"
+      baseline-path: ".github/governance/audit-baseline.json"
+      classifier-path: ".github/scripts/classify_pr.py"
+    secrets: inherit

@@ -1,0 +1,89 @@
+# workflow-interface-registry.yml
+# Quantum-L9 CI API Contract — machine-readable kernel catalog
+# Source of truth: Quantum-L9/l9-ci-core .github/workflows/
+
+schema_version: "1.0"
+kernel_provider: "Quantum-L9/l9-ci-core"
+current_ref: "v1"
+current_sha: "2b330a5aab90cd7781bef08f14c5e7904b61bc56"
+
+kernels:
+  - name: pr-pipeline
+    file: ".github/workflows/pr-pipeline.yml"
+    ref: "v1"
+    description: "PR quality gate: validate, lint, semgrep, test, security, SBOM, Scorecard"
+    minimum_permissions:
+      contents: read
+      security-events: write
+      pull-requests: read
+      id-token: write
+    inputs:
+      required: []
+      optional:
+        - name: python-version
+          type: string
+          default: "3.12"
+        - name: source-dir
+          type: string
+          default: "."
+        - name: test-dir
+          type: string
+          default: "tests/"
+        - name: requirements-file
+          type: string
+          default: "requirements-ci.txt"
+    secrets:
+      mode: inherit
+      explicit: []
+    outputs: []
+    gate_job_name: "CI Gate"
+    semantic_version: "1.0.0"
+
+  - name: trio-governance
+    file: ".github/workflows/trio-governance.yml"
+    ref: "v1"
+    description: "Governance trio: threshold policy, rule-mode policy, approval validation, governance files integrity, classifier, marker separation"
+    minimum_permissions:
+      contents: read
+    inputs:
+      required: []
+      optional:
+        - name: python-version
+          type: string
+          default: "3.12"
+        - name: changed-files
+          type: string
+          default: ""
+        - name: policy-path
+          type: string
+          default: ".github/governance/audit-policy.yml"
+    secrets:
+      mode: inherit
+      explicit: []
+    outputs: []
+    gate_job_name: "trio-governance-passed"
+    semantic_version: "1.0.0"
+
+  - name: security
+    file: ".github/workflows/security.yml"
+    ref: "v1"
+    description: "Security scan: Gitleaks secret detection, pip-audit, Bandit SAST, PR dependency review"
+    minimum_permissions:
+      contents: read
+      security-events: write
+      pull-requests: read
+    inputs:
+      required: []
+      optional:
+        - name: python-version
+          type: string
+          default: "3.12"
+        - name: source-dir
+          type: string
+          default: "."
+    secrets:
+      mode: inherit
+      explicit: []
+    outputs: []
+    gate_job_name: "security"
+    semantic_version: "1.0.0"

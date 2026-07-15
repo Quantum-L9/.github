@@ -1,0 +1,17 @@
+# .github/CODEOWNERS — Quantum-L9/.github
+# This repo is the org-wide blast-radius repo. 2 reviewers required for any change.
+
+*                           @Quantum-L9/platform
+
+# Workflow starters — changes affect all repos' Actions tab
+/workflow-templates/        @Quantum-L9/platform @cryptoxdog
+
+# Health files — changes propagate org-wide
+/CONTRIBUTING.md            @Quantum-L9/platform @cryptoxdog
+/SECURITY.md                @Quantum-L9/platform @cryptoxdog
+/CODE_OF_CONDUCT.md         @Quantum-L9/platform @cryptoxdog
+/PULL_REQUEST_TEMPLATE.md   @Quantum-L9/platform @cryptoxdog
+/ISSUE_TEMPLATE/            @Quantum-L9/platform @cryptoxdog
+
+# Org profile
+/profile/                   @Quantum-L9/platform @cryptoxdog
