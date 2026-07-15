@@ -7,7 +7,7 @@ on:
 
 jobs:
   governance:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/trio-governance.yml@2b330a5aab90cd7781bef08f14c5e7904b61bc56
+    uses: Quantum-L9/l9-ci-core/.github/workflows/trio-governance.yml@102c9a5960c53c607216d320339e0457046948cb
     with:
       python-version: "3.12"
       policy-path: ".github/governance/audit-policy.yml"
