@@ -1,4 +1,5 @@
 # Quantum-L9 org starter — Three-tier separation enforcement (model/service/interface). Calls l9-ci-core kernel; do not add logic here.
+# LEGACY (frozen @v1) — historical kernel starter. New work starts from l9-ci-pack/README.md (v2).
 name: "L9 Governance Trio"
 on:
   pull_request:
