@@ -13,16 +13,24 @@
 | Repository | Role | Entry Point |
 |---|---|---|
 | [`Cursor-Governance`](https://github.com/Quantum-L9/Cursor-Governance) | Policy SSOT — CANONICAL_LAW.md §1–§9, symlink wiring, GlobalCommands | `CANONICAL_LAW.md` |
-| [`l9-ci-core`](https://github.com/Quantum-L9/l9-ci-core) | Reusable CI kernel library — 8 `workflow_call` kernels | `.github/workflows/pr-pipeline.yml@v1` |
+| [`l9-ci-core`](https://github.com/Quantum-L9/l9-ci-core) | Thin GitHub Actions control plane (v2) — SDK-provisioning, governance resolution, publication | [`l9-ci-pack/README.md`](https://github.com/Quantum-L9/.github/blob/main/l9-ci-pack/README.md) (v2, current); `pr-pipeline.yml@v1` (legacy, frozen) |
 | [`l9-assurance`](https://github.com/Quantum-L9/l9-assurance) | 51-package TypeScript governance assurance monorepo | `packages/` |
 | [`.github`](https://github.com/Quantum-L9/.github) | Org backbone — health files, starter templates, workflow registry | `workflow-interface-registry.yml` |
 
 ---
 
-## CI Kernel API
+## CI instantiation
 
-All repositories consume `l9-ci-core` kernels via thin caller workflows.  
-See [`workflow-interface-registry.yml`](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml) for the machine-readable CI API contract.
+**v2 (current, start here):** [`l9-ci-pack/README.md`](https://github.com/Quantum-L9/.github/blob/main/l9-ci-pack/README.md) —
+governed semgrep analysis (`l9-ci-pack/workflows/l9-analysis.yml`) publishing
+GitHub checks via `l9-ci-core`'s `profile-normalize-semgrep.yml` +
+`publish-analysis.yml`, plus optional per-language lint/test templates.
+
+**`@v1` (legacy, frozen):** All repositories still on legacy `@v1` consume
+`l9-ci-core` kernels via thin caller workflows. See
+[`workflow-interface-registry.yml`](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml)
+for the machine-readable CI API contract (`v2:` block for the current pack,
+top-level `kernels:` list for the frozen `@v1` set).
 
 | Kernel | Purpose |
 |---|---|

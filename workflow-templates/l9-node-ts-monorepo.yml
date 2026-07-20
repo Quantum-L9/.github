@@ -1,4 +1,5 @@
 # Quantum-L9 org starter — Node/TypeScript monorepo pipeline.
+# LEGACY (frozen @v1) — historical kernel starter. New work starts from l9-ci-pack/README.md (v2).
 # Inline jobs for install/typecheck/test/publish-dry-run.
 # Security and Scorecard delegate to l9-ci-core kernels; do not add logic to those jobs.
 name: "L9 Node/TS Monorepo Pipeline"
