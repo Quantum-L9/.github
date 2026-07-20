@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "Structural schema for GitHub Actions workflow-template *.properties.json files (https://docs.github.com/en/actions/using-workflows/creating-starter-workflows-for-your-organization). categories.items is intentionally type:string with NO enum: GitHub accepts an open union of 11 fixed category buckets (continuous-integration, deployment, testing, code-quality, code-review, dependency-management, monitoring, Automation, utilities, Pages, Hugo) PLUS any github/linguist language name PLUS any known tech-stack name -- there is no single published closed list. A strict enum here would false-flag legitimate values (the SchemaStore community schema for this file type only encodes the linguist-language list and omits the 11 fixed buckets entirely, which is exactly this trap). This schema enforces structure/type-correctness only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "description"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "iconName": { "type": "string", "minLength": 1 },
+    "creator": { "type": "string", "minLength": 1 },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "filePatterns": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "labels": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}
