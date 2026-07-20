@@ -1,0 +1,42 @@
+# Path-based PR auto-labeling config for actions/labeler.
+# Mirrors the blast-radius mapping already defined in .github/CODEOWNERS —
+# keep both files in sync when adding new top-level paths.
+
+area:ci-templates:
+  - changed-files:
+      - any-glob-to-any-file: "workflow-templates/**"
+
+area:ci-pack:
+  - changed-files:
+      - any-glob-to-any-file: "l9-ci-pack/**"
+
+area:governance:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "workflow-interface-registry.yml"
+          - "docs/adr/**"
+
+area:ops:
+  - changed-files:
+      - any-glob-to-any-file: "ops/**"
+
+area:issue-templates:
+  - changed-files:
+      - any-glob-to-any-file: ".github/ISSUE_TEMPLATE/**"
+
+area:community-health:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "CODE_OF_CONDUCT.md"
+          - "CONTRIBUTING.md"
+          - "SECURITY.md"
+          - "SUPPORT.md"
+          - "PULL_REQUEST_TEMPLATE.md"
+
+area:org-profile:
+  - changed-files:
+      - any-glob-to-any-file: "profile/**"
+
+area:ci-self:
+  - changed-files:
+      - any-glob-to-any-file: ".github/workflows/**"
