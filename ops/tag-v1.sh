@@ -3,9 +3,17 @@
 # Creates v1.0.0 annotated tag and moving v1 tag on Quantum-L9/l9-ci-core.
 # PREREQUISITE: Run from inside the l9-ci-core repo root with a clean working tree.
 # PREREQUISITE: git remote 'origin' must point to Quantum-L9/l9-ci-core.
+# PREREQUISITE: Run ops/verify-v1-anchor.sh first to re-confirm zero floating
+#               third-party Action refs at EXPECTED_SHA before tagging.
 set -euo pipefail
 
-EXPECTED_SHA="2b330a5aab90cd7781bef08f14c5e7904b61bc56"
+# Anchor: last commit of the pre-v2-rewrite v1 lineage (direct parent of the
+# v2 rewrite commit 54a2f2fc8d060674d544fab14388bb5eff6b8e78 on l9-ci-core).
+# Supersedes the originally-planned 2b330a5aab90cd7781bef08f14c5e7904b61bc56,
+# which predated the Actions SHA-pinning hardening fix (PR #8 / 8928005) and
+# would have frozen floating actions/checkout@v6, ossf/scorecard-action@v2,
+# github/codeql-action/upload-sarif@v4 refs into an "immutable" tag.
+EXPECTED_SHA="2a3270be5f5184099c33a101807f65b1becf4e7c"
 REPO="Quantum-L9/l9-ci-core"
 
 echo "=== Quantum-L9 l9-ci-core @v1 Tag Creation Script ==="
@@ -52,7 +60,7 @@ git checkout "$EXPECTED_SHA"
 if git rev-parse "v1.0.0" >/dev/null 2>&1; then
   echo "⚠️  Tag v1.0.0 already exists. Skipping creation."
 else
-  git tag -a v1.0.0 -m "v1.0.0 — initial kernel release: 8 workflow_call kernels (pr-pipeline, release-publish, nightly, pre-commit-ci, trio-governance, security, scorecard, sbom)"
+  git tag -a v1.0.0 -m "v1.0.0 — initial kernel release: 8 workflow_call kernels (pr-pipeline, release-publish, nightly, pre-commit-ci, trio-governance, security, scorecard, sbom); all static third-party actions SHA-pinned"
   echo "✅ Annotated tag v1.0.0 created."
 fi
 
