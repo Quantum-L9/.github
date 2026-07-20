@@ -34,9 +34,15 @@ the workspace root must have `.cursor/` symlinks resolving to `Cursor-Governance
 
 ---
 
-## CI Gate Requirements
+## CI Gate Requirements (Legacy `@v1`)
 
-All pull requests must pass:
+> **New repos: skip this table.** Instantiate `l9-ci-core` **v2** from
+> [`l9-ci-pack/README.md`](https://github.com/Quantum-L9/.github/blob/main/l9-ci-pack/README.md)
+> instead — governed semgrep analysis + optional per-language lint/test
+> templates. The kernels below are frozen at the historical `@v1` commit and
+> kept only so already-imported repos keep resolving.
+
+All pull requests on repos still using legacy `@v1` kernels must pass:
 
 | Gate | Tool | Kernel |
 |---|---|---|
@@ -67,4 +73,20 @@ All pull requests must pass:
 - Kernels must use `on: workflow_call` only
 - `l9-self-ci.yml` must remain `on: pull_request/push` — **never convert to workflow_call** (circular dependency)
 - `@v1` moving tag discipline: force-update `v1` for backward-compatible changes; cut `v2` for breaking changes
-- See [workflow-interface-registry.yml](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml) for the full kernel API contract
+- See [workflow-interface-registry.yml](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml) for the full kernel API contract (see the `v2:` block for the current pack; the top-level `kernels:` list is the frozen `@v1` set)
+
+---
+
+## Instantiating l9-ci-core v2 (current)
+
+For any new repo, start here — not the `@v1` table above:
+
+1. Copy the six governance files from
+   [`l9-ci-pack/governance/`](https://github.com/Quantum-L9/.github/tree/main/l9-ci-pack/governance) → `.github/governance/`.
+2. Copy [`l9-ci-pack/workflows/l9-analysis.yml`](https://github.com/Quantum-L9/.github/blob/main/l9-ci-pack/workflows/l9-analysis.yml) → `.github/workflows/l9-analysis.yml`.
+3. Optionally copy the matching lint/test template for your language.
+4. Full steps, profile matrix, and rollout guidance:
+   [`l9-ci-pack/README.md`](https://github.com/Quantum-L9/.github/blob/main/l9-ci-pack/README.md).
+
+Ownership and pinning rules live in
+[`l9-ci-core/AGENTS.md`](https://github.com/Quantum-L9/l9-ci-core/blob/main/AGENTS.md).
