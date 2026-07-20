@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # ops/tag-v1.sh
-# Creates v1.0.0 annotated tag and moving v1 tag on Quantum-L9/l9-ci-core.
+# Creates v1.0.0 annotated tag and moving v1 tag on Quantum-L9/l9-ci-core,
+# pointing at the frozen historical kernel commit — NOT at whatever main
+# currently is (main has since moved on to the v2 thin-control-plane rewrite).
+#
 # PREREQUISITE: Run from inside the l9-ci-core repo root with a clean working tree.
 # PREREQUISITE: git remote 'origin' must point to Quantum-L9/l9-ci-core.
 set -euo pipefail
@@ -27,25 +30,26 @@ if [[ -n "$(git status --porcelain)" ]]; then
   exit 1
 fi
 
-# 3. Fetch latest from origin/main
-echo "Fetching origin/main..."
-git fetch origin main
+# 3. Fetch the exact historical commit this tag freezes. This is intentionally
+# a `git fetch origin <sha>`, NOT `git fetch origin main` — v1 tags a fixed
+# historical commit regardless of where main has advanced to since (v2 retired
+# the 8 kernels this tag preserves). Do NOT change this to track main.
+echo "Fetching pinned historical commit $EXPECTED_SHA..."
+git fetch origin "$EXPECTED_SHA"
 
-# 4. Assert HEAD matches expected SHA
-HEAD_SHA=$(git rev-parse origin/main)
-echo "HEAD SHA: $HEAD_SHA"
-echo "Expected: $EXPECTED_SHA"
-
-if [[ "$HEAD_SHA" != "$EXPECTED_SHA" ]]; then
-  echo "❌ ERROR: HEAD SHA does not match expected SHA."
-  echo "   This script is pinned to SHA $EXPECTED_SHA."
-  echo "   If main has advanced legitimately, update EXPECTED_SHA in this script."
+# 4. Confirm the pinned commit actually exists in this remote (fails loudly if
+# EXPECTED_SHA was ever force-pushed away or the fetch above silently no-ops).
+if ! git cat-file -e "${EXPECTED_SHA}^{commit}" 2>/dev/null; then
+  echo "❌ ERROR: $EXPECTED_SHA is not a valid commit reachable from origin."
+  echo "   This script tags a fixed historical commit; it does not require"
+  echo "   main to be at this SHA. If this commit is genuinely gone, stop and"
+  echo "   ask a human — do not repoint v1 at a different commit silently."
   exit 1
 fi
+echo "✅ Pinned commit verified reachable."
 
-echo "✅ SHA assertion passed."
-
-# 5. Checkout the exact SHA
+# 5. Checkout the exact historical SHA (detached) — independent of main's
+# current position.
 git checkout "$EXPECTED_SHA"
 
 # 6. Create annotated v1.0.0 tag (immutable)
