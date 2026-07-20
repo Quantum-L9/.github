@@ -22,6 +22,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install jsonschema
-        run: pip install --quiet jsonschema
+        run: |
+          pip install --quiet --only-binary :all: "jsonschema==4.26.0"
       - name: Validate workflow-templates/*.properties.json
         run: python3 ops/validate-properties-json.py

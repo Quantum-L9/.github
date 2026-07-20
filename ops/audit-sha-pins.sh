@@ -21,7 +21,8 @@ CHECKED=0
 SEARCH_DIRS=("workflow-templates" "l9-ci-pack/workflows" ".github/workflows")
 
 is_sha() {
-  [[ "$1" =~ ^[0-9a-f]{40}$ ]]
+  local ref="$1"
+  [[ "$ref" =~ ^[0-9a-f]{40}$ ]]
 }
 
 is_frozen_core_tag() {
@@ -30,7 +31,7 @@ is_frozen_core_tag() {
 }
 
 for dir in "${SEARCH_DIRS[@]}"; do
-  [ -d "$dir" ] || continue
+  [[ -d "$dir" ]] || continue
   while IFS= read -r -d '' f; do
     line_no=0
     while IFS= read -r line; do
@@ -65,7 +66,7 @@ done
 
 echo "---"
 echo "Checked ${CHECKED} uses: references."
-if [ "$FAILED" -gt 0 ]; then
+if [[ "$FAILED" -gt 0 ]]; then
   echo "${FAILED} floating (non-SHA, non-frozen-tag) reference(s) found."
   exit 1
 fi
