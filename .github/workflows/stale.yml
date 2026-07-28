@@ -1,0 +1,29 @@
+name: Stale issues
+
+on:
+  schedule:
+    - cron: "17 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@5bef64f19d7facfb25b37b414482c7164d639639 # v9.1.0
+        with:
+          days-before-stale: 60
+          days-before-close: 14
+          only-labels: needs:info
+          exempt-issue-labels: "type:incident,priority:P0,priority:P1,pinned,security:possible-leak"
+          stale-issue-label: stale
+          stale-issue-message: >
+            This has sat 60 days awaiting the requested information. It will close in
+            14 days unless updated. Reopening later is fine and costs nothing.
+          close-issue-message: >
+            Closing for now — no information received. Comment with the missing details
+            and it will be reopened.
+          days-before-pr-stale: -1
+          days-before-pr-close: -1

@@ -1,0 +1,79 @@
+name: ✨ Feature
+description: Propose a capability that does not exist yet.
+title: "feat: "
+labels: ["type:feature", "needs:triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: The user-facing pain, not the solution. Who is blocked, and on what?
+      placeholder: Operators cannot tell which agent consumed a token budget, so cost overruns are diagnosed by guesswork.
+    validations:
+      required: true
+
+  - type: textarea
+    id: today
+    attributes:
+      label: What you do today
+      description: The current workaround and its cost in time, money, or risk.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: What should exist. Include the interface — CLI flag, API shape, config key.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Options you rejected and why. "None" usually means the problem is underexplored.
+    validations:
+      required: true
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      description: Observable, checkable outcomes. This becomes the acceptance criteria.
+      value: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - S — under a day, one file or module
+        - M — a few days, one repo
+        - L — multi-repo or migration required
+        - XL — needs a design doc first
+    validations:
+      required: true
+
+  - type: dropdown
+    id: breaking
+    attributes:
+      label: Breaking change?
+      options: ["No", "Yes — behind a flag", "Yes — requires a major bump"]
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: gates
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched for an existing request covering this.
+          required: true
+        - label: This is a concrete capability, not an open-ended question (those go to Discussions).
+          required: true
