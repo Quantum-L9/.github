@@ -2,11 +2,17 @@
 # Preflight: verify assumptions BEFORE seeding. Read-only, safe to run anytime.
 set -euo pipefail
 ORG=Quantum-L9
+# gh may colorize JSON output (ANSI escapes) when a terminal/clicolor is forced,
+# which silently breaks every grep-based parse below. Disable color and strip
+# any residual escapes defensively.
+export GH_FORCE_TTY=0 CLICOLOR=0 CLICOLOR_FORCE=0 NO_COLOR=1
+strip_ansi() { sed -e 's/\x1b\[[0-9;]*m//g'; }
 command -v gh >/dev/null || { echo "gh CLI required" >&2; exit 1; }
 
 echo "== 1. CODEOWNERS team slugs must resolve =="
 mapfile -t SLUGS < <(grep -oE '@'"$ORG"'/[a-z0-9-]+' .github/CODEOWNERS | sed "s|@$ORG/||" | sort -u)
-REAL=$(gh api "orgs/$ORG/teams" --paginate --jq '.[].slug' 2>/dev/null || echo "__no_team_read__")
+REAL=$(gh api "orgs/$ORG/teams" --paginate --jq '.[].slug' 2>/dev/null || true)
+[[ -z "$REAL" ]] && REAL="__no_team_read__"  # empty list and read-denied are both unverifiable
 for s in "${SLUGS[@]}"; do
   if [[ "$REAL" == "__no_team_read__" ]]; then echo "  ?  $s (cannot read teams — need admin:org)"
   elif grep -qx "$s" <<<"$REAL"; then echo "  OK $s"
@@ -31,16 +37,19 @@ echo
 echo "== 4. Repos with LOCAL overrides that block inheritance =="
 gh repo list "$ORG" --limit 200 --json name --jq '.[].name' | while read -r r; do
   for p in .github/pull_request_template.md PULL_REQUEST_TEMPLATE.md SECURITY.md .github/ISSUE_TEMPLATE; do
-    gh api "repos/$ORG/$r/contents/$p" --silent 2>/dev/null && echo "  $r has local $p (org default IGNORED)"
+    if gh api "repos/$ORG/$r/contents/$p" --silent 2>/dev/null; then
+      echo "  $r has local $p (org default IGNORED)"
+    fi
   done
-done
+done || true  # probe misses must not abort the script under set -e
 
 echo
 echo "== 5. Actions policy must permit cross-repo reusable workflows =="
 echo "   (a caller referencing Quantum-L9/.github@v1 fails before any step if blocked)"
-ORG_POL=$(gh api "orgs/$ORG/actions/permissions" 2>/dev/null || echo '{}')
+ORG_POL=$(gh api "orgs/$ORG/actions/permissions" 2>/dev/null | strip_ansi || echo '{}')
 echo "   org policy: $(echo "$ORG_POL" | tr -d '\n' | cut -c1-160)"
-case "$(echo "$ORG_POL" | grep -o '"allowed_actions":"[a-z_]*"' | cut -d'"' -f4)" in
+ORG_AA=$(echo "$ORG_POL" | tr -d ' \n' | grep -o '"allowed_actions":"[a-z_]*"' | cut -d'"' -f4 || true)
+case "$ORG_AA" in
   all)      echo "   OK org allows all actions and reusable workflows" ;;
   local_only) echo "   !! org is LOCAL_ONLY — every cross-repo caller will fail org-wide" ;;
   selected) echo "   ?  org uses an allow-list — confirm Quantum-L9/* is included:"
@@ -51,9 +60,9 @@ esac
 gh repo list "$ORG" --limit 200 --json name,isArchived,isFork \
   --jq '.[] | select(.isArchived==false and .isFork==false and .name!=".github") | .name' \
 | while read -r r; do
-    P=$(gh api "repos/$ORG/$r/actions/permissions" 2>/dev/null || echo '{}')
-    EN=$(echo "$P" | grep -o '"enabled":[a-z]*' | cut -d: -f2)
-    AA=$(echo "$P" | grep -o '"allowed_actions":"[a-z_]*"' | cut -d'"' -f4)
+    P=$(gh api "repos/$ORG/$r/actions/permissions" 2>/dev/null | strip_ansi | tr -d ' \n' || echo '{}')
+    EN=$(echo "$P" | grep -o '"enabled":[a-z]*' | cut -d: -f2 || true)
+    AA=$(echo "$P" | grep -o '"allowed_actions":"[a-z_]*"' | cut -d'"' -f4 || true)
     case "$EN:$AA" in
       true:all)        printf '  OK %-40s actions=on allowed=all\n' "$r" ;;
       true:local_only) printf '  !! %-40s LOCAL_ONLY — caller will fail\n' "$r" ;;
@@ -62,7 +71,7 @@ gh repo list "$ORG" --limit 200 --json name,isArchived,isFork \
       true:)           printf '  OK %-40s actions=on (inherits org policy)\n' "$r" ;;
       *)               printf '  ?  %-40s unreadable (need admin)\n' "$r" ;;
     esac
-  done
+  done || true  # per-repo probe misses must not abort under set -e
 
 echo
 echo "Remediation for a blocked repo:"
