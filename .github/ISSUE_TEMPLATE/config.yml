@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔐 Report a security vulnerability
+    url: https://github.com/Quantum-L9/.github/security/advisories/new
+    about: Do NOT open a public issue. Use a private security advisory.
+  - name: 💬 Question or design discussion
+    url: https://github.com/orgs/Quantum-L9/discussions
+    about: Open-ended questions, architecture debate, and "how do I…" belong in Discussions.
+  - name: 📕 Documentation
+    url: https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md
+    about: Check the runbooks and reference before filing.
