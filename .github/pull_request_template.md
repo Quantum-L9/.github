@@ -1,3 +1,8 @@
+<!-- Canonical org-wide PR template. Correct path: .github/pull_request_template.md
+     inside the Quantum-L9/.github repo's own .github/ folder. A copy at repo ROOT
+     does NOT propagate org-wide — GitHub only reads the nested path.
+     See docs/AUDIT.md, finding #1. -->
+
 ## Problem
 
 <!-- REQUIRED. The error, bug, or gap this fixes. Lead with the symptom a human saw.

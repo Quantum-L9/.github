@@ -154,3 +154,42 @@ All three are now shipped.
 **Assessment**: items 1 and 2 were documentation debt. Item 3 was a genuine rollout
 trap — it would have surfaced as a batch of confusing red X's across seeded repos
 with no obvious cause. Caught pre-deploy.
+
+
+---
+
+# v3.0.0 — five gaps filled, advisory posture, CI boundary enforced
+
+**Constraint applied**: do not duplicate `l9-ci-sdk` or `l9-ci-core`.
+
+The previously-ranked #3 gap (reusable CI callees for pytest/ruff/pyright/semgrep,
+score 4.67) is **withdrawn**. `l9-ci-sdk` owns CI execution and `l9-ci-core` already
+runs Code Quality and CodeQL. Building CI callees here would have created two
+competing sources of CI truth — precisely the duplication this effort exists to
+eliminate. It is replaced by `governance-report.yml`, which measures governance
+*metadata* coverage only and states in its own header what it refuses to measure.
+
+**Advisory conversion**: `governance-pr.yml` input `strict` now defaults to `false`;
+`governance-issue.yml` no longer calls `setFailed`; rulesets ship `evaluate`; push
+protection is opt-in behind a typed confirmation; Dependabot opens PRs with no
+auto-merge. Issue forms require *fields*, not gating checkboxes.
+
+**Anti-drift**: `preflight.sh` gained section 6 (posture assertions) and section 7
+(boundary check — fails if any workflow here references a test or lint tool). The
+promotion ladder in `docs/ADVISORY.md` has four rungs, each requiring evidence from
+the one below.
+
+**Unverified**: CODEOWNERS team slugs remain placeholders. Whether `l9-ci-sdk`
+already publishes a `workflow_call` CI callee is UNKNOWN — if it does, consumer
+repos should call it directly; this repo will not proxy it.
+
+
+---
+
+# v3.1.0 — deployment completeness
+
+Adds an agent-executable deployment runbook, offline pack verifier, deployment PR
+body, and evidence template. The runbook separates merge-time inheritance from
+org-setting activation, one-time GitHub App seeding, label synchronization, and
+weekly report activation. It explicitly refuses enforcing fallbacks, stages one
+repository before fleet seeding, and includes rollback.

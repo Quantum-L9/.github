@@ -7,8 +7,7 @@ body:
     id: problem
     attributes:
       label: Problem
-      description: The user-facing pain, not the solution. Who is blocked, and on what?
-      placeholder: Operators cannot tell which agent consumed a token budget, so cost overruns are diagnosed by guesswork.
+      description: The pain, not the solution. Who is blocked, and on what?
     validations:
       required: true
 
@@ -16,16 +15,27 @@ body:
     id: today
     attributes:
       label: What you do today
-      description: The current workaround and its cost in time, money, or risk.
-    validations:
-      required: true
+      description: Current workaround and its cost.
 
   - type: textarea
     id: proposal
     attributes:
       label: Proposed behavior
-      description: What should exist. Include the interface — CLI flag, API shape, config key.
-      render: shell
+      description: What should exist. Include the interface if you know it.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: owner
+    attributes:
+      label: Which component should own this?
+      description: Prevents governance from absorbing CI concerns.
+      options:
+        - this repo (org governance / community health)
+        - l9-ci-sdk or l9-ci-core (test, lint, build execution)
+        - l9-ci-debt-resolver (CI failure diagnosis or remediation)
+        - l9-ci-debt-intelligence (CI debt measurement)
+        - unsure
     validations:
       required: true
 
@@ -33,47 +43,16 @@ body:
     id: alternatives
     attributes:
       label: Alternatives considered
-      description: Options you rejected and why. "None" usually means the problem is underexplored.
-    validations:
-      required: true
-
-  - type: textarea
-    id: done
-    attributes:
-      label: Definition of done
-      description: Observable, checkable outcomes. This becomes the acceptance criteria.
-      value: |
-        - [ ]
-        - [ ]
-    validations:
-      required: true
+      description: Options you rejected and why.
 
   - type: dropdown
     id: scope
     attributes:
       label: Scope
       options:
-        - S — under a day, one file or module
+        - S — under a day
         - M — a few days, one repo
-        - L — multi-repo or migration required
+        - L — multi-repo or migration
         - XL — needs a design doc first
     validations:
       required: true
-
-  - type: dropdown
-    id: breaking
-    attributes:
-      label: Breaking change?
-      options: ["No", "Yes — behind a flag", "Yes — requires a major bump"]
-    validations:
-      required: true
-
-  - type: checkboxes
-    id: gates
-    attributes:
-      label: Before submitting
-      options:
-        - label: I searched for an existing request covering this.
-          required: true
-        - label: This is a concrete capability, not an open-ended question (those go to Discussions).
-          required: true
