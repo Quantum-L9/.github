@@ -14,23 +14,27 @@ Before opening any pull request, verify each item:
 
 ---
 
-## Quick Setup (3 Steps)
+## Quick Setup
+
+Governance defaults (PR/issue templates, `SECURITY.md`, this file) are **inherited
+automatically** from `Quantum-L9/.github` — no cloning or copying required. For a
+new or existing repo, one idempotent command verifies your setup and reports
+anything that still needs local wiring:
 
 ```bash
-# Step 1: Clone Cursor-Governance alongside your target repo
-git clone https://github.com/Quantum-L9/Cursor-Governance.git
-
-# Step 2: Run workspace symlink wiring
-cd Cursor-Governance
-bash scripts/setup_workspace_symlinks.sh
-
-# Step 3: Validate symlinks
-ls -la .cursor/rules .cursor/skills .cursor/commands
-# Expected: all three resolve without error
+# one-time bootstrap for a new or existing repo (idempotent, safe to re-run)
+curl -fsSL https://raw.githubusercontent.com/Quantum-L9/.github/main/scripts/bootstrap.sh | bash
 ```
 
-Per [CANONICAL_LAW.md §2](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md#2-symlink-contract):
-the workspace root must have `.cursor/` symlinks resolving to `Cursor-Governance/rules/`, `skills/`, and `commands/`.
+`bootstrap.sh` reports which files inherit from the org defaults and which have
+local overrides. It never duplicates inherited files — duplication is the drift
+mechanism this repo exists to eliminate (see `docs/AUDIT.md` finding #4 for the
+migration away from the previous "clone Cursor-Governance alongside your repo" step).
+
+For Cursor workspace wiring (rules/skills/commands symlinks), follow
+[CANONICAL_LAW.md §2](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md#2-symlink-contract):
+the workspace root must have `.cursor/` symlinks resolving to `Cursor-Governance/rules/`, `skills/`, and `commands/`,
+validated with `ls -la .cursor/rules .cursor/skills .cursor/commands`.
 
 ---
 

@@ -2,7 +2,18 @@
 
 ## Scope
 
-This policy applies to all repositories in the **Quantum-L9** GitHub organization.
+This policy applies to all repositories in the **Quantum-L9** GitHub organization,
+including internal tooling (`l9-*` cartridges), infrastructure-as-code, and CI/CD
+workflows. This file is the **single canonical source**, inherited org-wide from
+`Quantum-L9/.github` — individual repos MUST NOT maintain a competing `SECURITY.md`;
+link here instead. (One local copy makes that repo ignore this file entirely; there
+is no merging.)
+
+## Out of Scope
+
+Vulnerabilities requiring physical access, social engineering of maintainers, or
+issues in third-party dependencies without a demonstrated exploit path against
+Quantum-L9 systems specifically — report those upstream instead.
 
 ## Reporting a Vulnerability
 
