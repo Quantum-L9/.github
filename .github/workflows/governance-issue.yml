@@ -34,4 +34,5 @@ jobs:
                 body: `> [!CAUTION]\n> Possible **${hits.join(', ')}** in this issue. Edit it out and **rotate the credential** — edit history is public.` });
             }
             if (add.size) await github.rest.issues.addLabels({ ...context.repo, issue_number: context.payload.issue.number, labels: [...add] });
-            if (hits.length) core.setFailed('Possible credential: ' + hits.join(', '));
+            // ADVISORY: label + comment, never fail. Rotation is the remedy, not a red X.
+            if (hits.length) core.warning('Possible credential: ' + hits.join(', '));

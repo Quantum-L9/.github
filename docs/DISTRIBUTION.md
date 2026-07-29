@@ -9,7 +9,7 @@ GitHub *inherits* community health files by reference. There is no copy, no sync
 and no token involved. Repos read the latest `main` of `Quantum-L9/.github` live.
 Merge a fix to `SECURITY.md` and all 29 repos reflect it on the next page load.
 
-The token gated exactly two files, and only for a **one-time seed** — not for
+The token gated exactly three files, and only for a **one-time seed** — not for
 ongoing updates.
 
 ## The three distribution mechanisms
@@ -42,14 +42,16 @@ which the inheritance requirement already forces.
 here and move the `v1` tag. All 29 repos pick it up on their next PR. Zero token
 use, zero fan-out, zero PRs.
 
-### Physical copy covers only two files
+### Physical copy covers only three files
 
-Two things genuinely cannot be inherited or referenced:
+Three things genuinely cannot be inherited or referenced:
 
 1. **`CODEOWNERS`** — GitHub does not list it as a community health file. It must
    physically exist in each repo at root, `.github/`, or `docs/`.
 2. **The caller stub** — a repo cannot be made to run a workflow it does not contain.
    Twelve lines, pinned to a tag, and it should never change again.
+3. **`dependabot.yml`** — repository-specific dependency configuration is not a
+   community-health default and must physically exist in each consumer repo.
 
 `seed-governance.yml` seeds these once per repo, via PR, and skips repos already
 seeded. That is the total scope of what the token was blocking.

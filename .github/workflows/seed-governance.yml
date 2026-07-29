@@ -49,9 +49,12 @@ jobs:
             const FILTER = '${{ inputs.repo_filter }}';
             const BRANCH = 'chore/seed-governance';
 
+            // The three files GitHub cannot inherit. Nothing else is ever copied.
+            // NOTE: no CI workflow is seeded here — l9-ci-sdk owns CI. See docs/BOUNDARIES.md.
             const payload = {
               '.github/CODEOWNERS': fs.readFileSync('templates/CODEOWNERS.repo', 'utf8'),
               '.github/workflows/governance.yml': fs.readFileSync('templates/governance-caller.yml', 'utf8'),
+              '.github/dependabot.yml': fs.readFileSync('templates/dependabot.yml', 'utf8'),
             };
 
             const all = await github.paginate(github.rest.repos.listForOrg, { org: 'Quantum-L9', type: 'all', per_page: 100 });
@@ -90,7 +93,10 @@ jobs:
                     'Seeds the only two governance files GitHub cannot inherit from `Quantum-L9/.github`.',
                     '',
                     '- `.github/CODEOWNERS` — CODEOWNERS is not a community health file, so it must be physical.',
-                    '- `.github/workflows/governance.yml` — a caller pinned to `@v1`. Logic lives in `.github`; this file should never need to change again.',
+                    '- `.github/workflows/governance.yml` — a caller pinned to `@v1`. Logic lives in `.github`; this file should never need to change again. **Advisory only** — `strict` defaults to false, so it cannot fail your merge.',
+                    '- `.github/dependabot.yml` — weekly dependency PRs. No auto-merge. Exists because our PR gate asks for SHA-pinned actions, and a pin without updates ages badly.',
+                    '',
+                    'No CI workflow is included. Test, lint, and build execution is owned by `l9-ci-sdk` / `l9-ci-core`; this seed deliberately does not touch it.',
                     '',
                     'Everything else (SECURITY.md, CONTRIBUTING.md, PR and issue templates) is already inherited automatically — nothing was copied.',
                   ].join('\n'),

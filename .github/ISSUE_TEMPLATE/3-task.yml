@@ -7,7 +7,7 @@ body:
     id: problem
     attributes:
       label: Problem
-      description: Why this work exists. What breaks or degrades if it is never done?
+      description: Why this work exists. What degrades if it is never done?
     validations:
       required: true
 
@@ -15,7 +15,6 @@ body:
     id: work
     attributes:
       label: Work
-      description: The steps. Each line should be independently verifiable.
       value: |
         - [ ]
         - [ ]
@@ -26,15 +25,7 @@ body:
     id: kind
     attributes:
       label: Kind
-      options: [chore, refactor, infra / IaC, CI / CD, docs, dependency bump, test coverage]
-    validations:
-      required: true
-
-  - type: textarea
-    id: risk
-    attributes:
-      label: Risk and rollback
-      description: Blast radius if this goes wrong, and how to undo it.
+      options: [chore, refactor, infra / IaC, governance, docs, dependency bump]
     validations:
       required: true
 
@@ -42,4 +33,4 @@ body:
     id: blocks
     attributes:
       label: Blocks / blocked by
-      placeholder: "blocked by #1191, blocks #1204"
+      placeholder: "blocked by #12, blocks #34"
