@@ -1,14 +1,15 @@
+# Quantum-L9 org-wide issue template chooser config.
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository
+
 blank_issues_enabled: false
+
 contact_links:
-  - name: 🔐 Report a security vulnerability
-    url: https://github.com/Quantum-L9/.github/security/advisories/new
-    about: Do NOT open a public issue. Use a private security advisory.
-  - name: 🔧 CI failure or flaky pipeline
-    url: https://github.com/Quantum-L9/l9-ci-debt-resolver/issues/new
-    about: CI diagnosis and remediation is owned by l9-ci-debt-resolver, not here.
-  - name: 💬 Question or design discussion
-    url: https://github.com/orgs/Quantum-L9/discussions
-    about: Open-ended questions, architecture debate, and "how do I…" belong in Discussions.
-  - name: 📕 Documentation
+  - name: Security Vulnerability Report
+    url: https://github.com/Quantum-L9/.github/security/policy
+    about: Do not open a public issue for security vulnerabilities. Follow SECURITY.md instead.
+  - name: Governance / CANONICAL_LAW Question
     url: https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md
-    about: Check the runbooks and reference before filing.
+    about: For questions about governance policy, symlink contracts, or CANONICAL_LAW.md, read the policy source of truth first.
+  - name: CI Kernel API Contract
+    url: https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml
+    about: For questions about kernel inputs/outputs/versioning, check the machine-readable registry before filing an issue.
