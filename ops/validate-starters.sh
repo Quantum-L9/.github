@@ -2,11 +2,16 @@
 # ops/validate-starters.sh
 # Validates every workflow-templates/*.yml has a matching *.properties.json.
 # Validates each properties.json contains required fields: name, description, iconName, categories, filePatterns.
+# Validates the l9-ci-pack/ (v2) required CI file set is present and pinned to
+# a full commit SHA or a Core release tag — never @main.
 # Run from the root of the Quantum-L9/.github repo.
 set -euo pipefail
 
 TEMPLATES_DIR="workflow-templates"
+PACK_DIR="l9-ci-pack"
 REQUIRED_FIELDS=("name" "description" "iconName" "categories" "filePatterns")
+REQUIRED_PACK_GOVERNANCE=("execution-profiles.yaml" "provider-requiredness.yaml" "rule-modes.yaml" "waivers.yaml" "promotion-policy.yaml" "quality-thresholds.yaml")
+REQUIRED_PACK_WORKFLOWS=("l9-analysis.yml" "l9-lint-test.yml" "l9-lint-test-node.yml")
 PASS=0
 FAIL=0
 
@@ -51,9 +56,10 @@ for yml in "$TEMPLATES_DIR"/*.yml; do
     fi
   done
 
-  # Validate no @main references in the YAML (must use @v1)
+  # Validate no @main references in the YAML (must use @v1, a full SHA, or a
+  # Core release tag such as @v2.0.0/@v2)
   if grep -q "@main" "$yml"; then
-    echo "❌ @main REFERENCE found in $yml — must use @v1"
+    echo "❌ @main REFERENCE found in $yml — must use @v1, a full commit SHA, or a release tag"
     FAIL=$((FAIL+1))
     FIELDS_OK=false
   fi
@@ -63,6 +69,53 @@ for yml in "$TEMPLATES_DIR"/*.yml; do
     PASS=$((PASS+1))
   fi
 done
+
+echo ""
+echo "=== l9-ci-pack (v2) completeness ==="
+
+if [ ! -d "$PACK_DIR" ]; then
+  echo "❌ FATAL: $PACK_DIR directory not found."
+  FAIL=$((FAIL+1))
+else
+  for f in "${REQUIRED_PACK_GOVERNANCE[@]}"; do
+    path="$PACK_DIR/governance/$f"
+    if [ -f "$path" ]; then
+      echo "✅ $path present"
+      PASS=$((PASS+1))
+    else
+      echo "❌ MISSING required governance file: $path"
+      FAIL=$((FAIL+1))
+    fi
+  done
+
+  for f in "${REQUIRED_PACK_WORKFLOWS[@]}"; do
+    path="$PACK_DIR/workflows/$f"
+    if [ ! -f "$path" ]; then
+      echo "❌ MISSING required workflow template: $path"
+      FAIL=$((FAIL+1))
+      continue
+    fi
+    if grep -q "@main" "$path"; then
+      echo "❌ @main REFERENCE found in $path — must be a full commit SHA or a release tag"
+      FAIL=$((FAIL+1))
+      continue
+    fi
+    echo "✅ $path present, no @main refs"
+    PASS=$((PASS+1))
+  done
+
+  if [ ! -f "$PACK_DIR/README.md" ]; then
+    echo "❌ MISSING $PACK_DIR/README.md"
+    FAIL=$((FAIL+1))
+  else
+    echo "✅ $PACK_DIR/README.md present"
+    PASS=$((PASS+1))
+  fi
+
+  # Explicitly NOT required in the pack: issue/PR templates are owned solely
+  # by this repo's own community-health files (.github/ISSUE_TEMPLATE/,
+  # root PULL_REQUEST_TEMPLATE.md), never synced from l9-ci-core.
+fi
 
 echo ""
 echo "================================"

@@ -1,0 +1,12 @@
+{
+  "name": "L9 Lint and Test (v2, Python)",
+  "description": "Python hygiene: ruff, ruff format, mypy, pytest+coverage. Consumer-owned template, not called by l9-ci-core. Pairs with L9 Analysis (v2). See l9-ci-pack/README.md.",
+  "iconName": "beaker",
+  "categories": [
+    "Python",
+    "CI"
+  ],
+  "filePatterns": [
+    "**/*.py"
+  ]
+}

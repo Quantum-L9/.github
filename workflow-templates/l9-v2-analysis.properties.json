@@ -1,0 +1,17 @@
+{
+  "name": "L9 Analysis (v2)",
+  "description": "Semgrep -> l9-ci-core v2 SDK normalize/validate/publish. Requires the governance pack from l9-ci-pack/governance/ copied to .github/governance/ first. See l9-ci-pack/README.md.",
+  "iconName": "shield",
+  "categories": [
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Security",
+    "CI"
+  ],
+  "filePatterns": [
+    "**/*.py",
+    "**/*.js",
+    "**/*.ts"
+  ]
+}

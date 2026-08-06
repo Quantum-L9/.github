@@ -1,6 +1,6 @@
 {
   "name": "L9 Governance Trio",
-  "description": "Three-tier separation enforcement (model/service/interface). Calls l9-ci-core kernel; do not add logic here.",
+  "description": "Three-tier separation enforcement (model/service/interface). Calls l9-ci-core kernel; do not add logic here. LEGACY (frozen @v1) \u2014 see l9-ci-pack/README.md for v2.",
   "iconName": "shield",
   "categories": [
     "Python",

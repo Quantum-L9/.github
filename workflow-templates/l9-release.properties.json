@@ -1,6 +1,6 @@
 {
   "name": "L9 Release",
-  "description": "Versioned release build and PyPI publish. Calls l9-ci-core kernel; do not add logic here.",
+  "description": "Versioned release build and PyPI publish. Calls l9-ci-core kernel; do not add logic here. LEGACY (frozen @v1) \u2014 see l9-ci-pack/README.md for v2.",
   "iconName": "tag",
   "categories": [
     "Python",

@@ -9,6 +9,67 @@ last_audited: "2026-07-05"
 # v1      — moving tag, force-updated by platform team on backward-compatible changes
 # v2      — cut for breaking changes (new required inputs, removed outputs, renamed jobs)
 # Never reference @main from thin callers. Always use @v1.
+#
+# v1 is FROZEN (historical): l9-ci-core `main` has since been rewritten as a
+# thin control plane (v2) and no longer contains these 8 kernels at HEAD —
+# they only exist at the pinned historical commit above. @v1 starters below
+# keep resolving against that frozen commit; they are not maintained further.
+
+# v2 (CURRENT — start here for all new work):
+#   Full instantiation pack:  l9-ci-pack/  (README.md + governance/ + workflows/)
+#   Pinned Core ref:          see l9-ci-pack/README.md "Prerequisites" (full
+#                              commit SHA pre-release; @v2.0.0 / @v2 after cut)
+#   Legacy v1 starters:       workflow-templates/l9-{pr-pipeline,security,
+#                              scorecard,sbom,pre-commit,nightly,release,
+#                              governance,node-ts-monorepo}.yml — frozen @v1,
+#                              kept only for already-imported wrappers.
+v2:
+  schema_version: "1.0"
+  kernel_provider: "Quantum-L9/l9-ci-core"
+  current_sha: "f88116503430aa18992b70d8d31063e34ff97ef1"
+  status: "pre-release-candidate"  # flips to "released" once v2.0.0 is tagged
+  pack_path: "l9-ci-pack/"
+  pack_readme: "l9-ci-pack/README.md"
+  reusable_workflows:
+    - name: profile-normalize-semgrep
+      file: "l9-ci-pack/workflows/l9-analysis.yml"
+      calls: "Quantum-L9/l9-ci-core/.github/workflows/profile-normalize-semgrep.yml"
+      classification: KERNEL
+      description: "Semgrep -> SDK normalize/validate/route, one job per caller repo."
+    - name: publish-analysis
+      file: "l9-ci-pack/workflows/l9-analysis.yml"
+      calls: "Quantum-L9/l9-ci-core/.github/workflows/publish-analysis.yml"
+      classification: KERNEL
+      description: "Publishes the resolved GitHub check + PR annotations from the SDK agent-review projection."
+  consumer_owned_templates:
+    - name: l9-lint-test
+      file: "l9-ci-pack/workflows/l9-lint-test.yml"
+      classification: CONSUMER_TEMPLATE
+      description: "Python hygiene (ruff, mypy, pytest+coverage). Not called by Core; copied and owned by the consumer."
+    - name: l9-lint-test-node
+      file: "l9-ci-pack/workflows/l9-lint-test-node.yml"
+      classification: CONSUMER_TEMPLATE
+      description: "Node/TypeScript hygiene (eslint, tsc --noEmit, vitest run). Not called by Core; copied and owned by the consumer."
+  governance_files:
+    - "l9-ci-pack/governance/execution-profiles.yaml"
+    - "l9-ci-pack/governance/provider-requiredness.yaml"
+    - "l9-ci-pack/governance/rule-modes.yaml"
+    - "l9-ci-pack/governance/waivers.yaml"
+    - "l9-ci-pack/governance/promotion-policy.yaml"
+    - "l9-ci-pack/governance/quality-thresholds.yaml"
+  excluded_from_pack:
+    # Owned solely by this repo's own community-health files; never synced
+    # from l9-ci-core docs/templates/.
+    - ".github/ISSUE_TEMPLATE/*"
+    - "PULL_REQUEST_TEMPLATE.md"
+  no_v2_equivalent:
+    # SDK does not implement these providers yet — do not re-add as Core
+    # reusable workflows without an explicit, authorized scope change.
+    - scorecard
+    - sbom
+    - gitleaks
+    - pre-commit
+    - dedicated-nightly-release-kernel
 
 kernels:
   - name: pr-pipeline
