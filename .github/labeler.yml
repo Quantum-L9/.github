@@ -1,6 +1,9 @@
 # Path-based PR auto-labeling config for actions/labeler.
-# Mirrors the blast-radius mapping already defined in .github/CODEOWNERS —
-# keep both files in sync when adding new top-level paths.
+# Complements .github/CODEOWNERS blast-radius paths where they overlap
+# (workflow-templates/, ops/, community health, profile/, registry, issue
+# templates). Also covers paths CODEOWNERS does not yet list (l9-ci-pack/,
+# docs/adr/, .github/workflows/). Keep labels.yml area:* names in sync with
+# the keys below.
 
 area:ci-templates:
   - changed-files:
