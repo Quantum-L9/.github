@@ -81,7 +81,7 @@ fi
 
 KERNEL_FILES=()
 for f in "${ALL_WORKFLOW_FILES[@]}"; do
-  if git -C "$WORK_DIR" show "FETCH_HEAD:$f" | grep -q '^\s*workflow_call:'; then
+  if git -C "$WORK_DIR" show "FETCH_HEAD:$f" | grep -Eq '^[[:space:]]*workflow_call:'; then
     KERNEL_FILES+=("$f")
   fi
 done
@@ -152,7 +152,7 @@ for f in "${KERNEL_FILES[@]}"; do
     [[ "$matched_exception" == true ]] && continue
 
     violations+=("$f:$line_no  $uses_value")
-  done < <(git -C "$WORK_DIR" show "FETCH_HEAD:$f" | grep -nE '^[[:space:]]*-?[[:space:]]*uses:[[:space:]]*[A-Za-z0-9./]')
+  done < <(git -C "$WORK_DIR" show "FETCH_HEAD:$f" | grep -nE '^[[:space:]]*-?[[:space:]]*uses:[[:space:]]*[^[:space:]#]')
 done
 
 echo ""
