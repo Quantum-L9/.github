@@ -30,8 +30,11 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Pin Core to the immutable release commit (or replace with the v2 tag).
-  L9_CORE_REF: "f88116503430aa18992b70d8d31063e34ff97ef1"
+  # Core pin is the literal SHA/tag on every uses: Quantum-L9/l9-ci-core/...@...
+  # line below. GitHub Actions does NOT expand env/expressions in uses: refs —
+  # do not add an L9_CORE_REF env expecting it to repin; edit each uses: line
+  # (or run ops/sync-v2-starters.sh) instead. Current pin:
+  # f88116503430aa18992b70d8d31063e34ff97ef1
   # Match the event: pr_fast for pull_request, merge for push, nightly/release/
   # supply_chain as appropriate. Must be allowed_events in execution-profiles.yaml.
   L9_PROFILE: "pr_fast"

@@ -64,10 +64,15 @@ if compgen -G "workflow-templates/l9-v2-*.yml" >/dev/null; then
 fi
 for f in "${FILES_TO_REPIN[@]}"; do
   [[ -f "$f" ]] || continue
-  sed -i.bak -E "s#(Quantum-L9/l9-ci-core/[A-Za-z0-9._/-]+)@[0-9a-f]{40}#\\1@${CORE_REF}#g" "$f"
+  # Rewrite SHA pins and frozen Core tags (@v2 / @v2.0.0 / @v1) — never @main.
+  sed -i.bak -E "s#(Quantum-L9/l9-ci-core/[A-Za-z0-9._/-]+)@([0-9a-f]{40}|v[0-9]+(\.[0-9]+)*)#\1@${CORE_REF}#g" "$f"
   rm -f "${f}.bak"
 done
-sed -i.bak -E "s#(pin Core at \`)[0-9a-f]{40}(\`)#\\1${CORE_REF}\\2#gi" "$PACK_DIR/README.md" 2>/dev/null || true
+# README uses "Pin Core at **`SHA`**" (bold+backticks); also accept legacy "pin Core at `SHA`".
+sed -i.bak -E \
+  -e "s#(Pin Core at \*\*\`)([0-9a-f]{40}|v[0-9]+(\.[0-9]+)*)(\`\*\*)#\1${CORE_REF}\4#g" \
+  -e "s#(pin Core at \`)([0-9a-f]{40}|v[0-9]+(\.[0-9]+)*)(\`)#\1${CORE_REF}\4#gi" \
+  "$PACK_DIR/README.md" 2>/dev/null || true
 rm -f "$PACK_DIR/README.md.bak"
 
 echo ""

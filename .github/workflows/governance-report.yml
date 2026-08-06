@@ -1,0 +1,89 @@
+name: Governance report (advisory)
+
+# Read-only weekly posture report. Opens/updates ONE issue in this repo.
+#
+# SCOPE BOUNDARY: this workflow does NOT run tests, lint, typecheck, scan code, or
+# parse build logs. It reads governance METADATA only. Test/lint/build execution is
+# owned by l9-ci-sdk and l9-ci-core; CI failure diagnosis by l9-ci-debt-resolver.
+# See docs/BOUNDARIES.md.
+
+on:
+  schedule:
+    - cron: "23 13 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const ORG = 'Quantum-L9';
+            const repos = (await github.paginate(github.rest.repos.listForOrg, { org: ORG, type: 'all', per_page: 100 }))
+              .filter(r => !r.archived && !r.fork);
+
+            const has = async (repo, path) =>
+              github.rest.repos.getContent({ owner: ORG, repo, path }).then(() => true).catch(() => false);
+
+            const rows = [];
+            for (const r of repos) {
+              const [co, caller, dep] = await Promise.all([
+                has(r.name, '.github/CODEOWNERS'),
+                has(r.name, '.github/workflows/governance.yml'),
+                has(r.name, '.github/dependabot.yml'),
+              ]);
+              let actions = '?';
+              try {
+                const p = await github.rest.actions.getGithubActionsPermissionsRepository({ owner: ORG, repo: r.name });
+                actions = p.data.enabled === false ? 'disabled'
+                        : (p.data.allowed_actions === 'local_only' ? 'local_only' : 'ok');
+              } catch (e) { actions = 'unreadable'; }
+              rows.push({ name: r.name, co, caller, dep, actions });
+            }
+
+            const tick = b => b ? '✅' : '⬜';
+            const pct = k => Math.round(100 * rows.filter(r => r[k]).length / (rows.length || 1));
+            const blocked = rows.filter(r => r.actions === 'disabled' || r.actions === 'local_only');
+
+            const body = [
+              `_Advisory posture report. Nothing here blocks anything. Generated ${new Date().toISOString().slice(0,10)}._`,
+              '',
+              `**Coverage across ${rows.length} active repos** — CODEOWNERS ${pct('co')}% · governance caller ${pct('caller')}% · dependabot ${pct('dep')}%`,
+              '',
+              blocked.length
+                ? `> [!NOTE]\n> ${blocked.length} repo(s) have an Actions policy that would prevent the governance caller from running: ` +
+                  blocked.map(r => `\`${r.name}\` (${r.actions})`).join(', ') + '. See docs/DISTRIBUTION.md Appendix B.'
+                : '> [!NOTE]\n> All repos permit cross-repo reusable workflows.',
+              '',
+              '| Repo | CODEOWNERS | Caller | Dependabot | Actions |',
+              '| --- | :-: | :-: | :-: | :-: |',
+              ...rows.map(r => `| \`${r.name}\` | ${tick(r.co)} | ${tick(r.caller)} | ${tick(r.dep)} | ${r.actions === 'ok' ? 'ok' : '⚠️ ' + r.actions} |`),
+              '',
+              '### Not measured here, on purpose',
+              '',
+              'Test results, lint findings, type errors, code scanning, and CI failure',
+              'diagnosis are owned by `l9-ci-sdk`, `l9-ci-core`, and `l9-ci-debt-resolver`.',
+              'This report deliberately does not recompute them — see `docs/BOUNDARIES.md`.',
+              '',
+              '### Promotion readiness',
+              '',
+              'Per `docs/ADVISORY.md`, rung 1 needs 4 consecutive weekly reports plus a',
+              'named highest-signal finding. Do not promote a gate without that evidence.',
+            ].join('\n');
+
+            const TITLE = 'Governance posture (advisory, weekly)';
+            const open = await github.rest.issues.listForRepo({ ...context.repo, state: 'open', labels: 'advisory', per_page: 20 });
+            const existing = open.data.find(i => i.title === TITLE);
+            if (existing) {
+              await github.rest.issues.update({ ...context.repo, issue_number: existing.number, body });
+              await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number,
+                body: `Refreshed ${new Date().toISOString().slice(0,10)} — CODEOWNERS ${pct('co')}%, caller ${pct('caller')}%, dependabot ${pct('dep')}%.` });
+            } else {
+              await github.rest.issues.create({ ...context.repo, title: TITLE, body, labels: ['advisory'] });
+            }
+            core.summary.addRaw(body).write();

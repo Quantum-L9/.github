@@ -8,7 +8,7 @@
 # PREREQUISITE: git remote 'origin' must point to Quantum-L9/l9-ci-core.
 set -euo pipefail
 
-EXPECTED_SHA="2b330a5aab90cd7781bef08f14c5e7904b61bc56"
+EXPECTED_SHA="2a3270be5f5184099c33a101807f65b1becf4e7c"
 REPO="Quantum-L9/l9-ci-core"
 
 echo "=== Quantum-L9 l9-ci-core @v1 Tag Creation Script ==="

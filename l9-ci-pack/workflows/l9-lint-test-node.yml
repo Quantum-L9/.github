@@ -77,7 +77,7 @@ jobs:
             npm install
           fi
       - name: ESLint
-        run: npx --no-install eslint . || npx eslint .
+        run: npx --no-install eslint .
 
   typecheck:
     name: tsc --noEmit
@@ -113,7 +113,7 @@ jobs:
             npm install
           fi
       - name: Type-check (tsc --noEmit)
-        run: npx --no-install tsc --noEmit || npx tsc --noEmit
+        run: npx --no-install tsc --noEmit
 
   test:
     name: Vitest
@@ -151,6 +151,6 @@ jobs:
       - name: Vitest (one-shot, non-interactive)
         env:
           CI: "true"
-        run: npx --no-install vitest run || npx vitest run
+        run: npx --no-install vitest run
         # For coverage, install @vitest/coverage-v8 and use:
         #   npx vitest run --coverage
