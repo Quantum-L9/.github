@@ -33,4 +33,4 @@ jobs:
             echo "No workflow files found to lint." >&2
             exit 1
           fi
-          ./actionlint -color never "${files[@]}"
+          ./actionlint -color "${files[@]}"
