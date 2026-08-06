@@ -4,11 +4,11 @@ Version 1.0 — 2026
 Copyright (c) 2026 Quantum AI Partners ("Licensor"). All rights reserved.
 
 This software and associated documentation files (the "Software") are the
-proprietary and confidential property of Quantum AI Partners. The Software
-is made source-available on this repository for transparency, audit, and
-evaluation purposes only, under the terms below. NO OPEN-SOURCE LICENSE IS
-GRANTED. No prior license grant by Licensor (if any) shall be construed as
-a waiver of these terms.
+proprietary property of Quantum AI Partners. The Software is made
+source-available on this repository for transparency, audit, and evaluation
+purposes only, under the terms below. NO OPEN-SOURCE LICENSE IS GRANTED. No
+prior license grant by Licensor (if any) shall be construed as a waiver of
+these terms.
 
 1. DEFINITIONS
 
@@ -92,21 +92,11 @@ a waiver of these terms.
 
 9. GOVERNING LAW
 
-   This License shall be governed by the laws of the jurisdiction in which
-   Quantum AI Partners is organized, without regard to conflict-of-law
-   principles. [Confirm jurisdiction/venue with counsel before relying on
-   this in a dispute.]
+   This License shall be governed by the laws of the State of Delaware,
+   United States of America, without regard to conflict-of-law principles.
 
 ---
-NOTE: This template was drafted to match your stated intent (restrict
-copying, require payment for commercial/profit-driven use) but has not been
-reviewed by an attorney. Have counsel review before relying on it in an
-actual dispute or before this repository accepts external contributions.
-
----
-ORG DEFAULT NOTICE: This LICENSE lives in the Quantum-L9/.github repository,
-which GitHub uses as the org-wide "community health file" fallback. Any
-Quantum-L9 repository that does NOT contain its own LICENSE file will show
-and inherit these terms by default. To use a different license for a
-specific repository, add an explicit LICENSE file to that repository — it
-will override this default.
+REPOSITORY NOTICE: This LICENSE applies only to the Quantum-L9/.github
+repository. GitHub does not propagate LICENSE files via org community-health
+fallbacks. Other Quantum-L9 repositories should include their own LICENSE
+file (this text may be used as the org template).
