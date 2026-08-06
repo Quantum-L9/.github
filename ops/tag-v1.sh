@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 # ops/tag-v1.sh
-# Creates v1.0.0 annotated tag and moving v1 tag on Quantum-L9/l9-ci-core,
-# pointing at the frozen historical kernel commit — NOT at whatever main
-# currently is (main has since moved on to the v2 thin-control-plane rewrite).
-#
+# Creates v1.0.0 annotated tag and moving v1 tag on Quantum-L9/l9-ci-core.
 # PREREQUISITE: Run from inside the l9-ci-core repo root with a clean working tree.
 # PREREQUISITE: git remote 'origin' must point to Quantum-L9/l9-ci-core.
+# PREREQUISITE: Run ops/verify-v1-anchor.sh first to re-confirm zero floating
+#               third-party Action refs at EXPECTED_SHA before tagging.
 set -euo pipefail
 
+# Anchor: last commit of the pre-v2-rewrite v1 lineage (direct parent of the
+# v2 rewrite commit 54a2f2fc8d060674d544fab14388bb5eff6b8e78 on l9-ci-core).
+# Supersedes the originally-planned 2b330a5aab90cd7781bef08f14c5e7904b61bc56,
+# which predated the Actions SHA-pinning hardening fix (PR #8 / 8928005) and
+# would have frozen floating actions/checkout@v6, ossf/scorecard-action@v2,
+# github/codeql-action/upload-sarif@v4 refs into an "immutable" tag.
 EXPECTED_SHA="2a3270be5f5184099c33a101807f65b1becf4e7c"
 REPO="Quantum-L9/l9-ci-core"
 
@@ -30,33 +35,32 @@ if [[ -n "$(git status --porcelain)" ]]; then
   exit 1
 fi
 
-# 3. Fetch the exact historical commit this tag freezes. This is intentionally
-# a `git fetch origin <sha>`, NOT `git fetch origin main` — v1 tags a fixed
-# historical commit regardless of where main has advanced to since (v2 retired
-# the 8 kernels this tag preserves). Do NOT change this to track main.
-echo "Fetching pinned historical commit $EXPECTED_SHA..."
-git fetch origin "$EXPECTED_SHA"
+# 3. Fetch latest from origin/main
+echo "Fetching origin/main..."
+git fetch origin main
 
-# 4. Confirm the pinned commit actually exists in this remote (fails loudly if
-# EXPECTED_SHA was ever force-pushed away or the fetch above silently no-ops).
-if ! git cat-file -e "${EXPECTED_SHA}^{commit}" 2>/dev/null; then
-  echo "❌ ERROR: $EXPECTED_SHA is not a valid commit reachable from origin."
-  echo "   This script tags a fixed historical commit; it does not require"
-  echo "   main to be at this SHA. If this commit is genuinely gone, stop and"
-  echo "   ask a human — do not repoint v1 at a different commit silently."
+# 4. Assert HEAD matches expected SHA
+HEAD_SHA=$(git rev-parse origin/main)
+echo "HEAD SHA: $HEAD_SHA"
+echo "Expected: $EXPECTED_SHA"
+
+if [[ "$HEAD_SHA" != "$EXPECTED_SHA" ]]; then
+  echo "❌ ERROR: HEAD SHA does not match expected SHA."
+  echo "   This script is pinned to SHA $EXPECTED_SHA."
+  echo "   If main has advanced legitimately, update EXPECTED_SHA in this script."
   exit 1
 fi
-echo "✅ Pinned commit verified reachable."
 
-# 5. Checkout the exact historical SHA (detached) — independent of main's
-# current position.
+echo "✅ SHA assertion passed."
+
+# 5. Checkout the exact SHA
 git checkout "$EXPECTED_SHA"
 
 # 6. Create annotated v1.0.0 tag (immutable)
 if git rev-parse "v1.0.0" >/dev/null 2>&1; then
   echo "⚠️  Tag v1.0.0 already exists. Skipping creation."
 else
-  git tag -a v1.0.0 -m "v1.0.0 — initial kernel release: 8 workflow_call kernels (pr-pipeline, release-publish, nightly, pre-commit-ci, trio-governance, security, scorecard, sbom)"
+  git tag -a v1.0.0 -m "v1.0.0 — initial kernel release: 8 workflow_call kernels (pr-pipeline, release-publish, nightly, pre-commit-ci, trio-governance, security, scorecard, sbom); all static third-party actions SHA-pinned"
   echo "✅ Annotated tag v1.0.0 created."
 fi
 
