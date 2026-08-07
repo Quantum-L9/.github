@@ -8,11 +8,12 @@
 #               third-party Action refs at EXPECTED_SHA before tagging.
 set -euo pipefail
 
-# Anchor: published @v1.0.0 / @v1 tip on l9-ci-core — PR #44
+# Anchor: immutable @v1.0.0 freeze on l9-ci-core — PR #44
 # ("feat: add v1 compatibility kernels restoring the @v1 reusable-workflow
-# contracts"). Supersedes 2a3270be5f5184099c33a101807f65b1becf4e7c (PR #11
-# preventive pin on the pre-v2-rewrite lineage), which was never what got
-# tagged. Also supersedes the originally-planned
+# contracts"). Moving @v1 may advance independently (see l9-ci-core
+# docs/v1-compatibility.md). Supersedes 2a3270be5f5184099c33a101807f65b1becf4e7c
+# (PR #11 preventive pin on the pre-v2-rewrite lineage), which was never what
+# got tagged. Also supersedes the originally-planned
 # 2b330a5aab90cd7781bef08f14c5e7904b61bc56 (pre-SHA-pinning hardening).
 EXPECTED_SHA="978cf948133fa4d9cd6b78ecbb383295869cb70f"
 REPO="Quantum-L9/l9-ci-core"
@@ -123,39 +124,45 @@ peel_remote_tag() {
 v100_sha=$(peel_remote_tag "v1.0.0")
 v1_sha=$(peel_remote_tag "v1")
 
-if [[ -n "$v100_sha" || -n "$v1_sha" ]]; then
-  echo "Remote tag tips:"
-  [[ -n "$v100_sha" ]] && echo "  v1.0.0 → $v100_sha" || echo "  v1.0.0 → (absent)"
-  [[ -n "$v1_sha" ]] && echo "  v1     → $v1_sha" || echo "  v1     → (absent)"
-  echo ""
+echo "Remote tag tips:"
+[[ -n "$v100_sha" ]] && echo "  v1.0.0 → $v100_sha" || echo "  v1.0.0 → (absent)"
+[[ -n "$v1_sha" ]] && echo "  v1     → $v1_sha" || echo "  v1     → (absent)"
+echo ""
 
-  mismatch=false
-  if [[ -n "$v100_sha" && "$v100_sha" != "$EXPECTED_SHA" ]]; then
+# Consistency policy (EXPECTED_SHA = immutable v1.0.0 freeze only):
+# - v1.0.0 present + wrong SHA  → fail closed (never force-update)
+# - v1.0.0 present + EXPECTED_SHA → idempotent exit 0 (even if moving v1 differs)
+# - v1.0.0 absent + v1 present  → fail closed (half-state)
+# - both absent                 → create both at EXPECTED_SHA (no force-push)
+# Never force-move v1 back to EXPECTED_SHA.
+
+if [[ -n "$v100_sha" ]]; then
+  if [[ "$v100_sha" != "$EXPECTED_SHA" ]]; then
     echo "❌ ERROR: v1.0.0 peels to $v100_sha, not EXPECTED_SHA $EXPECTED_SHA."
     echo "   Refusing to force-update immutable v1.0.0. Update EXPECTED_SHA only after an intentional retag decision."
-    mismatch=true
-  fi
-  if [[ -n "$v1_sha" && "$v1_sha" != "$EXPECTED_SHA" ]]; then
-    echo "❌ ERROR: v1 peels to $v1_sha, not EXPECTED_SHA $EXPECTED_SHA."
-    echo "   Refusing to force-move v1. Align EXPECTED_SHA or advance tags in a separate, explicit release."
-    mismatch=true
-  fi
-  if [[ "$mismatch" == true ]]; then
     exit 1
   fi
 
-  # Tags present and match — idempotent success; do not push or retag.
-  if [[ -n "$v100_sha" && -n "$v1_sha" ]]; then
-    echo "✅ Tags already match EXPECTED_SHA. Nothing to create or push."
-    echo "   v1.0.0 — immutable annotated tip"
-    echo "   v1      — moving tag at same commit"
-    exit 0
+  echo "✅ v1.0.0 already matches EXPECTED_SHA. Nothing to create or push."
+  echo "   v1.0.0 — immutable freeze at $EXPECTED_SHA"
+  if [[ -n "$v1_sha" && "$v1_sha" != "$EXPECTED_SHA" ]]; then
+    echo ""
+    echo "ℹ️  Notice: moving tag v1 is ahead of the v1.0.0 freeze:"
+    echo "     v1     → $v1_sha"
+    echo "     v1.0.0 → $EXPECTED_SHA"
+    echo "   This is expected — @v1 may advance independently per"
+    echo "   l9-ci-core docs/v1-compatibility.md. Not moving v1 back."
+  elif [[ -n "$v1_sha" ]]; then
+    echo "   v1      — moving tag currently at the same commit"
+  else
+    echo "   v1      — (absent on origin; not inventing it while v1.0.0 exists)"
   fi
+  exit 0
+fi
 
-  # Partial presence at the correct SHA is unexpected; fail closed rather than
-  # half-create or force-push the missing sibling.
-  echo "❌ ERROR: Only one of v1.0.0 / v1 is present (both must exist together at EXPECTED_SHA)."
-  echo "   Fix the missing tag manually; this script will not invent a half-state."
+if [[ -n "$v1_sha" ]]; then
+  echo "❌ ERROR: v1.0.0 is absent but v1 exists (peels to $v1_sha)."
+  echo "   Half-state — refuse to create or force-move tags. Fix manually."
   exit 1
 fi
 
