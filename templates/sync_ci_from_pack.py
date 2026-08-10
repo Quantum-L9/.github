@@ -59,7 +59,10 @@ COMMUNITY_HEALTH = (
 ISSUE_TEMPLATES_DIR = "templates/issue-templates"
 
 # ── PR template ─────────────────────────────────────────────────────────────
-PR_TEMPLATE = ("templates/pr-templates/pull_request_template.md", ".github/pull_request_template.md")
+PR_TEMPLATE = (
+    "templates/pr-templates/pull_request_template.md",
+    ".github/pull_request_template.md",
+)
 
 FORBIDDEN_USES_LINE = (
     re.compile(r"^\s*uses:\s+\S+@main\b"),
@@ -88,7 +91,9 @@ def load_pins() -> dict[str, str]:
 
 
 def fetch(url: str) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": "l9-repo-template-sync-ci"})
+    req = urllib.request.Request(
+        url, headers={"User-Agent": "l9-repo-template-sync-ci"}
+    )
     with urllib.request.urlopen(req, timeout=60) as resp:
         return cast(bytes, resp.read())
 
@@ -123,7 +128,9 @@ def list_governance(sha: str) -> list[str]:
     data = json.loads(fetch(api).decode("utf-8"))
     names: list[str] = []
     for item in data:
-        if item.get("type") == "file" and str(item.get("name", "")).endswith((".yaml", ".yml")):
+        if item.get("type") == "file" and str(item.get("name", "")).endswith(
+            (".yaml", ".yml")
+        ):
             names.append(str(item["name"]))
     if not names:
         raise SystemExit("no governance YAML files found in org pack")
@@ -141,7 +148,9 @@ def patch_lint_test(text: str) -> str:
     """Ensure requirements-consumer-ci.txt is installed; keep pack env defaults."""
     if "requirements-consumer-ci.txt" in text:
         return text
-    marker = "if [ -f requirements-ci.txt ]; then pip install -r requirements-ci.txt; fi"
+    marker = (
+        "if [ -f requirements-ci.txt ]; then pip install -r requirements-ci.txt; fi"
+    )
     if marker not in text:
         print(
             "warning: lint-test install needle not found; leaving workflow as-is",
