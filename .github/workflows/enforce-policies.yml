@@ -38,7 +38,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install PyYAML
-        run: pip install pyyaml
+        run: pip install --only-binary=:all: "pyyaml==6.0.2"
 
       - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         env:
