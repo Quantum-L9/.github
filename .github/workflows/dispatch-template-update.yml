@@ -1,0 +1,95 @@
+# Dispatches a repository_dispatch event to all seeded consumer repos when
+# org templates change. Consumer repos with an on-org-update.yml receiver
+# will auto-sync on the next event.
+name: Dispatch template update
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "templates/**"
+      - "l9-ci-pack/**"
+  workflow_dispatch:
+    inputs:
+      target_repo:
+        description: "Specific repo to notify (blank = all seeded repos)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - id: token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1.12.0
+        with:
+          app-id: ${{ vars.GOVERNANCE_APP_ID }}
+          private-key: ${{ secrets.GOVERNANCE_APP_PRIVATE_KEY }}
+          owner: Quantum-L9
+
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        env:
+          TARGET: ${{ inputs.target_repo || '' }}
+          COMMIT_SHA: ${{ github.sha }}
+        with:
+          github-token: ${{ steps.token.outputs.token }}
+          script: |
+            const ORG = 'Quantum-L9';
+            const TARGET = process.env.TARGET;
+            const SHA = process.env.COMMIT_SHA;
+
+            let targets;
+            if (TARGET) {
+              targets = [{ name: TARGET }];
+            } else {
+              // Find all repos that have the governance caller (seeded repos)
+              const all = await github.paginate(github.rest.repos.listForOrg, {
+                org: ORG, type: 'all', per_page: 100
+              });
+              const active = all.filter(r => !r.archived && !r.fork && r.name !== '.github');
+
+              // Check which have the governance caller (proxy for "seeded")
+              targets = [];
+              for (const repo of active) {
+                const has = await github.rest.repos.getContent({
+                  owner: ORG, repo: repo.name, path: '.github/workflows/governance.yml'
+                }).then(() => true).catch(() => false);
+                if (has) targets.push(repo);
+              }
+            }
+
+            const rows = [];
+            for (const repo of targets) {
+              const n = typeof repo === 'string' ? repo : repo.name;
+              try {
+                await github.rest.repos.createDispatchEvent({
+                  owner: ORG,
+                  repo: n,
+                  event_type: 'org_template_updated',
+                  client_payload: {
+                    org_sha: SHA,
+                    source: 'Quantum-L9/.github',
+                    action: 'sync-ci recommended'
+                  }
+                });
+                rows.push([n, 'dispatched']);
+              } catch (e) {
+                rows.push([n, `failed: ${(e.message || '').slice(0, 60)}`]);
+              }
+            }
+
+            core.summary
+              .addHeading(`Template update dispatched — ${rows.length} repos`, 2)
+              .addTable([
+                [{data: 'Repo', header: true}, {data: 'Result', header: true}],
+                ...rows.map(r => r.map(String))
+              ])
+              .write();
+
+            core.info(`Dispatched to ${rows.filter(r => r[1] === 'dispatched').length} repos`);

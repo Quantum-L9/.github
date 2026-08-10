@@ -1,0 +1,168 @@
+# Auto-seeds governance files into newly created repositories.
+# Triggers on repository creation via repository_dispatch from an org webhook,
+# or on manual dispatch for backfill. Uses the same GitHub App as seed-governance.yml.
+#
+# Advisory only — opens a PR, never pushes directly to main.
+name: Auto-seed new repository
+
+on:
+  # Triggered by org webhook → repository created event (via GitHub App or webhook relay)
+  repository_dispatch:
+    types: [repo_created]
+  # Manual backfill: seed a specific repo or all unseeded repos
+  workflow_dispatch:
+    inputs:
+      target_repo:
+        description: "Specific repo name to seed (blank = all unseeded repos)"
+        type: string
+        default: ""
+      dry_run:
+        description: "Dry run (report only, no PRs)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - id: token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1.12.0
+        with:
+          app-id: ${{ vars.GOVERNANCE_APP_ID }}
+          private-key: ${{ secrets.GOVERNANCE_APP_PRIVATE_KEY }}
+          owner: Quantum-L9
+
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          TARGET_REPO: ${{ inputs.target_repo || github.event.client_payload.repository || '' }}
+        with:
+          github-token: ${{ steps.token.outputs.token }}
+          script: |
+            const fs = require('fs');
+            const DRY = process.env.DRY_RUN === 'true';
+            const TARGET = process.env.TARGET_REPO;
+            const BRANCH = 'chore/auto-seed-governance';
+
+            // Files to seed (non-inheritable, must be physical)
+            const payload = {
+              '.github/CODEOWNERS': fs.readFileSync('templates/CODEOWNERS.repo', 'utf8'),
+              '.github/workflows/governance.yml': fs.readFileSync('templates/governance-caller.yml', 'utf8'),
+              '.github/dependabot.yml': fs.readFileSync('templates/dependabot.yml', 'utf8'),
+            };
+
+            // Determine target repos
+            let targets;
+            if (TARGET) {
+              const repo = await github.rest.repos.get({ owner: 'Quantum-L9', repo: TARGET });
+              targets = [repo.data];
+            } else {
+              const all = await github.paginate(github.rest.repos.listForOrg, {
+                org: 'Quantum-L9', type: 'all', per_page: 100
+              });
+              targets = all.filter(r => !r.archived && !r.fork && r.name !== '.github');
+            }
+
+            const rows = [];
+            for (const repo of targets) {
+              const o = repo.owner.login, n = repo.name;
+              try {
+                // Skip if already seeded (all files present)
+                const checks = await Promise.all(
+                  Object.keys(payload).map(p =>
+                    github.rest.repos.getContent({ owner: o, repo: n, path: p })
+                      .then(() => true).catch(() => false)
+                  )
+                );
+                if (checks.every(Boolean)) {
+                  rows.push([n, 'already seeded']);
+                  continue;
+                }
+
+                if (DRY) {
+                  rows.push([n, 'would seed']);
+                  continue;
+                }
+
+                const base = repo.default_branch;
+                const ref = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
+
+                // Create or reset branch
+                try {
+                  await github.rest.git.createRef({
+                    owner: o, repo: n,
+                    ref: `refs/heads/${BRANCH}`,
+                    sha: ref.data.object.sha
+                  });
+                } catch (e) {
+                  if (e.status === 422) {
+                    await github.rest.git.updateRef({
+                      owner: o, repo: n,
+                      ref: `heads/${BRANCH}`,
+                      sha: ref.data.object.sha,
+                      force: true
+                    });
+                  } else throw e;
+                }
+
+                // Create/update files
+                for (const [path, content] of Object.entries(payload)) {
+                  const existing = await github.rest.repos.getContent({
+                    owner: o, repo: n, path, ref: BRANCH
+                  }).catch(() => null);
+
+                  await github.rest.repos.createOrUpdateFileContents({
+                    owner: o, repo: n, path, branch: BRANCH,
+                    message: `chore(governance): auto-seed ${path}`,
+                    content: Buffer.from(content).toString('base64'),
+                    sha: existing?.data?.sha,
+                  });
+                }
+
+                // Open PR
+                const existingPR = await github.rest.pulls.list({
+                  owner: o, repo: n, head: `Quantum-L9:${BRANCH}`, state: 'open'
+                });
+
+                if (existingPR.data.length === 0) {
+                  const pr = await github.rest.pulls.create({
+                    owner: o, repo: n, head: BRANCH, base,
+                    title: 'chore(governance): auto-seed org governance files',
+                    body: [
+                      'Automatically seeds governance files from `Quantum-L9/.github`.',
+                      '',
+                      '**What this adds:**',
+                      '- `.github/CODEOWNERS` — review routing (not inheritable)',
+                      '- `.github/workflows/governance.yml` — advisory PR/issue governance caller',
+                      '- `.github/dependabot.yml` — weekly dependency update PRs',
+                      '',
+                      '**Advisory only** — the governance caller defaults to `strict: false`,',
+                      'so it reports findings but cannot block your merge.',
+                      '',
+                      '_Opened automatically by Quantum-L9/.github auto-seed._',
+                    ].join('\n'),
+                  });
+                  rows.push([n, `PR #${pr.data.number}`]);
+                } else {
+                  rows.push([n, `PR already open: #${existingPR.data[0].number}`]);
+                }
+              } catch (e) {
+                rows.push([n, `failed: ${(e.message || '').slice(0, 80)}`]);
+              }
+            }
+
+            // Summary
+            const mode = DRY ? 'DRY RUN' : 'APPLIED';
+            core.summary
+              .addHeading(`Auto-seed (${mode}) — ${rows.length} repos`, 2)
+              .addTable([
+                [{data: 'Repo', header: true}, {data: 'Result', header: true}],
+                ...rows.map(r => r.map(String))
+              ])
+              .write();
