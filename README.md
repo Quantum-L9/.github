@@ -47,9 +47,7 @@ diagnose CI failures.
 ├── labels.yml                           org label taxonomy
 ├── ISSUE_TEMPLATE/                      inherited org-wide
 ├── actions/
-│   ├── immutable-checkout/              reusable: SHA-pinned checkout
-│   ├── setup-python-hygiene/            reusable: ruff/mypy/pytest setup
-│   └── setup-node-hygiene/              reusable: Node/Biome setup
+│   └── immutable-checkout/              reusable: SHA-pinned checkout
 └── workflows/
     ├── governance-pr.yml                workflow_call, strict=false
     ├── governance-issue.yml             labels only, never fails

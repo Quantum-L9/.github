@@ -49,8 +49,6 @@ All pull requests are checked by the L9 v2 CI pipeline:
 Consumer repos use the centralized composite actions for setup:
 
 ```yaml
-- uses: Quantum-L9/.github/actions/setup-python-hygiene@<sha>
-- uses: Quantum-L9/.github/actions/setup-node-hygiene@<sha>
 - uses: Quantum-L9/.github/actions/immutable-checkout@<sha>
 ```
 

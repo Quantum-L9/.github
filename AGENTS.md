@@ -70,8 +70,6 @@ These are not agents but reusable building blocks consumed by consumer repo CI:
 | Action | Path | Purpose |
 | --- | --- | --- |
 | Immutable Checkout | `.github/actions/immutable-checkout/` | SHA-pinned git checkout without marketplace dependency |
-| Python Hygiene | `.github/actions/setup-python-hygiene/` | Install ruff, mypy, pytest at pinned versions |
-| Node Hygiene | `.github/actions/setup-node-hygiene/` | Install Node.js, detect package manager, verify Biome |
 
 ## Copilot Governance
 
