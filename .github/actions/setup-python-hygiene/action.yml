@@ -1,0 +1,82 @@
+name: Setup Python hygiene tools
+description: >
+  Installs Python and the L9 consumer CI toolchain (ruff, mypy, pytest) at
+  pinned versions. Replaces the inline `run:` blocks in l9-lint-test.yml with
+  a single reusable action. Consumer repos call this instead of managing their
+  own tool installation logic.
+inputs:
+  python-version:
+    description: "Python version to install"
+    required: false
+    default: "3.12"
+  install-package:
+    description: "Whether to install the local package in editable mode"
+    required: false
+    default: "true"
+  core-pin:
+    description: "l9-ci-core commit SHA for requirements-consumer-ci.txt (blank = main)"
+    required: false
+    default: ""
+outputs:
+  ruff-version:
+    description: "Installed ruff version"
+    value: ${{ steps.versions.outputs.ruff }}
+  mypy-version:
+    description: "Installed mypy version"
+    value: ${{ steps.versions.outputs.mypy }}
+  pytest-version:
+    description: "Installed pytest version"
+    value: ${{ steps.versions.outputs.pytest }}
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install CI toolchain
+      shell: bash
+      env:
+        CORE_PIN: ${{ inputs.core-pin }}
+        INSTALL_PKG: ${{ inputs.install-package }}
+      run: |
+        set -euo pipefail
+        python -m pip install --upgrade pip
+
+        # 1. Consumer CI requirements (pinned tools from l9-ci-core)
+        if [ -f requirements-consumer-ci.txt ]; then
+          pip install -r requirements-consumer-ci.txt
+        elif [ -f requirements-ci.txt ]; then
+          pip install -r requirements-ci.txt
+        else
+          # Fetch from l9-ci-core at pinned SHA
+          REF="${CORE_PIN:-main}"
+          URL="https://raw.githubusercontent.com/Quantum-L9/l9-ci-core/${REF}/requirements-consumer-ci.txt"
+          curl -fsSL "$URL" -o /tmp/requirements-consumer-ci.txt && \
+            pip install -r /tmp/requirements-consumer-ci.txt || \
+            echo "::notice::Could not fetch consumer CI requirements — installing defaults"
+        fi
+
+        # 2. Ensure tools are available (fallback if not in requirements file)
+        command -v ruff >/dev/null 2>&1 || pip install ruff
+        command -v mypy >/dev/null 2>&1 || pip install mypy
+        command -v pytest >/dev/null 2>&1 || pip install pytest
+        python -c "import pytest_cov" 2>/dev/null || pip install pytest-cov
+        python -c "import xdist" 2>/dev/null || pip install pytest-xdist
+        python -c "import pytest_timeout" 2>/dev/null || pip install pytest-timeout
+
+        # 3. Install local package
+        if [ "$INSTALL_PKG" = "true" ]; then
+          pip install -e ".[dev]" 2>/dev/null || \
+            pip install -e . 2>/dev/null || \
+            echo "::notice::No local editable package to install"
+        fi
+
+    - id: versions
+      name: Report installed versions
+      shell: bash
+      run: |
+        echo "ruff=$(ruff --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+        echo "mypy=$(mypy --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+        echo "pytest=$(pytest --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"

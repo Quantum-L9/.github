@@ -1,0 +1,31 @@
+name: Immutable event-revision checkout
+description: >
+  Checks out the exact commit SHA that triggered the workflow using raw git
+  commands. No floating ref, no action marketplace dependency, no token in
+  remote URL. Matches the L9 v2 convention used across all org workflows.
+inputs:
+  fetch-depth:
+    description: "Number of commits to fetch (1 = shallow clone)"
+    required: false
+    default: "1"
+runs:
+  using: composite
+  steps:
+    - id: checkout
+      shell: bash
+      env:
+        REPOSITORY: ${{ github.repository }}
+        REVISION: ${{ github.sha }}
+        TOKEN: ${{ github.token }}
+        FETCH_DEPTH: ${{ inputs.fetch-depth }}
+      run: |
+        set -euo pipefail
+        git init .
+        git remote add origin "https://github.com/${REPOSITORY}.git"
+        # Authenticate via per-fetch header — token never written to .git/config
+        auth_header="Authorization: Basic $(printf 'x-access-token:%s' "${TOKEN}" | base64 | tr -d '\n')"
+        git -c protocol.version=2 \
+          -c "http.https://github.com/.extraheader=${auth_header}" \
+          fetch --depth="${FETCH_DEPTH}" origin "${REVISION}"
+        git checkout --detach FETCH_HEAD
+        echo "checked out ${REPOSITORY}@${REVISION} (depth=${FETCH_DEPTH})"

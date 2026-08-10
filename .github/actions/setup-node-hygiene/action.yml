@@ -1,0 +1,90 @@
+name: Setup Node.js hygiene tools
+description: >
+  Installs Node.js with the correct package manager (auto-detected from
+  lockfile) and verifies Biome is available for formatting/linting. Replaces
+  the inline setup blocks in l9-lint-test-node.yml with a single reusable
+  action.
+inputs:
+  node-version:
+    description: "Node.js version to install"
+    required: false
+    default: "22"
+  package-manager:
+    description: "Package manager override (pnpm, npm, yarn). Blank = auto-detect from lockfile."
+    required: false
+    default: ""
+  install-deps:
+    description: "Whether to install dependencies"
+    required: false
+    default: "true"
+outputs:
+  package-manager:
+    description: "Detected or specified package manager"
+    value: ${{ steps.detect.outputs.pm }}
+  biome-version:
+    description: "Installed Biome version (if available)"
+    value: ${{ steps.biome.outputs.version }}
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4.4.0
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - id: detect
+      name: Detect package manager
+      shell: bash
+      env:
+        PM_OVERRIDE: ${{ inputs.package-manager }}
+      run: |
+        set -euo pipefail
+        if [ -n "$PM_OVERRIDE" ]; then
+          echo "pm=$PM_OVERRIDE" >> "$GITHUB_OUTPUT"
+          echo "Using override: $PM_OVERRIDE"
+          exit 0
+        fi
+        if [ -f pnpm-lock.yaml ]; then
+          echo "pm=pnpm" >> "$GITHUB_OUTPUT"
+          echo "Detected: pnpm (pnpm-lock.yaml)"
+        elif [ -f yarn.lock ]; then
+          echo "pm=yarn" >> "$GITHUB_OUTPUT"
+          echo "Detected: yarn (yarn.lock)"
+        else
+          echo "pm=npm" >> "$GITHUB_OUTPUT"
+          echo "Detected: npm (default)"
+        fi
+
+    - name: Enable Corepack (pnpm/yarn)
+      if: steps.detect.outputs.pm != 'npm'
+      shell: bash
+      run: |
+        corepack enable
+        echo "Corepack enabled for ${{ steps.detect.outputs.pm }}"
+
+    - name: Install dependencies
+      if: inputs.install-deps == 'true'
+      shell: bash
+      env:
+        PM: ${{ steps.detect.outputs.pm }}
+      run: |
+        set -euo pipefail
+        case "$PM" in
+          pnpm)  pnpm install --frozen-lockfile ;;
+          yarn)  yarn install --immutable ;;
+          npm)   npm ci ;;
+        esac
+
+    - id: biome
+      name: Verify Biome
+      shell: bash
+      run: |
+        set -euo pipefail
+        if npx biome --version 2>/dev/null; then
+          VER=$(npx biome --version 2>/dev/null | head -1)
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "Biome available: $VER"
+        else
+          echo "version=" >> "$GITHUB_OUTPUT"
+          echo "::notice::Biome not found in node_modules — install @biomejs/biome as a dev dependency"
+        fi

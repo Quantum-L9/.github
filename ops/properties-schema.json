@@ -1,0 +1,41 @@
+[
+  {
+    "property_name": "l9-ci-version",
+    "value_type": "single_select",
+    "required": false,
+    "default_value": "none",
+    "description": "Which version of the L9 CI pipeline this repo uses",
+    "allowed_values": ["v1", "v2", "none"]
+  },
+  {
+    "property_name": "l9-tier",
+    "value_type": "single_select",
+    "required": false,
+    "default_value": "standard",
+    "description": "Criticality tier — determines ruleset strictness and review requirements",
+    "allowed_values": ["critical", "standard", "experimental"]
+  },
+  {
+    "property_name": "l9-language",
+    "value_type": "multi_select",
+    "required": false,
+    "default_value": null,
+    "description": "Primary language(s) used in this repository",
+    "allowed_values": ["python", "typescript", "javascript", "rust", "go"]
+  },
+  {
+    "property_name": "l9-seeded",
+    "value_type": "true_false",
+    "required": false,
+    "default_value": "false",
+    "description": "Whether governance files have been seeded into this repo"
+  },
+  {
+    "property_name": "l9-team",
+    "value_type": "single_select",
+    "required": false,
+    "default_value": "platform",
+    "description": "Owning team for review routing and escalation",
+    "allowed_values": ["platform", "product", "infra", "external"]
+  }
+]

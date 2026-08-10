@@ -1,0 +1,28 @@
+# Declarative repository settings policy.
+# Enforced by .github/workflows/enforce-policies.yml (weekly).
+# Settings here are the org standard; repos that diverge get auto-corrected.
+#
+# Opt out: create .l9/no-policy-enforcement in the repo.
+defaults:
+  has_issues: true
+  has_wiki: false
+  has_projects: false
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: false
+  delete_branch_on_merge: true
+  allow_auto_merge: false
+  # Security
+  has_vulnerability_alerts: true
+  # Branch default
+  default_branch: main
+
+overrides:
+  # Repos that need wiki or projects
+  - repos: ["Quantum-Website-Cursor", "quantum-dashboard"]
+    has_wiki: true
+  - repos: ["l9-assurance"]
+    has_projects: true
+  # Repos that allow merge commits (monorepo patterns)
+  - repos: ["l9-assurance"]
+    allow_merge_commit: true
