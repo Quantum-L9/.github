@@ -51,11 +51,14 @@ The [`l9-assurance`](https://github.com/Quantum-L9/l9-assurance) monorepo provid
 ## Automated Security Controls
 
 All repositories use:
-- **gitleaks** — secret scanning on every commit
-- **Bandit + Semgrep** — Python SAST
+- **GitHub Secret Scanning** — org-wide alerts enabled (advisory mode)
+- **Semgrep** — SAST via `l9-analysis.yml` pipeline
 - **pip-audit / npm audit** — dependency vulnerability scanning
-- **Dependabot** — automated dependency updates with SHA pinning via `ratchet`
-- **OpenSSF Scorecard** — supply-chain security posture scoring
+- **Dependabot** — automated dependency updates with SHA pinning
+- **SHA-pin audit** — monthly org-wide check for floating action refs (`audit-pins-org.yml`)
+- **Copilot content exclusion** — prevents AI from indexing sensitive paths (see `docs/copilot-exclusions.md`)
+- **Org rulesets (evaluate)** — observes force-push, branch deletion, PR bypass patterns
+- **Custom properties** — repos tagged with `l9-tier` for security posture routing
 
 ## Disclosure Policy
 

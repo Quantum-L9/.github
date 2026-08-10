@@ -18,6 +18,15 @@ Open a GitHub Issue in the relevant repository using the appropriate template:
 For questions, architectural discussions, and community input:
 [github.com/Quantum-L9/.github/discussions](https://github.com/Quantum-L9/.github/discussions)
 
+## Automated Governance
+
+Many governance tasks are handled automatically. Before opening an issue:
+
+- **Missing CODEOWNERS/dependabot?** → Wait for the weekly `continuous-sync.yml` PR
+- **Labels missing?** → Wait for the weekly `sync-labels-all.yml` run (Monday)
+- **Repo settings wrong?** → Wait for the weekly `enforce-policies.yml` run (Wednesday)
+- **Need to sync CI?** → Run `make sync-ci` or wait for `dispatch-template-update.yml`
+
 ## Out of Scope
 
 The following are **not supported** through Quantum-L9 channels:
@@ -25,6 +34,7 @@ The following are **not supported** through Quantum-L9 channels:
 - Debugging third-party tools (GitHub Actions runners, PyPI, npm registry)
 - Questions already answered in [CANONICAL_LAW.md](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md)
 - Requests to bypass CI gates or CODEOWNERS requirements
+- Requests to opt out of governance without creating `.l9/no-sync`
 
 ## Response Expectations
 
