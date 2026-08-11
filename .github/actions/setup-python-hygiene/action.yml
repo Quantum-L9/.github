@@ -1,0 +1,50 @@
+name: Setup Python hygiene tools
+description: >
+  Installs Python and the L9 consumer CI toolchain (ruff, mypy, pytest) at
+  exact pinned versions, wheels-only. Reusable composite action for consumer
+  repo CI. Pins mirror Quantum-L9/l9-ci-core requirements-consumer-ci.txt and
+  are kept in lockstep (Dependabot-tracked there).
+inputs:
+  python-version:
+    description: "Python version to install"
+    required: false
+    default: "3.12"
+outputs:
+  ruff-version:
+    description: "Installed ruff version"
+    value: ${{ steps.versions.outputs.ruff }}
+  mypy-version:
+    description: "Installed mypy version"
+    value: ${{ steps.versions.outputs.mypy }}
+  pytest-version:
+    description: "Installed pytest version"
+    value: ${{ steps.versions.outputs.pytest }}
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install CI toolchain (pinned, wheels-only)
+      shell: bash
+      run: |
+        set -euo pipefail
+        # Exact `==` pins (locked resolved versions) + `--only-binary=:all:`
+        # (wheels only — never build from an sdist, so no setup-script
+        # execution). Pins mirror Quantum-L9/l9-ci-core
+        # requirements-consumer-ci.txt.
+        python -m pip install --only-binary=:all: \
+          "ruff==0.16.1" \
+          "mypy==2.3.0" \
+          "pytest==9.1.1"
+
+    - id: versions
+      name: Report installed versions
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "ruff=$(ruff --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+        echo "mypy=$(mypy --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+        echo "pytest=$(pytest --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
