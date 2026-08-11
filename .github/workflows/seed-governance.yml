@@ -46,12 +46,16 @@ jobs:
           owner: Quantum-L9
 
       - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        env:
+          # Pass dispatch inputs via env — never interpolate into script: (CodeQL js/actions/code-injection)
+          SEED_MODE: ${{ inputs.mode }}
+          SEED_REPO_FILTER: ${{ inputs.repo_filter }}
         with:
           github-token: ${{ steps.token.outputs.token }}
           script: |
             const fs = require('fs');
-            const MODE = '${{ inputs.mode }}';
-            const FILTER = '${{ inputs.repo_filter }}';
+            const MODE = process.env.SEED_MODE || 'dry-run';
+            const FILTER = process.env.SEED_REPO_FILTER || '';
             const BRANCH = 'chore/seed-governance';
 
             // Templates — no CI workflow is seeded (l9-ci-sdk owns CI). See docs/BOUNDARIES.md.
