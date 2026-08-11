@@ -3,12 +3,17 @@ name: Seed non-inheritable governance
 # Community health files (SECURITY.md, CONTRIBUTING.md, PR/issue templates) are
 # INHERITED automatically — this workflow does not touch them.
 #
-# It seeds only the two things GitHub cannot inherit:
-#   1. .github/CODEOWNERS          (not a community health file)
-#   2. .github/workflows/governance.yml  (a 12-line caller pinned to @v1)
+# Seeds the three things GitHub cannot inherit (when missing):
+#   1. .github/CODEOWNERS                 (skipped if root CODEOWNERS already exists)
+#   2. .github/workflows/governance.yml   (advisory caller pinned to @v1)
+#   3. .github/dependabot.yml
 #
-# This is a ONE-TIME seed per repo. After it lands, updating governance logic means
-# editing governance-pr.yml here and moving the v1 tag — no fan-out, no token use.
+# REQUIRES GitHub App permissions on the installation:
+#   Contents: R/W, Pull requests: R/W, Metadata: R, Administration: R,
+#   Workflows: R/W  ← required to create/update .github/workflows/*
+#
+# ONE-TIME seed per repo. After it lands, updating governance logic means
+# editing governance-pr.yml here and moving the v1 tag — no fan-out.
 
 on:
   workflow_dispatch:
@@ -29,7 +34,7 @@ permissions:
 jobs:
   seed:
     runs-on: ubuntu-latest
-    environment: governance-distribution   # add required reviewers here
+    environment: governance-distribution
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -41,72 +46,167 @@ jobs:
           owner: Quantum-L9
 
       - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        env:
+          # Pass dispatch inputs via env — never interpolate into script: (CodeQL js/actions/code-injection)
+          SEED_MODE: ${{ inputs.mode }}
+          SEED_REPO_FILTER: ${{ inputs.repo_filter }}
         with:
           github-token: ${{ steps.token.outputs.token }}
           script: |
             const fs = require('fs');
-            const MODE = '${{ inputs.mode }}';
-            const FILTER = '${{ inputs.repo_filter }}';
+            const MODE = process.env.SEED_MODE || 'dry-run';
+            const FILTER = process.env.SEED_REPO_FILTER || '';
             const BRANCH = 'chore/seed-governance';
 
-            // The three files GitHub cannot inherit. Nothing else is ever copied.
-            // NOTE: no CI workflow is seeded here — l9-ci-sdk owns CI. See docs/BOUNDARIES.md.
-            const payload = {
+            // Templates — no CI workflow is seeded (l9-ci-sdk owns CI). See docs/BOUNDARIES.md.
+            const templates = {
               '.github/CODEOWNERS': fs.readFileSync('templates/CODEOWNERS.repo', 'utf8'),
               '.github/workflows/governance.yml': fs.readFileSync('templates/governance-caller.yml', 'utf8'),
               '.github/dependabot.yml': fs.readFileSync('templates/dependabot.yml', 'utf8'),
             };
 
-            const all = await github.paginate(github.rest.repos.listForOrg, { org: 'Quantum-L9', type: 'all', per_page: 100 });
-            const targets = all.filter(r => !r.archived && !r.fork && r.name !== '.github' && (!FILTER || r.name.includes(FILTER)));
+            const exists = async (owner, repo, path, ref) => {
+              try {
+                await github.rest.repos.getContent({ owner, repo, path, ...(ref ? { ref } : {}) });
+                return true;
+              } catch {
+                return false;
+              }
+            };
+
+            const all = await github.paginate(github.rest.repos.listForOrg, {
+              org: 'Quantum-L9', type: 'all', per_page: 100,
+            });
+            const targets = all.filter(r =>
+              !r.archived && !r.fork && r.name !== '.github' && (!FILTER || r.name.includes(FILTER)));
 
             const rows = [];
+            let failures = 0;
+
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
               try {
-                // idempotency: skip if both files already exist
-                const present = await Promise.all(Object.keys(payload).map(p =>
-                  github.rest.repos.getContent({ owner: o, repo: n, path: p }).then(() => true).catch(() => false)));
-                if (present.every(Boolean)) { rows.push([n, 'already seeded']); continue; }
+                // Root CODEOWNERS takes precedence conflict: GitHub prefers
+                // `.github/CODEOWNERS` over root `CODEOWNERS`. Never overlay.
+                const hasRootCodeowners = await exists(o, n, 'CODEOWNERS');
+                const payload = { ...templates };
+                if (hasRootCodeowners) delete payload['.github/CODEOWNERS'];
 
-                if (MODE === 'dry-run') { rows.push([n, 'would seed']); continue; }
+                const paths = Object.keys(payload);
+                if (!paths.length) {
+                  rows.push([n, 'skipped (nothing safe to seed)']);
+                  continue;
+                }
+
+                const present = await Promise.all(paths.map(p => exists(o, n, p)));
+                if (present.every(Boolean)) {
+                  rows.push([n, hasRootCodeowners
+                    ? 'already seeded (root CODEOWNERS preserved)'
+                    : 'already seeded']);
+                  continue;
+                }
+
+                if (MODE === 'dry-run') {
+                  const missing = paths.filter((_, i) => !present[i]);
+                  const note = hasRootCodeowners ? '; preserve root CODEOWNERS' : '';
+                  rows.push([n, `would seed: ${missing.join(', ')}${note}`]);
+                  continue;
+                }
 
                 const base = repo.default_branch;
-                const ref = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
-                await github.rest.git.createRef({ owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: ref.data.object.sha })
-                  .catch(e => { if (e.status !== 422) throw e; });
+                const baseRef = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
+                const baseSha = baseRef.data.object.sha;
+                const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
 
-                for (const [path, content] of Object.entries(payload)) {
-                  const existing = await github.rest.repos.getContent({ owner: o, repo: n, path, ref: BRANCH }).catch(() => null);
-                  await github.rest.repos.createOrUpdateFileContents({
-                    owner: o, repo: n, path, branch: BRANCH,
-                    message: `chore(governance): seed ${path}`,
-                    content: Buffer.from(content).toString('base64'),
-                    sha: existing?.data?.sha,
+                // Atomic single commit: all missing files or none (no orphan partial branches).
+                const treeItems = [];
+                for (const path of paths) {
+                  if (await exists(o, n, path, base)) continue; // already on default branch
+                  const blob = await github.rest.git.createBlob({
+                    owner: o, repo: n,
+                    content: Buffer.from(payload[path]).toString('base64'),
+                    encoding: 'base64',
+                  });
+                  treeItems.push({ path, mode: '100644', type: 'blob', sha: blob.data.sha });
+                }
+
+                if (!treeItems.length) {
+                  rows.push([n, 'already seeded']);
+                  continue;
+                }
+
+                const tree = await github.rest.git.createTree({
+                  owner: o, repo: n,
+                  base_tree: baseCommit.data.tree.sha,
+                  tree: treeItems,
+                });
+                const commit = await github.rest.git.createCommit({
+                  owner: o, repo: n,
+                  message: `chore(governance): seed ${treeItems.map(t => t.path).join(', ')}`,
+                  tree: tree.data.sha,
+                  parents: [baseSha],
+                });
+
+                // Point branch at the new commit (create or fast-forward/reset to this tip).
+                try {
+                  await github.rest.git.createRef({
+                    owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: commit.data.sha,
+                  });
+                } catch (e) {
+                  if (e.status !== 422) throw e;
+                  await github.rest.git.updateRef({
+                    owner: o, repo: n, ref: `heads/${BRANCH}`, sha: commit.data.sha, force: true,
                   });
                 }
 
-                const pr = await github.rest.pulls.create({
-                  owner: o, repo: n, head: BRANCH, base,
-                  title: 'chore(governance): seed CODEOWNERS and governance caller',
-                  body: [
-                    'Seeds the only two governance files GitHub cannot inherit from `Quantum-L9/.github`.',
-                    '',
-                    '- `.github/CODEOWNERS` — CODEOWNERS is not a community health file, so it must be physical.',
-                    '- `.github/workflows/governance.yml` — a caller pinned to `@v1`. Logic lives in `.github`; this file should never need to change again. **Advisory only** — `strict` defaults to false, so it cannot fail your merge.',
-                    '- `.github/dependabot.yml` — weekly dependency PRs. No auto-merge. Exists because our PR gate asks for SHA-pinned actions, and a pin without updates ages badly.',
-                    '',
-                    'No CI workflow is included. Test, lint, and build execution is owned by `l9-ci-sdk` / `l9-ci-core`; this seed deliberately does not touch it.',
-                    '',
-                    'Everything else (SECURITY.md, CONTRIBUTING.md, PR and issue templates) is already inherited automatically — nothing was copied.',
-                  ].join('\n'),
-                });
-                rows.push([n, `PR #${pr.data.number}`]);
+                let prNumber;
+                try {
+                  const pr = await github.rest.pulls.create({
+                    owner: o, repo: n, head: BRANCH, base,
+                    title: 'chore(governance): seed CODEOWNERS and governance caller',
+                    body: [
+                      'Seeds non-inheritable governance files from `Quantum-L9/.github`.',
+                      '',
+                      ...treeItems.map(t => `- \`${t.path}\``),
+                      hasRootCodeowners
+                        ? '- root `CODEOWNERS` already present — **not** overwritten by `.github/CODEOWNERS`'
+                        : '',
+                      '',
+                      '`.github/workflows/governance.yml` is **advisory** (`strict` defaults false).',
+                      'No CI workflow is included — `l9-ci-sdk` / `l9-ci-core` own test/lint/build.',
+                    ].filter(Boolean).join('\n'),
+                  });
+                  prNumber = pr.data.number;
+                } catch (e) {
+                  if (e.status === 422 && /pull request already exists/i.test(e.message || '')) {
+                    const open = await github.rest.pulls.list({
+                      owner: o, repo: n, head: `${o}:${BRANCH}`, state: 'open',
+                    });
+                    prNumber = open.data[0]?.number;
+                    if (!prNumber) throw e;
+                  } else {
+                    throw e;
+                  }
+                }
+                rows.push([n, `PR #${prNumber} (${treeItems.map(t => t.path).join(', ')})`]);
               } catch (e) {
-                rows.push([n, `failed: ${e.status || ''} ${e.message}`.slice(0, 90)]);
+                failures += 1;
+                const msg = `${e.status || ''} ${e.message || e}`.replace(/\s+/g, ' ').slice(0, 160);
+                const hint = /Resource not accessible|must have .*workflows/i.test(msg)
+                  ? ' — App needs Workflows: Read and write'
+                  : '';
+                rows.push([n, `failed: ${msg}${hint}`]);
               }
             }
 
-            core.summary.addHeading(`Seed (${MODE}) — ${rows.length} repos`, 2)
-              .addTable([[{data:'repo',header:true},{data:'result',header:true}], ...rows.map(r => r.map(String))])
+            await core.summary
+              .addHeading(`Seed (${MODE}) — ${rows.length} repos`, 2)
+              .addTable([
+                [{ data: 'repo', header: true }, { data: 'result', header: true }],
+                ...rows.map(r => r.map(String)),
+              ])
               .write();
+
+            if (failures > 0) {
+              core.setFailed(`${failures} repo(s) failed seeding — see job summary`);
+            }
