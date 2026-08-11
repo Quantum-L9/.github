@@ -3,8 +3,8 @@
 #
 # Lightweight, read-only pre-tag check: re-confirms zero floating (non-SHA)
 # third-party GitHub Action references in the workflow_call kernels at the
-# EXPECTED_SHA anchor that ops/tag-v1.sh is about to freeze as v1.0.0 / v1
-# on Quantum-L9/l9-ci-core.
+# EXPECTED_SHA anchor that ops/tag-v1.sh records as the published v1.0.0 / v1
+# tip on Quantum-L9/l9-ci-core (create only if those tags are still absent).
 #
 # Run this BEFORE ops/tag-v1.sh, every time, even if EXPECTED_SHA "hasn't
 # changed" — it costs seconds and is the only thing standing between an
