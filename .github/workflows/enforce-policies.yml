@@ -1,0 +1,156 @@
+# Enforces declarative policies from policies/*.yml across all org repos.
+# Runs weekly. Auto-corrects repo settings drift and reports missing files.
+name: Enforce policies
+
+on:
+  schedule:
+    - cron: "0 13 * * 3"  # Wednesday 13:00 UTC
+  workflow_dispatch:
+    inputs:
+      repo_filter:
+        description: "Only enforce on repos containing this string (blank = all)"
+        type: string
+        default: ""
+      dry_run:
+        description: "Dry run (report only)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - id: token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1.12.0
+        with:
+          app-id: ${{ vars.GOVERNANCE_APP_ID }}
+          private-key: ${{ secrets.GOVERNANCE_APP_PRIVATE_KEY }}
+          owner: Quantum-L9
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: pip install --only-binary=:all: "pyyaml==6.0.2"
+
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          FILTER: ${{ inputs.repo_filter || '' }}
+        with:
+          github-token: ${{ steps.token.outputs.token }}
+          script: |
+            const { execSync } = require('child_process');
+            const fs = require('fs');
+            const ORG = 'Quantum-L9';
+            const DRY = process.env.DRY_RUN === 'true';
+            const FILTER = process.env.FILTER;
+
+            // Parse YAML via Python (no native YAML in actions/github-script)
+            const parseYaml = (file) => {
+              const out = execSync(
+                `python3 -c "import yaml,json,sys; print(json.dumps(yaml.safe_load(open(sys.argv[1]))))" "${file}"`,
+                { encoding: 'utf8' }
+              );
+              return JSON.parse(out);
+            };
+
+            const settingsPolicy = parseYaml('policies/repo-settings.yml');
+            const filesPolicy = parseYaml('policies/mandatory-files.yml');
+
+            const all = await github.paginate(github.rest.repos.listForOrg, {
+              org: ORG, type: 'all', per_page: 100
+            });
+            const targets = all.filter(r =>
+              !r.archived && !r.fork && r.name !== '.github' &&
+              (!FILTER || r.name.includes(FILTER))
+            );
+
+            // Check exceptions
+            const fileExceptions = (filesPolicy.exceptions || []).map(e => e.repo);
+
+            const rows = [];
+
+            for (const repo of targets) {
+              const n = repo.name;
+              const findings = [];
+
+              // Check opt-out
+              const optOut = await github.rest.repos.getContent({
+                owner: ORG, repo: n, path: '.l9/no-policy-enforcement'
+              }).then(() => true).catch(() => false);
+
+              if (optOut) {
+                rows.push([n, 'opted out']);
+                continue;
+              }
+
+              // ── Settings enforcement ──
+              const defaults = settingsPolicy.defaults || {};
+              const overrides = (settingsPolicy.overrides || [])
+                .filter(o => o.repos && o.repos.includes(n))
+                .reduce((acc, o) => ({ ...acc, ...o, repos: undefined }), {});
+              const expected = { ...defaults, ...overrides };
+              delete expected.repos;
+
+              // Check current settings
+              const current = await github.rest.repos.get({ owner: ORG, repo: n });
+              const settingsDrift = [];
+              for (const [key, val] of Object.entries(expected)) {
+                if (key === 'default_branch') continue; // Don't auto-change default branch
+                if (current.data[key] !== val) {
+                  settingsDrift.push({ key, expected: val, actual: current.data[key] });
+                }
+              }
+
+              if (settingsDrift.length > 0) {
+                if (!DRY) {
+                  const patch = {};
+                  for (const d of settingsDrift) patch[d.key] = d.expected;
+                  try {
+                    await github.rest.repos.update({ owner: ORG, repo: n, ...patch });
+                    findings.push(`settings fixed: ${settingsDrift.map(d => d.key).join(', ')}`);
+                  } catch (e) {
+                    findings.push(`settings fix failed: ${e.message?.slice(0, 50)}`);
+                  }
+                } else {
+                  findings.push(`settings drift: ${settingsDrift.map(d => `${d.key}=${d.actual}→${d.expected}`).join(', ')}`);
+                }
+              }
+
+              // ── Mandatory files check ──
+              if (!fileExceptions.includes(n)) {
+                for (const file of (filesPolicy.files || [])) {
+                  const exists = await github.rest.repos.getContent({
+                    owner: ORG, repo: n, path: file.path
+                  }).then(() => true).catch(() => false);
+
+                  if (!exists) {
+                    findings.push(`missing: ${file.path}`);
+                  }
+                }
+              }
+
+              if (findings.length === 0) {
+                rows.push([n, 'compliant']);
+              } else {
+                rows.push([n, findings.join('; ')]);
+              }
+            }
+
+            const mode = DRY ? 'DRY RUN' : 'ENFORCED';
+            const compliant = rows.filter(r => r[1] === 'compliant').length;
+            core.summary
+              .addHeading(`Policy enforcement (${mode}) — ${compliant}/${targets.length} compliant`, 2)
+              .addTable([
+                [{data: 'Repo', header: true}, {data: 'Status', header: true}],
+                ...rows.filter(r => r[1] !== 'compliant').map(r => r.map(String))
+              ])
+              .write();

@@ -48,8 +48,13 @@ jobs:
             // paths the author declared under "## Changes by intent"
             const intentSec = (body.match(/##\s*Changes by intent([\s\S]*?)(?=\n##\s|$)/i) || [,''])[1]
               .replace(/<!--[\s\S]*?-->/g, '');
+            // Accept declared tokens that look like paths (contain "/" or ".")
+            // or that exactly match a changed path — the latter lets extensionless
+            // root files (e.g. Makefile, LICENSE, Dockerfile) be declared too.
+            const changedPaths = new Set(rows.map(r => r.path));
             const declared = new Set([...intentSec.matchAll(/`([^`]+)`/g)]
-              .map(m => m[1].trim()).filter(p => p.includes('/') || p.includes('.')));
+              .map(m => m[1].trim())
+              .filter(p => p.includes('/') || p.includes('.') || changedPaths.has(p)));
 
             const undeclared = rows.filter(r => !declared.has(r.path) && !GEN.test(r.path));
             const phantom = [...declared].filter(d => !rows.some(r => r.path === d) && !d.startsWith('path/to/'));

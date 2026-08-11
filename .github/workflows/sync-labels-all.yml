@@ -1,0 +1,115 @@
+# Syncs the org-standard label taxonomy to all active repos.
+# Runs weekly (after governance-report) and on manual dispatch.
+# Creates or updates labels; never deletes (additive only).
+name: Sync labels (org-wide)
+
+on:
+  schedule:
+    - cron: "30 9 * * 1"  # Monday 09:30 UTC, after governance report
+  workflow_dispatch:
+    inputs:
+      repo_filter:
+        description: "Only sync repos containing this string (blank = all)"
+        type: string
+        default: ""
+      dry_run:
+        description: "Dry run (report only)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - id: token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1.12.0
+        with:
+          app-id: ${{ vars.GOVERNANCE_APP_ID }}
+          private-key: ${{ secrets.GOVERNANCE_APP_PRIVATE_KEY }}
+          owner: Quantum-L9
+
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          FILTER: ${{ inputs.repo_filter || '' }}
+        with:
+          github-token: ${{ steps.token.outputs.token }}
+          script: |
+            const fs = require('fs');
+            const DRY = process.env.DRY_RUN === 'true';
+            const FILTER = process.env.FILTER;
+
+            // Parse labels from .github/labels.yml
+            const raw = fs.readFileSync('.github/labels.yml', 'utf8');
+            const labels = [];
+            for (const line of raw.split('\n')) {
+              const m = line.match(/name:\s*"([^"]+)".*color:\s*"([^"]+)".*description:\s*"([^"]*)"/);
+              if (m) labels.push({ name: m[1], color: m[2], description: m[3] });
+            }
+
+            if (labels.length === 0) {
+              core.setFailed('No labels parsed from .github/labels.yml');
+              return;
+            }
+            core.info(`Parsed ${labels.length} labels from .github/labels.yml`);
+
+            // Get all active repos
+            const all = await github.paginate(github.rest.repos.listForOrg, {
+              org: 'Quantum-L9', type: 'all', per_page: 100
+            });
+            const targets = all.filter(r =>
+              !r.archived && !r.fork && r.name !== '.github' &&
+              (!FILTER || r.name.includes(FILTER))
+            );
+
+            const rows = [];
+            for (const repo of targets) {
+              const o = repo.owner.login, n = repo.name;
+              let created = 0, updated = 0, skipped = 0;
+
+              for (const label of labels) {
+                if (DRY) { skipped++; continue; }
+                try {
+                  await github.rest.issues.createLabel({
+                    owner: o, repo: n,
+                    name: label.name,
+                    color: label.color,
+                    description: label.description
+                  });
+                  created++;
+                } catch (e) {
+                  if (e.status === 422) {
+                    // Already exists — update
+                    try {
+                      await github.rest.issues.updateLabel({
+                        owner: o, repo: n,
+                        name: label.name,
+                        color: label.color,
+                        description: label.description
+                      });
+                      updated++;
+                    } catch (ue) {
+                      skipped++;
+                    }
+                  } else {
+                    skipped++;
+                  }
+                }
+              }
+              rows.push([n, DRY ? 'dry-run' : `+${created} ~${updated} =${skipped}`]);
+            }
+
+            const mode = DRY ? 'DRY RUN' : 'APPLIED';
+            core.summary
+              .addHeading(`Label sync (${mode}) — ${targets.length} repos, ${labels.length} labels`, 2)
+              .addTable([
+                [{data: 'Repo', header: true}, {data: 'Result', header: true}],
+                ...rows.map(r => r.map(String))
+              ])
+              .write();
