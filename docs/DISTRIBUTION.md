@@ -18,7 +18,7 @@ ongoing updates.
 | --- | --- | --- | --- |
 | **Inheritance** (automatic) | `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SUPPORT.md`, `FUNDING.yml`, `pull_request_template.md`, `ISSUE_TEMPLATE/*` | No | Instant, live from `main` |
 | **Reference** (`workflow_call`) | governance workflow *logic* | No | Instant, on tag move |
-| **Physical copy** (seed) | `CODEOWNERS`, the 12-line caller | **Yes, once** | Never needs re-running |
+| **Physical copy** (seed) | Full `templates/` bundle (CODEOWNERS, caller, dependabot, labels, community-health, issue/PR templates, on-org-update) | **Yes, once** (or when new surfaces are added) | Re-run seed / consumer `make sync-ci` |
 
 ### Inheritance covers most of the repo
 
@@ -42,19 +42,22 @@ which the inheritance requirement already forces.
 here and move the `v1` tag. All 29 repos pick it up on their next PR. Zero token
 use, zero fan-out, zero PRs.
 
-### Physical copy covers only three files
+### Physical copy covers the full `templates/` bundle
 
-Three things genuinely cannot be inherited or referenced:
+Org inheritance is convenient for repos that stay inside Quantum-L9, but it is the
+wrong distribution model for **repo templates**, forks, and contributors who need
+files visible in-tree. `templates/` is therefore the SSOT for a **physical** seed:
 
-1. **`CODEOWNERS`** — GitHub does not list it as a community health file. It must
-   physically exist in each repo at root, `.github/`, or `docs/`.
-2. **The caller stub** — a repo cannot be made to run a workflow it does not contain.
-   Twelve lines, pinned to a tag, and it should never change again.
-3. **`dependabot.yml`** — repository-specific dependency configuration is not a
-   community-health default and must physically exist in each consumer repo.
+1. **`CODEOWNERS`**, **`dependabot.yml`**, **governance caller**, **labels**
+2. **Community health** (`CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md`,
+   `SUPPORT.md`, `LICENSE`, `.github/FUNDING.yml`)
+3. **Issue + PR templates** and the **`on-org-update`** receiver workflow
 
-`seed-governance.yml` seeds these once per repo, via PR, and skips repos already
-seeded. That is the total scope of what the token was blocking.
+`seed-governance.yml` (and `auto-seed-new-repo.yml`) seed these once per repo via
+PR using `ops/build-seed-payload.js`, matching `ops/sync-org-files.sh`. Existing
+files are left untouched (missing-only). Root `CODEOWNERS` is never overwritten by
+`.github/CODEOWNERS`. CI execution workflows are never seeded — see
+`docs/BOUNDARIES.md`.
 
 ## Corrected assessment of the earlier claim
 

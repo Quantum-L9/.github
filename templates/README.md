@@ -1,9 +1,18 @@
 # Org-level templates for consumer repos
 
 Everything in this directory is **physically seeded** into consumer repositories
-by `scripts/sync_ci_from_pack.py` (in consumer repos) or the org's
-`ops/sync-org-files.sh` script. These files are NOT GitHub-inheritable — they
-must live in each repo's tree to take effect.
+by:
+
+1. **Actions seeder** — `.github/workflows/seed-governance.yml` (org App, opens PRs)
+2. **Org CLI** — `ops/sync-org-files.sh` (local checkout sync)
+3. **Consumer sync** — `templates/sync_ci_from_pack.py` (copied to consumer as
+   `scripts/sync_ci_from_pack.py` / `make sync-ci`)
+
+Payload map SSOT for Actions: `ops/build-seed-payload.js` (must stay aligned with
+`ops/sync-org-files.sh`).
+
+These files are NOT reliably GitHub-inheritable for template/fork use — they must
+live in each repo's tree to take effect.
 
 ## Layout
 
@@ -12,8 +21,9 @@ must live in each repo's tree to take effect.
 | `CODEOWNERS.repo` | `.github/CODEOWNERS` | Not inheritable; must be physical |
 | `dependabot.yml` | `.github/dependabot.yml` | Not inheritable; must be physical |
 | `governance-caller.yml` | `.github/workflows/governance.yml` | Calls org reusable workflows |
+| `on-org-update.yml` | `.github/workflows/on-org-update.yml` | Receiver for org template sync PRs |
 | `labels.yml` | `.github/labels.yml` | Used by `gh label sync` or labeler |
-| `community-health/` | repo root (`CODE_OF_CONDUCT.md`, etc.) | Physical copy overrides org inherit |
+| `community-health/` | repo root + `.github/FUNDING.yml` | Physical copy overrides org inherit |
 | `issue-templates/` | `.github/ISSUE_TEMPLATE/` | Not inheritable; must be physical |
 | `pr-templates/` | `.github/pull_request_template.md` | Not inheritable from org `.github/` nested path |
 
