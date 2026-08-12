@@ -7,9 +7,11 @@ name: Seed org templates into consumers
 # Matches ops/sync-org-files.sh + templates/README.md. Does NOT seed CI
 # execution workflows (l9-ci-sdk / l9-ci-core own those) — see docs/BOUNDARIES.md.
 #
-# REQUIRES GitHub App permissions on the installation:
-#   Contents: R/W, Pull requests: R/W, Metadata: R, Administration: R,
-#   Workflows: R/W  ← required to create/update .github/workflows/*
+# Auth: org secret `GH_TOKEN` (SSOT = AWS openclaw-igorbot/github#token).
+# A fine-grained PAT / classic admin PAT can write `.github/workflows/*`.
+# The l9-governance-seeder App also requests workflows:write, but an org install
+# only gains that scope after a browser "Accept new permissions" — there is no
+# REST accept endpoint. Prefer the PAT so seed is not blocked on that click.
 #
 # Default behavior: add missing files only (never overwrite existing content).
 # Root CODEOWNERS takes precedence — .github/CODEOWNERS is not seeded over it.
@@ -44,12 +46,15 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - id: token
-        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
-        with:
-          app-id: ${{ vars.GOVERNANCE_APP_ID }}
-          private-key: ${{ secrets.GOVERNANCE_APP_PRIVATE_KEY }}
-          owner: Quantum-L9
+      - name: Require org GH_TOKEN
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::org secret GH_TOKEN is empty — sync from AWS openclaw-igorbot/github#token"
+            exit 1
+          fi
 
       - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         env:
@@ -58,7 +63,7 @@ jobs:
           SEED_REPO_FILTER: ${{ inputs.repo_filter }}
           SEED_CATEGORIES: ${{ inputs.categories }}
         with:
-          github-token: ${{ steps.token.outputs.token }}
+          github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const fs = require('fs');
             const {
