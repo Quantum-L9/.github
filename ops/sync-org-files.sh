@@ -17,11 +17,13 @@
 #   dependabot        .github/dependabot.yml
 #   governance        .github/workflows/governance.yml
 #   labels            .github/labels.yml
-#   community-health  CODE_OF_CONDUCT.md, CONTRIBUTING.md, SECURITY.md, SUPPORT.md, LICENSE
+#   community-health  CODE_OF_CONDUCT.md, CONTRIBUTING.md, SECURITY.md, SUPPORT.md, LICENSE, .github/FUNDING.yml
 #   issue-templates   .github/ISSUE_TEMPLATE/*
 #   pr-templates      .github/pull_request_template.md
+#   on-org-update     .github/workflows/on-org-update.yml
 #
 # Default (no --include flag): seeds all categories.
+# Actions twin: .github/workflows/seed-governance.yml (ops/build-seed-payload.js).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -30,7 +32,7 @@ TEMPLATES_DIR="$ORG_ROOT/templates"
 
 usage() {
   echo "Usage: $0 <consumer-repo-path> [--include-all|--include <category>...]" >&2
-  echo "Categories: codeowners dependabot governance labels community-health issue-templates pr-templates" >&2
+  echo "Categories: codeowners dependabot governance labels community-health issue-templates pr-templates on-org-update" >&2
   exit 1
 }
 
@@ -47,7 +49,7 @@ if [[ ! -d "$CONSUMER_ROOT" ]]; then
 fi
 
 # Parse categories
-ALL_CATEGORIES=(codeowners dependabot governance labels community-health issue-templates pr-templates)
+ALL_CATEGORIES=(codeowners dependabot governance labels community-health issue-templates pr-templates on-org-update)
 CATEGORIES=()
 
 if [[ $# -eq 0 ]] || [[ "${1:-}" == "--include-all" ]]; then
@@ -129,6 +131,11 @@ for cat in "${CATEGORIES[@]}"; do
       echo "── PR template ──"
       sync_file "$TEMPLATES_DIR/pr-templates/pull_request_template.md" \
         "$CONSUMER_ROOT/.github/pull_request_template.md"
+      ;;
+    on-org-update)
+      echo "── on-org-update receiver ──"
+      sync_file "$TEMPLATES_DIR/on-org-update.yml" \
+        "$CONSUMER_ROOT/.github/workflows/on-org-update.yml"
       ;;
     *)
       echo "⚠️  WARNING: unknown category '$cat', skipping." >&2

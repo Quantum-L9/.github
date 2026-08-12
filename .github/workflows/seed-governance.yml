@@ -1,19 +1,18 @@
-name: Seed non-inheritable governance
+name: Seed org templates into consumers
 
-# Community health files (SECURITY.md, CONTRIBUTING.md, PR/issue templates) are
-# INHERITED automatically — this workflow does not touch them.
+# Physically seeds everything under templates/ that consumers need in-tree:
+# CODEOWNERS, dependabot, governance caller, labels, community-health,
+# issue/PR templates, and on-org-update receiver.
 #
-# Seeds the three things GitHub cannot inherit (when missing):
-#   1. .github/CODEOWNERS                 (skipped if root CODEOWNERS already exists)
-#   2. .github/workflows/governance.yml   (advisory caller pinned to @v1)
-#   3. .github/dependabot.yml
+# Matches ops/sync-org-files.sh + templates/README.md. Does NOT seed CI
+# execution workflows (l9-ci-sdk / l9-ci-core own those) — see docs/BOUNDARIES.md.
 #
 # REQUIRES GitHub App permissions on the installation:
 #   Contents: R/W, Pull requests: R/W, Metadata: R, Administration: R,
 #   Workflows: R/W  ← required to create/update .github/workflows/*
 #
-# ONE-TIME seed per repo. After it lands, updating governance logic means
-# editing governance-pr.yml here and moving the v1 tag — no fan-out.
+# Default behavior: add missing files only (never overwrite existing content).
+# Root CODEOWNERS takes precedence — .github/CODEOWNERS is not seeded over it.
 
 on:
   workflow_dispatch:
@@ -24,9 +23,16 @@ on:
         options: [dry-run, seed]
         default: dry-run
       repo_filter:
-        description: Optional substring filter, e.g. "l9-" to pilot a subset.
+        description: Optional substring filter, e.g. "l9-repo-template".
         type: string
         default: ""
+      categories:
+        description: >-
+          Comma-separated categories, or "all". Options: codeowners, dependabot,
+          governance, labels, community-health, issue-templates, pr-templates,
+          on-org-update.
+        type: string
+        default: all
 
 permissions:
   contents: read
@@ -50,20 +56,28 @@ jobs:
           # Pass dispatch inputs via env — never interpolate into script: (CodeQL js/actions/code-injection)
           SEED_MODE: ${{ inputs.mode }}
           SEED_REPO_FILTER: ${{ inputs.repo_filter }}
+          SEED_CATEGORIES: ${{ inputs.categories }}
         with:
           github-token: ${{ steps.token.outputs.token }}
           script: |
             const fs = require('fs');
+            const {
+              buildSeedPayload,
+              parseCategories,
+              ALL_CATEGORIES,
+            } = require('./ops/build-seed-payload.js');
+
             const MODE = process.env.SEED_MODE || 'dry-run';
             const FILTER = process.env.SEED_REPO_FILTER || '';
             const BRANCH = 'chore/seed-governance';
 
-            // Templates — no CI workflow is seeded (l9-ci-sdk owns CI). See docs/BOUNDARIES.md.
-            const templates = {
-              '.github/CODEOWNERS': fs.readFileSync('templates/CODEOWNERS.repo', 'utf8'),
-              '.github/workflows/governance.yml': fs.readFileSync('templates/governance-caller.yml', 'utf8'),
-              '.github/dependabot.yml': fs.readFileSync('templates/dependabot.yml', 'utf8'),
-            };
+            let categories;
+            try {
+              categories = parseCategories(process.env.SEED_CATEGORIES || 'all');
+            } catch (e) {
+              core.setFailed(e.message);
+              return;
+            }
 
             const exists = async (owner, repo, path, ref) => {
               try {
@@ -83,16 +97,15 @@ jobs:
             const rows = [];
             let failures = 0;
 
+            core.info(`categories=${categories.join(',')} (of ${ALL_CATEGORIES.join(',')})`);
+
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
               try {
-                // Root CODEOWNERS takes precedence conflict: GitHub prefers
-                // `.github/CODEOWNERS` over root `CODEOWNERS`. Never overlay.
                 const hasRootCodeowners = await exists(o, n, 'CODEOWNERS');
-                const payload = { ...templates };
-                if (hasRootCodeowners) delete payload['.github/CODEOWNERS'];
-
+                const payload = buildSeedPayload({ fs, categories, hasRootCodeowners });
                 const paths = Object.keys(payload);
+
                 if (!paths.length) {
                   rows.push([n, 'skipped (nothing safe to seed)']);
                   continue;
@@ -106,10 +119,14 @@ jobs:
                   continue;
                 }
 
+                const missing = paths.filter((_, i) => !present[i]);
+
                 if (MODE === 'dry-run') {
-                  const missing = paths.filter((_, i) => !present[i]);
                   const note = hasRootCodeowners ? '; preserve root CODEOWNERS' : '';
-                  rows.push([n, `would seed: ${missing.join(', ')}${note}`]);
+                  const preview = missing.length <= 6
+                    ? missing.join(', ')
+                    : `${missing.slice(0, 6).join(', ')} (+${missing.length - 6} more)`;
+                  rows.push([n, `would seed ${missing.length} file(s): ${preview}${note}`]);
                   continue;
                 }
 
@@ -120,8 +137,8 @@ jobs:
 
                 // Atomic single commit: all missing files or none (no orphan partial branches).
                 const treeItems = [];
-                for (const path of paths) {
-                  if (await exists(o, n, path, base)) continue; // already on default branch
+                for (const path of missing) {
+                  if (await exists(o, n, path, base)) continue;
                   const blob = await github.rest.git.createBlob({
                     owner: o, repo: n,
                     content: Buffer.from(payload[path]).toString('base64'),
@@ -142,12 +159,11 @@ jobs:
                 });
                 const commit = await github.rest.git.createCommit({
                   owner: o, repo: n,
-                  message: `chore(governance): seed ${treeItems.map(t => t.path).join(', ')}`,
+                  message: `chore(governance): seed ${treeItems.length} org template file(s)`,
                   tree: tree.data.sha,
                   parents: [baseSha],
                 });
 
-                // Point branch at the new commit (create or fast-forward/reset to this tip).
                 try {
                   await github.rest.git.createRef({
                     owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: commit.data.sha,
@@ -159,22 +175,31 @@ jobs:
                   });
                 }
 
+                const listed = treeItems.map(t => `- \`${t.path}\``);
+                const bodyLines = [
+                  'Seeds org template files from `Quantum-L9/.github/templates/` (physical copy).',
+                  '',
+                  `Categories: \`${categories.join('`, `')}\`.`,
+                  '',
+                  '### Files in this PR',
+                  ...listed,
+                  hasRootCodeowners
+                    ? '- root `CODEOWNERS` already present — **not** overwritten by `.github/CODEOWNERS`'
+                    : '',
+                  '',
+                  'Existing files were left untouched (missing-only seed).',
+                  '`.github/workflows/governance.yml` is **advisory** (`strict` defaults false).',
+                  'No CI execution workflows are included — `l9-ci-sdk` / `l9-ci-core` own test/lint/build.',
+                  '',
+                  'Source map: `templates/README.md` · sync twin: `ops/sync-org-files.sh`.',
+                ].filter((line, idx, arr) => !(line === '' && arr[idx - 1] === ''));
+
                 let prNumber;
                 try {
                   const pr = await github.rest.pulls.create({
                     owner: o, repo: n, head: BRANCH, base,
-                    title: 'chore(governance): seed CODEOWNERS and governance caller',
-                    body: [
-                      'Seeds non-inheritable governance files from `Quantum-L9/.github`.',
-                      '',
-                      ...treeItems.map(t => `- \`${t.path}\``),
-                      hasRootCodeowners
-                        ? '- root `CODEOWNERS` already present — **not** overwritten by `.github/CODEOWNERS`'
-                        : '',
-                      '',
-                      '`.github/workflows/governance.yml` is **advisory** (`strict` defaults false).',
-                      'No CI workflow is included — `l9-ci-sdk` / `l9-ci-core` own test/lint/build.',
-                    ].filter(Boolean).join('\n'),
+                    title: 'chore(governance): seed org templates from Quantum-L9/.github',
+                    body: bodyLines.join('\n'),
                   });
                   prNumber = pr.data.number;
                 } catch (e) {
@@ -188,7 +213,7 @@ jobs:
                     throw e;
                   }
                 }
-                rows.push([n, `PR #${prNumber} (${treeItems.map(t => t.path).join(', ')})`]);
+                rows.push([n, `PR #${prNumber} (${treeItems.length} file(s))`]);
               } catch (e) {
                 failures += 1;
                 const msg = `${e.status || ''} ${e.message || e}`.replace(/\s+/g, ' ').slice(0, 160);
@@ -201,6 +226,7 @@ jobs:
 
             await core.summary
               .addHeading(`Seed (${MODE}) — ${rows.length} repos`, 2)
+              .addRaw(`\nCategories: \`${categories.join('`, `')}\`\n`)
               .addTable([
                 [{ data: 'repo', header: true }, { data: 'result', header: true }],
                 ...rows.map(r => r.map(String)),
