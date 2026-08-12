@@ -216,11 +216,15 @@ jobs:
                 rows.push([n, `PR #${prNumber} (${treeItems.length} file(s))`]);
               } catch (e) {
                 failures += 1;
-                const msg = `${e.status || ''} ${e.message || e}`.replace(/\s+/g, ' ').slice(0, 160);
-                const hint = /Resource not accessible|must have .*workflows/i.test(msg)
-                  ? ' — App needs Workflows: Read and write'
+                const msg = `${e.status || ''} ${e.message || e}`.replace(/\s+/g, ' ').slice(0, 200);
+                const needsWorkflows = /Resource not accessible|must have .*workflows|Workflows/i.test(msg)
+                  || /\.github\/workflows\//.test(msg);
+                const hint = needsWorkflows
+                  ? ' — grant App permission Workflows: Read and write, then re-accept the install'
                   : '';
-                rows.push([n, `failed: ${msg}${hint}`]);
+                const line = `failed: ${msg}${hint}`;
+                core.error(`${n}: ${line}`);
+                rows.push([n, line]);
               }
             }
 
