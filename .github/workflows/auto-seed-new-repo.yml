@@ -1,5 +1,6 @@
 # Auto-seeds full org templates into newly created repositories.
 # Same payload as seed-governance.yml (ops/build-seed-payload.js).
+# Auth: org secret GH_TOKEN (AWS openclaw-igorbot/github#token) — see seed-governance.yml.
 # Advisory only — opens a PR, never pushes directly to main.
 name: Auto-seed new repository
 
@@ -28,19 +29,22 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
-      - id: token
-        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1.12.0
-        with:
-          app-id: ${{ vars.GOVERNANCE_APP_ID }}
-          private-key: ${{ secrets.GOVERNANCE_APP_PRIVATE_KEY }}
-          owner: Quantum-L9
+      - name: Require org GH_TOKEN
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::org secret GH_TOKEN is empty — sync from AWS openclaw-igorbot/github#token"
+            exit 1
+          fi
 
       - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         env:
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
           TARGET_REPO: ${{ inputs.target_repo || github.event.client_payload.repository || '' }}
         with:
-          github-token: ${{ steps.token.outputs.token }}
+          github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const fs = require('fs');
             const { buildSeedPayload } = require('./ops/build-seed-payload.js');
