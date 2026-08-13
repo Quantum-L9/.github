@@ -82,7 +82,8 @@ sync_file() {
   local dest="$2"
   mkdir -p "$(dirname "$dest")"
   cp "$src" "$dest"
-  echo "  ✓ $(realpath --relative-to="$CONSUMER_ROOT" "$dest")"
+  rel="${dest#"$CONSUMER_ROOT"/}"
+  echo "  ✓ $rel"
 }
 
 echo "=== Syncing org files to $(basename "$CONSUMER_ROOT") ==="
