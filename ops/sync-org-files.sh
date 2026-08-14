@@ -5,9 +5,9 @@
 # script that targets a consumer checkout).
 #
 # This is the org-side counterpart to the consumer's `sync_ci_from_pack.py`.
-# While sync_ci_from_pack.py pulls CI workflows + governance from the org repo,
-# this script handles the broader org-level surface: community health files,
-# issue/PR templates, labels, governance caller, CODEOWNERS, and dependabot.
+# Health files come from templates/. Category l9-ci-pack copies the Core hub
+# pack (analysis caller + governance YAMLs + lint callers) from l9-ci-pack/.
+# This repo distributes those callers; l9-ci-core executes CI.
 #
 # Usage (from the org repo root):
 #   ops/sync-org-files.sh <consumer-repo-path> [--include-all|--include <category>...]
@@ -21,6 +21,7 @@
 #   issue-templates   .github/ISSUE_TEMPLATE/*
 #   pr-templates      .github/pull_request_template.md
 #   on-org-update     .github/workflows/on-org-update.yml
+#   l9-ci-pack        .github/workflows/l9-analysis.yml + lint callers + .github/governance/*
 #
 # Default (no --include flag): seeds all categories.
 # Actions twin: .github/workflows/seed-governance.yml (ops/build-seed-payload.js).
@@ -32,7 +33,7 @@ TEMPLATES_DIR="$ORG_ROOT/templates"
 
 usage() {
   echo "Usage: $0 <consumer-repo-path> [--include-all|--include <category>...]" >&2
-  echo "Categories: codeowners dependabot governance labels community-health issue-templates pr-templates on-org-update" >&2
+  echo "Categories: codeowners dependabot governance labels community-health issue-templates pr-templates on-org-update l9-ci-pack" >&2
   exit 1
 }
 
@@ -49,7 +50,8 @@ if [[ ! -d "$CONSUMER_ROOT" ]]; then
 fi
 
 # Parse categories
-ALL_CATEGORIES=(codeowners dependabot governance labels community-health issue-templates pr-templates on-org-update)
+ALL_CATEGORIES=(codeowners dependabot governance labels community-health issue-templates pr-templates on-org-update l9-ci-pack)
+PACK_DIR="$ORG_ROOT/l9-ci-pack"
 CATEGORIES=()
 
 if [[ $# -eq 0 ]] || [[ "${1:-}" == "--include-all" ]]; then
@@ -137,6 +139,21 @@ for cat in "${CATEGORIES[@]}"; do
       echo "── on-org-update receiver ──"
       sync_file "$TEMPLATES_DIR/on-org-update.yml" \
         "$CONSUMER_ROOT/.github/workflows/on-org-update.yml"
+      ;;
+    l9-ci-pack)
+      echo "── l9-ci-pack (Core hub callers) ──"
+      if [[ -d "$PACK_DIR/workflows" ]]; then
+        for f in "$PACK_DIR/workflows/"*; do
+          [[ -f "$f" ]] || continue
+          sync_file "$f" "$CONSUMER_ROOT/.github/workflows/$(basename "$f")"
+        done
+      fi
+      if [[ -d "$PACK_DIR/governance" ]]; then
+        for f in "$PACK_DIR/governance/"*; do
+          [[ -f "$f" ]] || continue
+          sync_file "$f" "$CONSUMER_ROOT/.github/governance/$(basename "$f")"
+        done
+      fi
       ;;
     *)
       echo "⚠️  WARNING: unknown category '$cat', skipping." >&2
