@@ -26,6 +26,8 @@ live in each repo's tree to take effect.
 | `community-health/` | repo root + `.github/FUNDING.yml` | Physical copy overrides org inherit |
 | `issue-templates/` | `.github/ISSUE_TEMPLATE/` | Not inheritable; must be physical |
 | `pr-templates/` | `.github/pull_request_template.md` | Not inheritable from org `.github/` nested path |
+| `../l9-ci-pack/workflows/` | `.github/workflows/` | Core hub callers (`l9-analysis.yml`, lint templates). Missing-only. |
+| `../l9-ci-pack/governance/` | `.github/governance/` | Governance YAMLs the Core resolver reads. |
 
 ## Inheritance vs. physical copy
 

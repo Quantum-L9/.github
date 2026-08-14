@@ -14,8 +14,7 @@
         "~ALL"
       ],
       "exclude": [
-        ".github",
-        "Cursor-Governance"
+        ".github"
       ]
     }
   },

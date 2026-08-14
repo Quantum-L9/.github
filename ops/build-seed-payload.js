@@ -1,10 +1,14 @@
 'use strict';
 
 /**
- * Build the consumer-repo seed payload from templates/.
+ * Build the consumer-repo seed payload from templates/ plus l9-ci-pack/.
  *
  * Mirrors ops/sync-org-files.sh categories and templates/README.md destinations.
  * Used by seed-governance.yml and auto-seed-new-repo.yml.
+ * Health files come from templates/. The Core hub pack (l9-analysis.yml +
+ * .github/governance/*.yaml + lint callers) comes from l9-ci-pack/.
+ * This repo distributes those callers; l9-ci-core executes CI.
+ * Missing-only seed in Actions never overwrites an existing consumer file.
  *
  * @param {object} opts
  * @param {typeof import('fs')} opts.fs
@@ -21,6 +25,7 @@ const ALL_CATEGORIES = Object.freeze([
   'issue-templates',
   'pr-templates',
   'on-org-update',
+  'l9-ci-pack',
 ]);
 
 function parseCategories(raw) {
@@ -43,6 +48,14 @@ function parseCategories(raw) {
 function readIfFile(fs, path) {
   if (!fs.existsSync(path) || !fs.statSync(path).isFile()) return null;
   return fs.readFileSync(path, 'utf8');
+}
+
+function addDirFiles(fs, srcDir, destPrefix, payload) {
+  if (!fs.existsSync(srcDir) || !fs.statSync(srcDir).isDirectory()) return;
+  for (const name of fs.readdirSync(srcDir)) {
+    const body = readIfFile(fs, `${srcDir}/${name}`);
+    if (body != null) payload[`${destPrefix}/${name}`] = body;
+  }
 }
 
 function buildSeedPayload({ fs, categories, hasRootCodeowners = false } = {}) {
@@ -105,6 +118,11 @@ function buildSeedPayload({ fs, categories, hasRootCodeowners = false } = {}) {
       case 'on-org-update': {
         const body = readIfFile(fs, 'templates/on-org-update.yml');
         if (body != null) payload['.github/workflows/on-org-update.yml'] = body;
+        break;
+      }
+      case 'l9-ci-pack': {
+        addDirFiles(fs, 'l9-ci-pack/workflows', '.github/workflows', payload);
+        addDirFiles(fs, 'l9-ci-pack/governance', '.github/governance', payload);
         break;
       }
       default:
