@@ -2,6 +2,14 @@
 # Same payload as seed-governance.yml (ops/build-seed-payload.js).
 # Auth: org secret GH_TOKEN (AWS openclaw-igorbot/github#token) — see seed-governance.yml.
 # Advisory only — opens a PR, never pushes directly to main.
+#
+# Create-time trigger (2026-08-14 probe): nothing in Quantum-L9 sends
+# repository_dispatch type repo_created (no org webhook; l9-governance-seeder
+# App has empty events). A new App/webhook install is required to make this
+# fire on blank-repo create. Until then:
+#   1. Template-first inherit — seed l9-dependency-template so "Use this template"
+#      copies health + l9-ci-pack.
+#   2. Backfill — workflow_dispatch this workflow or seed-governance.yml.
 name: Auto-seed new repository
 
 on:
@@ -155,14 +163,14 @@ jobs:
                     owner: o, repo: n, head: BRANCH, base,
                     title: 'chore(governance): auto-seed org templates from Quantum-L9/.github',
                     body: [
-                      'Automatically seeds org template files from `Quantum-L9/.github/templates/`.',
+                      'Automatically seeds org template files from `Quantum-L9/.github/templates/` plus the `l9-ci-pack/` Core hub.',
                       '',
                       '### Files in this PR',
                       ...treeItems.map(t => `- \`${t.path}\``),
                       '',
                       'Existing files were left untouched (missing-only seed).',
                       'Governance caller is **advisory** (`strict` defaults false).',
-                      'No CI execution workflows — owned by `l9-ci-sdk` / `l9-ci-core`.',
+                      'Core pack callers are distributed here; `l9-ci-core` executes CI.',
                       '',
                       '_Opened automatically by Quantum-L9/.github auto-seed._',
                     ].join('\n'),
