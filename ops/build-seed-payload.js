@@ -8,6 +8,7 @@
  * Health files come from templates/. The Core hub pack (l9-analysis.yml +
  * .github/governance/*.yaml + lint callers) comes from l9-ci-pack/.
  * This repo distributes those callers; l9-ci-core executes CI.
+ * Missing-only seed in Actions never overwrites an existing consumer file.
  *
  * @param {object} opts
  * @param {typeof import('fs')} opts.fs
