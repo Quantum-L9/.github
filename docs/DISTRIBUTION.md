@@ -52,12 +52,15 @@ files visible in-tree. `templates/` is therefore the SSOT for a **physical** see
 2. **Community health** (`CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md`,
    `SUPPORT.md`, `LICENSE`, `.github/FUNDING.yml`)
 3. **Issue + PR templates** and the **`on-org-update`** receiver workflow
+4. **`l9-ci-pack/`** — Core hub callers (`l9-analysis.yml`, lint templates) and
+   `.github/governance/*.yaml`. This repo distributes the pack; `l9-ci-core`
+   executes CI. See `docs/BOUNDARIES.md`.
 
 `seed-governance.yml` (and `auto-seed-new-repo.yml`) seed these once per repo via
 PR using `ops/build-seed-payload.js`, matching `ops/sync-org-files.sh`. Existing
 files are left untouched (missing-only). Root `CODEOWNERS` is never overwritten by
-`.github/CODEOWNERS`. CI execution workflows are never seeded — see
-`docs/BOUNDARIES.md`.
+`.github/CODEOWNERS`. New repos from `l9-dependency-template` inherit the pack
+because it is in the template tree; `make sync-ci` is refresh-only.
 
 ## Corrected assessment of the earlier claim
 
@@ -128,7 +131,9 @@ and reinstalled only if a new repo needs seeding.
 | PR template structure | Edit `pull_request_template.md`, merge | No |
 | A governance gate rule | Edit `governance-pr.yml`, move `v1` tag | No |
 | Code ownership routing | Edit `templates/CODEOWNERS.repo`, re-run seed | Yes |
-| New repo joins the org | Run seed filtered to that repo | Yes |
+| New repo from `l9-dependency-template` | Files already in the template tree | No |
+| Blank repo (no template) | `workflow_dispatch` `seed-governance.yml` or `auto-seed-new-repo.yml` | Yes |
+| New repo joins the org (legacy) | Run seed filtered to that repo | Yes |
 
 Only the last two rows ever need it.
 
