@@ -1,11 +1,12 @@
 name: Seed org templates into consumers
 
-# Physically seeds everything under templates/ that consumers need in-tree:
+# Physically seeds templates/ health files plus the l9-ci-pack Core hub:
 # CODEOWNERS, dependabot, governance caller, labels, community-health,
-# issue/PR templates, and on-org-update receiver.
+# issue/PR templates, on-org-update receiver, l9-analysis.yml, lint callers,
+# and .github/governance/*.yaml.
 #
-# Matches ops/sync-org-files.sh + templates/README.md. Does NOT seed CI
-# execution workflows (l9-ci-sdk / l9-ci-core own those) — see docs/BOUNDARIES.md.
+# Matches ops/sync-org-files.sh + templates/README.md. This repo distributes
+# Core pack callers; l9-ci-core executes CI — see docs/BOUNDARIES.md.
 #
 # Auth: org secret `GH_TOKEN` (SSOT = AWS openclaw-igorbot/github#token).
 # A fine-grained PAT / classic admin PAT can write `.github/workflows/*`.
@@ -32,7 +33,7 @@ on:
         description: >-
           Comma-separated categories, or "all". Options: codeowners, dependabot,
           governance, labels, community-health, issue-templates, pr-templates,
-          on-org-update.
+          on-org-update, l9-ci-pack.
         type: string
         default: all
 
@@ -182,7 +183,7 @@ jobs:
 
                 const listed = treeItems.map(t => `- \`${t.path}\``);
                 const bodyLines = [
-                  'Seeds org template files from `Quantum-L9/.github/templates/` (physical copy).',
+                  'Seeds org template files from `Quantum-L9/.github/templates/` plus the `l9-ci-pack/` Core hub (physical copy).',
                   '',
                   `Categories: \`${categories.join('`, `')}\`.`,
                   '',
@@ -194,9 +195,9 @@ jobs:
                   '',
                   'Existing files were left untouched (missing-only seed).',
                   '`.github/workflows/governance.yml` is **advisory** (`strict` defaults false).',
-                  'No CI execution workflows are included — `l9-ci-sdk` / `l9-ci-core` own test/lint/build.',
+                  'Core pack callers (`l9-analysis.yml`, lint templates, `.github/governance/`) are distributed here; `l9-ci-core` executes CI.',
                   '',
-                  'Source map: `templates/README.md` · sync twin: `ops/sync-org-files.sh`.',
+                  'Source map: `templates/README.md` · pack: `l9-ci-pack/` · sync twin: `ops/sync-org-files.sh`.',
                 ].filter((line, idx, arr) => !(line === '' && arr[idx - 1] === ''));
 
                 let prNumber;
