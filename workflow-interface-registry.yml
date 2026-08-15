@@ -49,7 +49,7 @@ v2:
     - name: l9-lint-test-node
       file: "l9-ci-pack/workflows/l9-lint-test-node.yml"
       classification: CONSUMER_TEMPLATE
-      description: "Node/TypeScript hygiene (eslint, tsc --noEmit, vitest run). Not called by Core; copied and owned by the consumer."
+      description: "Node/TypeScript hygiene (SDK Biome scan, tsc --noEmit, package test script) plus locked biome.json contract. Not called by Core; copied and owned by the consumer."
   governance_files:
     - "l9-ci-pack/governance/execution-profiles.yaml"
     - "l9-ci-pack/governance/provider-requiredness.yaml"

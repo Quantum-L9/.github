@@ -123,6 +123,18 @@ function buildSeedPayload({ fs, categories, hasRootCodeowners = false } = {}) {
       case 'l9-ci-pack': {
         addDirFiles(fs, 'l9-ci-pack/workflows', '.github/workflows', payload);
         addDirFiles(fs, 'l9-ci-pack/governance', '.github/governance', payload);
+        // Locked TypeScript formatter contract (l9-ci-core presets/typescript).
+        // Missing-only seed never overwrites a consumer biome.json.
+        const formatterFiles = [
+          ['l9-ci-pack/biome.json', 'biome.json'],
+          ['l9-ci-pack/.biomeignore', '.biomeignore'],
+          ['l9-ci-pack/.editorconfig', '.editorconfig'],
+          ['l9-ci-pack/.vscode/extensions.json', '.vscode/extensions.json'],
+        ];
+        for (const [src, dest] of formatterFiles) {
+          const body = readIfFile(fs, src);
+          if (body != null) payload[dest] = body;
+        }
         break;
       }
       default:

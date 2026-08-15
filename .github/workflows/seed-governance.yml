@@ -3,7 +3,8 @@ name: Seed org templates into consumers
 # Physically seeds templates/ health files plus the l9-ci-pack Core hub:
 # CODEOWNERS, dependabot, governance caller, labels, community-health,
 # issue/PR templates, on-org-update receiver, l9-analysis.yml, lint callers,
-# and .github/governance/*.yaml.
+# .github/governance/*.yaml, and the locked TypeScript Biome contract
+# (biome.json, .biomeignore, .editorconfig, .vscode/extensions.json).
 #
 # Matches ops/sync-org-files.sh + templates/README.md. This repo distributes
 # Core pack callers; l9-ci-core executes CI — see docs/BOUNDARIES.md.
@@ -195,7 +196,7 @@ jobs:
                   '',
                   'Existing files were left untouched (missing-only seed).',
                   '`.github/workflows/governance.yml` is **advisory** (`strict` defaults false).',
-                  'Core pack callers (`l9-analysis.yml`, lint templates, `.github/governance/`) are distributed here; `l9-ci-core` executes CI.',
+                  'Core pack callers (`l9-analysis.yml`, lint templates, `.github/governance/`) and the locked Biome contract (`biome.json`) are distributed here; `l9-ci-core` executes CI.',
                   '',
                   'Source map: `templates/README.md` · pack: `l9-ci-pack/` · sync twin: `ops/sync-org-files.sh`.',
                 ].filter((line, idx, arr) => !(line === '' && arr[idx - 1] === ''));
