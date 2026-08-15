@@ -68,10 +68,15 @@ for yml in "$TEMPLATES_DIR"/*.yml; do
     fi
   done
 
-  # Validate no @main references in the YAML (must use @v1, a full SHA, or a
-  # Core release tag such as @v2.0.0/@v2)
+  # Validate no @main references in the YAML (must use a full SHA or a
+  # Core release tag such as @v2.0.0/@v2). l9-ci-core@v1 does not exist.
   if grep -q "@main" "$yml"; then
-    echo "❌ @main REFERENCE found in $yml — must use @v1, a full commit SHA, or a release tag"
+    echo "❌ @main REFERENCE found in $yml — must use a full commit SHA or a release tag"
+    FAIL=$((FAIL+1))
+    FIELDS_OK=false
+  fi
+  if grep -qE 'Quantum-L9/l9-ci-core/.+@v1\b' "$yml"; then
+    echo "❌ $yml pins l9-ci-core@v1 — tag does not exist; use frozen SHA 2b330a5aab90cd7781bef08f14c5e7904b61bc56"
     FAIL=$((FAIL+1))
     FIELDS_OK=false
   fi
@@ -109,6 +114,11 @@ else
     fi
     if grep -q "@main" "$path"; then
       echo "❌ @main REFERENCE found in $path — must be a full commit SHA or a release tag"
+      FAIL=$((FAIL+1))
+      continue
+    fi
+    if grep -qE 'Quantum-L9/l9-ci-core/.+@v1\b' "$path"; then
+      echo "❌ $path pins l9-ci-core@v1 — tag does not exist"
       FAIL=$((FAIL+1))
       continue
     fi

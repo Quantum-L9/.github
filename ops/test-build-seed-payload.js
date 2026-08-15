@@ -9,7 +9,13 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { buildSeedPayload, parseCategories } = require('./build-seed-payload.js');
+const {
+  buildSeedPayload,
+  parseCategories,
+  isStockEslintNodeWorkflow,
+  selectSeedWrites,
+  STOCK_ESLINT_NODE_DEST,
+} = require('./build-seed-payload.js');
 
 const root = path.resolve(__dirname, '..');
 const origCwd = process.cwd();
@@ -46,7 +52,36 @@ try {
   const exts = JSON.parse(payload['.vscode/extensions.json']);
   assert.ok(exts.recommendations.includes('biomejs.biome'));
 
+  const stockEslint = [
+    'name: L9 Lint and Test (Node)',
+    'jobs:',
+    '  lint:',
+    '    name: ESLint',
+    '      - name: ESLint',
+    '        run: npx --no-install eslint .',
+  ].join('\n');
+  assert.strictEqual(isStockEslintNodeWorkflow(stockEslint), true);
+  assert.strictEqual(isStockEslintNodeWorkflow(nodeWf), false);
+  assert.strictEqual(isStockEslintNodeWorkflow('name: ESLint\nrun: npx eslint .'), false);
+
+  const dest = STOCK_ESLINT_NODE_DEST;
+  let plan = selectSeedWrites({ [dest]: nodeWf, 'biome.json': '{}' }, {
+    [dest]: stockEslint,
+    'biome.json': true,
+  });
+  assert.deepStrictEqual(plan.replaced, [dest]);
+  assert.ok(plan.writes.includes(dest));
+  assert.ok(plan.kept.includes('biome.json'));
+
+  plan = selectSeedWrites({ [dest]: nodeWf }, { [dest]: nodeWf });
+  assert.deepStrictEqual(plan.replaced, []);
+  assert.deepStrictEqual(plan.kept, [dest]);
+
+  plan = selectSeedWrites({ [dest]: nodeWf }, { [dest]: null });
+  assert.deepStrictEqual(plan.writes, [dest]);
+
   console.log('ok: l9-ci-pack payload includes locked Biome contract');
+  console.log('ok: stock ESLint node caller is replaceable; Biome/custom are kept');
 } finally {
   process.chdir(origCwd);
 }

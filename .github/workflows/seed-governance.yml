@@ -15,7 +15,8 @@ name: Seed org templates into consumers
 # only gains that scope after a browser "Accept new permissions" — there is no
 # REST accept endpoint. Prefer the PAT so seed is not blocked on that click.
 #
-# Default behavior: add missing files only (never overwrite existing content).
+# Default behavior: add missing files only (never overwrite existing content),
+# except replace a stock ESLint l9-lint-test-node.yml with the Biome caller.
 # Root CODEOWNERS takes precedence — .github/CODEOWNERS is not seeded over it.
 
 on:
@@ -72,6 +73,8 @@ jobs:
               buildSeedPayload,
               parseCategories,
               ALL_CATEGORIES,
+              STOCK_ESLINT_NODE_DEST,
+              selectSeedWrites,
             } = require('./ops/build-seed-payload.js');
 
             const MODE = process.env.SEED_MODE || 'dry-run';
@@ -93,6 +96,16 @@ jobs:
               } catch {
                 return false;
               }
+            };
+
+            const readText = async (owner, repo, path) => {
+              try {
+                const res = await github.rest.repos.getContent({ owner, repo, path });
+                if (res.data && res.data.content) {
+                  return Buffer.from(res.data.content, 'base64').toString('utf8');
+                }
+              } catch { /* missing */ }
+              return null;
             };
 
             const all = await github.paginate(github.rest.repos.listForOrg, {
@@ -118,22 +131,31 @@ jobs:
                   continue;
                 }
 
-                const present = await Promise.all(paths.map(p => exists(o, n, p)));
-                if (present.every(Boolean)) {
+                const existingByPath = {};
+                for (const p of paths) {
+                  if (!(await exists(o, n, p))) {
+                    existingByPath[p] = null;
+                    continue;
+                  }
+                  existingByPath[p] = p === STOCK_ESLINT_NODE_DEST
+                    ? await readText(o, n, p)
+                    : true;
+                }
+                const { writes, replaced } = selectSeedWrites(payload, existingByPath);
+                if (!writes.length) {
                   rows.push([n, hasRootCodeowners
                     ? 'already seeded (root CODEOWNERS preserved)'
                     : 'already seeded']);
                   continue;
                 }
 
-                const missing = paths.filter((_, i) => !present[i]);
-
                 if (MODE === 'dry-run') {
                   const note = hasRootCodeowners ? '; preserve root CODEOWNERS' : '';
-                  const preview = missing.length <= 6
-                    ? missing.join(', ')
-                    : `${missing.slice(0, 6).join(', ')} (+${missing.length - 6} more)`;
-                  rows.push([n, `would seed ${missing.length} file(s): ${preview}${note}`]);
+                  const upgrade = replaced.length ? `; replace stock ESLint ${replaced.join(', ')}` : '';
+                  const preview = writes.length <= 6
+                    ? writes.join(', ')
+                    : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
+                  rows.push([n, `would seed ${writes.length} file(s): ${preview}${upgrade}${note}`]);
                   continue;
                 }
 
@@ -142,10 +164,10 @@ jobs:
                 const baseSha = baseRef.data.object.sha;
                 const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
 
-                // Atomic single commit: all missing files or none (no orphan partial branches).
+                // Atomic single commit: all writes or none (no orphan partial branches).
                 const treeItems = [];
-                for (const path of missing) {
-                  if (await exists(o, n, path, base)) continue;
+                for (const path of writes) {
+                  if (!replaced.includes(path) && await exists(o, n, path, base)) continue;
                   const blob = await github.rest.git.createBlob({
                     owner: o, repo: n,
                     content: Buffer.from(payload[path]).toString('base64'),
@@ -194,7 +216,7 @@ jobs:
                     ? '- root `CODEOWNERS` already present — **not** overwritten by `.github/CODEOWNERS`'
                     : '',
                   '',
-                  'Existing files were left untouched (missing-only seed).',
+                  'Existing files were left untouched (missing-only seed), except a stock ESLint `l9-lint-test-node.yml` which is replaced with the Biome SDK caller.',
                   '`.github/workflows/governance.yml` is **advisory** (`strict` defaults false).',
                   'Core pack callers (`l9-analysis.yml`, lint templates, `.github/governance/`) and the locked Biome contract (`biome.json`) are distributed here; `l9-ci-core` executes CI.',
                   '',
