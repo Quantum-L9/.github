@@ -83,8 +83,6 @@ Repos are tagged with structured metadata via GitHub Custom Properties:
 
 | Property | Type | Values | Purpose |
 | --- | --- | --- | --- |
-| `l9-ci-version` | single_select | v1, v2, none | CI migration tracking |
 | `l9-tier` | single_select | critical, standard, experimental | Ruleset targeting |
-| `l9-language` | multi_select | python, typescript, javascript, rust, go | CI template routing |
-| `l9-seeded` | true_false | true, false | Governance seeding status |
+| `l9-language` | multi_select | python, typescript, javascript, rust, go | Repository taxonomy |
 | `l9-team` | single_select | platform, product, infra, external | Ownership routing |

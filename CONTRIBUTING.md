@@ -99,7 +99,6 @@ Consumer repos can opt out of specific automation:
 - **`validate-starters.sh`** — `l9-ci-pack/` completeness and `@main`-ref check
 - **`actionlint`** — lints all workflow files for YAML/expression/shellcheck errors
 - **`SHA-pin audit`** — every `uses:` ref must be pinned by full 40-char commit SHA
-- **`properties.json schema validation`** — workflow-template metadata
 
 ---
 
@@ -108,4 +107,6 @@ Consumer repos can opt out of specific automation:
 - Kernels must use `on: workflow_call` only
 - `l9-self-ci.yml` must remain `on: pull_request/push` — **never convert to workflow_call** (circular dependency)
 - SHA-pin discipline: force-update moving tag for backward-compatible changes; cut new major for breaking
-- See [workflow-interface-registry.yml](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml) for the full kernel API contract
+- The workflow interface registry previously hosted in this repository was
+  retired with the CI boundary campaign. Kernel API contracts live with
+  `l9-ci-core`; policy lives with the `l9-ci-control-plane`.

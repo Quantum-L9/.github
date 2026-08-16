@@ -21,6 +21,17 @@ RETIRED_PATHS=(
   "ops/build-seed-payload.js"
   "ops/sync-org-files.sh"
   "ops/sync-v2-starters.sh"
+  "workflow-interface-registry.yml"
+  "workflow-templates"
+  "rulesets/org-required-analysis.json"
+  "ops/tag-v1.sh"
+  "ops/verify-v1-anchor.sh"
+  "ops/set-repo-properties.sh"
+  "ops/validate-properties-json.py"
+  "ops/schemas"
+  ".github/workflows/properties-json-schema.yml"
+  "scripts/apply-rulesets.sh"
+  "ops/activate-all.sh"
 )
 
 echo "=== Quantum-L9/.github boundary validation ==="
