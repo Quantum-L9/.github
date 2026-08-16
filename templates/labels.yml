@@ -23,9 +23,7 @@
 - { name: "breaking",        color: "5319e7", description: "Requires a major version bump" }
 - { name: "env:prod",        color: "1d76db", description: "Observed in production" }
 - { name: "area:ci",         color: "1d76db", description: "CI/CD pipelines" }
-- { name: "area:ci-templates", color: "1d76db", description: "workflow-templates/ starter gallery" }
-- { name: "area:ci-pack", color: "1d76db", description: "l9-ci-pack/ v2 instantiation kit" }
-- { name: "area:governance", color: "5319e7", description: "registry, ADR template, governance docs" }
+- { name: "area:governance", color: "5319e7", description: "governance docs, ADRs" }
 - { name: "area:ops", color: "1d76db", description: "ops/ scripts" }
 - { name: "area:issue-templates", color: "c5def5", description: ".github/ISSUE_TEMPLATE/" }
 - { name: "area:community-health", color: "0e8a16", description: "CONTRIBUTING/SECURITY/SUPPORT/etc" }

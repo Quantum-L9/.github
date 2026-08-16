@@ -1,24 +1,21 @@
-# Distribution model — what the token actually blocks
+# Distribution model — org defaults and non-CI governance
 
-## Short answer
+> **Retired (campaign l9-dot-github-ci-boundary-v1):** this repository no longer
+> distributes, seeds, synchronizes, or versions L9 CI implementation. The
+> `l9-ci-pack`, the Actions seeders (`auto-seed-new-repo.yml`,
+> `seed-governance.yml`), the drift sync (`continuous-sync.yml`), the template
+> dispatch (`dispatch-template-update.yml`), and the consumer sync script
+> (`templates/sync_ci_from_pack.py`) have been removed. CI targeting,
+> versioning, reconciliation, and enforcement belong to `l9-ci-core` (runtime
+> execution) and the `l9-ci-control-plane` (policy); neither lives here.
 
-**No. The missing token does not block pushing the current version of
-`Quantum-L9/.github` to org repos — because most of it is never pushed at all.**
-
-GitHub *inherits* community health files by reference. There is no copy, no sync,
-and no token involved. Repos read the latest `main` of `Quantum-L9/.github` live.
-Merge a fix to `SECURITY.md` and all 29 repos reflect it on the next page load.
-
-The token gated exactly three files, and only for a **one-time seed** — not for
-ongoing updates.
-
-## The three distribution mechanisms
+## What still distributes from here
 
 | Mechanism | Files | Token needed? | Update propagation |
 | --- | --- | --- | --- |
 | **Inheritance** (automatic) | `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SUPPORT.md`, `FUNDING.yml`, `pull_request_template.md`, `ISSUE_TEMPLATE/*` | No | Instant, live from `main` |
-| **Reference** (`workflow_call`) | governance workflow *logic* | No | Instant, on tag move |
-| **Physical copy** (seed) | Full `templates/` bundle (CODEOWNERS, caller, dependabot, labels, community-health, issue/PR templates, on-org-update) | **Yes, once** (or when new surfaces are added) | Re-run seed / consumer `make sync-ci` |
+| **Reference** (`workflow_call`) | governance workflow *logic* (`governance-pr.yml`, `governance-issue.yml`) | No | Instant, on tag move |
+| **Manual copy** | `templates/` files GitHub cannot inherit | No | Copy by hand, when a repo needs them |
 
 ### Inheritance covers most of the repo
 
@@ -30,113 +27,46 @@ Any repo without its own copy falls back to the org default automatically. Cavea
 - Override is **all-or-nothing per file**. One local `SECURITY.md` in a repo means
   that repo ignores the org default for that file. There is no merging.
 
-### Reference covers workflow logic
+### Reference covers non-CI governance workflow logic
 
 Workflows are *not* community health files and are never inherited. But they do not
 need copying either. `governance-pr.yml` and `governance-issue.yml` live here as
 `workflow_call` callees; each repo has a caller pinned to `@v1`. Cross-repo
-`workflow_call` requires the callee repo be accessible — public satisfies this,
-which the inheritance requirement already forces.
+`workflow_call` requires the callee repo be accessible — public satisfies this.
 
 **Consequence**: to change a governance rule org-wide, edit `governance-pr.yml`
-here and move the `v1` tag. All 29 repos pick it up on their next PR. Zero token
+here and move the `v1` tag. Consumers pick it up on their next PR. Zero token
 use, zero fan-out, zero PRs.
 
-### Physical copy covers the full `templates/` bundle
+### Manual copy covers the non-inheritable `templates/` files
 
-Org inheritance is convenient for repos that stay inside Quantum-L9, but it is the
-wrong distribution model for **repo templates**, forks, and contributors who need
-files visible in-tree. `templates/` is therefore the SSOT for a **physical** seed:
+Org inheritance is convenient for repos that stay inside Quantum-L9, but some
+files are **never** inherited (`CODEOWNERS`, `dependabot.yml`, labels, issue/PR
+templates) and forks/templates need them visible in-tree. `templates/` is the
+copy source; nothing here pushes it automatically. New repositories copy the
+files they need by hand — see `templates/README.md`.
 
-1. **`CODEOWNERS`**, **`dependabot.yml`**, **governance caller**, **labels**
-2. **Community health** (`CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md`,
-   `SUPPORT.md`, `LICENSE`, `.github/FUNDING.yml`)
-3. **Issue + PR templates** and the **`on-org-update`** receiver workflow
-4. **`l9-ci-pack/`** — Core hub callers (`l9-analysis.yml`, lint templates) and
-   `.github/governance/*.yaml`. This repo distributes the pack; `l9-ci-core`
-   executes CI. See `docs/BOUNDARIES.md`.
+## Tag policy (governance callers)
 
-`seed-governance.yml` (and `auto-seed-new-repo.yml`) seed these once per repo via
-PR using `ops/build-seed-payload.js`, matching `ops/sync-org-files.sh`. Existing
-files are left untouched (missing-only). Root `CODEOWNERS` is never overwritten by
-`.github/CODEOWNERS`. New repos from `l9-dependency-template` inherit the pack
-because it is in the template tree; `make sync-ci` is refresh-only.
+Tag `v1` so callers have something to pin:
 
-## Corrected assessment of the earlier claim
+```bash
+# immutable release tag + moving alias
+git tag v1.0.0
+git push origin v1.0.0
+git tag -f v1 v1.0.0
+git push origin v1 --force
+```
 
-The previous statement — "does not open PRs yet, needs a token with write scope
-across 29 repos" — was **true but badly framed**. It implied governance updates were
-blocked pending a token decision. They are not:
+Callers pin `@v1`. To ship a governance change later, repeat with a new
+immutable tag and re-point the alias:
 
-- Findings 1, 3, 4 (PR template path, SECURITY.md, CONTRIBUTING.md) propagate on
-  merge with **no token whatsoever**.
-- Finding 2 (CODEOWNERS) needs the one-time seed.
-- Finding 5's real deliverable was never fan-out — it is the `workflow_call`
-  indirection that makes fan-out unnecessary. The earlier version proposed
-  recurring distribution, which was the wrong architecture: it would have required
-  standing write access to 29 repos forever, to solve a problem that a pinned tag
-  solves with none.
+```bash
+git tag v1.1.0 && git push origin v1.1.0
+git tag -f v1 v1.1.0 && git push origin v1 --force
+```
 
-## Credential recommendation
-
-Do **not** use a PAT. Use a **GitHub App** installed on the org, scoped to
-`contents: write` and `pull_requests: write`:
-
-- No human owner; survives offboarding.
-- Installation token expires in one hour.
-- `create-github-app-token` mints it per run — nothing long-lived in secrets.
-- The workflow is `workflow_dispatch`-only and pinned to a protected
-  `governance-distribution` environment, so a required reviewer approves each run.
-
-Since seeding runs roughly once ever, App credentials can be uninstalled afterward
-and reinstalled only if a new repo needs seeding.
-
-## Order of operations
-
-1. `./scripts/preflight.sh` — verify team slugs resolve, `.github` is public, list
-   which repos already have local overrides blocking inheritance.
-2. Fix any placeholder team slug that preflight flags as nonexistent.
-3. Merge to `main`. **Findings 1, 3, 4 are live at this point, no token.**
-4. Tag `v1` so callers have something to pin:
-
-   ```bash
-   # immutable release tag + moving alias
-   git tag v1.0.0
-   git push origin v1.0.0
-   git tag -f v1 v1.0.0
-   git push origin v1 --force
-   ```
-
-   Callers pin `@v1`. To ship a governance change later, repeat with a new
-   immutable tag and re-point the alias:
-
-   ```bash
-   git tag v1.1.0 && git push origin v1.1.0
-   git tag -f v1 v1.1.0 && git push origin v1 --force
-   ```
-
-   Never delete `v1`; force-move it. Deleting breaks every caller until it reappears.
-5. Install the GitHub App; configure `governance-distribution` environment reviewers.
-6. Run `seed-governance.yml` with `mode: dry-run`, `repo_filter: l9-` — inspect the
-   summary table.
-7. Re-run with `mode: seed` on the filtered subset, review those PRs, then drop the
-   filter.
-8. Optionally uninstall the App.
-
-## Ongoing steady state
-
-| Change | Action | Token? |
-| --- | --- | --- |
-| Security policy text | Edit `SECURITY.md`, merge | No |
-| PR template structure | Edit `pull_request_template.md`, merge | No |
-| A governance gate rule | Edit `governance-pr.yml`, move `v1` tag | No |
-| Code ownership routing | Edit `templates/CODEOWNERS.repo`, re-run seed | Yes |
-| New repo from `l9-dependency-template` | Files already in the template tree | No |
-| Blank repo (no template) | `workflow_dispatch` `seed-governance.yml` or `auto-seed-new-repo.yml` | Yes |
-| New repo joins the org (legacy) | Run seed filtered to that repo | Yes |
-
-Only the last two rows ever need it.
-
+Never delete `v1`; force-move it. Deleting breaks every caller until it reappears.
 
 ---
 
@@ -207,4 +137,4 @@ gh api -X PUT orgs/Quantum-L9/actions/permissions \
 ```
 
 `scripts/preflight.sh` now checks this for every repo (section 5) so the trap is
-caught before seeding rather than after.
+caught before rollout rather than after.

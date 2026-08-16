@@ -22,10 +22,10 @@ For questions, architectural discussions, and community input:
 
 Many governance tasks are handled automatically. Before opening an issue:
 
-- **Missing CODEOWNERS/dependabot?** → Wait for the weekly `continuous-sync.yml` PR
+- **Missing CODEOWNERS/dependabot?** → The weekly `enforce-policies.yml` run reports missing mandatory files (Wednesday)
 - **Labels missing?** → Wait for the weekly `sync-labels-all.yml` run (Monday)
 - **Repo settings wrong?** → Wait for the weekly `enforce-policies.yml` run (Wednesday)
-- **Need to sync CI?** → Run `make sync-ci` or wait for `dispatch-template-update.yml`
+- **CI setup or sync?** → See the L9 CI control-plane guidance; this repository no longer seeds or syncs CI files
 
 ## Out of Scope
 

@@ -1,4 +1,4 @@
-name: Validate starters and l9-ci-pack
+name: Boundary validation
 
 on:
   pull_request:

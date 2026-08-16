@@ -120,8 +120,9 @@ solve with no credentials.
 
 **Corrected**: community health files inherit live from this repo's `main`.
 Workflow logic is consumed by reference via `workflow_call` at `@v1`. Only
-`CODEOWNERS` and a 12-line caller are physically copied, once, by
-`seed-governance.yml`.
+`CODEOWNERS` and a 12-line caller are physically copied — by hand, from
+`templates/`, since the automated seeders were retired in campaign
+l9-dot-github-ci-boundary-v1.
 
 **Impact on findings 1, 3, 4**: they were never token-blocked. They go live the
 moment this merges.

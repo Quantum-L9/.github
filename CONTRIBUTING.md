@@ -73,9 +73,7 @@ manual intervention:
 
 | Event | Automation | Your Action |
 | --- | --- | --- |
-| New repo created | `auto-seed-new-repo.yml` opens a PR with CODEOWNERS + dependabot + governance caller | Merge the PR |
-| Template changes in `.github` | `dispatch-template-update.yml` notifies your repo | Merge the auto-sync PR (if you have `on-org-update.yml`) |
-| Governance files deleted | `continuous-sync.yml` opens a restoration PR | Merge or opt out (`.l9/no-sync`) |
+| New repo created | GitHub inheritance applies the org defaults automatically; copy non-inheritable files from `.github/templates/` by hand when needed | Nothing, unless you want CODEOWNERS/dependabot/labels in-tree |
 | Repo settings drift | `enforce-policies.yml` auto-corrects | Nothing — settings are restored |
 | Labels missing | `sync-labels-all.yml` adds them | Nothing — labels appear |
 
@@ -87,7 +85,6 @@ Consumer repos can opt out of specific automation:
 
 | Opt-out | How | Effect |
 | --- | --- | --- |
-| Drift remediation | Create `.l9/no-sync` | `continuous-sync.yml` skips this repo |
 | Policy enforcement | Create `.l9/no-policy-enforcement` | `enforce-policies.yml` skips this repo |
 
 ---
@@ -96,10 +93,9 @@ Consumer repos can opt out of specific automation:
 
 `Quantum-L9/.github` validates itself on every PR/push to `main`:
 
-- **`validate-starters.sh`** — `l9-ci-pack/` completeness and `@main`-ref check
+- **`validate-starters.sh`** — boundary validation: rejects reintroduction of the retired CI-distribution surfaces
 - **`actionlint`** — lints all workflow files for YAML/expression/shellcheck errors
 - **`SHA-pin audit`** — every `uses:` ref must be pinned by full 40-char commit SHA
-- **`properties.json schema validation`** — workflow-template metadata
 
 ---
 
@@ -108,4 +104,6 @@ Consumer repos can opt out of specific automation:
 - Kernels must use `on: workflow_call` only
 - `l9-self-ci.yml` must remain `on: pull_request/push` — **never convert to workflow_call** (circular dependency)
 - SHA-pin discipline: force-update moving tag for backward-compatible changes; cut new major for breaking
-- See [workflow-interface-registry.yml](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml) for the full kernel API contract
+- The workflow interface registry previously hosted in this repository was
+  retired with the CI boundary campaign. Kernel API contracts live with
+  `l9-ci-core`; policy lives with the `l9-ci-control-plane`.

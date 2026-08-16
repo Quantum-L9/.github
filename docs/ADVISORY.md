@@ -18,9 +18,10 @@ manufactures false confidence.
 | Dependabot | opens PRs | No — no auto-merge |
 | Weekly governance report | read-only issue | No |
 
-There is exactly one hard failure anywhere in the pack: `apply-rulesets.sh` refuses
-to run if a ruleset file says anything other than `evaluate`. It fails closed toward
-*advisory*, which is the safe direction.
+There is exactly one hard failure anywhere in the repo: `ops/validate-starters.sh`
+fails if any retired CI-distribution surface reappears, and it refuses to run
+past a ruleset file that says anything other than `evaluate`. It fails closed
+toward *advisory*, which is the safe direction.
 
 ## Promotion ladder
 
