@@ -25,9 +25,7 @@ jobs:
   pr:
     if: github.event_name == 'pull_request'
     uses: Quantum-L9/.github/.github/workflows/governance-pr.yml@v1
-    # secrets: inherit
 
   issue:
     if: github.event_name == 'issues'
     uses: Quantum-L9/.github/.github/workflows/governance-issue.yml@v1
-    # secrets: inherit
