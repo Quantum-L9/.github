@@ -24,11 +24,6 @@ is_sha() {
   [[ "$ref" =~ ^[0-9a-f]{40}$ ]]
 }
 
-is_frozen_core_tag() {
-  local repo="$1" ref="$2"
-  [[ "$repo" == "Quantum-L9/l9-ci-core"* ]] && [[ "$ref" =~ ^v(1|2|2\.0\.0)$ ]]
-}
-
 for dir in "${SEARCH_DIRS[@]}"; do
   [[ -d "$dir" ]] || continue
   while IFS= read -r -d '' f; do
@@ -54,9 +49,6 @@ for dir in "${SEARCH_DIRS[@]}"; do
       if is_sha "$ref"; then
         continue
       fi
-      if is_frozen_core_tag "$repo" "$ref"; then
-        continue
-      fi
       echo "FAIL: ${f}:${line_no}: floating ref '${ref}' on '${repo}' — pin by full 40-char commit SHA"
       FAILED=$((FAILED + 1))
     done < "$f"
@@ -69,4 +61,4 @@ if [[ "$FAILED" -gt 0 ]]; then
   echo "${FAILED} floating (non-SHA, non-frozen-tag) reference(s) found."
   exit 1
 fi
-echo "All references pinned by SHA or a documented frozen Core tag (@v1/@v2/@v2.0.0)."
+echo "All references pinned by full 40-char commit SHA."
