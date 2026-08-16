@@ -1,4 +1,4 @@
-name: actionlint (workflow-templates + l9-ci-pack)
+name: actionlint (.github/workflows)
 on:
   pull_request:
   push:
@@ -24,11 +24,11 @@ jobs:
             "https://raw.githubusercontent.com/rhysd/actionlint/914e7df21a07ef503a81201c76d2b11c789d3fca/scripts/download-actionlint.bash"
           echo "72fa3e45ac20f3c3a512d6747b4fcf719e21f890e8c43e78d48a41fdfb900c4e  /tmp/download-actionlint.bash" | sha256sum -c -
           bash /tmp/download-actionlint.bash 1.7.12
-      - name: Lint workflow-templates/ and l9-ci-pack/workflows/
+      - name: Lint .github/workflows/
         run: |
           set -euo pipefail
           shopt -s nullglob
-          files=(workflow-templates/*.yml l9-ci-pack/workflows/*.yml)
+          files=(.github/workflows/*.yml)
           if [ "${#files[@]}" -eq 0 ]; then
             echo "No workflow files found to lint." >&2
             exit 1

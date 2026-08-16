@@ -2,23 +2,22 @@
 # ops/audit-sha-pins.sh
 #
 # Repo-wide SHA-pin audit. Every `uses:` reference in every workflow YAML file
-# in this repo (workflow-templates/, l9-ci-pack/workflows/, .github/workflows/)
-# must be pinned by a full 40-character commit SHA, EXCEPT the documented,
-# intentionally-frozen Quantum-L9/l9-ci-core major-version tags (@v1 = frozen
-# legacy kernel set; @v2 / @v2.0.0 = current major once published). `@main`,
-# `@master`, `@latest`, or any other floating tag is a failure.
+# in this repo (.github/workflows/) must be pinned by a full 40-character
+# commit SHA, EXCEPT the documented, intentionally-frozen Quantum-L9/l9-ci-core
+# major-version tags (@v1 = frozen legacy kernel set; @v2 / @v2.0.0 = current
+# major once published). `@main`, `@master`, `@latest`, or any other floating
+# tag is a failure.
 #
-# This generalizes the l9-ci-pack-only pin check already in
-# ops/validate-starters.sh to every workflow file in the repo, including the
-# workflow-templates/ gallery (which validate-starters.sh does not scan for
-# pins beyond the @main check).
+# The retired CI-distribution surfaces (workflow-templates/ gallery,
+# l9-ci-pack/workflows/) are no longer scanned — see ops/validate-starters.sh
+# for the boundary assertions that reject their reintroduction.
 set -euo pipefail
 
 FAILED=0
 CHECKED=0
 
 # Directories that can contain `uses:` lines.
-SEARCH_DIRS=("workflow-templates" "l9-ci-pack/workflows" ".github/workflows")
+SEARCH_DIRS=(".github/workflows")
 
 is_sha() {
   local ref="$1"
