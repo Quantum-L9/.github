@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Offline, deterministic v3.1 assertions. Makes no network calls.
+# Offline, deterministic advisory/boundary assertions. Makes no network calls.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
@@ -60,4 +60,4 @@ for p in pathlib.Path('rulesets').glob('*.json'):
 PY
 
 [[ "$fail" == 0 ]] || exit 1
-echo "PASS v3.1 pack is advisory and boundary-clean"
+echo "PASS advisory governance is advisory and boundary-clean"

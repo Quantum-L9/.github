@@ -62,6 +62,39 @@ else
   done
 fi
 
+# Code-level negative assertions: no live reference to the retired CI
+# distribution machinery may remain in surviving workflows or scripts.
+# Documentation may still mention retired surfaces.
+CODE_GREP_PATTERNS=(
+  "sync_ci_from_pack"
+  "on-org-update"
+  "build-seed-payload"
+  "l9-ci-pack"
+  "seed-governance"
+  "auto-seed-new-repo"
+  "dispatch-template-update"
+  "continuous-sync"
+)
+for pat in "${CODE_GREP_PATTERNS[@]}"; do
+  hits=$(grep -rl "$pat" .github/workflows scripts ops 2>/dev/null \
+    | grep -v "ops/validate-starters.sh" || true)
+  if [ -n "$hits" ]; then
+    echo "❌ live reference to retired CI surface '$pat': $hits"
+    FAIL=$((FAIL+1))
+  else
+    echo "✅ no code reference to retired CI surface: $pat"
+    PASS=$((PASS+1))
+  fi
+done
+
+if grep -rn "Quantum-L9/l9-ci-core" .github/workflows 2>/dev/null; then
+  echo "❌ surviving workflow references l9-ci-core (CI runtime belongs outside .github)"
+  FAIL=$((FAIL+1))
+else
+  echo "✅ no workflow references l9-ci-core"
+  PASS=$((PASS+1))
+fi
+
 echo ""
 echo "================================"
 echo "Results: $PASS passed, $FAIL failed"

@@ -3,14 +3,14 @@
 #
 # Repo-wide SHA-pin audit. Every `uses:` reference in every workflow YAML file
 # in this repo (.github/workflows/) must be pinned by a full 40-character
-# commit SHA, EXCEPT the documented, intentionally-frozen Quantum-L9/l9-ci-core
-# major-version tags (@v1 = frozen legacy kernel set; @v2 / @v2.0.0 = current
-# major once published). `@main`, `@master`, `@latest`, or any other floating
-# tag is a failure.
+# commit SHA. `@main`, `@master`, `@latest`, or any other floating tag is a
+# failure. (The legacy frozen l9-ci-core tag exception was removed with the
+# CI-distribution retirement — surviving workflows must not reference
+# l9-ci-core at all.)
 #
-# The retired CI-distribution surfaces (workflow-templates/ gallery,
-# l9-ci-pack/workflows/) are no longer scanned — see ops/validate-starters.sh
-# for the boundary assertions that reject their reintroduction.
+# The retired CI-distribution surfaces are no longer scanned — see
+# ops/validate-starters.sh for the boundary assertions that reject their
+# reintroduction.
 set -euo pipefail
 
 FAILED=0

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Preflight: verify assumptions BEFORE seeding. Read-only, safe to run anytime.
+# Preflight: verify org-wide governance assumptions. Read-only, safe to run anytime.
 set -euo pipefail
 ORG=Quantum-L9
 # gh may colorize JSON output (ANSI escapes) when a terminal/clicolor is forced,
@@ -10,7 +10,8 @@ strip_ansi() { sed -e 's/\x1b\[[0-9;]*m//g'; }
 command -v gh >/dev/null || { echo "gh CLI required" >&2; exit 1; }
 
 echo "== 1. CODEOWNERS team slugs must resolve =="
-mapfile -t SLUGS < <(grep -oE '@'"$ORG"'/[a-z0-9-]+' .github/CODEOWNERS | sed "s|@$ORG/||" | sort -u)
+SLUGS=()
+while IFS= read -r slug; do SLUGS+=("$slug"); done < <(grep -oE '@'"$ORG"'/[a-z0-9-]+' .github/CODEOWNERS | sed "s|@$ORG/||" | sort -u)
 REAL=$(gh api "orgs/$ORG/teams" --paginate --jq '.[].slug' 2>/dev/null || true)
 [[ -z "$REAL" ]] && REAL="__no_team_read__"  # empty list and read-denied are both unverifiable
 for s in "${SLUGS[@]}"; do
@@ -24,7 +25,7 @@ echo "== 2. .github repo must be public (or nothing inherits) =="
 gh api "repos/$ORG/.github" --jq 'if .private then "  !! PRIVATE — inheritance is OFF" else "  OK public" end'
 
 echo
-echo "== 3. Which repos already inherit vs need seeding =="
+echo "== 3. Which repos have local CODEOWNERS/caller copies vs inherit =="
 gh repo list "$ORG" --limit 200 --json name,isArchived,isFork \
   --jq '.[] | select(.isArchived==false and .isFork==false and .name!=".github") | .name' \
 | while read -r r; do
