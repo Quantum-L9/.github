@@ -13,35 +13,19 @@
 | Repository | Role | Entry Point |
 |---|---|---|
 | [`Cursor-Governance`](https://github.com/Quantum-L9/Cursor-Governance) | Policy SSOT — CANONICAL_LAW.md §1–§9, symlink wiring, GlobalCommands | `CANONICAL_LAW.md` |
-| [`l9-ci-core`](https://github.com/Quantum-L9/l9-ci-core) | Thin GitHub Actions control plane (v2) — SDK-provisioning, governance resolution, publication | [`l9-ci-pack/README.md`](https://github.com/Quantum-L9/.github/blob/main/l9-ci-pack/README.md) (v2, current); `pr-pipeline.yml@v1` (legacy, frozen) |
+| [`l9-ci-core`](https://github.com/Quantum-L9/l9-ci-core) | GitHub Actions CI runtime — SDK-provisioning, governance resolution, publication | [`l9-ci-core` README](https://github.com/Quantum-L9/l9-ci-core) |
 | [`l9-assurance`](https://github.com/Quantum-L9/l9-assurance) | 51-package TypeScript governance assurance monorepo | `packages/` |
-| [`.github`](https://github.com/Quantum-L9/.github) | Org backbone — health files, starter templates, workflow registry | `workflow-interface-registry.yml` |
+| [`.github`](https://github.com/Quantum-L9/.github) | Org backbone — health files, org defaults, advisory governance | [`README.md`](https://github.com/Quantum-L9/.github) |
 
 ---
 
-## CI instantiation
+## CI
 
-**v2 (current, start here):** [`l9-ci-pack/README.md`](https://github.com/Quantum-L9/.github/blob/main/l9-ci-pack/README.md) —
-governed semgrep analysis (`l9-ci-pack/workflows/l9-analysis.yml`) publishing
-GitHub checks via `l9-ci-core`'s `profile-normalize-semgrep.yml` +
-`publish-analysis.yml`, plus optional per-language lint/test templates.
-
-**`@v1` (legacy, frozen):** All repositories still on legacy `@v1` consume
-`l9-ci-core` kernels via thin caller workflows. See
-[`workflow-interface-registry.yml`](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml)
-for the machine-readable CI API contract (`v2:` block for the current pack,
-top-level `kernels:` list for the frozen `@v1` set).
-
-| Kernel | Purpose |
-|---|---|
-| `pr-pipeline.yml@v1` | Lint, type-check, test, security gates on every PR |
-| `release-publish.yml@v1` | Versioned release build and publish |
-| `nightly.yml@v1` | Scheduled nightly validation |
-| `pre-commit-ci.yml@v1` | Pre-commit hook enforcement |
-| `trio-governance.yml@v1` | Three-tier separation governance check |
-| `security.yml@v1` | Gitleaks, Bandit/Semgrep, pip-audit/npm audit |
-| `scorecard.yml@v1` | OpenSSF Scorecard analysis |
-| `sbom.yml@v1` | SBOM generation (SPDX-JSON via Syft) |
+CI execution is owned by [`l9-ci-core`](https://github.com/Quantum-L9/l9-ci-core);
+CI targeting, versioning, reconciliation, and enforcement are owned by the
+`l9-ci-control-plane`. This repository no longer distributes CI templates,
+packs, or starter workflows — it provides the GitHub-native organization
+defaults and advisory governance only.
 
 ---
 
