@@ -16,9 +16,10 @@ the synced org distribution copy (see `ops/sync-v2-starters.sh`).
   is the part that **publishes GitHub checks** — this is the L9 finding
   pipeline (semgrep → SDK normalize/validate → publish).
 - **Lint templates** (`workflows/l9-lint-test.yml` /
-  `workflows/l9-lint-test-node.yml`) are **optional hygiene** — generic
-  dev-tool CI (ruff/mypy/pytest or eslint/tsc/vitest). Core does not call or
-  gate on these; you own them outright.
+  `workflows/l9-lint-test-node.yml`) are **optional hygiene**. Python versions
+  come from `Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@v2`
+  (no `ruff==` / `mypy==` / `pytest==` literals, no copied pin file). Node
+  lint stays on the SHA-pinned SDK Biome caller. You own config, not versions.
 
 ## 2. Prerequisites
 
