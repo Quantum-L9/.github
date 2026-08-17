@@ -18,7 +18,7 @@ the synced org distribution copy (see `ops/sync-v2-starters.sh`).
 - **Lint templates** (`workflows/l9-lint-test.yml` /
   `workflows/l9-lint-test-node.yml`) are **optional hygiene**. Python versions
   come from `Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@v2`
-  (no `ruff==` / `mypy==` / `pytest==` literals, no copied pin file). Node
+  (no version literals for those tools, no copied pin file). Node
   lint stays on the SHA-pinned SDK Biome caller. You own config, not versions.
 
 ## 2. Prerequisites
