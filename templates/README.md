@@ -28,6 +28,10 @@ live in each repo's tree to take effect.
 | `pr-templates/` | `.github/pull_request_template.md` | Not inheritable from org `.github/` nested path |
 | `../l9-ci-pack/workflows/` | `.github/workflows/` | Core hub callers (`l9-analysis.yml`, lint templates). Missing-only. |
 | `../l9-ci-pack/governance/` | `.github/governance/` | Governance YAMLs the Core resolver reads. |
+| `../l9-ci-pack/biome.json` | `biome.json` | Locked Biome 2.5.8 contract. Missing-only; never overwrite. |
+| `../l9-ci-pack/.biomeignore` | `.biomeignore` | Path exclusions companion. Missing-only. |
+| `../l9-ci-pack/.editorconfig` | `.editorconfig` | Editor indent/newline contract. Missing-only. |
+| `../l9-ci-pack/.vscode/extensions.json` | `.vscode/extensions.json` | Recommends `biomejs.biome`. Missing-only. |
 
 ## Inheritance vs. physical copy
 

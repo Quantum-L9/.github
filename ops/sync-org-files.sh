@@ -21,7 +21,9 @@
 #   issue-templates   .github/ISSUE_TEMPLATE/*
 #   pr-templates      .github/pull_request_template.md
 #   on-org-update     .github/workflows/on-org-update.yml
-#   l9-ci-pack        .github/workflows/l9-analysis.yml + lint callers + .github/governance/*
+#   l9-ci-pack        .github/workflows/l9-analysis.yml + lint callers +
+#                     .github/governance/* + locked Biome contract (biome.json,
+#                     .biomeignore, .editorconfig, .vscode/extensions.json)
 #
 # Default (no --include flag): seeds all categories.
 # Actions twin: .github/workflows/seed-governance.yml (ops/build-seed-payload.js).
@@ -141,7 +143,7 @@ for cat in "${CATEGORIES[@]}"; do
         "$CONSUMER_ROOT/.github/workflows/on-org-update.yml"
       ;;
     l9-ci-pack)
-      echo "── l9-ci-pack (Core hub callers) ──"
+      echo "── l9-ci-pack (Core hub callers + Biome contract) ──"
       if [[ -d "$PACK_DIR/workflows" ]]; then
         for f in "$PACK_DIR/workflows/"*; do
           [[ -f "$f" ]] || continue
@@ -154,6 +156,25 @@ for cat in "${CATEGORIES[@]}"; do
           sync_file "$f" "$CONSUMER_ROOT/.github/governance/$(basename "$f")"
         done
       fi
+      # Formatter contract: missing-only, matching stamp.sh / Actions seeder.
+      # Never overwrite a consumer biome.json or .editorconfig.
+      for pair in \
+        "biome.json:biome.json" \
+        ".biomeignore:.biomeignore" \
+        ".editorconfig:.editorconfig" \
+        ".vscode/extensions.json:.vscode/extensions.json"
+      do
+        src="$PACK_DIR/${pair%%:*}"
+        dest="$CONSUMER_ROOT/${pair##*:}"
+        if [[ ! -f "$src" ]]; then
+          continue
+        fi
+        if [[ -e "$dest" ]]; then
+          echo "  keep existing ${pair##*:}"
+          continue
+        fi
+        sync_file "$src" "$dest"
+      done
       ;;
     *)
       echo "⚠️  WARNING: unknown category '$cat', skipping." >&2

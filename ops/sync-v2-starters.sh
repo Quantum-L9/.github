@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 # ops/sync-v2-starters.sh
-# Syncs the v2 CI instantiation surface from Quantum-L9/l9-ci-core's
-# docs/templates/ into this repo's l9-ci-pack/, then rewrites every Core pin
-# in l9-ci-pack/ + workflow-templates/l9-v2-*.yml to the given ref.
+# Syncs the v2 CI instantiation surface from Quantum-L9/l9-ci-core into
+# this repo's l9-ci-pack/, then rewrites every Core pin in l9-ci-pack/ +
+# workflow-templates/l9-v2-*.yml to the given ref.
+#
+# Sources (both required at the Core ref):
+#   docs/templates/              analysis + Python lint + governance YAMLs
+#   presets/typescript/          locked Biome contract + Node lint caller
+# Never copy the stale ESLint docs/templates/l9-lint-test-node.yml when the
+# typescript preset is present — that is what made org fan-out invent ESLint.
 #
 # Usage:
 #   ops/sync-v2-starters.sh <core-ref>
@@ -39,20 +45,51 @@ trap 'rm -rf "$WORKDIR"' EXIT
 
 echo "=== Syncing l9-ci-pack from ${CORE_REPO}@${CORE_REF} ==="
 
-echo "Fetching docs/templates/ from ${CORE_REPO}@${CORE_REF}..."
+echo "Fetching docs/templates/ and presets/typescript/ from ${CORE_REPO}@${CORE_REF}..."
 git clone --quiet --no-checkout "https://github.com/${CORE_REPO}.git" "$WORKDIR/core"
 git -C "$WORKDIR/core" fetch --quiet --depth=1 origin "$CORE_REF"
-git -C "$WORKDIR/core" checkout --quiet FETCH_HEAD -- docs/templates
+git -C "$WORKDIR/core" checkout --quiet FETCH_HEAD -- docs/templates presets/typescript
 
-mkdir -p "$PACK_DIR/governance" "$PACK_DIR/workflows"
+mkdir -p "$PACK_DIR/governance" "$PACK_DIR/workflows" "$PACK_DIR/.vscode"
 
 for f in execution-profiles provider-requiredness rule-modes waivers promotion-policy quality-thresholds; do
   cp "$WORKDIR/core/docs/templates/governance/${f}.yaml" "$PACK_DIR/governance/${f}.yaml"
 done
 
-for f in l9-analysis l9-lint-test l9-lint-test-node; do
-  cp "$WORKDIR/core/docs/templates/${f}.yml" "$PACK_DIR/workflows/${f}.yml"
-done
+cp "$WORKDIR/core/docs/templates/l9-analysis.yml" "$PACK_DIR/workflows/l9-analysis.yml"
+cp "$WORKDIR/core/docs/templates/l9-lint-test.yml" "$PACK_DIR/workflows/l9-lint-test.yml"
+
+# Node/TS caller: prefer the locked typescript preset (Biome + tsc + tests).
+# Fall back to docs/templates only if the preset is absent at this ref.
+PRESET_NODE="$WORKDIR/core/presets/typescript/.github/workflows/l9-lint-test.yml"
+TEMPLATE_NODE="$WORKDIR/core/docs/templates/l9-lint-test-node.yml"
+if [[ -f "$PRESET_NODE" ]]; then
+  cp "$PRESET_NODE" "$PACK_DIR/workflows/l9-lint-test-node.yml"
+elif [[ -f "$TEMPLATE_NODE" ]]; then
+  echo "⚠️  presets/typescript workflow missing at ${CORE_REF}; using docs/templates/l9-lint-test-node.yml" >&2
+  cp "$TEMPLATE_NODE" "$PACK_DIR/workflows/l9-lint-test-node.yml"
+else
+  echo "❌ ERROR: no Node lint workflow at ${CORE_REF}" >&2
+  exit 2
+fi
+
+if grep -qE 'npx --no-install eslint|name: ESLint' "$PACK_DIR/workflows/l9-lint-test-node.yml"; then
+  echo "❌ ERROR: Node lint workflow at ${CORE_REF} is still the ESLint template." >&2
+  echo "   Refusing to sync an ESLint caller into l9-ci-pack. Use a Core ref that" >&2
+  echo "   contains presets/typescript (Biome) or docs/templates Biome content." >&2
+  exit 2
+fi
+
+PRESET_DIR="$WORKDIR/core/presets/typescript"
+if [[ ! -f "$PRESET_DIR/biome.json" ]]; then
+  echo "❌ ERROR: presets/typescript/biome.json missing at ${CORE_REF}." >&2
+  echo "   The org seeder cannot fan out a locked Biome contract from this ref." >&2
+  exit 2
+fi
+cp "$PRESET_DIR/biome.json" "$PACK_DIR/biome.json"
+cp "$PRESET_DIR/.biomeignore" "$PACK_DIR/.biomeignore"
+cp "$PRESET_DIR/.editorconfig" "$PACK_DIR/.editorconfig"
+cp "$PRESET_DIR/.vscode/extensions.json" "$PACK_DIR/.vscode/extensions.json"
 
 echo "Rewriting Core pins to @${CORE_REF} in ${PACK_DIR}/ and workflow-templates/l9-v2-*.yml..."
 # Matches full-40-char-SHA pins on Quantum-L9/l9-ci-core refs only — never

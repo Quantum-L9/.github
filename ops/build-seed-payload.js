@@ -8,7 +8,10 @@
  * Health files come from templates/. The Core hub pack (l9-analysis.yml +
  * .github/governance/*.yaml + lint callers) comes from l9-ci-pack/.
  * This repo distributes those callers; l9-ci-core executes CI.
- * Missing-only seed in Actions never overwrites an existing consumer file.
+ * Missing-only seed in Actions never overwrites an existing consumer file,
+ * except one safe upgrade: a stock ESLint `l9-lint-test-node.yml` (the old
+ * pack caller) is replaced with the Biome SDK caller. Customized workflows
+ * are kept.
  *
  * @param {object} opts
  * @param {typeof import('fs')} opts.fs
@@ -48,6 +51,50 @@ function parseCategories(raw) {
 function readIfFile(fs, path) {
   if (!fs.existsSync(path) || !fs.statSync(path).isFile()) return null;
   return fs.readFileSync(path, 'utf8');
+}
+
+const STOCK_ESLINT_NODE_DEST = '.github/workflows/l9-lint-test-node.yml';
+
+function isStockEslintNodeWorkflow(text) {
+  if (typeof text !== 'string' || !text.trim()) return false;
+  if (/l9-biome-scan\.yml/.test(text)) return false;
+  const named = /^\s*name:\s*L9 Lint and Test \(Node\)\s*$/m.test(text);
+  const eslintJob = /^\s*name:\s*ESLint\s*$/m.test(text);
+  const eslintRun = /npx(?:\s+--no-install)?\s+eslint\b/.test(text);
+  return named && eslintJob && eslintRun;
+}
+
+/**
+ * Decide which payload dests to write.
+ * @param {Record<string, string>} payload
+ * @param {Record<string, string|null|true>} existingByPath
+ *   null/absent = missing (write);
+ *   true = present, content not fetched (keep);
+ *   string = fetched content (replace only if stock ESLint node caller).
+ * @returns {{ writes: string[], replaced: string[], kept: string[] }}
+ */
+function selectSeedWrites(payload, existingByPath = {}) {
+  const writes = [];
+  const replaced = [];
+  const kept = [];
+  for (const dest of Object.keys(payload)) {
+    if (!(dest in existingByPath) || existingByPath[dest] === null) {
+      writes.push(dest);
+      continue;
+    }
+    const existing = existingByPath[dest];
+    if (
+      dest === STOCK_ESLINT_NODE_DEST &&
+      typeof existing === 'string' &&
+      isStockEslintNodeWorkflow(existing)
+    ) {
+      writes.push(dest);
+      replaced.push(dest);
+      continue;
+    }
+    kept.push(dest);
+  }
+  return { writes, replaced, kept };
 }
 
 function addDirFiles(fs, srcDir, destPrefix, payload) {
@@ -123,6 +170,18 @@ function buildSeedPayload({ fs, categories, hasRootCodeowners = false } = {}) {
       case 'l9-ci-pack': {
         addDirFiles(fs, 'l9-ci-pack/workflows', '.github/workflows', payload);
         addDirFiles(fs, 'l9-ci-pack/governance', '.github/governance', payload);
+        // Locked TypeScript formatter contract (l9-ci-core presets/typescript).
+        // Missing-only seed never overwrites a consumer biome.json.
+        const formatterFiles = [
+          ['l9-ci-pack/biome.json', 'biome.json'],
+          ['l9-ci-pack/.biomeignore', '.biomeignore'],
+          ['l9-ci-pack/.editorconfig', '.editorconfig'],
+          ['l9-ci-pack/.vscode/extensions.json', '.vscode/extensions.json'],
+        ];
+        for (const [src, dest] of formatterFiles) {
+          const body = readIfFile(fs, src);
+          if (body != null) payload[dest] = body;
+        }
         break;
       }
       default:
@@ -135,6 +194,9 @@ function buildSeedPayload({ fs, categories, hasRootCodeowners = false } = {}) {
 
 module.exports = {
   ALL_CATEGORIES,
+  STOCK_ESLINT_NODE_DEST,
   parseCategories,
   buildSeedPayload,
+  isStockEslintNodeWorkflow,
+  selectSeedWrites,
 };

@@ -52,9 +52,12 @@ files visible in-tree. `templates/` is therefore the SSOT for a **physical** see
 2. **Community health** (`CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md`,
    `SUPPORT.md`, `LICENSE`, `.github/FUNDING.yml`)
 3. **Issue + PR templates** and the **`on-org-update`** receiver workflow
-4. **`l9-ci-pack/`** — Core hub callers (`l9-analysis.yml`, lint templates) and
-   `.github/governance/*.yaml`. This repo distributes the pack; `l9-ci-core`
-   executes CI. See `docs/BOUNDARIES.md`.
+4. **`l9-ci-pack/`** — Core hub callers (`l9-analysis.yml`, lint templates),
+   `.github/governance/*.yaml`, and the locked TypeScript Biome contract
+   (`biome.json`, `.biomeignore`, `.editorconfig`, `.vscode/extensions.json`).
+   This repo distributes the pack; `l9-ci-core` executes CI. See
+   `docs/BOUNDARIES.md`. Seeding `biome.json` is distribution of the locked
+   contract, not a second scanner.
 
 `seed-governance.yml` (and `auto-seed-new-repo.yml`) seed these once per repo via
 PR using `ops/build-seed-payload.js`, matching `ops/sync-org-files.sh`. Existing
