@@ -19,11 +19,14 @@ lint caller). This pack is the synced org distribution copy (see
   is the part that **publishes GitHub checks** — this is the L9 finding
   pipeline (semgrep → SDK normalize/validate → publish).
 - **Lint templates** (`workflows/l9-lint-test.yml` /
-  `workflows/l9-lint-test-node.yml`) are **optional hygiene**. Python is
-  ruff/mypy/pytest. Node/TS is **Biome** (SDK `l9-biome-scan.yml`) + tsc +
-  the repo test script. Core does not call or gate on these; you own the
-  `env:` block and `enforce-biome` flip. Do not add ESLint or Prettier as a
-  second JS/TS/JSON owner.
+  `workflows/l9-lint-test-node.yml`) are **optional hygiene**. Python tool
+  *versions* come from
+  `Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@v2` (no version
+  literals for those tools, no copied pin file) — you own the config, not the
+  versions. Node/TS is **Biome** (SDK `l9-biome-scan.yml`) + tsc + the repo
+  test script, on the SHA-pinned Biome caller. Core does not call or gate on
+  these; you own the `env:` block and `enforce-biome` flip. Do not add ESLint
+  or Prettier as a second JS/TS/JSON owner.
 - **Formatter contract** (`biome.json`, `.biomeignore`, `.editorconfig`,
   `.vscode/extensions.json`) is the locked Biome 2.5.8 contract from
   `presets/typescript/`. The seeder and `stamp.sh` never overwrite an

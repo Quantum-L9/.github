@@ -102,7 +102,8 @@ fi
 for f in "${FILES_TO_REPIN[@]}"; do
   [[ -f "$f" ]] || continue
   # Rewrite SHA pins and frozen Core tags (@v2 / @v2.0.0 / @v1) — never @main.
-  sed -i.bak -E "s#(Quantum-L9/l9-ci-core/[A-Za-z0-9._/-]+)@([0-9a-f]{40}|v[0-9]+(\.[0-9]+)*)#\1@${CORE_REF}#g" "$f"
+  # Keep install-consumer-ci@v2 floating so pin-file retags percolate.
+  sed -i.bak -E "/install-consumer-ci@v2/!s#(Quantum-L9/l9-ci-core/[A-Za-z0-9._/-]+)@([0-9a-f]{40}|v[0-9]+(\.[0-9]+)*)#\1@${CORE_REF}#g" "$f"
   rm -f "${f}.bak"
 done
 # README uses "Pin Core at **`SHA`**" (bold+backticks); also accept legacy "pin Core at `SHA`".
