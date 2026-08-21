@@ -2,8 +2,11 @@
 
 Everything a consumer repo — human or agent — needs to fully instantiate
 `l9-ci-core` **v2**, without browsing the `l9-ci-core` repo itself. Source of
-truth for these files is `Quantum-L9/l9-ci-core/docs/templates/`; this pack is
-the synced org distribution copy (see `ops/sync-v2-starters.sh`).
+truth is `Quantum-L9/l9-ci-core`: `docs/templates/` (analysis + Python lint +
+governance YAMLs) and `presets/typescript/` (locked Biome contract + Node
+lint caller). This pack is the synced org distribution copy (see
+`ops/sync-v2-starters.sh`). The org seeder copies these files into consumers
+(missing-only). Agents must not invent `biome.json` or `ci.yml`.
 
 > **Canonical "how Core works / how to plug in" doc:**
 > [`Quantum-L9/l9-ci-core/AGENTS.md`](https://github.com/Quantum-L9/l9-ci-core/blob/main/AGENTS.md).
@@ -16,9 +19,16 @@ the synced org distribution copy (see `ops/sync-v2-starters.sh`).
   is the part that **publishes GitHub checks** — this is the L9 finding
   pipeline (semgrep → SDK normalize/validate → publish).
 - **Lint templates** (`workflows/l9-lint-test.yml` /
-  `workflows/l9-lint-test-node.yml`) are **optional hygiene** — generic
-  dev-tool CI (ruff/mypy/pytest or eslint/tsc/vitest). Core does not call or
-  gate on these; you own them outright.
+  `workflows/l9-lint-test-node.yml`) are **optional hygiene**. Python is
+  ruff/mypy/pytest. Node/TS is **Biome** (SDK `l9-biome-scan.yml`) + tsc +
+  the repo test script. Core does not call or gate on these; you own the
+  `env:` block and `enforce-biome` flip. Do not add ESLint or Prettier as a
+  second JS/TS/JSON owner.
+- **Formatter contract** (`biome.json`, `.biomeignore`, `.editorconfig`,
+  `.vscode/extensions.json`) is the locked Biome 2.5.8 contract from
+  `presets/typescript/`. The seeder and `stamp.sh` never overwrite an
+  existing `biome.json`. Extra path excludes may only be appended to
+  `files.includes`.
 
 ## 2. Prerequisites
 
@@ -49,12 +59,21 @@ the synced org distribution copy (see `ops/sync-v2-starters.sh`).
 ## 5. Node / TypeScript path
 
 1. Do §3 above with `--config p/javascript --config p/typescript`.
-2. Copy `workflows/l9-lint-test-node.yml` →
+2. Copy the locked formatter contract if absent: `biome.json`,
+   `.biomeignore`, `.editorconfig`, `.vscode/extensions.json`.
+   **Do not invent `biome.json`.** Prefer the org seeder
+   (`categories=l9-ci-pack`) or `l9-ci-core/presets/typescript/stamp.sh`.
+3. Copy `workflows/l9-lint-test-node.yml` →
    `.github/workflows/l9-lint-test-node.yml`.
-3. Tune package manager / scripts — auto-detected from your lockfile
-   (npm / pnpm / yarn). Keep `tsconfig.json` / `.eslintrc*` /
-   `vitest.config.ts` as your source of truth; the template invokes your
-   tools, it does not replace your configs.
+4. Tune only the `env:` block (`NODE_VERSION`, `PACKAGE_MANAGER`,
+   `HAS_TYPESCRIPT`). Leave `enforce-biome: false` until the tree is clean.
+5. Biome owns JS/TS/JSON. Do not keep `.eslintrc*` / `eslint.config.*` as a
+   second format authority. `tsconfig.json` remains the type-check SSOT.
+
+The seeder replaces a **stock** ESLint `l9-lint-test-node.yml` (the old
+pack caller: workflow name `L9 Lint and Test (Node)` + job `ESLint` +
+`npx eslint`) with this Biome caller. Customized Node lint workflows are
+kept.
 
 ## 6. Profile matrix
 

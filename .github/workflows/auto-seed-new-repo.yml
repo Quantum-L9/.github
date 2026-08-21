@@ -3,16 +3,16 @@
 # Auth: org secret GH_TOKEN (AWS openclaw-igorbot/github#token) — see seed-governance.yml.
 # Advisory only — opens a PR, never pushes directly to main.
 #
-# Create-time trigger (2026-08-14 probe): nothing in Quantum-L9 sends
-# repository_dispatch type repo_created (no org webhook; l9-governance-seeder
-# App has empty events). A new App/webhook install is required to make this
-# fire on blank-repo create. Until then:
-#   1. Template-first inherit — seed l9-dependency-template so "Use this template"
-#      copies health + l9-ci-pack.
-#   2. Backfill — workflow_dispatch this workflow or seed-governance.yml.
+# Create-time path: a 15-minute cron lists org repos and seeds anything
+# missing (or still carrying the stock ESLint node caller). That does not
+# depend on an org webhook or App repository events.
+# repository_dispatch type repo_created remains as an optional fast path
+# if an App/webhook is installed later.
 name: Auto-seed new repository
 
 on:
+  schedule:
+    - cron: '*/15 * * * *'
   repository_dispatch:
     types: [repo_created]
   workflow_dispatch:
@@ -55,7 +55,11 @@ jobs:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const fs = require('fs');
-            const { buildSeedPayload } = require('./ops/build-seed-payload.js');
+            const {
+              buildSeedPayload,
+              STOCK_ESLINT_NODE_DEST,
+              selectSeedWrites,
+            } = require('./ops/build-seed-payload.js');
 
             const DRY = process.env.DRY_RUN === 'true';
             const TARGET = process.env.TARGET_REPO;
@@ -68,6 +72,16 @@ jobs:
               } catch {
                 return false;
               }
+            };
+
+            const readText = async (owner, repo, path) => {
+              try {
+                const res = await github.rest.repos.getContent({ owner, repo, path });
+                if (res.data && res.data.content) {
+                  return Buffer.from(res.data.content, 'base64').toString('utf8');
+                }
+              } catch { /* missing */ }
+              return null;
             };
 
             let targets;
@@ -95,18 +109,28 @@ jobs:
                   continue;
                 }
 
-                const present = await Promise.all(paths.map(p => exists(o, n, p)));
-                if (present.every(Boolean)) {
+                const existingByPath = {};
+                for (const p of paths) {
+                  if (!(await exists(o, n, p))) {
+                    existingByPath[p] = null;
+                    continue;
+                  }
+                  existingByPath[p] = p === STOCK_ESLINT_NODE_DEST
+                    ? await readText(o, n, p)
+                    : true;
+                }
+                const { writes, replaced } = selectSeedWrites(payload, existingByPath);
+                if (!writes.length) {
                   rows.push([n, 'already seeded']);
                   continue;
                 }
 
-                const missing = paths.filter((_, i) => !present[i]);
                 if (DRY) {
-                  const preview = missing.length <= 6
-                    ? missing.join(', ')
-                    : `${missing.slice(0, 6).join(', ')} (+${missing.length - 6} more)`;
-                  rows.push([n, `would seed ${missing.length}: ${preview}`]);
+                  const upgrade = replaced.length ? `; replace stock ESLint` : '';
+                  const preview = writes.length <= 6
+                    ? writes.join(', ')
+                    : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
+                  rows.push([n, `would seed ${writes.length}: ${preview}${upgrade}`]);
                   continue;
                 }
 
@@ -116,8 +140,8 @@ jobs:
                 const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
 
                 const treeItems = [];
-                for (const path of missing) {
-                  if (await exists(o, n, path, base)) continue;
+                for (const path of writes) {
+                  if (!replaced.includes(path) && await exists(o, n, path, base)) continue;
                   const blob = await github.rest.git.createBlob({
                     owner: o, repo: n,
                     content: Buffer.from(payload[path]).toString('base64'),
@@ -168,7 +192,7 @@ jobs:
                       '### Files in this PR',
                       ...treeItems.map(t => `- \`${t.path}\``),
                       '',
-                      'Existing files were left untouched (missing-only seed).',
+                      'Existing files were left untouched (missing-only seed), except a stock ESLint `l9-lint-test-node.yml` which is replaced with the Biome SDK caller.',
                       'Governance caller is **advisory** (`strict` defaults false).',
                       'Core pack callers are distributed here; `l9-ci-core` executes CI.',
                       '',

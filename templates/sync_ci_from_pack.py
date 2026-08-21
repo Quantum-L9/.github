@@ -36,6 +36,16 @@ HEX40 = re.compile(r"^[0-9a-f]{40}$")
 WORKFLOWS = (
     "l9-ci-pack/workflows/l9-analysis.yml",
     "l9-ci-pack/workflows/l9-lint-test.yml",
+    "l9-ci-pack/workflows/l9-lint-test-node.yml",
+)
+
+# Locked TypeScript formatter contract. Missing-only — never overwrite a
+# consumer biome.json (matches stamp.sh and the Actions seeder).
+FORMATTER_CONTRACT = (
+    ("l9-ci-pack/biome.json", "biome.json"),
+    ("l9-ci-pack/.biomeignore", ".biomeignore"),
+    ("l9-ci-pack/.editorconfig", ".editorconfig"),
+    ("l9-ci-pack/.vscode/extensions.json", ".vscode/extensions.json"),
 )
 
 # ── Org templates (physical copy, not inheritable) ──────────────────────────
@@ -221,6 +231,19 @@ def main() -> int:
             text = patch_lint_test(text)
         validate_workflow(workflow_path, text)
         write_bytes(workflow_path, text.encode("utf-8"))
+
+    # ── 2b. Locked Biome contract (missing-only) ─────────────────────────────
+    print("── formatter contract ──")
+    for src_rel, dest_rel in FORMATTER_CONTRACT:
+        dest = Path(dest_rel)
+        if (ROOT / dest).exists():
+            print(f"  keep existing {dest_rel}")
+            continue
+        data = fetch_optional(raw_org(sha, src_rel))
+        if data is not None:
+            write_bytes(dest, data)
+        else:
+            print(f"  ⊘ {src_rel} (not found, skipping)")
 
     # ── 3. Org templates (CODEOWNERS, dependabot, governance-caller, labels) ─
     print("── org templates ──")

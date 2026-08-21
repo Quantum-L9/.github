@@ -24,13 +24,17 @@ in the CI constellation and must not be reimplemented here.
 If a proposed addition here would run a test, parse a build log, or decide whether
 code is correct, it belongs in `l9-ci-sdk` / `l9-ci-core` / `l9-ci-debt-resolver`.
 This repo only ever asks: *is the governance metadata present and coherent?*
+Distributing the locked `biome.json` contract from `l9-ci-core
+presets/typescript/` is in-bounds (same as shipping lint callers). Reimplementing
+the Biome scanner is not.
 
 ## Explicitly rejected additions
 
-- **Reusable CI callees for pytest/ruff/pyright/semgrep.** `l9-ci-sdk` / `l9-ci-core`
-  own execution. This repo may **distribute** thin callers from `l9-ci-pack/`
-  (`l9-analysis.yml`, lint templates, `.github/governance/*.yaml`). It must not
-  reimplement those jobs here.
+- **Reusable CI callees for pytest/ruff/pyright/semgrep/biome.** `l9-ci-sdk` / `l9-ci-core`
+  own execution. This repo may **distribute** thin callers and the locked
+  formatter contract from `l9-ci-pack/` (`l9-analysis.yml`, lint templates,
+  `.github/governance/*.yaml`, `biome.json`). It must not reimplement those
+  jobs here.
 - **Any code-scanning engine.** `l9-ci-core` already runs CodeQL / analysis.
   Seeding the Core caller is distribution, not a second scanner.
 - **Any CI-failure triage or auto-fix.** `l9-ci-debt-resolver` owns bounded recovery.

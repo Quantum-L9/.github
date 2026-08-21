@@ -8,5 +8,5 @@ on:
 
 jobs:
   l9_sbom:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/sbom.yml@v1
+    uses: Quantum-L9/l9-ci-core/.github/workflows/sbom.yml@2b330a5aab90cd7781bef08f14c5e7904b61bc56
     secrets: inherit

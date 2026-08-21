@@ -12,10 +12,22 @@ PACK_DIR="l9-ci-pack"
 REQUIRED_FIELDS=("name" "description" "iconName" "categories" "filePatterns")
 REQUIRED_PACK_GOVERNANCE=("execution-profiles.yaml" "provider-requiredness.yaml" "rule-modes.yaml" "waivers.yaml" "promotion-policy.yaml" "quality-thresholds.yaml")
 REQUIRED_PACK_WORKFLOWS=("l9-analysis.yml" "l9-lint-test.yml" "l9-lint-test-node.yml")
+REQUIRED_PACK_FORMATTER=("biome.json" ".biomeignore" ".editorconfig" ".vscode/extensions.json")
 PASS=0
 FAIL=0
 
 echo "=== Quantum-L9 Workflow Starter Validation ==="
+
+if command -v node &>/dev/null; then
+  if node ops/test-build-seed-payload.js; then
+    echo "✅ ops/test-build-seed-payload.js"
+    PASS=$((PASS+1))
+  else
+    echo "❌ ops/test-build-seed-payload.js"
+    FAIL=$((FAIL+1))
+  fi
+  echo ""
+fi
 echo "Templates directory: $TEMPLATES_DIR"
 echo ""
 
@@ -56,10 +68,15 @@ for yml in "$TEMPLATES_DIR"/*.yml; do
     fi
   done
 
-  # Validate no @main references in the YAML (must use @v1, a full SHA, or a
-  # Core release tag such as @v2.0.0/@v2)
+  # Validate no @main references in the YAML (must use a full SHA or a
+  # Core release tag such as @v2.0.0/@v2). l9-ci-core@v1 does not exist.
   if grep -q "@main" "$yml"; then
-    echo "❌ @main REFERENCE found in $yml — must use @v1, a full commit SHA, or a release tag"
+    echo "❌ @main REFERENCE found in $yml — must use a full commit SHA or a release tag"
+    FAIL=$((FAIL+1))
+    FIELDS_OK=false
+  fi
+  if grep -qE 'Quantum-L9/l9-ci-core/.+@v1\b' "$yml"; then
+    echo "❌ $yml pins l9-ci-core@v1 — tag does not exist; use frozen SHA 2b330a5aab90cd7781bef08f14c5e7904b61bc56"
     FAIL=$((FAIL+1))
     FIELDS_OK=false
   fi
@@ -100,8 +117,38 @@ else
       FAIL=$((FAIL+1))
       continue
     fi
+    if grep -qE 'Quantum-L9/l9-ci-core/.+@v1\b' "$path"; then
+      echo "❌ $path pins l9-ci-core@v1 — tag does not exist"
+      FAIL=$((FAIL+1))
+      continue
+    fi
     echo "✅ $path present, no @main refs"
     PASS=$((PASS+1))
+  done
+
+  node_wf="$PACK_DIR/workflows/l9-lint-test-node.yml"
+  if [ -f "$node_wf" ]; then
+    if grep -qE 'npx --no-install eslint|name: ESLint' "$node_wf"; then
+      echo "❌ $node_wf still invokes ESLint — pack must ship the Biome SDK caller"
+      FAIL=$((FAIL+1))
+    elif grep -q 'l9-biome-scan.yml' "$node_wf"; then
+      echo "✅ $node_wf calls SDK Biome scanner"
+      PASS=$((PASS+1))
+    else
+      echo "❌ $node_wf missing l9-biome-scan.yml pin"
+      FAIL=$((FAIL+1))
+    fi
+  fi
+
+  for f in "${REQUIRED_PACK_FORMATTER[@]}"; do
+    path="$PACK_DIR/$f"
+    if [ -f "$path" ]; then
+      echo "✅ $path present"
+      PASS=$((PASS+1))
+    else
+      echo "❌ MISSING required formatter contract: $path"
+      FAIL=$((FAIL+1))
+    fi
   done
 
   if [ ! -f "$PACK_DIR/README.md" ]; then
