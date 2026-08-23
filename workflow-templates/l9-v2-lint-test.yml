@@ -8,10 +8,15 @@
 #   - Lint / test run only when `pyproject.toml` or `requirements.txt` exists.
 #   - The test job is named `Python Test Suite`, not `Test Suite`, so it
 #     cannot collide with a required Node check context.
-#   - Toolchain versions come only from install-consumer-ci@v2: no unpinned
-#     pytest plugin fallbacks. The consumer's own package and dependencies
-#     are still installed from pyproject.toml / requirements.txt, or pytest
-#     fails on import before running a test.
+#   - Toolchain versions come only from install-consumer-ci: no unpinned
+#     pytest plugin fallbacks. That action pins ruff, mypy and pytest and
+#     nothing else, so the pytest invocation below stays inside that set --
+#     see Core's own pr-pipeline.yml, which runs a bare `pytest -q`.
+#   - The consumer's own package and dependencies are still installed from
+#     pyproject.toml / requirements.txt in BOTH jobs: pytest fails on import
+#     without them, and mypy silently type-checks a different world without
+#     them (an optional-dependency fallback guarded by `type: ignore` reads
+#     as an unused ignore once the real import is missing).
 #
 # v2 conventions preserved here:
 #   - immutable event-revision checkout (no floating action ref)
@@ -26,10 +31,17 @@ on:
       - main
   workflow_dispatch:
 
-# ── Consumer config: edit these values for your repo ───────────────────────────
+# ── Consumer config ───────────────────────────────────────────────────────────
+# The org seeder rewrites this file from its own copy and force-updates the
+# seed branch, so an edit made here is reverted by the next sync. Values that
+# have to differ per repo are therefore auto-detected below; set one
+# explicitly only if the detection is wrong for your layout.
 env:
   PYTHON_VERSION: "3.12"
-  SOURCE_DIR: "."
+  # Blank = auto-detect: `src` when a src/ directory exists, else the repo
+  # root. A literal "." made mypy walk the entire checkout -- vendored packs,
+  # docs fixtures and all -- in every src-layout repo.
+  SOURCE_DIR: ""
   TEST_DIR: "tests/"
   # Fail the build below this line coverage percentage. 0 = advisory (no gate).
   COVERAGE_THRESHOLD: "0"
@@ -102,17 +114,38 @@ jobs:
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install consumer CI toolchain
-        uses: Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@v2
+      - name: Install consumer package and dependencies
+        run: |
+          set -euo pipefail
+          if [ -f pyproject.toml ]; then
+            pip install -e ".[dev]" || pip install -e . || \
+              echo "::notice::pyproject.toml is not pip-installable; relying on PYTHONPATH"
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
       - name: Install extra CI requirements
         run: |
           set -euo pipefail
           if [ -f requirements-ci.txt ]; then pip install -r requirements-ci.txt; fi
+      - name: Install consumer CI toolchain
+        uses: Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@7148fc73dcbf41367f5c5401432dc997b1f4f869  # main@7148fc7
+      - id: srcdir
+        name: Resolve source directory
+        run: |
+          set -euo pipefail
+          dir="${SOURCE_DIR:-}"
+          if [ -z "${dir}" ]; then
+            if [ -d src ]; then dir="src"; else dir="."; fi
+          fi
+          echo "dir=${dir}" >> "$GITHUB_OUTPUT"
+          echo "::notice::SOURCE_DIR resolved to ${dir}"
       - name: ruff check
         run: ruff check . --output-format=github
       - name: ruff format --check
         run: ruff format --check .
       - name: mypy
+        env:
+          SOURCE_DIR: ${{ steps.srcdir.outputs.dir }}
         run: |
           mypy "${SOURCE_DIR}" \
             --show-error-codes --pretty \
@@ -144,15 +177,6 @@ jobs:
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install consumer CI toolchain
-        uses: Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@v2
-      - name: Install extra CI requirements
-        run: |
-          set -euo pipefail
-          if [ -f requirements-ci.txt ]; then pip install -r requirements-ci.txt; fi
-      # Toolchain versions come from install-consumer-ci@v2. The consumer's own
-      # runtime dependencies still have to be installed from the manifest that
-      # triggered this job, or pytest fails on import before it runs a test.
       - name: Install consumer package and dependencies
         run: |
           set -euo pipefail
@@ -162,14 +186,32 @@ jobs:
           elif [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
+      - name: Install extra CI requirements
+        run: |
+          set -euo pipefail
+          if [ -f requirements-ci.txt ]; then pip install -r requirements-ci.txt; fi
+      # Core pins land last so a consumer dev extra declaring its own pytest
+      # range cannot move the version this job was pinned to.
+      - name: Install consumer CI toolchain
+        uses: Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@7148fc73dcbf41367f5c5401432dc997b1f4f869  # main@7148fc7
+      - id: srcdir
+        name: Resolve source directory
+        run: |
+          set -euo pipefail
+          dir="${SOURCE_DIR:-}"
+          if [ -z "${dir}" ]; then
+            if [ -d src ]; then dir="src"; else dir="."; fi
+          fi
+          echo "dir=${dir}" >> "$GITHUB_OUTPUT"
+          echo "::notice::SOURCE_DIR resolved to ${dir}"
       - name: pytest with coverage
         env:
           TESTING: "true"
+          SOURCE_DIR: ${{ steps.srcdir.outputs.dir }}
         run: |
           set -euo pipefail
           PYTHONPATH=. pytest "${TEST_DIR}" \
-            -n auto \
             --cov="${SOURCE_DIR}" \
             --cov-report=xml --cov-report=term-missing \
             --cov-fail-under="${COVERAGE_THRESHOLD}" \
-            --timeout=300 --tb=short -v
+            --tb=short -v

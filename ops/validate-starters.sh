@@ -9,6 +9,16 @@ set -euo pipefail
 
 TEMPLATES_DIR="workflow-templates"
 PACK_DIR="l9-ci-pack"
+# Print every first-party Quantum-L9 `uses:` reference in $1 that is not a full
+# 40-hex commit SHA. Comment lines are stripped first: l9-analysis.yml states
+# the pin policy in prose that quotes a `uses:` line, and matching that text
+# reported a correctly pinned file as unpinned.
+unpinned_internal_refs() {
+  grep -vE '^[[:space:]]*#' "$1" \
+    | grep -oE 'uses:[[:space:]]*Quantum-L9/[^@[:space:]]+@[^[:space:]]+' \
+    | grep -vE '@[0-9a-f]{40}$' || true
+}
+
 REQUIRED_FIELDS=("name" "description" "iconName" "categories" "filePatterns")
 REQUIRED_PACK_GOVERNANCE=("execution-profiles.yaml" "provider-requiredness.yaml" "rule-modes.yaml" "waivers.yaml" "promotion-policy.yaml" "quality-thresholds.yaml" "semgrep-identity-map.yaml" "semgrep-finding-policy.yaml")
 REQUIRED_PACK_WORKFLOWS=("l9-analysis.yml" "l9-lint-test.yml" "l9-lint-test-node.yml")
@@ -77,15 +87,18 @@ for yml in "$TEMPLATES_DIR"/*.yml; do
     fi
   done
 
-  # Validate no @main references in the YAML (must use a full SHA or a
-  # Core release tag such as @v2.0.0/@v2). l9-ci-core@v1 does not exist.
-  if grep -q "@main" "$yml"; then
-    echo "❌ @main REFERENCE found in $yml — must use a full commit SHA or a release tag"
+  # Every first-party Quantum-L9 reference must be a full 40-hex commit SHA.
+  # audit-pins-org.yml rates an unpinned internal action HIGH (higher than an
+  # unpinned external one), and a floating tag is how a starter silently
+  # breaks: l9-ci-core@v2 was referenced org-wide for weeks and never existed.
+  if unpinned_internal_refs "$yml" | grep -q .; then
+    echo "❌ $yml has an internal Quantum-L9 ref that is not a full commit SHA:"
+    unpinned_internal_refs "$yml" | sed 's/^/     /'
     FAIL=$((FAIL+1))
     FIELDS_OK=false
   fi
-  if grep -qE 'Quantum-L9/l9-ci-core/.+@v1\b' "$yml"; then
-    echo "❌ $yml pins l9-ci-core@v1 — tag does not exist; use frozen SHA 2b330a5aab90cd7781bef08f14c5e7904b61bc56"
+  if grep -q "@main" "$yml"; then
+    echo "❌ @main REFERENCE found in $yml — must use a full commit SHA"
     FAIL=$((FAIL+1))
     FIELDS_OK=false
   fi
@@ -127,16 +140,17 @@ else
       continue
     fi
     if grep -q "@main" "$path"; then
-      echo "❌ @main REFERENCE found in $path — must be a full commit SHA or a release tag"
+      echo "❌ @main REFERENCE found in $path — must be a full commit SHA"
       FAIL=$((FAIL+1))
       continue
     fi
-    if grep -qE 'Quantum-L9/l9-ci-core/.+@v1\b' "$path"; then
-      echo "❌ $path pins l9-ci-core@v1 — tag does not exist"
+    if unpinned_internal_refs "$path" | grep -q .; then
+      echo "❌ $path has an internal Quantum-L9 ref that is not a full commit SHA:"
+      unpinned_internal_refs "$path" | sed 's/^/     /'
       FAIL=$((FAIL+1))
       continue
     fi
-    echo "✅ $path present, no @main refs"
+    echo "✅ $path present, internal refs SHA-pinned"
     PASS=$((PASS+1))
   done
 
