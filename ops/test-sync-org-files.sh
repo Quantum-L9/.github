@@ -35,24 +35,28 @@ printf '* @Quantum-L9/example-owners\n' > "$WITH_ROOT/CODEOWNERS"
 
 (cd "$ORG_ROOT" && bash ops/sync-org-files.sh "$WITH_ROOT" "${CATEGORIES[@]}") > /dev/null
 
-[[ -f "$WITH_ROOT/.github/CODEOWNERS" ]] && \
+if [[ -f "$WITH_ROOT/.github/CODEOWNERS" ]]; then
   fail "root CODEOWNERS was overridden by .github/CODEOWNERS"
+fi
 grep -q '@Quantum-L9/example-owners' "$WITH_ROOT/CODEOWNERS" || \
   fail "root CODEOWNERS was modified"
 echo "✅ root CODEOWNERS preserved (no .github/CODEOWNERS written)"
 
 grep -q 'https://github.com/Quantum-L9/example/security/advisories/new' \
   "$WITH_ROOT/SECURITY.md" || fail "SECURITY.md advisory link not rewritten"
-grep -q 'https://github.com/Quantum-L9/.github/security/advisories/new' \
-  "$WITH_ROOT/SECURITY.md" && fail "SECURITY.md still points at Quantum-L9/.github"
+if grep -q 'https://github.com/Quantum-L9/.github/security/advisories/new' \
+  "$WITH_ROOT/SECURITY.md"; then
+  fail "SECURITY.md still points at Quantum-L9/.github"
+fi
 echo "✅ SECURITY.md advisory link rewritten to the consumer"
 
 CFG="$WITH_ROOT/.github/ISSUE_TEMPLATE/config.yml"
 [[ -f "$CFG" ]] || fail "issue-template config.yml not synced"
 grep -q 'https://github.com/Quantum-L9/example/security/advisories/new' "$CFG" || \
   fail "config.yml advisory link not rewritten"
-grep -q 'https://github.com/Quantum-L9/.github/security/advisories/new' "$CFG" && \
+if grep -q 'https://github.com/Quantum-L9/.github/security/advisories/new' "$CFG"; then
   fail "config.yml still points at Quantum-L9/.github"
+fi
 echo "✅ issue-template config.yml advisory link rewritten to the consumer"
 
 # ── 2. consumer WITHOUT a root CODEOWNERS ─────────────────────────────────────
