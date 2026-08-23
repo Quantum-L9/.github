@@ -9,8 +9,11 @@
  * .github/governance/*.yaml + lint callers) comes from l9-ci-pack/.
  * This repo distributes those callers; l9-ci-core executes CI.
  * Missing-only seed in Actions never overwrites an existing consumer file,
- * except one safe upgrade: a stock ESLint `l9-lint-test-node.yml` (the old
- * pack caller) is replaced with the Biome SDK caller. Customized workflows
+ * except two safe upgrades of `.github/workflows/l9-lint-test-node.yml`:
+ *   1. a stock ESLint caller (the old pack)
+ *   2. the stock Biome caller that ran `tsc` / `Test Suite` with
+ *      `cache: ${{ env.PACKAGE_MANAGER }}` (hard-fails without a lockfile)
+ * Customized workflows (for example Cursor-Governance's Biome-only file)
  * are kept.
  *
  * @param {object} opts
@@ -65,12 +68,30 @@ function isStockEslintNodeWorkflow(text) {
 }
 
 /**
+ * Stock Biome node caller that fails CI on non-Node repos.
+ * Matches the pack file shipped before the #276 remediating:
+ * workflow name + job named `Test Suite` + setup-node cache on PACKAGE_MANAGER.
+ */
+function isStockUnsafeNodeWorkflow(text) {
+  if (typeof text !== 'string' || !text.trim()) return false;
+  if (!/l9-biome-scan\.yml/.test(text)) return false;
+  const named = /^\s*name:\s*L9 Lint and Test \(Node\)\s*$/m.test(text);
+  const testSuite = /^\s*name:\s*Test Suite\s*$/m.test(text);
+  const cachePm = /cache:\s*\$\{\{\s*env\.PACKAGE_MANAGER\s*\}\}/.test(text);
+  return named && testSuite && cachePm;
+}
+
+function isReplaceableStockNodeWorkflow(text) {
+  return isStockEslintNodeWorkflow(text) || isStockUnsafeNodeWorkflow(text);
+}
+
+/**
  * Decide which payload dests to write.
  * @param {Record<string, string>} payload
  * @param {Record<string, string|null|true>} existingByPath
  *   null/absent = missing (write);
  *   true = present, content not fetched (keep);
- *   string = fetched content (replace only if stock ESLint node caller).
+ *   string = fetched content (replace only if a stock replaceable node caller).
  * @returns {{ writes: string[], replaced: string[], kept: string[] }}
  */
 function selectSeedWrites(payload, existingByPath = {}) {
@@ -86,7 +107,7 @@ function selectSeedWrites(payload, existingByPath = {}) {
     if (
       dest === STOCK_ESLINT_NODE_DEST &&
       typeof existing === 'string' &&
-      isStockEslintNodeWorkflow(existing)
+      isReplaceableStockNodeWorkflow(existing)
     ) {
       writes.push(dest);
       replaced.push(dest);
@@ -198,5 +219,7 @@ module.exports = {
   parseCategories,
   buildSeedPayload,
   isStockEslintNodeWorkflow,
+  isStockUnsafeNodeWorkflow,
+  isReplaceableStockNodeWorkflow,
   selectSeedWrites,
 };
