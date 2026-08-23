@@ -18,6 +18,10 @@ name: Seed org templates into consumers
 # Default behavior: add missing files only (never overwrite existing content),
 # except replace a stock ESLint l9-lint-test-node.yml with the Biome caller.
 # Root CODEOWNERS takes precedence — .github/CODEOWNERS is not seeded over it.
+#
+# Branch safety: the seed branch is rebuilt as "default branch + one seed
+# commit", so ops/seed-branch-safety.js gates every ref move. A branch with an
+# open PR, or carrying any commit the seeder did not author, is left alone.
 
 on:
   workflow_dispatch:
@@ -76,6 +80,7 @@ jobs:
               STOCK_ESLINT_NODE_DEST,
               selectSeedWrites,
             } = require('./ops/build-seed-payload.js');
+            const { classifySeedBranch } = require('./ops/seed-branch-safety.js');
 
             const MODE = process.env.SEED_MODE || 'dry-run';
             const FILTER = process.env.SEED_REPO_FILTER || '';
@@ -115,7 +120,7 @@ jobs:
               !r.archived && !r.fork && r.name !== '.github' && (!FILTER || r.name.includes(FILTER)));
 
             const rows = [];
-            let failures = 0;
+            const failed = [];
 
             core.info(`categories=${categories.join(',')} (of ${ALL_CATEGORIES.join(',')})`);
 
@@ -149,17 +154,60 @@ jobs:
                   continue;
                 }
 
+                const base = repo.default_branch;
+
+                // ── Seed-branch safety gate ──────────────────────────────
+                // Runs before any git write. The seed commit below is built on
+                // the default branch, so moving the branch onto it discards
+                // anything else already there. Prove the branch is still
+                // pristine seeder output, or leave it alone.
+                const openPRs = await github.rest.pulls.list({
+                  owner: o, repo: n, head: `${o}:${BRANCH}`, state: 'open',
+                });
+                if (openPRs.data.length) {
+                  rows.push([n, `PR #${openPRs.data[0].number} already open — left alone`]);
+                  continue;
+                }
+
+                let branchSha = null;
+                try {
+                  const ref = await github.rest.git.getRef({
+                    owner: o, repo: n, ref: `heads/${BRANCH}`,
+                  });
+                  branchSha = ref.data.object.sha;
+                } catch (e) {
+                  if (e.status !== 404) throw e;
+                }
+
+                if (branchSha) {
+                  // Raw REST: no dependency on an octokit method alias.
+                  const cmp = await github.request(
+                    'GET /repos/{owner}/{repo}/compare/{basehead}',
+                    { owner: o, repo: n, basehead: `${base}...${BRANCH}` },
+                  );
+                  const verdict = classifySeedBranch({
+                    aheadBy: cmp.data.ahead_by,
+                    commits: (cmp.data.commits || []).map(c => ({
+                      sha: c.sha, message: c.commit && c.commit.message,
+                    })),
+                  });
+                  if (!verdict.safeToReplace) {
+                    rows.push([n, `branch ${BRANCH} ${verdict.reason} — left alone`]);
+                    continue;
+                  }
+                }
+
                 if (MODE === 'dry-run') {
                   const note = hasRootCodeowners ? '; preserve root CODEOWNERS' : '';
                   const upgrade = replaced.length ? `; replace stock ESLint ${replaced.join(', ')}` : '';
                   const preview = writes.length <= 6
                     ? writes.join(', ')
                     : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
-                  rows.push([n, `would seed ${writes.length} file(s): ${preview}${upgrade}${note}`]);
+                  const onto = branchSha ? `; rebuild ${BRANCH}` : '';
+                  rows.push([n, `would seed ${writes.length} file(s): ${preview}${upgrade}${note}${onto}`]);
                   continue;
                 }
 
-                const base = repo.default_branch;
                 const baseRef = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
                 const baseSha = baseRef.data.object.sha;
                 const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
@@ -193,12 +241,29 @@ jobs:
                   parents: [baseSha],
                 });
 
-                try {
-                  await github.rest.git.createRef({
-                    owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: commit.data.sha,
+                if (branchSha === null) {
+                  try {
+                    await github.rest.git.createRef({
+                      owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: commit.data.sha,
+                    });
+                  } catch (e) {
+                    if (e.status !== 422) throw e;
+                    // Appeared mid-run — it was not covered by the gate above.
+                    rows.push([n, `branch ${BRANCH} appeared during the run — left alone`]);
+                    continue;
+                  }
+                } else {
+                  // Compare-and-swap: the verdict above is only valid for the
+                  // sha it was computed from.
+                  const now = await github.rest.git.getRef({
+                    owner: o, repo: n, ref: `heads/${BRANCH}`,
                   });
-                } catch (e) {
-                  if (e.status !== 422) throw e;
+                  if (now.data.object.sha !== branchSha) {
+                    rows.push([n, `branch ${BRANCH} moved during the run — left alone`]);
+                    continue;
+                  }
+                  // Force is required (the rebuild is not a fast-forward) and
+                  // safe: the branch was proven to hold only the seeder commit.
                   await github.rest.git.updateRef({
                     owner: o, repo: n, ref: `heads/${BRANCH}`, sha: commit.data.sha, force: true,
                   });
@@ -244,7 +309,7 @@ jobs:
                 }
                 rows.push([n, `PR #${prNumber} (${treeItems.length} file(s))`]);
               } catch (e) {
-                failures += 1;
+                failed.push(n);
                 const msg = `${e.status || ''} ${e.message || e}`.replace(/\s+/g, ' ').slice(0, 200);
                 const needsWorkflows = /Resource not accessible|must have .*workflows|Workflows/i.test(msg)
                   || /\.github\/workflows\//.test(msg);
@@ -266,6 +331,8 @@ jobs:
               ])
               .write();
 
-            if (failures > 0) {
-              core.setFailed(`${failures} repo(s) failed seeding — see job summary`);
+            if (failed.length) {
+              core.setFailed(
+                `${failed.length} repo(s) failed seeding: ${failed.join(', ')} — see job summary`,
+              );
             }

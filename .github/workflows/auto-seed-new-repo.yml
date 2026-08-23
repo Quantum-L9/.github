@@ -3,16 +3,22 @@
 # Auth: org secret GH_TOKEN (AWS openclaw-igorbot/github#token) — see seed-governance.yml.
 # Advisory only — opens a PR, never pushes directly to main.
 #
-# Create-time path: a 15-minute cron lists org repos and seeds anything
+# Create-time path: an hourly cron lists org repos and seeds anything
 # missing (or still carrying the stock ESLint node caller). That does not
 # depend on an org webhook or App repository events.
 # repository_dispatch type repo_created remains as an optional fast path
 # if an App/webhook is installed later.
+#
+# Branch safety: the seed branch is rebuilt as "default branch + one seed
+# commit", so ops/seed-branch-safety.js gates every ref move. A branch with an
+# open PR, or carrying any commit the seeder did not author, is left alone.
+# A sweep takes ~10 minutes org-wide; hourly leaves headroom and the
+# concurrency group keeps two sweeps from holding org-wide write at once.
 name: Auto-seed new repository
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '20 * * * *'
   repository_dispatch:
     types: [repo_created]
   workflow_dispatch:
@@ -28,6 +34,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: auto-seed-new-repo
+  cancel-in-progress: false
 
 jobs:
   seed:
@@ -60,6 +70,7 @@ jobs:
               STOCK_ESLINT_NODE_DEST,
               selectSeedWrites,
             } = require('./ops/build-seed-payload.js');
+            const { classifySeedBranch } = require('./ops/seed-branch-safety.js');
 
             const DRY = process.env.DRY_RUN === 'true';
             const TARGET = process.env.TARGET_REPO;
@@ -96,7 +107,7 @@ jobs:
             }
 
             const rows = [];
-            let failures = 0;
+            const failed = [];
 
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
@@ -125,16 +136,63 @@ jobs:
                   continue;
                 }
 
+                const base = repo.default_branch;
+
+                // ── Seed-branch safety gate ────────────────────────────────
+                // Runs before any git write. The rebuild below constructs the
+                // branch as "current default branch + one seed commit", so
+                // anything else already on that branch would be discarded by
+                // construction rather than by conflict. Prove the branch is
+                // still pristine seeder output, or leave it alone.
+
+                // An open seed PR is work in flight: the branch may carry
+                // review fixes, maintainer commits, or agent remediation.
+                const openPRs = await github.rest.pulls.list({
+                  owner: o, repo: n, head: `${o}:${BRANCH}`, state: 'open',
+                });
+                if (openPRs.data.length) {
+                  rows.push([n, `PR #${openPRs.data[0].number} already open — left alone`]);
+                  continue;
+                }
+
+                let branchSha = null;
+                try {
+                  const ref = await github.rest.git.getRef({
+                    owner: o, repo: n, ref: `heads/${BRANCH}`,
+                  });
+                  branchSha = ref.data.object.sha;
+                } catch (e) {
+                  if (e.status !== 404) throw e;
+                }
+
+                if (branchSha) {
+                  // Raw REST: no dependency on an octokit method alias.
+                  const cmp = await github.request(
+                    'GET /repos/{owner}/{repo}/compare/{basehead}',
+                    { owner: o, repo: n, basehead: `${base}...${BRANCH}` },
+                  );
+                  const verdict = classifySeedBranch({
+                    aheadBy: cmp.data.ahead_by,
+                    commits: (cmp.data.commits || []).map(c => ({
+                      sha: c.sha, message: c.commit && c.commit.message,
+                    })),
+                  });
+                  if (!verdict.safeToReplace) {
+                    rows.push([n, `branch ${BRANCH} ${verdict.reason} — left alone`]);
+                    continue;
+                  }
+                }
+
                 if (DRY) {
                   const upgrade = replaced.length ? `; replace stock ESLint` : '';
                   const preview = writes.length <= 6
                     ? writes.join(', ')
                     : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
-                  rows.push([n, `would seed ${writes.length}: ${preview}${upgrade}`]);
+                  const onto = branchSha ? `; rebuild ${BRANCH}` : '';
+                  rows.push([n, `would seed ${writes.length}: ${preview}${upgrade}${onto}`]);
                   continue;
                 }
 
-                const base = repo.default_branch;
                 const baseRef = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
                 const baseSha = baseRef.data.object.sha;
                 const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
@@ -167,45 +225,60 @@ jobs:
                   parents: [baseSha],
                 });
 
-                try {
-                  await github.rest.git.createRef({
-                    owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: commit.data.sha,
+                if (branchSha === null) {
+                  try {
+                    await github.rest.git.createRef({
+                      owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: commit.data.sha,
+                    });
+                  } catch (e) {
+                    if (e.status !== 422) throw e;
+                    // Appeared mid-run — it was not covered by the gate above.
+                    rows.push([n, `branch ${BRANCH} appeared during the run — left alone`]);
+                    continue;
+                  }
+                } else {
+                  // Compare-and-swap: the verdict above is only valid for the
+                  // sha it was computed from.
+                  const now = await github.rest.git.getRef({
+                    owner: o, repo: n, ref: `heads/${BRANCH}`,
                   });
-                } catch (e) {
-                  if (e.status !== 422) throw e;
+                  if (now.data.object.sha !== branchSha) {
+                    rows.push([n, `branch ${BRANCH} moved during the run — left alone`]);
+                    continue;
+                  }
+                  // Force is required (the rebuild is not a fast-forward) and
+                  // safe: the branch was proven to hold only the seeder commit.
                   await github.rest.git.updateRef({
                     owner: o, repo: n, ref: `heads/${BRANCH}`, sha: commit.data.sha, force: true,
                   });
                 }
 
-                const existingPR = await github.rest.pulls.list({
-                  owner: o, repo: n, head: `Quantum-L9:${BRANCH}`, state: 'open'
+                const pr = await github.rest.pulls.create({
+                  owner: o, repo: n, head: BRANCH, base,
+                  title: 'chore(governance): auto-seed org templates from Quantum-L9/.github',
+                  body: [
+                    'Automatically seeds org template files from `Quantum-L9/.github/templates/` plus the `l9-ci-pack/` Core hub.',
+                    '',
+                    '### Files in this PR',
+                    ...treeItems.map(t => `- \`${t.path}\``),
+                    '',
+                    'Existing files were left untouched (missing-only seed), except a stock ESLint `l9-lint-test-node.yml` which is replaced with the Biome SDK caller.',
+                    'Governance caller is **advisory** (`strict` defaults false).',
+                    'Core pack callers are distributed here; `l9-ci-core` executes CI.',
+                    '',
+                    'While this PR is open the seeder leaves the branch alone — commit review fixes onto it freely.',
+                    '',
+                    '_Opened automatically by Quantum-L9/.github auto-seed._',
+                  ].join('\n'),
                 });
-
-                if (existingPR.data.length === 0) {
-                  const pr = await github.rest.pulls.create({
-                    owner: o, repo: n, head: BRANCH, base,
-                    title: 'chore(governance): auto-seed org templates from Quantum-L9/.github',
-                    body: [
-                      'Automatically seeds org template files from `Quantum-L9/.github/templates/` plus the `l9-ci-pack/` Core hub.',
-                      '',
-                      '### Files in this PR',
-                      ...treeItems.map(t => `- \`${t.path}\``),
-                      '',
-                      'Existing files were left untouched (missing-only seed), except a stock ESLint `l9-lint-test-node.yml` which is replaced with the Biome SDK caller.',
-                      'Governance caller is **advisory** (`strict` defaults false).',
-                      'Core pack callers are distributed here; `l9-ci-core` executes CI.',
-                      '',
-                      '_Opened automatically by Quantum-L9/.github auto-seed._',
-                    ].join('\n'),
-                  });
-                  rows.push([n, `PR #${pr.data.number} (${treeItems.length} file(s))`]);
-                } else {
-                  rows.push([n, `PR already open: #${existingPR.data[0].number}`]);
-                }
+                rows.push([n, `PR #${pr.data.number} (${treeItems.length} file(s))`]);
               } catch (e) {
-                failures += 1;
+                failed.push(n);
                 const msg = `${e.status || ''} ${e.message || e}`.replace(/\s+/g, ' ').slice(0, 120);
+                // Also to the log: the per-repo rows below land in the job
+                // summary, which is not retrievable from the run log, so a
+                // summary-only failure is undiagnosable after the fact.
+                core.error(`${n}: failed: ${msg}`);
                 rows.push([n, `failed: ${msg}`]);
               }
             }
@@ -219,6 +292,8 @@ jobs:
               ])
               .write();
 
-            if (failures > 0) {
-              core.setFailed(`${failures} repo(s) failed auto-seed — see job summary`);
+            if (failed.length) {
+              core.setFailed(
+                `${failed.length} repo(s) failed auto-seed: ${failed.join(', ')} — see job summary`,
+              );
             }
