@@ -96,7 +96,10 @@ caller:
 
 `typecheck` and `Node Test Suite` skip when there is no root
 `package.json`. Biome still runs. Customized Node lint workflows are
-kept.
+kept. When a stock caller **is** replaced, the values you tuned in step 4
+(`NODE_VERSION`, `PACKAGE_MANAGER`, `SOURCE_DIR`, `HAS_TYPESCRIPT`) are
+carried into the upgraded file — the upgrade never reverts them to the
+pack defaults.
 
 ## 6. Profile matrix
 

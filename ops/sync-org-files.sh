@@ -17,7 +17,8 @@
 #   dependabot        .github/dependabot.yml (github-actions only)
 #   governance        .github/workflows/governance.yml
 #   community-health  CODE_OF_CONDUCT.md, CONTRIBUTING.md, SECURITY.md
-#                     (no LICENSE, FUNDING.yml, SUPPORT.md)
+#                     (no LICENSE, FUNDING.yml, SUPPORT.md); advisory links
+#                     are rewritten to the consumer's origin remote
 #   issue-templates   numbered chooser + ci-failure + seed-ci-failure +
 #                     gov-violation + config.yml (no bug_report / feature_request)
 #   pr-templates      pull_request_template.md + PULL_REQUEST_TEMPLATE/agent.md
@@ -63,6 +64,23 @@ if [[ -f "$CONSUMER_ROOT/pyproject.toml" || -f "$CONSUMER_ROOT/requirements.txt"
   HAS_PYTHON=1
 fi
 
+# GitHub reads .github/CODEOWNERS in preference to a root CODEOWNERS, so seeding
+# the path-scoped template over an existing root file silently drops the
+# consumer's ownership rules for every path the template does not list.
+# Mirrors buildSeedPayload({ hasRootCodeowners }).
+HAS_ROOT_CODEOWNERS=0
+if [[ -f "$CONSUMER_ROOT/CODEOWNERS" ]]; then
+  HAS_ROOT_CODEOWNERS=1
+fi
+
+# owner/name of the consumer, used to point advisory links at the consumer
+# rather than at this org repo. Mirrors applyRepoPlaceholders(text, repository).
+CONSUMER_REPO=""
+if remote_url="$(git -C "$CONSUMER_ROOT" remote get-url origin 2>/dev/null)"; then
+  CONSUMER_REPO="$(printf '%s' "$remote_url" \
+    | sed -E 's#^git@github\.com:#https://github.com/#; s#^https://[^/]*/##; s#\.git$##')"
+fi
+
 if [[ $# -eq 0 ]] || [[ "${1:-}" == "--include-all" ]]; then
   CATEGORIES=("${DEFAULT_CATEGORIES[@]}")
 else
@@ -97,6 +115,37 @@ sync_file() {
   echo "  ✓ $rel"
 }
 
+# Same copy, with this org repo's advisory URLs rewritten to the consumer's, so
+# a synced SECURITY.md / issue-template config.yml does not route vulnerability
+# reports to Quantum-L9/.github while claiming to target the consumer.
+ADVISORY_INBOX_STOCK="https://github.com/Quantum-L9/.github/security/advisories/new"
+ADVISORY_POLICY_STOCK="https://github.com/Quantum-L9/.github/security/policy"
+
+sync_file_with_placeholders() {
+  local src="$1"
+  local dest="$2"
+  if [[ -z "$CONSUMER_REPO" ]]; then
+    sync_file "$src" "$dest"
+    return
+  fi
+  local advisory="https://github.com/${CONSUMER_REPO}/security/advisories/new"
+  mkdir -p "$(dirname "$dest")"
+  ADVISORY_INBOX_STOCK="$ADVISORY_INBOX_STOCK" \
+  ADVISORY_POLICY_STOCK="$ADVISORY_POLICY_STOCK" \
+  ADVISORY_NEW="$advisory" \
+  python3 -c 'import os,sys
+src, dest = sys.argv[1], sys.argv[2]
+with open(src, encoding="utf-8") as fh:
+    text = fh.read()
+new = os.environ["ADVISORY_NEW"]
+for stock in (os.environ["ADVISORY_INBOX_STOCK"], os.environ["ADVISORY_POLICY_STOCK"]):
+    text = text.replace(stock, new)
+with open(dest, "w", encoding="utf-8") as fh:
+    fh.write(text)' "$src" "$dest"
+  rel="${dest#"$CONSUMER_ROOT"/}"
+  echo "  ✓ $rel (advisory links → $CONSUMER_REPO)"
+}
+
 echo "=== Syncing org files to $(basename "$CONSUMER_ROOT") ==="
 echo "Categories: ${CATEGORIES[*]}"
 echo ""
@@ -105,7 +154,11 @@ for cat in "${CATEGORIES[@]}"; do
   case "$cat" in
     codeowners)
       echo "── CODEOWNERS ──"
-      sync_file "$TEMPLATES_DIR/CODEOWNERS.repo" "$CONSUMER_ROOT/.github/CODEOWNERS"
+      if [[ "$HAS_ROOT_CODEOWNERS" -eq 1 ]]; then
+        echo "  skip .github/CODEOWNERS (root CODEOWNERS present; it stays authoritative)"
+      else
+        sync_file "$TEMPLATES_DIR/CODEOWNERS.repo" "$CONSUMER_ROOT/.github/CODEOWNERS"
+      fi
       ;;
     dependabot)
       echo "── dependabot.yml ──"
@@ -123,7 +176,7 @@ for cat in "${CATEGORIES[@]}"; do
       echo "── community health ──"
       for f in CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md; do
         if [[ -f "$TEMPLATES_DIR/community-health/$f" ]]; then
-          sync_file "$TEMPLATES_DIR/community-health/$f" "$CONSUMER_ROOT/$f"
+          sync_file_with_placeholders "$TEMPLATES_DIR/community-health/$f" "$CONSUMER_ROOT/$f"
         fi
       done
       ;;
@@ -136,7 +189,7 @@ for cat in "${CATEGORIES[@]}"; do
         case "$name" in
           bug_report.yml|feature_request.yml) continue ;;
         esac
-        sync_file "$f" "$CONSUMER_ROOT/.github/ISSUE_TEMPLATE/$name"
+        sync_file_with_placeholders "$f" "$CONSUMER_ROOT/.github/ISSUE_TEMPLATE/$name"
       done
       ;;
     pr-templates)

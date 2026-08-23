@@ -14,6 +14,8 @@ const {
   isStockEslintNodeWorkflow,
   isStockUnsafeNodeWorkflow,
   isReplaceableStockNodeWorkflow,
+  preserveTunedNodeEnv,
+  readTopLevelEnv,
   selectSeedWrites,
   biomeSchemaOf,
   DEFAULT_CATEGORIES,
@@ -55,12 +57,24 @@ try {
   assert.ok(pythonPayload[PYTHON_LINT_DEST], 'Python lint dest when hasPython');
   assert.match(pythonPayload[PYTHON_LINT_DEST], /name: Python Test Suite/);
   assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /^\s*name:\s*Test Suite\s*$/m);
-  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /^\s+pip install -e /m);
+  // Toolchain versions must not be pinned here (that is install-consumer-ci@v2's
+  // job), but the consumer's own package still has to be installed — see the
+  // "Install consumer package and dependencies" assertions below.
+  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /pip install (ruff|mypy|pytest)\b/);
   assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /^\s+.*\|\|\s+pip install pytest-cov/m);
   assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /python -c "import pytest_cov"/);
   assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /python -c "import xdist"/);
   assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /python -c "import pytest_timeout"/);
   assert.match(pythonPayload[PYTHON_LINT_DEST], /name: Detect Python package/);
+
+  // Dropping the unpinned pytest-plugin fallbacks must not also drop the
+  // consumer's own dependencies: pytest fails on import without them.
+  assert.match(
+    pythonPayload[PYTHON_LINT_DEST],
+    /name: Install consumer package and dependencies/,
+  );
+  assert.match(pythonPayload[PYTHON_LINT_DEST], /pip install -e "\.\[dev\]"/);
+  assert.match(pythonPayload[PYTHON_LINT_DEST], /pip install -r requirements\.txt/);
 
   const contributing = defaultPayload['CONTRIBUTING.md'];
   assert.ok(contributing, 'CONTRIBUTING.md is default-seeded');
@@ -231,6 +245,42 @@ try {
   assert.deepStrictEqual(plan.kept, [STOCK_BIOME_DEST]);
   assert.strictEqual(biomeSchemaOf(otherSchema), 'https://biomejs.dev/schemas/1.0.0/schema.json');
 
+  // A consumer that tuned only the env: block (l9-ci-pack/README.md §5.4) still
+  // matches every stock marker, so the upgrade must carry those values over
+  // instead of reverting them to the payload defaults.
+  const shippedNode = pack[STOCK_ESLINT_NODE_DEST];
+  const tunedStockNode = shippedNode
+    .replace('name: Node Test Suite', 'name: Test Suite')
+    .replace('NODE_VERSION: "20"', 'NODE_VERSION: "22"')
+    .replace('PACKAGE_MANAGER: "npm"', 'PACKAGE_MANAGER: "pnpm"')
+    .replace(
+      'node-version: ${{ env.NODE_VERSION }}',
+      'node-version: ${{ env.NODE_VERSION }}\n          cache: ${{ env.PACKAGE_MANAGER }}',
+    );
+  assert.strictEqual(isStockUnsafeNodeWorkflow(tunedStockNode), true);
+  assert.deepStrictEqual(readTopLevelEnv(tunedStockNode).NODE_VERSION, '"22"');
+
+  const upgradePayload = { [STOCK_ESLINT_NODE_DEST]: shippedNode };
+  plan = selectSeedWrites(upgradePayload, { [STOCK_ESLINT_NODE_DEST]: tunedStockNode });
+  assert.deepStrictEqual(plan.replaced, [STOCK_ESLINT_NODE_DEST]);
+  const upgraded = upgradePayload[STOCK_ESLINT_NODE_DEST];
+  assert.match(upgraded, /NODE_VERSION: "22"/);
+  assert.match(upgraded, /PACKAGE_MANAGER: "pnpm"/);
+  // the unsafe parts still get replaced by the shipped caller
+  assert.match(upgraded, /name: Node Test Suite/);
+  assert.doesNotMatch(upgraded, /cache: \$\{\{ env\.PACKAGE_MANAGER \}\}/);
+  // an untuned consumer file is upgraded byte-for-byte to the payload
+  const untunedPayload = { [STOCK_ESLINT_NODE_DEST]: shippedNode };
+  selectSeedWrites(untunedPayload, {
+    [STOCK_ESLINT_NODE_DEST]: shippedNode.replace('name: Node Test Suite', 'name: Test Suite')
+      .replace(
+        'node-version: ${{ env.NODE_VERSION }}',
+        'node-version: ${{ env.NODE_VERSION }}\n          cache: ${{ env.PACKAGE_MANAGER }}',
+      ),
+  });
+  assert.strictEqual(untunedPayload[STOCK_ESLINT_NODE_DEST], shippedNode);
+  assert.strictEqual(preserveTunedNodeEnv(shippedNode, 'not a workflow'), shippedNode);
+
   const pin = fs.readFileSync('ops/governance-v1-pin.txt', 'utf8');
   assert.match(pin, /7ed3ab8650583f6659a6caf061eae77dbd3ed1be/);
 
@@ -239,6 +289,8 @@ try {
   console.log('ok: CONTRIBUTING has no v2 .cursor/rules|skills|commands ritual');
   console.log('ok: governance pack is JSON-in-YAML with sdk_policy + agent/l4 profiles');
   console.log('ok: stock ESLint and unsafe Node callers are replaceable; custom + other biome $schema kept');
+  console.log('ok: Node caller upgrade preserves the consumer-tuned env: block');
+  console.log('ok: Python test job installs the consumer package and dependencies');
 } finally {
   process.chdir(origCwd);
 }

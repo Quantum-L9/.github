@@ -28,6 +28,15 @@ if command -v node &>/dev/null; then
   fi
   echo ""
 fi
+
+if bash ops/test-sync-org-files.sh; then
+  echo "✅ ops/test-sync-org-files.sh"
+  PASS=$((PASS+1))
+else
+  echo "❌ ops/test-sync-org-files.sh"
+  FAIL=$((FAIL+1))
+fi
+echo ""
 echo "Templates directory: $TEMPLATES_DIR"
 echo ""
 
@@ -133,13 +142,18 @@ else
 
   py_wf="$PACK_DIR/workflows/l9-lint-test.yml"
   if [ -f "$py_wf" ]; then
+    # The CI toolchain is pinned by install-consumer-ci@v2, so the caller must
+    # not pip-install ruff / mypy / pytest or fall back to unpinned plugins.
+    # Installing the CONSUMER's own package is required, not forbidden —
+    # without it pytest fails on import before running a test.
     if grep -qE 'name: Python Test Suite' "$py_wf" \
       && grep -qE 'name: Detect Python package' "$py_wf" \
-      && ! grep -qE '^[[:space:]]+pip install -e |python -c "import pytest_cov"' "$py_wf"; then
-      echo "✅ $py_wf is skip-safe (Python Test Suite, no unpinned pip)"
+      && grep -qE 'name: Install consumer package and dependencies' "$py_wf" \
+      && ! grep -qE 'pip install (ruff|mypy|pytest)[[:space:]]|python -c "import pytest_cov"' "$py_wf"; then
+      echo "✅ $py_wf is skip-safe (Python Test Suite, consumer deps, no unpinned toolchain pip)"
       PASS=$((PASS+1))
     else
-      echo "❌ $py_wf must skip without manifests, name Python Test Suite, and use install-consumer-ci only"
+      echo "❌ $py_wf must skip without manifests, name Python Test Suite, install consumer deps, and take its toolchain from install-consumer-ci only"
       FAIL=$((FAIL+1))
     fi
   fi

@@ -106,6 +106,68 @@ function isReplaceableStockNodeWorkflow(text) {
   return isStockEslintNodeWorkflow(text) || isStockUnsafeNodeWorkflow(text);
 }
 
+/**
+ * `env:` keys l9-ci-pack/README.md §5.4 tells consumers to tune in their copy
+ * of `l9-lint-test-node.yml`. Tuning them leaves every stock marker intact, so
+ * the replaceable-stock predicates still fire on re-seed. Carry the tuned
+ * values into the replacement instead of silently reverting them to defaults.
+ */
+const TUNABLE_NODE_ENV_KEYS = Object.freeze([
+  'NODE_VERSION',
+  'PACKAGE_MANAGER',
+  'SOURCE_DIR',
+  'HAS_TYPESCRIPT',
+]);
+
+/**
+ * Read the top-level `env:` mapping of a workflow. Only scalar `KEY: value`
+ * entries at one indent level are read; the block ends at the first
+ * non-indented, non-blank line.
+ * @param {string} text
+ * @returns {Record<string, string>} key → raw value (quotes preserved)
+ */
+function readTopLevelEnv(text) {
+  const out = {};
+  if (typeof text !== 'string') return out;
+  const lines = text.split('\n');
+  let inEnv = false;
+  for (const line of lines) {
+    if (!inEnv) {
+      if (/^env:\s*$/.test(line)) inEnv = true;
+      continue;
+    }
+    if (!line.trim()) continue;
+    if (!/^\s/.test(line)) break;
+    const m = line.match(/^\s+([A-Za-z_][A-Za-z0-9_]*):\s*(\S.*?)\s*$/);
+    if (m) out[m[1]] = m[2];
+  }
+  return out;
+}
+
+/**
+ * Rewrite the tunable `env:` entries of `incoming` with the values the
+ * consumer already set in `existing`. Keys absent from either side are left
+ * alone, so a replacement never invents configuration.
+ * @param {string} incoming  payload contents about to be written
+ * @param {string} existing  the consumer file being replaced
+ * @returns {string}
+ */
+function preserveTunedNodeEnv(incoming, existing) {
+  if (typeof incoming !== 'string' || typeof existing !== 'string') return incoming;
+  const tuned = readTopLevelEnv(existing);
+  const shipped = readTopLevelEnv(incoming);
+  let out = incoming;
+  for (const key of TUNABLE_NODE_ENV_KEYS) {
+    if (!(key in tuned) || !(key in shipped)) continue;
+    if (tuned[key] === shipped[key]) continue;
+    out = out.replace(
+      new RegExp(`^(\\s+${key}:\\s*).*$`, 'm'),
+      (_m, indent) => `${indent}${tuned[key]}`,
+    );
+  }
+  return out;
+}
+
 function biomeSchemaOf(text) {
   if (typeof text !== 'string' || !text.trim()) return null;
   try {
@@ -151,6 +213,9 @@ function buildExtensionsJson({ hasPython }) {
  *   true = present, content not fetched (keep);
  *   string = fetched content (replace only if a stock replaceable node caller
  *            or biome.json with the same $schema — different $schema is keep).
+ * Replacing a stock node caller rewrites `payload[dest]` in place so the
+ * consumer's tuned `env:` values survive the upgrade; callers write
+ * `payload[dest]` after this returns.
  * @returns {{ writes: string[], replaced: string[], kept: string[] }}
  */
 function selectSeedWrites(payload, existingByPath = {}) {
@@ -168,6 +233,8 @@ function selectSeedWrites(payload, existingByPath = {}) {
       typeof existing === 'string' &&
       isReplaceableStockNodeWorkflow(existing)
     ) {
+      // Upgrade the caller, keep the consumer's tuned env: block.
+      payload[dest] = preserveTunedNodeEnv(payload[dest], existing);
       writes.push(dest);
       replaced.push(dest);
       continue;
@@ -311,6 +378,9 @@ module.exports = {
   isStockEslintNodeWorkflow,
   isStockUnsafeNodeWorkflow,
   isReplaceableStockNodeWorkflow,
+  preserveTunedNodeEnv,
+  readTopLevelEnv,
+  TUNABLE_NODE_ENV_KEYS,
   biomeSchemaOf,
   selectSeedWrites,
   applyRepoPlaceholders,
