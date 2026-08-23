@@ -38,15 +38,15 @@ the workspace root must have `.cursor/` symlinks resolving to `Cursor-Governance
 
 All pull requests must pass:
 
-| Gate | Tool | Kernel |
-|---|---|---|
-| Lint + type-check | ruff, mypy (Python) / tsc (TypeScript) | `pr-pipeline.yml@v1` |
-| Unit tests | pytest (Python) / Jest (TypeScript) | `pr-pipeline.yml@v1` |
-| Secret scan | gitleaks | `security.yml@v1` |
-| SAST | Bandit + Semgrep (Python) | `security.yml@v1` |
-| Dependency audit | pip-audit / npm audit | `security.yml@v1` |
-| Pre-commit hooks | pre-commit framework | `pre-commit-ci.yml@v1` |
-| Governance trio | Three-tier separation | `trio-governance.yml@v1` |
+| Gate              | Tool                                   | Kernel                   |
+| ----------------- | -------------------------------------- | ------------------------ |
+| Lint + type-check | ruff, mypy (Python) / tsc (TypeScript) | `pr-pipeline.yml@v1`     |
+| Unit tests        | pytest (Python) / Jest (TypeScript)    | `pr-pipeline.yml@v1`     |
+| Secret scan       | gitleaks                               | `security.yml@v1`        |
+| SAST              | Bandit + Semgrep (Python)              | `security.yml@v1`        |
+| Dependency audit  | pip-audit / npm audit                  | `security.yml@v1`        |
+| Pre-commit hooks  | pre-commit framework                   | `pre-commit-ci.yml@v1`   |
+| Governance trio   | Three-tier separation                  | `trio-governance.yml@v1` |
 
 > **Anti-patterns** ([§7](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md#7-anti-patterns)):
 > Never duplicate logic across kernels. Never add business logic to thin callers.
@@ -65,8 +65,8 @@ All pull requests must pass:
 ## This Repo's Own CI
 
 `Quantum-L9/.github` validates itself on every PR/push to `main` — note that
-none of the 12 files under `workflow-templates/` ever run as CI *in this
-repo*; they only appear as starter-workflow choices in other repos' Actions
+none of the 12 files under `workflow-templates/` ever run as CI _in this
+repo_; they only appear as starter-workflow choices in other repos' Actions
 tab. What actually executes here:
 
 - **`validate-starters.sh`** — workflow-templates + `l9-ci-pack/` completeness

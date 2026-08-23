@@ -22,6 +22,7 @@ Quantum-L9 systems specifically — report those upstream instead.
 Report vulnerabilities privately via [GitHub Security Advisories](https://github.com/Quantum-L9/.github/security/advisories/new).
 
 Include:
+
 - Affected repository and version/SHA
 - Vulnerability type and CVSS score estimate (see guidance below)
 - Reproduction steps (minimal reproducer preferred)
@@ -30,12 +31,12 @@ Include:
 
 ## Response SLA
 
-| Severity | Acknowledge | Patch Target |
-|---|---|---|
-| Critical (CVSS 9.0–10.0) | 24 hours | 7 days |
-| High (CVSS 7.0–8.9) | 48 hours | 14 days |
-| Medium (CVSS 4.0–6.9) | 48 hours | 30 days |
-| Low (CVSS 0.1–3.9) | 5 business days | Next release cycle |
+| Severity                 | Acknowledge     | Patch Target       |
+| ------------------------ | --------------- | ------------------ |
+| Critical (CVSS 9.0–10.0) | 24 hours        | 7 days             |
+| High (CVSS 7.0–8.9)      | 48 hours        | 14 days            |
+| Medium (CVSS 4.0–6.9)    | 48 hours        | 30 days            |
+| Low (CVSS 0.1–3.9)       | 5 business days | Next release cycle |
 
 ## CVSS Scoring Guidance for Reporters
 
@@ -45,12 +46,14 @@ Key vectors: Attack Vector, Attack Complexity, Privileges Required, User Interac
 ## Security Packages
 
 The [`l9-assurance`](https://github.com/Quantum-L9/l9-assurance) monorepo provides:
+
 - [`l9-agent-security-testkit`](https://github.com/Quantum-L9/l9-assurance/tree/main/packages/l9-agent-security-testkit) — agent-layer security test utilities
 - [`l9-security-testkit`](https://github.com/Quantum-L9/l9-assurance/tree/main/packages/l9-security-testkit) — general security testing framework
 
 ## Automated Security Controls
 
 All repositories use:
+
 - **gitleaks** — secret scanning on every commit
 - **Bandit + Semgrep** — Python SAST
 - **pip-audit / npm audit** — dependency vulnerability scanning

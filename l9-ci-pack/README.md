@@ -73,9 +73,17 @@ lint caller). This pack is the synced org distribution copy (see
 5. Biome owns JS/TS/JSON. Do not keep `.eslintrc*` / `eslint.config.*` as a
    second format authority. `tsconfig.json` remains the type-check SSOT.
 
-The seeder replaces a **stock** ESLint `l9-lint-test-node.yml` (the old
-pack caller: workflow name `L9 Lint and Test (Node)` + job `ESLint` +
-`npx eslint`) with this Biome caller. Customized Node lint workflows are
+The seeder replaces two **stock** `l9-lint-test-node.yml` files with this
+caller:
+
+- the old ESLint pack (workflow name `L9 Lint and Test (Node)` + job
+  `ESLint` + `npx eslint`)
+- the Biome caller that ran `tsc` / `Test Suite` with
+  `cache: ${{ env.PACKAGE_MANAGER }}` (hard-fails on repos with no Node
+  lockfile; remediating from Cursor-Governance#276)
+
+`typecheck` and `Node Test Suite` skip when there is no root
+`package.json`. Biome still runs. Customized Node lint workflows are
 kept.
 
 ## 6. Profile matrix

@@ -13,6 +13,8 @@ const {
   buildSeedPayload,
   parseCategories,
   isStockEslintNodeWorkflow,
+  isStockUnsafeNodeWorkflow,
+  isReplaceableStockNodeWorkflow,
   selectSeedWrites,
   STOCK_ESLINT_NODE_DEST,
 } = require('./build-seed-payload.js');
@@ -48,6 +50,15 @@ try {
   assert.match(nodeWf, /l9-biome-scan\.yml@[0-9a-f]{40}/);
   assert.doesNotMatch(nodeWf, /npx --no-install eslint/);
   assert.doesNotMatch(nodeWf, /name: ESLint/);
+  assert.match(nodeWf, /name: Detect Node package/);
+  assert.match(nodeWf, /name: Node Test Suite/);
+  assert.doesNotMatch(nodeWf, /^\s*name:\s*Test Suite\s*$/m);
+  assert.doesNotMatch(nodeWf, /cache:\s*\$\{\{\s*env\.PACKAGE_MANAGER\s*\}\}/);
+  assert.strictEqual(isStockUnsafeNodeWorkflow(nodeWf), false);
+
+  const analysis = payload['.github/workflows/l9-analysis.yml'];
+  assert.match(analysis, /semgrep>=1\.100\.0,<2\.0\.0/);
+  assert.doesNotMatch(analysis, /pip install --upgrade pip semgrep$/m);
 
   const exts = JSON.parse(payload['.vscode/extensions.json']);
   assert.ok(exts.recommendations.includes('biomejs.biome'));
@@ -80,8 +91,29 @@ try {
   plan = selectSeedWrites({ [dest]: nodeWf }, { [dest]: null });
   assert.deepStrictEqual(plan.writes, [dest]);
 
+  const stockUnsafe = [
+    'name: L9 Lint and Test (Node)',
+    'uses: Quantum-L9/l9-ci-sdk/.github/workflows/l9-biome-scan.yml@deadbeef',
+    '    name: Test Suite',
+    '          cache: ${{ env.PACKAGE_MANAGER }}',
+  ].join('\n');
+  assert.strictEqual(isStockUnsafeNodeWorkflow(stockUnsafe), true);
+  assert.strictEqual(isReplaceableStockNodeWorkflow(stockUnsafe), true);
+  plan = selectSeedWrites({ [dest]: nodeWf }, { [dest]: stockUnsafe });
+  assert.deepStrictEqual(plan.replaced, [dest]);
+  assert.ok(plan.writes.includes(dest));
+
+  const customizedBiomeOnly = [
+    'name: L9 Biome (JSON/JS/TS)',
+    'uses: Quantum-L9/l9-ci-sdk/.github/workflows/l9-biome-scan.yml@deadbeef',
+  ].join('\n');
+  assert.strictEqual(isStockUnsafeNodeWorkflow(customizedBiomeOnly), false);
+  plan = selectSeedWrites({ [dest]: nodeWf }, { [dest]: customizedBiomeOnly });
+  assert.deepStrictEqual(plan.replaced, []);
+  assert.deepStrictEqual(plan.kept, [dest]);
+
   console.log('ok: l9-ci-pack payload includes locked Biome contract');
-  console.log('ok: stock ESLint node caller is replaceable; Biome/custom are kept');
+  console.log('ok: stock ESLint and unsafe Node callers are replaceable; custom kept');
 } finally {
   process.chdir(origCwd);
 }
