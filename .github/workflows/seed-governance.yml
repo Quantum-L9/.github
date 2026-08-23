@@ -80,7 +80,10 @@ jobs:
               STOCK_ESLINT_NODE_DEST,
               selectSeedWrites,
             } = require('./ops/build-seed-payload.js');
-            const { classifySeedBranch } = require('./ops/seed-branch-safety.js');
+            const {
+              assessSeedBranch,
+              moveSeedBranch,
+            } = require('./ops/seed-branch-safety.js');
 
             const MODE = process.env.SEED_MODE || 'dry-run';
             const FILTER = process.env.SEED_REPO_FILTER || '';
@@ -156,46 +159,20 @@ jobs:
 
                 const base = repo.default_branch;
 
-                // ── Seed-branch safety gate ──────────────────────────────
-                // Runs before any git write. The seed commit below is built on
-                // the default branch, so moving the branch onto it discards
-                // anything else already there. Prove the branch is still
-                // pristine seeder output, or leave it alone.
-                const openPRs = await github.rest.pulls.list({
-                  owner: o, repo: n, head: `${o}:${BRANCH}`, state: 'open',
+                // ── Seed-branch safety gate ────────────────────────────────
+                // The rebuild below constructs the branch as "current default
+                // branch + one seed commit", so anything else already on that
+                // branch would be discarded by construction rather than by
+                // conflict. ops/seed-branch-safety.js decides, read-only,
+                // before any git write; both seeders share that one decision.
+                const gate = await assessSeedBranch({
+                  github, owner: o, repo: n, base, branch: BRANCH,
                 });
-                if (openPRs.data.length) {
-                  rows.push([n, `PR #${openPRs.data[0].number} already open — left alone`]);
+                if (gate.action === 'skip') {
+                  rows.push([n, gate.reason]);
                   continue;
                 }
-
-                let branchSha = null;
-                try {
-                  const ref = await github.rest.git.getRef({
-                    owner: o, repo: n, ref: `heads/${BRANCH}`,
-                  });
-                  branchSha = ref.data.object.sha;
-                } catch (e) {
-                  if (e.status !== 404) throw e;
-                }
-
-                if (branchSha) {
-                  // Raw REST: no dependency on an octokit method alias.
-                  const cmp = await github.request(
-                    'GET /repos/{owner}/{repo}/compare/{basehead}',
-                    { owner: o, repo: n, basehead: `${base}...${BRANCH}` },
-                  );
-                  const verdict = classifySeedBranch({
-                    aheadBy: cmp.data.ahead_by,
-                    commits: (cmp.data.commits || []).map(c => ({
-                      sha: c.sha, message: c.commit && c.commit.message,
-                    })),
-                  });
-                  if (!verdict.safeToReplace) {
-                    rows.push([n, `branch ${BRANCH} ${verdict.reason} — left alone`]);
-                    continue;
-                  }
-                }
+                const branchSha = gate.sha;
 
                 if (MODE === 'dry-run') {
                   const note = hasRootCodeowners ? '; preserve root CODEOWNERS' : '';
@@ -241,32 +218,13 @@ jobs:
                   parents: [baseSha],
                 });
 
-                if (branchSha === null) {
-                  try {
-                    await github.rest.git.createRef({
-                      owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: commit.data.sha,
-                    });
-                  } catch (e) {
-                    if (e.status !== 422) throw e;
-                    // Appeared mid-run — it was not covered by the gate above.
-                    rows.push([n, `branch ${BRANCH} appeared during the run — left alone`]);
-                    continue;
-                  }
-                } else {
-                  // Compare-and-swap: the verdict above is only valid for the
-                  // sha it was computed from.
-                  const now = await github.rest.git.getRef({
-                    owner: o, repo: n, ref: `heads/${BRANCH}`,
-                  });
-                  if (now.data.object.sha !== branchSha) {
-                    rows.push([n, `branch ${BRANCH} moved during the run — left alone`]);
-                    continue;
-                  }
-                  // Force is required (the rebuild is not a fast-forward) and
-                  // safe: the branch was proven to hold only the seeder commit.
-                  await github.rest.git.updateRef({
-                    owner: o, repo: n, ref: `heads/${BRANCH}`, sha: commit.data.sha, force: true,
-                  });
+                const moved = await moveSeedBranch({
+                  github, owner: o, repo: n, branch: BRANCH,
+                  expectedSha: branchSha, commitSha: commit.data.sha,
+                });
+                if (!moved.moved) {
+                  rows.push([n, moved.reason]);
+                  continue;
                 }
 
                 const listed = treeItems.map(t => `- \`${t.path}\``);
