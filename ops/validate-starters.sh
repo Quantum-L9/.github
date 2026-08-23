@@ -10,7 +10,7 @@ set -euo pipefail
 TEMPLATES_DIR="workflow-templates"
 PACK_DIR="l9-ci-pack"
 REQUIRED_FIELDS=("name" "description" "iconName" "categories" "filePatterns")
-REQUIRED_PACK_GOVERNANCE=("execution-profiles.yaml" "provider-requiredness.yaml" "rule-modes.yaml" "waivers.yaml" "promotion-policy.yaml" "quality-thresholds.yaml")
+REQUIRED_PACK_GOVERNANCE=("execution-profiles.yaml" "provider-requiredness.yaml" "rule-modes.yaml" "waivers.yaml" "promotion-policy.yaml" "quality-thresholds.yaml" "semgrep-identity-map.yaml" "semgrep-finding-policy.yaml")
 REQUIRED_PACK_WORKFLOWS=("l9-analysis.yml" "l9-lint-test.yml" "l9-lint-test-node.yml")
 REQUIRED_PACK_FORMATTER=("biome.json" ".biomeignore" ".editorconfig" ".vscode/extensions.json")
 PASS=0
@@ -28,6 +28,15 @@ if command -v node &>/dev/null; then
   fi
   echo ""
 fi
+
+if bash ops/test-sync-org-files.sh; then
+  echo "✅ ops/test-sync-org-files.sh"
+  PASS=$((PASS+1))
+else
+  echo "❌ ops/test-sync-org-files.sh"
+  FAIL=$((FAIL+1))
+fi
+echo ""
 echo "Templates directory: $TEMPLATES_DIR"
 echo ""
 
@@ -97,8 +106,13 @@ else
   for f in "${REQUIRED_PACK_GOVERNANCE[@]}"; do
     path="$PACK_DIR/governance/$f"
     if [ -f "$path" ]; then
-      echo "✅ $path present"
-      PASS=$((PASS+1))
+      if python3 -c 'import json,sys; json.loads(sys.stdin.read())' < "$path"; then
+        echo "✅ $path present (JSON-in-YAML)"
+        PASS=$((PASS+1))
+      else
+        echo "❌ $path is not JSON-in-YAML"
+        FAIL=$((FAIL+1))
+      fi
     else
       echo "❌ MISSING required governance file: $path"
       FAIL=$((FAIL+1))
@@ -125,6 +139,24 @@ else
     echo "✅ $path present, no @main refs"
     PASS=$((PASS+1))
   done
+
+  py_wf="$PACK_DIR/workflows/l9-lint-test.yml"
+  if [ -f "$py_wf" ]; then
+    # The CI toolchain is pinned by install-consumer-ci@v2, so the caller must
+    # not pip-install ruff / mypy / pytest or fall back to unpinned plugins.
+    # Installing the CONSUMER's own package is required, not forbidden —
+    # without it pytest fails on import before running a test.
+    if grep -qE 'name: Python Test Suite' "$py_wf" \
+      && grep -qE 'name: Detect Python package' "$py_wf" \
+      && grep -qE 'name: Install consumer package and dependencies' "$py_wf" \
+      && ! grep -qE 'pip install (ruff|mypy|pytest)[[:space:]]|python -c "import pytest_cov"' "$py_wf"; then
+      echo "✅ $py_wf is skip-safe (Python Test Suite, consumer deps, no unpinned toolchain pip)"
+      PASS=$((PASS+1))
+    else
+      echo "❌ $py_wf must skip without manifests, name Python Test Suite, install consumer deps, and take its toolchain from install-consumer-ci only"
+      FAIL=$((FAIL+1))
+    fi
+  fi
 
   node_wf="$PACK_DIR/workflows/l9-lint-test-node.yml"
   if [ -f "$node_wf" ]; then

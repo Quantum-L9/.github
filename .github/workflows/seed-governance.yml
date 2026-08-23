@@ -1,10 +1,10 @@
 name: Seed org templates into consumers
 
-# Physically seeds templates/ health files plus the l9-ci-pack Core hub:
-# CODEOWNERS, dependabot, governance caller, labels, community-health,
-# issue/PR templates, on-org-update receiver, l9-analysis.yml, lint callers,
-# .github/governance/*.yaml, and the locked TypeScript Biome contract
-# (biome.json, .biomeignore, .editorconfig, .vscode/extensions.json).
+# Physically seeds templates/ health files plus the l9-ci-pack Core hub.
+# Default `all` omits labels.yml (org sync-labels-all), on-org-update.yml,
+# LICENSE, FUNDING.yml, SUPPORT.md, and duplicate issue templates.
+# Python l9-lint-test.yml is seeded only when the consumer has
+# pyproject.toml or requirements.txt.
 #
 # Matches ops/sync-org-files.sh + templates/README.md. This repo distributes
 # Core pack callers; l9-ci-core executes CI — see docs/BOUNDARIES.md.
@@ -33,9 +33,9 @@ on:
         default: ""
       categories:
         description: >-
-          Comma-separated categories, or "all". Options: codeowners, dependabot,
-          governance, labels, community-health, issue-templates, pr-templates,
-          on-org-update, l9-ci-pack.
+          Comma-separated categories, or "all" (default set: codeowners,
+          dependabot, governance, community-health, issue-templates,
+          pr-templates, l9-ci-pack). Opt-in: labels, on-org-update.
         type: string
         default: all
 
@@ -73,7 +73,9 @@ jobs:
               buildSeedPayload,
               parseCategories,
               ALL_CATEGORIES,
+              DEFAULT_CATEGORIES,
               STOCK_ESLINT_NODE_DEST,
+              STOCK_BIOME_DEST,
               selectSeedWrites,
             } = require('./ops/build-seed-payload.js');
 
@@ -117,13 +119,23 @@ jobs:
             const rows = [];
             let failures = 0;
 
-            core.info(`categories=${categories.join(',')} (of ${ALL_CATEGORIES.join(',')})`);
+            core.info(`categories=${categories.join(',')} (default ${DEFAULT_CATEGORIES.join(',')}; all ${ALL_CATEGORIES.join(',')})`);
 
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
               try {
                 const hasRootCodeowners = await exists(o, n, 'CODEOWNERS');
-                const payload = buildSeedPayload({ fs, categories, hasRootCodeowners });
+                const hasPython = (await exists(o, n, 'pyproject.toml'))
+                  || (await exists(o, n, 'requirements.txt'));
+                const hasPackageJson = await exists(o, n, 'package.json');
+                const payload = buildSeedPayload({
+                  fs,
+                  categories,
+                  hasRootCodeowners,
+                  hasPython,
+                  hasPackageJson,
+                  repository: `${o}/${n}`,
+                });
                 const paths = Object.keys(payload);
 
                 if (!paths.length) {
@@ -137,7 +149,7 @@ jobs:
                     existingByPath[p] = null;
                     continue;
                   }
-                  existingByPath[p] = p === STOCK_ESLINT_NODE_DEST
+                  existingByPath[p] = (p === STOCK_ESLINT_NODE_DEST || p === STOCK_BIOME_DEST)
                     ? await readText(o, n, p)
                     : true;
                 }
