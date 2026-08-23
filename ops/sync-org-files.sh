@@ -12,20 +12,21 @@
 # Usage (from the org repo root):
 #   ops/sync-org-files.sh <consumer-repo-path> [--include-all|--include <category>...]
 #
-# Categories:
-#   codeowners        .github/CODEOWNERS
-#   dependabot        .github/dependabot.yml
+# Categories (default `all` = DEFAULT set; labels + on-org-update are opt-in):
+#   codeowners        .github/CODEOWNERS (path-scoped; skip if root CODEOWNERS)
+#   dependabot        .github/dependabot.yml (github-actions only)
 #   governance        .github/workflows/governance.yml
-#   labels            .github/labels.yml
-#   community-health  CODE_OF_CONDUCT.md, CONTRIBUTING.md, SECURITY.md, SUPPORT.md, LICENSE, .github/FUNDING.yml
-#   issue-templates   .github/ISSUE_TEMPLATE/*
-#   pr-templates      .github/pull_request_template.md
-#   on-org-update     .github/workflows/on-org-update.yml
-#   l9-ci-pack        .github/workflows/l9-analysis.yml + lint callers +
-#                     .github/governance/* + locked Biome contract (biome.json,
-#                     .biomeignore, .editorconfig, .vscode/extensions.json)
+#   community-health  CODE_OF_CONDUCT.md, CONTRIBUTING.md, SECURITY.md
+#                     (no LICENSE, FUNDING.yml, SUPPORT.md)
+#   issue-templates   numbered chooser + ci-failure + seed-ci-failure +
+#                     gov-violation + config.yml (no bug_report / feature_request)
+#   pr-templates      pull_request_template.md + PULL_REQUEST_TEMPLATE/agent.md
+#   l9-ci-pack        analysis + Node lint + governance YAMLs + Biome contract;
+#                     Python lint only when pyproject.toml or requirements.txt
+#   labels            OPT-IN — org sync-labels-all.yml already fans labels
+#   on-org-update     OPT-IN — do not seed until sync_ci_from_pack.py is real
 #
-# Default (no --include flag): seeds all categories.
+# Default (no --include flag): DEFAULT_CATEGORIES (not labels / on-org-update).
 # Actions twin: .github/workflows/seed-governance.yml (ops/build-seed-payload.js).
 set -euo pipefail
 
@@ -35,7 +36,8 @@ TEMPLATES_DIR="$ORG_ROOT/templates"
 
 usage() {
   echo "Usage: $0 <consumer-repo-path> [--include-all|--include <category>...]" >&2
-  echo "Categories: codeowners dependabot governance labels community-health issue-templates pr-templates on-org-update l9-ci-pack" >&2
+  echo "Default: codeowners dependabot governance community-health issue-templates pr-templates l9-ci-pack" >&2
+  echo "Opt-in:  labels on-org-update" >&2
   exit 1
 }
 
@@ -52,12 +54,17 @@ if [[ ! -d "$CONSUMER_ROOT" ]]; then
 fi
 
 # Parse categories
-ALL_CATEGORIES=(codeowners dependabot governance labels community-health issue-templates pr-templates on-org-update l9-ci-pack)
+DEFAULT_CATEGORIES=(codeowners dependabot governance community-health issue-templates pr-templates l9-ci-pack)
+ALL_CATEGORIES=("${DEFAULT_CATEGORIES[@]}" labels on-org-update)
 PACK_DIR="$ORG_ROOT/l9-ci-pack"
 CATEGORIES=()
+HAS_PYTHON=0
+if [[ -f "$CONSUMER_ROOT/pyproject.toml" || -f "$CONSUMER_ROOT/requirements.txt" ]]; then
+  HAS_PYTHON=1
+fi
 
 if [[ $# -eq 0 ]] || [[ "${1:-}" == "--include-all" ]]; then
-  CATEGORIES=("${ALL_CATEGORIES[@]}")
+  CATEGORIES=("${DEFAULT_CATEGORIES[@]}")
 else
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -114,28 +121,32 @@ for cat in "${CATEGORIES[@]}"; do
       ;;
     community-health)
       echo "── community health ──"
-      for f in CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md SUPPORT.md LICENSE; do
+      for f in CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md; do
         if [[ -f "$TEMPLATES_DIR/community-health/$f" ]]; then
           sync_file "$TEMPLATES_DIR/community-health/$f" "$CONSUMER_ROOT/$f"
         fi
       done
-      # FUNDING.yml goes to .github/ (GitHub reads it from there for non-org repos)
-      if [[ -f "$TEMPLATES_DIR/community-health/FUNDING.yml" ]]; then
-        sync_file "$TEMPLATES_DIR/community-health/FUNDING.yml" "$CONSUMER_ROOT/.github/FUNDING.yml"
-      fi
       ;;
     issue-templates)
       echo "── issue templates ──"
       mkdir -p "$CONSUMER_ROOT/.github/ISSUE_TEMPLATE"
       for f in "$TEMPLATES_DIR/issue-templates/"*; do
         [[ -f "$f" ]] || continue
-        sync_file "$f" "$CONSUMER_ROOT/.github/ISSUE_TEMPLATE/$(basename "$f")"
+        name="$(basename "$f")"
+        case "$name" in
+          bug_report.yml|feature_request.yml) continue ;;
+        esac
+        sync_file "$f" "$CONSUMER_ROOT/.github/ISSUE_TEMPLATE/$name"
       done
       ;;
     pr-templates)
       echo "── PR template ──"
       sync_file "$TEMPLATES_DIR/pr-templates/pull_request_template.md" \
         "$CONSUMER_ROOT/.github/pull_request_template.md"
+      if [[ -f "$TEMPLATES_DIR/pr-templates/agent.md" ]]; then
+        sync_file "$TEMPLATES_DIR/pr-templates/agent.md" \
+          "$CONSUMER_ROOT/.github/PULL_REQUEST_TEMPLATE/agent.md"
+      fi
       ;;
     on-org-update)
       echo "── on-org-update receiver ──"
@@ -147,12 +158,23 @@ for cat in "${CATEGORIES[@]}"; do
       if [[ -d "$PACK_DIR/workflows" ]]; then
         for f in "$PACK_DIR/workflows/"*; do
           [[ -f "$f" ]] || continue
-          sync_file "$f" "$CONSUMER_ROOT/.github/workflows/$(basename "$f")"
+          name="$(basename "$f")"
+          if [[ "$name" == "l9-lint-test.yml" && "$HAS_PYTHON" -ne 1 ]]; then
+            echo "  skip $name (no Python manifest)"
+            continue
+          fi
+          sync_file "$f" "$CONSUMER_ROOT/.github/workflows/$name"
         done
       fi
       if [[ -d "$PACK_DIR/governance" ]]; then
         for f in "$PACK_DIR/governance/"*; do
           [[ -f "$f" ]] || continue
+          if [[ "$f" == *.yaml ]]; then
+            if ! python3 -c 'import json,sys; json.loads(sys.stdin.read())' < "$f"; then
+              echo "❌ ERROR: $f is not JSON-in-YAML" >&2
+              exit 1
+            fi
+          fi
           sync_file "$f" "$CONSUMER_ROOT/.github/governance/$(basename "$f")"
         done
       fi

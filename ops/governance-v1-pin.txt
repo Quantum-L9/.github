@@ -1,0 +1,4 @@
+# Recorded moving-tag pin for templates/governance-caller.yml @v1.
+# Refresh only when the org force-moves refs/tags/v1.
+# Check: git ls-remote https://github.com/Quantum-L9/.github.git refs/tags/v1
+v1 7ed3ab8650583f6659a6caf061eae77dbd3ed1be

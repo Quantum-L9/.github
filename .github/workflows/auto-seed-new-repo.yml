@@ -58,6 +58,7 @@ jobs:
             const {
               buildSeedPayload,
               STOCK_ESLINT_NODE_DEST,
+              STOCK_BIOME_DEST,
               selectSeedWrites,
             } = require('./ops/build-seed-payload.js');
 
@@ -102,7 +103,16 @@ jobs:
               const o = repo.owner.login, n = repo.name;
               try {
                 const hasRootCodeowners = await exists(o, n, 'CODEOWNERS');
-                const payload = buildSeedPayload({ fs, hasRootCodeowners });
+                const hasPython = (await exists(o, n, 'pyproject.toml'))
+                  || (await exists(o, n, 'requirements.txt'));
+                const hasPackageJson = await exists(o, n, 'package.json');
+                const payload = buildSeedPayload({
+                  fs,
+                  hasRootCodeowners,
+                  hasPython,
+                  hasPackageJson,
+                  repository: `${o}/${n}`,
+                });
                 const paths = Object.keys(payload);
                 if (!paths.length) {
                   rows.push([n, 'skipped (nothing safe to seed)']);
@@ -115,7 +125,7 @@ jobs:
                     existingByPath[p] = null;
                     continue;
                   }
-                  existingByPath[p] = p === STOCK_ESLINT_NODE_DEST
+                  existingByPath[p] = (p === STOCK_ESLINT_NODE_DEST || p === STOCK_BIOME_DEST)
                     ? await readText(o, n, p)
                     : true;
                 }

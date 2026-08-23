@@ -21,11 +21,11 @@ live in each repo's tree to take effect.
 | `CODEOWNERS.repo` | `.github/CODEOWNERS` | Not inheritable; must be physical |
 | `dependabot.yml` | `.github/dependabot.yml` | Not inheritable; must be physical |
 | `governance-caller.yml` | `.github/workflows/governance.yml` | Calls org reusable workflows |
-| `on-org-update.yml` | `.github/workflows/on-org-update.yml` | Receiver for org template sync PRs |
-| `labels.yml` | `.github/labels.yml` | Used by `gh label sync` or labeler |
-| `community-health/` | repo root + `.github/FUNDING.yml` | Physical copy overrides org inherit |
-| `issue-templates/` | `.github/ISSUE_TEMPLATE/` | Not inheritable; must be physical |
-| `pr-templates/` | `.github/pull_request_template.md` | Not inheritable from org `.github/` nested path |
+| `on-org-update.yml` | `.github/workflows/on-org-update.yml` | **Opt-in** — not in default `all` |
+| `labels.yml` | `.github/labels.yml` | **Opt-in** — org `sync-labels-all.yml` fans labels |
+| `community-health/` | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md` | No LICENSE / FUNDING / SUPPORT in default seed |
+| `issue-templates/` | `.github/ISSUE_TEMPLATE/` | Numbered chooser + ci/seed-ci/gov + config; no `bug_report` / `feature_request` |
+| `pr-templates/` | `pull_request_template.md` + `PULL_REQUEST_TEMPLATE/agent.md` | Human + agent/chore variants |
 | `../l9-ci-pack/workflows/` | `.github/workflows/` | Core hub callers (`l9-analysis.yml`, lint templates). Missing-only. |
 | `../l9-ci-pack/governance/` | `.github/governance/` | Governance YAMLs the Core resolver reads. |
 | `../l9-ci-pack/biome.json` | `biome.json` | Locked Biome 2.5.8 contract. Missing-only; never overwrite. |

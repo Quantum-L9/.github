@@ -8,6 +8,17 @@ lint caller). This pack is the synced org distribution copy (see
 `ops/sync-v2-starters.sh`). The org seeder copies these files into consumers
 (missing-only). Agents must not invent `biome.json` or `ci.yml`.
 
+**Default seed (seeder `all`):** codeowners, dependabot (github-actions
+only), governance caller, community-health (`CODE_OF_CONDUCT.md`,
+`CONTRIBUTING.md`, `SECURITY.md`), numbered issue templates +
+`ci-failure` / `seed-ci-failure` / `gov-violation` / `config.yml`, human +
+agent PR templates, this pack. **Dropped dests:** `LICENSE`,
+`.github/FUNDING.yml`, `SUPPORT.md`, `.github/labels.yml` (org
+`sync-labels-all`), `.github/workflows/on-org-update.yml`,
+`bug_report.yml`, `feature_request.yml`. Python `l9-lint-test.yml` is
+written only when the consumer has `pyproject.toml` or
+`requirements.txt`. Opt-in categories: `labels`, `on-org-update`.
+
 > **Canonical "how Core works / how to plug in" doc:**
 > [`Quantum-L9/l9-ci-core/AGENTS.md`](https://github.com/Quantum-L9/l9-ci-core/blob/main/AGENTS.md).
 > Read this README for the copy-paste path; read `AGENTS.md` when you need
@@ -46,8 +57,9 @@ lint caller). This pack is the synced org distribution copy (see
    ⚠️ **Format gotcha:** these are JSON-in-`.yaml` — the resolver parses them
    with `json.loads`. Double-quoted keys, no comments, no trailing commas.
 2. Copy `workflows/l9-analysis.yml` → `.github/workflows/l9-analysis.yml`.
-3. Set the semgrep `--config` ruleset for your language inside that file
-   (§4/§5 below).
+3. The analysis caller stack-selects `--config` (`p/python` vs
+   `p/javascript`+`p/typescript`). If `.github/governance/` is missing
+   it fails with check `governance-pack-missing`.
 4. Grant `checks: write` **only** on the job that calls Core's
    `publish-analysis.yml` (already scoped that way in the template — do not
    widen it).

@@ -39,8 +39,12 @@ representing the community in public spaces.
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the platform team
-via GitHub Security Advisories (for confidential reports) or by contacting `@Quantum-L9/platform` directly.
+Instances of abusive, harassing, or otherwise unacceptable behavior:
+
+- Open [`gov-violation.yml`](.github/ISSUE_TEMPLATE/gov-violation.yml) for a public, routable report.
+- Use this repository's Security Advisory form for a confidential / reporter-privacy path (see SECURITY.md).
+
+Do not "mention @platform" in markdown as the enforcement action. The resolvable owner is the CODEOWNERS team `@Quantum-L9/platform` on `.github/`, `SECURITY.md`, and `CODEOWNERS` only.
 
 All complaints will be reviewed and investigated promptly and fairly.
 

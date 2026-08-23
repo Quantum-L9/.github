@@ -5,38 +5,61 @@
  *
  * Mirrors ops/sync-org-files.sh categories and templates/README.md destinations.
  * Used by seed-governance.yml and auto-seed-new-repo.yml.
- * Health files come from templates/. The Core hub pack (l9-analysis.yml +
- * .github/governance/*.yaml + lint callers) comes from l9-ci-pack/.
- * This repo distributes those callers; l9-ci-core executes CI.
- * Missing-only seed in Actions never overwrites an existing consumer file,
- * except two safe upgrades of `.github/workflows/l9-lint-test-node.yml`:
+ *
+ * Default `all` is the DEFAULT_CATEGORIES set (stack-aware L9 pack). Opt-in
+ * extras (`labels`, `on-org-update`) stay parseable but are not in `all`.
+ * Missing-only seed never overwrites an existing consumer file, except two
+ * safe upgrades of `.github/workflows/l9-lint-test-node.yml`:
  *   1. a stock ESLint caller (the old pack)
  *   2. the stock Biome caller that ran `tsc` / `Test Suite` with
  *      `cache: ${{ env.PACKAGE_MANAGER }}` (hard-fails without a lockfile)
  * Customized workflows (for example Cursor-Governance's Biome-only file)
- * are kept.
+ * are kept. A consumer `biome.json` with a different `$schema` is never
+ * replaced.
  *
  * @param {object} opts
  * @param {typeof import('fs')} opts.fs
- * @param {string[]} [opts.categories]  subset of ALL_CATEGORIES; default all
+ * @param {string[]} [opts.categories]  subset of ALL_CATEGORIES; default DEFAULT
  * @param {boolean} [opts.hasRootCodeowners]  skip .github/CODEOWNERS when root CODEOWNERS exists
+ * @param {boolean} [opts.hasPython]  seed Python lint caller only when true
+ * @param {boolean} [opts.hasPackageJson]  add Ruff to extensions.json when Python
+ * @param {string} [opts.repository]  owner/name — rewrite SECURITY / contact_links
  * @returns {Record<string, string>} destPath → file contents
  */
-const ALL_CATEGORIES = Object.freeze([
+
+const DEFAULT_CATEGORIES = Object.freeze([
   'codeowners',
   'dependabot',
   'governance',
-  'labels',
   'community-health',
   'issue-templates',
   'pr-templates',
-  'on-org-update',
   'l9-ci-pack',
 ]);
 
+const OPT_IN_CATEGORIES = Object.freeze(['labels', 'on-org-update']);
+
+const ALL_CATEGORIES = Object.freeze([...DEFAULT_CATEGORIES, ...OPT_IN_CATEGORIES]);
+
+const COMMUNITY_HEALTH_DEFAULT = Object.freeze([
+  'CODE_OF_CONDUCT.md',
+  'CONTRIBUTING.md',
+  'SECURITY.md',
+]);
+
+const SKIP_ISSUE_TEMPLATES = Object.freeze(['bug_report.yml', 'feature_request.yml']);
+
+const PYTHON_LINT_DEST = '.github/workflows/l9-lint-test.yml';
+const STOCK_BIOME_DEST = 'biome.json';
+const STOCK_ESLINT_NODE_DEST = '.github/workflows/l9-lint-test-node.yml';
+const STOCK_BIOME_SCHEMA = 'https://biomejs.dev/schemas/2.5.8/schema.json';
+
+const ADVISORY_INBOX_STOCK = 'https://github.com/Quantum-L9/.github/security/advisories/new';
+const ADVISORY_POLICY_STOCK = 'https://github.com/Quantum-L9/.github/security/policy';
+
 function parseCategories(raw) {
   if (raw == null || String(raw).trim() === '' || String(raw).trim() === 'all') {
-    return [...ALL_CATEGORIES];
+    return [...DEFAULT_CATEGORIES];
   }
   const wanted = String(raw)
     .split(/[,\s]+/)
@@ -55,8 +78,6 @@ function readIfFile(fs, path) {
   if (!fs.existsSync(path) || !fs.statSync(path).isFile()) return null;
   return fs.readFileSync(path, 'utf8');
 }
-
-const STOCK_ESLINT_NODE_DEST = '.github/workflows/l9-lint-test-node.yml';
 
 function isStockEslintNodeWorkflow(text) {
   if (typeof text !== 'string' || !text.trim()) return false;
@@ -85,13 +106,51 @@ function isReplaceableStockNodeWorkflow(text) {
   return isStockEslintNodeWorkflow(text) || isStockUnsafeNodeWorkflow(text);
 }
 
+function biomeSchemaOf(text) {
+  if (typeof text !== 'string' || !text.trim()) return null;
+  try {
+    const parsed = JSON.parse(text);
+    return typeof parsed.$schema === 'string' ? parsed.$schema : '';
+  } catch {
+    return null;
+  }
+}
+
+function assertJsonInYaml(text, dest) {
+  try {
+    JSON.parse(text);
+  } catch (err) {
+    throw new Error(`governance pack ${dest} is not JSON-in-YAML: ${err.message}`);
+  }
+}
+
+function applyRepoPlaceholders(text, repository) {
+  if (!repository || typeof text !== 'string') return text;
+  const advisory = `https://github.com/${repository}/security/advisories/new`;
+  return text.split(ADVISORY_INBOX_STOCK).join(advisory).split(ADVISORY_POLICY_STOCK).join(advisory);
+}
+
+function buildExtensionsJson({ hasPython }) {
+  const recommendations = ['biomejs.biome'];
+  if (hasPython) recommendations.push('charliermarsh.ruff');
+  return `${JSON.stringify(
+    {
+      recommendations,
+      unwantedRecommendations: ['dbaeumer.vscode-eslint', 'esbenp.prettier-vscode'],
+    },
+    null,
+    2,
+  )}\n`;
+}
+
 /**
  * Decide which payload dests to write.
  * @param {Record<string, string>} payload
  * @param {Record<string, string|null|true>} existingByPath
  *   null/absent = missing (write);
  *   true = present, content not fetched (keep);
- *   string = fetched content (replace only if a stock replaceable node caller).
+ *   string = fetched content (replace only if a stock replaceable node caller
+ *            or biome.json with the same $schema — different $schema is keep).
  * @returns {{ writes: string[], replaced: string[], kept: string[] }}
  */
 function selectSeedWrites(payload, existingByPath = {}) {
@@ -113,20 +172,41 @@ function selectSeedWrites(payload, existingByPath = {}) {
       replaced.push(dest);
       continue;
     }
+    if (dest === STOCK_BIOME_DEST && typeof existing === 'string') {
+      const existingSchema = biomeSchemaOf(existing);
+      const incomingSchema = biomeSchemaOf(payload[dest]);
+      if (
+        existingSchema != null &&
+        incomingSchema != null &&
+        existingSchema !== incomingSchema
+      ) {
+        kept.push(dest);
+        continue;
+      }
+    }
     kept.push(dest);
   }
   return { writes, replaced, kept };
 }
 
-function addDirFiles(fs, srcDir, destPrefix, payload) {
+function addDirFiles(fs, srcDir, destPrefix, payload, { skipNames = [] } = {}) {
   if (!fs.existsSync(srcDir) || !fs.statSync(srcDir).isDirectory()) return;
+  const skip = new Set(skipNames);
   for (const name of fs.readdirSync(srcDir)) {
+    if (skip.has(name)) continue;
     const body = readIfFile(fs, `${srcDir}/${name}`);
     if (body != null) payload[`${destPrefix}/${name}`] = body;
   }
 }
 
-function buildSeedPayload({ fs, categories, hasRootCodeowners = false } = {}) {
+function buildSeedPayload({
+  fs,
+  categories,
+  hasRootCodeowners = false,
+  hasPython = false,
+  hasPackageJson = false,
+  repository = '',
+} = {}) {
   if (!fs) throw new Error('buildSeedPayload requires fs');
   const cats = Array.isArray(categories) ? categories : parseCategories(categories);
   const payload = {};
@@ -155,32 +235,29 @@ function buildSeedPayload({ fs, categories, hasRootCodeowners = false } = {}) {
         break;
       }
       case 'community-health': {
-        for (const f of [
-          'CODE_OF_CONDUCT.md',
-          'CONTRIBUTING.md',
-          'SECURITY.md',
-          'SUPPORT.md',
-          'LICENSE',
-        ]) {
+        for (const f of COMMUNITY_HEALTH_DEFAULT) {
           const body = readIfFile(fs, `templates/community-health/${f}`);
-          if (body != null) payload[f] = body;
+          if (body != null) payload[f] = applyRepoPlaceholders(body, repository);
         }
-        const funding = readIfFile(fs, 'templates/community-health/FUNDING.yml');
-        if (funding != null) payload['.github/FUNDING.yml'] = funding;
         break;
       }
       case 'issue-templates': {
         const dir = 'templates/issue-templates';
         if (!fs.existsSync(dir)) break;
         for (const name of fs.readdirSync(dir)) {
+          if (SKIP_ISSUE_TEMPLATES.includes(name)) continue;
           const body = readIfFile(fs, `${dir}/${name}`);
-          if (body != null) payload[`.github/ISSUE_TEMPLATE/${name}`] = body;
+          if (body != null) {
+            payload[`.github/ISSUE_TEMPLATE/${name}`] = applyRepoPlaceholders(body, repository);
+          }
         }
         break;
       }
       case 'pr-templates': {
-        const body = readIfFile(fs, 'templates/pr-templates/pull_request_template.md');
-        if (body != null) payload['.github/pull_request_template.md'] = body;
+        const human = readIfFile(fs, 'templates/pr-templates/pull_request_template.md');
+        if (human != null) payload['.github/pull_request_template.md'] = human;
+        const agent = readIfFile(fs, 'templates/pr-templates/agent.md');
+        if (agent != null) payload['.github/PULL_REQUEST_TEMPLATE/agent.md'] = agent;
         break;
       }
       case 'on-org-update': {
@@ -189,24 +266,30 @@ function buildSeedPayload({ fs, categories, hasRootCodeowners = false } = {}) {
         break;
       }
       case 'l9-ci-pack': {
-        addDirFiles(fs, 'l9-ci-pack/workflows', '.github/workflows', payload);
+        addDirFiles(fs, 'l9-ci-pack/workflows', '.github/workflows', payload, {
+          skipNames: hasPython ? [] : ['l9-lint-test.yml'],
+        });
         addDirFiles(fs, 'l9-ci-pack/governance', '.github/governance', payload);
-        // Locked TypeScript formatter contract (l9-ci-core presets/typescript).
-        // Missing-only seed never overwrites a consumer biome.json.
         const formatterFiles = [
-          ['l9-ci-pack/biome.json', 'biome.json'],
+          ['l9-ci-pack/biome.json', STOCK_BIOME_DEST],
           ['l9-ci-pack/.biomeignore', '.biomeignore'],
           ['l9-ci-pack/.editorconfig', '.editorconfig'],
-          ['l9-ci-pack/.vscode/extensions.json', '.vscode/extensions.json'],
         ];
         for (const [src, dest] of formatterFiles) {
           const body = readIfFile(fs, src);
           if (body != null) payload[dest] = body;
         }
+        payload['.vscode/extensions.json'] = buildExtensionsJson({ hasPython });
         break;
       }
       default:
         throw new Error(`unknown seed category: ${cat}`);
+    }
+  }
+
+  for (const dest of Object.keys(payload)) {
+    if (dest.startsWith('.github/governance/') && dest.endsWith('.yaml')) {
+      assertJsonInYaml(payload[dest], dest);
     }
   }
 
@@ -215,11 +298,20 @@ function buildSeedPayload({ fs, categories, hasRootCodeowners = false } = {}) {
 
 module.exports = {
   ALL_CATEGORIES,
+  DEFAULT_CATEGORIES,
+  OPT_IN_CATEGORIES,
+  COMMUNITY_HEALTH_DEFAULT,
+  SKIP_ISSUE_TEMPLATES,
+  PYTHON_LINT_DEST,
+  STOCK_BIOME_DEST,
+  STOCK_BIOME_SCHEMA,
   STOCK_ESLINT_NODE_DEST,
   parseCategories,
   buildSeedPayload,
   isStockEslintNodeWorkflow,
   isStockUnsafeNodeWorkflow,
   isReplaceableStockNodeWorkflow,
+  biomeSchemaOf,
   selectSeedWrites,
+  applyRepoPlaceholders,
 };

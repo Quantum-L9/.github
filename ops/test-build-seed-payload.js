@@ -1,8 +1,7 @@
 'use strict';
 
 /**
- * Asserts the l9-ci-pack seed payload includes the locked Biome contract
- * and that the Node lint caller is the SDK Biome workflow, not ESLint.
+ * Asserts the default seed payload is stack-aware and omits drop-ranked dests.
  * Run from the Quantum-L9/.github repo root:
  *   node ops/test-build-seed-payload.js
  */
@@ -16,7 +15,13 @@ const {
   isStockUnsafeNodeWorkflow,
   isReplaceableStockNodeWorkflow,
   selectSeedWrites,
+  biomeSchemaOf,
+  DEFAULT_CATEGORIES,
+  OPT_IN_CATEGORIES,
   STOCK_ESLINT_NODE_DEST,
+  STOCK_BIOME_DEST,
+  STOCK_BIOME_SCHEMA,
+  PYTHON_LINT_DEST,
 } = require('./build-seed-payload.js');
 
 const root = path.resolve(__dirname, '..');
@@ -24,11 +29,89 @@ const origCwd = process.cwd();
 process.chdir(root);
 
 try {
-  const cats = parseCategories('l9-ci-pack');
-  assert.deepStrictEqual(cats, ['l9-ci-pack']);
+  assert.deepStrictEqual(parseCategories('l9-ci-pack'), ['l9-ci-pack']);
+  assert.deepStrictEqual(parseCategories('all'), [...DEFAULT_CATEGORIES]);
+  assert.ok(!parseCategories('all').includes('labels'));
+  assert.ok(!parseCategories('all').includes('on-org-update'));
+  assert.ok(OPT_IN_CATEGORIES.includes('labels'));
+  assert.ok(OPT_IN_CATEGORIES.includes('on-org-update'));
+  assert.deepStrictEqual(parseCategories('labels'), ['labels']);
 
-  const payload = buildSeedPayload({ fs, categories: cats });
+  const defaultPayload = buildSeedPayload({ fs, categories: 'all' });
+  for (const dest of [
+    'LICENSE',
+    '.github/FUNDING.yml',
+    'SUPPORT.md',
+    '.github/workflows/on-org-update.yml',
+    '.github/labels.yml',
+    '.github/ISSUE_TEMPLATE/bug_report.yml',
+    '.github/ISSUE_TEMPLATE/feature_request.yml',
+    PYTHON_LINT_DEST,
+  ]) {
+    assert.ok(!(dest in defaultPayload), `default payload must omit ${dest}`);
+  }
 
+  const pythonPayload = buildSeedPayload({ fs, categories: 'all', hasPython: true });
+  assert.ok(pythonPayload[PYTHON_LINT_DEST], 'Python lint dest when hasPython');
+  assert.match(pythonPayload[PYTHON_LINT_DEST], /name: Python Test Suite/);
+  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /^\s*name:\s*Test Suite\s*$/m);
+  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /^\s+pip install -e /m);
+  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /^\s+.*\|\|\s+pip install pytest-cov/m);
+  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /python -c "import pytest_cov"/);
+  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /python -c "import xdist"/);
+  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /python -c "import pytest_timeout"/);
+  assert.match(pythonPayload[PYTHON_LINT_DEST], /name: Detect Python package/);
+
+  const contributing = defaultPayload['CONTRIBUTING.md'];
+  assert.ok(contributing, 'CONTRIBUTING.md is default-seeded');
+  assert.doesNotMatch(contributing, /\.cursor\/rules/);
+  assert.doesNotMatch(contributing, /\.cursor\/skills/);
+  assert.doesNotMatch(contributing, /\.cursor\/commands/);
+  assert.match(contributing, /PR_REMEDIATE=0 make pr/);
+  assert.match(contributing, /l9-governance/);
+
+  const security = buildSeedPayload({
+    fs,
+    categories: ['community-health'],
+    repository: 'Quantum-L9/example',
+  })['SECURITY.md'];
+  assert.match(security, /https:\/\/github\.com\/Quantum-L9\/example\/security\/advisories\/new/);
+  assert.doesNotMatch(security, /Quantum-L9\/\.github\/security\/advisories\/new/);
+
+  const cfg = buildSeedPayload({
+    fs,
+    categories: ['issue-templates'],
+    repository: 'Quantum-L9/example',
+  })['.github/ISSUE_TEMPLATE/config.yml'];
+  assert.match(cfg, /https:\/\/github\.com\/Quantum-L9\/example\/security\/advisories\/new/);
+  assert.ok(
+    buildSeedPayload({ fs, categories: ['issue-templates'] })[
+      '.github/ISSUE_TEMPLATE/seed-ci-failure.yml'
+    ],
+  );
+
+  const dependabot = defaultPayload['.github/dependabot.yml'];
+  assert.match(dependabot, /package-ecosystem: github-actions/);
+  assert.match(dependabot, /open-pull-requests-limit: 2/);
+  assert.doesNotMatch(dependabot, /package-ecosystem: pip/);
+  assert.doesNotMatch(dependabot, /labels:/);
+
+  const codeowners = defaultPayload['.github/CODEOWNERS'];
+  assert.doesNotMatch(codeowners, /^\*\s+@Quantum-L9\/platform\s*$/m);
+  assert.match(codeowners, /\/\.github\//);
+  assert.match(codeowners, /SECURITY\.md/);
+
+  const caller = defaultPayload['.github/workflows/governance.yml'];
+  assert.match(caller, /permissions:\n\s+contents: read\n\s+pull-requests: write/);
+  assert.match(caller, /permissions:\n\s+contents: read\n\s+issues: write/);
+  assert.doesNotMatch(caller, /^\s+secrets:\s*inherit\s*$/m);
+
+  assert.ok(defaultPayload['.github/PULL_REQUEST_TEMPLATE/agent.md']);
+  assert.ok(defaultPayload['.github/pull_request_template.md']);
+  assert.ok(defaultPayload['.github/ISSUE_TEMPLATE/1-bug.yml']);
+  assert.ok(defaultPayload['.github/ISSUE_TEMPLATE/2-feature.yml']);
+
+  const pack = buildSeedPayload({ fs, categories: ['l9-ci-pack'], hasPython: true });
   for (const dest of [
     'biome.json',
     '.biomeignore',
@@ -37,16 +120,33 @@ try {
     '.github/workflows/l9-lint-test-node.yml',
     '.github/workflows/l9-analysis.yml',
     '.github/governance/execution-profiles.yaml',
+    '.github/governance/semgrep-identity-map.yaml',
+    '.github/governance/semgrep-finding-policy.yaml',
+    PYTHON_LINT_DEST,
   ]) {
-    assert.ok(payload[dest], `missing seed dest ${dest}`);
+    assert.ok(pack[dest], `missing seed dest ${dest}`);
   }
 
-  const biome = JSON.parse(payload['biome.json']);
-  assert.strictEqual(biome.$schema, 'https://biomejs.dev/schemas/2.5.8/schema.json');
-  assert.strictEqual(biome.formatter.enabled, true);
-  assert.strictEqual(biome.linter.enabled, true);
+  for (const dest of Object.keys(pack).filter((d) => d.startsWith('.github/governance/') && d.endsWith('.yaml'))) {
+    JSON.parse(pack[dest]);
+  }
 
-  const nodeWf = payload['.github/workflows/l9-lint-test-node.yml'];
+  const thresholds = JSON.parse(pack['.github/governance/quality-thresholds.yaml']);
+  assert.ok(thresholds.profiles.pr_fast.sdk_policy);
+  assert.notStrictEqual(thresholds.profiles.pr_fast.sdk_policy, '');
+  const profiles = JSON.parse(pack['.github/governance/execution-profiles.yaml']);
+  assert.ok(profiles.profiles.agent);
+  assert.ok(profiles.profiles.l4_local);
+  assert.ok(profiles.profiles.agent.allowed_events.includes('workflow_dispatch'));
+  const promo = JSON.parse(pack['.github/governance/promotion-policy.yaml']);
+  assert.strictEqual(promo.requirements.approval_team, '@Quantum-L9/platform');
+
+  const biome = JSON.parse(pack['biome.json']);
+  assert.strictEqual(biome.$schema, STOCK_BIOME_SCHEMA);
+  assert.strictEqual(biome.formatter.enabled, true);
+  assert.ok(biome.files.includes.includes('!**/.l9'));
+
+  const nodeWf = pack['.github/workflows/l9-lint-test-node.yml'];
   assert.match(nodeWf, /l9-biome-scan\.yml@[0-9a-f]{40}/);
   assert.doesNotMatch(nodeWf, /npx --no-install eslint/);
   assert.doesNotMatch(nodeWf, /name: ESLint/);
@@ -56,12 +156,22 @@ try {
   assert.doesNotMatch(nodeWf, /cache:\s*\$\{\{\s*env\.PACKAGE_MANAGER\s*\}\}/);
   assert.strictEqual(isStockUnsafeNodeWorkflow(nodeWf), false);
 
-  const analysis = payload['.github/workflows/l9-analysis.yml'];
+  const analysis = pack['.github/workflows/l9-analysis.yml'];
   assert.match(analysis, /semgrep>=1\.100\.0,<2\.0\.0/);
   assert.doesNotMatch(analysis, /pip install --upgrade pip semgrep$/m);
+  assert.match(analysis, /governance-pack-missing/);
+  assert.match(analysis, /name: Detect stack/);
+  assert.match(analysis, /SEMGREP_CONFIGS/);
+  assert.match(analysis, /^name: L9 Analysis\s*$/m);
 
-  const exts = JSON.parse(payload['.vscode/extensions.json']);
-  assert.ok(exts.recommendations.includes('biomejs.biome'));
+  const extsPython = JSON.parse(pack['.vscode/extensions.json']);
+  assert.ok(extsPython.recommendations.includes('biomejs.biome'));
+  assert.ok(extsPython.recommendations.includes('charliermarsh.ruff'));
+  assert.ok(extsPython.unwantedRecommendations.includes('dbaeumer.vscode-eslint'));
+
+  const extsDefault = JSON.parse(defaultPayload['.vscode/extensions.json']);
+  assert.ok(extsDefault.recommendations.includes('biomejs.biome'));
+  assert.ok(!extsDefault.recommendations.includes('charliermarsh.ruff'));
 
   const stockEslint = [
     'name: L9 Lint and Test (Node)',
@@ -112,8 +222,23 @@ try {
   assert.deepStrictEqual(plan.replaced, []);
   assert.deepStrictEqual(plan.kept, [dest]);
 
-  console.log('ok: l9-ci-pack payload includes locked Biome contract');
-  console.log('ok: stock ESLint and unsafe Node callers are replaceable; custom kept');
+  const otherSchema = JSON.stringify({ $schema: 'https://biomejs.dev/schemas/1.0.0/schema.json' });
+  plan = selectSeedWrites(
+    { [STOCK_BIOME_DEST]: pack['biome.json'] },
+    { [STOCK_BIOME_DEST]: otherSchema },
+  );
+  assert.deepStrictEqual(plan.writes, []);
+  assert.deepStrictEqual(plan.kept, [STOCK_BIOME_DEST]);
+  assert.strictEqual(biomeSchemaOf(otherSchema), 'https://biomejs.dev/schemas/1.0.0/schema.json');
+
+  const pin = fs.readFileSync('ops/governance-v1-pin.txt', 'utf8');
+  assert.match(pin, /7ed3ab8650583f6659a6caf061eae77dbd3ed1be/);
+
+  console.log('ok: default payload drops LICENSE/FUNDING/SUPPORT/labels/on-org-update/dup issues');
+  console.log('ok: Python lint dest is stack-gated and skip-safe');
+  console.log('ok: CONTRIBUTING has no v2 .cursor/rules|skills|commands ritual');
+  console.log('ok: governance pack is JSON-in-YAML with sdk_policy + agent/l4 profiles');
+  console.log('ok: stock ESLint and unsafe Node callers are replaceable; custom + other biome $schema kept');
 } finally {
   process.chdir(origCwd);
 }
