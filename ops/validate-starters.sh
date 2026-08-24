@@ -4,6 +4,8 @@
 # Validates each properties.json contains required fields: name, description, iconName, categories, filePatterns.
 # Validates the l9-ci-pack/ (v2) required CI file set is present and pinned to
 # a full commit SHA or a Core release tag — never @main.
+# Runs the ops/test-*.js suites: seed payload selection, the seed-branch safety
+# gate, and the branch guard inside both seed workflows.
 # Run from the root of the Quantum-L9/.github repo.
 set -euo pipefail
 
@@ -29,13 +31,18 @@ FAIL=0
 echo "=== Quantum-L9 Workflow Starter Validation ==="
 
 if command -v node &>/dev/null; then
-  if node ops/test-build-seed-payload.js; then
-    echo "✅ ops/test-build-seed-payload.js"
-    PASS=$((PASS+1))
-  else
-    echo "❌ ops/test-build-seed-payload.js"
-    FAIL=$((FAIL+1))
-  fi
+  for t in \
+    ops/test-build-seed-payload.js \
+    ops/test-seed-branch-safety.js \
+    ops/test-seed-workflow-branch-guard.js; do
+    if node "$t"; then
+      echo "✅ $t"
+      PASS=$((PASS+1))
+    else
+      echo "❌ $t"
+      FAIL=$((FAIL+1))
+    fi
+  done
   echo ""
 fi
 
@@ -208,6 +215,18 @@ else
   # Explicitly NOT required in the pack: issue/PR templates are owned solely
   # by this repo's own community-health files (.github/ISSUE_TEMPLATE/,
   # root PULL_REQUEST_TEMPLATE.md), never synced from l9-ci-core.
+fi
+
+if command -v yamllint &>/dev/null; then
+  echo ""
+  echo "=== yamllint (distributed labels) ==="
+  if yamllint -c .yamllint.yml .github/labels.yml templates/labels.yml; then
+    echo "✅ yamllint labels.yml"
+    PASS=$((PASS+1))
+  else
+    echo "❌ yamllint labels.yml"
+    FAIL=$((FAIL+1))
+  fi
 fi
 
 echo ""

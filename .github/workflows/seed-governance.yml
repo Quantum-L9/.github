@@ -18,6 +18,10 @@ name: Seed org templates into consumers
 # Default behavior: add missing files only (never overwrite existing content),
 # except replace a stock ESLint l9-lint-test-node.yml with the Biome caller.
 # Root CODEOWNERS takes precedence — .github/CODEOWNERS is not seeded over it.
+#
+# Branch safety: the seed branch is rebuilt as "default branch + one seed
+# commit", so ops/seed-branch-safety.js gates every ref move. A branch with an
+# open PR, or carrying any commit the seeder did not author, is left alone.
 
 on:
   workflow_dispatch:
@@ -78,6 +82,10 @@ jobs:
               STOCK_BIOME_DEST,
               selectSeedWrites,
             } = require('./ops/build-seed-payload.js');
+            const {
+              assessSeedBranch,
+              moveSeedBranch,
+            } = require('./ops/seed-branch-safety.js');
 
             const MODE = process.env.SEED_MODE || 'dry-run';
             const FILTER = process.env.SEED_REPO_FILTER || '';
@@ -161,17 +169,33 @@ jobs:
                   continue;
                 }
 
+                const base = repo.default_branch;
+
+                // ── Seed-branch safety gate ────────────────────────────────
+                // The rebuild below constructs the branch as "current default
+                // branch + one seed commit", so anything else already on that
+                // branch would be discarded by construction rather than by
+                // conflict. ops/seed-branch-safety.js decides, read-only,
+                // before any git write; both seeders share that one decision.
+                const gate = await assessSeedBranch({
+                  github, owner: o, repo: n, base, branch: BRANCH,
+                });
+                if (gate.action === 'skip') {
+                  rows.push([n, gate.reason]);
+                  continue;
+                }
+                const branchSha = gate.sha;
+
                 if (MODE === 'dry-run') {
                   const note = hasRootCodeowners ? '; preserve root CODEOWNERS' : '';
                   const upgrade = replaced.length ? `; replace stock ESLint ${replaced.join(', ')}` : '';
                   const preview = writes.length <= 6
                     ? writes.join(', ')
                     : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
-                  rows.push([n, `would seed ${writes.length} file(s): ${preview}${upgrade}${note}`]);
+                  const onto = branchSha ? `; rebuild ${BRANCH}` : '';
+                  rows.push([n, `would seed ${writes.length} file(s): ${preview}${upgrade}${note}${onto}`]);
                   continue;
                 }
-
-                const base = repo.default_branch;
                 const baseRef = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
                 const baseSha = baseRef.data.object.sha;
                 const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
@@ -205,15 +229,13 @@ jobs:
                   parents: [baseSha],
                 });
 
-                try {
-                  await github.rest.git.createRef({
-                    owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: commit.data.sha,
-                  });
-                } catch (e) {
-                  if (e.status !== 422) throw e;
-                  await github.rest.git.updateRef({
-                    owner: o, repo: n, ref: `heads/${BRANCH}`, sha: commit.data.sha, force: true,
-                  });
+                const moved = await moveSeedBranch({
+                  github, owner: o, repo: n, branch: BRANCH,
+                  expectedSha: branchSha, commitSha: commit.data.sha,
+                });
+                if (!moved.moved) {
+                  rows.push([n, moved.reason]);
+                  continue;
                 }
 
                 const listed = treeItems.map(t => `- \`${t.path}\``);
@@ -233,6 +255,8 @@ jobs:
                   'Core pack callers (`l9-analysis.yml`, lint templates, `.github/governance/`) and the locked Biome contract (`biome.json`) are distributed here; `l9-ci-core` executes CI.',
                   '',
                   'Source map: `templates/README.md` · pack: `l9-ci-pack/` · sync twin: `ops/sync-org-files.sh`.',
+                  '',
+                  'While this PR is open the seeder leaves the branch alone — commit review fixes onto it freely.',
                 ].filter((line, idx, arr) => !(line === '' && arr[idx - 1] === ''));
 
                 let prNumber;

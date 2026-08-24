@@ -1,0 +1,7 @@
+# Lint distributed YAML the way the strictest consumer does (extends: default).
+# Seeded labels.yml must pass here before it is shipped to consumers.
+extends: default
+
+rules:
+  document-start: disable
+  line-length: disable
