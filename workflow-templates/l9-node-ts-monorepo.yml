@@ -65,12 +65,12 @@ jobs:
           done
 
   security:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/security.yml@2b330a5aab90cd7781bef08f14c5e7904b61bc56
+    uses: Quantum-L9/l9-ci-core/.github/workflows/security.yml@7148fc73dcbf41367f5c5401432dc997b1f4f869
     secrets: inherit
     with:
       python-version: "3.12"
       run-npm-audit: true
 
   scorecard:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/scorecard.yml@2b330a5aab90cd7781bef08f14c5e7904b61bc56
+    uses: Quantum-L9/l9-ci-core/.github/workflows/scorecard.yml@7148fc73dcbf41367f5c5401432dc997b1f4f869
     secrets: inherit
