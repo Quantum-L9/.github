@@ -74,12 +74,18 @@ branch, so both gate every ref move through `ops/seed-branch-safety.js`:
 | --- | --- |
 | Seed branch absent | create the branch, open a PR |
 | Seed PR open | **left alone** — the branch may carry review fixes |
-| Branch holds only the seeder's own commit, no open PR | rebuilt on the current default branch |
+| Branch holds only the seeder's own verified commit, no open PR | rebuilt on the current default branch |
 | Branch holds any other commit | **left alone**, reported in the job summary |
 | Branch state unprovable (comparison failed) | **left alone** — the gate fails closed |
 
-The ref write is a compare-and-swap: the branch head is re-read immediately
-before the update and the repo is skipped if it moved since the verdict.
+Seeder authorship is proven, not assumed: the single ahead commit must carry
+the seed subject **and** be committed by the identity the seeder runs as with
+a GitHub-verified signature — an amended or rebased commit that preserves the
+subject line fails the check and the branch is left alone.
+
+The ref write is a server-side compare-and-swap: GraphQL `updateRefs` pins
+`beforeOid` to the sha the verdict was computed from, so a branch that moves
+between verdict and write is rejected atomically and left untouched.
 
 `ops/test-seed-branch-safety.js` covers the gate; `ops/test-seed-workflow-branch-guard.js`
 runs each workflow's real `script:` body against a stubbed API and asserts the

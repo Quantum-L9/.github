@@ -13,11 +13,14 @@
  * Run from the Quantum-L9/.github repo root:
  *   node ops/test-seed-workflow-branch-guard.js
  */
-const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
+const assert = require('node:assert');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
+
+const SEEDER_LOGIN = 'seeder-bot';
 
 // Both seeders share the rebuild-then-move-ref shape, so both get the same proof.
 const WORKFLOWS = [
@@ -39,7 +42,13 @@ const WORKFLOWS = [
   },
 ];
 
-const MUTATIONS = ['git.createRef', 'git.updateRef', 'git.createCommit', 'pulls.create'];
+// Successful writes only — a rejected compare-and-swap attempt is not a mutation.
+const MUTATIONS = new Set([
+  'git.createRef',
+  'git.createCommit',
+  'pulls.create',
+  'graphql.updateRefs',
+]);
 
 /** Extract the github-script `script: |` block without a YAML dependency. */
 function extractScript(file) {
@@ -55,21 +64,46 @@ function extractScript(file) {
   return body.join('\n');
 }
 
+/**
+ * Load the extracted script body as a real CommonJS module: the body is
+ * written to a temp file and `require`d, so no string is ever turned into
+ * code in-process (no `eval` / `new Function`) and stack traces point at a
+ * real file. The exported function receives the same bindings github-script
+ * provides, with `require` shadowed by the scoped resolver the runner passes.
+ */
+function loadScriptModule(file) {
+  const body = extractScript(file);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'seed-guard-'));
+  const mod = path.join(dir, `${path.basename(file, '.yml')}.script.js`);
+  fs.writeFileSync(
+    mod,
+    `'use strict';\nmodule.exports = async (github, core, context, require) => {\n${body}\n};\n`,
+  );
+  try {
+    return require(mod);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 const notFound = (msg) => Object.assign(new Error(msg), { status: 404 });
 
 /**
  * @param {string} BRANCH               seed branch the workflow under test uses
- * @param {null|{sha,aheadBy,commits}} branch  stubbed remote branch state
+ * @param {null|{sha,aheadBy,commits}} branch  stubbed remote branch state;
+ *   commits are `{message, committer, verified}` fixtures, oldest first
  * @param {number[]} openPRs            open PR numbers with head BRANCH
  */
 function makeGithub(BRANCH, { branch, openPRs }) {
   const calls = [];
+  const state = { sha: branch ? branch.sha : null };
   const record = (name) => async (args) => {
     calls.push({ name, args });
     if (name === 'git.createBlob') return { data: { sha: 'blob-sha' } };
     if (name === 'git.createTree') return { data: { sha: 'tree-sha' } };
     if (name === 'git.createCommit') return { data: { sha: 'new-commit-sha' } };
     if (name === 'pulls.create') return { data: { number: 999 } };
+    if (name === 'git.createRef') state.sha = args.sha;
     return { data: {} };
   };
 
@@ -91,11 +125,38 @@ function makeGithub(BRANCH, { branch, openPRs }) {
       return {
         data: {
           ahead_by: branch.aheadBy,
-          commits: branch.commits.map((message, i) => ({ sha: `c${i}`, commit: { message } })),
+          commits: branch.commits.map((c, i) => ({
+            sha: `c${i}`,
+            commit: {
+              message: c.message,
+              verification: { verified: c.verified === true },
+            },
+            committer: c.committer ? { login: c.committer } : null,
+          })),
         },
       };
     },
+    graphql: async (doc, vars) => {
+      if (!/mutation/.test(doc)) {
+        calls.push({ name: 'graphql repositoryId', args: vars });
+        return { repository: { id: 'R_stub' } };
+      }
+      assert.match(doc, /updateRefs/, 'only updateRefs mutations are expected');
+      if (state.sha === null || vars.beforeOid !== state.sha) {
+        calls.push({ name: 'graphql.updateRefs.rejected', args: vars });
+        throw new Error(`could not update refs: expected "${vars.beforeOid}"`);
+      }
+      calls.push({ name: 'graphql.updateRefs', args: vars });
+      state.sha = vars.afterOid;
+      return { updateRefs: { clientMutationId: null } };
+    },
     rest: {
+      users: {
+        getAuthenticated: async () => {
+          calls.push({ name: 'users.getAuthenticated', args: {} });
+          return { data: { login: SEEDER_LOGIN } };
+        },
+      },
       repos: {
         // Every seed path is missing on the consumer: the full payload is selected.
         getContent: async () => {
@@ -116,8 +177,8 @@ function makeGithub(BRANCH, { branch, openPRs }) {
         getRef: async (args) => {
           calls.push({ name: 'git.getRef', args });
           if (args.ref === `heads/${BRANCH}`) {
-            if (!branch) throw notFound('Branch not found');
-            return { data: { object: { sha: branch.sha } } };
+            if (state.sha === null) throw notFound('Branch not found');
+            return { data: { object: { sha: state.sha } } };
           }
           return { data: { object: { sha: 'base-sha' } } };
         },
@@ -126,11 +187,10 @@ function makeGithub(BRANCH, { branch, openPRs }) {
         createTree: record('git.createTree'),
         createCommit: record('git.createCommit'),
         createRef: record('git.createRef'),
-        updateRef: record('git.updateRef'),
       },
     },
   };
-  return { github, calls };
+  return { github, calls, state };
 }
 
 function makeCore() {
@@ -141,20 +201,13 @@ function makeCore() {
     addTable: () => summary,
     write: async () => summary,
   };
-  return { info() {}, error() {}, setFailed: (m) => failures.push(m), summary, failures };
+  return { info() {}, error() {}, setFailed: (m) => failures.push(m), failures, summary };
 }
 
 const scopedRequire = (m) => require(m.startsWith('.') ? path.resolve(root, m) : m);
 
 function makeRunner(wf) {
-  const body = extractScript(path.join(root, wf.file));
-  const fn = new Function(
-    'github',
-    'core',
-    'context',
-    'require',
-    `return (async () => {\n${body}\n})()`,
-  );
+  const fn = loadScriptModule(path.join(root, wf.file));
 
   return async function run({ branch, openPRs = [], dry = false, mutateGithub } = {}) {
     const prevCwd = process.cwd();
@@ -162,8 +215,8 @@ function makeRunner(wf) {
     const prevEnv = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
     process.chdir(root);
     Object.assign(process.env, env);
-    const { github, calls } = makeGithub(wf.branch, { branch, openPRs });
-    if (mutateGithub) mutateGithub(github, wf.branch);
+    const { github, calls, state } = makeGithub(wf.branch, { branch, openPRs });
+    if (mutateGithub) mutateGithub(github, wf.branch, state);
     const core = makeCore();
     try {
       await fn(github, core, {}, scopedRequire);
@@ -178,8 +231,9 @@ function makeRunner(wf) {
     return {
       calls,
       names,
+      state,
       failures: core.failures,
-      mutated: names.some((n) => MUTATIONS.includes(n)),
+      mutated: names.some((n) => MUTATIONS.has(n)),
     };
   };
 }
@@ -188,6 +242,7 @@ function makeRunner(wf) {
   for (const wf of WORKFLOWS) {
     const run = makeRunner(wf);
     const SEED = wf.seedSubject;
+    const seedCommit = { message: SEED, committer: SEEDER_LOGIN, verified: true };
     const label = path.basename(wf.file);
 
     // 1. The incident: remediation commits stacked on the seed commit.
@@ -195,7 +250,10 @@ function makeRunner(wf) {
       branch: {
         sha: 'branch-sha',
         aheadBy: 2,
-        commits: [SEED, 'fix(governance): make the seeded templates safe to run here'],
+        commits: [
+          seedCommit,
+          { message: 'fix(governance): make the seeded templates safe to run here', committer: 'human-dev', verified: true },
+        ],
       },
     });
     assert.strictEqual(r.mutated, false, `${label}: rewrote a branch carrying remediation commits`);
@@ -204,7 +262,7 @@ function makeRunner(wf) {
 
     // 2. An open seed PR is work in flight — skip before any git read/write.
     r = await run({
-      branch: { sha: 'branch-sha', aheadBy: 1, commits: [SEED] },
+      branch: { sha: 'branch-sha', aheadBy: 1, commits: [seedCommit] },
       openPRs: [42],
     });
     assert.strictEqual(r.mutated, false, `${label}: wrote to a repo with an open seed PR`);
@@ -214,39 +272,61 @@ function makeRunner(wf) {
     );
     console.log(`ok: ${label} — repo with an open seed PR is skipped`);
 
-    // 3. Fresh repo: create the branch, never force-update it.
+    // 3. Fresh repo: create the branch, never rewrite one.
     r = await run({ branch: null });
     assert.ok(r.names.includes('git.createRef'), `${label}: fresh repo must get a seed branch`);
-    assert.ok(!r.names.includes('git.updateRef'), `${label}: fresh repo must not force-update`);
+    assert.ok(!r.names.includes('graphql.updateRefs'), `${label}: fresh repo must not rewrite a ref`);
     assert.ok(r.names.includes('pulls.create'), `${label}: fresh repo must get a seed PR`);
     console.log(`ok: ${label} — fresh repo is seeded with a created ref and a PR`);
 
-    // 4. Pristine seeder branch with no open PR: refresh is allowed.
-    r = await run({ branch: { sha: 'branch-sha', aheadBy: 1, commits: [SEED] } });
-    const update = r.calls.find((c) => c.name === 'git.updateRef');
+    // 4. Pristine seeder branch with no open PR: refresh is allowed, and the
+    //    ref move is a compare-and-swap pinned to the sha the verdict saw.
+    r = await run({ branch: { sha: 'branch-sha', aheadBy: 1, commits: [seedCommit] } });
+    const update = r.calls.find((c) => c.name === 'graphql.updateRefs');
     assert.ok(update, `${label}: pristine seeder branch should be refreshable`);
-    assert.strictEqual(update.args.force, true, `${label}: rebuild onto a newer base needs force`);
-    console.log(`ok: ${label} — pristine seeder branch is refreshed`);
+    assert.strictEqual(update.args.beforeOid, 'branch-sha', `${label}: CAS must pin the verdict sha`);
+    assert.strictEqual(update.args.afterOid, 'new-commit-sha', `${label}: CAS must move to the new seed commit`);
+    console.log(`ok: ${label} — pristine seeder branch is refreshed via compare-and-swap`);
+
+    // 4b. Seed-subject commit with foreign or unverified provenance: left alone.
+    for (const tampered of [
+      { message: SEED, committer: 'mallory', verified: true },
+      { message: SEED, committer: SEEDER_LOGIN, verified: false },
+    ]) {
+      r = await run({ branch: { sha: 'branch-sha', aheadBy: 1, commits: [tampered] } });
+      assert.strictEqual(
+        r.mutated,
+        false,
+        `${label}: rewrote a branch whose seed-subject commit has foreign provenance`,
+      );
+    }
+    console.log(`ok: ${label} — seed-subject commit with foreign provenance is left alone`);
 
     // 5. Compare-and-swap: the branch moves between the verdict and the ref write.
     r = await run({
-      branch: { sha: 'branch-sha', aheadBy: 1, commits: [SEED] },
-      mutateGithub: (github, BRANCH) => {
+      branch: { sha: 'branch-sha', aheadBy: 1, commits: [seedCommit] },
+      mutateGithub: (github, BRANCH, state) => {
         const realGetRef = github.rest.git.getRef;
         let seen = 0;
         github.rest.git.getRef = async (args) => {
           const res = await realGetRef(args);
-          if (args.ref === `heads/${BRANCH}` && seen++ > 0) {
-            return { data: { object: { sha: 'someone-else-pushed' } } };
+          if (args.ref === `heads/${BRANCH}` && seen++ === 0) {
+            // Someone pushes right after the verdict read.
+            state.sha = 'someone-else-pushed';
           }
           return res;
         };
       },
     });
     assert.ok(
-      !r.names.includes('git.updateRef'),
+      !r.names.includes('graphql.updateRefs'),
       `${label}: a branch that moved mid-run must not be overwritten`,
     );
+    assert.ok(
+      r.names.includes('graphql.updateRefs.rejected'),
+      `${label}: the guarded move must be attempted and rejected server-side`,
+    );
+    assert.strictEqual(r.state.sha, 'someone-else-pushed', `${label}: the moved ref must be untouched`);
     console.log(`ok: ${label} — branch that moves mid-run is left alone`);
 
     // 6. Dry run never writes.

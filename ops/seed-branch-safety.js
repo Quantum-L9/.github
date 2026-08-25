@@ -32,13 +32,21 @@ function isSeedCommitMessage(message) {
 /**
  * Classify an existing seed branch against the consumer's default branch.
  *
+ * Provenance is proven, not assumed: the single ahead commit must carry the
+ * seeder subject, must be committed by the identity the seeder itself runs
+ * as, and must be GitHub-verified (seeder commits are created through the
+ * API, so GitHub signs them). A commit amended or rebased locally loses the
+ * verified signature even when the subject line is preserved.
+ *
  * @param {object} comparison
  * @param {number} comparison.aheadBy   compare `ahead_by` (branch commits not on base)
- * @param {Array<{sha?: string, message?: string}>} comparison.commits
- *   compare `commits`, oldest first, mapped to `{ sha, message }`
+ * @param {Array<{sha?: string, message?: string, committerLogin?: string|null,
+ *   verified?: boolean}>} comparison.commits
+ *   compare `commits`, oldest first
+ * @param {string|null} comparison.seederLogin  login the seeder authenticates as
  * @returns {{ safeToReplace: boolean, reason: string }}
  */
-function classifySeedBranch({ aheadBy, commits } = {}) {
+function classifySeedBranch({ aheadBy, commits, seederLogin } = {}) {
   if (!Number.isInteger(aheadBy) || aheadBy < 0 || !Array.isArray(commits)) {
     return {
       safeToReplace: false,
@@ -63,7 +71,7 @@ function classifySeedBranch({ aheadBy, commits } = {}) {
   // aheadBy === 1: the compare payload must actually carry that commit.
   // GitHub truncates `commits` at 250; at ahead_by 1 an empty list means the
   // caller passed something unexpected, so fail closed.
-  const only = commits[commits.length - 1];
+  const only = commits.at(-1);
   if (!only || typeof only.message !== 'string') {
     return {
       safeToReplace: false,
@@ -76,7 +84,41 @@ function classifySeedBranch({ aheadBy, commits } = {}) {
       reason: 'holds a commit the seeder did not author',
     };
   }
-  return { safeToReplace: true, reason: 'holds only the seeder commit' };
+  if (typeof seederLogin !== 'string' || !seederLogin) {
+    return {
+      safeToReplace: false,
+      reason: 'cannot resolve the seeder identity — cannot prove the branch is seeder-authored',
+    };
+  }
+  if (only.committerLogin !== seederLogin) {
+    return {
+      safeToReplace: false,
+      reason: `holds a commit committed by ${only.committerLogin || 'an unknown identity'}, not the seeder`,
+    };
+  }
+  if (only.verified !== true) {
+    return {
+      safeToReplace: false,
+      reason: 'holds a seed-subject commit without a verified signature — possibly amended',
+    };
+  }
+  return { safeToReplace: true, reason: 'holds only the seeder\'s own verified commit' };
+}
+
+// The login a client authenticates as, resolved once per client. A seeder
+// sweep calls assessSeedBranch per consumer repo with the same octokit.
+const seederLoginCache = new WeakMap();
+async function resolveSeederLogin(github) {
+  if (seederLoginCache.has(github)) return seederLoginCache.get(github);
+  let login = null;
+  try {
+    const me = await github.rest.users.getAuthenticated();
+    login = (me.data && typeof me.data.login === 'string' && me.data.login) || null;
+  } catch {
+    login = null; // classifySeedBranch fails closed on a null login
+  }
+  seederLoginCache.set(github, login);
+  return login;
 }
 
 /**
@@ -124,8 +166,12 @@ async function assessSeedBranch({ github, owner, repo, base, branch }) {
   const verdict = classifySeedBranch({
     aheadBy: cmp.data.ahead_by,
     commits: (cmp.data.commits || []).map(c => ({
-      sha: c.sha, message: c.commit && c.commit.message,
+      sha: c.sha,
+      message: c.commit?.message,
+      committerLogin: c.committer?.login ?? null,
+      verified: c.commit?.verification?.verified === true,
     })),
+    seederLogin: await resolveSeederLogin(github),
   });
   if (!verdict.safeToReplace) {
     return { action: 'skip', sha, reason: `branch ${branch} ${verdict.reason} — left alone` };
@@ -137,10 +183,11 @@ async function assessSeedBranch({ github, owner, repo, base, branch }) {
  * Point `branch` at `commitSha`, honouring the verdict `assessSeedBranch`
  * returned. This is the only place either seeder moves a seed ref.
  *
- * The update is a compare-and-swap: `expectedSha` is re-read immediately
- * beforehand, because the verdict is only valid for the sha it was computed
- * from. GitHub's updateRef takes no expected-sha, so this is the closest
- * available guard.
+ * The update is a true compare-and-swap: GraphQL `updateRefs` enforces
+ * `beforeOid` server-side and atomically rejects the move when the branch no
+ * longer points at `expectedSha` — there is no window between check and
+ * write. (REST `updateRef` takes no expected sha, which is why it is not
+ * used here.)
  *
  * @param {object} opts
  * @param {object} opts.github
@@ -165,15 +212,43 @@ async function moveSeedBranch({ github, owner, repo, branch, expectedSha, commit
     }
   }
 
-  const now = await github.rest.git.getRef({ owner, repo, ref: `heads/${branch}` });
-  if (now.data.object.sha !== expectedSha) {
+  let repositoryId;
+  try {
+    const res = await github.graphql(
+      'query($owner: String!, $repo: String!) { repository(owner: $owner, name: $repo) { id } }',
+      { owner, repo },
+    );
+    repositoryId = res.repository.id;
+  } catch {
+    return {
+      moved: false,
+      reason: `could not resolve ${owner}/${repo} for a guarded ref move — left alone`,
+    };
+  }
+
+  try {
+    // The rebuild is not a fast-forward, so the update is forced — but only
+    // through this guarded mutation, whose beforeOid pins the exact sha the
+    // safety verdict was computed from.
+    await github.graphql(
+      `mutation($repositoryId: ID!, $name: String!, $afterOid: GitObjectID!, $beforeOid: GitObjectID!) {
+        updateRefs(input: {
+          repositoryId: $repositoryId,
+          refUpdates: [{ name: $name, afterOid: $afterOid, beforeOid: $beforeOid, force: true }]
+        }) { clientMutationId }
+      }`,
+      {
+        repositoryId,
+        name: `refs/heads/${branch}`,
+        afterOid: commitSha,
+        beforeOid: expectedSha,
+      },
+    );
+  } catch {
+    // beforeOid mismatch (branch moved since the verdict) or any other
+    // rejection: the ref was not touched. Fail closed either way.
     return { moved: false, reason: `branch ${branch} moved during the run — left alone` };
   }
-  // Force is required (the rebuild is not a fast-forward) and safe: the branch
-  // was proven to hold only the seeder's own commit.
-  await github.rest.git.updateRef({
-    owner, repo, ref: `heads/${branch}`, sha: commitSha, force: true,
-  });
   return { moved: true, reason: 'rebuilt' };
 }
 

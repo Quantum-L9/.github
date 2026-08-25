@@ -5,3 +5,7 @@ extends: default
 rules:
   document-start: disable
   line-length: disable
+  # labels.yml ships one-line flow maps padded as "{ name: ... }" so
+  # ops/sync-labels-all.yml can regex-parse them — allow that single space.
+  braces:
+    max-spaces-inside: 1
