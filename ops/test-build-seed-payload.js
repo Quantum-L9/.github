@@ -180,7 +180,7 @@ try {
   assert.doesNotMatch(analysis, /pip install/);
   assert.doesNotMatch(analysis, /l9-ci-core[^\n]*@main/);
   assert.match(analysis, /security-events: write/);
-  assert.doesNotMatch(analysis, /with:[\s\S]{0,200}\$\{\{\s*env\./);
+  assert.doesNotMatch(analysis, /\$\{\{ env\./);
   assert.match(analysis, /^\s*language: "(python|typescript)"\s*$/m);
   assert.match(analysis, /^name: L9 Analysis\s*$/m);
 

@@ -34,7 +34,7 @@ jobs:
       security-events: write
     # Consumer-configurable inputs. These must be literals: the `env` context
     # is not available in jobs.<id>.with (only github/needs/strategy/matrix/
-    # inputs/vars are), so `${{ env.* }}` here silently evaluates empty.
+    # inputs/vars are), so an env expression here silently evaluates empty.
     # Set language to "typescript" for Node repos.
     with:
       profile: "pr_fast"
