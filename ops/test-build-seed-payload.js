@@ -181,8 +181,8 @@ try {
   assert.doesNotMatch(analysis, /l9-ci-core[^\n]*@main/);
   assert.match(analysis, /security-events: write/);
   assert.doesNotMatch(analysis, /\$\{\{ env\./);
-  assert.match(analysis, /^\s*language: "(python|typescript)"\s*$/m);
-  assert.match(analysis, /^name: L9 Analysis\s*$/m);
+  assert.match(analysis, /^ *language: "(python|typescript)" *$/m);
+  assert.match(analysis, /^name: L9 Analysis *$/m);
 
   const extsPython = JSON.parse(pack['.vscode/extensions.json']);
   assert.ok(extsPython.recommendations.includes('biomejs.biome'));
