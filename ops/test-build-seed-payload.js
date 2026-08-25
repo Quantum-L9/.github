@@ -171,12 +171,18 @@ try {
   assert.strictEqual(isStockUnsafeNodeWorkflow(nodeWf), false);
 
   const analysis = pack['.github/workflows/l9-analysis.yml'];
-  assert.match(analysis, /semgrep>=1\.100\.0,<2\.0\.0/);
-  assert.doesNotMatch(analysis, /pip install --upgrade pip semgrep$/m);
-  assert.match(analysis, /governance-pack-missing/);
-  assert.match(analysis, /name: Detect stack/);
-  assert.match(analysis, /SEMGREP_CONFIGS/);
-  assert.match(analysis, /^name: L9 Analysis\s*$/m);
+  // v2 central orchestrator: the SDK owns semgrep execution, stack routing,
+  // and governance fallback (resolve-governance defaults/). The seeded caller
+  // must be a thin stub — SHA-pinned kernel call, no tool installs of its own,
+  // and literal `with:` inputs (the env context is unavailable in
+  // jobs.<id>.with, so `${{ env.* }}` there silently evaluates empty).
+  assert.match(analysis, /analyze-semgrep\.yml@[0-9a-f]{40}/);
+  assert.doesNotMatch(analysis, /pip install/);
+  assert.doesNotMatch(analysis, /l9-ci-core[^\n]*@main/);
+  assert.match(analysis, /security-events: write/);
+  assert.doesNotMatch(analysis, /\$\{\{ env\./);
+  assert.match(analysis, /^ *language: "(python|typescript)" *$/m);
+  assert.match(analysis, /^name: L9 Analysis *$/m);
 
   const extsPython = JSON.parse(pack['.vscode/extensions.json']);
   assert.ok(extsPython.recommendations.includes('biomejs.biome'));

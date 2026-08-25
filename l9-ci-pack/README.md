@@ -46,7 +46,7 @@ written only when the consumer has `pyproject.toml` or
 
 ## 2. Prerequisites
 
-- Pin Core at **`f88116503430aa18992b70d8d31063e34ff97ef1`** (the current
+- Pin Core at **`7148fc73dcbf41367f5c5401432dc997b1f4f869`** (the current
   verified candidate; will become `@v2.0.0` once released). **Never `@main`.**
 - **Never** copy the legacy `@v1` kernel starters for new work — see §9.
 

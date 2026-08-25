@@ -27,21 +27,16 @@ last_audited: "2026-07-05"
 v2:
   schema_version: "1.0"
   kernel_provider: "Quantum-L9/l9-ci-core"
-  current_sha: "f88116503430aa18992b70d8d31063e34ff97ef1"
+  current_sha: "7148fc73dcbf41367f5c5401432dc997b1f4f869"
   status: "pre-release-candidate"  # flips to "released" once v2.0.0 is tagged
   pack_path: "l9-ci-pack/"
   pack_readme: "l9-ci-pack/README.md"
   reusable_workflows:
-    - name: profile-normalize-semgrep
+    - name: analyze-semgrep
       file: "l9-ci-pack/workflows/l9-analysis.yml"
-      calls: "Quantum-L9/l9-ci-core/.github/workflows/profile-normalize-semgrep.yml"
+      calls: "Quantum-L9/l9-ci-core/.github/workflows/analyze-semgrep.yml"
       classification: KERNEL
-      description: "Semgrep -> SDK normalize/validate/route, one job per caller repo."
-    - name: publish-analysis
-      file: "l9-ci-pack/workflows/l9-analysis.yml"
-      calls: "Quantum-L9/l9-ci-core/.github/workflows/publish-analysis.yml"
-      classification: KERNEL
-      description: "Publishes the resolved GitHub check + PR annotations from the SDK agent-review projection."
+      description: "Central CI orchestrator: SDK-owned semgrep execution, gate evaluation, agent payload + SARIF projection, published check. Replaces the profile-normalize-semgrep + publish-analysis pair at this pin."
   consumer_owned_templates:
     - name: l9-lint-test
       file: "l9-ci-pack/workflows/l9-lint-test.yml"
