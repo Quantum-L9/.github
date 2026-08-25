@@ -1,20 +1,23 @@
 schema_version: "1.0"
 kernel_provider: "Quantum-L9/l9-ci-core"
-current_ref: "2b330a5aab90cd7781bef08f14c5e7904b61bc56"
-current_sha: "2b330a5aab90cd7781bef08f14c5e7904b61bc56"
-last_audited: "2026-07-05"
+current_ref: "7148fc73dcbf41367f5c5401432dc997b1f4f869"
+current_sha: "7148fc73dcbf41367f5c5401432dc997b1f4f869"
+last_audited: "2026-08-25"
 
 # TAG DISCIPLINE:
 # v1.0.0 — immutable annotated tag, protected via GitHub tag protection rules
 # v1      — moving tag, force-updated by platform team on backward-compatible changes
 # v2      — cut for breaking changes (new required inputs, removed outputs, renamed jobs)
-# Never reference @main from thin callers. Legacy kernels pin the frozen
-# SHA below — `l9-ci-core` has no `v1` tag (see issue #7).
+# Never reference @main from thin callers. `l9-ci-core` has no `v1` tag
+# (see issue #7).
 #
-# v1 is FROZEN (historical): l9-ci-core `main` has since been rewritten as a
-# thin control plane (v2) and no longer contains these 8 kernels at HEAD —
-# they only exist at the pinned historical commit above. Gallery starters
-# pin that SHA directly so "Set up this workflow" resolves.
+# 2026-08-25 pin refresh: the 8 v1 kernels below exist again at Core HEAD
+# (they were absent only from the interim thin-control-plane rewrite).
+# Verified at 7148fc7: every kernel's workflow_call interface is a strict
+# superset of the frozen 2b330a5 interface — added inputs are all
+# required: false with defaults, so already-imported v1 wrappers keep
+# resolving and keep their behavior. Gallery starters and this registry
+# now pin the same unified SHA as l9-ci-pack (see v2 below).
 
 # v2 (CURRENT — start here for all new work):
 #   Full instantiation pack:  l9-ci-pack/  (README.md + governance/ + workflows/)
@@ -22,7 +25,7 @@ last_audited: "2026-07-05"
 #                              commit SHA pre-release; @v2.0.0 / @v2 after cut)
 #   Legacy v1 starters:       workflow-templates/l9-{pr-pipeline,security,
 #                              scorecard,sbom,pre-commit,nightly,release,
-#                              governance,node-ts-monorepo}.yml — frozen @v1,
+#                              governance,node-ts-monorepo}.yml — same pin,
 #                              kept only for already-imported wrappers.
 v2:
   schema_version: "1.0"
