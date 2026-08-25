@@ -1,0 +1,11 @@
+# Lint distributed YAML the way the strictest consumer does (extends: default).
+# Seeded labels.yml must pass here before it is shipped to consumers.
+extends: default
+
+rules:
+  document-start: disable
+  line-length: disable
+  # labels.yml ships one-line flow maps padded as "{ name: ... }" so
+  # ops/sync-labels-all.yml can regex-parse them — allow that single space.
+  braces:
+    max-spaces-inside: 1
