@@ -27,6 +27,11 @@ const {
 } = require('./repo-class-profile.js');
 const { buildSeedPayload, DEFAULT_CATEGORIES } = require('./build-seed-payload.js');
 
+// `[].sort()` with no comparator sorts by string conversion. These lists are
+// already strings, but an assertion whose outcome depends on an implicit
+// ordering rule is one refactor away from being wrong, so the rule is stated.
+const byName = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+
 const root = path.resolve(__dirname, '..');
 const origCwd = process.cwd();
 process.chdir(root);
@@ -101,8 +106,8 @@ try {
   // ── the default class is a behavioral no-op ────────────────────────────
   // Every org sweep that ran before profiles existed must keep its payload.
   assert.deepStrictEqual(
-    [...def.seed_categories].sort(),
-    [...DEFAULT_CATEGORIES].sort(),
+    [...def.seed_categories].sort(byName),
+    [...DEFAULT_CATEGORIES].sort(byName),
     'default class must reproduce DEFAULT_CATEGORIES exactly',
   );
   assert.deepStrictEqual(def.inherit, []);
@@ -111,8 +116,8 @@ try {
     const legacy = buildSeedPayload({ fs, hasPython, repository: 'Quantum-L9/x' });
     const profiled = buildSeedPayload({ fs, profile: def, hasPython, repository: 'Quantum-L9/x' });
     assert.deepStrictEqual(
-      Object.keys(profiled).sort(),
-      Object.keys(legacy).sort(),
+      Object.keys(profiled).sort(byName),
+      Object.keys(legacy).sort(byName),
       `default class must not change the payload (hasPython=${hasPython})`,
     );
     for (const dest of Object.keys(legacy)) {
@@ -127,7 +132,7 @@ try {
     hasPython: true,
     repository: 'Quantum-L9/l9-observability-core',
   });
-  const bornDests = Object.keys(born).sort();
+  const bornDests = Object.keys(born).sort(byName);
   assert.deepStrictEqual(bornDests, [
     '.github/CODEOWNERS',
     '.github/dependabot.yml',
@@ -168,7 +173,10 @@ try {
   const inheritOnly = { 'CODE_OF_CONDUCT.md': 'x', '.github/ISSUE_TEMPLATE/1-bug.yml': 'y', 'keep.md': 'z' };
   const { payload: kept, inherited } = applyProfile(inheritOnly, ncp);
   assert.deepStrictEqual(Object.keys(kept), ['keep.md']);
-  assert.deepStrictEqual(inherited.sort(), ['.github/ISSUE_TEMPLATE/1-bug.yml', 'CODE_OF_CONDUCT.md']);
+  assert.deepStrictEqual(inherited.sort(byName), [
+    '.github/ISSUE_TEMPLATE/1-bug.yml',
+    'CODE_OF_CONDUCT.md',
+  ]);
 
   // ── mandatory-file waivers ─────────────────────────────────────────────
   assert.ok(waivesMandatoryFile(ncp, '.github/workflows/governance.yml'));
