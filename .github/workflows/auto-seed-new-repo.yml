@@ -91,6 +91,7 @@ jobs:
             const {
               loadRepoClasses,
               parseClassMarker,
+              classForRepo,
               resolveProfile,
             } = require('./ops/repo-class-profile.js');
 
@@ -150,10 +151,11 @@ jobs:
                 const marker = FORCED_CLASS
                   ? null
                   : await readText(o, n, classes.marker_path);
-                const profile = resolveProfile(
-                  classes,
-                  FORCED_CLASS || parseClassMarker(marker),
-                );
+                const decided = FORCED_CLASS
+                  ? { name: FORCED_CLASS, source: 'operator input' }
+                  : classForRepo(classes, n, marker);
+                const profile = resolveProfile(classes, decided.name);
+                if (decided.name) profile.resolved_from = decided.source;
 
                 const payload = buildSeedPayload({
                   fs,

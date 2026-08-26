@@ -19,6 +19,7 @@ const {
   parseJsonInYaml,
   loadRepoClasses,
   parseClassMarker,
+  classForRepo,
   matchPattern,
   resolveProfile,
   applyProfile,
@@ -184,7 +185,75 @@ try {
     );
   }
 
+  // ── org overrides: classify a repo that has not declared a marker ──────
+  // Every one of these was a live red seeder PR before the class existed.
+  const OVERRIDE_EXPECTATIONS = {
+    'l9-repo-template': 'non_constellation_python',
+    'l9-ci-core': 'self_governed',
+    'l9-meta-injector': 'self_governed',
+  };
+  for (const [repo, expected] of Object.entries(OVERRIDE_EXPECTATIONS)) {
+    const decided = classForRepo(doc, repo, null);
+    assert.strictEqual(decided.name, expected, `${repo} resolves to ${expected}`);
+    assert.strictEqual(decided.source, 'org override');
+  }
+
+  // A repository's own declaration outranks the override — the org classifies
+  // what has not declared, it does not overrule what has.
+  const declared = classForRepo(doc, 'l9-ci-core', 'profile: non_constellation_python\n');
+  assert.strictEqual(declared.name, 'non_constellation_python');
+  assert.strictEqual(declared.source, 'marker');
+
+  // An unlisted repo with no marker keeps the historic behavior exactly.
+  const plain = classForRepo(doc, 'some-other-repo', null);
+  assert.strictEqual(plain.name, null);
+  assert.strictEqual(resolveProfile(doc, plain.name).name, 'default');
+
+  // An override naming an undefined class is a policy bug, caught at load.
+  assert.throws(
+    () => loadRepoClasses({
+      existsSync: () => true,
+      readFileSync: () => JSON.stringify({
+        default_class: 'default',
+        classes: { default: {} },
+        overrides: { 'x': 'nope' },
+      }),
+    }),
+    /override x names undefined class nope/,
+  );
+
+  // ── self_governed writes no files at all ───────────────────────────────
+  const selfGoverned = resolveProfile(doc, 'self_governed');
+  assert.deepStrictEqual(selfGoverned.seed_categories, [], 'self_governed materializes nothing');
+  for (const hasPython of [true, false]) {
+    const payload = buildSeedPayload({
+      fs, profile: selfGoverned, hasPython, repository: 'Quantum-L9/l9-ci-core',
+    });
+    assert.deepStrictEqual(
+      Object.keys(payload), [],
+      'a self-governed repo receives capabilities through the API, never files',
+    );
+  }
+  assert.ok(selfGoverned.remote_apply.labels, 'labels still apply remotely');
+  assert.ok(selfGoverned.remote_apply.repo_settings, 'settings still apply remotely');
+  // The paths that actually broke these repos must be forbidden outright.
+  for (const denied of [
+    '.github/workflows/governance.yml',
+    '.github/workflows/l9-lint-test.yml',
+    '.github/workflows/l9-lint-test-node.yml',
+  ]) {
+    assert.ok(
+      matchPattern(selfGoverned.forbid, denied),
+      `self_governed must forbid ${denied}`,
+    );
+  }
+  // Mandatory-file reporting must not nag a repo for files it may not carry.
+  assert.ok(waivesMandatoryFile(selfGoverned, '.github/workflows/governance.yml'));
+  assert.ok(waivesMandatoryFile(selfGoverned, '.github/CODEOWNERS'));
+
   console.log('ok: repo-classes policy is JSON-in-YAML and PyYAML-readable');
+  console.log('ok: org overrides classify undeclared repos; a marker still outranks them');
+  console.log('ok: self_governed seeds zero files and still applies labels + settings remotely');
   console.log('ok: unknown/absent/unparseable class falls back to default, never widens');
   console.log('ok: default class reproduces pre-profile seeding byte-for-byte');
   console.log('ok: non_constellation_python seeds no template-denied CI distribution path');

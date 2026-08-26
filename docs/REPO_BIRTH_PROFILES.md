@@ -56,6 +56,15 @@ repository asked for.
 |-------|-----|-------|---------|
 | `default` | Unclassified repositories | The historic `DEFAULT_CATEGORIES` set, byte-for-byte | — |
 | `non_constellation_python` | `l9-repo-template` offspring | `.github/CODEOWNERS`, `.github/dependabot.yml`, `.github/labels.yml` | org CI distribution (11 paths) |
+| `self_governed` | Repos owning their complete CI/validation surface | nothing — capabilities apply through the API | org CI distribution + governance caller |
+
+### Assigning a class without a commit in the repo
+
+`overrides` in `policies/repo-classes.yml` maps a repository name to a class.
+Precedence is **marker > overrides > default_class**: a repository's own
+declaration always wins. `overrides` exists so the organization can classify a
+repository that has not declared one yet — not to overrule one that has. An
+override naming an undefined class fails at policy load, not at seed time.
 
 `default` is a behavioral no-op, asserted in `ops/test-repo-class-profile.js`:
 every sweep that ran before profiles existed keeps its exact payload. Adding a
@@ -86,6 +95,34 @@ A newborn does not wait for it. `make new-repo` dispatches
 settings are applied, then the **remote** is read back and attested. A birth
 that only checks what it assembled locally has proved nothing about what GitHub
 actually holds.
+
+## Why seeder PRs were turning red
+
+An audit of the seeder's own pull requests (2026-08-26) found five distinct
+causes. Three were bugs in the distributed CI caller; two were consumer
+invariants the seeder cannot satisfy by writing files.
+
+| Cause | Symptom | Fix |
+|-------|---------|-----|
+| `pytest --cov` with no `pytest-cov` | `pytest: error: unrecognized arguments: --cov=.` — exit 4 | coverage flags are added only when an import probe finds the plugin |
+| `mypy .` in a flat-layout repo | type-checks `tests/`, fixtures and vendored trees for the first time — 11 errors in `l9-ci-core` | `--exclude` for test/fixture dirs when `SOURCE_DIR` resolves to `.` |
+| Unqualified job name | seeded `Lint and Type Check` collided with the consumer's own job of that name; one green and one red check under one context | renamed to `Python Lint and Type Check`, matching the existing `Python Test Suite` convention |
+| Repo-local deny list | `l9-repo-template` fails closed on the seeded org-CI paths | `non_constellation_python` forbids them |
+| Repo-local invariants | `l9-ci-core` bans write permissions in unlisted workflows; `l9-meta-injector` binds a committed report to a `git ls-files` digest, so **any** added file reddens its own `smoke` job | `self_governed` seeds no files at all |
+
+The coverage bug had a specific history worth recording: an earlier hardening
+removed an unpinned `pip install pytest-cov` fallback — correctly — but removed
+the *probe* with it and left the four `--cov` flags in place. The gate written
+to enforce "no unpinned plugin installs" forbade reading too. The rule is *do
+not install an unpinned plugin*, not *do not look*, and
+`ops/validate-starters.sh` now says so, while additionally failing a caller that
+passes `--cov` with no probe, that probes through a pipe (`set -o pipefail`
+turns `grep -q`'s early exit into 141), or that publishes an unqualified job
+name.
+
+Not every red check on a seeder PR was the seeder's. `SonarCloud Code
+Analysis`, `declare-task`, and `Dependabot` are red on those repositories'
+`main` branches too, and are out of scope here.
 
 ## Adding a class
 

@@ -22,12 +22,21 @@
 # JSON is a YAML subset, so yaml.safe_load() parses this too.
 #
 # A repository declares its class in `.l9/org-birth-profile.yaml`. A repository
-# with no marker resolves to `default`, whose behavior is byte-identical to
-# pre-profile seeding.
+# with no marker resolves through `overrides` below, and failing that to
+# `default`, whose behavior is byte-identical to pre-profile seeding.
+#
+# Precedence: marker > overrides > default_class. A repository's own
+# declaration always wins — `overrides` exists so the organization can classify
+# a repository that has not declared one yet, not to overrule one that has.
 {
   "schema": "l9.org-birth-profile/v1",
   "default_class": "default",
   "marker_path": ".l9/org-birth-profile.yaml",
+  "overrides": {
+    "l9-repo-template": "non_constellation_python",
+    "l9-ci-core": "self_governed",
+    "l9-meta-injector": "self_governed"
+  },
   "classes": {
     "default": {
       "description": "Unclassified repository. Preserves historic org-wide seeding exactly.",
@@ -47,6 +56,36 @@
         "repo_settings": true
       },
       "mandatory_files_waive": []
+    },
+    "self_governed": {
+      "description": "A repository that owns its complete lint/test/validation surface and enforces invariants about which files and permissions may exist in it. Seeding files into one is not a no-op: l9-ci-core fails `tests/workflows/test_workflow_permissions.py` on a seeded governance caller that requests `pull-requests: write`, and l9-meta-injector binds a committed validation report to a `git ls-files` digest of the whole tree, so ANY added file makes its own `smoke` job red. The organization applies capabilities to these repos through the API, not by writing files into them.",
+      "seed_categories": [],
+      "inherit": [
+        "CODE_OF_CONDUCT.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
+        ".github/FUNDING.yml",
+        ".github/ISSUE_TEMPLATE/**",
+        ".github/pull_request_template.md",
+        ".github/PULL_REQUEST_TEMPLATE/**"
+      ],
+      "forbid": [
+        ".github/workflows/l9-analysis.yml",
+        ".github/workflows/l9-lint-test.yml",
+        ".github/workflows/l9-lint-test-node.yml",
+        ".github/workflows/governance.yml",
+        ".github/workflows/on-org-update.yml",
+        ".github/governance/**"
+      ],
+      "remote_apply": {
+        "labels": true,
+        "repo_settings": true
+      },
+      "mandatory_files_waive": [
+        ".github/workflows/governance.yml",
+        ".github/CODEOWNERS",
+        ".github/dependabot.yml"
+      ]
     },
     "non_constellation_python": {
       "description": "Quantum-L9/l9-repo-template offspring. Python runtimes, side projects, and experiments outside Constellation. Organization CI targeting belongs to l9-ci-core / l9-ci-control-plane and is never distributed into the repository.",

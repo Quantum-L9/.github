@@ -64,6 +64,11 @@ function loadRepoClasses(fs, path = DEFAULT_CLASSES_PATH) {
   if (!doc.classes[doc.default_class]) {
     throw new Error(`${path} default_class ${doc.default_class} is not defined`);
   }
+  for (const [repo, cls] of Object.entries(doc.overrides || {})) {
+    if (!doc.classes[cls]) {
+      throw new Error(`${path} override ${repo} names undefined class ${cls}`);
+    }
+  }
   return doc;
 }
 
@@ -106,6 +111,28 @@ function matchPattern(patterns, dest) {
     }
   }
   return null;
+}
+
+/**
+ * Decide which class a repository belongs to.
+ *
+ * Precedence is marker > overrides > default_class. A repository's own
+ * declaration always wins: `overrides` exists so the organization can classify
+ * a repository that has not declared one yet, never to overrule one that has.
+ *
+ * @param {object} doc  parsed policy document
+ * @param {string} repoName  bare repository name (no owner)
+ * @param {string|null} markerText  contents of the repo's marker file, if any
+ * @returns {{name: string|null, source: string}}
+ */
+function classForRepo(doc, repoName, markerText) {
+  const declared = parseClassMarker(markerText);
+  if (declared) return { name: declared, source: 'marker' };
+  const overrides = doc.overrides || {};
+  if (repoName && Object.prototype.hasOwnProperty.call(overrides, repoName)) {
+    return { name: overrides[repoName], source: 'org override' };
+  }
+  return { name: null, source: 'default' };
 }
 
 /**
@@ -204,6 +231,7 @@ module.exports = {
   parseJsonInYaml,
   loadRepoClasses,
   parseClassMarker,
+  classForRepo,
   matchPattern,
   resolveProfile,
   applyProfile,

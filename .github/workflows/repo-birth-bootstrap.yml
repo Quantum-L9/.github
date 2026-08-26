@@ -80,6 +80,7 @@ jobs:
             const {
               loadRepoClasses,
               parseClassMarker,
+              classForRepo,
               resolveProfile,
             } = require('./ops/repo-class-profile.js');
             const { parseLabels } = require('./ops/label-taxonomy.js');
@@ -119,7 +120,11 @@ jobs:
             if (FORCED_CLASS) resolveProfile(classes, FORCED_CLASS, { strict: true });
 
             const marker = FORCED_CLASS ? null : await readText(classes.marker_path);
-            const profile = resolveProfile(classes, FORCED_CLASS || parseClassMarker(marker));
+            const decided = FORCED_CLASS
+              ? { name: FORCED_CLASS, source: 'operator input' }
+              : classForRepo(classes, TARGET, marker);
+            const profile = resolveProfile(classes, decided.name);
+            if (decided.name) profile.resolved_from = decided.source;
             core.info(`repo class: ${profile.name} (${profile.resolved_from})`);
 
             const repo = await github.rest.repos.get({ owner: ORG, repo: TARGET });
@@ -213,12 +218,15 @@ jobs:
               record(`present:${path}`, present, present ? 'on remote HEAD' : 'missing on remote HEAD');
             }
 
+            // A repository classed by an org override legitimately carries no
+            // marker; only a marker that CONTRADICTS the resolved class is a
+            // failure. Demanding one would fail every override-classed repo.
             const markerClass = parseClassMarker(await readText(classes.marker_path));
-            record(
-              'marker:class',
-              markerClass === profile.name,
-              markerClass ? `marker says ${markerClass}` : 'marker unreadable or absent',
-            );
+            if (markerClass) {
+              record('marker:class', markerClass === profile.name, `marker says ${markerClass}`);
+            } else {
+              attest.push(['marker:class', 'SKIP', `no marker; class from ${profile.resolved_from}`]);
+            }
 
             // FORBID is an attestation, not only a build-time filter: a
             // repository can acquire a forbidden path from any source after

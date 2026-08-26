@@ -6,12 +6,21 @@
 #
 # Org-seed safety (mirrors Node #58):
 #   - Lint / test run only when `pyproject.toml` or `requirements.txt` exists.
-#   - The test job is named `Python Test Suite`, not `Test Suite`, so it
-#     cannot collide with a required Node check context.
-#   - Toolchain versions come only from install-consumer-ci: no unpinned
-#     pytest plugin fallbacks. That action pins ruff, mypy and pytest and
-#     nothing else, so the pytest invocation below stays inside that set --
-#     see Core's own pr-pipeline.yml, which runs a bare `pytest -q`.
+#   - Job names are language-qualified -- `Python Test Suite` and
+#     `Python Lint and Type Check`, never the bare `Test Suite` /
+#     `Lint and Type Check` -- so a seeded job cannot collide with a check
+#     context the consumer already publishes from its own workflow. l9-ci-core
+#     ships `Lint and Type Check` in self-ci.yml; when this file used the same
+#     name, one green and one red check ran under a single required context.
+#   - Toolchain versions come only from install-consumer-ci. That action pins
+#     ruff, mypy and pytest and NOTHING ELSE -- in particular no pytest-cov --
+#     so the coverage flags below are added only when the consumer's own
+#     dependencies already provide the plugin. Passing `--cov` unconditionally
+#     made pytest exit 4 (`unrecognized arguments`) in every consumer that does
+#     not ship pytest-cov itself.
+#   - mypy is never pointed at the whole checkout. In a flat-layout repo
+#     SOURCE_DIR resolves to `.`, and type-checking a repo's own tests/ for the
+#     first time is a guaranteed red on code the consumer never opted in to.
 #   - The consumer's own package and dependencies are still installed from
 #     pyproject.toml / requirements.txt in BOTH jobs: pytest fails on import
 #     without them, and mypy silently type-checks a different world without
@@ -89,7 +98,7 @@ jobs:
           fi
 
   lint:
-    name: Lint and Type Check
+    name: Python Lint and Type Check
     needs: detect-python
     if: needs.detect-python.outputs.has_python == 'true'
     runs-on: ubuntu-latest
@@ -147,7 +156,19 @@ jobs:
         env:
           SOURCE_DIR: ${{ steps.srcdir.outputs.dir }}
         run: |
-          mypy "${SOURCE_DIR}" \
+          set -euo pipefail
+          # A src-layout repo already scopes mypy to its package. A flat-layout
+          # repo resolves SOURCE_DIR to `.`, where an unscoped run type-checks
+          # tests/, fixtures and vendored trees the consumer never checked --
+          # 11 pre-existing errors in l9-ci-core's tests/ turned a seeded PR red
+          # while the repo's own type-check stayed green.
+          args=()
+          if [ "${SOURCE_DIR}" = "." ]; then
+            for d in tests test docs examples fixtures vendor .venv build dist; do
+              if [ -e "${d}" ]; then args+=(--exclude "^${d}/"); fi
+            done
+          fi
+          mypy "${SOURCE_DIR}" "${args[@]+"${args[@]}"}" \
             --show-error-codes --pretty \
             --install-types --non-interactive --ignore-missing-imports
 
@@ -204,14 +225,27 @@ jobs:
           fi
           echo "dir=${dir}" >> "$GITHUB_OUTPUT"
           echo "::notice::SOURCE_DIR resolved to ${dir}"
-      - name: pytest with coverage
+      - name: pytest
         env:
           TESTING: "true"
           SOURCE_DIR: ${{ steps.srcdir.outputs.dir }}
         run: |
           set -euo pipefail
-          PYTHONPATH=. pytest "${TEST_DIR}" \
-            --cov="${SOURCE_DIR}" \
-            --cov-report=xml --cov-report=term-missing \
-            --cov-fail-under="${COVERAGE_THRESHOLD}" \
-            --tb=short -v
+          # install-consumer-ci pins ruff, mypy and pytest -- not pytest-cov.
+          # Coverage is therefore opt-in on what the consumer already ships:
+          # present -> full coverage run; absent -> a bare pytest run, which is
+          # what Core's own pr-pipeline.yml does. Installing the plugin here
+          # would reintroduce an unpinned toolchain dependency.
+          # Probe by import, not by `pytest --help | grep`: under
+          # `set -o pipefail` grep exits at the first match, pytest takes
+          # SIGPIPE, and the pipeline reports 141 -- so the probe answers
+          # "absent" on a repo that ships the plugin.
+          cov=()
+          if python -c "import pytest_cov" 2>/dev/null; then
+            cov=(--cov="${SOURCE_DIR}"
+                 --cov-report=xml --cov-report=term-missing
+                 --cov-fail-under="${COVERAGE_THRESHOLD}")
+          else
+            echo "::notice::pytest-cov not provided by this repository; running without coverage"
+          fi
+          PYTHONPATH=. pytest "${TEST_DIR}" "${cov[@]+"${cov[@]}"}" --tb=short -v
