@@ -209,6 +209,14 @@ else
       echo "❌ $py_wf probes pytest-cov through a pipe — set -o pipefail reports 141 on grep's early exit"
       py_ok=false
     fi
+    if ! grep -q 'L9_SEED_OWNED' "$py_wf"; then
+      echo "❌ $py_wf lost its L9_SEED_OWNED marker — the next make sync-core will overwrite it from Core"
+      py_ok=false
+    fi
+    if ! grep -q 'L9_SEED_OWNED' ops/sync-v2-starters.sh; then
+      echo "❌ ops/sync-v2-starters.sh no longer honors L9_SEED_OWNED — seed hardening is clobberable again"
+      py_ok=false
+    fi
     if $py_ok; then
       echo "✅ $py_wf is skip-safe (qualified job names, guarded coverage, toolchain from install-consumer-ci)"
       PASS=$((PASS+1))

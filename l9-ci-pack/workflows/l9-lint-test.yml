@@ -1,3 +1,14 @@
+# L9_SEED_OWNED: this file is owned by Quantum-L9/.github, not by the Core
+# sync. It is the seed-hardened variant of l9-ci-core's
+# docs/templates/l9-lint-test.yml and deliberately differs from it: the biome
+# job is dropped, a detect-python gate is added, job names are
+# language-qualified, and the pytest invocation carries no unpinned plugin
+# flags. Core's template targets a human who copies it once and edits it;
+# this one is written unattended into ~45 repositories that never edit it.
+# ops/sync-v2-starters.sh refuses to overwrite a file carrying this marker —
+# without it, `make sync-core` silently reverted every seed-safety fix and the
+# seeder went back to opening red PRs.
+#
 # L9 consumer lint + test workflow (TEMPLATE — copy into your repo)
 #
 # This file is NOT executed from l9-ci-core. Copy it into the CONSUMER
