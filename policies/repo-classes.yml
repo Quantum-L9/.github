@@ -1,0 +1,87 @@
+# Organization birth profiles — repo-class contract (JSON-in-YAML).
+#
+# The organization does not give every repository "all files". It gives every
+# repository all *applicable capabilities*. This file is the SSOT for which
+# capabilities apply to which class of repository.
+#
+# Three modes, per CAPABILITY not per file:
+#
+#   INHERIT        GitHub supplies it dynamically from Quantum-L9/.github.
+#                  The repository must NOT carry a copy. Never seeded.
+#   MATERIALIZE    The repository must contain the file. Seeded missing-only.
+#   REMOTE APPLY   GitHub API state, not a file. Applied at birth + on sweeps.
+#
+# plus one prohibition:
+#
+#   FORBID         The repository must never carry this path. A payload that
+#                  would write one is a configuration bug and throws.
+#
+# JSON-in-YAML (same convention as l9-ci-pack/governance/*.yaml) so both
+# ops/repo-class-profile.js (Node, no js-yaml) and the Python birth
+# orchestrator in l9-repo-template read one file with zero YAML dependency.
+# JSON is a YAML subset, so yaml.safe_load() parses this too.
+#
+# A repository declares its class in `.l9/org-birth-profile.yaml`. A repository
+# with no marker resolves to `default`, whose behavior is byte-identical to
+# pre-profile seeding.
+{
+  "schema": "l9.org-birth-profile/v1",
+  "default_class": "default",
+  "marker_path": ".l9/org-birth-profile.yaml",
+  "classes": {
+    "default": {
+      "description": "Unclassified repository. Preserves historic org-wide seeding exactly.",
+      "seed_categories": [
+        "codeowners",
+        "dependabot",
+        "governance",
+        "community-health",
+        "issue-templates",
+        "pr-templates",
+        "l9-ci-pack"
+      ],
+      "inherit": [],
+      "forbid": [],
+      "remote_apply": {
+        "labels": true,
+        "repo_settings": true
+      },
+      "mandatory_files_waive": []
+    },
+    "non_constellation_python": {
+      "description": "Quantum-L9/l9-repo-template offspring. Python runtimes, side projects, and experiments outside Constellation. Organization CI targeting belongs to l9-ci-core / l9-ci-control-plane and is never distributed into the repository.",
+      "seed_categories": [
+        "codeowners",
+        "dependabot",
+        "labels"
+      ],
+      "inherit": [
+        "CODE_OF_CONDUCT.md",
+        ".github/FUNDING.yml",
+        ".github/ISSUE_TEMPLATE/**",
+        ".github/pull_request_template.md",
+        ".github/PULL_REQUEST_TEMPLATE/**"
+      ],
+      "forbid": [
+        ".github/workflows/l9-analysis.yml",
+        ".github/workflows/l9-lint-test.yml",
+        ".github/workflows/l9-lint-test-node.yml",
+        ".github/workflows/governance.yml",
+        ".github/workflows/on-org-update.yml",
+        ".github/governance/**",
+        "biome.json",
+        ".biomeignore",
+        ".l9/ci-pin",
+        "requirements-consumer-ci.txt",
+        "scripts/sync_ci_from_pack.py"
+      ],
+      "remote_apply": {
+        "labels": true,
+        "repo_settings": true
+      },
+      "mandatory_files_waive": [
+        ".github/workflows/governance.yml"
+      ]
+    }
+  }
+}

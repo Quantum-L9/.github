@@ -2,6 +2,14 @@
 # Defines files that must exist in every repo. Enforced by enforce-policies.yml.
 # If a file is missing, a remediation PR is opened.
 #
+# Class-aware: a repository's class (policies/repo-classes.yml, declared in the
+# repo's `.l9/org-birth-profile.yaml`) may waive an entry via
+# `mandatory_files_waive`. That is how `.github/workflows/governance.yml` stays
+# mandatory org-wide while `non_constellation_python` repos — where
+# scripts/inventory_check.py fails closed on exactly that path — are not
+# reported for its absence. A missing waiver, not a missing file, is the bug
+# when those two disagree.
+#
 # mode:
 #   managed  — content must match template exactly; drift is auto-restored
 #   seeded   — file must exist; content is consumer-owned after first seed
@@ -22,6 +30,8 @@ files:
   - path: .github/workflows/governance.yml
     source: templates/governance-caller.yml
     mode: seeded
+    # Waived for classes that own their CI invocation upstream; see
+    # `mandatory_files_waive` in policies/repo-classes.yml.
 
   - path: README.md
     mode: present

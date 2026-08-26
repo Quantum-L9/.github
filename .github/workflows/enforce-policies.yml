@@ -53,6 +53,12 @@ jobs:
           script: |
             const { execSync } = require('child_process');
             const fs = require('fs');
+            const {
+              loadRepoClasses,
+              parseClassMarker,
+              resolveProfile,
+              waivesMandatoryFile,
+            } = require('./ops/repo-class-profile.js');
             const ORG = 'Quantum-L9';
             const DRY = process.env.DRY_RUN === 'true';
             const FILTER = process.env.FILTER;
@@ -68,6 +74,17 @@ jobs:
 
             const settingsPolicy = parseYaml('policies/repo-settings.yml');
             const filesPolicy = parseYaml('policies/mandatory-files.yml');
+            const classes = loadRepoClasses(fs);
+
+            const readText = async (repo, path) => {
+              try {
+                const res = await github.rest.repos.getContent({ owner: ORG, repo, path });
+                if (res.data && res.data.content) {
+                  return Buffer.from(res.data.content, 'base64').toString('utf8');
+                }
+              } catch { /* missing */ }
+              return null;
+            };
 
             const all = await github.paginate(github.rest.repos.listForOrg, {
               org: ORG, type: 'all', per_page: 100
@@ -129,9 +146,19 @@ jobs:
                 }
               }
 
-              // ── Mandatory files check ──
+              // ── Mandatory files check (class-aware) ──
+              // A repository declares its class; a class may waive a mandatory
+              // path it structurally must not carry. Reporting a repo for a
+              // file its own class forbids is noise that trains people to
+              // ignore this report.
               if (!fileExceptions.includes(n)) {
+                const profile = resolveProfile(
+                  classes,
+                  parseClassMarker(await readText(n, classes.marker_path)),
+                );
                 for (const file of (filesPolicy.files || [])) {
+                  if (waivesMandatoryFile(profile, file.path)) continue;
+
                   const exists = await github.rest.repos.getContent({
                     owner: ORG, repo: n, path: file.path
                   }).then(() => true).catch(() => false);

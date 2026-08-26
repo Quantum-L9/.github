@@ -1,7 +1,15 @@
-# Auto-seeds full org templates into newly created repositories.
+# Auto-seeds applicable org capabilities into newly created repositories.
 # Same payload as seed-governance.yml (ops/build-seed-payload.js).
 # Auth: org secret GH_TOKEN (AWS openclaw-igorbot/github#token) — see seed-governance.yml.
 # Advisory only — opens a PR, never pushes directly to main.
+#
+# Repo-class aware: each target resolves its class from
+# `.l9/org-birth-profile.yaml` against policies/repo-classes.yml. The seed is
+# the class's applicable capabilities, NOT every template file. A repo with no
+# marker resolves to `default`, whose payload is what this workflow always sent.
+# This is what keeps the seeder from writing `.github/workflows/governance.yml`
+# and the l9-ci-pack callers into an l9-repo-template repository, where
+# scripts/inventory_check.py fails closed on exactly those paths.
 #
 # Create-time path: an hourly cron lists org repos and seeds anything
 # missing (or still carrying the stock ESLint node caller). That does not
@@ -25,6 +33,10 @@ on:
     inputs:
       target_repo:
         description: "Specific repo name to seed (blank = all unseeded repos)"
+        type: string
+        default: ""
+      repo_class:
+        description: "Force a repo class (blank = resolve from each repo's .l9/org-birth-profile.yaml)"
         type: string
         default: ""
       dry_run:
@@ -61,6 +73,7 @@ jobs:
         env:
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
           TARGET_REPO: ${{ inputs.target_repo || github.event.client_payload.repository || '' }}
+          REPO_CLASS: ${{ inputs.repo_class || github.event.client_payload.repo_class || '' }}
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
@@ -75,9 +88,19 @@ jobs:
               assessSeedBranch,
               moveSeedBranch,
             } = require('./ops/seed-branch-safety.js');
+            const {
+              loadRepoClasses,
+              parseClassMarker,
+              resolveProfile,
+            } = require('./ops/repo-class-profile.js');
 
             const DRY = process.env.DRY_RUN === 'true';
             const TARGET = process.env.TARGET_REPO;
+            const FORCED_CLASS = (process.env.REPO_CLASS || '').trim();
+            const classes = loadRepoClasses(fs);
+            // A forced class is an operator statement, so a typo must stop the
+            // run rather than silently fall back to the wider default payload.
+            if (FORCED_CLASS) resolveProfile(classes, FORCED_CLASS, { strict: true });
             const BRANCH = 'chore/auto-seed-governance';
 
             const exists = async (owner, repo, path, ref) => {
@@ -120,8 +143,21 @@ jobs:
                 const hasPython = (await exists(o, n, 'pyproject.toml'))
                   || (await exists(o, n, 'requirements.txt'));
                 const hasPackageJson = await exists(o, n, 'package.json');
+
+                // The repository declares its own class; the organization
+                // honours it. An unreadable or unknown marker resolves to
+                // `default` — never to something wider than the repo asked for.
+                const marker = FORCED_CLASS
+                  ? null
+                  : await readText(o, n, classes.marker_path);
+                const profile = resolveProfile(
+                  classes,
+                  FORCED_CLASS || parseClassMarker(marker),
+                );
+
                 const payload = buildSeedPayload({
                   fs,
+                  profile,
                   hasRootCodeowners,
                   hasPython,
                   hasPackageJson,
@@ -129,7 +165,7 @@ jobs:
                 });
                 const paths = Object.keys(payload);
                 if (!paths.length) {
-                  rows.push([n, 'skipped (nothing safe to seed)']);
+                  rows.push([n, profile.name, 'skipped (nothing safe to seed)']);
                   continue;
                 }
 
@@ -145,7 +181,7 @@ jobs:
                 }
                 const { writes, replaced } = selectSeedWrites(payload, existingByPath);
                 if (!writes.length) {
-                  rows.push([n, 'already seeded']);
+                  rows.push([n, profile.name, 'already seeded']);
                   continue;
                 }
 
@@ -161,7 +197,7 @@ jobs:
                   github, owner: o, repo: n, base, branch: BRANCH,
                 });
                 if (gate.action === 'skip') {
-                  rows.push([n, gate.reason]);
+                  rows.push([n, profile.name, gate.reason]);
                   continue;
                 }
                 const branchSha = gate.sha;
@@ -172,7 +208,7 @@ jobs:
                     ? writes.join(', ')
                     : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
                   const onto = branchSha ? `; rebuild ${BRANCH}` : '';
-                  rows.push([n, `would seed ${writes.length}: ${preview}${upgrade}${onto}`]);
+                  rows.push([n, profile.name, `would seed ${writes.length}: ${preview}${upgrade}${onto}`]);
                   continue;
                 }
                 const baseRef = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
@@ -191,7 +227,7 @@ jobs:
                 }
 
                 if (!treeItems.length) {
-                  rows.push([n, 'already seeded']);
+                  rows.push([n, profile.name, 'already seeded']);
                   continue;
                 }
 
@@ -212,7 +248,7 @@ jobs:
                   expectedSha: branchSha, commitSha: commit.data.sha,
                 });
                 if (!moved.moved) {
-                  rows.push([n, moved.reason]);
+                  rows.push([n, profile.name, moved.reason]);
                   continue;
                 }
 
@@ -220,7 +256,12 @@ jobs:
                   owner: o, repo: n, head: BRANCH, base,
                   title: 'chore(governance): auto-seed org templates from Quantum-L9/.github',
                   body: [
-                    'Automatically seeds org template files from `Quantum-L9/.github/templates/` plus the `l9-ci-pack/` Core hub.',
+                    'Automatically seeds the org capabilities applicable to this repository from `Quantum-L9/.github/templates/` plus the `l9-ci-pack/` Core hub.',
+                    '',
+                    `**Repo class:** \`${profile.name}\` (${profile.resolved_from}) — see \`policies/repo-classes.yml\`.`,
+                    profile.inherit.length
+                      ? `Inherited from the org \`.github\` repo and deliberately **not** copied here: ${profile.inherit.map(p => `\`${p}\``).join(', ')}.`
+                      : '',
                     '',
                     '### Files in this PR',
                     ...treeItems.map(t => `- \`${t.path}\``),
@@ -234,12 +275,12 @@ jobs:
                     '_Opened automatically by Quantum-L9/.github auto-seed._',
                   ].join('\n'),
                 });
-                rows.push([n, `PR #${pr.data.number} (${treeItems.length} file(s))`]);
+                rows.push([n, profile.name, `PR #${pr.data.number} (${treeItems.length} file(s))`]);
               } catch (e) {
                 failed.push(n);
                 const msg = `${e.status || ''} ${e.message || e}`.replace(/\s+/g, ' ').slice(0, 120);
                 core.error(`${n}: failed: ${msg}`);
-                rows.push([n, `failed: ${msg}`]);
+                rows.push([n, '?', `failed: ${msg}`]);
               }
             }
 
@@ -247,7 +288,11 @@ jobs:
             await core.summary
               .addHeading(`Auto-seed (${mode}) — ${rows.length} repos`, 2)
               .addTable([
-                [{data: 'Repo', header: true}, {data: 'Result', header: true}],
+                [
+                  {data: 'Repo', header: true},
+                  {data: 'Class', header: true},
+                  {data: 'Result', header: true},
+                ],
                 ...rows.map(r => r.map(String))
               ])
               .write();

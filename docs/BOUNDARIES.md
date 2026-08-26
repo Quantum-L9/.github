@@ -16,6 +16,8 @@ in the CI constellation and must not be reimplemented here.
 | PR/issue description quality | **this repo** | advisory gates |
 | Community health files (SECURITY, CONTRIBUTING, templates) | **this repo** | inherited org-wide |
 | CODEOWNERS, dependabot.yml (non-inheritable) | **this repo** | one-time seed |
+| Which capabilities a repo class receives | **this repo** | `policies/repo-classes.yml` |
+| How a repository is born | `l9-repo-template` | `make new-repo` — declares its class, this repo decides what that class gets |
 | Org rulesets, secret scanning posture | **this repo** | advisory / evaluate mode |
 | Cross-repo governance *reporting* | **this repo** | read-only weekly report |
 

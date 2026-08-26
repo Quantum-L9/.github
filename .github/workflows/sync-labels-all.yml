@@ -1,6 +1,10 @@
 # Syncs the org-standard label taxonomy to all active repos.
 # Runs weekly (after governance-report) and on manual dispatch.
 # Creates or updates labels; never deletes (additive only).
+#
+# This is the org-wide sweep. A newly born repository does not wait for it:
+# repo-birth-bootstrap.yml applies the same taxonomy, through the same parser
+# (ops/label-taxonomy.js), at birth.
 name: Sync labels (org-wide)
 
 on:
@@ -42,16 +46,14 @@ jobs:
           github-token: ${{ steps.token.outputs.token }}
           script: |
             const fs = require('fs');
+            const { parseLabels } = require('./ops/label-taxonomy.js');
             const DRY = process.env.DRY_RUN === 'true';
             const FILTER = process.env.FILTER;
 
-            // Parse labels from .github/labels.yml
-            const raw = fs.readFileSync('.github/labels.yml', 'utf8');
-            const labels = [];
-            for (const line of raw.split('\n')) {
-              const m = line.match(/name:\s*"([^"]+)".*color:\s*"([^"]+)".*description:\s*"([^"]*)"/);
-              if (m) labels.push({ name: m[1], color: m[2], description: m[3] });
-            }
+            // One parser, shared with repo-birth-bootstrap.yml and
+            // scripts/sync-labels.sh — a birth and a sweep must never disagree
+            // about what the taxonomy is.
+            const labels = parseLabels(fs.readFileSync('.github/labels.yml', 'utf8'));
 
             if (labels.length === 0) {
               core.setFailed('No labels parsed from .github/labels.yml');

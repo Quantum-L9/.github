@@ -56,3 +56,12 @@ at the pinned `ORG_GITHUB_SHA` from the consumer's `.l9/ci-pin`.
 - `FUNDING.yml` at org root — GitHub reads it org-wide automatically.
 - Community health files that the consumer has **not** opted into physical copy
   mode for — they fall back to org-level inheritance silently.
+
+## Repo classes
+
+These destinations are the `default` class. Which of them a given repository
+actually receives is decided by its class in `policies/repo-classes.yml` —
+INHERIT (GitHub supplies it), MATERIALIZE (seeded here), REMOTE APPLY (API
+state), or FORBID (never written).
+
+See [`docs/REPO_BIRTH_PROFILES.md`](../docs/REPO_BIRTH_PROFILES.md).

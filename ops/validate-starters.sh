@@ -4,7 +4,8 @@
 # Validates each properties.json contains required fields: name, description, iconName, categories, filePatterns.
 # Validates the l9-ci-pack/ (v2) required CI file set is present and pinned to
 # a full commit SHA or a Core release tag — never @main.
-# Runs the ops/test-*.js suites: seed payload selection, the seed-branch safety
+# Runs the ops/test-*.js suites: seed payload selection, the repo-class birth
+# profile contract, the shared label taxonomy parser, the seed-branch safety
 # gate, and the branch guard inside both seed workflows.
 # Run from the root of the Quantum-L9/.github repo.
 set -euo pipefail
@@ -33,6 +34,8 @@ echo "=== Quantum-L9 Workflow Starter Validation ==="
 if command -v node &>/dev/null; then
   for t in \
     ops/test-build-seed-payload.js \
+    ops/test-repo-class-profile.js \
+    ops/test-label-taxonomy.js \
     ops/test-seed-branch-safety.js \
     ops/test-seed-workflow-branch-guard.js; do
     if node "$t"; then
