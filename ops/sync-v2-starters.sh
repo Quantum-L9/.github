@@ -57,7 +57,27 @@ for f in execution-profiles provider-requiredness rule-modes waivers promotion-p
 done
 
 cp "$WORKDIR/core/docs/templates/l9-analysis.yml" "$PACK_DIR/workflows/l9-analysis.yml"
-cp "$WORKDIR/core/docs/templates/l9-lint-test.yml" "$PACK_DIR/workflows/l9-lint-test.yml"
+
+# A pack file marked L9_SEED_OWNED is maintained here, not upstream. Core's
+# templates target a human who copies one into a repo and edits it; the pack
+# copy is written unattended into ~45 repositories that never edit it, and it
+# carries seed-safety hardening (stack detection, language-qualified job names,
+# no unpinned plugin flags) that Core's audience does not need. Copying over it
+# reverts that hardening silently, which is how the seeder went back to opening
+# red PRs after each `make sync-core`.
+sync_pack_file() {
+  local src="$1" dest="$2"
+  if [[ -f "$dest" ]] && grep -q 'L9_SEED_OWNED' "$dest"; then
+    echo "⏭️  keeping seed-owned $dest (not synced from Core)"
+    if ! diff -q "$src" "$dest" >/dev/null 2>&1; then
+      echo "    Core's $(basename "$src") differs; review by hand if Core changed materially." >&2
+    fi
+    return 0
+  fi
+  cp "$src" "$dest"
+}
+
+sync_pack_file "$WORKDIR/core/docs/templates/l9-lint-test.yml" "$PACK_DIR/workflows/l9-lint-test.yml"
 
 # Node/TS caller: prefer the locked typescript preset (Biome + tsc + tests).
 # Fall back to docs/templates only if the preset is absent at this ref.

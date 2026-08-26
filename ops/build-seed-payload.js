@@ -1,5 +1,7 @@
 'use strict';
 
+const { applyProfile } = require('./repo-class-profile.js');
+
 /**
  * Build the consumer-repo seed payload from templates/ plus l9-ci-pack/.
  *
@@ -24,6 +26,10 @@
  * @param {boolean} [opts.hasPython]  seed Python lint caller only when true
  * @param {boolean} [opts.hasPackageJson]  add Ruff to extensions.json when Python
  * @param {string} [opts.repository]  owner/name — rewrite SECURITY / contact_links
+ * @param {object} [opts.profile]  resolved repo-class profile (ops/repo-class-profile.js).
+ *   When given and `categories` is not explicitly passed, the profile's
+ *   `seed_categories` decide the category set. INHERIT dests are dropped
+ *   (GitHub supplies them org-wide); a FORBID dest throws.
  * @returns {Record<string, string>} destPath → file contents
  */
 
@@ -273,9 +279,15 @@ function buildSeedPayload({
   hasPython = false,
   hasPackageJson = false,
   repository = '',
+  profile = null,
 } = {}) {
   if (!fs) throw new Error('buildSeedPayload requires fs');
-  const cats = Array.isArray(categories) ? categories : parseCategories(categories);
+  // An explicit `categories` argument always wins, so a caller can still ask
+  // for a specific category set and get a loud FORBID error if that set
+  // contradicts the class. With no explicit argument the class decides.
+  const requested =
+    categories == null && profile ? profile.seed_categories : categories;
+  const cats = Array.isArray(requested) ? requested : parseCategories(requested);
   const payload = {};
 
   for (const cat of cats) {
@@ -359,6 +371,8 @@ function buildSeedPayload({
       assertJsonInYaml(payload[dest], dest);
     }
   }
+
+  if (profile) applyProfile(payload, profile);
 
   return payload;
 }

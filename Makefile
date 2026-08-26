@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
-.PHONY: help activate preflight validate sync-core sync-labels seed-dry seed-apply \
+.PHONY: help activate preflight validate sync-core sync-labels sync-labels-all \
+        seed-dry seed-apply birth-bootstrap birth-seed \
         apply-rulesets set-properties pin-actions audit-pins enforce-dry enforce-apply \
         dispatch clean
 
@@ -27,14 +28,33 @@ sync-core: ## Sync l9-ci-pack from l9-ci-core at pinned SHA
 	@bash ops/sync-v2-starters.sh $(REF)
 
 # ─── Fan-out Operations ──────────────────────────────────────────────────────
-sync-labels: ## Sync org label taxonomy to all repos
-	@bash scripts/sync-labels.sh --all
+sync-labels: ## Sync org label taxonomy to one repo (REPO=owner/name)
+	@test -n "$(REPO)" || (echo "usage: make sync-labels REPO=owner/name (org-wide: make sync-labels-all)" >&2; exit 2)
+	@bash scripts/sync-labels.sh "$(REPO)"
+
+sync-labels-all: ## Sync org label taxonomy to every active repo (weekly sweep, on demand)
+	@gh workflow run sync-labels-all.yml
 
 seed-dry: ## Dry-run: show which repos would be seeded
 	@gh workflow run auto-seed-new-repo.yml -f dry_run=true
 
 seed-apply: ## Seed governance files into all unseeded repos
 	@gh workflow run auto-seed-new-repo.yml -f dry_run=false
+
+# ─── Repo Birth ──────────────────────────────────────────────────────────────
+birth-bootstrap: ## REMOTE APPLY + attest one newly created repo (REPO=name [CLASS=...])
+	@test -n "$(REPO)" || (echo "usage: make birth-bootstrap REPO=<repo-name> [CLASS=<repo-class>]" >&2; exit 2)
+	@gh workflow run repo-birth-bootstrap.yml \
+		-f target_repo="$(REPO)" \
+		-f repo_class="$(CLASS)" \
+		-f dry_run=false
+
+birth-seed: ## Seed one newly created repo's applicable files (REPO=name [CLASS=...])
+	@test -n "$(REPO)" || (echo "usage: make birth-seed REPO=<repo-name> [CLASS=<repo-class>]" >&2; exit 2)
+	@gh workflow run auto-seed-new-repo.yml \
+		-f target_repo="$(REPO)" \
+		-f repo_class="$(CLASS)" \
+		-f dry_run=false
 
 # ─── Rulesets ────────────────────────────────────────────────────────────────
 apply-rulesets: ## Apply org rulesets (evaluate mode only)

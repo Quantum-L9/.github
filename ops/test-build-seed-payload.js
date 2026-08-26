@@ -60,11 +60,35 @@ try {
   // Toolchain versions must not be pinned here (that is install-consumer-ci@v2's
   // job), but the consumer's own package still has to be installed — see the
   // "Install consumer package and dependencies" assertions below.
+  // The rule is "never INSTALL an unpinned plugin", not "never look".
+  // Forbidding the read too is what produced the live regression: the install
+  // fallback was removed, the read was removed with it, and the four `--cov`
+  // flags stayed — so pytest exited 4 with `unrecognized arguments` in every
+  // consumer that does not ship pytest-cov (l9-ci-core PR #113).
   assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /pip install (ruff|mypy|pytest)\b/);
-  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /^\s+.*\|\|\s+pip install pytest-cov/m);
-  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /python -c "import pytest_cov"/);
+  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /pip install pytest-cov/);
   assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /python -c "import xdist"/);
   assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /python -c "import pytest_timeout"/);
+
+  // Coverage must be guarded by a probe, and the probe must not go through a
+  // pipe: under `set -o pipefail`, `pytest --help | grep -q` reports 141 when
+  // grep exits at the first match, so the probe answers "absent" on a repo
+  // that ships the plugin.
+  const pyBody = pythonPayload[PYTHON_LINT_DEST]
+    .split('\n')
+    .filter((l) => !/^\s*#/.test(l))
+    .join('\n');
+  assert.match(pyBody, /--cov=/, 'coverage is still offered when available');
+  assert.match(pyBody, /python -c "import pytest_cov"/, 'coverage is guarded by an import probe');
+  assert.doesNotMatch(pyBody, /pytest --help[^\n]*\|[^\n]*grep/, 'probe must not use a pipe');
+
+  // Job names are language-qualified so a seeded job cannot take over a check
+  // context the consumer already publishes.
+  assert.match(pythonPayload[PYTHON_LINT_DEST], /name: Python Lint and Type Check/);
+  assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /^\s*name:\s*Lint and Type Check\s*$/m);
+
+  // mypy must not be pointed at the whole checkout in a flat-layout repo.
+  assert.match(pyBody, /--exclude/, 'mypy scopes away tests/fixtures when SOURCE_DIR is the repo root');
   assert.match(pythonPayload[PYTHON_LINT_DEST], /name: Detect Python package/);
 
   // Dropping the unpinned pytest-plugin fallbacks must not also drop the

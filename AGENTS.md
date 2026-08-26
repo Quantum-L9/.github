@@ -14,7 +14,8 @@ scope, schedule, permissions, and interaction model.
 | Policy Enforcer | `enforce-policies.yml` | Weekly (Wed 13:00 UTC) | All repos | Auto-correct settings |
 | Preflight Monitor | `preflight-scheduled.yml` | Monthly (1st, 10:00 UTC) | Org-wide | Issue report |
 | Pin Auditor | `audit-pins-org.yml` | Monthly (15th, 12:00 UTC) | All repos | Issue report |
-| Auto-Seeder | `auto-seed-new-repo.yml` | Hourly (:20) + dispatch / repo creation | All repos | PR-based |
+| Auto-Seeder | `auto-seed-new-repo.yml` | Hourly (:20) + dispatch / repo creation | All repos | PR-based, repo-class aware |
+| Birth Bootstrap | `repo-birth-bootstrap.yml` | Dispatch from `l9-repo-template` `make new-repo` | One repo | REMOTE APPLY + remote attestation |
 | Template Dispatcher | `dispatch-template-update.yml` | On push to templates/ | Seeded repos | Event dispatch |
 | Governance PR | `governance-pr.yml` | On PR (workflow_call) | Calling repo | Advisory check |
 | Governance Issue | `governance-issue.yml` | On issue (workflow_call) | Calling repo | Label-only |
@@ -64,6 +65,19 @@ Each agent guarantees:
 - **Summary output** — every run produces a GitHub Actions job summary table
 
 ### Seed-branch contract
+
+### Repo classes
+
+Seeding is **capability-scoped, not file-scoped**. Each target resolves its
+class from its own `.l9/org-birth-profile.yaml` against
+`policies/repo-classes.yml`; the class decides INHERIT / MATERIALIZE /
+REMOTE APPLY / FORBID. An absent or unknown marker resolves to `default`, whose
+payload is byte-identical to pre-class seeding (asserted in
+`ops/test-repo-class-profile.js`).
+
+A FORBID hit throws rather than dropping silently: it means the category set
+and the prohibition disagree, and that is a bug to fix, not to hide. See
+`docs/REPO_BIRTH_PROFILES.md`.
 
 The two seeders (`auto-seed-new-repo.yml`, `seed-governance.yml`) build their
 PR as *"the consumer's current default branch + one seed commit"* and then move

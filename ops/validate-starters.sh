@@ -4,7 +4,8 @@
 # Validates each properties.json contains required fields: name, description, iconName, categories, filePatterns.
 # Validates the l9-ci-pack/ (v2) required CI file set is present and pinned to
 # a full commit SHA or a Core release tag — never @main.
-# Runs the ops/test-*.js suites: seed payload selection, the seed-branch safety
+# Runs the ops/test-*.js suites: seed payload selection, the repo-class birth
+# profile contract, the shared label taxonomy parser, the seed-branch safety
 # gate, and the branch guard inside both seed workflows.
 # Run from the root of the Quantum-L9/.github repo.
 set -euo pipefail
@@ -33,6 +34,8 @@ echo "=== Quantum-L9 Workflow Starter Validation ==="
 if command -v node &>/dev/null; then
   for t in \
     ops/test-build-seed-payload.js \
+    ops/test-repo-class-profile.js \
+    ops/test-label-taxonomy.js \
     ops/test-seed-branch-safety.js \
     ops/test-seed-workflow-branch-guard.js; do
     if node "$t"; then
@@ -164,17 +167,60 @@ else
   py_wf="$PACK_DIR/workflows/l9-lint-test.yml"
   if [ -f "$py_wf" ]; then
     # The CI toolchain is pinned by install-consumer-ci@v2, so the caller must
-    # not pip-install ruff / mypy / pytest or fall back to unpinned plugins.
-    # Installing the CONSUMER's own package is required, not forbidden —
-    # without it pytest fails on import before running a test.
-    if grep -qE 'name: Python Test Suite' "$py_wf" \
-      && grep -qE 'name: Detect Python package' "$py_wf" \
-      && grep -qE 'name: Install consumer package and dependencies' "$py_wf" \
-      && ! grep -qE 'pip install (ruff|mypy|pytest)[[:space:]]|python -c "import pytest_cov"' "$py_wf"; then
-      echo "✅ $py_wf is skip-safe (Python Test Suite, consumer deps, no unpinned toolchain pip)"
+    # not pip-install ruff / mypy / pytest / pytest-cov or fall back to
+    # unpinned plugins. Installing the CONSUMER's own package is required, not
+    # forbidden — without it pytest fails on import before running a test.
+    # Reading whether a plugin is present is not installing one: the rule is
+    # "do not install an unpinned plugin", not "do not look".
+    #
+    # Job names must be language-qualified. A seeded job that publishes the
+    # bare `Test Suite` or `Lint and Type Check` context collides with the
+    # consumer's own job of that name — l9-ci-core PR #113 ran one green and
+    # one red check under a single `Lint and Type Check` context.
+    #
+    # Coverage flags must be guarded by a pytest-cov probe. Core pins ruff,
+    # mypy and pytest and nothing else, so an unconditional `--cov` makes
+    # pytest exit 4 with `unrecognized arguments` in every consumer that does
+    # not ship the plugin itself.
+    py_ok=true
+    for needle in 'name: Python Test Suite' 'name: Python Lint and Type Check' \
+                  'name: Detect Python package' 'name: Install consumer package and dependencies'; do
+      if ! grep -qF "$needle" "$py_wf"; then
+        echo "❌ $py_wf missing required marker: $needle"
+        py_ok=false
+      fi
+    done
+    if grep -qE '^\s+name: (Test Suite|Lint and Type Check)\s*$' "$py_wf"; then
+      echo "❌ $py_wf publishes an unqualified job name — collides with a consumer's own check context"
+      py_ok=false
+    fi
+    if grep -qE 'pip install (ruff|mypy|pytest|pytest-cov)' "$py_wf"; then
+      echo "❌ $py_wf installs a toolchain package — versions come from install-consumer-ci only"
+      py_ok=false
+    fi
+    if grep -qE -- '--cov' "$py_wf" && ! grep -qE 'import pytest_cov' "$py_wf"; then
+      echo "❌ $py_wf passes --cov without probing for pytest-cov (Core pins no coverage plugin)"
+      py_ok=false
+    fi
+    # Comments are stripped first: the file documents this very trap in prose,
+    # and matching that text reported a correct file as broken — the same
+    # false positive unpinned_internal_refs() already had to fix.
+    if grep -vE '^[[:space:]]*#' "$py_wf" | grep -qE 'pytest --help.*\|.*grep'; then
+      echo "❌ $py_wf probes pytest-cov through a pipe — set -o pipefail reports 141 on grep's early exit"
+      py_ok=false
+    fi
+    if ! grep -q 'L9_SEED_OWNED' "$py_wf"; then
+      echo "❌ $py_wf lost its L9_SEED_OWNED marker — the next make sync-core will overwrite it from Core"
+      py_ok=false
+    fi
+    if ! grep -q 'L9_SEED_OWNED' ops/sync-v2-starters.sh; then
+      echo "❌ ops/sync-v2-starters.sh no longer honors L9_SEED_OWNED — seed hardening is clobberable again"
+      py_ok=false
+    fi
+    if $py_ok; then
+      echo "✅ $py_wf is skip-safe (qualified job names, guarded coverage, toolchain from install-consumer-ci)"
       PASS=$((PASS+1))
     else
-      echo "❌ $py_wf must skip without manifests, name Python Test Suite, install consumer deps, and take its toolchain from install-consumer-ci only"
       FAIL=$((FAIL+1))
     fi
   fi
