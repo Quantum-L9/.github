@@ -203,11 +203,56 @@ try {
   const declared = classForRepo(doc, 'l9-ci-core', 'profile: non_constellation_python\n');
   assert.strictEqual(declared.name, 'non_constellation_python');
   assert.strictEqual(declared.source, 'marker');
+  assert.strictEqual(declared.error, null);
+
+  // ── an explicit declaration we cannot honor FAILS CLOSED ───────────────
+  // `default` is the widest payload there is. Falling back to it on a typo
+  // would turn `profile: non_constelation_python` into a broad-seeding
+  // candidate — the exact class of pull request this contract exists to stop.
+  for (const [label, markerText] of [
+    ['a typo in the class name', 'profile: non_constelation_python\n'],
+    ['an unknown class', 'profile: totally_made_up\n'],
+    ['a marker with no profile key', 'schema: l9.org-birth-profile-marker/v1\n'],
+    ['an empty marker file', ''],
+    ['a marker that is only whitespace', '   \n'],
+    ['an indented (nested) profile key', '  profile: sneaky\n'],
+  ]) {
+    const bad = classForRepo(doc, 'some-repo', markerText);
+    assert.strictEqual(bad.name, null, `${label} must not resolve to a class`);
+    assert.ok(bad.error, `${label} must report an error`);
+    assert.strictEqual(bad.source, 'marker');
+  }
+
+  // The failure survives an override: a repo that declared something broken is
+  // not quietly rescued by the org map either.
+  const brokenOverridden = classForRepo(doc, 'l9-ci-core', 'profile: non_constelation_python\n');
+  assert.ok(brokenOverridden.error, 'a malformed marker beats the override, and errors');
+
+  // Absence is NOT malformation: a repo that never declared has made no
+  // statement to contradict, so override-then-default still applies.
+  assert.strictEqual(classForRepo(doc, 'l9-ci-core', null).name, 'self_governed');
+  assert.strictEqual(classForRepo(doc, 'l9-ci-core', null).error, null);
+  assert.strictEqual(classForRepo(doc, 'unlisted-repo', null).name, null);
+  assert.strictEqual(classForRepo(doc, 'unlisted-repo', null).error, null);
 
   // An unlisted repo with no marker keeps the historic behavior exactly.
   const plain = classForRepo(doc, 'some-other-repo', null);
   assert.strictEqual(plain.name, null);
+  assert.strictEqual(plain.error, null);
   assert.strictEqual(resolveProfile(doc, plain.name).name, 'default');
+
+  // ── the consumer LICENSE must never carry the .github-specific notice ──
+  // The birth engine copies templates/community-health/LICENSE into every
+  // newborn as canonical, so a repository-specific footer here is a licence
+  // that lies about which repository it governs, reproduced automatically.
+  const consumerLicense = fs.readFileSync('templates/community-health/LICENSE', 'utf8');
+  assert.doesNotMatch(
+    consumerLicense,
+    /applies only to the Quantum-L9\/\.github repository/,
+    'the consumer LICENSE template must not claim to govern only the .github repo',
+  );
+  assert.match(consumerLicense, /QUANTUM AI PARTNERS/, 'still the L9 proprietary licence');
+  assert.match(consumerLicense, /GOVERNING LAW/, 'licence body intact');
 
   // An override naming an undefined class is a policy bug, caught at load.
   assert.throws(
@@ -253,8 +298,10 @@ try {
 
   console.log('ok: repo-classes policy is JSON-in-YAML and PyYAML-readable');
   console.log('ok: org overrides classify undeclared repos; a marker still outranks them');
+  console.log('ok: a malformed or unknown EXPLICIT class fails closed, never widens to default');
+  console.log('ok: consumer LICENSE template is generic, not .github-specific');
   console.log('ok: self_governed seeds zero files and still applies labels + settings remotely');
-  console.log('ok: unknown/absent/unparseable class falls back to default, never widens');
+  console.log('ok: resolveProfile is strict at birth and defensive on a null (absent) class');
   console.log('ok: default class reproduces pre-profile seeding byte-for-byte');
   console.log('ok: non_constellation_python seeds no template-denied CI distribution path');
   console.log('ok: labels.yml is MATERIALIZE per class while staying out of the global default');

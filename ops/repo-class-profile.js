@@ -116,23 +116,60 @@ function matchPattern(patterns, dest) {
 /**
  * Decide which class a repository belongs to.
  *
- * Precedence is marker > overrides > default_class. A repository's own
- * declaration always wins: `overrides` exists so the organization can classify
- * a repository that has not declared one yet, never to overrule one that has.
+ * Precedence is marker > overrides > default_class, with one hard rule:
+ *
+ *   marker absent                 -> override, else default_class
+ *   marker present + known class  -> that class
+ *   marker present + unparseable  -> ERROR. Never default.
+ *   marker present + unknown class-> ERROR. Never default.
+ *
+ * The last two matter more than they look. `default` is the WIDEST payload
+ * there is, so silently falling back to it on a malformed marker turns a typo
+ * (`profile: non_constelation_python`) into a broad-seeding candidate — which
+ * is precisely the class of pull request this contract exists to stop. An
+ * explicit declaration that cannot be honored must fail closed and be
+ * reported, not quietly widened.
+ *
+ * Absence is different from malformation: a repository that never declared a
+ * class has not made a statement to contradict, so the override map and then
+ * the default apply as before.
  *
  * @param {object} doc  parsed policy document
  * @param {string} repoName  bare repository name (no owner)
- * @param {string|null} markerText  contents of the repo's marker file, if any
- * @returns {{name: string|null, source: string}}
+ * @param {string|null} markerText  marker file contents, or null when ABSENT.
+ *   An empty/whitespace string means the file exists but says nothing, which
+ *   is a malformed declaration, not an absent one.
+ * @returns {{name: string|null, source: string, error: string|null}}
+ *   `error` non-null means the caller must skip (sweep) or fail (birth); it
+ *   must never be treated as "use the default".
  */
 function classForRepo(doc, repoName, markerText) {
-  const declared = parseClassMarker(markerText);
-  if (declared) return { name: declared, source: 'marker' };
+  const hasMarker = typeof markerText === 'string';
+  if (hasMarker) {
+    const declared = parseClassMarker(markerText);
+    if (!declared) {
+      return {
+        name: null,
+        source: 'marker',
+        error: `${doc.marker_path || 'class marker'} is present but declares no parseable profile`,
+      };
+    }
+    if (!doc.classes[declared]) {
+      return {
+        name: null,
+        source: 'marker',
+        error:
+          `${doc.marker_path || 'class marker'} declares unknown class ${declared} ` +
+          `(known: ${Object.keys(doc.classes).join(', ')})`,
+      };
+    }
+    return { name: declared, source: 'marker', error: null };
+  }
   const overrides = doc.overrides || {};
   if (repoName && Object.prototype.hasOwnProperty.call(overrides, repoName)) {
-    return { name: overrides[repoName], source: 'org override' };
+    return { name: overrides[repoName], source: 'org override', error: null };
   }
-  return { name: null, source: 'default' };
+  return { name: null, source: 'default', error: null };
 }
 
 /**

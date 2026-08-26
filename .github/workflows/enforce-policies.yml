@@ -153,10 +153,19 @@ jobs:
               // file its own class forbids is noise that trains people to
               // ignore this report.
               if (!fileExceptions.includes(n)) {
-                const profile = resolveProfile(
-                  classes,
-                  classForRepo(classes, n, await readText(n, classes.marker_path)).name,
-                );
+                // Existence first, so a failed fetch is not mistaken for an
+                // absent marker (which would enforce the widest class).
+                let markerText = null;
+                const markerHit = await github.rest.repos.getContent({
+                  owner: ORG, repo: n, path: classes.marker_path,
+                }).then(() => true).catch(() => false);
+                if (markerHit) markerText = (await readText(n, classes.marker_path)) ?? '';
+
+                const decidedClass = classForRepo(classes, n, markerText);
+                if (decidedClass.error) {
+                  findings.push(`unresolvable repo class: ${decidedClass.error}`);
+                }
+                const profile = resolveProfile(classes, decidedClass.name);
                 for (const file of (filesPolicy.files || [])) {
                   if (waivesMandatoryFile(profile, file.path)) continue;
 

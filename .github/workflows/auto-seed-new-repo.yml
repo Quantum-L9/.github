@@ -136,6 +136,7 @@ jobs:
 
             const rows = [];
             const failed = [];
+            const unresolved = [];
 
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
@@ -148,12 +149,31 @@ jobs:
                 // The repository declares its own class; the organization
                 // honours it. An unreadable or unknown marker resolves to
                 // `default` — never to something wider than the repo asked for.
-                const marker = FORCED_CLASS
-                  ? null
-                  : await readText(o, n, classes.marker_path);
+                // Absent and unreadable are different answers. readText()
+                // returns null for both a missing file and a failed fetch, and
+                // treating a failed fetch as "absent" would fall through to
+                // `default` — the widest payload — on a transient API error.
+                // Probe existence first, so only a genuinely absent marker
+                // reaches the override/default path.
+                let marker = null;
+                if (!FORCED_CLASS) {
+                  if (await exists(o, n, classes.marker_path)) {
+                    marker = (await readText(o, n, classes.marker_path)) ?? '';
+                  }
+                }
                 const decided = FORCED_CLASS
-                  ? { name: FORCED_CLASS, source: 'operator input' }
+                  ? { name: FORCED_CLASS, source: 'operator input', error: null }
                   : classForRepo(classes, n, marker);
+
+                // A repository that declared a class we cannot honor is skipped
+                // and reported. Seeding it under `default` would widen exactly
+                // what its declaration was trying to narrow.
+                if (decided.error) {
+                  rows.push([n, 'unresolved', `skipped: ${decided.error}`]);
+                  unresolved.push(n);
+                  continue;
+                }
+
                 const profile = resolveProfile(classes, decided.name);
                 if (decided.name) profile.resolved_from = decided.source;
 
@@ -298,6 +318,13 @@ jobs:
                 ...rows.map(r => r.map(String))
               ])
               .write();
+
+            if (unresolved.length) {
+              core.warning(
+                `${unresolved.length} repo(s) declare an unresolvable class and were skipped: ` +
+                  `${unresolved.join(', ')} — fix the marker; they are NOT seeded under default`,
+              );
+            }
 
             if (failed.length) {
               core.setFailed(

@@ -66,6 +66,29 @@ declaration always wins. `overrides` exists so the organization can classify a
 repository that has not declared one yet — not to overrule one that has. An
 override naming an undefined class fails at policy load, not at seed time.
 
+### An explicit declaration fails closed
+
+| Marker state | Result |
+|---|---|
+| absent | override, else `default_class` |
+| present, known class | that class |
+| present, unparseable | **ERROR — skipped and reported. Never `default`.** |
+| present, unknown class | **ERROR — skipped and reported. Never `default`.** |
+
+`default` is the widest payload there is, so falling back to it on a malformed
+marker turns a typo — `profile: non_constelation_python` — into a broad-seeding
+candidate, which is exactly the pull request this contract exists to stop. An
+explicit declaration that cannot be honored is a fault to fix, not a licence to
+widen.
+
+Absence is not malformation: a repository that never declared a class has made
+no statement to contradict, so the override map and then the default apply.
+
+The seeder probes the marker's **existence** before reading it, because a
+failed API fetch and an absent file are otherwise indistinguishable — and
+treating a transient fetch error as "absent" is the same fail-open by another
+route.
+
 `default` is a behavioral no-op, asserted in `ops/test-repo-class-profile.js`:
 every sweep that ran before profiles existed keeps its exact payload. Adding a
 class is how behavior changes — never by editing the default.

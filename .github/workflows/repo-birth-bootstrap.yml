@@ -119,10 +119,19 @@ jobs:
             const classes = loadRepoClasses(fs);
             if (FORCED_CLASS) resolveProfile(classes, FORCED_CLASS, { strict: true });
 
-            const marker = FORCED_CLASS ? null : await readText(classes.marker_path);
+            // Existence first: a failed fetch must not read as "absent" and
+            // fall through to the widest class. See ops/repo-class-profile.js.
+            let marker = null;
+            if (!FORCED_CLASS && (await pathExists(classes.marker_path))) {
+              marker = (await readText(classes.marker_path)) ?? '';
+            }
             const decided = FORCED_CLASS
-              ? { name: FORCED_CLASS, source: 'operator input' }
+              ? { name: FORCED_CLASS, source: 'operator input', error: null }
               : classForRepo(classes, TARGET, marker);
+            if (decided.error) {
+              core.setFailed(`${ORG}/${TARGET}: ${decided.error}`);
+              return;
+            }
             const profile = resolveProfile(classes, decided.name);
             if (decided.name) profile.resolved_from = decided.source;
             core.info(`repo class: ${profile.name} (${profile.resolved_from})`);
