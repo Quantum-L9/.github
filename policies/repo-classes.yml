@@ -39,15 +39,14 @@
   },
   "classes": {
     "default": {
-      "description": "Unclassified repository. Preserves historic org-wide seeding exactly.",
+      "description": "Unclassified repository. Community-health and ownership seeding only. CI is NOT seeded: `l9-ci-pack` was retired here because Quantum-L9/l9-ci-core forbids CI distribution from this repository, and both governed classes already FORBID every destination that category wrote.",
       "seed_categories": [
         "codeowners",
         "dependabot",
         "governance",
         "community-health",
         "issue-templates",
-        "pr-templates",
-        "l9-ci-pack"
+        "pr-templates"
       ],
       "inherit": [],
       "forbid": [],

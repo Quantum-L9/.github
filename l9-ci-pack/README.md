@@ -1,3 +1,43 @@
+> # ⛔ RETIRED — this pack is no longer distributed
+>
+> This directory is **frozen reference material**. Nothing seeds it into a
+> repository any more, and the seed categories that used to
+> (`l9-ci-pack`, `on-org-update`) now **fail closed**.
+>
+> **Why.** `Quantum-L9/l9-ci-core` declares the copy-first model prohibited in
+> [`.l9/org-runtime-contract.yaml`](https://github.com/Quantum-L9/l9-ci-core/blob/main/.l9/org-runtime-contract.yaml):
+>
+> ```
+> ownership.prohibited:
+>   - CI distribution from Quantum-L9/.github
+>   - copied L9 workflows in consumer repositories as an enforcement mechanism
+>   - consumer-owned Core or SDK pins for organization enforcement
+> ```
+>
+> Both governed repo classes in `policies/repo-classes.yml` already FORBID every
+> destination this pack wrote (`.github/workflows/l9-analysis.yml`,
+> `l9-lint-test*.yml`, `.github/governance/**`), and
+> `l9-ci-core/skills/l9-ci-activation` is marked LEGACY with
+> *"do not use this skill for new consumers"*. Only the unclassified `default`
+> class still received the pack — that was the drift, and it is closed.
+>
+> **What replaces it.** Canonical CI is
+> `Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml`, reached through a GitHub
+> organization **required-workflow ruleset**. No copied workflow, no governance
+> pack, no consumer-selected Core pin.
+>
+> **Kept, not deleted,** because `actionlint.yml`, `sha-pin-audit.yml` and
+> `validate-starters.sh` still lint and pin-audit these files, and their content
+> contract is still asserted by `ops/test-build-seed-payload.js`. Freezing is
+> reversible and honest; deleting would silently drop those checks.
+>
+> **Open question this does not answer:** the ruleset that is supposed to enforce
+> `org-ci.yml` is unverified. `l9-ci-core` records
+> `organization-ruleset-live-enforcement` as `status: UNKNOWN, evidence: []`, and
+> `make apply-rulesets` in this repository points at `ops/apply-rulesets.sh`,
+> which **does not exist**. Retiring distribution does not by itself give any
+> repository canonical CI.
+
 # L9 CI instantiation pack (v2)
 
 Everything a consumer repo — human or agent — needs to fully instantiate

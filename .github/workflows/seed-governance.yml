@@ -1,7 +1,7 @@
 name: Seed org templates into consumers
 
-# Physically seeds templates/ health files plus the l9-ci-pack Core hub.
-# Default `all` omits labels.yml (org sync-labels-all), on-org-update.yml,
+# Physically seeds templates/ health + ownership files. CI is never seeded.
+# Default `all` omits labels.yml (org sync-labels-all),
 # LICENSE, FUNDING.yml, SUPPORT.md, and duplicate issue templates.
 # Python l9-lint-test.yml is seeded only when the consumer has
 # pyproject.toml or requirements.txt.
@@ -39,7 +39,8 @@ on:
         description: >-
           Comma-separated categories, or "all" (default set: codeowners,
           dependabot, governance, community-health, issue-templates,
-          pr-templates, l9-ci-pack). Opt-in: labels, on-org-update.
+          pr-templates). Opt-in: labels. Retired (fail closed): l9-ci-pack,
+          on-org-update.
         type: string
         default: all
 
@@ -240,7 +241,7 @@ jobs:
 
                 const listed = treeItems.map(t => `- \`${t.path}\``);
                 const bodyLines = [
-                  'Seeds org template files from `Quantum-L9/.github/templates/` plus the `l9-ci-pack/` Core hub (physical copy).',
+                  'Seeds org template health and ownership files from `Quantum-L9/.github/templates/`. CI is not distributed from this repository.',
                   '',
                   `Categories: \`${categories.join('`, `')}\`.`,
                   '',
@@ -254,7 +255,7 @@ jobs:
                   '`.github/workflows/governance.yml` is **advisory** (`strict` defaults false).',
                   'Core pack callers (`l9-analysis.yml`, lint templates, `.github/governance/`) and the locked Biome contract (`biome.json`) are distributed here; `l9-ci-core` executes CI.',
                   '',
-                  'Source map: `templates/README.md` · pack: `l9-ci-pack/` · sync twin: `ops/sync-org-files.sh`.',
+                  'Source map: `templates/README.md` · sync twin: `ops/sync-org-files.sh`.',
                   '',
                   'While this PR is open the seeder leaves the branch alone — commit review fixes onto it freely.',
                 ].filter((line, idx, arr) => !(line === '' && arr[idx - 1] === ''));

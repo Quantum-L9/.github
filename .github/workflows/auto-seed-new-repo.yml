@@ -8,7 +8,7 @@
 # the class's applicable capabilities, NOT every template file. A repo with no
 # marker resolves to `default`, whose payload is what this workflow always sent.
 # This is what keeps the seeder from writing `.github/workflows/governance.yml`
-# and the l9-ci-pack callers into an l9-repo-template repository, where
+# into an l9-repo-template repository, where
 # scripts/inventory_check.py fails closed on exactly those paths.
 #
 # Create-time path: an hourly cron lists org repos and seeds anything
@@ -278,7 +278,7 @@ jobs:
                   owner: o, repo: n, head: BRANCH, base,
                   title: 'chore(governance): auto-seed org templates from Quantum-L9/.github',
                   body: [
-                    'Automatically seeds the org capabilities applicable to this repository from `Quantum-L9/.github/templates/` plus the `l9-ci-pack/` Core hub.',
+                    'Automatically seeds the org capabilities applicable to this repository from `Quantum-L9/.github/templates/`. CI is not distributed from this repository.',
                     '',
                     `**Repo class:** \`${profile.name}\` (${profile.resolved_from}) — see \`policies/repo-classes.yml\`.`,
                     profile.inherit.length

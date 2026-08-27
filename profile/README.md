@@ -13,7 +13,7 @@
 | Repository | Role | Entry Point |
 |---|---|---|
 | [`Cursor-Governance`](https://github.com/Quantum-L9/Cursor-Governance) | Policy SSOT — CANONICAL_LAW.md §1–§9, symlink wiring, GlobalCommands | `CANONICAL_LAW.md` |
-| [`l9-ci-core`](https://github.com/Quantum-L9/l9-ci-core) | Thin GitHub Actions control plane (v2) — SDK-provisioning, governance resolution, publication | [`l9-ci-pack/README.md`](https://github.com/Quantum-L9/.github/blob/main/l9-ci-pack/README.md) (v2, current); `pr-pipeline.yml@v1` (legacy, frozen) |
+| [`l9-ci-core`](https://github.com/Quantum-L9/l9-ci-core) | Thin GitHub Actions control plane (v2) — SDK-provisioning, governance resolution, publication | `org-ci.yml` via org required-workflow ruleset (current); `l9-ci-pack/` + `pr-pipeline.yml@v1` (retired/frozen) |
 | [`l9-assurance`](https://github.com/Quantum-L9/l9-assurance) | 51-package TypeScript governance assurance monorepo | `packages/` |
 | [`.github`](https://github.com/Quantum-L9/.github) | Org backbone — health files, starter templates, workflow registry | `workflow-interface-registry.yml` |
 
@@ -21,10 +21,13 @@
 
 ## CI instantiation
 
-**v2 (current, start here):** [`l9-ci-pack/README.md`](https://github.com/Quantum-L9/.github/blob/main/l9-ci-pack/README.md) —
-governed semgrep analysis (`l9-ci-pack/workflows/l9-analysis.yml`) publishing
-GitHub checks via `l9-ci-core`'s `profile-normalize-semgrep.yml` +
-`publish-analysis.yml`, plus optional per-language lint/test templates.
+**Current:** canonical CI is
+[`l9-ci-core/.github/workflows/org-ci.yml`](https://github.com/Quantum-L9/l9-ci-core/blob/main/.github/workflows/org-ci.yml),
+enforced by a GitHub organization required-workflow ruleset. Consumer
+repositories copy no workflow and select no Core revision.
+
+**`l9-ci-pack/` (retired):** the copy-first distribution kit, frozen for
+reference — see [`l9-ci-pack/README.md`](https://github.com/Quantum-L9/.github/blob/main/l9-ci-pack/README.md).
 
 **`@v1` (legacy, frozen):** All repositories still on legacy `@v1` consume
 `l9-ci-core` kernels via thin caller workflows. See

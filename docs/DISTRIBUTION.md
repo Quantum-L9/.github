@@ -51,13 +51,10 @@ files visible in-tree. `templates/` is therefore the SSOT for a **physical** see
 1. **`CODEOWNERS`**, **`dependabot.yml`**, **governance caller**, **labels**
 2. **Community health** (`CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md`,
    `SUPPORT.md`, `LICENSE`, `.github/FUNDING.yml`)
-3. **Issue + PR templates** and the **`on-org-update`** receiver workflow
-4. **`l9-ci-pack/`** — Core hub callers (`l9-analysis.yml`, lint templates),
-   `.github/governance/*.yaml`, and the locked TypeScript Biome contract
-   (`biome.json`, `.biomeignore`, `.editorconfig`, `.vscode/extensions.json`).
-   This repo distributes the pack; `l9-ci-core` executes CI. See
-   `docs/BOUNDARIES.md`. Seeding `biome.json` is distribution of the locked
-   contract, not a second scanner.
+3. **Issue + PR templates**
+**Not distributed: CI.** The `l9-ci-pack` and `on-org-update` categories are
+RETIRED and fail closed. Canonical CI is `Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml`, enforced by a GitHub organization required-workflow ruleset. `l9-ci-pack/` remains as
+frozen reference material only — see [`../l9-ci-pack/README.md`](../l9-ci-pack/README.md).
 
 `seed-governance.yml` (and `auto-seed-new-repo.yml`) seed these once per repo via
 PR using `ops/build-seed-payload.js`, matching `ops/sync-org-files.sh`. Existing
