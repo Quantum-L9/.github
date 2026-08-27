@@ -21,9 +21,13 @@
  *   node ops/test-continuous-sync-branch-guard.js
  */
 const assert = require('node:assert');
-const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
+const {
+  loadScriptModule,
+  notFound,
+  makeCore,
+  makeScopedRequire,
+} = require('./workflow-script-harness.js');
 
 const root = path.resolve(__dirname, '..');
 const WORKFLOW = '.github/workflows/continuous-sync.yml';
@@ -37,38 +41,6 @@ const MUTATIONS = new Set([
   'repos.createOrUpdateFileContents',
   'pulls.create',
 ]);
-
-/** Extract the github-script `script: |` block without a YAML dependency. */
-function extractScript(file) {
-  const lines = fs.readFileSync(file, 'utf8').split('\n');
-  const start = lines.findIndex((l) => /^\s*script:\s*\|\s*$/.test(l));
-  assert.ok(start !== -1, `no "script: |" block in ${file}`);
-  const indent = lines[start].match(/^\s*/)[0].length + 2;
-  const body = [];
-  for (const line of lines.slice(start + 1)) {
-    if (line.trim() !== '' && line.match(/^\s*/)[0].length < indent) break;
-    body.push(line.slice(indent));
-  }
-  return body.join('\n');
-}
-
-/** Load the extracted body as a real module — no eval, real stack traces. */
-function loadScriptModule(file) {
-  const body = extractScript(file);
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sync-guard-'));
-  const mod = path.join(dir, 'continuous-sync.script.js');
-  fs.writeFileSync(
-    mod,
-    `'use strict';\nmodule.exports = async (github, core, context, require) => {\n${body}\n};\n`,
-  );
-  try {
-    return require(mod);
-  } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
-}
-
-const notFound = (msg) => Object.assign(new Error(msg), { status: 404 });
 
 /**
  * @param {null|{sha:string}} branch  stubbed sync-branch state (null = absent)
@@ -138,20 +110,9 @@ function makeGithub({ branch, openPRs }) {
   };
 }
 
-function makeCore() {
-  const failures = [];
-  const summary = {
-    addHeading: () => summary,
-    addRaw: () => summary,
-    addTable: () => summary,
-    write: async () => summary,
-  };
-  return { info() {}, error() {}, setFailed: (m) => failures.push(m), failures, summary };
-}
+const scopedRequire = makeScopedRequire(root);
 
-const scopedRequire = (m) => require(m.startsWith('.') ? path.resolve(root, m) : m);
-
-const fn = loadScriptModule(path.join(root, WORKFLOW));
+const fn = loadScriptModule(path.join(root, WORKFLOW), 'sync-guard-');
 
 async function run({ branch, openPRs = [], dry = false } = {}) {
   const prevCwd = process.cwd();
