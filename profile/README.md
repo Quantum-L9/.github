@@ -54,5 +54,5 @@ top-level `kernels:` list for the frozen `@v1` set).
 2. Clone `Cursor-Governance` and run `setup_workspace_symlinks.sh` before committing to any repo.
 3. All PRs require CI green + CODEOWNERS approval (2 reviewers for blast-radius files).
 
-See [`SECURITY.md`](https://github.com/Quantum-L9/.github/blob/main/SECURITY.md) to report vulnerabilities.  
+See [`SECURITY.md`](https://github.com/Quantum-L9/.github/blob/main/SECURITY.md) to report vulnerabilities.
 Security packages: [`l9-agent-security-testkit`](https://github.com/Quantum-L9/l9-assurance/tree/main/packages/l9-agent-security-testkit), [`l9-security-testkit`](https://github.com/Quantum-L9/l9-assurance/tree/main/packages/l9-security-testkit).
