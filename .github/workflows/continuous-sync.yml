@@ -104,9 +104,27 @@ jobs:
               // Open remediation PR
               try {
                 const base = repo.default_branch;
+
+                // An open PR on the sync branch is work in flight: it may carry
+                // review fixes, maintainer commits, or agent remediation. The
+                // reset below rebuilds the branch as "default branch tip", so
+                // anything else on it is discarded by construction, not by
+                // conflict. This check therefore MUST precede the ref write --
+                // it used to sit after it, so the branch was already clobbered
+                // by the time the workflow noticed the PR and reported
+                // "PR already open" (issue #60).
+                const openPR = await github.rest.pulls.list({
+                  owner: o, repo: n, head: `${ORG}:${BRANCH}`, state: 'open'
+                });
+                if (openPR.data.length) {
+                  rows.push([n, `PR #${openPR.data[0].number} already open — branch left alone`]);
+                  continue;
+                }
+
                 const ref = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
 
-                // Create or reset branch
+                // Create or reset branch. Safe only because no PR is open on it:
+                // see the guard above.
                 try {
                   await github.rest.git.createRef({
                     owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: ref.data.object.sha
@@ -132,12 +150,9 @@ jobs:
                   });
                 }
 
-                // Check for existing PR
-                const existingPR = await github.rest.pulls.list({
-                  owner: o, repo: n, head: `${ORG}:${BRANCH}`, state: 'open'
-                });
-
-                if (existingPR.data.length === 0) {
+                // No open-PR branch here: the guard above returned early for
+                // those, so this always opens a fresh PR.
+                {
                   const pr = await github.rest.pulls.create({
                     owner: o, repo: n, head: BRANCH, base,
                     title: 'chore(governance): restore drifted governance files',
@@ -154,8 +169,6 @@ jobs:
                     ].join('\n'),
                   });
                   rows.push([n, `PR #${pr.data.number} (${drifted.length} files)`]);
-                } else {
-                  rows.push([n, `PR already open: #${existingPR.data[0].number}`]);
                 }
               } catch (e) {
                 rows.push([n, `failed: ${(e.message || '').slice(0, 60)}`]);
