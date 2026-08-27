@@ -89,4 +89,63 @@ function makeCore() {
 const makeScopedRequire = (root) => (m) =>
   require(m.startsWith('.') ? path.resolve(root, m) : m);
 
-module.exports = { extractScript, loadScriptModule, notFound, makeCore, makeScopedRequire };
+
+/**
+ * Build the `run()` a branch-guard suite drives its workflow with.
+ *
+ * Owns everything that is identical across suites — loading the script body,
+ * pinning cwd to the repo root (the script reads templates by relative path),
+ * setting and restoring the workflow's env, and reducing the recorded calls
+ * to a verdict. What differs per workflow — the API stub and the set of call
+ * names that count as a mutation — is injected.
+ *
+ * @param {object}   opts
+ * @param {string}   opts.file        absolute path to the workflow YAML
+ * @param {string}   opts.root        repo root; cwd during the run
+ * @param {string}   [opts.tmpTag]    temp-dir prefix, for readable failures
+ * @param {(dry: boolean) => Record<string,string>} opts.envFor  workflow env
+ * @param {(o: object) => {github: object, calls: object[], state: object}} opts.makeGithub
+ * @param {Set<string>} opts.mutations  call names that count as a write
+ * @returns {(o?: object) => Promise<{calls, names, state, failures, mutated}>}
+ */
+function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations }) {
+  const fn = loadScriptModule(file, tmpTag);
+  const scopedRequire = makeScopedRequire(root);
+
+  return async function run({ dry = false, mutateGithub, ...stubOpts } = {}) {
+    const prevCwd = process.cwd();
+    const env = envFor(dry);
+    const prevEnv = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
+    process.chdir(root);
+    Object.assign(process.env, env);
+    const { github, calls, state } = makeGithub(stubOpts);
+    if (mutateGithub) mutateGithub(github, state);
+    const core = makeCore();
+    try {
+      await fn(github, core, {}, scopedRequire);
+    } finally {
+      process.chdir(prevCwd);
+      for (const [k, v] of Object.entries(prevEnv)) {
+        if (v === undefined) delete process.env[k];
+        else process.env[k] = v;
+      }
+    }
+    const names = calls.map((c) => c.name);
+    return {
+      calls,
+      names,
+      state,
+      failures: core.failures,
+      mutated: names.some((n) => mutations.has(n)),
+    };
+  };
+}
+
+module.exports = {
+  extractScript,
+  loadScriptModule,
+  notFound,
+  makeCore,
+  makeScopedRequire,
+  makeScriptRunner,
+};

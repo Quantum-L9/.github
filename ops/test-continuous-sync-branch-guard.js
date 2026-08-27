@@ -22,12 +22,7 @@
  */
 const assert = require('node:assert');
 const path = require('node:path');
-const {
-  loadScriptModule,
-  notFound,
-  makeCore,
-  makeScopedRequire,
-} = require('./workflow-script-harness.js');
+const { notFound, makeScriptRunner } = require('./workflow-script-harness.js');
 
 const root = path.resolve(__dirname, '..');
 const WORKFLOW = '.github/workflows/continuous-sync.yml';
@@ -46,7 +41,7 @@ const MUTATIONS = new Set([
  * @param {null|{sha:string}} branch  stubbed sync-branch state (null = absent)
  * @param {number[]} openPRs         open PR numbers with head BRANCH
  */
-function makeGithub({ branch, openPRs }) {
+function makeGithub({ branch = null, openPRs = [] }) {
   const calls = [];
   const state = { sha: branch ? branch.sha : null };
   const record = (name) => async (args) => {
@@ -110,30 +105,14 @@ function makeGithub({ branch, openPRs }) {
   };
 }
 
-const scopedRequire = makeScopedRequire(root);
-
-const fn = loadScriptModule(path.join(root, WORKFLOW), 'sync-guard-');
-
-async function run({ branch, openPRs = [], dry = false } = {}) {
-  const prevCwd = process.cwd();
-  const env = { DRY_RUN: dry ? 'true' : 'false', FILTER: '' };
-  const prevEnv = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
-  process.chdir(root);
-  Object.assign(process.env, env);
-  const { github, calls, state } = makeGithub({ branch, openPRs });
-  const core = makeCore();
-  try {
-    await fn(github, core, {}, scopedRequire);
-  } finally {
-    process.chdir(prevCwd);
-    for (const [k, v] of Object.entries(prevEnv)) {
-      if (v === undefined) delete process.env[k];
-      else process.env[k] = v;
-    }
-  }
-  const names = calls.map((c) => c.name);
-  return { calls, names, state, failures: core.failures, mutated: names.some((n) => MUTATIONS.has(n)) };
-}
+const run = makeScriptRunner({
+  file: path.join(root, WORKFLOW),
+  root,
+  tmpTag: 'sync-guard-',
+  envFor: (dry) => ({ DRY_RUN: dry ? 'true' : 'false', FILTER: '' }),
+  makeGithub,
+  mutations: MUTATIONS,
+});
 
 (async () => {
   const label = path.basename(WORKFLOW);

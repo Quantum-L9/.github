@@ -15,12 +15,7 @@
  */
 const assert = require('node:assert');
 const path = require('node:path');
-const {
-  loadScriptModule,
-  notFound,
-  makeCore,
-  makeScopedRequire,
-} = require('./workflow-script-harness.js');
+const { notFound, makeScriptRunner } = require('./workflow-script-harness.js');
 
 const root = path.resolve(__dirname, '..');
 
@@ -60,7 +55,7 @@ const MUTATIONS = new Set([
  *   commits are `{message, committer, verified}` fixtures, oldest first
  * @param {number[]} openPRs            open PR numbers with head BRANCH
  */
-function makeGithub(BRANCH, { branch, openPRs }) {
+function makeGithub(BRANCH, { branch = null, openPRs = [] }) {
   const calls = [];
   const state = { sha: branch ? branch.sha : null };
   const record = (name) => async (args) => {
@@ -159,38 +154,15 @@ function makeGithub(BRANCH, { branch, openPRs }) {
   return { github, calls, state };
 }
 
-const scopedRequire = makeScopedRequire(root);
-
 function makeRunner(wf) {
-  const fn = loadScriptModule(path.join(root, wf.file), 'seed-guard-');
-
-  return async function run({ branch, openPRs = [], dry = false, mutateGithub } = {}) {
-    const prevCwd = process.cwd();
-    const env = wf.env(dry);
-    const prevEnv = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
-    process.chdir(root);
-    Object.assign(process.env, env);
-    const { github, calls, state } = makeGithub(wf.branch, { branch, openPRs });
-    if (mutateGithub) mutateGithub(github, wf.branch, state);
-    const core = makeCore();
-    try {
-      await fn(github, core, {}, scopedRequire);
-    } finally {
-      process.chdir(prevCwd);
-      for (const [k, v] of Object.entries(prevEnv)) {
-        if (v === undefined) delete process.env[k];
-        else process.env[k] = v;
-      }
-    }
-    const names = calls.map((c) => c.name);
-    return {
-      calls,
-      names,
-      state,
-      failures: core.failures,
-      mutated: names.some((n) => MUTATIONS.has(n)),
-    };
-  };
+  return makeScriptRunner({
+    file: path.join(root, wf.file),
+    root,
+    tmpTag: 'seed-guard-',
+    envFor: wf.env,
+    makeGithub: (o) => makeGithub(wf.branch, o),
+    mutations: MUTATIONS,
+  });
 }
 
 (async () => {
@@ -260,7 +232,8 @@ function makeRunner(wf) {
     // 5. Compare-and-swap: the branch moves between the verdict and the ref write.
     r = await run({
       branch: { sha: 'branch-sha', aheadBy: 1, commits: [seedCommit] },
-      mutateGithub: (github, BRANCH, state) => {
+      mutateGithub: (github, state) => {
+        const BRANCH = wf.branch;
         const realGetRef = github.rest.git.getRef;
         let seen = 0;
         github.rest.git.getRef = async (args) => {
