@@ -141,6 +141,45 @@ function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations })
   };
 }
 
+
+/**
+ * The two stub surfaces a branch guard always needs, with identical meaning in
+ * both suites: "is a PR open on the guard branch?" and "where does the guard
+ * branch point?".
+ *
+ * Kept here because the SEMANTICS are shared, not merely the text — `getRef`
+ * must 404 while the branch is absent and otherwise report the live
+ * `state.sha`, which is what lets a test observe whether a run moved the ref.
+ * Everything workflow-specific (how a commit is built, how the ref is moved)
+ * stays in the suite's own stub.
+ *
+ * @param {object} o
+ * @param {string} o.branch   the guard branch name
+ * @param {object} o.state    mutable `{ sha }` the suite also inspects
+ * @param {object[]} o.calls  shared call log
+ * @param {number[]} o.openPRs
+ * @param {Function} o.record recorder factory from the suite
+ */
+function makeBranchStubs({ branch, state, calls, openPRs, record }) {
+  return {
+    pulls: {
+      list: async (args) => {
+        calls.push({ name: 'pulls.list', args });
+        return { data: openPRs.map((number) => ({ number })) };
+      },
+      create: record('pulls.create'),
+    },
+    getRef: async (args) => {
+      calls.push({ name: 'git.getRef', args });
+      if (args.ref === `heads/${branch}`) {
+        if (state.sha === null) throw notFound('Branch not found');
+        return { data: { object: { sha: state.sha } } };
+      }
+      return { data: { object: { sha: 'base-sha' } } };
+    },
+  };
+}
+
 module.exports = {
   extractScript,
   loadScriptModule,
@@ -148,4 +187,5 @@ module.exports = {
   makeCore,
   makeScopedRequire,
   makeScriptRunner,
+  makeBranchStubs,
 };

@@ -22,7 +22,11 @@
  */
 const assert = require('node:assert');
 const path = require('node:path');
-const { notFound, makeScriptRunner } = require('./workflow-script-harness.js');
+const {
+  notFound,
+  makeScriptRunner,
+  makeBranchStubs,
+} = require('./workflow-script-harness.js');
 
 const root = path.resolve(__dirname, '..');
 const WORKFLOW = '.github/workflows/continuous-sync.yml';
@@ -52,6 +56,8 @@ function makeGithub({ branch = null, openPRs = [] }) {
     return { data: {} };
   };
 
+  const shared = makeBranchStubs({ branch: BRANCH, state, calls, openPRs, record });
+
   return {
     github: {
       paginate: async () => [
@@ -74,22 +80,9 @@ function makeGithub({ branch = null, openPRs = [] }) {
           },
           createOrUpdateFileContents: record('repos.createOrUpdateFileContents'),
         },
-        pulls: {
-          list: async (args) => {
-            calls.push({ name: 'pulls.list', args });
-            return { data: openPRs.map((number) => ({ number })) };
-          },
-          create: record('pulls.create'),
-        },
+        pulls: shared.pulls,
         git: {
-          getRef: async (args) => {
-            calls.push({ name: 'git.getRef', args });
-            if (args.ref === `heads/${BRANCH}`) {
-              if (state.sha === null) throw notFound('Branch not found');
-              return { data: { object: { sha: state.sha } } };
-            }
-            return { data: { object: { sha: 'base-sha' } } };
-          },
+          getRef: shared.getRef,
           createRef: async (args) => {
             calls.push({ name: 'git.createRef', args });
             if (state.sha !== null) throw Object.assign(new Error('exists'), { status: 422 });

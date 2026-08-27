@@ -15,7 +15,11 @@
  */
 const assert = require('node:assert');
 const path = require('node:path');
-const { notFound, makeScriptRunner } = require('./workflow-script-harness.js');
+const {
+  notFound,
+  makeScriptRunner,
+  makeBranchStubs,
+} = require('./workflow-script-harness.js');
 
 const root = path.resolve(__dirname, '..');
 
@@ -67,6 +71,8 @@ function makeGithub(BRANCH, { branch = null, openPRs = [] }) {
     if (name === 'git.createRef') state.sha = args.sha;
     return { data: {} };
   };
+
+  const shared = makeBranchStubs({ branch: BRANCH, state, calls, openPRs, record });
 
   const github = {
     paginate: async () => [
@@ -127,22 +133,9 @@ function makeGithub(BRANCH, { branch = null, openPRs = [] }) {
           throw notFound('Not Found');
         },
       },
-      pulls: {
-        list: async (args) => {
-          calls.push({ name: 'pulls.list', args });
-          return { data: openPRs.map((number) => ({ number })) };
-        },
-        create: record('pulls.create'),
-      },
+      pulls: shared.pulls,
       git: {
-        getRef: async (args) => {
-          calls.push({ name: 'git.getRef', args });
-          if (args.ref === `heads/${BRANCH}`) {
-            if (state.sha === null) throw notFound('Branch not found');
-            return { data: { object: { sha: state.sha } } };
-          }
-          return { data: { object: { sha: 'base-sha' } } };
-        },
+        getRef: shared.getRef,
         getCommit: async () => ({ data: { tree: { sha: 'base-tree-sha' } } }),
         createBlob: record('git.createBlob'),
         createTree: record('git.createTree'),
