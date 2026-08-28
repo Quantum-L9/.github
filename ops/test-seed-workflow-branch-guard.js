@@ -14,9 +14,12 @@
  *   node ops/test-seed-workflow-branch-guard.js
  */
 const assert = require('node:assert');
-const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
+const {
+  notFound,
+  makeScriptRunner,
+  makeBranchStubs,
+} = require('./workflow-script-harness.js');
 
 const root = path.resolve(__dirname, '..');
 
@@ -50,51 +53,13 @@ const MUTATIONS = new Set([
   'graphql.updateRefs',
 ]);
 
-/** Extract the github-script `script: |` block without a YAML dependency. */
-function extractScript(file) {
-  const lines = fs.readFileSync(file, 'utf8').split('\n');
-  const start = lines.findIndex((l) => /^\s*script:\s*\|\s*$/.test(l));
-  assert.ok(start !== -1, `no "script: |" block in ${file}`);
-  const indent = lines[start].match(/^\s*/)[0].length + 2;
-  const body = [];
-  for (const line of lines.slice(start + 1)) {
-    if (line.trim() !== '' && line.match(/^\s*/)[0].length < indent) break;
-    body.push(line.slice(indent));
-  }
-  return body.join('\n');
-}
-
-/**
- * Load the extracted script body as a real CommonJS module: the body is
- * written to a temp file and `require`d, so no string is ever turned into
- * code in-process (no `eval` / `new Function`) and stack traces point at a
- * real file. The exported function receives the same bindings github-script
- * provides, with `require` shadowed by the scoped resolver the runner passes.
- */
-function loadScriptModule(file) {
-  const body = extractScript(file);
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'seed-guard-'));
-  const mod = path.join(dir, `${path.basename(file, '.yml')}.script.js`);
-  fs.writeFileSync(
-    mod,
-    `'use strict';\nmodule.exports = async (github, core, context, require) => {\n${body}\n};\n`,
-  );
-  try {
-    return require(mod);
-  } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
-}
-
-const notFound = (msg) => Object.assign(new Error(msg), { status: 404 });
-
 /**
  * @param {string} BRANCH               seed branch the workflow under test uses
  * @param {null|{sha,aheadBy,commits}} branch  stubbed remote branch state;
  *   commits are `{message, committer, verified}` fixtures, oldest first
  * @param {number[]} openPRs            open PR numbers with head BRANCH
  */
-function makeGithub(BRANCH, { branch, openPRs }) {
+function makeGithub(BRANCH, { branch = null, openPRs = [] }) {
   const calls = [];
   const state = { sha: branch ? branch.sha : null };
   const record = (name) => async (args) => {
@@ -106,6 +71,8 @@ function makeGithub(BRANCH, { branch, openPRs }) {
     if (name === 'git.createRef') state.sha = args.sha;
     return { data: {} };
   };
+
+  const shared = makeBranchStubs({ branch: BRANCH, state, calls, openPRs, record });
 
   const github = {
     paginate: async () => [
@@ -166,22 +133,9 @@ function makeGithub(BRANCH, { branch, openPRs }) {
           throw notFound('Not Found');
         },
       },
-      pulls: {
-        list: async (args) => {
-          calls.push({ name: 'pulls.list', args });
-          return { data: openPRs.map((number) => ({ number })) };
-        },
-        create: record('pulls.create'),
-      },
+      pulls: shared.pulls,
       git: {
-        getRef: async (args) => {
-          calls.push({ name: 'git.getRef', args });
-          if (args.ref === `heads/${BRANCH}`) {
-            if (state.sha === null) throw notFound('Branch not found');
-            return { data: { object: { sha: state.sha } } };
-          }
-          return { data: { object: { sha: 'base-sha' } } };
-        },
+        getRef: shared.getRef,
         getCommit: async () => ({ data: { tree: { sha: 'base-tree-sha' } } }),
         createBlob: record('git.createBlob'),
         createTree: record('git.createTree'),
@@ -193,49 +147,15 @@ function makeGithub(BRANCH, { branch, openPRs }) {
   return { github, calls, state };
 }
 
-function makeCore() {
-  const failures = [];
-  const summary = {
-    addHeading: () => summary,
-    addRaw: () => summary,
-    addTable: () => summary,
-    write: async () => summary,
-  };
-  return { info() {}, error() {}, setFailed: (m) => failures.push(m), failures, summary };
-}
-
-const scopedRequire = (m) => require(m.startsWith('.') ? path.resolve(root, m) : m);
-
 function makeRunner(wf) {
-  const fn = loadScriptModule(path.join(root, wf.file));
-
-  return async function run({ branch, openPRs = [], dry = false, mutateGithub } = {}) {
-    const prevCwd = process.cwd();
-    const env = wf.env(dry);
-    const prevEnv = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
-    process.chdir(root);
-    Object.assign(process.env, env);
-    const { github, calls, state } = makeGithub(wf.branch, { branch, openPRs });
-    if (mutateGithub) mutateGithub(github, wf.branch, state);
-    const core = makeCore();
-    try {
-      await fn(github, core, {}, scopedRequire);
-    } finally {
-      process.chdir(prevCwd);
-      for (const [k, v] of Object.entries(prevEnv)) {
-        if (v === undefined) delete process.env[k];
-        else process.env[k] = v;
-      }
-    }
-    const names = calls.map((c) => c.name);
-    return {
-      calls,
-      names,
-      state,
-      failures: core.failures,
-      mutated: names.some((n) => MUTATIONS.has(n)),
-    };
-  };
+  return makeScriptRunner({
+    file: path.join(root, wf.file),
+    root,
+    tmpTag: 'seed-guard-',
+    envFor: wf.env,
+    makeGithub: (o) => makeGithub(wf.branch, o),
+    mutations: MUTATIONS,
+  });
 }
 
 (async () => {
@@ -305,7 +225,8 @@ function makeRunner(wf) {
     // 5. Compare-and-swap: the branch moves between the verdict and the ref write.
     r = await run({
       branch: { sha: 'branch-sha', aheadBy: 1, commits: [seedCommit] },
-      mutateGithub: (github, BRANCH, state) => {
+      mutateGithub: (github, state) => {
+        const BRANCH = wf.branch;
         const realGetRef = github.rest.git.getRef;
         let seen = 0;
         github.rest.git.getRef = async (args) => {

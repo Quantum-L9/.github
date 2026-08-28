@@ -1,0 +1,10 @@
+# Container-injected agent-surface config (Quantum-L9/Cursor-Governance#281).
+# The Claude Code cloud session writes these into every clone it opens; nothing
+# under them has ever been tracked here (`git ls-files .claude .mcp.json` = 0).
+# Left unignored they make every session report a dirty tree and fail this
+# repo's ruff gate on an injected hook file that is not repo content.
+#
+# This file is NOT part of the seeded template set (see templates/) — it is
+# local to this repository and does not cascade to consumers.
+.claude/
+.mcp.json
