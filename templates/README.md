@@ -3,10 +3,13 @@
 Everything in this directory is **physically seeded** into consumer repositories
 by:
 
+> **CI is not seeded from this repository.** The `l9-ci-pack` and
+> `on-org-update` categories are RETIRED and fail closed; canonical CI is
+> `Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml` via an organization
+> required-workflow ruleset. See [`../l9-ci-pack/README.md`](../l9-ci-pack/README.md).
+
 1. **Actions seeder** — `.github/workflows/seed-governance.yml` (org App, opens PRs)
 2. **Org CLI** — `ops/sync-org-files.sh` (local checkout sync)
-3. **Consumer sync** — `templates/sync_ci_from_pack.py` (copied to consumer as
-   `scripts/sync_ci_from_pack.py` / `make sync-ci`)
 
 Payload map SSOT for Actions: `ops/build-seed-payload.js` (must stay aligned with
 `ops/sync-org-files.sh`).
@@ -26,12 +29,6 @@ live in each repo's tree to take effect.
 | `community-health/` | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md` | No LICENSE / FUNDING / SUPPORT in default seed |
 | `issue-templates/` | `.github/ISSUE_TEMPLATE/` | Numbered chooser + ci/seed-ci/gov + config; no `bug_report` / `feature_request` |
 | `pr-templates/` | `pull_request_template.md` + `PULL_REQUEST_TEMPLATE/agent.md` | Human + agent/chore variants |
-| `../l9-ci-pack/workflows/` | `.github/workflows/` | Core hub callers (`l9-analysis.yml`, lint templates). Missing-only. |
-| `../l9-ci-pack/governance/` | `.github/governance/` | Governance YAMLs the Core resolver reads. |
-| `../l9-ci-pack/biome.json` | `biome.json` | Locked Biome 2.5.8 contract. Missing-only; never overwrite. |
-| `../l9-ci-pack/.biomeignore` | `.biomeignore` | Path exclusions companion. Missing-only. |
-| `../l9-ci-pack/.editorconfig` | `.editorconfig` | Editor indent/newline contract. Missing-only. |
-| `../l9-ci-pack/.vscode/extensions.json` | `.vscode/extensions.json` | Recommends `biomejs.biome`. Missing-only. |
 
 ## Inheritance vs. physical copy
 

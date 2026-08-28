@@ -8,7 +8,7 @@ in the CI constellation and must not be reimplemented here.
 
 | Concern | Owner | This repo's role |
 | --- | --- | --- |
-| Test execution, lint, typecheck | `l9-ci-sdk` / `l9-ci-core` | distribute `l9-ci-pack` callers only — never execute here |
+| Test execution, lint, typecheck | `l9-ci-sdk` / `l9-ci-core` | none — CI is no longer distributed from here (see `l9-ci-pack/README.md`) |
 | Code scanning / CodeQL | `l9-ci-core` (already runs Code Quality + CodeQL) | none |
 | CI failure diagnosis, log retrieval, bounded remediation | `l9-ci-debt-resolver` | none |
 | CI debt measurement | `l9-ci-debt-intelligence` | consume as a link, never recompute |
@@ -32,11 +32,12 @@ the Biome scanner is not.
 
 ## Explicitly rejected additions
 
-- **Reusable CI callees for pytest/ruff/pyright/semgrep/biome.** `l9-ci-sdk` / `l9-ci-core`
-  own execution. This repo may **distribute** thin callers and the locked
-  formatter contract from `l9-ci-pack/` (`l9-analysis.yml`, lint templates,
-  `.github/governance/*.yaml`, `biome.json`). It must not reimplement those
-  jobs here.
+- **Reusable CI callees for pytest/ruff/pyright/semgrep/biome.** `l9-ci-sdk` /
+  `l9-ci-core` own execution **and** delivery. This repo no longer distributes
+  callers, governance packs, or the formatter contract: `l9-ci-core`'s
+  `.l9/org-runtime-contract.yaml` lists "CI distribution from Quantum-L9/.github"
+  as prohibited. The `l9-ci-pack/` directory is frozen reference material and
+  its seed category fails closed.
 - **Any code-scanning engine.** `l9-ci-core` already runs CodeQL / analysis.
   Seeding the Core caller is distribution, not a second scanner.
 - **Any CI-failure triage or auto-fix.** `l9-ci-debt-resolver` owns bounded recovery.
@@ -45,7 +46,8 @@ the Biome scanner is not.
 
 Where governance needs a CI signal, it **references** the owning component rather
 than recomputing it. `templates/governance-caller.yml` contains only governance
-jobs. The Core hub pack (`l9-ci-pack/`) is the consumer-side caller that points at
-`l9-ci-core`. This repo **ships** that pack via the seeder; it does not run
-ruff, pytest, or semgrep itself. `make sync-ci` remains an optional refresh path,
+jobs. Canonical CI is `Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml`, enforced by a GitHub organization required-workflow ruleset — no file in the consumer, no
+consumer-selected Core pin. This repo ships no CI and does not run ruff,
+pytest, or semgrep itself. The retired refresh path (`make sync-ci` /
+`scripts/sync_ci_from_pack.py`) is gone,
 not the first-install path.

@@ -4,15 +4,16 @@
 # consumer repo. Designed to be called FROM the consumer repo (or by a seeding
 # script that targets a consumer checkout).
 #
-# This is the org-side counterpart to the consumer's `sync_ci_from_pack.py`.
-# Health files come from templates/. Category l9-ci-pack copies the Core hub
-# pack (analysis caller + governance YAMLs + lint callers) from l9-ci-pack/.
+# Org-side seeding of community-health and ownership files. CI is NOT seeded
+# from this repository (see l9-ci-pack/README.md).
+# Health files come from templates/. The l9-ci-pack and on-org-update
+# categories are RETIRED and fail closed.
 # This repo distributes those callers; l9-ci-core executes CI.
 #
 # Usage (from the org repo root):
 #   ops/sync-org-files.sh <consumer-repo-path> [--include-all|--include <category>...]
 #
-# Categories (default `all` = DEFAULT set; labels + on-org-update are opt-in):
+# Categories (default `all` = DEFAULT set; labels is opt-in):
 #   codeowners        .github/CODEOWNERS (path-scoped; skip if root CODEOWNERS)
 #   dependabot        .github/dependabot.yml (github-actions only)
 #   governance        .github/workflows/governance.yml
@@ -22,12 +23,12 @@
 #   issue-templates   numbered chooser + ci-failure + seed-ci-failure +
 #                     gov-violation + config.yml (no bug_report / feature_request)
 #   pr-templates      pull_request_template.md + PULL_REQUEST_TEMPLATE/agent.md
-#   l9-ci-pack        analysis + Node lint + governance YAMLs + Biome contract;
+#   l9-ci-pack        RETIRED — CI is never distributed from this repository;
 #                     Python lint only when pyproject.toml or requirements.txt
 #   labels            OPT-IN — org sync-labels-all.yml already fans labels
-#   on-org-update     OPT-IN — do not seed until sync_ci_from_pack.py is real
+#   on-org-update     OPT-IN — legacy receiver; the pack it pulled is retired
 #
-# Default (no --include flag): DEFAULT_CATEGORIES (not labels / on-org-update).
+# Default (no --include flag): DEFAULT_CATEGORIES (not labels).
 # Actions twin: .github/workflows/seed-governance.yml (ops/build-seed-payload.js).
 set -euo pipefail
 
@@ -37,8 +38,9 @@ TEMPLATES_DIR="$ORG_ROOT/templates"
 
 usage() {
   echo "Usage: $0 <consumer-repo-path> [--include-all|--include <category>...]" >&2
-  echo "Default: codeowners dependabot governance community-health issue-templates pr-templates l9-ci-pack" >&2
-  echo "Opt-in:  labels on-org-update" >&2
+  echo "Default: codeowners dependabot governance community-health issue-templates pr-templates" >&2
+  echo "Opt-in:  labels" >&2
+  echo "Retired: l9-ci-pack on-org-update (fail closed)" >&2
   exit 1
 }
 
@@ -55,8 +57,9 @@ if [[ ! -d "$CONSUMER_ROOT" ]]; then
 fi
 
 # Parse categories
-DEFAULT_CATEGORIES=(codeowners dependabot governance community-health issue-templates pr-templates l9-ci-pack)
-ALL_CATEGORIES=("${DEFAULT_CATEGORIES[@]}" labels on-org-update)
+DEFAULT_CATEGORIES=(codeowners dependabot governance community-health issue-templates pr-templates)
+ALL_CATEGORIES=("${DEFAULT_CATEGORIES[@]}" labels)
+RETIRED_CATEGORIES=(l9-ci-pack on-org-update)
 PACK_DIR="$ORG_ROOT/l9-ci-pack"
 CATEGORIES=()
 HAS_PYTHON=0
@@ -202,54 +205,26 @@ for cat in "${CATEGORIES[@]}"; do
       fi
       ;;
     on-org-update)
-      echo "── on-org-update receiver ──"
-      sync_file "$TEMPLATES_DIR/on-org-update.yml" \
-        "$CONSUMER_ROOT/.github/workflows/on-org-update.yml"
+      # RETIRED with l9-ci-pack: this receiver's only action was running
+      # scripts/sync_ci_from_pack.py, the consumer half of the same copy loop.
+      echo "❌ ERROR: seed category 'on-org-update' is RETIRED." >&2
+      echo "   It existed to run scripts/sync_ci_from_pack.py, which is gone." >&2
+      exit 1
       ;;
     l9-ci-pack)
-      echo "── l9-ci-pack (Core hub callers + Biome contract) ──"
-      if [[ -d "$PACK_DIR/workflows" ]]; then
-        for f in "$PACK_DIR/workflows/"*; do
-          [[ -f "$f" ]] || continue
-          name="$(basename "$f")"
-          if [[ "$name" == "l9-lint-test.yml" && "$HAS_PYTHON" -ne 1 ]]; then
-            echo "  skip $name (no Python manifest)"
-            continue
-          fi
-          sync_file "$f" "$CONSUMER_ROOT/.github/workflows/$name"
-        done
-      fi
-      if [[ -d "$PACK_DIR/governance" ]]; then
-        for f in "$PACK_DIR/governance/"*; do
-          [[ -f "$f" ]] || continue
-          if [[ "$f" == *.yaml ]]; then
-            if ! python3 -c 'import json,sys; json.loads(sys.stdin.read())' < "$f"; then
-              echo "❌ ERROR: $f is not JSON-in-YAML" >&2
-              exit 1
-            fi
-          fi
-          sync_file "$f" "$CONSUMER_ROOT/.github/governance/$(basename "$f")"
-        done
-      fi
-      # Formatter contract: missing-only, matching stamp.sh / Actions seeder.
-      # Never overwrite a consumer biome.json or .editorconfig.
-      for pair in \
-        "biome.json:biome.json" \
-        ".biomeignore:.biomeignore" \
-        ".editorconfig:.editorconfig" \
-        ".vscode/extensions.json:.vscode/extensions.json"
-      do
-        src="$PACK_DIR/${pair%%:*}"
-        dest="$CONSUMER_ROOT/${pair##*:}"
-        if [[ ! -f "$src" ]]; then
-          continue
-        fi
-        if [[ -e "$dest" ]]; then
-          echo "  keep existing ${pair##*:}"
-          continue
-        fi
-        sync_file "$src" "$dest"
-      done
+      # RETIRED. This category physically copied Core callers and a governance
+      # pack into consumer repositories. Quantum-L9/l9-ci-core now declares
+      # "CI distribution from Quantum-L9/.github" prohibited in
+      # .l9/org-runtime-contract.yaml, and both governed repo classes FORBID
+      # every destination it wrote. Canonical CI is
+      # l9-ci-core/.github/workflows/org-ci.yml via an organization
+      # required-workflow ruleset. Fail closed: a silent skip here would read
+      # as "synced, nothing to do".
+      echo "❌ ERROR: seed category 'l9-ci-pack' is RETIRED." >&2
+      echo "   Quantum-L9/.github no longer distributes CI." >&2
+      echo "   Canonical CI: Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml" >&2
+      echo "   enforced by a GitHub organization required-workflow ruleset." >&2
+      exit 1
       ;;
     *)
       echo "⚠️  WARNING: unknown category '$cat', skipping." >&2

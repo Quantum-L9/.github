@@ -25,7 +25,11 @@ const {
   applyProfile,
   waivesMandatoryFile,
 } = require('./repo-class-profile.js');
-const { buildSeedPayload, DEFAULT_CATEGORIES } = require('./build-seed-payload.js');
+const {
+  buildSeedPayload,
+  DEFAULT_CATEGORIES,
+  parseCategories,
+} = require('./build-seed-payload.js');
 
 // `[].sort()` with no comparator sorts by string conversion. These lists are
 // already strings, but an assertion whose outcome depends on an implicit
@@ -163,10 +167,20 @@ try {
     (err) => {
       assert.match(err.message, /violates repo class non_constellation_python/);
       assert.match(err.message, /governance\.yml/);
-      assert.match(err.message, /l9-analysis\.yml/);
       return true;
     },
     'a forbidden dest must throw',
+  );
+
+  // `l9-analysis.yml` used to be the other half of that error, arriving through
+  // the `l9-ci-pack` category. That category is now RETIRED, so the historic
+  // default set can no longer produce it under ANY class — which is a stronger
+  // guarantee than throwing on it, and is asserted at its own layer.
+  assert.ok(!parseCategories('all').includes('l9-ci-pack'));
+  assert.throws(
+    () => buildSeedPayload({ fs, profile: ncp, categories: ['l9-ci-pack'], hasPython: true }),
+    /RETIRED/,
+    'the retired CI-distribution category must fail closed under a governed class too',
   );
 
   // ── INHERIT drops, never errors ────────────────────────────────────────

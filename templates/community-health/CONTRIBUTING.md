@@ -45,7 +45,7 @@ a PR is not merge authorization.
 
 ## CI gates
 
-Consumer CI is the org `l9-ci-pack` (missing-only seed):
+Consumer CI is `Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml`, enforced by a GitHub organization required-workflow ruleset. Nothing is copied into this repository:
 
 | Gate | When it runs |
 | --- | --- |

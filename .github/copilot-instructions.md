@@ -4,7 +4,8 @@
 
 This organization uses a governed CI constellation. All CI pipelines are owned by
 `l9-ci-core` (thin control plane) and `l9-ci-sdk` (execution engine). Never write
-CI workflows from scratch — use the templates from `Quantum-L9/.github/l9-ci-pack/`.
+CI workflows at all — canonical CI is `Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml`,
+enforced by an organization required-workflow ruleset. `l9-ci-pack/` is retired.
 
 The policy source of truth is `CANONICAL_LAW.md` in `Quantum-L9/Cursor-Governance`.
 

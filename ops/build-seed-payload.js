@@ -40,10 +40,31 @@ const DEFAULT_CATEGORIES = Object.freeze([
   'community-health',
   'issue-templates',
   'pr-templates',
-  'l9-ci-pack',
 ]);
 
-const OPT_IN_CATEGORIES = Object.freeze(['labels', 'on-org-update']);
+const OPT_IN_CATEGORIES = Object.freeze(['labels']);
+
+// RETIRED — the copy-first CI era. `l9-ci-pack` physically copied Core callers
+// (`l9-analysis.yml`, the lint callers) and a governance pack into every
+// unclassified repository. Quantum-L9/l9-ci-core now declares that model
+// prohibited in `.l9/org-runtime-contract.yaml`:
+//
+//   ownership.prohibited:
+//     - CI distribution from Quantum-L9/.github
+//     - copied L9 workflows in consumer repositories as an enforcement mechanism
+//
+// and both governed repo classes already FORBID exactly the destinations this
+// category writes. Canonical CI is `l9-ci-core/.github/workflows/org-ci.yml`,
+// reached through a GitHub organization required-workflow ruleset — no copied
+// file, no consumer-selected Core pin.
+//
+// The category is refused rather than deleted: `l9-ci-pack/` stays in this
+// repository as frozen reference material (still actionlint-ed, still
+// pin-audited), but nothing can seed it into a repository again.
+// `on-org-update` retires with it: that receiver's only action was to run
+// `scripts/sync_ci_from_pack.py`, the consumer half of the same copy loop, and
+// it is FORBID in both governed classes.
+const RETIRED_CATEGORIES = Object.freeze(['l9-ci-pack', 'on-org-update']);
 
 const ALL_CATEGORIES = Object.freeze([...DEFAULT_CATEGORIES, ...OPT_IN_CATEGORIES]);
 
@@ -198,18 +219,6 @@ function applyRepoPlaceholders(text, repository) {
   return text.split(ADVISORY_INBOX_STOCK).join(advisory).split(ADVISORY_POLICY_STOCK).join(advisory);
 }
 
-function buildExtensionsJson({ hasPython }) {
-  const recommendations = ['biomejs.biome'];
-  if (hasPython) recommendations.push('charliermarsh.ruff');
-  return `${JSON.stringify(
-    {
-      recommendations,
-      unwantedRecommendations: ['dbaeumer.vscode-eslint', 'esbenp.prettier-vscode'],
-    },
-    null,
-    2,
-  )}\n`;
-}
 
 /**
  * Decide which payload dests to write.
@@ -291,6 +300,16 @@ function buildSeedPayload({
   const payload = {};
 
   for (const cat of cats) {
+    // Fail closed, loudly. A retired category silently producing an empty
+    // payload would read as "seeded, nothing to do" — the same false green the
+    // whole distribution model was retired for.
+    if (RETIRED_CATEGORIES.includes(cat)) {
+      throw new Error(
+        `seed category '${cat}' is RETIRED: Quantum-L9/.github no longer distributes CI. ` +
+          'Canonical CI is Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml, ' +
+          'enforced by a GitHub organization required-workflow ruleset.',
+      );
+    }
     switch (cat) {
       case 'codeowners': {
         if (hasRootCodeowners) break;
@@ -339,28 +358,6 @@ function buildSeedPayload({
         if (agent != null) payload['.github/PULL_REQUEST_TEMPLATE/agent.md'] = agent;
         break;
       }
-      case 'on-org-update': {
-        const body = readIfFile(fs, 'templates/on-org-update.yml');
-        if (body != null) payload['.github/workflows/on-org-update.yml'] = body;
-        break;
-      }
-      case 'l9-ci-pack': {
-        addDirFiles(fs, 'l9-ci-pack/workflows', '.github/workflows', payload, {
-          skipNames: hasPython ? [] : ['l9-lint-test.yml'],
-        });
-        addDirFiles(fs, 'l9-ci-pack/governance', '.github/governance', payload);
-        const formatterFiles = [
-          ['l9-ci-pack/biome.json', STOCK_BIOME_DEST],
-          ['l9-ci-pack/.biomeignore', '.biomeignore'],
-          ['l9-ci-pack/.editorconfig', '.editorconfig'],
-        ];
-        for (const [src, dest] of formatterFiles) {
-          const body = readIfFile(fs, src);
-          if (body != null) payload[dest] = body;
-        }
-        payload['.vscode/extensions.json'] = buildExtensionsJson({ hasPython });
-        break;
-      }
       default:
         throw new Error(`unknown seed category: ${cat}`);
     }
@@ -381,6 +378,7 @@ module.exports = {
   ALL_CATEGORIES,
   DEFAULT_CATEGORIES,
   OPT_IN_CATEGORIES,
+  RETIRED_CATEGORIES,
   COMMUNITY_HEALTH_DEFAULT,
   SKIP_ISSUE_TEMPLATES,
   PYTHON_LINT_DEST,

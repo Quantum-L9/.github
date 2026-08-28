@@ -24,19 +24,56 @@ const {
   STOCK_BIOME_DEST,
   STOCK_BIOME_SCHEMA,
   PYTHON_LINT_DEST,
+  RETIRED_CATEGORIES,
 } = require('./build-seed-payload.js');
 
 const root = path.resolve(__dirname, '..');
+
+/** The frozen pack, in the destination shape the retired category used to emit. */
+function readFrozenPack() {
+  const out = {};
+  for (const [srcDir, destPrefix] of [
+    ['l9-ci-pack/workflows', '.github/workflows'],
+    ['l9-ci-pack/governance', '.github/governance'],
+  ]) {
+    for (const name of fs.readdirSync(path.join(root, srcDir)).sort()) {
+      out[`${destPrefix}/${name}`] = fs.readFileSync(path.join(root, srcDir, name), 'utf8');
+    }
+  }
+  for (const [src, dest] of [
+    ['l9-ci-pack/biome.json', 'biome.json'],
+    ['l9-ci-pack/.biomeignore', '.biomeignore'],
+    ['l9-ci-pack/.editorconfig', '.editorconfig'],
+    ['l9-ci-pack/.vscode/extensions.json', '.vscode/extensions.json'],
+  ]) {
+    out[dest] = fs.readFileSync(path.join(root, src), 'utf8');
+  }
+  return out;
+}
 const origCwd = process.cwd();
 process.chdir(root);
 
 try {
-  assert.deepStrictEqual(parseCategories('l9-ci-pack'), ['l9-ci-pack']);
+  // RETIRED: still parses as a name, but building it fails closed and 'all'
+  // never includes it. See RETIRED_CATEGORIES in build-seed-payload.js.
+  assert.ok(RETIRED_CATEGORIES.includes('l9-ci-pack'));
+  assert.ok(!DEFAULT_CATEGORIES.includes('l9-ci-pack'));
+  assert.ok(!parseCategories('all').includes('l9-ci-pack'));
+  assert.throws(
+    () => buildSeedPayload({ fs, categories: ['l9-ci-pack'], hasPython: true }),
+    /RETIRED/,
+    'a retired category must fail closed, not seed an empty payload',
+  );
   assert.deepStrictEqual(parseCategories('all'), [...DEFAULT_CATEGORIES]);
   assert.ok(!parseCategories('all').includes('labels'));
   assert.ok(!parseCategories('all').includes('on-org-update'));
   assert.ok(OPT_IN_CATEGORIES.includes('labels'));
-  assert.ok(OPT_IN_CATEGORIES.includes('on-org-update'));
+  assert.ok(RETIRED_CATEGORIES.includes('on-org-update'));
+  assert.throws(
+    () => buildSeedPayload({ fs, categories: ['on-org-update'] }),
+    /RETIRED/,
+    'the receiver for the retired copier must fail closed too',
+  );
   assert.deepStrictEqual(parseCategories('labels'), ['labels']);
 
   const defaultPayload = buildSeedPayload({ fs, categories: 'all' });
@@ -53,8 +90,16 @@ try {
     assert.ok(!(dest in defaultPayload), `default payload must omit ${dest}`);
   }
 
-  const pythonPayload = buildSeedPayload({ fs, categories: 'all', hasPython: true });
-  assert.ok(pythonPayload[PYTHON_LINT_DEST], 'Python lint dest when hasPython');
+  // `.github/workflows/l9-lint-test.yml` was the pack's Python lint caller. It
+  // is FORBID in both governed repo classes and is no longer seeded by anything,
+  // so the default payload must omit it at every hasPython setting.
+  assert.ok(
+    !(PYTHON_LINT_DEST in buildSeedPayload({ fs, categories: 'all', hasPython: true })),
+    'the retired Python lint caller must not be seeded, even for a Python repo',
+  );
+  // Its content contract still holds for the frozen copy in l9-ci-pack/.
+  const pythonPayload = readFrozenPack();
+  assert.ok(pythonPayload[PYTHON_LINT_DEST], 'frozen pack still ships the Python lint caller');
   assert.match(pythonPayload[PYTHON_LINT_DEST], /name: Python Test Suite/);
   assert.doesNotMatch(pythonPayload[PYTHON_LINT_DEST], /^\s*name:\s*Test Suite\s*$/m);
   // Toolchain versions must not be pinned here (that is install-consumer-ci@v2's
@@ -149,7 +194,11 @@ try {
   assert.ok(defaultPayload['.github/ISSUE_TEMPLATE/1-bug.yml']);
   assert.ok(defaultPayload['.github/ISSUE_TEMPLATE/2-feature.yml']);
 
-  const pack = buildSeedPayload({ fs, categories: ['l9-ci-pack'], hasPython: true });
+  // `l9-ci-pack/` is frozen reference material, not a seed source. Its content
+  // contract (pinned callers, JSON-in-YAML governance, the locked Biome schema)
+  // is still asserted below — read from disk, because the seed path that used to
+  // produce it is now refused.
+  const pack = readFrozenPack();
   for (const dest of [
     'biome.json',
     '.biomeignore',
@@ -208,14 +257,15 @@ try {
   assert.match(analysis, /^ *language: "(python|typescript)" *$/m);
   assert.match(analysis, /^name: L9 Analysis *$/m);
 
-  const extsPython = JSON.parse(pack['.vscode/extensions.json']);
-  assert.ok(extsPython.recommendations.includes('biomejs.biome'));
-  assert.ok(extsPython.recommendations.includes('charliermarsh.ruff'));
-  assert.ok(extsPython.unwantedRecommendations.includes('dbaeumer.vscode-eslint'));
-
-  const extsDefault = JSON.parse(defaultPayload['.vscode/extensions.json']);
-  assert.ok(extsDefault.recommendations.includes('biomejs.biome'));
-  assert.ok(!extsDefault.recommendations.includes('charliermarsh.ruff'));
+  // The pack's static editor-recommendation contract. The per-repo GENERATOR
+  // that used to vary this by language had exactly one caller — the retired
+  // l9-ci-pack category — and went with it; only the frozen file remains.
+  const exts = JSON.parse(pack['.vscode/extensions.json']);
+  assert.ok(exts.recommendations.includes('biomejs.biome'));
+  assert.ok(
+    !('.vscode/extensions.json' in defaultPayload),
+    'editor recommendations are no longer seeded into consumer repositories',
+  );
 
   const stockEslint = [
     'name: L9 Lint and Test (Node)',
