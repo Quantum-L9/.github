@@ -33,15 +33,16 @@ function isSeedCommitMessage(message) {
  * Classify an existing seed branch against the consumer's default branch.
  *
  * Provenance is proven, not assumed: the single ahead commit must carry the
- * seeder subject, must be committed by the identity the seeder itself runs
- * as, and must be GitHub-verified (seeder commits are created through the
- * API, so GitHub signs them). A commit amended or rebased locally loses the
- * verified signature even when the subject line is preserved.
+ * seeder subject and must be committed by the identity the seeder itself
+ * runs as. GitHub-verified signatures satisfy that (App / Actions tokens).
+ * User-PAT Git Data commits are unsigned, so matching author.date and
+ * committer.date is the amend/rebase detector: an amend updates
+ * committer.date while keeping the subject.
  *
  * @param {object} comparison
  * @param {number} comparison.aheadBy   compare `ahead_by` (branch commits not on base)
  * @param {Array<{sha?: string, message?: string, committerLogin?: string|null,
- *   verified?: boolean}>} comparison.commits
+ *   verified?: boolean, authorDate?: string, committerDate?: string}>} comparison.commits
  *   compare `commits`, oldest first
  * @param {string|null} comparison.seederLogin  login the seeder authenticates as
  * @returns {{ safeToReplace: boolean, reason: string }}
@@ -96,13 +97,30 @@ function classifySeedBranch({ aheadBy, commits, seederLogin } = {}) {
       reason: `holds a commit committed by ${only.committerLogin || 'an unknown identity'}, not the seeder`,
     };
   }
-  if (only.verified !== true) {
+  if (!hasSeederCommitProvenance(only)) {
     return {
       safeToReplace: false,
-      reason: 'holds a seed-subject commit without a verified signature — possibly amended',
+      reason: 'holds a seed-subject commit without verified signature or matching author/committer dates — possibly amended',
     };
   }
-  return { safeToReplace: true, reason: 'holds only the seeder\'s own verified commit' };
+  return { safeToReplace: true, reason: 'holds only the seeder\'s own commit' };
+}
+
+/**
+ * App-token commits are GitHub-signed. PAT Git Data commits are not.
+ * Matching author and committer timestamps fail closed on amend/rebase.
+ * @param {{verified?: boolean, authorDate?: string, committerDate?: string}} commit
+ */
+function hasSeederCommitProvenance(commit) {
+  if (commit.verified === true) return true;
+  const authorDate = commit.authorDate;
+  const committerDate = commit.committerDate;
+  return (
+    typeof authorDate === 'string' &&
+    typeof committerDate === 'string' &&
+    authorDate.length > 0 &&
+    authorDate === committerDate
+  );
 }
 
 // The login a client authenticates as, resolved once per client. A seeder
@@ -170,6 +188,8 @@ async function assessSeedBranch({ github, owner, repo, base, branch }) {
       message: c.commit?.message,
       committerLogin: c.committer?.login ?? null,
       verified: c.commit?.verification?.verified === true,
+      authorDate: c.commit?.author?.date,
+      committerDate: c.commit?.committer?.date,
     })),
     seederLogin: await resolveSeederLogin(github),
   });
