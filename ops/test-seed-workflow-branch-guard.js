@@ -97,6 +97,8 @@ function makeGithub(BRANCH, { branch = null, openPRs = [] }) {
             commit: {
               message: c.message,
               verification: { verified: c.verified === true },
+              author: c.authorDate ? { date: c.authorDate } : undefined,
+              committer: c.committerDate ? { date: c.committerDate } : undefined,
             },
             committer: c.committer ? { login: c.committer } : null,
           })),
@@ -221,6 +223,26 @@ function makeRunner(wf) {
       );
     }
     console.log(`ok: ${label} — seed-subject commit with foreign provenance is left alone`);
+
+    // PAT Git Data commits are unsigned; matching author/committer dates prove no amend.
+    r = await run({
+      branch: {
+        sha: 'branch-sha',
+        aheadBy: 1,
+        commits: [{
+          message: SEED,
+          committer: SEEDER_LOGIN,
+          verified: false,
+          authorDate: '2026-08-25T23:04:56Z',
+          committerDate: '2026-08-25T23:04:56Z',
+        }],
+      },
+    });
+    assert.ok(
+      r.calls.some((c) => c.name === 'graphql.updateRefs'),
+      `${label}: unsigned PAT seed commit with matching dates should refresh`,
+    );
+    console.log(`ok: ${label} — unsigned PAT seed commit with matching dates is refreshed`);
 
     // 5. Compare-and-swap: the branch moves between the verdict and the ref write.
     r = await run({

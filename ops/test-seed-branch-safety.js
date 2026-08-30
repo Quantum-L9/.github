@@ -89,8 +89,30 @@ v = classifySeedBranch({
   commits: [seedCommit(autoSeedSubject, { verified: false })],
   seederLogin: SEEDER,
 });
-assert.strictEqual(v.safeToReplace, false, 'unverified seed-subject commit must block');
-assert.match(v.reason, /verified/);
+assert.strictEqual(v.safeToReplace, false, 'unverified seed-subject commit without dates must block');
+assert.match(v.reason, /verified signature or matching author\/committer dates/);
+
+v = classifySeedBranch({
+  aheadBy: 1,
+  commits: [seedCommit(autoSeedSubject, {
+    verified: false,
+    authorDate: '2026-08-25T23:04:56Z',
+    committerDate: '2026-08-25T23:04:56Z',
+  })],
+  seederLogin: SEEDER,
+});
+assert.strictEqual(v.safeToReplace, true, 'unsigned PAT seed commit with matching dates must rebuild');
+
+v = classifySeedBranch({
+  aheadBy: 1,
+  commits: [seedCommit(autoSeedSubject, {
+    verified: false,
+    authorDate: '2026-08-25T23:04:56Z',
+    committerDate: '2026-08-25T23:10:00Z',
+  })],
+  seederLogin: SEEDER,
+});
+assert.strictEqual(v.safeToReplace, false, 'unsigned commit with drifted committer date must block');
 
 v = classifySeedBranch({
   aheadBy: 1, commits: [seedCommit(autoSeedSubject)], seederLogin: null,
@@ -165,6 +187,8 @@ function stub({ openPRs = [], branchSha = null, aheadBy = 1, commits = [seedComm
             commit: {
               message: c.message,
               verification: { verified: c.verified === true },
+              author: c.authorDate ? { date: c.authorDate } : undefined,
+              committer: c.committerDate ? { date: c.committerDate } : undefined,
             },
             committer: c.committerLogin ? { login: c.committerLogin } : null,
           })),
@@ -255,13 +279,25 @@ const where = { owner: 'Quantum-L9', repo: 'consumer', base: 'main', branch: 'ch
   assert.strictEqual(g.action, 'skip');
   assert.match(g.reason, /mallory/);
 
-  // Seed subject, unverified (amended) commit → skip.
+  // Seed subject, unverified without dates → skip.
   s = stub({
     branchSha: 'abc123',
     commits: [seedCommit(autoSeedSubject, { verified: false })],
   });
   g = await assessSeedBranch({ github: s.github, ...where });
   assert.strictEqual(g.action, 'skip');
+
+  // Unsigned PAT seed commit with matching dates → rebuild.
+  s = stub({
+    branchSha: 'abc123',
+    commits: [seedCommit(autoSeedSubject, {
+      verified: false,
+      authorDate: '2026-08-25T23:04:56Z',
+      committerDate: '2026-08-25T23:04:56Z',
+    })],
+  });
+  g = await assessSeedBranch({ github: s.github, ...where });
+  assert.strictEqual(g.action, 'rebuild');
 
   // Seeder identity unresolvable → skip, never rebuild.
   s = stub({ branchSha: 'abc123' });
