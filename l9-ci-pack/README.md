@@ -171,10 +171,15 @@ blocking`. Change the mode in `governance/rule-modes.yaml` (`defaults` or a
 
 The org's existing `@v1` kernel starters (`workflow-templates/l9-pr-pipeline.yml`,
 `l9-security.yml`, `l9-scorecard.yml`, `l9-sbom.yml`, `l9-pre-commit.yml`,
-`l9-nightly.yml`, `l9-release.yml`, `l9-governance.yml`,
+`l9-release.yml`, `l9-governance.yml`,
 `l9-node-ts-monorepo.yml`) are **Legacy (frozen `@v1`)** — kept only so
 already-imported wrappers keep resolving against the historical `l9-ci-core`
 kernels. New work always starts here, from `l9-ci-pack/`.
+
+`workflow-templates/l9-nightly.yml` and `l9-ci-pack/workflows/l9-nightly.yml`
+are **not** frozen. They are the one org nightly: they pin
+`l9-ci-core/.github/workflows/nightly.yml`, which nests `analyze-semgrep` at
+`profile: nightly` (`ci_deep`, advisory) plus full-tree language tests.
 
 Scorecard / SBOM / Gitleaks / pre-commit / a dedicated nightly-release kernel
 have **no v2 `workflow_call` equivalent** — the v2 SDK does not implement

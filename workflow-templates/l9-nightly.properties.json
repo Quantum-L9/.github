@@ -1,6 +1,6 @@
 {
   "name": "L9 Nightly",
-  "description": "Nightly scheduled validation and dependency freshness check. Calls l9-ci-core kernel; do not add logic here. LEGACY (frozen @v1) \u2014 see l9-ci-pack/README.md for v2.",
+  "description": "Org nightly: ci_deep Semgrep (advisory) plus full-tree language tests. Calls the l9-ci-core nightly kernel; do not add scan logic here.",
   "iconName": "clock",
   "categories": [
     "Python",
