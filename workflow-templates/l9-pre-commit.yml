@@ -8,7 +8,7 @@ on:
 
 jobs:
   l9_pre_commit:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/pre-commit-ci.yml@7148fc73dcbf41367f5c5401432dc997b1f4f869
+    uses: Quantum-L9/l9-ci-core/.github/workflows/pre-commit-ci.yml@4c842cb838b6c49cf44681ecc683a432538fd348
     secrets: inherit
     with:
       python-version: "3.12"
