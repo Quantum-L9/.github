@@ -250,6 +250,33 @@ else
     fi
   done
 
+  nightly_ok=true
+  for nightly in \
+    "$PACK_DIR/workflows/l9-nightly.yml" \
+    "$TEMPLATES_DIR/l9-nightly.yml"; do
+    if [ ! -f "$nightly" ]; then
+      echo "❌ MISSING nightly caller: $nightly"
+      nightly_ok=false
+      continue
+    fi
+    # Caller permissions cap the reusable nightly kernel (packages: read).
+    if ! grep -vE '^[[:space:]]*#' "$nightly" | grep -q 'packages:[[:space:]]*read'; then
+      echo "❌ $nightly omits packages: read — Core nightly.yml cannot authenticate to GitHub Packages"
+      nightly_ok=false
+    fi
+  done
+  if ! grep -q 'l9-nightly.yml' ops/sync-v2-starters.sh || \
+     ! grep -q 'keeping nightly Core pin' ops/sync-v2-starters.sh; then
+    echo "❌ ops/sync-v2-starters.sh no longer excludes l9-nightly.yml from the generic Core repinner"
+    nightly_ok=false
+  fi
+  if $nightly_ok; then
+    echo "✅ nightly callers grant packages: read and keep their own Core pin"
+    PASS=$((PASS+1))
+  else
+    FAIL=$((FAIL+1))
+  fi
+
   if [ ! -f "$PACK_DIR/README.md" ]; then
     echo "❌ MISSING $PACK_DIR/README.md"
     FAIL=$((FAIL+1))

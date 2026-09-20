@@ -180,6 +180,8 @@ kernels. New work always starts here, from `l9-ci-pack/`.
 are **not** frozen. They are the one org nightly: they pin
 `l9-ci-core/.github/workflows/nightly.yml`, which nests `analyze-semgrep` at
 `profile: nightly` (`ci_deep`, advisory) plus full-tree language tests.
+Callers grant `packages: read` so the kernel's GitHub Packages auth is not
+capped. `ops/sync-v2-starters.sh` does **not** rewrite that nightly SHA.
 
 Scorecard / SBOM / Gitleaks / pre-commit / a dedicated nightly-release kernel
 have **no v2 `workflow_call` equivalent** — the v2 SDK does not implement

@@ -121,6 +121,12 @@ if compgen -G "workflow-templates/l9-v2-*.yml" >/dev/null; then
 fi
 for f in "${FILES_TO_REPIN[@]}"; do
   [[ -f "$f" ]] || continue
+  # Nightly pins a different Core SHA than the v2 pack. A generic repin
+  # silently retargets it and breaks the org nightly caller (#92).
+  if [[ "$(basename "$f")" == "l9-nightly.yml" ]]; then
+    echo "⏭️  keeping nightly Core pin in $f (not rewritten by sync-core)"
+    continue
+  fi
   # Rewrite SHA pins and frozen Core tags (@v2 / @v2.0.0 / @v1) — never @main.
   # Keep install-consumer-ci@v2 floating so pin-file retags percolate.
   sed -i.bak -E "/install-consumer-ci@v2/!s#(Quantum-L9/l9-ci-core/[A-Za-z0-9._/-]+)@([0-9a-f]{40}|v[0-9]+(\.[0-9]+)*)#\1@${CORE_REF}#g" "$f"

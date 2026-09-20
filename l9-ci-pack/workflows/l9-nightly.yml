@@ -8,14 +8,18 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   l9_nightly:
+    # NIGHTLY_CORE_PIN — owned here. ops/sync-v2-starters.sh must not rewrite
+    # this SHA when `make sync-core` repins the rest of l9-ci-pack/.
     uses: Quantum-L9/l9-ci-core/.github/workflows/nightly.yml@0d3d8d3cf2828e1a8c01c237597feb3979c2ba52
     permissions:
       actions: read
       checks: write
       contents: read
+      packages: read
     secrets: inherit
     with:
       python-version: "3.12"
