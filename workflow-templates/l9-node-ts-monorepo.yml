@@ -72,5 +72,5 @@ jobs:
       run-npm-audit: true
 
   scorecard:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/scorecard.yml@7148fc73dcbf41367f5c5401432dc997b1f4f869
+    uses: Quantum-L9/l9-ci-core/.github/workflows/scorecard.yml@059fd45ac2fb5306903b6afcf4fcf48856406418
     secrets: inherit
