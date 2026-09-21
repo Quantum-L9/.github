@@ -9,7 +9,7 @@ on:
 
 jobs:
   l9_pr_pipeline:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/pr-pipeline.yml@7148fc73dcbf41367f5c5401432dc997b1f4f869
+    uses: Quantum-L9/l9-ci-core/.github/workflows/pr-pipeline.yml@059fd45ac2fb5306903b6afcf4fcf48856406418
     secrets: inherit
     with:
       python-version: "3.12"
