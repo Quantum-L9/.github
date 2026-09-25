@@ -77,18 +77,26 @@ jobs:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const fs = require('fs');
+            // Policy is interpreted only by the governance-plan compiler
+            // (docs/adr/0001-one-governance-brain.md). This workflow gathers
+            // the target's facts, compiles one verified plan, applies its
+            // REMOTE APPLY desired state, and attests against the same plan.
             const {
-              loadRepoClasses,
-              parseClassMarker,
-              classForRepo,
-              resolveProfile,
-            } = require('./ops/repo-class-profile.js');
-            const { parseLabels } = require('./ops/label-taxonomy.js');
+              loadAuthority,
+              gatherTargetFacts,
+              compileVerifiedPlan,
+              applyPlanLabels,
+              settingsDrift,
+              markerClassOf,
+              planIdentity,
+            } = require('./ops/plan-adapter.js');
 
             const ORG = 'Quantum-L9';
             const DRY = process.env.DRY_RUN === 'true';
             const TARGET = (process.env.TARGET_REPO || '').trim();
             const FORCED_CLASS = (process.env.REPO_CLASS || '').trim();
+            // The exact revision actions/checkout put on disk (GOV-019).
+            const AUTHORITY_SHA = process.env.GITHUB_SHA;
 
             if (!TARGET) {
               core.setFailed('target_repo is required');
@@ -116,25 +124,22 @@ jobs:
               return null;
             };
 
-            const classes = loadRepoClasses(fs);
-            if (FORCED_CLASS) resolveProfile(classes, FORCED_CLASS, { strict: true });
-
-            // Existence first: a failed fetch must not read as "absent" and
-            // fall through to the widest class. See ops/repo-class-profile.js.
-            let marker = null;
-            if (!FORCED_CLASS && (await pathExists(classes.marker_path))) {
-              marker = (await readText(classes.marker_path)) ?? '';
-            }
-            const decided = FORCED_CLASS
-              ? { name: FORCED_CLASS, source: 'operator input', error: null }
-              : classForRepo(classes, TARGET, marker);
-            if (decided.error) {
-              core.setFailed(`${ORG}/${TARGET}: ${decided.error}`);
+            const authority = loadAuthority(fs);
+            // Existence first: a failed fetch of a marker that exists is a
+            // malformed declaration the compiler refuses — never "absent",
+            // which would fall through to the widest class.
+            const facts = await gatherTargetFacts({ exists: pathExists, readText }, authority.classes.marker_path);
+            let plan;
+            try {
+              plan = compileVerifiedPlan({
+                fs, authority, authoritySha: AUTHORITY_SHA,
+                repository: `${ORG}/${TARGET}`, facts, requestedClass: FORCED_CLASS || null,
+              });
+            } catch (e) {
+              core.setFailed(`${ORG}/${TARGET}: ${e.message}`);
               return;
             }
-            const profile = resolveProfile(classes, decided.name);
-            if (decided.name) profile.resolved_from = decided.source;
-            core.info(`repo class: ${profile.name} (${profile.resolved_from})`);
+            core.info(`${TARGET}: ${planIdentity(plan)}`);
 
             const repo = await github.rest.repos.get({ owner: ORG, repo: TARGET });
             const attest = [];
@@ -145,60 +150,21 @@ jobs:
               if (!ok) failures += 1;
             };
 
-            // ── REMOTE APPLY: labels ───────────────────────────────────────
-            if (profile.remote_apply.labels) {
-              const labels = parseLabels(fs.readFileSync('.github/labels.yml', 'utf8'));
-              if (!labels.length) {
-                record('labels', false, 'no labels parsed from .github/labels.yml');
-              } else if (DRY) {
-                record('labels', true, `would apply ${labels.length} labels (dry run)`);
+            // ── REMOTE APPLY: labels (plan.remote_apply.labels) ────────────
+            if (plan.remote_apply.labels.enabled) {
+              const r = await applyPlanLabels({ github, owner: ORG, repo: TARGET, plan, dry: DRY });
+              if (DRY) {
+                record('labels', true, `would apply ${r.total} labels (dry run)`);
               } else {
-                let created = 0, updated = 0, failed = 0;
-                for (const label of labels) {
-                  try {
-                    await github.rest.issues.createLabel({
-                      owner: ORG, repo: TARGET,
-                      name: label.name, color: label.color, description: label.description,
-                    });
-                    created += 1;
-                  } catch (e) {
-                    if (e.status !== 422) { failed += 1; continue; }
-                    try {
-                      await github.rest.issues.updateLabel({
-                        owner: ORG, repo: TARGET,
-                        name: label.name, color: label.color, description: label.description,
-                      });
-                      updated += 1;
-                    } catch { failed += 1; }
-                  }
-                }
-                record('labels', failed === 0, `+${created} ~${updated} !${failed} of ${labels.length}`);
+                record('labels', r.failed === 0, `+${r.created} ~${r.updated} !${r.failed} of ${r.total}`);
               }
             } else {
-              attest.push(['labels', 'SKIP', `class ${profile.name} does not remote-apply labels`]);
+              attest.push(['labels', 'SKIP', `class ${plan.repo_class.name} does not remote-apply labels`]);
             }
 
-            // ── REMOTE APPLY: repository settings ──────────────────────────
-            if (profile.remote_apply.repo_settings) {
-              const { execSync } = require('child_process');
-              // No native YAML in actions/github-script; same shell-out as
-              // enforce-policies.yml, which owns the same policy file.
-              const settingsPolicy = JSON.parse(execSync(
-                'python3 -c "import yaml,json,sys; print(json.dumps(yaml.safe_load(open(sys.argv[1]))))" "policies/repo-settings.yml"',
-                { encoding: 'utf8' },
-              ));
-              const defaults = settingsPolicy.defaults || {};
-              const overrides = (settingsPolicy.overrides || [])
-                .filter((o) => o.repos && o.repos.includes(TARGET))
-                .reduce((acc, o) => ({ ...acc, ...o, repos: undefined }), {});
-              const expected = { ...defaults, ...overrides };
-              delete expected.repos;
-              delete expected.default_branch;  // never auto-change the default branch
-
-              const drift = Object.entries(expected)
-                .filter(([k, v]) => repo.data[k] !== v)
-                .map(([k, v]) => ({ key: k, expected: v, actual: repo.data[k] }));
-
+            // ── REMOTE APPLY: repository settings (plan desired state) ─────
+            if (plan.remote_apply.repo_settings.enabled) {
+              const drift = settingsDrift(plan, repo.data);
               if (!drift.length) {
                 record('repo_settings', true, 'already matches org policy');
               } else if (DRY) {
@@ -215,26 +181,28 @@ jobs:
                 }
               }
             } else {
-              attest.push(['repo_settings', 'SKIP', `class ${profile.name} does not remote-apply settings`]);
+              attest.push(['repo_settings', 'SKIP', `class ${plan.repo_class.name} does not remote-apply settings`]);
             }
 
             // ── ATTESTATION: the remote, not the local assembly ────────────
             // A birth that only checks what it built locally proves nothing
             // about what GitHub actually holds. Every check below reads the
-            // remote back.
-            for (const path of ['README.md', 'LICENSE', classes.marker_path]) {
+            // remote back, against the expectations in plan.attestation.
+            for (const path of plan.attestation.required_present) {
               const present = (await readText(path)) != null;
               record(`present:${path}`, present, present ? 'on remote HEAD' : 'missing on remote HEAD');
             }
 
             // A repository classed by an org override legitimately carries no
-            // marker; only a marker that CONTRADICTS the resolved class is a
+            // marker; only a marker that CONTRADICTS the plan's class is a
             // failure. Demanding one would fail every override-classed repo.
-            const markerClass = parseClassMarker(await readText(classes.marker_path));
+            const markerClass = plan.attestation.verify_class_marker
+              ? markerClassOf(await readText(authority.classes.marker_path))
+              : null;
             if (markerClass) {
-              record('marker:class', markerClass === profile.name, `marker says ${markerClass}`);
+              record('marker:class', markerClass === plan.repo_class.name, `marker says ${markerClass}`);
             } else {
-              attest.push(['marker:class', 'SKIP', `no marker; class from ${profile.resolved_from}`]);
+              attest.push(['marker:class', 'SKIP', `no marker; class from ${plan.repo_class.resolved_from}`]);
             }
 
             // FORBID is an attestation, not only a build-time filter: a
@@ -242,7 +210,7 @@ jobs:
             // birth — a hand-added workflow, a sweep that predates its class,
             // a copy-paste from a sibling repo.
             const leaked = [];
-            for (const pattern of profile.forbid) {
+            for (const pattern of plan.attestation.required_absent) {
               // A `dir/**` pattern is probed at the directory itself: the
               // contents API returns a listing for a directory that exists and
               // 404s for one that does not.
@@ -256,13 +224,14 @@ jobs:
               leaked.length === 0,
               leaked.length
                 ? `org CI distribution present on remote: ${leaked.join(', ')}`
-                : `${profile.forbid.length} pattern(s) probed, none present`,
+                : `${plan.attestation.required_absent.length} pattern(s) probed, none present`,
             );
 
             const mode = DRY ? 'DRY RUN' : 'APPLIED';
             await core.summary
               .addHeading(`Repo birth bootstrap (${mode}) — ${ORG}/${TARGET}`, 2)
-              .addRaw(`**Class:** \`${profile.name}\` (${profile.resolved_from})\n\n`)
+              .addRaw(`**Class:** \`${plan.repo_class.name}\` (${plan.repo_class.resolved_from})\n\n`)
+              .addRaw(`**Governance plan:** authority \`${plan.authority.sha}\`, digest \`${plan.digest.value}\`\n\n`)
               .addTable([
                 [
                   { data: 'Check', header: true },

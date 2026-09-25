@@ -19,6 +19,7 @@ const {
   GovernanceCompileError,
 } = require('./compile-repo-governance.js');
 const { RETIRED_CATEGORIES } = require('./build-seed-payload.js');
+const { parseClassMarker } = require('./repo-class-profile.js');
 
 /**
  * Collect the explicit target facts the compiler needs.
@@ -100,6 +101,70 @@ function payloadOf(files) {
 }
 
 /**
+ * Apply `plan.remote_apply.labels` to one repository: create, else update.
+ * Additive only — never deletes. Applies exactly the plan's label set and
+ * nothing when the plan disables labels (GOV-013, B-12). Shared by the birth
+ * bootstrap and the weekly sweep so both apply the same answer (AC-INT-004).
+ *
+ * @param {object} o
+ * @param {object} o.github  octokit (actions/github-script)
+ * @param {string} o.owner
+ * @param {string} o.repo
+ * @param {object} o.plan  verified plan
+ * @param {boolean} [o.dry]
+ * @returns {Promise<{enabled: boolean, total: number, created: number, updated: number, failed: number}>}
+ */
+async function applyPlanLabels({ github, owner, repo, plan, dry = false }) {
+  const { enabled, items } = plan.remote_apply.labels;
+  const out = { enabled, total: items.length, created: 0, updated: 0, failed: 0 };
+  if (!enabled || dry) return out;
+  for (const label of items) {
+    const body = { owner, repo, name: label.name, color: label.color, description: label.description };
+    try {
+      await github.rest.issues.createLabel(body);
+      out.created += 1;
+    } catch (e) {
+      if (e.status !== 422) {
+        out.failed += 1;
+        continue;
+      }
+      try {
+        await github.rest.issues.updateLabel(body);
+        out.updated += 1;
+      } catch {
+        out.failed += 1;
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Settings drift between a repository's current state and the plan's desired
+ * settings (GOV-014). Compare only — the plan already excludes settings the
+ * org never auto-changes.
+ *
+ * @param {object} plan
+ * @param {object} current  `repos.get().data`
+ * @returns {Array<{key: string, expected: unknown, actual: unknown}>}
+ */
+function settingsDrift(plan, current) {
+  return Object.entries(plan.remote_apply.repo_settings.desired)
+    .filter(([k, v]) => current[k] !== v)
+    .map(([k, v]) => ({ key: k, expected: v, actual: current[k] }));
+}
+
+/**
+ * The class a remote marker declares, for attestation read-back. Parsing only;
+ * whether it may differ from the plan's class is the plan's attestation rule.
+ * @param {string|null} markerText
+ * @returns {string|null}
+ */
+function markerClassOf(markerText) {
+  return parseClassMarker(markerText);
+}
+
+/**
  * One line of plan identity for job summaries (13-observability).
  * @param {object} plan
  * @returns {string}
@@ -118,5 +183,8 @@ module.exports = {
   compileVerifiedPlan,
   selectPlanFiles,
   payloadOf,
+  applyPlanLabels,
+  settingsDrift,
+  markerClassOf,
   planIdentity,
 };

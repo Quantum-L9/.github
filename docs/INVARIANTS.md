@@ -32,8 +32,8 @@ today; `Pending Gn` becomes enforced when slice Gn migrates its consumers;
 | GOV-010 | A forbidden path present remotely is an attestation failure. | Targeted bootstrap | AC-INT-006 | Pending G5 |
 | GOV-011 | `MATERIALIZE` writes only plan-declared entries and honors the plan write mode. | Seed adapters | ops/test-seed-plan-adapters.js; AC-BEH-002 | Enforced (G2) |
 | GOV-012 | Manual filters may narrow execution but cannot widen the compiled plan. | Manual-seed / sync tests | ops/test-seed-plan-adapters.js, ops/test-sync-org-files.sh; AC-ADV-003 | Enforced (G2) |
-| GOV-013 | Remote labels are applied only when enabled in the plan, and only from the exact plan label set. | Label adapters | AC-BEH-003 | Pending G3 |
-| GOV-014 | Remote settings are applied only from the fully resolved plan desired state. | Bootstrap / enforcement | AC-BEH-004 | Pending G3 |
+| GOV-013 | Remote labels are applied only when enabled in the plan, and only from the exact plan label set. | Label adapters | ops/test-remote-apply-adapters.js; AC-BEH-003 | Enforced (G3) |
+| GOV-014 | Remote settings are applied only from the fully resolved plan desired state. | Bootstrap / enforcement | ops/test-remote-apply-adapters.js; AC-BEH-004 | Enforced (G3) |
 | GOV-015 | Effective mandatory-file waivers are identical across enforcement and reconciliation. | Compiler + workflow tests | AC-INT-003 | Pending G4 |
 | GOV-016 | Drift repair cannot restore a file the effective class waives or forbids. | Continuous sync | AC-ADV-004 | Pending G4 |
 | GOV-017 | Same authority SHA + same target identity and facts + same policy bytes yields a byte-identical canonical plan and digest. | Determinism test | AC-CON-003 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |

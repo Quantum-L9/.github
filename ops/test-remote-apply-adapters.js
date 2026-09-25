@@ -1,0 +1,236 @@
+'use strict';
+
+/**
+ * G3 adapter proofs: REMOTE APPLY paths apply the compiled plan's desired
+ * state and nothing else.
+ *
+ * Runs the real `script:` bodies of repo-birth-bootstrap.yml and
+ * sync-labels-all.yml (ops/workflow-script-harness.js) plus scripts/sync-labels.sh
+ * (through a `gh` shim) and asserts:
+ *   - bootstrap, sweep, and the CLI apply exactly plan.remote_apply.labels
+ *     for the same target (AC-INT-004, AC-BEH-003)
+ *   - bootstrap patches exactly the plan's settings drift, never
+ *     default_branch (AC-BEH-004, AC-INT-005 bootstrap half)
+ *   - a plan with labels disabled makes zero label mutations (B-12)
+ *   - an unknown or unreadable marker fails the bootstrap before any
+ *     mutation and is skipped (never labelled as default) by the sweep
+ *     (AC-ADV-001, AC-ADV-009)
+ *   - attestation reads back plan.attestation (present, marker, forbid)
+ *   - summaries carry authority SHA and plan digest (AC-INT-007 precursor)
+ *
+ * Run from the Quantum-L9/.github repo root:
+ *   node ops/test-remote-apply-adapters.js
+ */
+const assert = require('node:assert');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+const { notFound, makeScriptRunner } = require('./workflow-script-harness.js');
+const { compileGovernancePlan } = require('./compile-repo-governance.js');
+const { applyPlanLabels, settingsDrift } = require('./plan-adapter.js');
+
+const root = path.resolve(__dirname, '..');
+const SHA = '77587b7421b2e7cfad391e5036f531d8b5833e2b';
+const MARKER = '.l9/org-birth-profile.yaml';
+const MUTATIONS = new Set(['issues.createLabel', 'issues.updateLabel', 'repos.update']);
+const ABSENT = { marker_state: 'absent', has_root_codeowners: false, has_python: false, has_package_json: false };
+
+function planFor(repoName, facts = ABSENT) {
+  const cwd = process.cwd();
+  process.chdir(root);
+  try {
+    return compileGovernancePlan({ fs, authoritySha: SHA, repository: `Quantum-L9/${repoName}`, facts });
+  } finally {
+    process.chdir(cwd);
+  }
+}
+
+/**
+ * @param {object} o
+ * @param {Record<string,string>} [o.files]  remote files (path → contents)
+ * @param {string[]} [o.unreadable]  exist, but content reads fail
+ * @param {object} [o.settings]  current repos.get().data
+ * @param {string[]} [o.existingLabels]  labels already on the repo (create → 422)
+ */
+function makeGithub({ files = {}, unreadable = [], settings = {}, existingLabels = [] } = {}) {
+  const calls = [];
+  const probes = {};
+  const record = (name, fn) => async (args) => {
+    calls.push({ name, args });
+    return fn ? fn(args) : { data: {} };
+  };
+  const repoData = { name: 'target', owner: { login: 'Quantum-L9' }, archived: false, fork: false, ...settings };
+  const github = {
+    paginate: async () => [repoData],
+    rest: {
+      repos: {
+        getContent: async ({ path: p }) => {
+          if (unreadable.includes(p)) {
+            probes[p] = (probes[p] || 0) + 1;
+            if (probes[p] > 1) throw new Error('500 transient read failure');
+            return { data: [] };
+          }
+          if (Object.hasOwn(files, p)) return { data: { content: Buffer.from(files[p]).toString('base64') } };
+          throw notFound('Not Found');
+        },
+        get: async () => ({ data: repoData }),
+        update: record('repos.update'),
+      },
+      issues: {
+        createLabel: record('issues.createLabel', (args) => {
+          if (existingLabels.includes(args.name)) {
+            const e = new Error('already_exists');
+            e.status = 422;
+            throw e;
+          }
+          return { data: {} };
+        }),
+        updateLabel: record('issues.updateLabel'),
+      },
+    },
+  };
+  return { github, calls, state: {} };
+}
+
+const runner = (file, envFor) =>
+  makeScriptRunner({ file: path.join(root, file), root, tmpTag: 'remote-apply-', envFor, makeGithub, mutations: MUTATIONS });
+
+const bootstrap = (env = {}) =>
+  runner('.github/workflows/repo-birth-bootstrap.yml', (dry) => ({
+    DRY_RUN: dry ? 'true' : 'false',
+    TARGET_REPO: 'target',
+    REPO_CLASS: '',
+    GITHUB_SHA: SHA,
+    ...env,
+  }));
+const sweep = (env = {}) =>
+  runner('.github/workflows/sync-labels-all.yml', (dry) => ({
+    DRY_RUN: dry ? 'true' : 'false',
+    FILTER: '',
+    GITHUB_SHA: SHA,
+    ...env,
+  }));
+
+const labelNames = (r) =>
+  r.calls.filter((c) => c.name === 'issues.createLabel').map((c) => `${c.args.name}|${c.args.color}|${c.args.description}`);
+
+/** Run scripts/sync-labels.sh against a gh shim, from a clean copy of this tree. */
+function cliSync(remoteFiles) {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'sync-labels-'));
+  const copy = path.join(tmp, 'org');
+  const bin = path.join(tmp, 'bin');
+  const log = path.join(tmp, 'gh.log');
+  fs.mkdirSync(bin);
+  // The compiler CLI refuses a dirty checkout (B-20), so run from a fresh
+  // single-commit copy of the working tree: provenance holds, and the code
+  // under test is this tree, not the last commit.
+  fs.cpSync(root, copy, { recursive: true, filter: (src) => !src.includes(`${path.sep}.git${path.sep}`) && !src.endsWith(`${path.sep}.git`) });
+  const git = ['/usr/bin/git', '/usr/local/bin/git'].find((p) => fs.existsSync(p));
+  const g = (args) => spawnSync(git, ['-C', copy, ...args], { encoding: 'utf8' });
+  g(['init', '-q']);
+  g(['add', '-A']);
+  g(['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '-m', 'snapshot']);
+
+  const files = JSON.stringify(remoteFiles);
+  fs.writeFileSync(
+    path.join(bin, 'gh'),
+    `#!/usr/bin/env bash
+echo "$*" >> ${JSON.stringify(log)}
+if [[ "$1" == "api" ]]; then
+  p="\${2#repos/Quantum-L9/target/contents/}"
+  body="$(FILES='${files.replace(/'/g, "'\\''")}' P="$p" node -e 'const f=JSON.parse(process.env.FILES); if (Object.hasOwn(f, process.env.P)) process.stdout.write(Buffer.from(f[process.env.P]).toString("base64")); else process.exit(3)')" || { echo "gh: Not Found (HTTP 404)" >&2; exit 1; }
+  if [[ " $* " == *" --jq "* ]]; then echo "$body"; fi
+  exit 0
+fi
+exit 0
+`,
+    { mode: 0o755 },
+  );
+  const bash = ['/usr/bin/bash', '/bin/bash'].find((b) => fs.existsSync(b));
+  const out = spawnSync(bash, [path.join(copy, 'scripts/sync-labels.sh'), 'Quantum-L9/target'], {
+    encoding: 'utf8',
+    env: { ...process.env, PATH: `${bin}:${process.env.PATH}` },
+  });
+  const calls = fs.existsSync(log) ? fs.readFileSync(log, 'utf8').trim().split('\n') : [];
+  fs.rmSync(tmp, { recursive: true, force: true });
+  return { status: out.status, stderr: out.stderr, labelCreates: calls.filter((c) => c.startsWith('label create')) };
+}
+
+(async () => {
+  const plan = planFor('target');
+  const expectedLabels = plan.remote_apply.labels.items.map((l) => `${l.name}|${l.color}|${l.description}`);
+  assert.ok(expectedLabels.length > 0);
+
+  // ── same target → same label set, three adapters (AC-INT-004) ───────────
+  const b = await bootstrap()({ files: { 'README.md': 'x', LICENSE: 'x' } });
+  const s = await sweep()({});
+  const cli = cliSync({});
+  assert.deepStrictEqual(labelNames(b), expectedLabels, 'bootstrap applies exactly the plan labels');
+  assert.deepStrictEqual(labelNames(s), expectedLabels, 'sweep applies exactly the plan labels');
+  assert.strictEqual(cli.status, 0, `sync-labels.sh failed: ${cli.stderr}`);
+  assert.strictEqual(cli.labelCreates.length, expectedLabels.length, 'CLI applies exactly the plan labels');
+  assert.match(cli.stderr, /plan [0-9a-f]{12} @ [0-9a-f]{12}/, 'CLI names the plan it applied');
+  console.log(`ok: bootstrap, sweep, and sync-labels.sh apply the same ${expectedLabels.length} plan labels`);
+
+  // Existing labels are updated, not duplicated.
+  const upd = await sweep()({ existingLabels: [plan.remote_apply.labels.items[0].name] });
+  assert.strictEqual(upd.calls.filter((c) => c.name === 'issues.updateLabel').length, 1);
+  console.log('ok: an existing label is updated in place');
+
+  // ── settings: exactly the plan drift, never default_branch (AC-BEH-004) ──
+  const current = { ...plan.remote_apply.repo_settings.desired, has_wiki: true, allow_merge_commit: true, default_branch: 'trunk' };
+  const bs = await bootstrap()({ files: { 'README.md': 'x', LICENSE: 'x' }, settings: current });
+  const update = bs.calls.find((c) => c.name === 'repos.update');
+  assert.ok(update, 'drifted settings are patched');
+  const { owner: _o, repo: _r, ...patch } = update.args;
+  const expectedPatch = Object.fromEntries(settingsDrift(plan, current).map((d) => [d.key, d.expected]));
+  assert.deepStrictEqual(patch, expectedPatch);
+  assert.deepStrictEqual(Object.keys(patch).sort(), ['allow_merge_commit', 'has_wiki']);
+  assert.ok(!('default_branch' in patch), 'default_branch is never auto-changed');
+  const inSync = await bootstrap()({ files: { 'README.md': 'x', LICENSE: 'x' }, settings: plan.remote_apply.repo_settings.desired });
+  assert.ok(!inSync.calls.some((c) => c.name === 'repos.update'), 'no patch when settings match');
+  console.log('ok: bootstrap patches exactly the plan settings drift, default_branch excluded');
+
+  // ── labels disabled in the plan → zero label mutations (B-12) ───────────
+  const disabled = JSON.parse(JSON.stringify(plan));
+  disabled.remote_apply.labels = { enabled: false, items: [] };
+  const calls = [];
+  const gh = { rest: { issues: { createLabel: async () => calls.push(1), updateLabel: async () => calls.push(1) } } };
+  const r = await applyPlanLabels({ github: gh, owner: 'Quantum-L9', repo: 'x', plan: disabled });
+  assert.deepStrictEqual([r.enabled, calls.length], [false, 0]);
+  console.log('ok: a plan with labels disabled makes zero label calls');
+
+  // ── fail closed on class declarations (AC-ADV-001, AC-ADV-009) ──────────
+  const unknown = { [MARKER]: 'profile: totally_made_up\n', 'README.md': 'x', LICENSE: 'x' };
+  const bu = await bootstrap()({ files: unknown });
+  assert.strictEqual(bu.mutated, false, 'bootstrap must not mutate for an unknown class');
+  assert.ok(bu.failures.some((f) => /unknown class totally_made_up/.test(f)), `${bu.failures}`);
+  const bunread = await bootstrap()({ unreadable: [MARKER] });
+  assert.strictEqual(bunread.mutated, false, 'an unreadable marker must not read as absent');
+  assert.ok(bunread.failures.length > 0);
+  const bforced = await bootstrap({ REPO_CLASS: 'defualt' })({});
+  assert.strictEqual(bforced.mutated, false, 'a mistyped forced class must not mutate');
+  const su = await sweep()({ files: unknown });
+  assert.strictEqual(su.mutated, false, 'sweep must not label an unresolvable repository');
+  assert.deepStrictEqual(su.failures, [], 'an unresolvable repository is skipped, not a sweep failure');
+  assert.notStrictEqual(cliSync({ [MARKER]: 'profile: totally_made_up\n' }).status, 0, 'CLI refuses an unknown class');
+  for (const [label, run] of [['bootstrap', bootstrap({ GITHUB_SHA: '' })], ['sweep', sweep({ GITHUB_SHA: '' })]]) {
+    const x = await run({ files: { 'README.md': 'x', LICENSE: 'x' } });
+    assert.strictEqual(x.mutated, false, `${label}: no authority SHA, no mutation`);
+  }
+  console.log('ok: unknown, unreadable, or mistyped classes and a missing authority SHA mutate nothing');
+
+  // ── attestation reads back plan.attestation ──────────────────────────────
+  const missingLicense = await bootstrap()({ files: { 'README.md': 'x' } });
+  assert.ok(missingLicense.failures.some((f) => /attestation check/.test(f)), 'missing required file fails attestation');
+  const selfGoverned = { [MARKER]: 'profile: self_governed\n', 'README.md': 'x', LICENSE: 'x', '.github/workflows/governance.yml': 'x' };
+  const leaked = await bootstrap()({ files: selfGoverned });
+  assert.ok(leaked.failures.length > 0, 'a FORBID path present on the remote fails attestation (GV-007)');
+  const contradicted = await bootstrap({ REPO_CLASS: 'default' })({ files: { [MARKER]: 'profile: self_governed\n', 'README.md': 'x', LICENSE: 'x' } });
+  assert.ok(contradicted.failures.length > 0, 'a marker contradicting the plan class fails attestation');
+  console.log('ok: attestation fails on a missing required file, a present FORBID path, and a contradicting marker');
+})().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -3,8 +3,10 @@
 # Creates or updates labels; never deletes (additive only).
 #
 # This is the org-wide sweep. A newly born repository does not wait for it:
-# repo-birth-bootstrap.yml applies the same taxonomy, through the same parser
-# (ops/label-taxonomy.js), at birth.
+# repo-birth-bootstrap.yml applies the same labels at birth. Both read the
+# desired label set from each repository's compiled governance plan
+# (ops/compile-repo-governance.js), so labels land only where the repository's
+# class enables remote_apply.labels.
 name: Sync labels (org-wide)
 
 on:
@@ -46,20 +48,41 @@ jobs:
           github-token: ${{ steps.token.outputs.token }}
           script: |
             const fs = require('fs');
-            const { parseLabels } = require('./ops/label-taxonomy.js');
+            // Label applicability is a class decision, made only by the
+            // governance-plan compiler (docs/adr/0001-one-governance-brain.md).
+            // Each repository gets its own verified plan; the sweep applies
+            // plan.remote_apply.labels through the same helper the birth
+            // bootstrap uses, so a birth and a sweep can never disagree.
+            const {
+              loadAuthority,
+              GovernanceCompileError,
+              gatherTargetFacts,
+              compileVerifiedPlan,
+              applyPlanLabels,
+            } = require('./ops/plan-adapter.js');
             const DRY = process.env.DRY_RUN === 'true';
             const FILTER = process.env.FILTER;
+            // The exact revision actions/checkout put on disk (GOV-019).
+            const AUTHORITY_SHA = process.env.GITHUB_SHA;
+            const authority = loadAuthority(fs);
 
-            // One parser, shared with repo-birth-bootstrap.yml and
-            // scripts/sync-labels.sh — a birth and a sweep must never disagree
-            // about what the taxonomy is.
-            const labels = parseLabels(fs.readFileSync('.github/labels.yml', 'utf8'));
-
-            if (labels.length === 0) {
-              core.setFailed('No labels parsed from .github/labels.yml');
-              return;
-            }
-            core.info(`Parsed ${labels.length} labels from .github/labels.yml`);
+            const exists = async (owner, repo, path) => {
+              try {
+                await github.rest.repos.getContent({ owner, repo, path });
+                return true;
+              } catch {
+                return false;
+              }
+            };
+            const readText = async (owner, repo, path) => {
+              try {
+                const res = await github.rest.repos.getContent({ owner, repo, path });
+                if (res.data && res.data.content) {
+                  return Buffer.from(res.data.content, 'base64').toString('utf8');
+                }
+              } catch { /* missing */ }
+              return null;
+            };
 
             // Get all active repos
             const all = await github.paginate(github.rest.repos.listForOrg, {
@@ -71,47 +94,50 @@ jobs:
             );
 
             const rows = [];
+            const failed = [];
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
-              let created = 0, updated = 0, skipped = 0;
-
-              for (const label of labels) {
-                if (DRY) { skipped++; continue; }
-                try {
-                  await github.rest.issues.createLabel({
-                    owner: o, repo: n,
-                    name: label.name,
-                    color: label.color,
-                    description: label.description
-                  });
-                  created++;
-                } catch (e) {
-                  if (e.status === 422) {
-                    // Already exists — update
-                    try {
-                      await github.rest.issues.updateLabel({
-                        owner: o, repo: n,
-                        name: label.name,
-                        color: label.color,
-                        description: label.description
-                      });
-                      updated++;
-                    } catch (ue) {
-                      skipped++;
-                    }
-                  } else {
-                    skipped++;
-                  }
+              let plan;
+              try {
+                const facts = await gatherTargetFacts({
+                  exists: (p) => exists(o, n, p),
+                  readText: (p) => readText(o, n, p),
+                }, authority.classes.marker_path);
+                plan = compileVerifiedPlan({
+                  fs, authority, authoritySha: AUTHORITY_SHA, repository: `${o}/${n}`, facts,
+                });
+              } catch (e) {
+                // A sweep does not stop for one repository: an unresolvable
+                // class is skipped and reported, never labelled as default.
+                if (e instanceof GovernanceCompileError && e.code === 'class_resolution') {
+                  rows.push([n, 'unresolved', `skipped: ${e.message}`]);
+                  continue;
                 }
+                failed.push(n);
+                rows.push([n, '?', `failed: ${e.message}`.slice(0, 160)]);
+                continue;
               }
-              rows.push([n, DRY ? 'dry-run' : `+${created} ~${updated} =${skipped}`]);
+              const r = await applyPlanLabels({ github, owner: o, repo: n, plan, dry: DRY });
+              const digest = plan.digest.value.slice(0, 12);
+              if (!r.enabled) {
+                rows.push([n, plan.repo_class.name, `SKIP: class does not remote-apply labels (plan ${digest})`]);
+              } else if (DRY) {
+                rows.push([n, plan.repo_class.name, `dry-run: would apply ${r.total} (plan ${digest})`]);
+              } else {
+                rows.push([n, plan.repo_class.name, `+${r.created} ~${r.updated} !${r.failed} of ${r.total} (plan ${digest})`]);
+              }
             }
 
             const mode = DRY ? 'DRY RUN' : 'APPLIED';
-            core.summary
-              .addHeading(`Label sync (${mode}) — ${targets.length} repos, ${labels.length} labels`, 2)
+            await core.summary
+              .addHeading(`Label sync (${mode}) — ${targets.length} repos`, 2)
+              .addRaw(`**Governance authority:** \`${AUTHORITY_SHA}\`\n\n`)
               .addTable([
-                [{data: 'Repo', header: true}, {data: 'Result', header: true}],
+                [{data: 'Repo', header: true}, {data: 'Class', header: true}, {data: 'Result', header: true}],
                 ...rows.map(r => r.map(String))
               ])
               .write();
+
+            if (failed.length) {
+              core.setFailed(`${failed.length} repo(s) could not be planned: ${failed.join(', ')} — see job summary`);
+            }
