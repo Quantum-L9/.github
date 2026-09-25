@@ -1,4 +1,4 @@
-# Mandatory files policy.
+# Mandatory files policy (JSON-in-YAML).
 # Defines files that must exist in every repo. Enforced by enforce-policies.yml.
 # If a file is missing, a remediation PR is opened.
 #
@@ -14,31 +14,47 @@
 #   managed  — content must match template exactly; drift is auto-restored
 #   seeded   — file must exist; content is consumer-owned after first seed
 #   present  — file must exist; no content check (any content is acceptable)
-files:
-  - path: .github/CODEOWNERS
-    source: templates/CODEOWNERS.repo
-    mode: managed
-
-  - path: .github/dependabot.yml
-    source: templates/dependabot.yml
-    mode: managed
-
-  - path: LICENSE
-    source: templates/community-health/LICENSE
-    mode: seeded
-
-  - path: .github/workflows/governance.yml
-    source: templates/governance-caller.yml
-    mode: seeded
+#
+# JSON-in-YAML (same convention as policies/repo-classes.yml) so Node reads it
+# through parseJsonInYaml() in ops/repo-class-profile.js with no YAML
+# dependency. JSON is a YAML subset, so the yaml.safe_load() reader in
+# enforce-policies.yml parses it unchanged. Parsed-object parity with the prior
+# block-YAML form is asserted by ops/test-policy-serialization.js — keep that
+# fixture in step with any edit.
+#
+# Only full-line `#` comments are allowed (parseJsonInYaml strips those alone).
+{
+  "files": [
+    {
+      "path": ".github/CODEOWNERS",
+      "source": "templates/CODEOWNERS.repo",
+      "mode": "managed"
+    },
+    {
+      "path": ".github/dependabot.yml",
+      "source": "templates/dependabot.yml",
+      "mode": "managed"
+    },
+    {
+      "path": "LICENSE",
+      "source": "templates/community-health/LICENSE",
+      "mode": "seeded"
+    },
     # Waived for classes that own their CI invocation upstream; see
     # `mandatory_files_waive` in policies/repo-classes.yml.
-
-  - path: README.md
-    mode: present
-
-exceptions:
-  # Repos exempt from mandatory file checks
-  - repo: ".github"
-    reason: "This IS the template source"
-  - repo: "Cursor-Governance"
-    reason: "Policy SSOT — has its own governance model"
+    {
+      "path": ".github/workflows/governance.yml",
+      "source": "templates/governance-caller.yml",
+      "mode": "seeded"
+    },
+    {
+      "path": "README.md",
+      "mode": "present"
+    }
+  ],
+  "exceptions": [
+    # Repos exempt from mandatory file checks
+    { "repo": ".github", "reason": "This IS the template source" },
+    { "repo": "Cursor-Governance", "reason": "Policy SSOT — has its own governance model" }
+  ]
+}
