@@ -1,13 +1,15 @@
 name: Seed org templates into consumers
 
 # Physically seeds templates/ health + ownership files. CI is never seeded.
-# Default `all` omits labels.yml (org sync-labels-all),
-# LICENSE, FUNDING.yml, SUPPORT.md, and duplicate issue templates.
-# Python l9-lint-test.yml is seeded only when the consumer has
-# pyproject.toml or requirements.txt.
 #
-# Matches ops/sync-org-files.sh + templates/README.md. This repo distributes
-# Core pack callers; l9-ci-core executes CI — see docs/BOUNDARIES.md.
+# Class-aware: every repository's writes come from its compiled governance
+# plan (ops/compile-repo-governance.js via ops/plan-adapter.js), so INHERIT,
+# FORBID, and class seed categories apply here exactly as in
+# auto-seed-new-repo.yml. The `categories` input only narrows each plan; a
+# category a repository's class does not authorize refuses that repository.
+#
+# Matches ops/sync-org-files.sh + templates/README.md. CI is executed by
+# l9-ci-core, never distributed from here — see docs/BOUNDARIES.md.
 #
 # Auth: org secret `GH_TOKEN` (SSOT = AWS openclaw-igorbot/github#token).
 # A fine-grained PAT / classic admin PAT can write `.github/workflows/*`.
@@ -37,10 +39,10 @@ on:
         default: ""
       categories:
         description: >-
-          Comma-separated categories, or "all" (default set: codeowners,
-          dependabot, governance, community-health, issue-templates,
-          pr-templates). Opt-in: labels. Retired (fail closed): l9-ci-pack,
-          on-org-update.
+          Comma-separated categories, or "all" (= each repository's full
+          compiled plan). A list narrows every repository's plan; a category
+          the repository's class does not authorize refuses that repository.
+          Retired (fail closed): l9-ci-pack, on-org-update.
         type: string
         default: all
 
@@ -75,10 +77,6 @@ jobs:
           script: |
             const fs = require('fs');
             const {
-              buildSeedPayload,
-              parseCategories,
-              ALL_CATEGORIES,
-              DEFAULT_CATEGORIES,
               STOCK_ESLINT_NODE_DEST,
               STOCK_BIOME_DEST,
               selectSeedWrites,
@@ -87,18 +85,27 @@ jobs:
               assessSeedBranch,
               moveSeedBranch,
             } = require('./ops/seed-branch-safety.js');
+            // Policy is interpreted only by the governance-plan compiler
+            // (docs/adr/0001-one-governance-brain.md). The category input is an
+            // operator filter: it may narrow each repository's compiled plan,
+            // never add to it (GOV-012).
+            const {
+              loadAuthority,
+              GovernanceCompileError,
+              gatherTargetFacts,
+              compileVerifiedPlan,
+              selectPlanFiles,
+              payloadOf,
+              planIdentity,
+            } = require('./ops/plan-adapter.js');
 
             const MODE = process.env.SEED_MODE || 'dry-run';
             const FILTER = process.env.SEED_REPO_FILTER || '';
+            const CATEGORIES = (process.env.SEED_CATEGORIES || 'all').trim() || 'all';
             const BRANCH = 'chore/seed-governance';
-
-            let categories;
-            try {
-              categories = parseCategories(process.env.SEED_CATEGORIES || 'all');
-            } catch (e) {
-              core.setFailed(e.message);
-              return;
-            }
+            // The exact revision actions/checkout put on disk (GOV-019).
+            const AUTHORITY_SHA = process.env.GITHUB_SHA;
+            const authority = loadAuthority(fs);
 
             const exists = async (owner, repo, path, ref) => {
               try {
@@ -128,23 +135,36 @@ jobs:
             const rows = [];
             let failures = 0;
 
-            core.info(`categories=${categories.join(',')} (default ${DEFAULT_CATEGORIES.join(',')}; all ${ALL_CATEGORIES.join(',')})`);
+            core.info(`categories=${CATEGORIES} (filter over each repo's compiled plan; authority ${AUTHORITY_SHA})`);
 
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
               try {
-                const hasRootCodeowners = await exists(o, n, 'CODEOWNERS');
-                const hasPython = (await exists(o, n, 'pyproject.toml'))
-                  || (await exists(o, n, 'requirements.txt'));
-                const hasPackageJson = await exists(o, n, 'package.json');
-                const payload = buildSeedPayload({
-                  fs,
-                  categories,
-                  hasRootCodeowners,
-                  hasPython,
-                  hasPackageJson,
-                  repository: `${o}/${n}`,
-                });
+                const facts = await gatherTargetFacts({
+                  exists: (p) => exists(o, n, p),
+                  readText: (p) => readText(o, n, p),
+                }, authority.classes.marker_path);
+                const hasRootCodeowners = facts.has_root_codeowners;
+
+                // An undeclarable class, or a category the repository's class
+                // does not authorize, refuses this repository; it is never
+                // seeded under a wider answer (B-10).
+                let plan;
+                let files;
+                try {
+                  plan = compileVerifiedPlan({
+                    fs, authority, authoritySha: AUTHORITY_SHA, repository: `${o}/${n}`, facts,
+                  });
+                  files = selectPlanFiles(plan, CATEGORIES);
+                } catch (e) {
+                  if (!(e instanceof GovernanceCompileError)) throw e;
+                  if (e.code !== 'class_resolution' && e.code !== 'policy_contradiction') throw e;
+                  failures += 1;
+                  rows.push([n, `refused: ${e.message}`]);
+                  continue;
+                }
+                core.info(`${n}: ${planIdentity(plan)}`);
+                const payload = payloadOf(files);
                 const paths = Object.keys(payload);
 
                 if (!paths.length) {
@@ -243,7 +263,8 @@ jobs:
                 const bodyLines = [
                   'Seeds org template health and ownership files from `Quantum-L9/.github/templates/`. CI is not distributed from this repository.',
                   '',
-                  `Categories: \`${categories.join('`, `')}\`.`,
+                  `Categories: \`${CATEGORIES}\` (filter over the repository's compiled plan).`,
+                  `**Repo class:** \`${plan.repo_class.name}\` (${plan.repo_class.resolved_from}) · governance plan: authority \`${plan.authority.sha}\`, digest \`${plan.digest.value}\`.`,
                   '',
                   '### Files in this PR',
                   ...listed,
@@ -296,7 +317,7 @@ jobs:
 
             await core.summary
               .addHeading(`Seed (${MODE}) — ${rows.length} repos`, 2)
-              .addRaw(`\nCategories: \`${categories.join('`, `')}\`\n`)
+              .addRaw(`\nCategories: \`${CATEGORIES}\` · governance authority \`${AUTHORITY_SHA}\`\n`)
               .addTable([
                 [{ data: 'repo', header: true }, { data: 'result', header: true }],
                 ...rows.map(r => r.map(String)),

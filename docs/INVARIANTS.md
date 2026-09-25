@@ -30,8 +30,8 @@ today; `Pending Gn` becomes enforced when slice Gn migrates its consumers;
 | GOV-008 | `INHERIT` paths are not materialized by plan execution. | Compiler + integration tests | AC-BEH-001 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
 | GOV-009 | `FORBID` paths cannot appear in a valid materialization plan. | Compiler validation | AC-ADV-002 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
 | GOV-010 | A forbidden path present remotely is an attestation failure. | Targeted bootstrap | AC-INT-006 | Pending G5 |
-| GOV-011 | `MATERIALIZE` writes only plan-declared entries and honors the plan write mode. | Seed adapters | AC-BEH-002 | Pending G2 |
-| GOV-012 | Manual filters may narrow execution but cannot widen the compiled plan. | Manual-seed / sync tests | AC-ADV-003 | Pending G2 |
+| GOV-011 | `MATERIALIZE` writes only plan-declared entries and honors the plan write mode. | Seed adapters | ops/test-seed-plan-adapters.js; AC-BEH-002 | Enforced (G2) |
+| GOV-012 | Manual filters may narrow execution but cannot widen the compiled plan. | Manual-seed / sync tests | ops/test-seed-plan-adapters.js, ops/test-sync-org-files.sh; AC-ADV-003 | Enforced (G2) |
 | GOV-013 | Remote labels are applied only when enabled in the plan, and only from the exact plan label set. | Label adapters | AC-BEH-003 | Pending G3 |
 | GOV-014 | Remote settings are applied only from the fully resolved plan desired state. | Bootstrap / enforcement | AC-BEH-004 | Pending G3 |
 | GOV-015 | Effective mandatory-file waivers are identical across enforcement and reconciliation. | Compiler + workflow tests | AC-INT-003 | Pending G4 |
@@ -41,7 +41,7 @@ today; `Pending Gn` becomes enforced when slice Gn migrates its consumers;
 | GOV-019 | Every production plan names an exact 40-character authority SHA. | Schema + bootstrap | AC-CON-005 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
 | GOV-020 | Targeted bootstrap refuses mutation on authority-SHA or plan-digest mismatch. | Workflow integration | AC-ADV-005 | Pending G5 |
 | GOV-021 | One public targeted bootstrap entry point owns materialize + remote-apply + attestation orchestration after G5. | Workflow / Makefile contract | AC-ARCH-003 | Pending G5 |
-| GOV-022 | Existing seed branch safety remains authoritative for branch mutation. | Regression test | AC-REG-003 | Pending G2 |
+| GOV-022 | Existing seed branch safety remains authoritative for branch mutation. | Regression test | ops/test-seed-workflow-branch-guard.js; AC-REG-003 | Enforced (G2) |
 | GOV-023 | No compiler change may re-enable retired CI distribution. | Policy test + path search | AC-ADV-006 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
 | GOV-024 | This repository never becomes a code correctness, lint, test, scan, or remediation engine. | Boundary review ([`BOUNDARIES.md`](./BOUNDARIES.md)) | AC-ARCH-004 | Review (every slice) |
 | GOV-025 | The compiler performs pure policy compilation from explicit facts; GitHub I/O belongs to adapters. | Module test / review | AC-ARCH-005 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |

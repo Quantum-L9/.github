@@ -40,7 +40,8 @@ if command -v node &>/dev/null; then
     ops/test-seed-workflow-branch-guard.js \
     ops/test-continuous-sync-branch-guard.js \
     ops/test-policy-serialization.js \
-    ops/test-compile-repo-governance.js; do
+    ops/test-compile-repo-governance.js \
+    ops/test-seed-plan-adapters.js; do
     if node "$t"; then
       echo "✅ $t"
       PASS=$((PASS+1))

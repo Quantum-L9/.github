@@ -57,8 +57,10 @@ RETIRED and fail closed. Canonical CI is `Quantum-L9/l9-ci-core/.github/workflow
 frozen reference material only — see [`../l9-ci-pack/README.md`](../l9-ci-pack/README.md).
 
 `seed-governance.yml` (and `auto-seed-new-repo.yml`) seed these once per repo via
-PR using `ops/build-seed-payload.js`, matching `ops/sync-org-files.sh`. Existing
-files are left untouched (missing-only). Root `CODEOWNERS` is never overwritten by
+PR, and `ops/sync-org-files.sh` into a local checkout. All three apply the
+repository's compiled governance plan (`ops/compile-repo-governance.js` via
+`ops/plan-adapter.js`), so class INHERIT/FORBID hold on every path and a category
+filter can only narrow the plan. Existing files are left untouched (missing-only). Root `CODEOWNERS` is never overwritten by
 `.github/CODEOWNERS`. New repos from `l9-dependency-template` inherit the pack
 because it is in the template tree; `make sync-ci` is refresh-only.
 

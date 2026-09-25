@@ -24,6 +24,8 @@ const {
 const root = path.resolve(__dirname, '..');
 
 const SEEDER_LOGIN = 'seeder-bot';
+// Both seeders bind every compiled governance plan to the checked-out revision.
+const AUTHORITY_SHA = '77587b7421b2e7cfad391e5036f531d8b5833e2b';
 
 // Both seeders share the rebuild-then-move-ref shape, so both get the same proof.
 const WORKFLOWS = [
@@ -31,7 +33,7 @@ const WORKFLOWS = [
     file: '.github/workflows/auto-seed-new-repo.yml',
     branch: 'chore/auto-seed-governance',
     seedSubject: 'chore(governance): auto-seed 28 org template file(s)',
-    env: (dry) => ({ DRY_RUN: dry ? 'true' : 'false', TARGET_REPO: '' }),
+    env: (dry) => ({ DRY_RUN: dry ? 'true' : 'false', TARGET_REPO: '', GITHUB_SHA: AUTHORITY_SHA }),
   },
   {
     file: '.github/workflows/seed-governance.yml',
@@ -41,6 +43,7 @@ const WORKFLOWS = [
       SEED_MODE: dry ? 'dry-run' : 'seed',
       SEED_REPO_FILTER: '',
       SEED_CATEGORIES: 'all',
+      GITHUB_SHA: AUTHORITY_SHA,
     }),
   },
 ];

@@ -79,7 +79,6 @@ jobs:
           script: |
             const fs = require('fs');
             const {
-              buildSeedPayload,
               STOCK_ESLINT_NODE_DEST,
               STOCK_BIOME_DEST,
               selectSeedWrites,
@@ -88,20 +87,26 @@ jobs:
               assessSeedBranch,
               moveSeedBranch,
             } = require('./ops/seed-branch-safety.js');
+            // Policy is interpreted only by the governance-plan compiler
+            // (docs/adr/0001-one-governance-brain.md). This workflow gathers
+            // facts, compiles a verified plan per target, and applies
+            // plan.materialize — it never resolves class policy itself.
             const {
-              loadRepoClasses,
-              parseClassMarker,
-              classForRepo,
-              resolveProfile,
-            } = require('./ops/repo-class-profile.js');
+              loadAuthority,
+              GovernanceCompileError,
+              gatherTargetFacts,
+              compileVerifiedPlan,
+              payloadOf,
+              planIdentity,
+            } = require('./ops/plan-adapter.js');
 
             const DRY = process.env.DRY_RUN === 'true';
             const TARGET = process.env.TARGET_REPO;
             const FORCED_CLASS = (process.env.REPO_CLASS || '').trim();
-            const classes = loadRepoClasses(fs);
-            // A forced class is an operator statement, so a typo must stop the
-            // run rather than silently fall back to the wider default payload.
-            if (FORCED_CLASS) resolveProfile(classes, FORCED_CLASS, { strict: true });
+            // The exact revision actions/checkout put on disk; every plan
+            // names it (GOV-019).
+            const AUTHORITY_SHA = process.env.GITHUB_SHA;
+            const authority = loadAuthority(fs);
             const BRANCH = 'chore/auto-seed-governance';
 
             const exists = async (owner, repo, path, ref) => {
@@ -141,50 +146,39 @@ jobs:
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
               try {
-                const hasRootCodeowners = await exists(o, n, 'CODEOWNERS');
-                const hasPython = (await exists(o, n, 'pyproject.toml'))
-                  || (await exists(o, n, 'requirements.txt'));
-                const hasPackageJson = await exists(o, n, 'package.json');
-
-                // The repository declares its own class; the organization
-                // honours it. An unreadable or unknown marker resolves to
-                // `default` — never to something wider than the repo asked for.
-                // Absent and unreadable are different answers. readText()
-                // returns null for both a missing file and a failed fetch, and
-                // treating a failed fetch as "absent" would fall through to
-                // `default` — the widest payload — on a transient API error.
-                // Probe existence first, so only a genuinely absent marker
-                // reaches the override/default path.
-                let marker = null;
-                if (!FORCED_CLASS) {
-                  if (await exists(o, n, classes.marker_path)) {
-                    marker = (await readText(o, n, classes.marker_path)) ?? '';
-                  }
-                }
-                const decided = FORCED_CLASS
-                  ? { name: FORCED_CLASS, source: 'operator input', error: null }
-                  : classForRepo(classes, n, marker);
+                // Facts only. Existence is probed before a marker is read, so a
+                // failed fetch of a marker that exists is a malformed
+                // declaration the compiler refuses — never "absent", which
+                // would fall through to the widest class.
+                const facts = await gatherTargetFacts({
+                  exists: (p) => exists(o, n, p),
+                  readText: (p) => readText(o, n, p),
+                }, authority.classes.marker_path);
 
                 // A repository that declared a class we cannot honor is skipped
                 // and reported. Seeding it under `default` would widen exactly
-                // what its declaration was trying to narrow.
-                if (decided.error) {
-                  rows.push([n, 'unresolved', `skipped: ${decided.error}`]);
+                // what its declaration was trying to narrow. A forced class the
+                // compiler rejects is an operator typo and stops the run.
+                let plan;
+                try {
+                  plan = compileVerifiedPlan({
+                    fs, authority, authoritySha: AUTHORITY_SHA,
+                    repository: `${o}/${n}`, facts, requestedClass: FORCED_CLASS || null,
+                  });
+                } catch (e) {
+                  if (!(e instanceof GovernanceCompileError) || e.code !== 'class_resolution') throw e;
+                  if (FORCED_CLASS) {
+                    core.setFailed(e.message);
+                    return;
+                  }
+                  rows.push([n, 'unresolved', `skipped: ${e.message}`]);
                   unresolved.push(n);
                   continue;
                 }
+                const profile = { name: plan.repo_class.name, resolved_from: plan.repo_class.resolved_from };
+                core.info(`${n}: ${planIdentity(plan)}`);
 
-                const profile = resolveProfile(classes, decided.name);
-                if (decided.name) profile.resolved_from = decided.source;
-
-                const payload = buildSeedPayload({
-                  fs,
-                  profile,
-                  hasRootCodeowners,
-                  hasPython,
-                  hasPackageJson,
-                  repository: `${o}/${n}`,
-                });
+                const payload = payloadOf(plan.materialize.files);
                 const paths = Object.keys(payload);
                 if (!paths.length) {
                   rows.push([n, profile.name, 'skipped (nothing safe to seed)']);
@@ -281,8 +275,9 @@ jobs:
                     'Automatically seeds the org capabilities applicable to this repository from `Quantum-L9/.github/templates/`. CI is not distributed from this repository.',
                     '',
                     `**Repo class:** \`${profile.name}\` (${profile.resolved_from}) — see \`policies/repo-classes.yml\`.`,
-                    profile.inherit.length
-                      ? `Inherited from the org \`.github\` repo and deliberately **not** copied here: ${profile.inherit.map(p => `\`${p}\``).join(', ')}.`
+                    `**Governance plan:** authority \`${plan.authority.sha}\`, digest \`${plan.digest.value}\`.`,
+                    plan.inherit.paths.length
+                      ? `Inherited from the org \`.github\` repo and deliberately **not** copied here: ${plan.inherit.paths.map(p => `\`${p}\``).join(', ')}.`
                       : '',
                     '',
                     '### Files in this PR',
@@ -309,6 +304,7 @@ jobs:
             const mode = DRY ? 'DRY RUN' : 'APPLIED';
             await core.summary
               .addHeading(`Auto-seed (${mode}) — ${rows.length} repos`, 2)
+              .addRaw(`**Governance authority:** \`${AUTHORITY_SHA}\` — per-repo plan digests are in the job log.\n\n`)
               .addTable([
                 [
                   {data: 'Repo', header: true},
