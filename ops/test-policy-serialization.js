@@ -19,10 +19,10 @@
  * Run from the Quantum-L9/.github repo root:
  *   node ops/test-policy-serialization.js
  */
-const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
-const { spawnSync } = require('child_process');
+const assert = require('node:assert');
+const fs = require('node:fs');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 const { parseJsonInYaml } = require('./repo-class-profile.js');
 
 const root = path.resolve(__dirname, '..');
@@ -74,14 +74,20 @@ function assertSameKeyOrder(actual, expected, where) {
   }
 }
 
+// Absolute interpreter paths only: resolving `python3` through PATH would let a
+// writable PATH entry substitute the interpreter (Sonar S4036). GitHub-hosted
+// runners ship /usr/bin/python3 with PyYAML.
+const PYTHON = ['/usr/bin/python3', '/usr/local/bin/python3'].find((p) => fs.existsSync(p));
+
 function pyyamlAvailable() {
-  const probe = spawnSync('python3', ['-c', 'import yaml'], { encoding: 'utf8' });
+  if (!PYTHON) return false;
+  const probe = spawnSync(PYTHON, ['-c', 'import yaml'], { encoding: 'utf8' });
   return probe.status === 0;
 }
 
 function parseWithPyYaml(file) {
   const out = spawnSync(
-    'python3',
+    PYTHON,
     ['-c', 'import json,sys,yaml; print(json.dumps(yaml.safe_load(open(sys.argv[1], encoding="utf-8"))))', file],
     { encoding: 'utf8' },
   );
