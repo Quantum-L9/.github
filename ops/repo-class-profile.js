@@ -26,26 +26,28 @@ const DEFAULT_CLASSES_PATH = 'policies/repo-classes.yml';
 const MODES = Object.freeze(['inherit', 'materialize', 'remote_apply']);
 
 /**
- * Parse the JSON-in-YAML class file.
+ * Parse a JSON-in-YAML policy file (repo-classes, repo-settings,
+ * mandatory-files).
  *
  * Full-line `#` comments are stripped before JSON.parse so the policy file can
  * document itself. Only lines whose first non-space character is `#` are
  * removed, so a `#` inside a JSON string value is preserved. A JSON string must
- * therefore never be the first thing on a line after a `#`; the policy file is
- * validated by ops/test-repo-class-profile.js.
+ * therefore never be the first thing on a line after a `#`; the policy files
+ * are validated by ops/test-repo-class-profile.js and
+ * ops/test-policy-serialization.js.
  *
  * @param {string} text
  * @returns {object}
  */
 function parseJsonInYaml(text) {
   if (typeof text !== 'string' || !text.trim()) {
-    throw new Error('repo-classes policy is empty');
+    throw new Error('policy is empty');
   }
   const stripped = text.replace(/^[ \t]*#.*$/gm, '');
   try {
     return JSON.parse(stripped);
   } catch (err) {
-    throw new Error(`repo-classes policy is not JSON-in-YAML: ${err.message}`);
+    throw new Error(`policy is not JSON-in-YAML: ${err.message}`);
   }
 }
 
