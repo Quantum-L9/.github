@@ -1,0 +1,403 @@
+{
+  "$defs": {
+    "label": {
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "pattern": "^[0-9A-Fa-f]{6}$",
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "color",
+        "description"
+      ],
+      "type": "object"
+    },
+    "mandatoryRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "managed",
+            "seeded",
+            "present"
+          ],
+          "type": "string"
+        },
+        "path": {
+          "$ref": "#/$defs/safePattern"
+        },
+        "source": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "mode"
+      ],
+      "type": "object"
+    },
+    "materializedFile": {
+      "additionalProperties": false,
+      "properties": {
+        "capability": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "content_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "content_utf8": {
+          "type": "string"
+        },
+        "path": {
+          "$ref": "#/$defs/safePattern"
+        },
+        "source": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "write_mode": {
+          "enum": [
+            "missing_only",
+            "replace_if_stock"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "capability",
+        "source",
+        "write_mode",
+        "content_utf8",
+        "content_sha256"
+      ],
+      "type": "object"
+    },
+    "safePattern": {
+      "minLength": 1,
+      "not": {
+        "pattern": "(^/|(^|/)\\.\\.(/|$)|\\u0000|\\\\)"
+      },
+      "type": "string"
+    }
+  },
+  "$id": "https://github.com/Quantum-L9/.github/ops/schemas/repo-governance-plan.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Effective governance for one target repository compiled from one immutable Quantum-L9/.github revision by ops/compile-repo-governance.js. Architecture: docs/adr/0002-versioned-governance-plan-compiler.md.",
+  "properties": {
+    "attestation": {
+      "additionalProperties": false,
+      "properties": {
+        "required_absent": {
+          "items": {
+            "$ref": "#/$defs/safePattern"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "required_present": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "verify_class_marker": {
+          "type": "boolean"
+        },
+        "verify_remote_apply": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "required_present",
+        "required_absent",
+        "verify_class_marker",
+        "verify_remote_apply"
+      ],
+      "type": "object"
+    },
+    "authority": {
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "const": "Quantum-L9/.github"
+        },
+        "sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "sha"
+      ],
+      "type": "object"
+    },
+    "capabilities": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "compiler": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "const": "1.0.0"
+        },
+        "name": {
+          "const": "ops/compile-repo-governance.js"
+        }
+      },
+      "required": [
+        "name",
+        "contract_version"
+      ],
+      "type": "object"
+    },
+    "digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "canonicalization": {
+          "const": "l9.canonical-json/v1"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "algorithm",
+        "canonicalization",
+        "value"
+      ],
+      "type": "object"
+    },
+    "forbid": {
+      "additionalProperties": false,
+      "properties": {
+        "paths": {
+          "items": {
+            "$ref": "#/$defs/safePattern"
+          },
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "paths"
+      ],
+      "type": "object"
+    },
+    "inherit": {
+      "additionalProperties": false,
+      "properties": {
+        "paths": {
+          "items": {
+            "$ref": "#/$defs/safePattern"
+          },
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "paths"
+      ],
+      "type": "object"
+    },
+    "mandatory_files": {
+      "additionalProperties": false,
+      "properties": {
+        "effective": {
+          "items": {
+            "$ref": "#/$defs/mandatoryRequirement"
+          },
+          "type": "array"
+        },
+        "waived": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "effective",
+        "waived"
+      ],
+      "type": "object"
+    },
+    "materialize": {
+      "additionalProperties": false,
+      "properties": {
+        "files": {
+          "items": {
+            "$ref": "#/$defs/materializedFile"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "files"
+      ],
+      "type": "object"
+    },
+    "remote_apply": {
+      "additionalProperties": false,
+      "properties": {
+        "labels": {
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "items": {
+              "items": {
+                "$ref": "#/$defs/label"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "items"
+          ],
+          "type": "object"
+        },
+        "repo_settings": {
+          "additionalProperties": false,
+          "properties": {
+            "desired": {
+              "type": "object"
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled",
+            "desired"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "labels",
+        "repo_settings"
+      ],
+      "type": "object"
+    },
+    "repo_class": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "resolved_from": {
+          "enum": [
+            "marker",
+            "org_override",
+            "default",
+            "operator_request"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "resolved_from"
+      ],
+      "type": "object"
+    },
+    "schema": {
+      "const": "l9.org-governance-plan/v1"
+    },
+    "target": {
+      "additionalProperties": false,
+      "properties": {
+        "facts": {
+          "additionalProperties": false,
+          "properties": {
+            "has_package_json": {
+              "type": "boolean"
+            },
+            "has_python": {
+              "type": "boolean"
+            },
+            "has_root_codeowners": {
+              "type": "boolean"
+            },
+            "marker_state": {
+              "enum": [
+                "absent",
+                "present"
+              ],
+              "type": "string"
+            },
+            "marker_text": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "marker_state",
+            "has_root_codeowners",
+            "has_python",
+            "has_package_json"
+          ],
+          "type": "object"
+        },
+        "repo_name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "repository": {
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "repo_name",
+        "facts"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema",
+    "compiler",
+    "authority",
+    "target",
+    "repo_class",
+    "capabilities",
+    "materialize",
+    "inherit",
+    "forbid",
+    "mandatory_files",
+    "remote_apply",
+    "attestation",
+    "digest"
+  ],
+  "title": "L9 Organization Governance Plan",
+  "type": "object"
+}

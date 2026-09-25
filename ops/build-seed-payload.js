@@ -281,6 +281,110 @@ function addDirFiles(fs, srcDir, destPrefix, payload, { skipNames = [] } = {}) {
   }
 }
 
+/**
+ * Collect seed files with their provenance: which category produced each dest
+ * and which template it came from. buildSeedPayload() is this, flattened to
+ * dest → contents; the governance-plan compiler (ops/compile-repo-governance.js)
+ * needs the provenance, so both read the same mapping and cannot drift.
+ *
+ * No class profile is applied here — INHERIT/FORBID are the caller's decision.
+ *
+ * @param {object} opts
+ * @param {typeof import('fs')} opts.fs
+ * @param {string[]} opts.categories  already-parsed category list
+ * @param {boolean} [opts.hasRootCodeowners]
+ * @param {string} [opts.repository]  owner/name for placeholder rewriting
+ * @returns {Array<{dest: string, category: string, source: string, content: string}>}
+ *   in payload insertion order
+ */
+function collectSeedFiles({ fs, categories, hasRootCodeowners = false, repository = '' }) {
+  if (!fs) throw new Error('collectSeedFiles requires fs');
+  const files = new Map();
+  const put = (dest, category, source, content) => {
+    files.set(dest, { dest, category, source, content });
+  };
+
+  for (const cat of categories) {
+    // Fail closed, loudly. A retired category silently producing an empty
+    // payload would read as "seeded, nothing to do" — the same false green the
+    // whole distribution model was retired for.
+    if (RETIRED_CATEGORIES.includes(cat)) {
+      throw new Error(
+        `seed category '${cat}' is RETIRED: Quantum-L9/.github no longer distributes CI. ` +
+          'Canonical CI is Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml, ' +
+          'enforced by a GitHub organization required-workflow ruleset.',
+      );
+    }
+    switch (cat) {
+      case 'codeowners': {
+        if (hasRootCodeowners) break;
+        const src = 'templates/CODEOWNERS.repo';
+        const body = readIfFile(fs, src);
+        if (body != null) put('.github/CODEOWNERS', cat, src, body);
+        break;
+      }
+      case 'dependabot': {
+        const src = 'templates/dependabot.yml';
+        const body = readIfFile(fs, src);
+        if (body != null) put('.github/dependabot.yml', cat, src, body);
+        break;
+      }
+      case 'governance': {
+        const src = 'templates/governance-caller.yml';
+        const body = readIfFile(fs, src);
+        if (body != null) put('.github/workflows/governance.yml', cat, src, body);
+        break;
+      }
+      case 'labels': {
+        const src = 'templates/labels.yml';
+        const body = readIfFile(fs, src);
+        if (body != null) put('.github/labels.yml', cat, src, body);
+        break;
+      }
+      case 'community-health': {
+        for (const f of COMMUNITY_HEALTH_DEFAULT) {
+          const src = `templates/community-health/${f}`;
+          const body = readIfFile(fs, src);
+          if (body != null) put(f, cat, src, applyRepoPlaceholders(body, repository));
+        }
+        break;
+      }
+      case 'issue-templates': {
+        const dir = 'templates/issue-templates';
+        if (!fs.existsSync(dir)) break;
+        for (const name of fs.readdirSync(dir)) {
+          if (SKIP_ISSUE_TEMPLATES.includes(name)) continue;
+          const src = `${dir}/${name}`;
+          const body = readIfFile(fs, src);
+          if (body != null) {
+            put(`.github/ISSUE_TEMPLATE/${name}`, cat, src, applyRepoPlaceholders(body, repository));
+          }
+        }
+        break;
+      }
+      case 'pr-templates': {
+        const humanSrc = 'templates/pr-templates/pull_request_template.md';
+        const human = readIfFile(fs, humanSrc);
+        if (human != null) put('.github/pull_request_template.md', cat, humanSrc, human);
+        const agentSrc = 'templates/pr-templates/agent.md';
+        const agent = readIfFile(fs, agentSrc);
+        if (agent != null) put('.github/PULL_REQUEST_TEMPLATE/agent.md', cat, agentSrc, agent);
+        break;
+      }
+      default:
+        throw new Error(`unknown seed category: ${cat}`);
+    }
+  }
+
+  for (const { dest, content } of files.values()) {
+    if (dest.startsWith('.github/governance/') && dest.endsWith('.yaml')) {
+      assertJsonInYaml(content, dest);
+    }
+  }
+
+  return [...files.values()];
+}
+
 function buildSeedPayload({
   fs,
   categories,
@@ -298,75 +402,8 @@ function buildSeedPayload({
     categories == null && profile ? profile.seed_categories : categories;
   const cats = Array.isArray(requested) ? requested : parseCategories(requested);
   const payload = {};
-
-  for (const cat of cats) {
-    // Fail closed, loudly. A retired category silently producing an empty
-    // payload would read as "seeded, nothing to do" — the same false green the
-    // whole distribution model was retired for.
-    if (RETIRED_CATEGORIES.includes(cat)) {
-      throw new Error(
-        `seed category '${cat}' is RETIRED: Quantum-L9/.github no longer distributes CI. ` +
-          'Canonical CI is Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml, ' +
-          'enforced by a GitHub organization required-workflow ruleset.',
-      );
-    }
-    switch (cat) {
-      case 'codeowners': {
-        if (hasRootCodeowners) break;
-        const body = readIfFile(fs, 'templates/CODEOWNERS.repo');
-        if (body != null) payload['.github/CODEOWNERS'] = body;
-        break;
-      }
-      case 'dependabot': {
-        const body = readIfFile(fs, 'templates/dependabot.yml');
-        if (body != null) payload['.github/dependabot.yml'] = body;
-        break;
-      }
-      case 'governance': {
-        const body = readIfFile(fs, 'templates/governance-caller.yml');
-        if (body != null) payload['.github/workflows/governance.yml'] = body;
-        break;
-      }
-      case 'labels': {
-        const body = readIfFile(fs, 'templates/labels.yml');
-        if (body != null) payload['.github/labels.yml'] = body;
-        break;
-      }
-      case 'community-health': {
-        for (const f of COMMUNITY_HEALTH_DEFAULT) {
-          const body = readIfFile(fs, `templates/community-health/${f}`);
-          if (body != null) payload[f] = applyRepoPlaceholders(body, repository);
-        }
-        break;
-      }
-      case 'issue-templates': {
-        const dir = 'templates/issue-templates';
-        if (!fs.existsSync(dir)) break;
-        for (const name of fs.readdirSync(dir)) {
-          if (SKIP_ISSUE_TEMPLATES.includes(name)) continue;
-          const body = readIfFile(fs, `${dir}/${name}`);
-          if (body != null) {
-            payload[`.github/ISSUE_TEMPLATE/${name}`] = applyRepoPlaceholders(body, repository);
-          }
-        }
-        break;
-      }
-      case 'pr-templates': {
-        const human = readIfFile(fs, 'templates/pr-templates/pull_request_template.md');
-        if (human != null) payload['.github/pull_request_template.md'] = human;
-        const agent = readIfFile(fs, 'templates/pr-templates/agent.md');
-        if (agent != null) payload['.github/PULL_REQUEST_TEMPLATE/agent.md'] = agent;
-        break;
-      }
-      default:
-        throw new Error(`unknown seed category: ${cat}`);
-    }
-  }
-
-  for (const dest of Object.keys(payload)) {
-    if (dest.startsWith('.github/governance/') && dest.endsWith('.yaml')) {
-      assertJsonInYaml(payload[dest], dest);
-    }
+  for (const { dest, content } of collectSeedFiles({ fs, categories: cats, hasRootCodeowners, repository })) {
+    payload[dest] = content;
   }
 
   if (profile) applyProfile(payload, profile);
@@ -386,6 +423,7 @@ module.exports = {
   STOCK_BIOME_SCHEMA,
   STOCK_ESLINT_NODE_DEST,
   parseCategories,
+  collectSeedFiles,
   buildSeedPayload,
   isStockEslintNodeWorkflow,
   isStockUnsafeNodeWorkflow,

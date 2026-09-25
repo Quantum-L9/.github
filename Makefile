@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
-.PHONY: help activate preflight validate sync-core sync-labels sync-labels-all \
+.PHONY: help activate preflight validate governance-plan sync-core sync-labels sync-labels-all \
         seed-dry seed-apply birth-bootstrap birth-seed \
         apply-rulesets set-properties pin-actions audit-pins enforce-dry enforce-apply \
         dispatch clean
@@ -21,6 +21,10 @@ preflight: ## Run preflight health check (read-only)
 validate: ## Validate starters, pack integrity, and SHA pins
 	@bash ops/validate-starters.sh
 	@bash ops/audit-sha-pins.sh
+
+governance-plan: ## Compile the governance plan for one repo (ARGS='--repo Quantum-L9/x --authority-sha HEAD --marker-absent')
+	@test -n "$(ARGS)" || (echo "usage: make governance-plan ARGS='--repo owner/name --authority-sha <sha|HEAD> --marker-absent|--marker-file <path> [--pretty]'" >&2; exit 2)
+	@node ops/compile-repo-governance.js $(ARGS)
 
 # ─── Sync from l9-ci-core ────────────────────────────────────────────────────
 sync-core: ## Sync l9-ci-pack from l9-ci-core at pinned SHA
