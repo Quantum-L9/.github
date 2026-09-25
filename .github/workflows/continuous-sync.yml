@@ -1,6 +1,8 @@
 # Continuous Sync: detects governance file drift and auto-opens PRs to restore.
-# Runs weekly. Checks managed files against templates; if drift detected, opens
-# a remediation PR. Repos can opt out with a .l9/no-sync marker file.
+# Runs weekly. The managed set is each repository's compiled governance plan
+# (mandatory files with mode `managed`, after class waivers); if one drifts from
+# its org template, a remediation PR restores it. A file the class waives or
+# forbids is never restored. Repos can opt out with a .l9/no-sync marker file.
 name: Continuous Sync (drift remediation)
 
 on:
@@ -42,15 +44,41 @@ jobs:
           github-token: ${{ steps.token.outputs.token }}
           script: |
             const fs = require('fs');
+            // Which files are managed for a repository is its compiled
+            // governance plan's answer (docs/adr/0001-one-governance-brain.md):
+            // plan.mandatory_files.effective entries with mode `managed`. A
+            // file the repository's class waives or forbids is not in that set,
+            // so drift repair can never restore it (GOV-016).
+            const {
+              loadAuthority,
+              GovernanceCompileError,
+              gatherTargetFacts,
+              compileVerifiedPlan,
+              managedRequirements,
+            } = require('./ops/plan-adapter.js');
             const DRY = process.env.DRY_RUN === 'true';
             const FILTER = process.env.FILTER;
             const BRANCH = 'chore/governance-sync';
             const ORG = 'Quantum-L9';
-
-            // Managed files: if these drift from template, auto-restore via PR
-            const MANAGED = {
-              '.github/CODEOWNERS': fs.readFileSync('templates/CODEOWNERS.repo', 'utf8'),
-              '.github/dependabot.yml': fs.readFileSync('templates/dependabot.yml', 'utf8'),
+            // The exact revision actions/checkout put on disk (GOV-019).
+            const AUTHORITY_SHA = process.env.GITHUB_SHA;
+            const authority = loadAuthority(fs);
+            // Org template bytes, read once per source the plans name.
+            const templateCache = new Map();
+            const template = (source) => {
+              if (!templateCache.has(source)) templateCache.set(source, fs.readFileSync(source, 'utf8'));
+              return templateCache.get(source);
+            };
+            const exists = async (owner, repo, path) =>
+              github.rest.repos.getContent({ owner, repo, path }).then(() => true).catch(() => false);
+            const readText = async (owner, repo, path) => {
+              try {
+                const res = await github.rest.repos.getContent({ owner, repo, path });
+                if (res.data && res.data.content) {
+                  return Buffer.from(res.data.content, 'base64').toString('utf8');
+                }
+              } catch { /* missing */ }
+              return null;
             };
 
             const all = await github.paginate(github.rest.repos.listForOrg, {
@@ -75,9 +103,35 @@ jobs:
                 continue;
               }
 
+              // The repository's plan decides what is managed. An unresolvable
+              // class is skipped and reported — never repaired as default.
+              let plan;
+              try {
+                const facts = await gatherTargetFacts({
+                  exists: (p) => exists(o, n, p),
+                  readText: (p) => readText(o, n, p),
+                }, authority.classes.marker_path);
+                plan = compileVerifiedPlan({
+                  fs, authority, authoritySha: AUTHORITY_SHA, repository: `${o}/${n}`, facts,
+                });
+              } catch (e) {
+                if (e instanceof GovernanceCompileError && e.code === 'class_resolution') {
+                  rows.push([n, `skipped: unresolvable repo class: ${e.message}`]);
+                } else {
+                  rows.push([n, `plan failed: ${(e.message || '').slice(0, 80)}`]);
+                }
+                continue;
+              }
+              const managed = managedRequirements(plan);
+              if (!managed.length) {
+                rows.push([n, `nothing managed for class ${plan.repo_class.name}`]);
+                continue;
+              }
+
               // Check each managed file for drift
               const drifted = [];
-              for (const [path, expected] of Object.entries(MANAGED)) {
+              for (const { path, source } of managed) {
+                const expected = template(source);
                 try {
                   const resp = await github.rest.repos.getContent({ owner: o, repo: n, path });
                   const actual = Buffer.from(resp.data.content, 'base64').toString('utf8');
@@ -159,6 +213,8 @@ jobs:
                     body: [
                       'Governance files have drifted from the org standard.',
                       '',
+                      `**Repo class:** \`${plan.repo_class.name}\` (${plan.repo_class.resolved_from}) · governance plan: authority \`${plan.authority.sha}\`, digest \`${plan.digest.value}\`.`,
+                      '',
                       '**Restored:**',
                       ...drifted.map(d => `- \`${d.path}\``),
                       '',
@@ -176,8 +232,9 @@ jobs:
             }
 
             const mode = DRY ? 'DRY RUN' : 'APPLIED';
-            core.summary
+            await core.summary
               .addHeading(`Continuous Sync (${mode}) — ${targets.length} repos`, 2)
+              .addRaw(`**Governance authority:** \`${AUTHORITY_SHA}\`\n\n`)
               .addTable([
                 [{data: 'Repo', header: true}, {data: 'Status', header: true}],
                 ...rows.map(r => r.map(String))

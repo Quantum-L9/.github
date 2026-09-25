@@ -102,7 +102,8 @@ const run = makeScriptRunner({
   file: path.join(root, WORKFLOW),
   root,
   tmpTag: 'sync-guard-',
-  envFor: (dry) => ({ DRY_RUN: dry ? 'true' : 'false', FILTER: '' }),
+  // continuous-sync binds each repository's governance plan to the checkout.
+  envFor: (dry) => ({ DRY_RUN: dry ? 'true' : 'false', FILTER: '', GITHUB_SHA: '77587b7421b2e7cfad391e5036f531d8b5833e2b' }),
   makeGithub,
   mutations: MUTATIONS,
 });

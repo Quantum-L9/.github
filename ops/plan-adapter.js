@@ -19,7 +19,7 @@ const {
   GovernanceCompileError,
 } = require('./compile-repo-governance.js');
 const { RETIRED_CATEGORIES } = require('./build-seed-payload.js');
-const { parseClassMarker } = require('./repo-class-profile.js');
+const { parseClassMarker, matchPattern } = require('./repo-class-profile.js');
 
 /**
  * Collect the explicit target facts the compiler needs.
@@ -165,6 +165,22 @@ function markerClassOf(markerText) {
 }
 
 /**
+ * Managed mandatory files a drift remediator may restore: the plan's effective
+ * requirements with mode `managed` and a template source, minus anything the
+ * plan forbids. A path the class waives is not in `effective` at all, so it can
+ * never be restored (GOV-016, AC-ADV-004).
+ *
+ * @param {object} plan
+ * @returns {Array<{path: string, source: string}>}
+ */
+function managedRequirements(plan) {
+  return plan.mandatory_files.effective
+    .filter((r) => r.mode === 'managed' && typeof r.source === 'string')
+    .filter((r) => matchPattern(plan.forbid.paths, r.path) == null)
+    .map((r) => ({ path: r.path, source: r.source }));
+}
+
+/**
  * One line of plan identity for job summaries (13-observability).
  * @param {object} plan
  * @returns {string}
@@ -186,5 +202,6 @@ module.exports = {
   applyPlanLabels,
   settingsDrift,
   markerClassOf,
+  managedRequirements,
   planIdentity,
 };

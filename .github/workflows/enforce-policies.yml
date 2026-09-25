@@ -1,5 +1,9 @@
-# Enforces declarative policies from policies/*.yml across all org repos.
-# Runs weekly. Auto-corrects repo settings drift and reports missing files.
+# Enforces declarative policies across all org repos. Runs weekly.
+# Auto-corrects repo settings drift and reports missing mandatory files, both
+# from each repository's compiled governance plan
+# (ops/compile-repo-governance.js). The PyYAML steps below are no longer used
+# by the script; they are left until open PR #86 (setup-python bump on the
+# same lines) lands, to avoid a conflicting edit.
 name: Enforce policies
 
 on:
@@ -51,32 +55,28 @@ jobs:
         with:
           github-token: ${{ steps.token.outputs.token }}
           script: |
-            const { execSync } = require('child_process');
             const fs = require('fs');
+            // Policy is interpreted only by the governance-plan compiler
+            // (docs/adr/0001-one-governance-brain.md). Each repository gets
+            // one verified plan; settings are compared to its desired state
+            // and mandatory files to its effective requirements, the same
+            // answer birth and continuous-sync use (GOV-015).
             const {
-              loadRepoClasses,
-              parseClassMarker,
-              classForRepo,
-              resolveProfile,
-              waivesMandatoryFile,
-            } = require('./ops/repo-class-profile.js');
+              loadAuthority,
+              GovernanceCompileError,
+              gatherTargetFacts,
+              compileVerifiedPlan,
+              settingsDrift,
+            } = require('./ops/plan-adapter.js');
             const ORG = 'Quantum-L9';
             const DRY = process.env.DRY_RUN === 'true';
             const FILTER = process.env.FILTER;
+            // The exact revision actions/checkout put on disk (GOV-019).
+            const AUTHORITY_SHA = process.env.GITHUB_SHA;
+            const authority = loadAuthority(fs);
 
-            // Parse YAML via Python (no native YAML in actions/github-script)
-            const parseYaml = (file) => {
-              const out = execSync(
-                `python3 -c "import yaml,json,sys; print(json.dumps(yaml.safe_load(open(sys.argv[1]))))" "${file}"`,
-                { encoding: 'utf8' }
-              );
-              return JSON.parse(out);
-            };
-
-            const settingsPolicy = parseYaml('policies/repo-settings.yml');
-            const filesPolicy = parseYaml('policies/mandatory-files.yml');
-            const classes = loadRepoClasses(fs);
-
+            const exists = async (repo, path) =>
+              github.rest.repos.getContent({ owner: ORG, repo, path }).then(() => true).catch(() => false);
             const readText = async (repo, path) => {
               try {
                 const res = await github.rest.repos.getContent({ owner: ORG, repo, path });
@@ -95,9 +95,6 @@ jobs:
               (!FILTER || r.name.includes(FILTER))
             );
 
-            // Check exceptions
-            const fileExceptions = (filesPolicy.exceptions || []).map(e => e.repo);
-
             const rows = [];
 
             for (const repo of targets) {
@@ -105,77 +102,60 @@ jobs:
               const findings = [];
 
               // Check opt-out
-              const optOut = await github.rest.repos.getContent({
-                owner: ORG, repo: n, path: '.l9/no-policy-enforcement'
-              }).then(() => true).catch(() => false);
-
-              if (optOut) {
+              if (await exists(n, '.l9/no-policy-enforcement')) {
                 rows.push([n, 'opted out']);
                 continue;
               }
 
-              // ── Settings enforcement ──
-              const defaults = settingsPolicy.defaults || {};
-              const overrides = (settingsPolicy.overrides || [])
-                .filter(o => o.repos && o.repos.includes(n))
-                .reduce((acc, o) => ({ ...acc, ...o, repos: undefined }), {});
-              const expected = { ...defaults, ...overrides };
-              delete expected.repos;
-
-              // Check current settings
-              const current = await github.rest.repos.get({ owner: ORG, repo: n });
-              const settingsDrift = [];
-              for (const [key, val] of Object.entries(expected)) {
-                if (key === 'default_branch') continue; // Don't auto-change default branch
-                if (current.data[key] !== val) {
-                  settingsDrift.push({ key, expected: val, actual: current.data[key] });
-                }
-              }
-
-              if (settingsDrift.length > 0) {
-                if (!DRY) {
-                  const patch = {};
-                  for (const d of settingsDrift) patch[d.key] = d.expected;
-                  try {
-                    await github.rest.repos.update({ owner: ORG, repo: n, ...patch });
-                    findings.push(`settings fixed: ${settingsDrift.map(d => d.key).join(', ')}`);
-                  } catch (e) {
-                    findings.push(`settings fix failed: ${e.message?.slice(0, 50)}`);
-                  }
+              // Existence first, so a failed marker fetch is a malformed
+              // declaration the compiler refuses — never "absent". A class
+              // that cannot be resolved stops enforcement for this repository
+              // instead of enforcing the widest class against it.
+              let plan;
+              try {
+                const facts = await gatherTargetFacts({
+                  exists: (p) => exists(n, p),
+                  readText: (p) => readText(n, p),
+                }, authority.classes.marker_path);
+                plan = compileVerifiedPlan({
+                  fs, authority, authoritySha: AUTHORITY_SHA, repository: `${ORG}/${n}`, facts,
+                });
+              } catch (e) {
+                if (e instanceof GovernanceCompileError && e.code === 'class_resolution') {
+                  rows.push([n, `unresolvable repo class: ${e.message} — not enforced`]);
                 } else {
-                  findings.push(`settings drift: ${settingsDrift.map(d => `${d.key}=${d.actual}→${d.expected}`).join(', ')}`);
+                  rows.push([n, `plan failed: ${e.message}`.slice(0, 200)]);
+                }
+                continue;
+              }
+
+              // ── Settings enforcement (plan.remote_apply.repo_settings) ──
+              if (plan.remote_apply.repo_settings.enabled) {
+                const current = await github.rest.repos.get({ owner: ORG, repo: n });
+                const settingsDriftList = settingsDrift(plan, current.data);
+                if (settingsDriftList.length > 0) {
+                  if (!DRY) {
+                    const patch = {};
+                    for (const d of settingsDriftList) patch[d.key] = d.expected;
+                    try {
+                      await github.rest.repos.update({ owner: ORG, repo: n, ...patch });
+                      findings.push(`settings fixed: ${settingsDriftList.map(d => d.key).join(', ')}`);
+                    } catch (e) {
+                      findings.push(`settings fix failed: ${e.message?.slice(0, 50)}`);
+                    }
+                  } else {
+                    findings.push(`settings drift: ${settingsDriftList.map(d => `${d.key}=${d.actual}→${d.expected}`).join(', ')}`);
+                  }
                 }
               }
 
-              // ── Mandatory files check (class-aware) ──
-              // A repository declares its class; a class may waive a mandatory
-              // path it structurally must not carry. Reporting a repo for a
-              // file its own class forbids is noise that trains people to
-              // ignore this report.
-              if (!fileExceptions.includes(n)) {
-                // Existence first, so a failed fetch is not mistaken for an
-                // absent marker (which would enforce the widest class).
-                let markerText = null;
-                const markerHit = await github.rest.repos.getContent({
-                  owner: ORG, repo: n, path: classes.marker_path,
-                }).then(() => true).catch(() => false);
-                if (markerHit) markerText = (await readText(n, classes.marker_path)) ?? '';
-
-                const decidedClass = classForRepo(classes, n, markerText);
-                if (decidedClass.error) {
-                  findings.push(`unresolvable repo class: ${decidedClass.error}`);
-                }
-                const profile = resolveProfile(classes, decidedClass.name);
-                for (const file of (filesPolicy.files || [])) {
-                  if (waivesMandatoryFile(profile, file.path)) continue;
-
-                  const exists = await github.rest.repos.getContent({
-                    owner: ORG, repo: n, path: file.path
-                  }).then(() => true).catch(() => false);
-
-                  if (!exists) {
-                    findings.push(`missing: ${file.path}`);
-                  }
+              // ── Mandatory files (plan.mandatory_files.effective) ──
+              // Class waivers and repository exceptions are already applied by
+              // the compiler: a path the class waives is not in the list, so a
+              // repo is never reported for a file its own class forbids.
+              for (const req of plan.mandatory_files.effective) {
+                if (!(await exists(n, req.path))) {
+                  findings.push(`missing: ${req.path}`);
                 }
               }
 
@@ -188,8 +168,9 @@ jobs:
 
             const mode = DRY ? 'DRY RUN' : 'ENFORCED';
             const compliant = rows.filter(r => r[1] === 'compliant').length;
-            core.summary
+            await core.summary
               .addHeading(`Policy enforcement (${mode}) — ${compliant}/${targets.length} compliant`, 2)
+              .addRaw(`**Governance authority:** \`${AUTHORITY_SHA}\`\n\n`)
               .addTable([
                 [{data: 'Repo', header: true}, {data: 'Status', header: true}],
                 ...rows.filter(r => r[1] !== 'compliant').map(r => r.map(String))

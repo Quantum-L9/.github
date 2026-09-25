@@ -73,10 +73,14 @@ const notFound = (msg) => Object.assign(new Error(msg), { status: 404 });
  */
 function makeCore() {
   const failures = [];
+  const tables = [];
   const summary = {
     addHeading: () => summary,
     addRaw: () => summary,
-    addTable: () => summary,
+    addTable: (rows) => {
+      tables.push(rows);
+      return summary;
+    },
     write: async () => summary,
   };
   const warnings = [];
@@ -87,6 +91,7 @@ function makeCore() {
     setFailed: (m) => failures.push(m),
     failures,
     warnings,
+    tables,
     summary,
   };
 }
@@ -146,6 +151,7 @@ function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations })
       state,
       failures: core.failures,
       warnings: core.warnings,
+      tables: core.tables,
       mutated: names.some((n) => mutations.has(n)),
     };
   };
