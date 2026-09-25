@@ -121,8 +121,20 @@ for (const bad of [
 // --- workflows must agree with this module -----------------------------------
 // The commit subjects the workflows write have to keep matching the pattern the
 // gate recognizes, or the gate silently starts refusing every rebuild.
+// auto-seed's materialization moved, unchanged, into ops/seed-plan-pr.js so the
+// birth front door reuses it (docs/adr/0004). The owner of the seed commit is
+// what must agree with the gate; the workflow must delegate to it and never
+// touch a seed ref itself.
+const autoSeedWorkflow = fs.readFileSync(path.join(root, '.github/workflows/auto-seed-new-repo.yml'), 'utf8');
+assert.ok(
+  /require\('\.\/ops\/seed-plan-pr\.js'\)/.test(autoSeedWorkflow) && /seedPlanPR\(/.test(autoSeedWorkflow),
+  'auto-seed-new-repo.yml must materialize through ops/seed-plan-pr.js',
+);
+for (const forbidden of ['git.createRef', 'git.updateRef', 'updateRefs', 'force: true']) {
+  assert.ok(!autoSeedWorkflow.includes(forbidden), `auto-seed-new-repo.yml touches a seed ref directly ("${forbidden}")`);
+}
 for (const [wf, subject] of [
-  ['.github/workflows/auto-seed-new-repo.yml', autoSeedSubject],
+  ['ops/seed-plan-pr.js', autoSeedSubject],
   ['.github/workflows/seed-governance.yml', seedSubject],
 ]) {
   const text = fs.readFileSync(path.join(root, wf), 'utf8');

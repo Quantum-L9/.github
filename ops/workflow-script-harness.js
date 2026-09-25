@@ -84,8 +84,13 @@ function makeCore() {
     write: async () => summary,
   };
   const warnings = [];
+  const outputs = {};
   return {
     info() {},
+    setOutput: (k, v) => {
+      outputs[k] = v;
+    },
+    outputs,
     error() {},
     warning: (m) => warnings.push(m),
     setFailed: (m) => failures.push(m),
@@ -152,6 +157,7 @@ function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations })
       failures: core.failures,
       warnings: core.warnings,
       tables: core.tables,
+      outputs: core.outputs,
       mutated: names.some((n) => mutations.has(n)),
     };
   };

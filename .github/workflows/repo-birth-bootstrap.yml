@@ -1,15 +1,28 @@
-# Targeted post-birth REMOTE APPLY + attestation for exactly one repository.
+# THE targeted governance front door for exactly one repository
+# (docs/adr/0004-single-targeted-bootstrap-front-door.md).
 #
-# `make new-repo` in Quantum-L9/l9-repo-template creates and pushes the
-# repository, then dispatches this workflow and waits for it. That is the
-# difference between a repository that is created and a repository that is
-# born: labels, settings, and the org policy attestation happen now, not on
-# the next hourly sweep.
+# `make birth` here, or `make new-repo` in Quantum-L9/l9-repo-template, runs
+# this workflow for one repository. It is one governance transaction bound to
+# one immutable authority (docs/adr/0003-immutable-authority-binding.md):
 #
-# Scope is deliberately narrow. This workflow applies the capabilities a class
-# marks REMOTE APPLY (GitHub API state, not files) and then attests. File
-# MATERIALIZE stays with auto-seed-new-repo.yml, which this workflow can chain
-# to via repository_dispatch — one owner per capability, never two.
+#   1. check out Quantum-L9/.github at the exact `authority_sha`;
+#   2. gather the target's facts and compile its governance plan;
+#   3. refuse before ANY mutation unless the recomputed plan digest equals
+#      `expected_plan_digest` (a stale plan, a moved target, or a tampered
+#      caller all fail here);
+#   4. materialize plan files (seed PR, via ops/seed-plan-pr.js — the same
+#      machinery and seed branch as auto-seed-new-repo.yml);
+#   5. apply plan REMOTE APPLY state (labels, settings);
+#   6. read the remote back and attest it against plan.attestation;
+#   7. report one terminal result carrying the authority SHA and plan digest.
+#
+# Obtaining the digest: run with `dry_run: true` and no digest. That compiles
+# the plan at `authority_sha`, reports its digest, and mutates nothing. Then run
+# again with the digest. If the target changed in between, the digest no longer
+# matches and nothing is written — recompile and retry.
+#
+# `auto-seed-new-repo.yml` remains the hourly repair sweep, not a targeted
+# entry point.
 #
 # Auth: org secret GH_TOKEN (AWS openclaw-igorbot/github#token), same as the
 # other org-write workflows.
@@ -22,6 +35,14 @@ on:
         description: "Repository name to bootstrap (without owner)"
         type: string
         required: true
+      authority_sha:
+        description: "Exact 40-hex Quantum-L9/.github commit whose policy governs this transaction"
+        type: string
+        required: true
+      expected_plan_digest:
+        description: "Plan digest to apply (blank only with dry_run: compiles and reports it)"
+        type: string
+        default: ""
       repo_class:
         description: "Force a repo class (blank = resolve from the repo's .l9/org-birth-profile.yaml)"
         type: string
@@ -43,10 +64,15 @@ concurrency:
 jobs:
   bootstrap:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     environment: governance-distribution
     steps:
+      # The authority revision, not the tip of main: policy is read from
+      # exactly the commit the caller named. A SHA that does not exist fails
+      # here, before any mutation.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ inputs.authority_sha || github.event.client_payload.authority_sha || github.sha }}
 
       - name: Require org GH_TOKEN
         env:
@@ -68,19 +94,23 @@ jobs:
         run: |
           pip install --only-binary=:all: "pyyaml==6.0.2"
 
-      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+      - id: bootstrap
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         env:
-          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          DRY_RUN: ${{ inputs.dry_run || github.event.client_payload.dry_run || 'false' }}
           TARGET_REPO: ${{ inputs.target_repo || github.event.client_payload.repository || '' }}
           REPO_CLASS: ${{ inputs.repo_class || github.event.client_payload.repo_class || '' }}
+          AUTHORITY_SHA: ${{ inputs.authority_sha || github.event.client_payload.authority_sha || '' }}
+          EXPECTED_PLAN_DIGEST: ${{ inputs.expected_plan_digest || github.event.client_payload.expected_plan_digest || '' }}
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const fs = require('fs');
+            const { execFileSync } = require('child_process');
             // Policy is interpreted only by the governance-plan compiler
             // (docs/adr/0001-one-governance-brain.md). This workflow gathers
-            // the target's facts, compiles one verified plan, applies its
-            // REMOTE APPLY desired state, and attests against the same plan.
+            // facts, verifies the one plan it was asked to apply, executes it,
+            // and attests the remote against it.
             const {
               loadAuthority,
               gatherTargetFacts,
@@ -88,18 +118,43 @@ jobs:
               applyPlanLabels,
               settingsDrift,
               markerClassOf,
-              planIdentity,
             } = require('./ops/plan-adapter.js');
+            const { verifyPlan } = require('./ops/compile-repo-governance.js');
+            const { seedPlanPR } = require('./ops/seed-plan-pr.js');
 
             const ORG = 'Quantum-L9';
             const DRY = process.env.DRY_RUN === 'true';
             const TARGET = (process.env.TARGET_REPO || '').trim();
             const FORCED_CLASS = (process.env.REPO_CLASS || '').trim();
-            // The exact revision actions/checkout put on disk (GOV-019).
-            const AUTHORITY_SHA = process.env.GITHUB_SHA;
+            const AUTHORITY_SHA = (process.env.AUTHORITY_SHA || '').trim();
+            const EXPECTED_DIGEST = (process.env.EXPECTED_PLAN_DIGEST || '').trim();
 
+            // ── Transaction preconditions: all before any read of the target ──
             if (!TARGET) {
               core.setFailed('target_repo is required');
+              return;
+            }
+            if (!/^[0-9a-f]{40}$/.test(AUTHORITY_SHA)) {
+              core.setFailed(`authority_sha must be an exact 40-hex Quantum-L9/.github commit, got "${AUTHORITY_SHA}"`);
+              return;
+            }
+            // The policy on disk must be the policy the caller named. Absolute
+            // git path: resolving it through PATH would let a writable PATH
+            // entry substitute the binary.
+            const head = execFileSync('/usr/bin/git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+            if (head !== AUTHORITY_SHA) {
+              core.setFailed(`checked-out authority is ${head}, not the requested ${AUTHORITY_SHA}`);
+              return;
+            }
+            if (EXPECTED_DIGEST && !/^[0-9a-f]{64}$/.test(EXPECTED_DIGEST)) {
+              core.setFailed(`expected_plan_digest must be 64 hex chars, got "${EXPECTED_DIGEST}"`);
+              return;
+            }
+            if (!DRY && !EXPECTED_DIGEST) {
+              core.setFailed(
+                'expected_plan_digest is required to mutate. Run with dry_run: true (no digest) to compile ' +
+                  'the plan at this authority_sha and obtain its digest, then run again with it.',
+              );
               return;
             }
 
@@ -113,7 +168,6 @@ jobs:
                 return false;
               }
             };
-
             const readText = async (path) => {
               try {
                 const res = await github.rest.repos.getContent({ owner: ORG, repo: TARGET, path });
@@ -126,8 +180,7 @@ jobs:
 
             const authority = loadAuthority(fs);
             // Existence first: a failed fetch of a marker that exists is a
-            // malformed declaration the compiler refuses — never "absent",
-            // which would fall through to the widest class.
+            // malformed declaration the compiler refuses — never "absent".
             const facts = await gatherTargetFacts({ exists: pathExists, readText }, authority.classes.marker_path);
             let plan;
             try {
@@ -135,20 +188,62 @@ jobs:
                 fs, authority, authoritySha: AUTHORITY_SHA,
                 repository: `${ORG}/${TARGET}`, facts, requestedClass: FORCED_CLASS || null,
               });
+              if (EXPECTED_DIGEST) {
+                verifyPlan(plan, {
+                  schema: authority.schema, authoritySha: AUTHORITY_SHA,
+                  repository: `${ORG}/${TARGET}`, digest: EXPECTED_DIGEST,
+                });
+              }
             } catch (e) {
-              core.setFailed(`${ORG}/${TARGET}: ${e.message}`);
+              const computed = plan ? ` (plan compiled now: ${plan.digest.value})` : '';
+              core.setFailed(`${ORG}/${TARGET}: refused before any mutation — ${e.message}${computed}`);
               return;
             }
-            core.info(`${TARGET}: ${planIdentity(plan)}`);
+            core.setOutput('plan_digest', plan.digest.value);
+            core.setOutput('authority_sha', plan.authority.sha);
 
-            const repo = await github.rest.repos.get({ owner: ORG, repo: TARGET });
             const attest = [];
             let failures = 0;
-
             const record = (name, ok, detail) => {
               attest.push([name, ok ? 'PASS' : 'FAIL', detail]);
               if (!ok) failures += 1;
             };
+            const summarize = async (mode) => {
+              await core.summary
+                .addHeading(`Repo birth bootstrap (${mode}) — ${ORG}/${TARGET}`, 2)
+                .addRaw(`**Class:** \`${plan.repo_class.name}\` (${plan.repo_class.resolved_from})\n\n`)
+                .addRaw(`**Governance plan:** authority \`${plan.authority.sha}\`, digest \`${plan.digest.value}\`\n\n`)
+                .addTable([
+                  [
+                    { data: 'Check', header: true },
+                    { data: 'Result', header: true },
+                    { data: 'Detail', header: true },
+                  ],
+                  ...attest.map((r) => r.map(String)),
+                ])
+                .write();
+            };
+
+            // Plan-only: compile and report, touch nothing on the target.
+            if (DRY && !EXPECTED_DIGEST) {
+              attest.push(['plan', 'INFO', `compiled at ${AUTHORITY_SHA}; digest ${plan.digest.value}`]);
+              await summarize('PLAN ONLY');
+              core.info(`plan digest: ${plan.digest.value}`);
+              return;
+            }
+            record('plan', true, `digest ${plan.digest.value} matches expected`);
+
+            const repo = await github.rest.repos.get({ owner: ORG, repo: TARGET });
+
+            // ── MATERIALIZE: plan files, as a seed PR (shared with auto-seed) ─
+            try {
+              const seeded = await seedPlanPR({
+                github, owner: ORG, repo: TARGET, base: repo.data.default_branch, plan, dry: DRY,
+              });
+              record('materialize', true, `${seeded.outcome}: ${seeded.detail}`);
+            } catch (e) {
+              record('materialize', false, `${e.message}`.slice(0, 120));
+            }
 
             // ── REMOTE APPLY: labels (plan.remote_apply.labels) ────────────
             if (plan.remote_apply.labels.enabled) {
@@ -185,17 +280,14 @@ jobs:
             }
 
             // ── ATTESTATION: the remote, not the local assembly ────────────
-            // A birth that only checks what it built locally proves nothing
-            // about what GitHub actually holds. Every check below reads the
-            // remote back, against the expectations in plan.attestation.
+            // Every check reads the remote back, against plan.attestation.
             for (const path of plan.attestation.required_present) {
               const present = (await readText(path)) != null;
               record(`present:${path}`, present, present ? 'on remote HEAD' : 'missing on remote HEAD');
             }
 
             // A repository classed by an org override legitimately carries no
-            // marker; only a marker that CONTRADICTS the plan's class is a
-            // failure. Demanding one would fail every override-classed repo.
+            // marker; only a marker that CONTRADICTS the plan's class fails.
             const markerClass = plan.attestation.verify_class_marker
               ? markerClassOf(await readText(authority.classes.marker_path))
               : null;
@@ -205,15 +297,10 @@ jobs:
               attest.push(['marker:class', 'SKIP', `no marker; class from ${plan.repo_class.resolved_from}`]);
             }
 
-            // FORBID is an attestation, not only a build-time filter: a
-            // repository can acquire a forbidden path from any source after
-            // birth — a hand-added workflow, a sweep that predates its class,
-            // a copy-paste from a sibling repo.
+            // FORBID is an attestation, not only a build-time filter (GOV-010).
             const leaked = [];
             for (const pattern of plan.attestation.required_absent) {
-              // A `dir/**` pattern is probed at the directory itself: the
-              // contents API returns a listing for a directory that exists and
-              // 404s for one that does not.
+              // A `dir/**` pattern is probed at the directory itself.
               const probe = pattern.endsWith('/**') ? pattern.slice(0, -3) : pattern;
               if ((await readText(probe)) != null || (await pathExists(probe))) {
                 leaked.push(pattern);
@@ -227,21 +314,7 @@ jobs:
                 : `${plan.attestation.required_absent.length} pattern(s) probed, none present`,
             );
 
-            const mode = DRY ? 'DRY RUN' : 'APPLIED';
-            await core.summary
-              .addHeading(`Repo birth bootstrap (${mode}) — ${ORG}/${TARGET}`, 2)
-              .addRaw(`**Class:** \`${plan.repo_class.name}\` (${plan.repo_class.resolved_from})\n\n`)
-              .addRaw(`**Governance plan:** authority \`${plan.authority.sha}\`, digest \`${plan.digest.value}\`\n\n`)
-              .addTable([
-                [
-                  { data: 'Check', header: true },
-                  { data: 'Result', header: true },
-                  { data: 'Detail', header: true },
-                ],
-                ...attest.map((r) => r.map(String)),
-              ])
-              .write();
-
+            await summarize(DRY ? 'DRY RUN' : 'APPLIED');
             if (failures) {
               core.setFailed(`${failures} birth attestation check(s) failed for ${ORG}/${TARGET}`);
             }

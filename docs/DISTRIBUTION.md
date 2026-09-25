@@ -134,7 +134,7 @@ and reinstalled only if a new repo needs seeding.
 | A governance gate rule | Edit `governance-pr.yml`, move `v1` tag | No |
 | Code ownership routing | Edit `templates/CODEOWNERS.repo`, re-run seed | Yes |
 | New repo from `l9-dependency-template` | Files already in the template tree | No |
-| Blank repo (no template) | `workflow_dispatch` `seed-governance.yml` or `auto-seed-new-repo.yml` | Yes |
+| Blank repo (no template) | `make birth REPO=<name>` (plan), then with `SHA=` and `DIGEST=` (apply) | Yes |
 | New repo joins the org (legacy) | Run seed filtered to that repo | Yes |
 
 Only the last two rows ever need it.

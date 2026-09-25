@@ -26,7 +26,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { notFound, makeScriptRunner } = require('./workflow-script-harness.js');
+const { notFound, makeScriptRunner, makeBranchStubs } = require('./workflow-script-harness.js');
 const { compileGovernancePlan } = require('./compile-repo-governance.js');
 const { applyPlanLabels, settingsDrift } = require('./plan-adapter.js');
 
@@ -60,7 +60,9 @@ function makeGithub({ files = {}, unreadable = [], settings = {}, existingLabels
     calls.push({ name, args });
     return fn ? fn(args) : { data: {} };
   };
-  const repoData = { name: 'target', owner: { login: 'Quantum-L9' }, archived: false, fork: false, ...settings };
+  const repoData = { name: 'target', owner: { login: 'Quantum-L9' }, default_branch: 'main', archived: false, fork: false, ...settings };
+  const branchState = { sha: null };
+  const shared = makeBranchStubs({ branch: 'chore/auto-seed-governance', state: branchState, calls, openPRs: [], record: (name) => record(name, () => ({ data: { number: 1 } })) });
   const github = {
     paginate: async () => [repoData],
     rest: {
@@ -88,6 +90,15 @@ function makeGithub({ files = {}, unreadable = [], settings = {}, existingLabels
         }),
         updateLabel: record('issues.updateLabel'),
       },
+      pulls: shared.pulls,
+      git: {
+        getRef: shared.getRef,
+        getCommit: async () => ({ data: { tree: { sha: 'base-tree' } } }),
+        createBlob: record('git.createBlob', () => ({ data: { sha: 'blob' } })),
+        createTree: record('git.createTree', () => ({ data: { sha: 'tree' } })),
+        createCommit: record('git.createCommit', () => ({ data: { sha: 'commit' } })),
+        createRef: record('git.createRef'),
+      },
     },
   };
   return { github, calls, state: {} };
@@ -96,14 +107,26 @@ function makeGithub({ files = {}, unreadable = [], settings = {}, existingLabels
 const runner = (file, envFor) =>
   makeScriptRunner({ file: path.join(root, file), root, tmpTag: 'remote-apply-', envFor, makeGithub, mutations: MUTATIONS });
 
-const bootstrap = (env = {}) =>
+// The bootstrap is the single front door (G5): it runs at the checked-out
+// authority and mutates only with the expected plan digest. Tests drive it the
+// way a caller does — plan-only first, then apply with the reported digest.
+const git = ['/usr/bin/git', '/usr/local/bin/git'].find((p) => fs.existsSync(p));
+const HEAD = spawnSync(git, ['-C', root, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).stdout.trim();
+const frontDoor = (env) =>
   runner('.github/workflows/repo-birth-bootstrap.yml', (dry) => ({
     DRY_RUN: dry ? 'true' : 'false',
     TARGET_REPO: 'target',
     REPO_CLASS: '',
-    GITHUB_SHA: SHA,
+    AUTHORITY_SHA: HEAD,
+    EXPECTED_PLAN_DIGEST: '',
     ...env,
   }));
+const bootstrap = (env = {}) => async (opts = {}) => {
+  const planned = await frontDoor(env)({ ...opts, dry: true });
+  const digest = planned.outputs.plan_digest;
+  if (!digest) return planned; // refused while planning: report that run
+  return frontDoor({ EXPECTED_PLAN_DIGEST: digest, ...env })(opts);
+};
 const sweep = (env = {}) =>
   runner('.github/workflows/sync-labels-all.yml', (dry) => ({
     DRY_RUN: dry ? 'true' : 'false',
@@ -215,7 +238,7 @@ exit 0
   assert.strictEqual(su.mutated, false, 'sweep must not label an unresolvable repository');
   assert.deepStrictEqual(su.failures, [], 'an unresolvable repository is skipped, not a sweep failure');
   assert.notStrictEqual(cliSync({ [MARKER]: 'profile: totally_made_up\n' }).status, 0, 'CLI refuses an unknown class');
-  for (const [label, run] of [['bootstrap', bootstrap({ GITHUB_SHA: '' })], ['sweep', sweep({ GITHUB_SHA: '' })]]) {
+  for (const [label, run] of [['bootstrap', bootstrap({ AUTHORITY_SHA: '' })], ['sweep', sweep({ GITHUB_SHA: '' })]]) {
     const x = await run({ files: { 'README.md': 'x', LICENSE: 'x' } });
     assert.strictEqual(x.mutated, false, `${label}: no authority SHA, no mutation`);
   }

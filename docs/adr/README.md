@@ -38,6 +38,7 @@ single PR revert.
 | [0001](./0001-one-governance-brain.md) | One governance brain | Accepted |
 | [0002](./0002-versioned-governance-plan-compiler.md) | Versioned deterministic governance-plan compiler | Accepted |
 | [0003](./0003-immutable-authority-binding.md) | Immutable authority binding | Accepted |
+| [0004](./0004-single-targeted-bootstrap-front-door.md) | Single targeted bootstrap front door | Accepted |
 
 The invariants these decisions create are registered in
 [`docs/INVARIANTS.md`](../INVARIANTS.md).

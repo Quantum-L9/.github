@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 .PHONY: help activate preflight validate governance-plan sync-core sync-labels sync-labels-all \
-        seed-dry seed-apply birth-bootstrap birth-seed \
+        seed-dry seed-apply birth \
         apply-rulesets set-properties pin-actions audit-pins enforce-dry enforce-apply \
         dispatch clean
 
@@ -46,19 +46,20 @@ seed-apply: ## Seed governance files into all unseeded repos
 	@gh workflow run auto-seed-new-repo.yml -f dry_run=false
 
 # ─── Repo Birth ──────────────────────────────────────────────────────────────
-birth-bootstrap: ## REMOTE APPLY + attest one newly created repo (REPO=name [CLASS=...])
-	@test -n "$(REPO)" || (echo "usage: make birth-bootstrap REPO=<repo-name> [CLASS=<repo-class>]" >&2; exit 2)
-	@gh workflow run repo-birth-bootstrap.yml \
-		-f target_repo="$(REPO)" \
-		-f repo_class="$(CLASS)" \
-		-f dry_run=false
-
-birth-seed: ## Seed one newly created repo's applicable files (REPO=name [CLASS=...])
-	@test -n "$(REPO)" || (echo "usage: make birth-seed REPO=<repo-name> [CLASS=<repo-class>]" >&2; exit 2)
-	@gh workflow run auto-seed-new-repo.yml \
-		-f target_repo="$(REPO)" \
-		-f repo_class="$(CLASS)" \
-		-f dry_run=false
+# One targeted front door (docs/adr/0004-single-targeted-bootstrap-front-door.md).
+# Without DIGEST: compile the plan at SHA and report its digest (no writes).
+# With DIGEST: materialize + remote-apply + attest exactly that plan, or refuse.
+birth: ## Govern one repo through the single front door (REPO=name [SHA=authority] [DIGEST=plan] [CLASS=...])
+	@test -n "$(REPO)" || (echo "usage: make birth REPO=<repo-name> [SHA=<authority-sha>] [DIGEST=<plan-digest>] [CLASS=<repo-class>]" >&2; exit 2)
+	@sha="$(SHA)"; [ -n "$$sha" ] || sha="$$(gh api repos/Quantum-L9/.github/commits/main --jq .sha)"; \
+	if [ -z "$(DIGEST)" ]; then \
+		echo "plan-only at authority $$sha — read the digest from the run summary, then: make birth REPO=$(REPO) SHA=$$sha DIGEST=<digest>"; \
+		gh workflow run repo-birth-bootstrap.yml -f target_repo="$(REPO)" -f authority_sha="$$sha" \
+			-f repo_class="$(CLASS)" -f dry_run=true; \
+	else \
+		gh workflow run repo-birth-bootstrap.yml -f target_repo="$(REPO)" -f authority_sha="$$sha" \
+			-f expected_plan_digest="$(DIGEST)" -f repo_class="$(CLASS)" -f dry_run=false; \
+	fi
 
 # ─── Rulesets ────────────────────────────────────────────────────────────────
 apply-rulesets: ## Apply org rulesets (evaluate mode only)

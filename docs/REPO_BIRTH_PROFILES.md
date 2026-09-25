@@ -101,12 +101,14 @@ the class, not the global category list, decides.
 
 | Surface | Uses |
 |---------|------|
-| `ops/repo-class-profile.js` | resolver — load, parse marker, resolve, apply, waive |
-| `ops/build-seed-payload.js` | `profile` option: class picks the categories; INHERIT drops, FORBID throws |
-| `.github/workflows/auto-seed-new-repo.yml` | per-repo class resolution; reports the class per row |
-| `.github/workflows/repo-birth-bootstrap.yml` | targeted REMOTE APPLY + attestation for one repo |
-| `.github/workflows/enforce-policies.yml` | honours `mandatory_files_waive` |
-| `l9-repo-template` `scripts/birth-runner/new_repo.py` | reads the same file to apply the profile locally, before creation |
+| `ops/compile-repo-governance.js` | the only policy interpreter: compiles one verified plan per target |
+| `ops/repo-class-profile.js`, `ops/build-seed-payload.js`, `ops/label-taxonomy.js` | compiler internals — resolver, category→file mapping, label parser |
+| `ops/plan-adapter.js`, `ops/seed-plan-pr.js` | adapter plumbing: gather facts, verify the plan, apply it |
+| `.github/workflows/repo-birth-bootstrap.yml` (`make birth`) | the single targeted front door: SHA + digest pinned, materialize, remote apply, attest |
+| `.github/workflows/auto-seed-new-repo.yml`, `seed-governance.yml`, `ops/sync-org-files.sh` | apply `plan.materialize` (sweep, manual filter, local checkout) |
+| `.github/workflows/sync-labels-all.yml`, `scripts/sync-labels.sh` | apply `plan.remote_apply.labels` |
+| `.github/workflows/enforce-policies.yml`, `continuous-sync.yml` | check / repair against `plan.mandatory_files` and `plan.remote_apply.repo_settings` |
+| `l9-repo-template` `scripts/birth-runner/new_repo.py` | reads `policies/repo-classes.yml` to apply the profile locally, before creation (outside this repository) |
 
 ## Governance plan compiler
 
@@ -183,24 +185,37 @@ failure exits 2 with a `[code]` prefix: `class_resolution`,
 `policy_contradiction`, `unsafe_path`, `missing_fact`, `authority_identity`,
 `digest`, or `contract`.
 
-### Migration state: M1
+### Migration state: M5 (cutover)
 
-The compiler is available and tested; no consumer has switched to it yet. The
-seed, sync, remote-apply, enforcement, and bootstrap paths listed under
-[Consumers](#consumers) remain operationally authoritative and migrate one
-group at a time in G2–G5 of campaign `dotgithub-governance-compiler-v1`.
-Invariants and their slice status are in [`INVARIANTS.md`](./INVARIANTS.md).
+Every class-aware consumer listed under [Consumers](#consumers) executes a
+compiled plan; none resolves class policy itself, which
+`ops/test-one-governance-brain.js` enforces by search. Targeted governance has
+one front door that verifies the authority SHA and plan digest before any
+mutation. Invariants and their proofs are in [`INVARIANTS.md`](./INVARIANTS.md).
 
 ## Birth is immediate, not hourly
 
 `auto-seed-new-repo.yml` still sweeps hourly and still opens a PR — that is the
 **repair** path for repositories that drift or predate their class.
 
-A newborn does not wait for it. `make new-repo` dispatches
-`repo-birth-bootstrap.yml` for exactly one repository and waits: labels and
-settings are applied, then the **remote** is read back and attested. A birth
-that only checks what it assembled locally has proved nothing about what GitHub
-actually holds.
+A newborn does not wait for it. `repo-birth-bootstrap.yml` — `make birth`
+here, dispatched by `make new-repo` in `l9-repo-template` — governs exactly one
+repository as one transaction ([ADR-0004](./adr/0004-single-targeted-bootstrap-front-door.md)):
+
+```bash
+make birth REPO=newborn                          # plan only: compiles at main's SHA, reports the digest
+make birth REPO=newborn SHA=<sha> DIGEST=<digest> # apply exactly that plan, or refuse
+```
+
+The apply run checks out Quantum-L9/.github at `SHA`, recompiles the plan from
+the target's remote facts, and refuses before any write unless the digest
+matches. It then opens the seed PR, applies labels and settings, reads the
+**remote** back, and attests it. A birth that only checks what it assembled
+locally has proved nothing about what GitHub actually holds.
+
+Callers that dispatch `repo_birth` must send `authority_sha` and
+`expected_plan_digest` in `client_payload`; a dispatch without them is refused
+(dry runs without a digest only plan).
 
 ## Why seeder PRs were turning red
 

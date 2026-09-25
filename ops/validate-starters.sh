@@ -43,7 +43,9 @@ if command -v node &>/dev/null; then
     ops/test-compile-repo-governance.js \
     ops/test-seed-plan-adapters.js \
     ops/test-remote-apply-adapters.js \
-    ops/test-reconciliation-adapters.js; do
+    ops/test-reconciliation-adapters.js \
+    ops/test-birth-front-door.js \
+    ops/test-one-governance-brain.js; do
     if node "$t"; then
       echo "✅ $t"
       PASS=$((PASS+1))

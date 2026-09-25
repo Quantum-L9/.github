@@ -15,7 +15,7 @@ scope, schedule, permissions, and interaction model.
 | Preflight Monitor | `preflight-scheduled.yml` | Monthly (1st, 10:00 UTC) | Org-wide | Issue report |
 | Pin Auditor | `audit-pins-org.yml` | Monthly (15th, 12:00 UTC) | All repos | Issue report |
 | Auto-Seeder | `auto-seed-new-repo.yml` | Hourly (:20) + dispatch / repo creation | All repos | PR-based, repo-class aware |
-| Birth Bootstrap | `repo-birth-bootstrap.yml` | Dispatch from `l9-repo-template` `make new-repo` | One repo | REMOTE APPLY + remote attestation |
+| Birth Bootstrap | `repo-birth-bootstrap.yml` | `make birth` / dispatch from `l9-repo-template` `make new-repo` | One repo | Single targeted front door: SHA + plan-digest pinned; materialize + REMOTE APPLY + remote attestation |
 | Template Dispatcher | `dispatch-template-update.yml` | On push to templates/ | Seeded repos | Event dispatch |
 | Governance PR | `governance-pr.yml` | On PR (workflow_call) | Calling repo | Advisory check |
 | Governance Issue | `governance-issue.yml` | On issue (workflow_call) | Calling repo | Label-only |
@@ -130,3 +130,12 @@ Repos are tagged with structured metadata via GitHub Custom Properties:
 | `l9-language` | multi_select | python, typescript, javascript, rust, go | CI template routing |
 | `l9-seeded` | true_false | true, false | Governance seeding status |
 | `l9-team` | single_select | platform, product, infra, external | Ownership routing |
+
+## Governance plan compiler
+
+Every class-aware agent above executes a plan compiled by
+`ops/compile-repo-governance.js`; none interprets `policies/` itself
+(`ops/test-one-governance-brain.js` enforces this). Targeted governance of one
+repository goes through `repo-birth-bootstrap.yml` only, pinned to an exact
+authority SHA and expected plan digest. See `docs/adr/0001`–`0004` and
+`docs/INVARIANTS.md`.

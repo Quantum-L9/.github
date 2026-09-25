@@ -76,11 +76,14 @@ templates/
 ├── issue-templates/                     full issue template set
 └── pr-templates/                        PR template
 ops/
+├── compile-repo-governance.js           THE governance-plan compiler (one policy brain)
+├── plan-adapter.js                      shared plumbing: facts → verified plan → apply
+├── schemas/repo-governance-plan.schema.json  l9.org-governance-plan/v1 contract
 ├── activate-all.sh                      one-shot: enables everything
 ├── set-repo-properties.sh              bulk-set custom properties
 ├── properties-schema.json               custom properties definition
 ├── sync-v2-starters.sh                  syncs from l9-ci-core
-├── sync-org-files.sh                    seeds templates into consumers
+├── sync-org-files.sh                    applies a repo's plan to a local checkout
 ├── apply-rulesets.sh                    applies org rulesets
 ├── validate-starters.sh                 validates pack integrity
 ├── pin-actions-sha.sh                   pins floating action refs
@@ -89,6 +92,7 @@ docs/
 ├── ADVISORY.md                          promotion ladder
 ├── BOUNDARIES.md                        scope constraints
 ├── DISTRIBUTION.md                      distribution model
+├── INVARIANTS.md                        governance invariant registry (GOV-*)
 ├── copilot-exclusions.md                content exclusion source of truth
 └── adr/                                 architecture decision records
 scripts/

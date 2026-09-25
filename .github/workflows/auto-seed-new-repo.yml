@@ -78,15 +78,7 @@ jobs:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const fs = require('fs');
-            const {
-              STOCK_ESLINT_NODE_DEST,
-              STOCK_BIOME_DEST,
-              selectSeedWrites,
-            } = require('./ops/build-seed-payload.js');
-            const {
-              assessSeedBranch,
-              moveSeedBranch,
-            } = require('./ops/seed-branch-safety.js');
+            const { seedPlanPR } = require('./ops/seed-plan-pr.js');
             // Policy is interpreted only by the governance-plan compiler
             // (docs/adr/0001-one-governance-brain.md). This workflow gathers
             // facts, compiles a verified plan per target, and applies
@@ -96,7 +88,6 @@ jobs:
               GovernanceCompileError,
               gatherTargetFacts,
               compileVerifiedPlan,
-              payloadOf,
               planIdentity,
             } = require('./ops/plan-adapter.js');
 
@@ -107,7 +98,6 @@ jobs:
             // names it (GOV-019).
             const AUTHORITY_SHA = process.env.GITHUB_SHA;
             const authority = loadAuthority(fs);
-            const BRANCH = 'chore/auto-seed-governance';
 
             const exists = async (owner, repo, path, ref) => {
               try {
@@ -178,121 +168,12 @@ jobs:
                 const profile = { name: plan.repo_class.name, resolved_from: plan.repo_class.resolved_from };
                 core.info(`${n}: ${planIdentity(plan)}`);
 
-                const payload = payloadOf(plan.materialize.files);
-                const paths = Object.keys(payload);
-                if (!paths.length) {
-                  rows.push([n, profile.name, 'skipped (nothing safe to seed)']);
-                  continue;
-                }
-
-                const existingByPath = {};
-                for (const p of paths) {
-                  if (!(await exists(o, n, p))) {
-                    existingByPath[p] = null;
-                    continue;
-                  }
-                  existingByPath[p] = (p === STOCK_ESLINT_NODE_DEST || p === STOCK_BIOME_DEST)
-                    ? await readText(o, n, p)
-                    : true;
-                }
-                const { writes, replaced } = selectSeedWrites(payload, existingByPath);
-                if (!writes.length) {
-                  rows.push([n, profile.name, 'already seeded']);
-                  continue;
-                }
-
-                const base = repo.default_branch;
-
-                // ── Seed-branch safety gate ────────────────────────────────
-                // The rebuild below constructs the branch as "current default
-                // branch + one seed commit", so anything else already on that
-                // branch would be discarded by construction rather than by
-                // conflict. ops/seed-branch-safety.js decides, read-only,
-                // before any git write; both seeders share that one decision.
-                const gate = await assessSeedBranch({
-                  github, owner: o, repo: n, base, branch: BRANCH,
+                // Materialization (writes, seed-branch safety, PR) is shared
+                // with the targeted birth bootstrap: ops/seed-plan-pr.js.
+                const seeded = await seedPlanPR({
+                  github, owner: o, repo: n, base: repo.default_branch, plan, dry: DRY,
                 });
-                if (gate.action === 'skip') {
-                  rows.push([n, profile.name, gate.reason]);
-                  continue;
-                }
-                const branchSha = gate.sha;
-
-                if (DRY) {
-                  const upgrade = replaced.length ? `; replace stock ESLint` : '';
-                  const preview = writes.length <= 6
-                    ? writes.join(', ')
-                    : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
-                  const onto = branchSha ? `; rebuild ${BRANCH}` : '';
-                  rows.push([n, profile.name, `would seed ${writes.length}: ${preview}${upgrade}${onto}`]);
-                  continue;
-                }
-                const baseRef = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
-                const baseSha = baseRef.data.object.sha;
-                const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
-
-                const treeItems = [];
-                for (const path of writes) {
-                  if (!replaced.includes(path) && await exists(o, n, path, base)) continue;
-                  const blob = await github.rest.git.createBlob({
-                    owner: o, repo: n,
-                    content: Buffer.from(payload[path]).toString('base64'),
-                    encoding: 'base64',
-                  });
-                  treeItems.push({ path, mode: '100644', type: 'blob', sha: blob.data.sha });
-                }
-
-                if (!treeItems.length) {
-                  rows.push([n, profile.name, 'already seeded']);
-                  continue;
-                }
-
-                const tree = await github.rest.git.createTree({
-                  owner: o, repo: n,
-                  base_tree: baseCommit.data.tree.sha,
-                  tree: treeItems,
-                });
-                const commit = await github.rest.git.createCommit({
-                  owner: o, repo: n,
-                  message: `chore(governance): auto-seed ${treeItems.length} org template file(s)`,
-                  tree: tree.data.sha,
-                  parents: [baseSha],
-                });
-
-                const moved = await moveSeedBranch({
-                  github, owner: o, repo: n, branch: BRANCH,
-                  expectedSha: branchSha, commitSha: commit.data.sha,
-                });
-                if (!moved.moved) {
-                  rows.push([n, profile.name, moved.reason]);
-                  continue;
-                }
-
-                const pr = await github.rest.pulls.create({
-                  owner: o, repo: n, head: BRANCH, base,
-                  title: 'chore(governance): auto-seed org templates from Quantum-L9/.github',
-                  body: [
-                    'Automatically seeds the org capabilities applicable to this repository from `Quantum-L9/.github/templates/`. CI is not distributed from this repository.',
-                    '',
-                    `**Repo class:** \`${profile.name}\` (${profile.resolved_from}) — see \`policies/repo-classes.yml\`.`,
-                    `**Governance plan:** authority \`${plan.authority.sha}\`, digest \`${plan.digest.value}\`.`,
-                    plan.inherit.paths.length
-                      ? `Inherited from the org \`.github\` repo and deliberately **not** copied here: ${plan.inherit.paths.map(p => `\`${p}\``).join(', ')}.`
-                      : '',
-                    '',
-                    '### Files in this PR',
-                    ...treeItems.map(t => `- \`${t.path}\``),
-                    '',
-                    'Existing files were left untouched (missing-only seed), except a stock ESLint `l9-lint-test-node.yml` which is replaced with the Biome SDK caller.',
-                    'Governance caller is **advisory** (`strict` defaults false).',
-                    'Core pack callers are distributed here; `l9-ci-core` executes CI.',
-                    '',
-                    'While this PR is open the seeder leaves the branch alone — commit review fixes onto it freely.',
-                    '',
-                    '_Opened automatically by Quantum-L9/.github auto-seed._',
-                  ].join('\n'),
-                });
-                rows.push([n, profile.name, `PR #${pr.data.number} (${treeItems.length} file(s))`]);
+                rows.push([n, profile.name, seeded.detail]);
               } catch (e) {
                 failed.push(n);
                 const msg = `${e.status || ''} ${e.message || e}`.replace(/\s+/g, ' ').slice(0, 120);
