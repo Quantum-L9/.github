@@ -30,6 +30,34 @@ Distributing the locked `biome.json` contract from `l9-ci-core
 presets/typescript/` is in-bounds (same as shipping lint callers). Reimplementing
 the Biome scanner is not.
 
+## One governance brain
+
+`ops/compile-repo-governance.js` is the only supported policy interpretation
+boundary ([ADR-0001](./adr/0001-one-governance-brain.md)). Every
+class-sensitive question — which class applies, what is materialized,
+inherited, or forbidden, which mandatory files remain effective, which labels
+and settings are desired, what must be attested — is answered once, as one
+`l9.org-governance-plan/v1` document.
+
+| Role | Does | Does not |
+| --- | --- | --- |
+| Workflows | gather facts about the target (marker, root `CODEOWNERS`, Python surface, `package.json`) | resolve class or capability semantics |
+| Compiler | decides, from explicit facts and policy at one authority SHA | call the GitHub API, touch the network, or mutate any repository |
+| Adapters | apply the plan (seed, labels, settings, attestation) | add, widen, or reinterpret plan entries |
+
+The compiler is pure: facts are passed in, the plan comes out, and GitHub I/O
+belongs to the adapters. Lower-level helpers (`ops/repo-class-profile.js`,
+`ops/build-seed-payload.js`) become compiler internals; existing direct
+consumers keep working until their slice migrates (G2–G5), and no new direct
+consumer is added.
+
+The compiler decides governance metadata only. It never grows into CI
+execution, lint, test, scan, or remediation — [The rule](#the-rule) applies to
+it unchanged. A compiled plan is transaction evidence, not a policy store:
+policy stays in version-controlled files here. The laws are registered in
+[`INVARIANTS.md`](./INVARIANTS.md) (GOV-001, GOV-002, GOV-024, GOV-025,
+GOV-029).
+
 ## Explicitly rejected additions
 
 - **Reusable CI callees for pytest/ruff/pyright/semgrep/biome.** `l9-ci-sdk` /

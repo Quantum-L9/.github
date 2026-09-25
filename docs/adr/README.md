@@ -1,6 +1,7 @@
 # Architecture Decision Records (ADRs)
 
-This directory holds the org-wide ADR template. ADRs record significant,
+This directory holds the org-wide ADR template and the ADRs for this
+repository's own code (`ops/`, `policies/`). ADRs record significant,
 hard-to-reverse technical or architectural decisions — not routine changes.
 
 ## When to write an ADR
@@ -18,8 +19,9 @@ single PR revert.
 ## How to use this template
 
 1. Copy [`template.md`](./template.md) into **your repository's own**
-   `docs/adr/` directory (this `.github` repo only hosts the template; ADRs
-   themselves are recorded per-repo, next to the code they govern).
+   `docs/adr/` directory (this `.github` repo hosts the template for the org;
+   ADRs are recorded per-repo, next to the code they govern — including this
+   repo's own, listed below).
 2. Name the file `docs/adr/NNNN-short-title.md`, using the next sequential
    4-digit number for that repo.
 3. Fill in every section. Leave `Considered Options` even if only one option
@@ -28,6 +30,17 @@ single PR revert.
    status change to `Accepted` without discussion of the tradeoffs section.
 5. If a later ADR reverses this one, do not delete the old file — set its
    status to `Superseded by ADR-NNNN` and link both directions.
+
+## This repository's ADRs
+
+| ADR | Decision | Status |
+| --- | --- | --- |
+| [0001](./0001-one-governance-brain.md) | One governance brain | Accepted |
+| [0002](./0002-versioned-governance-plan-compiler.md) | Versioned deterministic governance-plan compiler | Accepted |
+| [0003](./0003-immutable-authority-binding.md) | Immutable authority binding | Accepted |
+
+The invariants these decisions create are registered in
+[`docs/INVARIANTS.md`](../INVARIANTS.md).
 
 ## Relationship to CANONICAL_LAW.md
 

@@ -108,6 +108,89 @@ the class, not the global category list, decides.
 | `.github/workflows/enforce-policies.yml` | honours `mandatory_files_waive` |
 | `l9-repo-template` `scripts/birth-runner/new_repo.py` | reads the same file to apply the profile locally, before creation |
 
+## Governance plan compiler
+
+`ops/compile-repo-governance.js` compiles the complete effective governance
+answer for one target at one authority revision into a single
+`l9.org-governance-plan/v1` document, validated by
+`ops/schemas/repo-governance-plan.schema.json`. It is the one policy
+interpretation boundary ([ADR-0001](./adr/0001-one-governance-brain.md),
+[ADR-0002](./adr/0002-versioned-governance-plan-compiler.md)); the resolver and
+payload builder above are its internals.
+
+The compiler is pure. It fetches nothing from GitHub: callers gather the facts,
+the compiler decides.
+
+### Inputs
+
+| Input | Form |
+|-------|------|
+| Target repository | `owner/name` |
+| Authority SHA | the exact 40-hex `Quantum-L9/.github` commit whose policy is compiled |
+| Marker | `absent`, or `present` plus its text |
+| Target facts | `has_root_codeowners`, `has_python`, `has_package_json` |
+| Operator class request | optional; the explicit class an operator may already pass to targeted bootstrap, validated strictly |
+
+### Output
+
+| Section | Carries |
+|---------|---------|
+| `schema`, `compiler` | `l9.org-governance-plan/v1`, compiler name and contract version |
+| `authority` | `Quantum-L9/.github` and the 40-hex SHA |
+| `target` | repository, name, and the normalized facts above |
+| `repo_class` | effective class and `resolved_from`: `marker`, `org_override`, `default`, or `operator_request` |
+| `capabilities` | the applicable capability set |
+| `materialize.files` | path, capability, source, write mode (`missing_only` or `replace_if_stock`), UTF-8 content, content SHA-256 |
+| `inherit.paths` | paths GitHub supplies from this repository — never copied |
+| `forbid.paths` | paths the target must never carry |
+| `mandatory_files` | effective requirements after class waivers, and the waived paths |
+| `remote_apply` | `labels` (enabled + exact label set), `repo_settings` (enabled + fully resolved desired state) |
+| `attestation` | paths required present and absent, whether to verify the class marker and remote state |
+| `digest` | `sha256` over `l9.canonical-json/v1` |
+
+### Deterministic digest
+
+The digest is SHA-256 over the plan with `digest` removed, serialized as
+compact JSON with object keys sorted recursively and array order preserved,
+UTF-8 encoded. No timestamp or run ID enters the plan, so the same authority
+SHA, target, facts, and policy bytes always yield a byte-identical plan and
+digest — and any change to effective output changes the digest.
+
+### Fails closed
+
+| Condition | Result |
+|-----------|--------|
+| Marker present, unparseable | error — never `default` |
+| Marker present, unknown class | error — never `default` |
+| Operator class request names an unknown class | error |
+| A `FORBID` path would be materialized | error — the plan is invalid |
+| Unsafe materialization path (absolute, `..`, backslash, NUL, glob) or non-text content | error |
+| CLI asked to name a revision the checkout is not at, or policy inputs differ from it | error — no plan is printed |
+| Retired category (`l9-ci-pack`, `on-org-update`) requested | error |
+
+### Usage
+
+```bash
+node ops/compile-repo-governance.js --repo Quantum-L9/example --authority-sha HEAD --marker-absent
+make governance-plan ARGS='--repo Quantum-L9/example --authority-sha HEAD --marker-absent'
+```
+
+`--authority-sha HEAD` resolves to the checkout's commit. The CLI refuses to
+compile when HEAD is not the asserted SHA or when any policy input
+(`policies/`, `.github/labels.yml`, `templates/`, the schema) differs from it,
+so a printed plan always names the revision whose bytes produced it. Every
+failure exits 2 with a `[code]` prefix: `class_resolution`,
+`policy_contradiction`, `unsafe_path`, `missing_fact`, `authority_identity`,
+`digest`, or `contract`.
+
+### Migration state: M1
+
+The compiler is available and tested; no consumer has switched to it yet. The
+seed, sync, remote-apply, enforcement, and bootstrap paths listed under
+[Consumers](#consumers) remain operationally authoritative and migrate one
+group at a time in G2–G5 of campaign `dotgithub-governance-compiler-v1`.
+Invariants and their slice status are in [`INVARIANTS.md`](./INVARIANTS.md).
+
 ## Birth is immediate, not hourly
 
 `auto-seed-new-repo.yml` still sweeps hourly and still opens a PR — that is the
