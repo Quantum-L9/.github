@@ -35,8 +35,8 @@ if command -v node &>/dev/null; then
   for t in \
     ops/test-build-seed-payload.js \
     ops/test-repo-class-profile.js \
-    ops/test-label-taxonomy.js \
     ops/test-app-token-environment.js \
+    ops/test-label-taxonomy.js \
     ops/test-seed-branch-safety.js \
     ops/test-seed-workflow-branch-guard.js; do
     if node "$t"; then
