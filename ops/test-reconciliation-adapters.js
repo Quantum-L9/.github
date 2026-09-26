@@ -57,8 +57,10 @@ function planFor(repoName, files = {}) {
  * @param {Record<string,string>} [o.files]
  * @param {string[]} [o.unreadable]
  * @param {object} [o.settings]
+ * @param {Record<string, number|null>} [o.probeErrors]  paths whose every read
+ *   fails with that HTTP status (null = network error with no status)
  */
-function makeGithub({ name = 'target', files = {}, unreadable = [], settings = {} } = {}) {
+function makeGithub({ name = 'target', files = {}, unreadable = [], settings = {}, probeErrors = {} } = {}) {
   const calls = [];
   const probes = {};
   const record = (callName, data = {}) => async (args) => {
@@ -72,6 +74,10 @@ function makeGithub({ name = 'target', files = {}, unreadable = [], settings = {
       repos: {
         getContent: async ({ path: p, ref }) => {
           calls.push({ name: 'repos.getContent', args: { path: p, ref } });
+          if (Object.hasOwn(probeErrors, p)) {
+            const status = probeErrors[p];
+            throw Object.assign(new Error(status ? `HTTP ${status}` : 'socket hang up'), status ? { status } : {});
+          }
           if (unreadable.includes(p)) {
             probes[p] = (probes[p] || 0) + 1;
             if (probes[p] > 1) throw new Error('500 transient read failure');
@@ -110,8 +116,10 @@ const rowFor = (r, name) => {
   const row = table && table.slice(1).find((cells) => cells[0] === name);
   return row ? row[row.length - 1] : 'compliant';
 };
-const missingFrom = (status) => [...status.matchAll(/missing: ([^;]+)/g)].map((m) => m[1]).sort();
-const restored = (r) => r.calls.filter((c) => c.name === 'repos.createOrUpdateFileContents').map((c) => c.args.path).sort();
+// Explicit code-unit order (Sonar S2871); identical to a comparator-less sort.
+const byCodeUnit = (a, b) => (a < b ? -1 : Number(a > b));
+const missingFrom = (status) => [...status.matchAll(/missing: ([^;]+)/g)].map((m) => m[1]).sort(byCodeUnit);
+const restored = (r) => r.calls.filter((c) => c.name === 'repos.createOrUpdateFileContents').map((c) => c.args.path).sort(byCodeUnit);
 
 (async () => {
   // ── one waiver answer for enforcement and sync (AC-INT-003, GOV-015) ────
@@ -124,8 +132,8 @@ const restored = (r) => r.calls.filter((c) => c.name === 'repos.createOrUpdateFi
     const plan = planFor(name, files);
     const e = await enforce()({ name, files, settings: plan.remote_apply.repo_settings.desired });
     const s = await sync()({ name, files });
-    const expectMissing = plan.mandatory_files.effective.map((r) => r.path).sort();
-    const expectRestored = managedRequirements(plan).map((r) => r.path).sort();
+    const expectMissing = plan.mandatory_files.effective.map((r) => r.path).sort(byCodeUnit);
+    const expectRestored = managedRequirements(plan).map((r) => r.path).sort(byCodeUnit);
     assert.deepStrictEqual(missingFrom(rowFor(e, name)), expectMissing, `${name} ${plan.repo_class.name}: enforcement set`);
     assert.deepStrictEqual(restored(s), expectRestored, `${name} ${plan.repo_class.name}: sync repair set`);
     for (const waived of plan.mandatory_files.waived) {
@@ -165,16 +173,43 @@ const restored = (r) => r.calls.filter((c) => c.name === 'repos.createOrUpdateFi
   console.log('ok: enforcement patches exactly the plan settings drift, never default_branch; dry run writes nothing');
 
   // ── unresolvable class: not enforced, not repaired (fail closed) ────────
-  for (const bad of [{ files: { [MARKER]: 'profile: totally_made_up\n' } }, { unreadable: [MARKER] }]) {
-    const e = await enforce()({ ...bad, settings: current });
-    assert.strictEqual(e.mutated, false, 'no settings patch for an unresolvable class');
-    assert.match(rowFor(e, 'target'), /unresolvable repo class: .* not enforced/);
-    assert.ok(!/missing:/.test(rowFor(e, 'target')), 'no file findings computed under a default fallback');
-    const s = await sync()(bad);
-    assert.strictEqual(s.mutated, false, 'no repair for an unresolvable class');
-    assert.match(rowFor(s, 'target'), /skipped: unresolvable repo class/);
+  const unknownClass = { files: { [MARKER]: 'profile: totally_made_up\n' } };
+  const eu = await enforce()({ ...unknownClass, settings: current });
+  assert.strictEqual(eu.mutated, false, 'no settings patch for an unresolvable class');
+  assert.match(rowFor(eu, 'target'), /unresolvable repo class: .* not enforced/);
+  assert.ok(!/missing:/.test(rowFor(eu, 'target')), 'no file findings computed under a default fallback');
+  assert.ok(eu.warnings.some((w) => /unresolvable class/.test(w)), 'an unresolvable class is warned, not silent');
+  const su = await sync()(unknownClass);
+  assert.strictEqual(su.mutated, false, 'no repair for an unresolvable class');
+  assert.match(rowFor(su, 'target'), /skipped: unresolvable repo class/);
+  console.log('ok: an unknown marker class is neither enforced nor repaired as default, and is warned');
+
+  // ── a failed observation is never "absent" (AC-ADV-009) ──────────────────
+  // The FIRST probe of each fact is attacked — the opt-out marker, the class
+  // marker, a codeowners fact, a managed file — not only a later read. Each
+  // must leave the repository untouched AND turn the run red.
+  const attacks = [
+    ['enforce', enforce, '.l9/no-policy-enforcement', 500],
+    ['enforce', enforce, MARKER, 403],
+    ['enforce', enforce, 'CODEOWNERS', null],
+    ['enforce', enforce, 'README.md', 502],
+    ['sync', sync, '.l9/no-sync', 403],
+    ['sync', sync, MARKER, 500],
+    ['sync', sync, 'package.json', 429],
+    ['sync', sync, '.github/dependabot.yml', 502],
+  ];
+  for (const [label, make, probePath, status] of attacks) {
+    const what = `${label}: ${status || 'network'} on ${probePath}`;
+    const r = await make()({ probeErrors: { [probePath]: status }, settings: current });
+    assert.strictEqual(r.mutated, false, `${what} must not mutate`);
+    assert.ok(r.failures.some((f) => /could not be evaluated/.test(f)), `${what} must fail the run: ${JSON.stringify(r.failures)}`);
+    assert.match(rowFor(r, 'target'), /FAILED — not evaluated/, `${what} is reported, not a quiet row`);
   }
-  console.log('ok: an unknown or unreadable marker is neither enforced nor repaired as default');
+  // The second-read variant still fails closed.
+  const unreadMarker = await enforce()({ unreadable: [MARKER], settings: current });
+  assert.strictEqual(unreadMarker.mutated, false);
+  assert.ok(unreadMarker.failures.length > 0);
+  console.log('ok: a 403/5xx/429/network failure on any first probe mutates nothing and fails the run');
 
   // ── exceptions and opt-outs still hold ───────────────────────────────────
   const exempt = await enforce()({ name: 'Cursor-Governance', settings: planFor('Cursor-Governance').remote_apply.repo_settings.desired });
@@ -186,10 +221,15 @@ const restored = (r) => r.calls.filter((c) => c.name === 'repos.createOrUpdateFi
   assert.strictEqual(optSync.mutated, false);
   console.log('ok: repository exceptions, .l9/no-policy-enforcement, and .l9/no-sync still hold');
 
-  // ── no authority revision, no mutation ──────────────────────────────────
-  assert.strictEqual((await enforce({ GITHUB_SHA: '' })({ settings: current })).mutated, false);
-  assert.strictEqual((await sync({ GITHUB_SHA: '' })({})).mutated, false);
-  console.log('ok: without an exact authority SHA neither enforcement nor sync mutates');
+  // ── a non-class plan failure is the run's failure, not a green row ──────
+  // Missing authority SHA stands in for any template/authority defect: it
+  // disables every repository's plan, and must never finish green (F04).
+  for (const [label, make] of [['enforce', enforce], ['sync', sync]]) {
+    const r = await make({ GITHUB_SHA: '' })({ settings: current });
+    assert.strictEqual(r.mutated, false, `${label}: no authority SHA, no mutation`);
+    assert.ok(r.failures.some((f) => /could not be evaluated/.test(f)), `${label}: a plan failure must fail the run`);
+  }
+  console.log('ok: without an exact authority SHA neither enforcement nor sync mutates, and both runs fail');
 })().catch((err) => {
   console.error(err);
   process.exit(1);
