@@ -34,10 +34,10 @@
           "type": "string"
         },
         "path": {
-          "$ref": "#/$defs/safePattern"
+          "$ref": "#/$defs/safePath"
         },
         "source": {
-          "type": "string"
+          "$ref": "#/$defs/templateSource"
         }
       },
       "required": [
@@ -61,11 +61,10 @@
           "type": "string"
         },
         "path": {
-          "$ref": "#/$defs/safePattern"
+          "$ref": "#/$defs/safePath"
         },
         "source": {
-          "minLength": 1,
-          "type": "string"
+          "$ref": "#/$defs/templateSource"
         },
         "write_mode": {
           "enum": [
@@ -85,11 +84,29 @@
       ],
       "type": "object"
     },
-    "safePattern": {
+    "safePath": {
+      "description": "A literal relative file path: the safePattern rules plus no glob. Same rule as assertSafeDest in ops/compile-repo-governance.js.",
       "minLength": 1,
       "not": {
-        "pattern": "(^/|(^|/)\\.\\.(/|$)|\\u0000|\\\\)"
+        "pattern": "(^/|(^|/)\\.{1,2}(/|$)|//|/$|\\u0000|\\\\|\\*)"
       },
+      "type": "string"
+    },
+    "safePattern": {
+      "description": "A relative path or a trailing /** directory pattern: no absolute path, no . or .. segment, no empty segment, no trailing slash, no backslash, no NUL.",
+      "minLength": 1,
+      "not": {
+        "pattern": "(^/|(^|/)\\.{1,2}(/|$)|//|/$|\\u0000|\\\\)"
+      },
+      "type": "string"
+    },
+    "templateSource": {
+      "description": "An organization template this repository reads content from; always under templates/.",
+      "minLength": 1,
+      "not": {
+        "pattern": "(^/|(^|/)\\.{1,2}(/|$)|//|/$|\\u0000|\\\\|\\*)"
+      },
+      "pattern": "^templates/",
       "type": "string"
     }
   },
@@ -110,7 +127,7 @@
         },
         "required_present": {
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/safePath"
           },
           "type": "array",
           "uniqueItems": true

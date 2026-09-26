@@ -18,6 +18,7 @@ const {
   DEFAULT_CLASSES_PATH,
   parseJsonInYaml,
   loadRepoClasses,
+  isKnownClass,
   parseClassMarker,
   classForRepo,
   matchPattern,
@@ -238,12 +239,20 @@ try {
     ['an empty marker file', ''],
     ['a marker that is only whitespace', '   \n'],
     ['an indented (nested) profile key', '  profile: sneaky\n'],
+    // Object.prototype members are not classes (GOV-005).
+    ['a __proto__ class', 'profile: __proto__\n'],
+    ['a constructor class', 'profile: constructor\n'],
+    ['a toString class', 'profile: toString\n'],
   ]) {
     const bad = classForRepo(doc, 'some-repo', markerText);
     assert.strictEqual(bad.name, null, `${label} must not resolve to a class`);
     assert.ok(bad.error, `${label} must report an error`);
     assert.strictEqual(bad.source, 'marker');
   }
+
+  assert.ok(!isKnownClass(doc, '__proto__') && !isKnownClass(doc, 'constructor') && isKnownClass(doc, 'default'));
+  assert.throws(() => resolveProfile(doc, 'constructor', { strict: true }), /unknown repo class constructor/);
+  assert.strictEqual(resolveProfile(doc, 'hasOwnProperty').name, doc.default_class, 'sweep fallback, never a prototype member');
 
   // The failure survives an override: a repo that declared something broken is
   // not quietly rescued by the org map either.
