@@ -259,19 +259,58 @@ else
       nightly_ok=false
       continue
     fi
-    # Caller permissions cap the reusable nightly kernel (packages: read).
-    if ! grep -vE '^[[:space:]]*#' "$nightly" | grep -q 'packages:[[:space:]]*read'; then
-      echo "❌ $nightly omits packages: read — Core nightly.yml cannot authenticate to GitHub Packages"
+    # The reusable-workflow call is capped by the JOB's permissions: once
+    # jobs.l9_nightly lists permissions, an omitted scope is `none` whatever
+    # the workflow level says. So the check reads that block only.
+    job_perms="$(awk '
+      /^[^[:space:]#]/ { in_jobs = ($0 ~ /^jobs:/) }
+      in_jobs && /^  [A-Za-z0-9_-]+:/ { in_job = ($0 ~ /^  l9_nightly:/); in_perms = 0; next }
+      in_job && /^    [A-Za-z0-9_-]+:/ { in_perms = ($0 ~ /^    permissions:[[:space:]]*$/); next }
+      in_job && in_perms && /^      [A-Za-z0-9_-]+:/ { print }
+    ' "$nightly")"
+    if ! grep -qE '^[[:space:]]+packages:[[:space:]]*read[[:space:]]*$' <<<"$job_perms"; then
+      echo "❌ $nightly: jobs.l9_nightly.permissions omits packages: read — Core nightly.yml cannot authenticate to GitHub Packages"
+      nightly_ok=false
+    fi
+    # Least privilege: the workflow-level token stays minimal; the scope is
+    # granted where it is used.
+    wf_perms="$(awk '
+      /^[^[:space:]#]/ { in_perms = ($0 ~ /^permissions:[[:space:]]*$/); next }
+      in_perms && /^  [A-Za-z0-9_-]+:/ { print }
+    ' "$nightly")"
+    if grep -qE '^[[:space:]]+packages:' <<<"$wf_perms"; then
+      echo "❌ $nightly: workflow-level permissions grant packages — keep it on jobs.l9_nightly only"
       nightly_ok=false
     fi
   done
-  if ! grep -q 'l9-nightly.yml' ops/sync-v2-starters.sh || \
-     ! grep -q 'keeping nightly Core pin' ops/sync-v2-starters.sh; then
-    echo "❌ ops/sync-v2-starters.sh no longer excludes l9-nightly.yml from the generic Core repinner"
+  # Exercise the real repin loop from ops/sync-v2-starters.sh (#92) instead of
+  # grepping for its log line: a nightly caller must keep its own Core pin
+  # while a sibling pack caller is repinned.
+  repin_loop="$(awk '/^for f in "\$\{FILES_TO_REPIN\[@\]\}"; do$/ { p = 1 } p { print } p && /^done$/ { exit }' ops/sync-v2-starters.sh)"
+  guard_tmp="$(mktemp -d)"
+  old_pin="$(printf 'a%.0s' {1..40})"
+  new_pin="$(printf 'b%.0s' {1..40})"
+  printf 'uses: Quantum-L9/l9-ci-core/.github/workflows/nightly.yml@%s\n' "$old_pin" > "$guard_tmp/l9-nightly.yml"
+  printf 'uses: Quantum-L9/l9-ci-core/.github/workflows/ci.yml@%s\n' "$old_pin" > "$guard_tmp/l9-v2-ci.yml"
+  {
+    printf 'set -euo pipefail\n'
+    printf 'FILES_TO_REPIN=(%q %q)\n' "$guard_tmp/l9-nightly.yml" "$guard_tmp/l9-v2-ci.yml"
+    printf 'CORE_REF=%q\n' "$new_pin"
+    printf '%s\n' "$repin_loop"
+  } > "$guard_tmp/repin.sh"
+  if [ -z "$repin_loop" ] || ! bash "$guard_tmp/repin.sh" >/dev/null; then
+    echo "❌ could not run the Core repin loop from ops/sync-v2-starters.sh"
+    nightly_ok=false
+  elif ! grep -q "@$old_pin" "$guard_tmp/l9-nightly.yml"; then
+    echo "❌ ops/sync-v2-starters.sh repins l9-nightly.yml — the nightly caller must keep its own Core pin"
+    nightly_ok=false
+  elif ! grep -q "@$new_pin" "$guard_tmp/l9-v2-ci.yml"; then
+    echo "❌ ops/sync-v2-starters.sh no longer repins sibling pack callers (guard over-matches)"
     nightly_ok=false
   fi
+  rm -rf "$guard_tmp"
   if $nightly_ok; then
-    echo "✅ nightly callers grant packages: read and keep their own Core pin"
+    echo "✅ nightly callers grant packages: read on the l9_nightly job only and keep their own Core pin (repin loop exercised)"
     PASS=$((PASS+1))
   else
     FAIL=$((FAIL+1))
