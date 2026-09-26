@@ -42,7 +42,7 @@ jobs:
 
             const rows = fs.readFileSync('/tmp/changed.txt', 'utf8')
               .split('\n').filter(Boolean)
-              .map(l => { const p = l.split('\t'); return { st: SYM[p[0][0]] || p[0], path: p.slice(1).join(' -> ') }; });
+              .map(l => { const p = l.split('\t'); return { st: SYM[p[0][0]] || p[0], path: p.slice(1).join(' -> '), sides: p.slice(1) }; });
             const shortstat = fs.readFileSync('/tmp/shortstat.txt', 'utf8').trim();
 
             // paths the author declared under "## Changes by intent"
@@ -51,13 +51,16 @@ jobs:
             // Accept declared tokens that look like paths (contain "/" or ".")
             // or that exactly match a changed path — the latter lets extensionless
             // root files (e.g. Makefile, LICENSE, Dockerfile) be declared too.
-            const changedPaths = new Set(rows.map(r => r.path));
+            // A rename/copy row is "old -> new"; either side, or that exact key,
+            // declares it — authors naturally name the new path.
+            const changedPaths = new Set(rows.flatMap(r => [r.path, ...r.sides]));
             const declared = new Set([...intentSec.matchAll(/`([^`]+)`/g)]
               .map(m => m[1].trim())
               .filter(p => p.includes('/') || p.includes('.') || changedPaths.has(p)));
 
-            const undeclared = rows.filter(r => !declared.has(r.path) && !GEN.test(r.path));
-            const phantom = [...declared].filter(d => !rows.some(r => r.path === d) && !d.startsWith('path/to/'));
+            const isDeclared = r => declared.has(r.path) || r.sides.some(s => declared.has(s));
+            const undeclared = rows.filter(r => !isDeclared(r) && !GEN.test(r.path));
+            const phantom = [...declared].filter(d => !changedPaths.has(d) && !d.startsWith('path/to/'));
 
             const group = {};
             for (const r of rows) {
@@ -77,7 +80,7 @@ jobs:
               out += `\n\`${dir}/\`\n`;
               for (const r of group[dir]) {
                 const name = r.path.split('/').pop();
-                const mark = declared.has(r.path) ? '' : (GEN.test(r.path) ? ' _(generated)_' : ' ⚠️');
+                const mark = isDeclared(r) ? '' : (GEN.test(r.path) ? ' _(generated)_' : ' ⚠️');
                 out += r.st === 'deleted'
                   ? `- ~~\`${name}\`~~ — deleted${mark}\n`
                   : `- \`${name}\` — ${r.st}${mark}\n`;

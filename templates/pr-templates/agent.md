@@ -1,6 +1,7 @@
-<!-- Agent / chore PR body. make pr and auto-seed write this variant so
-     Enforce-PR-Policies does not fail generated PRs. Humans use
-     pull_request_template.md. -->
+<!-- Agent / chore PR body for generated seed / pack PRs, so the PR gates
+     (pr-gates.yml, governance-pr.yml) do not fail them. Humans use
+     pull_request_template.md; `make pr` (Cursor-Governance
+     compose_pr_body.py) composes from that same template, not this one. -->
 
 ## Problem
 

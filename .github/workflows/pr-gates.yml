@@ -35,12 +35,20 @@ jobs:
             if (!/```[\s\S]*?```/.test(section('Evidence')) && !/actions\/runs\/\d+/.test(section('Evidence')))
               fail.push('**Evidence**: paste command output or link a CI run.');
 
+            // An unchecked gate needs a reason on the line: a separator (—, --, :) or
+            // "n/a" / "not applicable", then at least 4 non-space characters. The
+            // old /(sep)\s*\S{4,}/ demanded one 4+ character WORD right after the
+            // separator, so "— no IAM change" and "— n/a — not this change" failed
+            // while stating a reason. Bare "— n/a" (3 characters) still fails.
+            const reasoned = item => {
+              const m = item.match(/(?:—|--|:|\bn\/a\b|\bnot applicable\b)([\s\S]*)$/i);
+              return !!m && m[1].replace(/\s+/g, '').length >= 4;
+            };
             for (const line of section('Gates').split('\n')) {
               const m = line.match(/^\s*-\s*\[ \]\s*(.+)$/);
               if (!m) continue;
               const item = m[1].trim();
-              // an unchecked box needs a stated reason: "n/a", "no ...", or a trailing "— because"
-              if (!/(n\/a|not applicable|—|--|:)\s*\S{4,}/i.test(item))
+              if (!reasoned(item))
                 fail.push(`**Gate** unchecked with no reason: _${item.slice(0, 70)}_`);
             }
 

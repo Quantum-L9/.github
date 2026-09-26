@@ -25,7 +25,11 @@ jobs:
             const fail = [];
             const sec = n => (body.match(new RegExp(`##\\s*${n}([\\s\\S]*?)(?=\\n##\\s|$)`,'i'))||[,''])[1];
 
-            const problem = sec('Problem').replace(/<!--[\s\S]*?-->/g,'').replace(/Closes #\d*/i,'').trim();
+            // Drop the template's own "paste the error" fence, as pr-gates.yml does:
+            // it is over 30 characters, so an untouched template passed this check.
+            const problem = sec('Problem').replace(/<!--[\s\S]*?-->/g,'')
+              .replace(/```[\s\S]*?```/g, m => m.includes('paste the error') ? '' : m)
+              .replace(/Closes #\d*/i,'').trim();
             if (problem.length < 30) fail.push('**Problem** empty or boilerplate.');
 
             const risk = [...sec('Risk').matchAll(/^\s*-\s*\[([ xX])\]/gm)].filter(m => m[1] !== ' ');
@@ -34,9 +38,18 @@ jobs:
             if (!/```[\s\S]*?```/.test(sec('Evidence')) && !/actions\/runs\/\d+/.test(sec('Evidence')))
               fail.push('**Evidence**: paste output or link a CI run.');
 
+            // An unchecked gate needs a reason on the line: a separator (—, --, :) or
+            // "n/a" / "not applicable", then at least 4 non-space characters. The
+            // old /(sep)\s*\S{4,}/ demanded one 4+ character WORD right after the
+            // separator, so "— no IAM change" and "— n/a — not this change" failed
+            // while stating a reason. Bare "— n/a" (3 characters) still fails.
+            const reasoned = item => {
+              const m = item.match(/(?:—|--|:|\bn\/a\b|\bnot applicable\b)([\s\S]*)$/i);
+              return !!m && m[1].replace(/\s+/g, '').length >= 4;
+            };
             for (const line of sec('Gates').split('\n')) {
               const m = line.match(/^\s*-\s*\[ \]\s*(.+)$/);
-              if (m && !/(n\/a|not applicable|—|--|:)\s*\S{4,}/i.test(m[1]))
+              if (m && !reasoned(m[1].trim()))
                 fail.push(`**Gate** unchecked without reason: _${m[1].slice(0,60)}_`);
             }
 
