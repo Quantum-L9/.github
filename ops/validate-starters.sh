@@ -33,12 +33,12 @@ echo "=== Quantum-L9 Workflow Starter Validation ==="
 
 if command -v node &>/dev/null; then
   for t in \
+    ops/test-pr-body-gates.js \
     ops/test-build-seed-payload.js \
     ops/test-repo-class-profile.js \
     ops/test-label-taxonomy.js \
     ops/test-seed-branch-safety.js \
-    ops/test-seed-workflow-branch-guard.js \
-    ops/test-pr-body-gates.js; do
+    ops/test-seed-workflow-branch-guard.js; do
     if node "$t"; then
       echo "✅ $t"
       PASS=$((PASS+1))
