@@ -16,7 +16,7 @@ updates:
       prefix: "chore(deps)"
     labels:
       - "dependencies"
-      - "github-actions"
+      - "area:ci"
     open-pull-requests-limit: 10
 
   # SHA-pin maintenance for operational scripts (uses GitHub CLI, ratchet)
@@ -33,5 +33,5 @@ updates:
       prefix: "chore(deps)"
     labels:
       - "dependencies"
-      - "github-actions"
+      - "area:ci"
     open-pull-requests-limit: 5

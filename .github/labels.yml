@@ -34,4 +34,8 @@
 - { name: "area:org-profile", color: "7057ff", description: "profile/ org landing page" }
 - { name: "area:ci-self", color: "1d76db", description: ".github/workflows/ self-CI" }
 - { name: "security:possible-leak", color: "b60205", description: "May contain a credential — rotate" }
+- { name: "dependencies", color: "0366d6", description: "Dependency version bump (Dependabot)" }
+- { name: "pinned", color: "fef2c0", description: "Keep open; exempt from stale" }
+- { name: "stale", color: "ededed", description: "No activity; set and cleared by stale.yml" }
+- { name: "advisory", color: "ededed", description: "Automated governance report (advisory, non-blocking)" }
 - { name: "good first issue", color: "7057ff", description: "Scoped, documented, low context" }

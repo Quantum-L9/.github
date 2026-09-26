@@ -1,7 +1,7 @@
 name: Seed / auto-seed CI failure
 description: A red governance seed or auto-seed PR — ticket, not a chat
 title: "[Seed CI]: "
-labels: ["ci-failure", "triage"]
+labels: ["type:bug", "area:ci", "needs:triage"]
 assignees: []
 body:
   - type: markdown
