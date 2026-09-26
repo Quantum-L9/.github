@@ -40,18 +40,27 @@ const MUTATIONS = new Set([
   'pulls.create',
 ]);
 
-function makeGithub({ name = 'newborn', files = {}, settings = {} } = {}) {
+/**
+ * @param {object} o
+ * @param {Record<string, number|null>} [o.probeErrors]  paths whose reads fail
+ *   with that HTTP status (null = network error with no status)
+ * @param {string|null} [o.seedBranchSha]  existing seed branch tip (null = absent)
+ * @param {number[]} [o.openPRs]  open PRs on the seed branch
+ * @param {string[]} [o.failOn]  call names that throw a 500
+ */
+function makeGithub({ name = 'newborn', files = {}, settings = {}, probeErrors = {}, seedBranchSha = null, openPRs = [], failOn = [] } = {}) {
   const calls = [];
   const record = (callName, data = {}) => async (args) => {
     calls.push({ name: callName, args });
+    if (failOn.includes(callName)) throw Object.assign(new Error(`${callName}: HTTP 500`), { status: 500 });
     return { data };
   };
   const repoData = { name, owner: { login: 'Quantum-L9' }, default_branch: 'main', has_wiki: true, ...settings };
   const shared = makeBranchStubs({
     branch: 'chore/auto-seed-governance',
-    state: { sha: null },
+    state: { sha: seedBranchSha },
     calls,
-    openPRs: [],
+    openPRs,
     record: (n) => record(n, { number: 5 }),
   });
   const github = {
@@ -59,6 +68,10 @@ function makeGithub({ name = 'newborn', files = {}, settings = {} } = {}) {
       repos: {
         getContent: async ({ path: p }) => {
           calls.push({ name: 'repos.getContent', args: { path: p } });
+          if (Object.hasOwn(probeErrors, p)) {
+            const status = probeErrors[p];
+            throw Object.assign(new Error(status ? `HTTP ${status}` : 'socket hang up'), status ? { status } : {});
+          }
           if (Object.hasOwn(files, p)) return { data: { content: Buffer.from(files[p]).toString('base64') } };
           throw notFound('Not Found');
         },
@@ -161,6 +174,70 @@ async function planDigest(opts = {}, env = {}) {
   const leakedRows = Object.fromEntries(leaked.tables[0].slice(1).map((r) => [r[0], r[1]]));
   assert.strictEqual(leakedRows.forbid, 'FAIL');
   console.log('ok: a FORBID path present on the remote fails the transaction (GV-007)');
+
+  const rowsOf = (r) => Object.fromEntries(r.tables[0].slice(1).map((row) => [row[0], row[1]]));
+  const REMOTE_WRITES = ['issues.createLabel', 'issues.updateLabel', 'repos.update'];
+
+  // ── materialization that cannot happen halts the whole transaction ───────
+  // The seed branch carries an open PR: branch safety answers `skip`. That is
+  // proven by a read-only preflight and refused before ANY write — never a
+  // materialize PASS followed by labels and settings (ADR-0004).
+  const unsafe = await door({ EXPECTED_PLAN_DIGEST: digest })({ files: BORN, seedBranchSha: 'foreign-tip', openPRs: [3] });
+  assert.strictEqual(unsafe.mutated, false, 'an unwritable seed branch mutates nothing');
+  assert.ok(unsafe.failures.some((f) => /refused before any mutation — seed branch not writable/.test(f)), `${unsafe.failures}`);
+  const unsafeRows = rowsOf(unsafe);
+  assert.strictEqual(unsafeRows.materialize, 'FAIL');
+  for (const step of ['labels', 'repo_settings', 'attestation']) assert.strictEqual(unsafeRows[step], 'NOT RUN', step);
+  // A materialization that fails mid-write halts before remote apply.
+  const broken = await door({ EXPECTED_PLAN_DIGEST: digest })({ files: BORN, failOn: ['git.createCommit'] });
+  assert.ok(broken.failures.some((f) => /materialization did not complete/.test(f)), `${broken.failures}`);
+  assert.ok(!broken.names.some((n) => REMOTE_WRITES.includes(n)), 'no labels or settings after a failed materialize');
+  assert.strictEqual(rowsOf(broken).labels, 'NOT RUN');
+  console.log('ok: an unwritable seed branch is refused before any write; a failed materialize halts before remote apply');
+
+  // ── a failed observation is never "absent" (AC-ADV-009) ──────────────────
+  // `.github/CODEOWNERS` is a seed path: the preflight reads it before any write.
+  for (const [probePath, status] of [[MARKER, 500], [MARKER, 403], [MARKER, null], ['CODEOWNERS', 429], ['.github/CODEOWNERS', 502]]) {
+    const what = `${status || 'network'} on ${probePath}`;
+    const r = await door({ EXPECTED_PLAN_DIGEST: digest })({ files: BORN, probeErrors: { [probePath]: status } });
+    assert.strictEqual(r.mutated, false, `${what} must not mutate`);
+    assert.ok(r.failures.some((f) => /refused before any mutation/.test(f)), `${what}: ${JSON.stringify(r.failures)}`);
+  }
+  // After the writes, a failed attestation read is a FAIL, not a pass.
+  const late = await door({ EXPECTED_PLAN_DIGEST: digest })({ files: BORN, probeErrors: { 'README.md': 502 } });
+  assert.strictEqual(rowsOf(late)['present:README.md'], 'FAIL');
+  assert.ok(late.failures.some((f) => /attestation check/.test(f)));
+  console.log('ok: a 403/5xx/429/network failure on a fact or a preflight read refuses before any write; a failed attestation read fails');
+
+  // ── attestation derives from the plan: markerless classes attest green ───
+  // An org override and an operator request legitimately carry no marker;
+  // the plan does not require one, so its absence is not a failure.
+  const tplFiles = { 'README.md': 'x', LICENSE: 'x' };
+  for (const [label, env, opts] of [
+    ['org override (l9-repo-template)', { TARGET_REPO: 'l9-repo-template' }, { name: 'l9-repo-template' }],
+    ['operator request', { REPO_CLASS: 'self_governed' }, {}],
+  ]) {
+    const d = (await planDigest({ files: tplFiles, ...opts }, env)).outputs.plan_digest;
+    const r = await door({ ...env, EXPECTED_PLAN_DIGEST: d })({ files: tplFiles, ...opts });
+    assert.deepStrictEqual(r.failures, [], `${label}: ${r.failures}`);
+    const rows = rowsOf(r);
+    assert.ok(!(`present:${MARKER}` in rows), `${label}: marker not required`);
+    assert.strictEqual(rows['marker:class'], 'SKIP', `${label}: no marker is legitimate`);
+  }
+  // A forced class the marker contradicts is refused before any write.
+  const contra = await door({ REPO_CLASS: 'self_governed', EXPECTED_PLAN_DIGEST: digest })({ files: BORN });
+  assert.strictEqual(contra.mutated, false);
+  assert.ok(contra.failures.some((f) => /refused before any mutation.*declares default/.test(f)), `${contra.failures}`);
+  console.log('ok: attestation follows the plan — markerless classes attest green; a contradicted forced class is refused before any write');
+
+  // ── the authority must be on main before any of its code runs (ADR-0003) ─
+  const wf = fs.readFileSync(path.join(root, '.github/workflows/repo-birth-bootstrap.yml'), 'utf8');
+  const ancestry = wf.indexOf('git merge-base --is-ancestor "$AUTHORITY_SHA" refs/remotes/origin/main');
+  const firstRequire = wf.indexOf("require('./ops/");
+  assert.ok(ancestry > 0 && ancestry < firstRequire, 'the on-main check runs before any repository code is required');
+  assert.match(wf, /fetch-depth: 0/, 'full history for the ancestry check');
+  assert.ok(!/setup-python|pyyaml/i.test(wf), 'no Python toolchain: nothing in the job reads it');
+  console.log('ok: the authority revision must be on main before any of its code runs');
 })().catch((err) => {
   console.error(err);
   process.exit(1);

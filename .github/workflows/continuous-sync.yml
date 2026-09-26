@@ -55,6 +55,8 @@ jobs:
               gatherTargetFacts,
               compileVerifiedPlan,
               managedRequirements,
+              probeContent,
+              remoteReader,
             } = require('./ops/plan-adapter.js');
             const DRY = process.env.DRY_RUN === 'true';
             const FILTER = process.env.FILTER;
@@ -69,17 +71,12 @@ jobs:
               if (!templateCache.has(source)) templateCache.set(source, fs.readFileSync(source, 'utf8'));
               return templateCache.get(source);
             };
-            const exists = async (owner, repo, path) =>
-              github.rest.repos.getContent({ owner, repo, path }).then(() => true).catch(() => false);
-            const readText = async (owner, repo, path) => {
-              try {
-                const res = await github.rest.repos.getContent({ owner, repo, path });
-                if (res.data && res.data.content) {
-                  return Buffer.from(res.data.content, 'base64').toString('utf8');
-                }
-              } catch { /* missing */ }
-              return null;
-            };
+            // Fail closed (ops/plan-adapter.js remoteReader): only a 404 is
+            // "absent". An unreadable opt-out, marker, or managed file fails
+            // that repository — it is never "not opted out", "default class",
+            // or "missing, restore it".
+            const exists = (owner, repo, path) => remoteReader(github, owner, repo).exists(path);
+            const readText = (owner, repo, path) => remoteReader(github, owner, repo).readText(path);
 
             const all = await github.paginate(github.rest.repos.listForOrg, {
               org: ORG, type: 'all', per_page: 100
@@ -90,144 +87,163 @@ jobs:
             );
 
             const rows = [];
+            // Repositories this run could not evaluate or repair. Any entry
+            // fails the run: green must mean every repository was checked.
+            const failed = [];
+            const unresolved = [];
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
-
-              // Check for opt-out marker
-              const optOut = await github.rest.repos.getContent({
-                owner: o, repo: n, path: '.l9/no-sync'
-              }).then(() => true).catch(() => false);
-
-              if (optOut) {
-                rows.push([n, 'opted out (.l9/no-sync)']);
-                continue;
-              }
-
-              // The repository's plan decides what is managed. An unresolvable
-              // class is skipped and reported — never repaired as default.
-              let plan;
               try {
-                const facts = await gatherTargetFacts({
-                  exists: (p) => exists(o, n, p),
-                  readText: (p) => readText(o, n, p),
-                }, authority.classes.marker_path);
-                plan = compileVerifiedPlan({
-                  fs, authority, authoritySha: AUTHORITY_SHA, repository: `${o}/${n}`, facts,
-                });
-              } catch (e) {
-                if (e instanceof GovernanceCompileError && e.code === 'class_resolution') {
-                  rows.push([n, `skipped: unresolvable repo class: ${e.message}`]);
-                } else {
-                  rows.push([n, `plan failed: ${(e.message || '').slice(0, 80)}`]);
-                }
-                continue;
-              }
-              const managed = managedRequirements(plan);
-              if (!managed.length) {
-                rows.push([n, `nothing managed for class ${plan.repo_class.name}`]);
-                continue;
-              }
+                // Check for opt-out marker
+                const optOut = await exists(o, n, '.l9/no-sync');
 
-              // Check each managed file for drift
-              const drifted = [];
-              for (const { path, source } of managed) {
-                const expected = template(source);
-                try {
-                  const resp = await github.rest.repos.getContent({ owner: o, repo: n, path });
-                  const actual = Buffer.from(resp.data.content, 'base64').toString('utf8');
-                  if (actual.trim() !== expected.trim()) {
-                    drifted.push({ path, sha: resp.data.sha, expected });
-                  }
-                } catch (e) {
-                  if (e.status === 404) {
-                    drifted.push({ path, sha: null, expected });
-                  }
-                }
-              }
-
-              if (drifted.length === 0) {
-                rows.push([n, 'in sync']);
-                continue;
-              }
-
-              if (DRY) {
-                rows.push([n, `drift: ${drifted.map(d => d.path).join(', ')}`]);
-                continue;
-              }
-
-              // Open remediation PR
-              try {
-                const base = repo.default_branch;
-
-                // An open PR on the sync branch is work in flight: it may carry
-                // review fixes, maintainer commits, or agent remediation. The
-                // reset below rebuilds the branch as "default branch tip", so
-                // anything else on it is discarded by construction, not by
-                // conflict. This check therefore MUST precede the ref write --
-                // it used to sit after it, so the branch was already clobbered
-                // by the time the workflow noticed the PR and reported
-                // "PR already open" (issue #60).
-                const openPR = await github.rest.pulls.list({
-                  owner: o, repo: n, head: `${ORG}:${BRANCH}`, state: 'open'
-                });
-                if (openPR.data.length) {
-                  rows.push([n, `PR #${openPR.data[0].number} already open — branch left alone`]);
+                if (optOut) {
+                  rows.push([n, 'opted out (.l9/no-sync)']);
                   continue;
                 }
 
-                const ref = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
-
-                // Create or reset branch. Safe only because no PR is open on it:
-                // see the guard above.
+                // The repository's plan decides what is managed. An unresolvable
+                // class is skipped and reported — never repaired as default.
+                let plan;
                 try {
-                  await github.rest.git.createRef({
-                    owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: ref.data.object.sha
+                  const facts = await gatherTargetFacts({
+                    exists: (p) => exists(o, n, p),
+                    readText: (p) => readText(o, n, p),
+                  }, authority.classes.marker_path);
+                  plan = compileVerifiedPlan({
+                    fs, authority, authoritySha: AUTHORITY_SHA, repository: `${o}/${n}`, facts,
                   });
                 } catch (e) {
-                  if (e.status === 422) {
-                    await github.rest.git.updateRef({
-                      owner: o, repo: n, ref: `heads/${BRANCH}`, sha: ref.data.object.sha, force: true
+                  if (e instanceof GovernanceCompileError && e.code === 'class_resolution') {
+                    unresolved.push(n);
+                    rows.push([n, `skipped: unresolvable repo class: ${e.message}`]);
+                    continue;
+                  }
+                  // Missing authority SHA, a template defect, a failed read:
+                  // this run's failure, never a quiet row.
+                  throw e;
+                }
+                const managed = managedRequirements(plan);
+                if (!managed.length) {
+                  rows.push([n, `nothing managed for class ${plan.repo_class.name}`]);
+                  continue;
+                }
+
+                // Check each managed file for drift
+                const drifted = [];
+                for (const { path, source } of managed) {
+                  const expected = template(source);
+                  const observed = await probeContent(github, { owner: o, repo: n, path });
+                  if (observed.state === 'ERROR') {
+                    // Unknown is not drift and not in-sync: fail the repository.
+                    const err = observed.error || {};
+                    throw new Error(`cannot read ${path}${err.status ? ` (HTTP ${err.status})` : ''}: ${err.message || err}`);
+                  }
+                  if (observed.state === 'ABSENT') {
+                    drifted.push({ path, sha: null, expected });
+                    continue;
+                  }
+                  if (!observed.data || Array.isArray(observed.data) || typeof observed.data.content !== 'string') {
+                    throw new Error(`cannot compare ${path}: present but not a readable file`);
+                  }
+                  const actual = Buffer.from(observed.data.content, 'base64').toString('utf8');
+                  if (actual.trim() !== expected.trim()) {
+                    drifted.push({ path, sha: observed.data.sha, expected });
+                  }
+                }
+
+                if (drifted.length === 0) {
+                  rows.push([n, 'in sync']);
+                  continue;
+                }
+
+                if (DRY) {
+                  rows.push([n, `drift: ${drifted.map(d => d.path).join(', ')}`]);
+                  continue;
+                }
+
+                // Open remediation PR
+                try {
+                  const base = repo.default_branch;
+
+                  // An open PR on the sync branch is work in flight: it may carry
+                  // review fixes, maintainer commits, or agent remediation. The
+                  // reset below rebuilds the branch as "default branch tip", so
+                  // anything else on it is discarded by construction, not by
+                  // conflict. This check therefore MUST precede the ref write --
+                  // it used to sit after it, so the branch was already clobbered
+                  // by the time the workflow noticed the PR and reported
+                  // "PR already open" (issue #60).
+                  const openPR = await github.rest.pulls.list({
+                    owner: o, repo: n, head: `${ORG}:${BRANCH}`, state: 'open'
+                  });
+                  if (openPR.data.length) {
+                    rows.push([n, `PR #${openPR.data[0].number} already open — branch left alone`]);
+                    continue;
+                  }
+
+                  const ref = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
+
+                  // Create or reset branch. Safe only because no PR is open on it:
+                  // see the guard above.
+                  try {
+                    await github.rest.git.createRef({
+                      owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: ref.data.object.sha
                     });
-                  } else throw e;
+                  } catch (e) {
+                    if (e.status === 422) {
+                      await github.rest.git.updateRef({
+                        owner: o, repo: n, ref: `heads/${BRANCH}`, sha: ref.data.object.sha, force: true
+                      });
+                    } else throw e;
+                  }
+
+                  for (const d of drifted) {
+                    const existing = await probeContent(github, { owner: o, repo: n, path: d.path, ref: BRANCH });
+                    if (existing.state === 'ERROR') {
+                      throw new Error(`cannot read ${d.path} on ${BRANCH}: ${(existing.error || {}).message || existing.error}`);
+                    }
+
+                    await github.rest.repos.createOrUpdateFileContents({
+                      owner: o, repo: n, path: d.path, branch: BRANCH,
+                      message: `chore(governance): restore ${d.path} to org standard`,
+                      content: Buffer.from(d.expected).toString('base64'),
+                      sha: existing.state === 'PRESENT' ? existing.data.sha : undefined,
+                    });
+                  }
+
+                  // No open-PR branch here: the guard above returned early for
+                  // those, so this always opens a fresh PR.
+                  {
+                    const pr = await github.rest.pulls.create({
+                      owner: o, repo: n, head: BRANCH, base,
+                      title: 'chore(governance): restore drifted governance files',
+                      body: [
+                        'Governance files have drifted from the org standard.',
+                        '',
+                        `**Repo class:** \`${plan.repo_class.name}\` (${plan.repo_class.resolved_from}) · governance plan: authority \`${plan.authority.sha}\`, digest \`${plan.digest.value}\`.`,
+                        '',
+                        '**Restored:**',
+                        ...drifted.map(d => `- \`${d.path}\``),
+                        '',
+                        'This is advisory — merge at your convenience.',
+                        'To opt out of automatic sync, create `.l9/no-sync` in your repo.',
+                        '',
+                        '_Opened by Quantum-L9/.github continuous-sync._',
+                      ].join('\n'),
+                    });
+                    rows.push([n, `PR #${pr.data.number} (${drifted.length} files)`]);
+                  }
+                } catch (e) {
+                  failed.push(n);
+                  rows.push([n, `failed: ${(e.message || '').slice(0, 60)}`]);
                 }
 
-                for (const d of drifted) {
-                  const existing = await github.rest.repos.getContent({
-                    owner: o, repo: n, path: d.path, ref: BRANCH
-                  }).catch(() => null);
-
-                  await github.rest.repos.createOrUpdateFileContents({
-                    owner: o, repo: n, path: d.path, branch: BRANCH,
-                    message: `chore(governance): restore ${d.path} to org standard`,
-                    content: Buffer.from(d.expected).toString('base64'),
-                    sha: existing?.data?.sha,
-                  });
-                }
-
-                // No open-PR branch here: the guard above returned early for
-                // those, so this always opens a fresh PR.
-                {
-                  const pr = await github.rest.pulls.create({
-                    owner: o, repo: n, head: BRANCH, base,
-                    title: 'chore(governance): restore drifted governance files',
-                    body: [
-                      'Governance files have drifted from the org standard.',
-                      '',
-                      `**Repo class:** \`${plan.repo_class.name}\` (${plan.repo_class.resolved_from}) · governance plan: authority \`${plan.authority.sha}\`, digest \`${plan.digest.value}\`.`,
-                      '',
-                      '**Restored:**',
-                      ...drifted.map(d => `- \`${d.path}\``),
-                      '',
-                      'This is advisory — merge at your convenience.',
-                      'To opt out of automatic sync, create `.l9/no-sync` in your repo.',
-                      '',
-                      '_Opened by Quantum-L9/.github continuous-sync._',
-                    ].join('\n'),
-                  });
-                  rows.push([n, `PR #${pr.data.number} (${drifted.length} files)`]);
-                }
               } catch (e) {
-                rows.push([n, `failed: ${(e.message || '').slice(0, 60)}`]);
+                failed.push(n);
+                const msg = `${e.message || e}`.replace(/\s+/g, ' ').slice(0, 160);
+                core.error(`${n}: not evaluated: ${msg}`);
+                rows.push([n, `FAILED — not evaluated: ${msg}`]);
               }
             }
 
@@ -240,3 +256,13 @@ jobs:
                 ...rows.map(r => r.map(String))
               ])
               .write();
+
+            if (unresolved.length) {
+              core.warning(
+                `${unresolved.length} repo(s) declare an unresolvable class and were not synced: ` +
+                  `${unresolved.join(', ')} — fix the marker`,
+              );
+            }
+            if (failed.length) {
+              core.setFailed(`${failed.length} repo(s) could not be evaluated or repaired: ${failed.join(', ')} — see job summary`);
+            }

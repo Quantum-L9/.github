@@ -21,6 +21,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { selectSeedWrites } = require('./build-seed-payload.js');
+const { AUTHORITY_INPUTS, assertCleanAuthority } = require('./compile-repo-governance.js');
 const {
   loadAuthority,
   GovernanceCompileError,
@@ -33,13 +34,36 @@ const {
 // Absolute paths only (Sonar S4036).
 const GIT_CANDIDATES = ['/usr/bin/git', '/usr/local/bin/git', '/opt/homebrew/bin/git'];
 
+// This adapter is part of what produces the local plan, so it is held to the
+// same provenance as the compiler (ADR-0003).
+const SYNC_AUTHORITY_INPUTS = Object.freeze([
+  ...AUTHORITY_INPUTS,
+  'ops/plan-adapter.js',
+  'ops/sync-org-files.js',
+  'ops/sync-org-files.sh',
+]);
+
+/**
+ * The authority revision this sync names, proven: HEAD of this checkout, with
+ * every authority input — policy, templates, schema, compiler and adapter code,
+ * including untracked and git-ignored files — identical to it. Uncommitted org
+ * content is refused, never synced under the committed SHA.
+ * @param {string} orgRoot
+ * @returns {string}
+ */
 function authorityRevision(orgRoot) {
   const git = GIT_CANDIDATES.find((p) => fs.existsSync(p));
   if (!git) throw new GovernanceCompileError('authority_identity', 'git not found; cannot name the authority revision');
   const run = (args) => execFileSync(git, ['-C', orgRoot, ...args], { encoding: 'utf8' });
   const sha = run(['rev-parse', 'HEAD']).trim();
-  const dirty = run(['status', '--porcelain', '--', 'policies', '.github/labels.yml', 'templates']).trim();
-  return { sha, dirty };
+  assertCleanAuthority({
+    headSha: sha,
+    authoritySha: sha,
+    gitStatus: run(['status', '--porcelain', '--ignored=matching', '--untracked-files=all', '--', ...SYNC_AUTHORITY_INPUTS]),
+    toplevel: fs.realpathSync(run(['rev-parse', '--show-toplevel']).trim()),
+    root: fs.realpathSync(orgRoot),
+  });
+  return sha;
 }
 
 function main(argv) {
@@ -55,13 +79,10 @@ function main(argv) {
   const consumer = path.resolve(consumerArg);
   process.chdir(orgRoot);
 
+  // Provenance first: nothing is read from the consumer or written to it
+  // unless the org content is exactly the revision the plan will name.
+  const sha = authorityRevision(orgRoot);
   const authority = loadAuthority(fs);
-  const { sha, dirty } = authorityRevision(orgRoot);
-  if (dirty) {
-    // A local sync writes a local checkout, not a remote; it proceeds, but it
-    // does not pretend these bytes are the revision it names.
-    process.stderr.write(`⚠️  policy/templates differ from ${sha.slice(0, 12)}; syncing uncommitted org content\n`);
-  }
 
   const inConsumer = (p) => path.join(consumer, p);
   const exists = (p) => fs.existsSync(inConsumer(p));
@@ -105,4 +126,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { main };
+module.exports = { main, SYNC_AUTHORITY_INPUTS };

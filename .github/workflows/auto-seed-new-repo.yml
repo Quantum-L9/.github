@@ -89,6 +89,7 @@ jobs:
               gatherTargetFacts,
               compileVerifiedPlan,
               planIdentity,
+              remoteReader,
             } = require('./ops/plan-adapter.js');
 
             const DRY = process.env.DRY_RUN === 'true';
@@ -99,24 +100,11 @@ jobs:
             const AUTHORITY_SHA = process.env.GITHUB_SHA;
             const authority = loadAuthority(fs);
 
-            const exists = async (owner, repo, path, ref) => {
-              try {
-                await github.rest.repos.getContent({ owner, repo, path, ...(ref ? { ref } : {}) });
-                return true;
-              } catch {
-                return false;
-              }
-            };
-
-            const readText = async (owner, repo, path) => {
-              try {
-                const res = await github.rest.repos.getContent({ owner, repo, path });
-                if (res.data && res.data.content) {
-                  return Buffer.from(res.data.content, 'base64').toString('utf8');
-                }
-              } catch { /* missing */ }
-              return null;
-            };
+            // Every read of a target fails closed (ops/plan-adapter.js
+            // remoteReader): only a 404 is "absent". A 403, 5xx or rate limit
+            // throws, which fails that repository before anything is written.
+            const exists = (owner, repo, path, ref) => remoteReader(github, owner, repo).exists(path, ref);
+            const readText = (owner, repo, path) => remoteReader(github, owner, repo).readText(path);
 
             let targets;
             if (TARGET) {
@@ -157,7 +145,10 @@ jobs:
                   });
                 } catch (e) {
                   if (!(e instanceof GovernanceCompileError) || e.code !== 'class_resolution') throw e;
-                  if (FORCED_CLASS) {
+                  // A forced class that does not exist is an operator typo and
+                  // stops the run. A forced class a repository's own marker
+                  // contradicts is that repository's refusal, reported below.
+                  if (FORCED_CLASS && /operator requested unknown repo class/.test(e.message)) {
                     core.setFailed(e.message);
                     return;
                   }

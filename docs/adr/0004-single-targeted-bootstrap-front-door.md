@@ -38,17 +38,32 @@ a partial run left a half-governed repository with no single result saying so.
 verifies the plan once and reports one result for the whole transaction.
 
 `repo-birth-bootstrap.yml` (`make birth`) receives the target, an exact
-`authority_sha`, and an `expected_plan_digest`. It checks out that authority,
-compiles the plan from the target's remote facts, refuses before any mutation
-unless the recomputed digest matches, then materializes plan files as a seed PR,
-applies labels and settings, reads the remote back, and attests. With
-`dry_run` and no digest it only compiles and reports the digest — the first
-half of the two-step call.
+`authority_sha`, and an `expected_plan_digest`. It checks out that authority
+and refuses unless the commit is on `main`, before any of its code runs. It
+compiles the plan from the target's remote facts — only a 404 counts as
+absent; any other failed read refuses — and refuses before any mutation unless
+the recomputed digest matches and a read-only seed preflight proves the plan
+can be materialized (seed-branch safety answers `skip` → refused). It then
+materializes plan files as a seed PR, applies labels and settings, reads the
+remote back, and attests. A materialization that is refused or fails halts the
+transaction: labels, settings, and attestation are reported NOT RUN and the
+result is a failure. With `dry_run` and no digest it only compiles and reports
+the digest — the first half of the two-step call.
+
+"Completes or refuses as a whole" is precise about where the line is: every
+precondition — authority on main, identity, digest, facts, class, and
+materialization safety — is proven before the first write. A remote failure
+after the first write cannot be rolled back through the GitHub API; it is a
+terminal FAIL for the whole transaction, and re-running the same authority SHA
+and digest is idempotent (missing-only seed, desired-state apply).
 
 Materialization reuses the auto-seed executor (`ops/seed-plan-pr.js`) and its
 seed branch, so `ops/seed-branch-safety.js` arbitrates between a birth and the
-hourly sweep. `auto-seed-new-repo.yml` remains the org-wide repair sweep; it is
-no longer a targeted entry point.
+hourly sweep. `auto-seed-new-repo.yml` remains the org-wide repair sweep. Its
+`target_repo` / `repo_created` inputs only narrow that sweep to one repository
+at the checked-out revision: materialization alone, with no authority pin,
+digest, remote apply, or attestation. It is not a birth transaction and does
+not orchestrate one.
 
 **Implementation:** `.github/workflows/repo-birth-bootstrap.yml`,
 `ops/seed-plan-pr.js`, `Makefile` target `birth`; proofs in
@@ -56,8 +71,12 @@ no longer a targeted entry point.
 
 ### Consequences
 
-- Good, because a birth either completes or refuses as a whole, with one summary
-  naming the authority SHA and plan digest.
+- Good, because a birth either completes or refuses as a whole — every
+  precondition proven before the first write, a later failure terminal and
+  idempotent on retry — with one summary naming the authority SHA and plan
+  digest.
+- Good, because only a revision already on `main` can govern: an unmerged
+  commit's code never runs with the org token.
 - Good, because internal capability executors can change without caller churn.
 - Bad, because callers must run twice (plan, then apply with the digest) and
   carry the SHA and digest between runs.

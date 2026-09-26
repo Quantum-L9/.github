@@ -26,7 +26,7 @@ campaign PR. After G5 no law is pending.
 | GOV-002 | No workflow or script outside the compiler may independently resolve repo-class capability semantics after cutover. | Search gate | ops/test-one-governance-brain.js; AC-ARCH-002 | Enforced (G5) |
 | GOV-003 | `policies/repo-classes.yml` remains the repo-class capability SSOT. | Compiler tests | AC-CON-001 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
 | GOV-004 | The canonical compiler is `ops/compile-repo-governance.js`. | File contract | AC-CON-002 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
-| GOV-005 | Explicit malformed or unknown class declarations fail closed and never widen to `default`. | Compiler and class tests | AC-ADV-001 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
+| GOV-005 | Explicit malformed, unknown, prototype-named, or operator-contradicted class declarations fail closed and never widen to `default`. | Compiler and class tests | AC-ADV-001 — `ops/test-compile-repo-governance.js`, `ops/test-repo-class-profile.js` | Enforced (G1b) |
 | GOV-006 | Class precedence remains marker > org override > default. | Existing + compiler tests | AC-REG-001 — `ops/test-repo-class-profile.js`, `ops/test-compile-repo-governance.js` | Enforced (G1b) |
 | GOV-007 | Default-class output remains backward compatible at this campaign boundary. | Golden parity | AC-REG-002 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
 | GOV-008 | `INHERIT` paths are not materialized by plan execution. | Compiler + integration tests | AC-BEH-001 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
@@ -40,7 +40,7 @@ campaign PR. After G5 no law is pending.
 | GOV-016 | Drift repair cannot restore a file the effective class waives or forbids. | Continuous sync | ops/test-reconciliation-adapters.js; AC-ADV-004 | Enforced (G4) |
 | GOV-017 | Same authority SHA + same target identity and facts + same policy bytes yields a byte-identical canonical plan and digest. | Determinism test | AC-CON-003 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
 | GOV-018 | The plan digest excludes volatile run metadata. | Canonicalization test | AC-CON-004 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
-| GOV-019 | Every production plan names an exact 40-character authority SHA. | Schema + bootstrap | AC-CON-005 — `ops/test-compile-repo-governance.js` | Enforced (G1b) |
+| GOV-019 | Every production plan names an exact 40-character authority SHA whose bytes — policy, templates, schema, and compiler code, including ignored files — produced it. | Schema + CLI provenance | AC-CON-005 — `ops/test-compile-repo-governance.js` (clean-clone CLI test) | Enforced (G1b) |
 | GOV-020 | Targeted bootstrap refuses mutation on authority-SHA or plan-digest mismatch. | Workflow integration | ops/test-birth-front-door.js; AC-ADV-005 | Enforced (G5) |
 | GOV-021 | One public targeted bootstrap entry point owns materialize + remote-apply + attestation orchestration after G5. | Workflow / Makefile contract | ops/test-one-governance-brain.js, ops/test-birth-front-door.js; AC-ARCH-003 | Enforced (G5) |
 | GOV-022 | Existing seed branch safety remains authoritative for branch mutation. | Regression test | ops/test-seed-workflow-branch-guard.js; AC-REG-003 | Enforced (G2) |

@@ -59,6 +59,7 @@ jobs:
               gatherTargetFacts,
               compileVerifiedPlan,
               applyPlanLabels,
+              remoteReader,
             } = require('./ops/plan-adapter.js');
             const DRY = process.env.DRY_RUN === 'true';
             const FILTER = process.env.FILTER;
@@ -66,23 +67,10 @@ jobs:
             const AUTHORITY_SHA = process.env.GITHUB_SHA;
             const authority = loadAuthority(fs);
 
-            const exists = async (owner, repo, path) => {
-              try {
-                await github.rest.repos.getContent({ owner, repo, path });
-                return true;
-              } catch {
-                return false;
-              }
-            };
-            const readText = async (owner, repo, path) => {
-              try {
-                const res = await github.rest.repos.getContent({ owner, repo, path });
-                if (res.data && res.data.content) {
-                  return Buffer.from(res.data.content, 'base64').toString('utf8');
-                }
-              } catch { /* missing */ }
-              return null;
-            };
+            // Fail closed (ops/plan-adapter.js remoteReader): only a 404 is
+            // "absent"; any other read failure fails that repository below.
+            const exists = (owner, repo, path) => remoteReader(github, owner, repo).exists(path);
+            const readText = (owner, repo, path) => remoteReader(github, owner, repo).readText(path);
 
             // Get all active repos
             const all = await github.paginate(github.rest.repos.listForOrg, {

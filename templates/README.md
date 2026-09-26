@@ -25,7 +25,7 @@ live in each repo's tree to take effect.
 | `dependabot.yml` | `.github/dependabot.yml` | Not inheritable; must be physical |
 | `governance-caller.yml` | `.github/workflows/governance.yml` | Calls org reusable workflows |
 | `on-org-update.yml` | `.github/workflows/on-org-update.yml` | **Opt-in** — not in default `all` |
-| `labels.yml` | `.github/labels.yml` | **Opt-in** — org `sync-labels-all.yml` fans labels |
+| `labels.yml` | `.github/labels.yml` | Materialized only where the repo's class plan authorizes it (`non_constellation_python`); elsewhere labels are remote-applied by `sync-labels-all.yml` and a category filter cannot add the file |
 | `community-health/` | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md` | No LICENSE / FUNDING / SUPPORT in default seed |
 | `issue-templates/` | `.github/ISSUE_TEMPLATE/` | Numbered chooser + ci/seed-ci/gov + config; no `bug_report` / `feature_request` |
 | `pr-templates/` | `pull_request_template.md` + `PULL_REQUEST_TEMPLATE/agent.md` | Human + agent/chore variants |

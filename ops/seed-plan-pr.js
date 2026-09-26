@@ -21,7 +21,7 @@ const {
   selectSeedWrites,
 } = require('./build-seed-payload.js');
 const { assessSeedBranch, moveSeedBranch } = require('./seed-branch-safety.js');
-const { payloadOf } = require('./plan-adapter.js');
+const { payloadOf, remoteReader } = require('./plan-adapter.js');
 
 const AUTO_SEED_BRANCH = 'chore/auto-seed-governance';
 
@@ -41,21 +41,10 @@ async function seedPlanPR({ github, owner, repo, base, plan, files = plan.materi
   const n = repo;
   const BRANCH = AUTO_SEED_BRANCH;
 
-  const exists = async (path, ref) => {
-    try {
-      await github.rest.repos.getContent({ owner: o, repo: n, path, ...(ref ? { ref } : {}) });
-      return true;
-    } catch {
-      return false;
-    }
-  };
-  const readText = async (path) => {
-    try {
-      const res = await github.rest.repos.getContent({ owner: o, repo: n, path });
-      if (res.data && res.data.content) return Buffer.from(res.data.content, 'base64').toString('utf8');
-    } catch { /* missing */ }
-    return null;
-  };
+  // Fail closed: only a 404 is "absent". An unreadable existing file must not
+  // look missing (it would be re-seeded over), so any other failure throws
+  // before the seed branch is touched.
+  const { exists, readText } = remoteReader(github, o, n);
 
   const payload = payloadOf(files);
   const paths = Object.keys(payload);

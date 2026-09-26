@@ -5,16 +5,24 @@
 # this workflow for one repository. It is one governance transaction bound to
 # one immutable authority (docs/adr/0003-immutable-authority-binding.md):
 #
-#   1. check out Quantum-L9/.github at the exact `authority_sha`;
-#   2. gather the target's facts and compile its governance plan;
+#   1. check out Quantum-L9/.github at the exact `authority_sha`, and refuse
+#      unless that commit is on main — before any of its code runs;
+#   2. gather the target's facts (fail closed: only a 404 is "absent") and
+#      compile its governance plan;
 #   3. refuse before ANY mutation unless the recomputed plan digest equals
 #      `expected_plan_digest` (a stale plan, a moved target, or a tampered
-#      caller all fail here);
+#      caller all fail here), and unless materialization is proven safe
+#      (a read-only seed preflight: the seed branch may be written);
 #   4. materialize plan files (seed PR, via ops/seed-plan-pr.js — the same
-#      machinery and seed branch as auto-seed-new-repo.yml);
+#      machinery and seed branch as auto-seed-new-repo.yml). A materialization
+#      that is refused or fails ends the transaction here: nothing else runs;
 #   5. apply plan REMOTE APPLY state (labels, settings);
 #   6. read the remote back and attest it against plan.attestation;
 #   7. report one terminal result carrying the authority SHA and plan digest.
+#
+# Every precondition is proven before the first write. A failure after it is a
+# terminal FAIL for the whole transaction, and re-running the same authority
+# SHA and digest is idempotent (missing-only seed, desired-state apply).
 #
 # Obtaining the digest: run with `dry_run: true` and no digest. That compiles
 # the plan at `authority_sha`, reports its digest, and mutates nothing. Then run
@@ -73,6 +81,28 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: ${{ inputs.authority_sha || github.event.client_payload.authority_sha || github.sha }}
+          # Full history: the next step proves the authority is on main.
+          fetch-depth: 0
+
+      # Only a revision already on main may govern. Without this, any caller
+      # able to dispatch could name an unmerged commit and have its ops/*.js
+      # run with the org token (ADR-0003). This step's script is part of the
+      # workflow definition, not of the checked-out authority, and runs before
+      # any repository code does.
+      - name: Require the authority revision on main
+        env:
+          AUTHORITY_SHA: ${{ inputs.authority_sha || github.event.client_payload.authority_sha || '' }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$AUTHORITY_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::authority_sha must be an exact 40-hex Quantum-L9/.github commit, got '$AUTHORITY_SHA'"
+            exit 1
+          fi
+          git fetch --no-tags --quiet origin "+refs/heads/main:refs/remotes/origin/main"
+          if ! git merge-base --is-ancestor "$AUTHORITY_SHA" refs/remotes/origin/main; then
+            echo "::error::authority_sha $AUTHORITY_SHA is not on Quantum-L9/.github main — refusing before running any of its code"
+            exit 1
+          fi
 
       - name: Require org GH_TOKEN
         env:
@@ -83,16 +113,6 @@ jobs:
             echo "::error::org secret GH_TOKEN is empty — sync from AWS openclaw-igorbot/github#token"
             exit 1
           fi
-
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
-        with:
-          python-version: "3.12"
-
-      - name: Install PyYAML
-        # Literal block scalar: the ": " inside --only-binary=:all: is invalid
-        # YAML in the plain-flow form. Same fix as enforce-policies.yml.
-        run: |
-          pip install --only-binary=:all: "pyyaml==6.0.2"
 
       - id: bootstrap
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
@@ -118,6 +138,7 @@ jobs:
               applyPlanLabels,
               settingsDrift,
               markerClassOf,
+              remoteReader,
             } = require('./ops/plan-adapter.js');
             const { verifyPlan } = require('./ops/compile-repo-governance.js');
             const { seedPlanPR } = require('./ops/seed-plan-pr.js');
@@ -158,32 +179,17 @@ jobs:
               return;
             }
 
-            // getContent returns an array for a directory and an object with
-            // `content` for a file, so a directory probe needs its own call.
-            const pathExists = async (path) => {
-              try {
-                await github.rest.repos.getContent({ owner: ORG, repo: TARGET, path });
-                return true;
-              } catch {
-                return false;
-              }
-            };
-            const readText = async (path) => {
-              try {
-                const res = await github.rest.repos.getContent({ owner: ORG, repo: TARGET, path });
-                if (res.data && res.data.content) {
-                  return Buffer.from(res.data.content, 'base64').toString('utf8');
-                }
-              } catch { /* missing */ }
-              return null;
-            };
+            // Every read of the target fails closed (ops/plan-adapter.js
+            // remoteReader): only a 404 is "absent". A 403, 5xx or rate limit
+            // on any fact refuses the transaction below, before any write.
+            // getContent answers a directory with a listing, so `exists` also
+            // probes directories.
+            const { exists: pathExists, readText } = remoteReader(github, ORG, TARGET);
 
             const authority = loadAuthority(fs);
-            // Existence first: a failed fetch of a marker that exists is a
-            // malformed declaration the compiler refuses — never "absent".
-            const facts = await gatherTargetFacts({ exists: pathExists, readText }, authority.classes.marker_path);
             let plan;
             try {
+              const facts = await gatherTargetFacts({ exists: pathExists, readText }, authority.classes.marker_path);
               plan = compileVerifiedPlan({
                 fs, authority, authoritySha: AUTHORITY_SHA,
                 repository: `${ORG}/${TARGET}`, facts, requestedClass: FORCED_CLASS || null,
@@ -234,16 +240,57 @@ jobs:
             record('plan', true, `digest ${plan.digest.value} matches expected`);
 
             const repo = await github.rest.repos.get({ owner: ORG, repo: TARGET });
+            const base = repo.data.default_branch;
+
+            // A transaction that cannot materialize its plan does not go on to
+            // apply the rest of it: the remaining steps are reported NOT RUN
+            // and the run fails as a whole (ADR-0004).
+            const halt = async (detail) => {
+              record('materialize', false, `${detail}`.slice(0, 160));
+              for (const step of ['labels', 'repo_settings', 'attestation']) {
+                attest.push([step, 'NOT RUN', 'transaction halted at materialize']);
+              }
+              await summarize(DRY ? 'DRY RUN' : 'HALTED');
+              core.setFailed(`${ORG}/${TARGET}: materialization did not complete — ${detail}`);
+            };
+
+            // ── PRECONDITION: materialization is possible, proven read-only ─
+            // seedPlanPR in dry mode performs every read and the seed-branch
+            // safety decision and writes nothing. `skip` means the seed branch
+            // carries work this transaction may not overwrite, so the plan's
+            // files cannot be materialized: refused before any write, never a
+            // PASS followed by labels and settings on a half-governed repo.
+            let preflight;
+            try {
+              preflight = await seedPlanPR({ github, owner: ORG, repo: TARGET, base, plan, dry: true });
+            } catch (e) {
+              await halt(`refused before any mutation — materialization preflight failed: ${e.message}`);
+              return;
+            }
+            if (preflight.outcome === 'skip') {
+              await halt(`refused before any mutation — seed branch not writable: ${preflight.detail}`);
+              return;
+            }
 
             // ── MATERIALIZE: plan files, as a seed PR (shared with auto-seed) ─
-            try {
-              const seeded = await seedPlanPR({
-                github, owner: ORG, repo: TARGET, base: repo.data.default_branch, plan, dry: DRY,
-              });
-              record('materialize', true, `${seeded.outcome}: ${seeded.detail}`);
-            } catch (e) {
-              record('materialize', false, `${e.message}`.slice(0, 120));
+            // Success means the plan's files are on the target or in an open
+            // seed PR: `opened`, `already` (every file present), `nothing` (the
+            // plan materializes none), or `dry`. Anything else halts.
+            const MATERIALIZED = new Set(['opened', 'already', 'nothing', 'dry']);
+            let seeded = preflight;
+            if (!DRY) {
+              try {
+                seeded = await seedPlanPR({ github, owner: ORG, repo: TARGET, base, plan, dry: false });
+              } catch (e) {
+                await halt(`${e.message}`);
+                return;
+              }
             }
+            if (!MATERIALIZED.has(seeded.outcome)) {
+              await halt(`${seeded.outcome}: ${seeded.detail}`);
+              return;
+            }
+            record('materialize', true, `${seeded.outcome}: ${seeded.detail}`);
 
             // ── REMOTE APPLY: labels (plan.remote_apply.labels) ────────────
             if (plan.remote_apply.labels.enabled) {
@@ -280,21 +327,40 @@ jobs:
             }
 
             // ── ATTESTATION: the remote, not the local assembly ────────────
-            // Every check reads the remote back, against plan.attestation.
+            // Every check reads the remote back, against plan.attestation. An
+            // observation that fails is a FAIL, never a pass by omission.
+            const observe = async (name, probe) => {
+              try {
+                return await probe();
+              } catch (e) {
+                record(name, false, `${e.message}`.slice(0, 120));
+                return undefined;
+              }
+            };
             for (const path of plan.attestation.required_present) {
-              const present = (await readText(path)) != null;
-              record(`present:${path}`, present, present ? 'on remote HEAD' : 'missing on remote HEAD');
+              const present = await observe(`present:${path}`, () => pathExists(path));
+              if (present !== undefined) {
+                record(`present:${path}`, present, present ? 'on remote HEAD' : 'missing on remote HEAD');
+              }
             }
 
-            // A repository classed by an org override legitimately carries no
-            // marker; only a marker that CONTRADICTS the plan's class fails.
-            const markerClass = plan.attestation.verify_class_marker
-              ? markerClassOf(await readText(authority.classes.marker_path))
+            // The compiler requires the marker (required_present) only where it
+            // decided the class. Elsewhere — org override, default, operator
+            // request — no marker is legitimate; a marker that is present must
+            // still agree with the plan's class and be parseable.
+            const markerText = plan.attestation.verify_class_marker
+              ? await observe('marker:class', () => readText(authority.classes.marker_path))
               : null;
-            if (markerClass) {
-              record('marker:class', markerClass === plan.repo_class.name, `marker says ${markerClass}`);
-            } else {
+            // undefined: the read failed and observe() already recorded FAIL.
+            if (markerText === null) {
               attest.push(['marker:class', 'SKIP', `no marker; class from ${plan.repo_class.resolved_from}`]);
+            } else if (markerText !== undefined) {
+              const markerClass = markerClassOf(markerText);
+              record(
+                'marker:class',
+                markerClass === plan.repo_class.name,
+                markerClass ? `marker says ${markerClass}` : 'marker present but declares no parseable profile',
+              );
             }
 
             // FORBID is an attestation, not only a build-time filter (GOV-010).
@@ -302,9 +368,8 @@ jobs:
             for (const pattern of plan.attestation.required_absent) {
               // A `dir/**` pattern is probed at the directory itself.
               const probe = pattern.endsWith('/**') ? pattern.slice(0, -3) : pattern;
-              if ((await readText(probe)) != null || (await pathExists(probe))) {
-                leaked.push(pattern);
-              }
+              const present = await observe(`forbid:${pattern}`, () => pathExists(probe));
+              if (present) leaked.push(pattern);
             }
             record(
               'forbid',
