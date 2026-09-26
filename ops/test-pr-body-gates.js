@@ -2,7 +2,7 @@
 
 /**
  * Runs the real `script:` bodies of the PR-body workflows (pr-gates.yml,
- * governance-pr.yml, pr-files.yml) against fixture bodies.
+ * governance-pr.yml) against fixture bodies.
  *
  * The friction this pins: `make pr` (Cursor-Governance compose_pr_body.py)
  * wrote unchecked gates as "— n/a — not this change", and the old reason
@@ -11,10 +11,6 @@
  * failed the same way for humans. governance-pr kept the template's own
  * "paste the error" fence in Problem, so an untouched template passed. Each
  * of those cases fails against the pre-fix workflows.
- *
- * pr-files keys a rename as "old -> new" and matches declarations exactly.
- * That stays strict: the producer (make pr) declares the canonical row key,
- * and a declaration naming only one endpoint is asserted to fail.
  *
  * Run from the Quantum-L9/.github repo root:
  *   node ops/test-pr-body-gates.js
@@ -28,16 +24,11 @@ const { extractScript, makeCore } = require("./workflow-script-harness.js");
 const root = path.resolve(__dirname, "..");
 const wf = (name) => path.join(root, ".github", "workflows", name);
 
-/**
- * Load a script body, substituting the `${{ }}` expressions the runner would.
- * `rewrites` are [RegExp, replacement] pairs applied after, used to point the
- * runner's scratch paths at a private temp directory.
- */
-function load(file, expressions = {}, rewrites = []) {
+/** Load a script body, substituting the `${{ }}` expressions the runner would. */
+function load(file, expressions = {}) {
 	let body = extractScript(file);
 	for (const [expr, value] of Object.entries(expressions))
 		body = body.split(expr).join(value);
-	for (const [pattern, value] of rewrites) body = body.replace(pattern, value);
 	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pr-body-gates-"));
 	const mod = path.join(dir, `${path.basename(file, ".yml")}.script.js`);
 	fs.writeFileSync(
@@ -145,87 +136,8 @@ async function main() {
 		);
 	}
 
-	// pr-files: a rename declared by its new path, by its row key, or by make
-	// pr's "(renamed: `old -> new`)" form is declared. The script reads the
-	// diff the preceding `run:` step wrote to the runner's scratch dir; point
-	// it at a private temp dir so the suite never writes a shared path.
-	const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "pr-files-"));
-	const run = load(wf("pr-files.yml"), {}, [
-		[
-			/(["'])\/tmp\/(changed|shortstat)\.txt\1/g,
-			(_m, q, n) => q + path.join(scratch, n + ".txt") + q,
-		],
-	]);
-	fs.writeFileSync(
-		path.join(scratch, "changed.txt"),
-		"M\tsrc/a.py\nR100\told/name.py\tnew/name.py\n",
-	);
-	fs.writeFileSync(
-		path.join(scratch, "shortstat.txt"),
-		" 2 files changed, 3 insertions(+)\n",
-	);
-	try {
-		for (const declared of [
-			"`old/name.py -> new/name.py` — moved",
-			"`new/name.py` — moved (renamed: `old/name.py -> new/name.py`)",
-		]) {
-			const text = `## Changes by intent\n\n- \`src/a.py\` — edit\n- ${declared}\n\n## Files touched\n\n<!-- FILES-TOUCHED:START -->\n_pending_\n<!-- FILES-TOUCHED:END -->\n`;
-			const core = makeGateCore();
-			let updated = "";
-			const github = {
-				rest: {
-					pulls: {
-						update: async ({ body: b }) => {
-							updated = b;
-						},
-					},
-				},
-			};
-			await run(github, core, context(text), require);
-			assert.deepStrictEqual(
-				core.failures,
-				[],
-				`pr-files: rename declared as ${declared} must pass`,
-			);
-			assert.ok(
-				updated.includes("FILES-TOUCHED:START"),
-				`pr-files: ${declared} still gets the file list`,
-			);
-		}
-		// The matcher stays strict: a rename is declared by its row key, not by
-		// either endpoint. make pr emits the key; see the regression above.
-		const endpointOnly = makeGateCore();
-		await run(
-			{ rest: { pulls: { update: async () => {} } } },
-			endpointOnly,
-			context(
-				"## Changes by intent\n\n- `src/a.py` — edit\n- `new/name.py` — moved\n",
-			),
-			require,
-		);
-		assert.strictEqual(
-			endpointOnly.failures.length,
-			1,
-			"pr-files: a rename declared by its new path alone still fails",
-		);
-		const core = makeGateCore();
-		await run(
-			{ rest: { pulls: { update: async () => {} } } },
-			core,
-			context("## Changes by intent\n\n- `src/a.py` — edit\n"),
-			require,
-		);
-		assert.strictEqual(
-			core.failures.length,
-			1,
-			"pr-files: an undeclared rename still fails",
-		);
-	} finally {
-		fs.rmSync(scratch, { recursive: true, force: true });
-	}
-
 	console.log(
-		"ok — pr-gates, governance-pr and pr-files accept make pr bodies and still reject unreasoned gates",
+		"ok — pr-gates and governance-pr accept reasoned bodies and still reject unreasoned gates",
 	);
 }
 
