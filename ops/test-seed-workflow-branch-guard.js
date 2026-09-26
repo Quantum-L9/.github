@@ -22,6 +22,13 @@ const {
 } = require('./workflow-script-harness.js');
 
 const root = path.resolve(__dirname, '..');
+const fs = require('node:fs');
+
+const TEMPLATE_DEST = '.github/pull_request_template.md';
+const ORG_TEMPLATE = fs.readFileSync(path.join(root, 'templates/pr-templates/pull_request_template.md'), 'utf8');
+const CLASS_MARKER = '.l9/org-birth-profile.yaml';
+// getContent answers 200 with no `content` (e.g. a file over the API size limit).
+const UNREADABLE = Symbol('unreadable');
 
 const SEEDER_LOGIN = 'seeder-bot';
 
@@ -58,8 +65,11 @@ const MUTATIONS = new Set([
  * @param {null|{sha,aheadBy,commits}} branch  stubbed remote branch state;
  *   commits are `{message, committer, verified}` fixtures, oldest first
  * @param {number[]} openPRs            open PR numbers with head BRANCH
+ * @param {{files?: Record<string, string|symbol>, presentByDefault?: boolean}} consumer
+ *   files on the consumer's default branch. `presentByDefault` answers every
+ *   other path (except the class marker) as an existing consumer-owned file.
  */
-function makeGithub(BRANCH, { branch = null, openPRs = [] }) {
+function makeGithub(BRANCH, { branch = null, openPRs = [], consumer = {} }) {
   const calls = [];
   const state = { sha: branch ? branch.sha : null };
   const record = (name) => async (args) => {
@@ -125,8 +135,17 @@ function makeGithub(BRANCH, { branch = null, openPRs = [] }) {
         },
       },
       repos: {
-        // Every seed path is missing on the consumer: the full payload is selected.
-        getContent: async () => {
+        // By default every seed path is missing on the consumer, so the full
+        // payload is selected; `consumer` describes files that do exist.
+        getContent: async ({ path: p }) => {
+          const files = consumer.files || {};
+          const b64 = (t) => Buffer.from(t).toString('base64');
+          if (Object.prototype.hasOwnProperty.call(files, p)) {
+            return { data: files[p] === UNREADABLE ? {} : { content: b64(files[p]) } };
+          }
+          if (consumer.presentByDefault && p !== CLASS_MARKER) {
+            return { data: { content: b64('consumer-owned\n') } };
+          }
           throw notFound('Not Found');
         },
         get: async () => {
@@ -254,7 +273,65 @@ function makeRunner(wf) {
     r = await run({ branch: null, dry: true });
     assert.strictEqual(r.mutated, false, `${label}: dry run must not write`);
     console.log(`ok: ${label} — dry run performs no writes`);
+
+    // 7. The PR template is org-managed: a consumer that already has every
+    //    seed file but an outdated template gets exactly that one file
+    //    replaced with the current org template.
+    const blobsOf = (res) =>
+      res.calls
+        .filter((c) => c.name === 'git.createBlob')
+        .map((c) => Buffer.from(c.args.content, 'base64').toString('utf8'));
+    const treeOf = (res) => res.calls.find((c) => c.name === 'git.createTree');
+    for (const [why, stale] of [
+      ['outdated', '## Summary\nan outdated local template\n'],
+      ['unreadable', UNREADABLE],
+    ]) {
+      r = await run({
+        branch: null,
+        consumer: { presentByDefault: true, files: { [TEMPLATE_DEST]: stale } },
+      });
+      const tree = treeOf(r);
+      assert.ok(tree, `${label}: an ${why} template must produce a seed commit`);
+      assert.deepStrictEqual(
+        tree.args.tree.map((t) => t.path),
+        [TEMPLATE_DEST],
+        `${label}: only the ${why} template is written when every other seed file exists`,
+      );
+      assert.deepStrictEqual(blobsOf(r), [ORG_TEMPLATE], `${label}: the ${why} template is replaced with the org template`);
+      const pr = r.calls.find((c) => c.name === 'pulls.create');
+      assert.ok(pr, `${label}: replacing an ${why} template opens a seed PR`);
+      assert.match(pr.args.body, /\*\*Replaced in this PR:\*\* `\.github\/pull_request_template\.md`/);
+    }
+    console.log(`ok: ${label} — an outdated or unreadable PR template is replaced by the org template`);
+
+    // 8. A current template is not rewritten and opens no PR.
+    r = await run({
+      branch: null,
+      consumer: { presentByDefault: true, files: { [TEMPLATE_DEST]: ORG_TEMPLATE } },
+    });
+    assert.strictEqual(r.mutated, false, `${label}: a current template must not produce a seed PR`);
+    assert.ok(!r.names.includes('git.createBlob'), `${label}: a current template must not be rewritten`);
+    console.log(`ok: ${label} — a current PR template is left alone and opens no PR`);
   }
+
+  // 9. Classes that do not seed pr-templates never receive the template, even
+  //    when their copy is outdated (auto-seed resolves the class marker).
+  const autoSeed = makeRunner(WORKFLOWS[0]);
+  for (const profile of ['self_governed', 'non_constellation_python']) {
+    const r = await autoSeed({
+      branch: null,
+      consumer: {
+        presentByDefault: true,
+        files: { [CLASS_MARKER]: `profile: ${profile}\n`, [TEMPLATE_DEST]: 'stale\n' },
+      },
+    });
+    const tree = r.calls.find((c) => c.name === 'git.createTree');
+    assert.ok(
+      !tree || !tree.args.tree.some((t) => t.path === TEMPLATE_DEST),
+      `auto-seed-new-repo.yml: class ${profile} must not receive the PR template`,
+    );
+  }
+  console.log('ok: auto-seed-new-repo.yml — self_governed and non_constellation_python get no PR template');
 })().catch((e) => {
   console.error(e);
   process.exit(1);

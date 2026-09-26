@@ -80,8 +80,7 @@ jobs:
             const fs = require('fs');
             const {
               buildSeedPayload,
-              STOCK_ESLINT_NODE_DEST,
-              STOCK_BIOME_DEST,
+              readsExistingContent,
               selectSeedWrites,
             } = require('./ops/build-seed-payload.js');
             const {
@@ -197,8 +196,11 @@ jobs:
                     existingByPath[p] = null;
                     continue;
                   }
-                  existingByPath[p] = (p === STOCK_ESLINT_NODE_DEST || p === STOCK_BIOME_DEST)
-                    ? await readText(o, n, p)
+                  // Present but unreadable is `true`, never `null`: `null`
+                  // means missing, and an org-managed dest whose content was
+                  // not read must not be assumed current.
+                  existingByPath[p] = readsExistingContent(p)
+                    ? ((await readText(o, n, p)) ?? true)
                     : true;
                 }
                 const { writes, replaced } = selectSeedWrites(payload, existingByPath);
@@ -225,7 +227,7 @@ jobs:
                 const branchSha = gate.sha;
 
                 if (DRY) {
-                  const upgrade = replaced.length ? `; replace stock ESLint` : '';
+                  const upgrade = replaced.length ? `; replace ${replaced.join(', ')}` : '';
                   const preview = writes.length <= 6
                     ? writes.join(', ')
                     : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
@@ -288,7 +290,8 @@ jobs:
                     '### Files in this PR',
                     ...treeItems.map(t => `- \`${t.path}\``),
                     '',
-                    'Existing files were left untouched (missing-only seed), except a stock ESLint `l9-lint-test-node.yml` which is replaced with the Biome SDK caller.',
+                    'Existing files were left untouched (missing-only seed), except two replacements: `.github/pull_request_template.md` is org-managed and replaced whenever it differs from the current org template, and a stock ESLint `l9-lint-test-node.yml` is replaced with the Biome SDK caller.',
+                    ...(replaced.length ? ['', `**Replaced in this PR:** ${replaced.map(p => `\`${p}\``).join(', ')}.`, ''] : []),
                     'Governance caller is **advisory** (`strict` defaults false).',
                     'Core pack callers are distributed here; `l9-ci-core` executes CI.',
                     '',

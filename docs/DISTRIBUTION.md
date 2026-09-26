@@ -58,7 +58,9 @@ frozen reference material only — see [`../l9-ci-pack/README.md`](../l9-ci-pack
 
 `seed-governance.yml` (and `auto-seed-new-repo.yml`) seed these once per repo via
 PR using `ops/build-seed-payload.js`, matching `ops/sync-org-files.sh`. Existing
-files are left untouched (missing-only). Root `CODEOWNERS` is never overwritten by
+files are left untouched (missing-only), except the org-managed
+`.github/pull_request_template.md`, which a seed PR replaces whenever it differs
+from `templates/pr-templates/pull_request_template.md`. Root `CODEOWNERS` is never overwritten by
 `.github/CODEOWNERS`. New repos from `l9-dependency-template` inherit the pack
 because it is in the template tree; `make sync-ci` is refresh-only.
 

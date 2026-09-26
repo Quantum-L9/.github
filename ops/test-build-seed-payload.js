@@ -23,6 +23,8 @@ const {
   STOCK_ESLINT_NODE_DEST,
   STOCK_BIOME_DEST,
   STOCK_BIOME_SCHEMA,
+  ORG_MANAGED_DESTS,
+  readsExistingContent,
   PYTHON_LINT_DEST,
   RETIRED_CATEGORIES,
 } = require('./build-seed-payload.js');
@@ -372,6 +374,26 @@ try {
   assert.strictEqual(untunedPayload[STOCK_ESLINT_NODE_DEST], shippedNode);
   assert.strictEqual(preserveTunedNodeEnv(shippedNode, 'not a workflow'), shippedNode);
 
+  // The PR template is org-managed: a differing or unread consumer copy is
+  // replaced; an identical one is kept; a missing one is a plain write.
+  const TPL = '.github/pull_request_template.md';
+  assert.deepStrictEqual([...ORG_MANAGED_DESTS], [TPL]);
+  const orgTpl = defaultPayload[TPL];
+  for (const [why, existing] of [['stale', '## Summary\nold\n'], ['unread', true]]) {
+    plan = selectSeedWrites({ [TPL]: orgTpl }, { [TPL]: existing });
+    assert.deepStrictEqual(plan, { writes: [TPL], replaced: [TPL], kept: [] }, `${why} template is replaced`);
+  }
+  plan = selectSeedWrites({ [TPL]: orgTpl }, { [TPL]: orgTpl });
+  assert.deepStrictEqual(plan, { writes: [], replaced: [], kept: [TPL] }, 'current template is kept');
+  plan = selectSeedWrites({ [TPL]: orgTpl }, { [TPL]: null });
+  assert.deepStrictEqual(plan, { writes: [TPL], replaced: [], kept: [] }, 'missing template is a plain write');
+  // Other existing dests stay missing-only even when they differ.
+  plan = selectSeedWrites({ 'SECURITY.md': 'org' }, { 'SECURITY.md': 'consumer' });
+  assert.deepStrictEqual(plan, { writes: [], replaced: [], kept: ['SECURITY.md'] });
+  // The seeders fetch content for exactly the dests the decision needs.
+  for (const d of [TPL, STOCK_ESLINT_NODE_DEST, STOCK_BIOME_DEST]) assert.ok(readsExistingContent(d), d);
+  assert.ok(!readsExistingContent('SECURITY.md'));
+
   const pin = fs.readFileSync('ops/governance-v1-pin.txt', 'utf8');
   assert.match(pin, /7ed3ab8650583f6659a6caf061eae77dbd3ed1be/);
 
@@ -382,6 +404,8 @@ try {
   console.log('ok: stock ESLint and unsafe Node callers are replaceable; custom + other biome $schema kept');
   console.log('ok: Node caller upgrade preserves the consumer-tuned env: block');
   console.log('ok: Python test job installs the consumer package and dependencies');
+  console.log('ok: org-managed PR template is replaced when stale or unread, kept when current');
+  console.log('ok: no seed payload carries the retired PULL_REQUEST_TEMPLATE/agent.md');
 } finally {
   process.chdir(origCwd);
 }

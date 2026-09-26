@@ -10,8 +10,10 @@ const { applyProfile } = require('./repo-class-profile.js');
  *
  * Default `all` is the DEFAULT_CATEGORIES set (stack-aware L9 pack). Opt-in
  * extras (`labels`, `on-org-update`) stay parseable but are not in `all`.
- * Missing-only seed never overwrites an existing consumer file, except two
- * safe upgrades of `.github/workflows/l9-lint-test-node.yml`:
+ * Missing-only seed never overwrites an existing consumer file, except:
+ *   - an ORG_MANAGED_DESTS entry (`.github/pull_request_template.md`) that
+ *     differs from the current org copy is replaced;
+ * and two safe upgrades of `.github/workflows/l9-lint-test-node.yml`:
  *   1. a stock ESLint caller (the old pack)
  *   2. the stock Biome caller that ran `tsc` / `Test Suite` with
  *      `cache: ${{ env.PACKAGE_MANAGER }}` (hard-fails without a lockfile)
@@ -80,6 +82,11 @@ const PYTHON_LINT_DEST = '.github/workflows/l9-lint-test.yml';
 const STOCK_BIOME_DEST = 'biome.json';
 const STOCK_ESLINT_NODE_DEST = '.github/workflows/l9-lint-test-node.yml';
 const STOCK_BIOME_SCHEMA = 'https://biomejs.dev/schemas/2.5.8/schema.json';
+
+// Dests the organization owns outright. Seeding is otherwise missing-only; a
+// consumer copy of one of these that differs from the current payload is
+// replaced by the next seed PR, so no repository keeps an outdated copy.
+const ORG_MANAGED_DESTS = Object.freeze(['.github/pull_request_template.md']);
 
 const ADVISORY_INBOX_STOCK = 'https://github.com/Quantum-L9/.github/security/advisories/new';
 const ADVISORY_POLICY_STOCK = 'https://github.com/Quantum-L9/.github/security/policy';
@@ -225,9 +232,11 @@ function applyRepoPlaceholders(text, repository) {
  * @param {Record<string, string>} payload
  * @param {Record<string, string|null|true>} existingByPath
  *   null/absent = missing (write);
- *   true = present, content not fetched (keep);
- *   string = fetched content (replace only if a stock replaceable node caller
- *            or biome.json with the same $schema — different $schema is keep).
+ *   true = present, content not fetched (keep — except an ORG_MANAGED_DESTS
+ *          entry, whose unread content is never assumed current: replace);
+ *   string = fetched content (replace an ORG_MANAGED_DESTS entry that differs
+ *            from the payload; otherwise replace only a stock replaceable node
+ *            caller — biome.json and everything else is kept).
  * Replacing a stock node caller rewrites `payload[dest]` in place so the
  * consumer's tuned `env:` values survive the upgrade; callers write
  * `payload[dest]` after this returns.
@@ -243,6 +252,15 @@ function selectSeedWrites(payload, existingByPath = {}) {
       continue;
     }
     const existing = existingByPath[dest];
+    if (ORG_MANAGED_DESTS.includes(dest)) {
+      if (existing === payload[dest]) {
+        kept.push(dest);
+      } else {
+        writes.push(dest);
+        replaced.push(dest);
+      }
+      continue;
+    }
     if (
       dest === STOCK_ESLINT_NODE_DEST &&
       typeof existing === 'string' &&
@@ -269,6 +287,20 @@ function selectSeedWrites(payload, existingByPath = {}) {
     kept.push(dest);
   }
   return { writes, replaced, kept };
+}
+
+/**
+ * Whether a seeder must fetch an existing dest's content for selectSeedWrites
+ * to decide it. Both seeders call this, so the read set cannot drift from the
+ * decision set. A fetch that fails must be passed as `true`, never `null`.
+ * @param {string} dest
+ */
+function readsExistingContent(dest) {
+  return (
+    dest === STOCK_ESLINT_NODE_DEST ||
+    dest === STOCK_BIOME_DEST ||
+    ORG_MANAGED_DESTS.includes(dest)
+  );
 }
 
 function addDirFiles(fs, srcDir, destPrefix, payload, { skipNames = [] } = {}) {
@@ -385,6 +417,8 @@ module.exports = {
   STOCK_BIOME_DEST,
   STOCK_BIOME_SCHEMA,
   STOCK_ESLINT_NODE_DEST,
+  ORG_MANAGED_DESTS,
+  readsExistingContent,
   parseCategories,
   buildSeedPayload,
   isStockEslintNodeWorkflow,
