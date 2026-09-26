@@ -13,7 +13,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { parseLabels } = require('./label-taxonomy.js');
+const { parseLabels, planLabelSync } = require('./label-taxonomy.js');
 
 const root = path.resolve(__dirname, '..');
 const origCwd = process.cwd();
@@ -60,8 +60,43 @@ try {
   assert.deepStrictEqual(parseLabels(null), []);
   assert.deepStrictEqual(parseLabels(''), []);
 
+  // planLabelSync: what a repository needs to match the taxonomy.
+  const want = [
+    { name: 'type:bug', color: 'd73a4a', description: 'Incorrect behavior with evidence' },
+    { name: 'needs:triage', color: 'ededed', description: 'Awaiting maintainer review' },
+    { name: 'area:ci', color: '1d76db', description: 'CI/CD pipelines' },
+  ];
+  // A repository with nothing gets every label created.
+  assert.deepStrictEqual(
+    planLabelSync([], want).create.map((l) => l.name),
+    ['type:bug', 'needs:triage', 'area:ci'],
+  );
+  const plan = planLabelSync(
+    [
+      { name: 'type:bug', color: 'D73A4A', description: 'Incorrect behavior with evidence' },
+      { name: 'Needs:Triage', color: 'ededed', description: 'Awaiting maintainer review' },
+      { name: 'area:ci', color: '000000', description: null },
+      { name: 'deps', color: '0366d6', description: 'Dependabot' },
+    ],
+    want,
+  );
+  // Color compares case-insensitively; an exact match is left alone.
+  assert.deepStrictEqual(plan.unchanged, ['type:bug']);
+  // Names are case-insensitive on GitHub: a case-only difference is a rename,
+  // never a second create; drifted color/description is an update.
+  assert.deepStrictEqual(plan.create, []);
+  assert.deepStrictEqual(
+    plan.update.map((u) => [u.current_name, u.name]),
+    [['Needs:Triage', 'needs:triage'], ['area:ci', 'area:ci']],
+  );
+  // Additive: a label outside the taxonomy is never planned for change.
+  assert.ok(![...plan.update, ...plan.create].some((l) => l.name === 'deps'));
+  // The live taxonomy against itself is all-unchanged (idempotent re-run).
+  assert.strictEqual(planLabelSync(labels, labels).unchanged.length, labels.length);
+
   console.log(`ok: org taxonomy parses (${labels.length} labels, all three fields, hex colors)`);
   console.log('ok: partial, commented, and duplicate label lines are skipped, not half-applied');
+  console.log('ok: planLabelSync creates missing, renames case-only, updates drift, leaves extras');
 } finally {
   process.chdir(origCwd);
 }
