@@ -8,11 +8,13 @@
  * wrote unchecked gates as "— n/a — not this change", and the old reason
  * regex /(sep)\s*\S{4,}/ needed a 4+ character WORD straight after the
  * separator, so every composed body failed six Gate lines; "— no IAM change"
- * failed the same way for humans. pr-files keyed renames as "old -> new" and
- * matched declarations exactly, so a declared new path was "undeclared".
- * governance-pr kept the template's own "paste the error" fence in Problem,
- * so an untouched template passed. Each case below fails against the pre-fix
- * workflows.
+ * failed the same way for humans. governance-pr kept the template's own
+ * "paste the error" fence in Problem, so an untouched template passed. Each
+ * of those cases fails against the pre-fix workflows.
+ *
+ * pr-files keys a rename as "old -> new" and matches declarations exactly.
+ * That stays strict: the producer (make pr) declares the canonical row key,
+ * and a declaration naming only one endpoint is asserted to fail.
  *
  * Run from the Quantum-L9/.github repo root:
  *   node ops/test-pr-body-gates.js
@@ -164,7 +166,6 @@ async function main() {
 	);
 	try {
 		for (const declared of [
-			"`new/name.py` — moved",
 			"`old/name.py -> new/name.py` — moved",
 			"`new/name.py` — moved (renamed: `old/name.py -> new/name.py`)",
 		]) {
@@ -187,10 +188,26 @@ async function main() {
 				`pr-files: rename declared as ${declared} must pass`,
 			);
 			assert.ok(
-				!updated.includes("Declared but not in the diff"),
-				`pr-files: ${declared} is not a phantom`,
+				updated.includes("FILES-TOUCHED:START"),
+				`pr-files: ${declared} still gets the file list`,
 			);
 		}
+		// The matcher stays strict: a rename is declared by its row key, not by
+		// either endpoint. make pr emits the key; see the regression above.
+		const endpointOnly = makeGateCore();
+		await run(
+			{ rest: { pulls: { update: async () => {} } } },
+			endpointOnly,
+			context(
+				"## Changes by intent\n\n- `src/a.py` — edit\n- `new/name.py` — moved\n",
+			),
+			require,
+		);
+		assert.strictEqual(
+			endpointOnly.failures.length,
+			1,
+			"pr-files: a rename declared by its new path alone still fails",
+		);
 		const core = makeGateCore();
 		await run(
 			{ rest: { pulls: { update: async () => {} } } },
