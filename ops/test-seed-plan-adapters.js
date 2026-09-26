@@ -24,21 +24,28 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { notFound, makeScriptRunner, makeBranchStubs } = require('./workflow-script-harness.js');
+const { notFound, makeScriptRunner, makeBranchStubs, makeCleanAuthority } = require('./workflow-script-harness.js');
 const { compileGovernancePlan } = require('./compile-repo-governance.js');
 
 const root = path.resolve(__dirname, '..');
 const SHA = '77587b7421b2e7cfad391e5036f531d8b5833e2b';
 const MARKER = '.l9/org-birth-profile.yaml';
 const MUTATIONS = new Set(['git.createRef', 'git.createCommit', 'pulls.create', 'graphql.updateRefs', 'git.createBlob']);
+// Explicit code-unit order (Sonar S2871); identical to a comparator-less sort.
+const byCodeUnit = (a, b) => (a < b ? -1 : Number(a > b));
+// The shell sync refuses uncommitted org content, so it runs from a clean
+// commit of this working tree (ops/workflow-script-harness.js).
+const authority = makeCleanAuthority(root);
 
 /**
  * @param {string} branch
  * @param {object} o
  * @param {Record<string,string>} [o.files]  consumer files present on the remote
  * @param {string[]} [o.unreadable]  paths that exist but whose content read fails
+ * @param {Record<string, number|null>} [o.probeErrors]  paths whose every read fails
+ *   with that HTTP status (null = a network error with no status)
  */
-function makeGithub(branch, { files = {}, unreadable = [] } = {}) {
+function makeGithub(branch, { files = {}, unreadable = [], probeErrors = {} } = {}) {
   const calls = [];
   const state = { sha: null };
   const record = (name) => async (args) => {
@@ -65,6 +72,10 @@ function makeGithub(branch, { files = {}, unreadable = [] } = {}) {
       users: { getAuthenticated: async () => ({ data: { login: 'seeder-bot' } }) },
       repos: {
         getContent: async ({ path: p }) => {
+          if (Object.hasOwn(probeErrors, p)) {
+            const status = probeErrors[p];
+            throw Object.assign(new Error(status ? `HTTP ${status}` : 'socket hang up'), status ? { status } : {});
+          }
           if (unreadable.includes(p)) {
             // Existence probe succeeds; the content read fails.
             probes[p] = (probes[p] || 0) + 1;
@@ -114,7 +125,7 @@ const seedGovernance = (env = {}) =>
 
 const treePaths = (r) => {
   const tree = r.calls.find((c) => c.name === 'git.createTree');
-  return tree ? tree.args.tree.map((t) => t.path).sort() : [];
+  return tree ? tree.args.tree.map((t) => t.path).sort(byCodeUnit) : [];
 };
 
 function planPaths(facts) {
@@ -122,7 +133,7 @@ function planPaths(facts) {
   process.chdir(root);
   try {
     const plan = compileGovernancePlan({ fs, authoritySha: SHA, repository: 'Quantum-L9/consumer-repo', facts });
-    return plan.materialize.files.map((f) => f.path).sort();
+    return plan.materialize.files.map((f) => f.path).sort(byCodeUnit);
   } finally {
     process.chdir(cwd);
   }
@@ -136,7 +147,7 @@ function shellSync(files, args = []) {
   }
   const bash = ['/usr/bin/bash', '/bin/bash'].find((b) => fs.existsSync(b));
   const out = spawnSync(bash, ['ops/sync-org-files.sh', dir, '--repo', 'Quantum-L9/consumer-repo', ...args], {
-    cwd: root,
+    cwd: authority.dir,
     encoding: 'utf8',
   });
   const written = [];
@@ -149,7 +160,7 @@ function shellSync(files, args = []) {
   };
   walk(dir);
   fs.rmSync(dir, { recursive: true, force: true });
-  return { status: out.status, written: written.filter((p) => !Object.hasOwn(files, p)).sort(), stderr: out.stderr };
+  return { status: out.status, written: written.filter((p) => !Object.hasOwn(files, p)).sort(byCodeUnit), stderr: out.stderr };
 }
 
 (async () => {
@@ -217,6 +228,27 @@ function shellSync(files, args = []) {
   assert.ok(forced.failures.some((f) => /operator requested unknown repo class defualt/.test(f)), `${forced.failures}`);
   console.log('ok: unknown, unreadable, or mistyped class declarations write nothing and never become default');
 
+  // ── a failed observation is never "absent" (AC-ADV-009) ──────────────────
+  // The FIRST probe of each fact is attacked, not a later read: a 403/5xx/429
+  // or a network error on the marker, a codeowners fact, or a seed path must
+  // fail that repository with zero writes. Only a 404 proves absence.
+  for (const [label, makeRun] of [['auto-seed', autoSeed], ['seed-governance', seedGovernance]]) {
+    for (const [probePath, status] of [[MARKER, 500], [MARKER, 403], [MARKER, null], ['CODEOWNERS', 429], ['.github/CODEOWNERS', 502]]) {
+      const r = await makeRun()({ probeErrors: { [probePath]: status } });
+      assert.strictEqual(r.mutated, false, `${label}: ${status || 'network'} on ${probePath} must write nothing`);
+      assert.ok(
+        r.failures.some((f) => /failed/.test(f)),
+        `${label}: ${status || 'network'} on ${probePath} must fail the run, got ${JSON.stringify(r.failures)}`,
+      );
+    }
+  }
+  // The marker contradiction of a forced class is that repository's refusal,
+  // decided before any write; it does not masquerade as an operator typo.
+  const contradicted = await autoSeed({ REPO_CLASS: 'default' })({ files: ncpMarker });
+  assert.strictEqual(contradicted.mutated, false, 'a forced class the marker contradicts writes nothing');
+  assert.ok(!contradicted.failures.some((f) => /unknown repo class/.test(f)));
+  console.log('ok: a 403/5xx/429/network failure on any first probe fails the repository with zero writes');
+
   // ── no authority revision, no plan, no writes (GOV-019) ──────────────────
   for (const [label, run] of [['auto-seed', autoSeed({ GITHUB_SHA: '' })], ['seed-governance', seedGovernance({ GITHUB_SHA: '' })]]) {
     const r = await run({});
@@ -224,7 +256,9 @@ function shellSync(files, args = []) {
     assert.ok(r.failures.length > 0, `${label}: a missing authority SHA must fail the run`);
   }
   console.log('ok: without an exact authority SHA neither seeder writes');
-})().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+})()
+  .catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  })
+  .finally(() => authority.cleanup());

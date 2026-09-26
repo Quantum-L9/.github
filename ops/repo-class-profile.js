@@ -52,6 +52,24 @@ function parseJsonInYaml(text) {
 }
 
 /**
+ * Whether `name` is a class the policy defines. Own properties only: a plain
+ * `doc.classes[name]` lookup also answers for `__proto__`, `constructor`,
+ * `toString` and every other Object.prototype member, which would let a marker
+ * naming one resolve to an empty class with no FORBID list (GOV-005).
+ * @param {object} doc
+ * @param {unknown} name
+ * @returns {boolean}
+ */
+function isKnownClass(doc, name) {
+  return (
+    typeof name === 'string' &&
+    !!doc &&
+    !!doc.classes &&
+    Object.prototype.hasOwnProperty.call(doc.classes, name)
+  );
+}
+
+/**
  * @param {typeof import('fs')} fs
  * @param {string} [path]
  * @returns {object} the parsed policy document
@@ -63,11 +81,11 @@ function loadRepoClasses(fs, path = DEFAULT_CLASSES_PATH) {
   if (!doc || typeof doc !== 'object' || !doc.classes || typeof doc.classes !== 'object') {
     throw new Error(`${path} has no classes map`);
   }
-  if (!doc.classes[doc.default_class]) {
+  if (!isKnownClass(doc, doc.default_class)) {
     throw new Error(`${path} default_class ${doc.default_class} is not defined`);
   }
   for (const [repo, cls] of Object.entries(doc.overrides || {})) {
-    if (!doc.classes[cls]) {
+    if (!isKnownClass(doc, cls)) {
       throw new Error(`${path} override ${repo} names undefined class ${cls}`);
     }
   }
@@ -156,7 +174,7 @@ function classForRepo(doc, repoName, markerText) {
         error: `${doc.marker_path || 'class marker'} is present but declares no parseable profile`,
       };
     }
-    if (!doc.classes[declared]) {
+    if (!isKnownClass(doc, declared)) {
       return {
         name: null,
         source: 'marker',
@@ -194,7 +212,7 @@ function resolveProfile(doc, className, { strict = false } = {}) {
   if (!name) {
     name = fallback;
     resolvedFrom = 'default (no marker)';
-  } else if (!doc.classes[name]) {
+  } else if (!isKnownClass(doc, name)) {
     if (strict) {
       throw new Error(
         `unknown repo class ${className} (known: ${Object.keys(doc.classes).join(', ')})`,
@@ -269,6 +287,7 @@ module.exports = {
   MODES,
   parseJsonInYaml,
   loadRepoClasses,
+  isKnownClass,
   parseClassMarker,
   classForRepo,
   matchPattern,

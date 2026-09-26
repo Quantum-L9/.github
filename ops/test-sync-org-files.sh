@@ -11,9 +11,19 @@
 #   bash ops/test-sync-org-files.sh
 set -euo pipefail
 
-ORG_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SRC_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
+
+# The sync refuses uncommitted org content (ADR-0003), so it runs from a clean
+# commit of this working tree's org content, not from the working tree itself.
+ORG_ROOT="$WORK/authority"
+mkdir -p "$ORG_ROOT/.github"
+cp -R "$SRC_ROOT/ops" "$SRC_ROOT/policies" "$SRC_ROOT/templates" "$ORG_ROOT/"
+cp "$SRC_ROOT/.github/labels.yml" "$ORG_ROOT/.github/labels.yml"
+git -C "$ORG_ROOT" init -q
+git -C "$ORG_ROOT" add -A
+git -C "$ORG_ROOT" -c user.email=t@t -c user.name=t -c commit.gpgsign=false commit -qm authority
 
 CATEGORIES=(--include codeowners community-health issue-templates)
 
@@ -123,4 +133,26 @@ fi
 [[ -z "$(find "$BAD" -type f -not -path '*/.git/*' -not -path '*/.l9/*')" ]] || fail "malformed-marker sync wrote files"
 echo "✅ retired category and unknown marker class fail closed with zero writes"
 
-echo "ok: shell sync applies the compiled plan: identity, missing-only, class, fail-closed"
+# ── 7. uncommitted org content is refused, never synced under HEAD's SHA ──────
+# Edited compiler code, an untracked template, and a git-ignored template each
+# change the plan's bytes without changing HEAD (ADR-0003).
+for mutate in \
+  "printf '\n// local edit\n' >> ops/build-seed-payload.js" \
+  "printf 'x\n' > templates/community-health/UNTRACKED.md" \
+  "printf 'templates/community-health/IGNORED.md\n' >> .git/info/exclude && printf 'x\n' > templates/community-health/IGNORED.md"; do
+  DIRTY="$WORK/dirty-$RANDOM"
+  make_consumer "$DIRTY"
+  (cd "$ORG_ROOT" && eval "$mutate")
+  set +e
+  (cd "$ORG_ROOT" && bash ops/sync-org-files.sh "$DIRTY" --include community-health) > /dev/null 2>"$WORK/dirty.err"
+  rc=$?
+  set -e
+  [[ $rc -eq 2 ]] || fail "uncommitted org content was not refused (exit $rc): $mutate"
+  grep -q 'authority_identity' "$WORK/dirty.err" || fail "refusal did not name authority_identity: $(cat "$WORK/dirty.err")"
+  [[ -z "$(find "$DIRTY" -type f -not -path '*/.git/*')" ]] || fail "refused sync still wrote files"
+  git -C "$ORG_ROOT" checkout -q -- ops/build-seed-payload.js
+  rm -f "$ORG_ROOT/templates/community-health/UNTRACKED.md" "$ORG_ROOT/templates/community-health/IGNORED.md"
+done
+echo "✅ edited code, untracked and ignored org content refused (exit 2) with zero writes"
+
+echo "ok: shell sync applies the compiled plan: identity, missing-only, class, fail-closed, provenance"

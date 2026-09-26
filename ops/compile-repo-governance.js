@@ -35,12 +35,15 @@ const {
   DEFAULT_CLASSES_PATH,
   parseJsonInYaml,
   loadRepoClasses,
+  isKnownClass,
+  parseClassMarker,
   classForRepo,
   resolveProfile,
   matchPattern,
   waivesMandatoryFile,
 } = require('./repo-class-profile.js');
 const {
+  ALL_CATEGORIES,
   RETIRED_CATEGORIES,
   STOCK_ESLINT_NODE_DEST,
   parseCategories,
@@ -59,8 +62,22 @@ const SETTINGS_PATH = 'policies/repo-settings.yml';
 const MANDATORY_PATH = 'policies/mandatory-files.yml';
 const LABELS_PATH = '.github/labels.yml';
 
-// Everything the compiler reads. A production compile asserts these bytes are
-// exactly the authority revision it names (B-20).
+// The code that turns policy into a plan. It is authority exactly as much as
+// the policy files are: a modified compiler produces different plan bytes from
+// the same policy, so its bytes must be the named revision too (ADR-0003).
+// ops/test-compile-repo-governance.js asserts every ops/ module the compiler
+// loads is listed here.
+const COMPILER_SOURCES = Object.freeze([
+  'ops/compile-repo-governance.js',
+  'ops/repo-class-profile.js',
+  'ops/build-seed-payload.js',
+  'ops/label-taxonomy.js',
+  'ops/json-schema-subset.js',
+]);
+
+// Everything that determines a plan's bytes: policy data, templates, schema,
+// and the compiler itself. A production compile asserts all of it is exactly
+// the authority revision it names (B-20).
 const AUTHORITY_INPUTS = Object.freeze([
   DEFAULT_CLASSES_PATH,
   SETTINGS_PATH,
@@ -68,6 +85,7 @@ const AUTHORITY_INPUTS = Object.freeze([
   LABELS_PATH,
   'templates',
   SCHEMA_PATH,
+  ...COMPILER_SOURCES,
 ]);
 
 // Settings the existing owners deliberately never auto-change
@@ -120,7 +138,7 @@ function canonicalJson(value) {
   }
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
   if (typeof value === 'object') {
-    const keys = Object.keys(value).sort();
+    const keys = Object.keys(value).sort(byCodeUnit);
     const parts = [];
     for (const key of keys) {
       if (value[key] === undefined) fail('digest', `undefined value at key "${key}" cannot be canonicalized`);
@@ -129,6 +147,14 @@ function canonicalJson(value) {
     return `{${parts.join(',')}}`;
   }
   return fail('digest', `${typeof value} cannot be canonicalized`);
+}
+
+// UTF-16 code-unit order — exactly what a comparator-less sort does, written
+// out (Sonar S2871). Never localeCompare: that would make the digest depend on
+// the runner's locale.
+function byCodeUnit(a, b) {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
 }
 
 function sha256(text) {
@@ -236,12 +262,27 @@ const RESOLVED_FROM = Object.freeze({
 
 function decideClass(classes, repoName, facts, requestedClass) {
   if (requestedClass != null && requestedClass !== '') {
-    if (typeof requestedClass !== 'string' || !classes.classes[requestedClass]) {
+    if (!isKnownClass(classes, requestedClass)) {
       fail(
         'class_resolution',
         `operator requested unknown repo class ${requestedClass} ` +
           `(known: ${Object.keys(classes.classes).join(', ')})`,
       );
+    }
+    // A repository's own declaration is never overruled, and a declaration
+    // that cannot be read is never ignored. Either contradiction is decided
+    // here, before a plan exists, so no adapter can write first and discover
+    // it at attestation.
+    if (facts.marker_state === 'present') {
+      const declared = parseClassMarker(facts.marker_text);
+      if (declared !== requestedClass) {
+        fail(
+          'class_resolution',
+          declared
+            ? `operator requested class ${requestedClass} but ${classes.marker_path} declares ${declared}`
+            : `operator requested class ${requestedClass} but ${classes.marker_path} is present and declares no parseable profile`,
+        );
+      }
     }
     return { name: requestedClass, resolved_from: 'operator_request' };
   }
@@ -266,14 +307,20 @@ function compileMaterialize(fs, profile, facts, repository) {
       fail('policy_contradiction', `repo class ${profile.name} names retired seed category ${cat}`);
     }
   }
-  let cats;
-  try {
-    cats = parseCategories(profile.seed_categories.join(','));
-  } catch (err) {
-    fail('policy_contradiction', `repo class ${profile.name}: ${err.message}`);
+  // Each entry is one category name. Joining and re-parsing would accept `all`
+  // (the default set) and whitespace-joined lists that buildSeedPayload
+  // refuses, so every entry is checked on its own.
+  for (const cat of profile.seed_categories) {
+    if (typeof cat !== 'string' || !ALL_CATEGORIES.includes(cat)) {
+      fail(
+        'policy_contradiction',
+        `repo class ${profile.name} names unknown seed category ${JSON.stringify(cat)} ` +
+          `(allowed: ${ALL_CATEGORIES.join(', ')})`,
+      );
+    }
   }
   // An empty category list means "nothing", not "the default set".
-  if (!profile.seed_categories.length) cats = [];
+  const cats = profile.seed_categories.length ? parseCategories(profile.seed_categories.join(',')) : [];
 
   const files = [];
   const violations = [];
@@ -290,6 +337,7 @@ function compileMaterialize(fs, profile, facts, repository) {
     }
     if (matchPattern(profile.inherit, entry.dest)) continue;
     assertSafeDest(entry.dest);
+    assertTemplateSource(entry.dest, entry.source);
     assertTextContent(entry.dest, entry.content);
     files.push({
       path: entry.dest,
@@ -308,11 +356,16 @@ function compileMaterialize(fs, profile, facts, repository) {
   }
   // Path order, not readdir order: identical inputs must give identical bytes
   // on every filesystem.
-  files.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+  files.sort((a, b) => byCodeUnit(a.path, b.path));
   return files;
 }
 
-function compileMandatory(mandatory, profile, repoName) {
+// GitHub reads .github/CODEOWNERS before a root CODEOWNERS, so writing the
+// org file into a repository that owns its root file would silently replace
+// the repository's ownership rules (B-08). buildSeedPayload already skips it.
+const DOT_GITHUB_CODEOWNERS = '.github/CODEOWNERS';
+
+function compileMandatory(mandatory, profile, repoName, facts) {
   const files = Array.isArray(mandatory.files) ? mandatory.files : [];
   const exempt = (mandatory.exceptions || []).some((e) => e && e.repo === repoName);
   const effective = [];
@@ -321,15 +374,30 @@ function compileMandatory(mandatory, profile, repoName) {
     if (!file || typeof file.path !== 'string' || !file.path) {
       fail('contract', `${MANDATORY_PATH} has an entry without a path`);
     }
-    if (exempt || waivesMandatoryFile(profile, file.path)) {
+    assertSafeDest(file.path);
+    const rootCodeowners = file.path === DOT_GITHUB_CODEOWNERS && facts.has_root_codeowners;
+    if (exempt || rootCodeowners || waivesMandatoryFile(profile, file.path)) {
       if (!waived.includes(file.path)) waived.push(file.path);
       continue;
     }
     const req = { path: file.path, mode: file.mode };
-    if (typeof file.source === 'string') req.source = file.source;
+    if (file.source !== undefined) {
+      // Reconciliation reads this path from the authority checkout and writes
+      // its bytes into consumer PRs, so it must name an org template — never
+      // an arbitrary runner path.
+      assertTemplateSource(file.path, file.source);
+      req.source = file.source;
+    }
     effective.push(req);
   }
   return { effective, waived };
+}
+
+function assertTemplateSource(dest, source) {
+  if (typeof source !== 'string' || !source.startsWith('templates/')) {
+    fail('unsafe_path', `template source for ${dest} must be under templates/, got ${JSON.stringify(source)}`);
+  }
+  assertSafeDest(source);
 }
 
 /**
@@ -401,14 +469,21 @@ function compileGovernancePlan({ fs, authority, authoritySha, repository, facts,
     materialize: { files: materialize },
     inherit: { paths: [...profile.inherit] },
     forbid: { paths: [...profile.forbid] },
-    mandatory_files: compileMandatory(auth.mandatory, profile, repoName),
+    mandatory_files: compileMandatory(auth.mandatory, profile, repoName, normalizedFacts),
     remote_apply: {
       labels: compileLabels(auth.labels, labelsEnabled),
       repo_settings: { enabled: settingsEnabled, desired: compileRepoSettings(auth.settings, repoName) },
     },
     attestation: {
-      // What repo-birth-bootstrap.yml reads back from the remote today.
-      required_present: ['README.md', 'LICENSE', auth.classes.marker_path],
+      // What repo-birth-bootstrap.yml reads back from the remote. The org never
+      // writes the class marker, so it is required only where it is the source
+      // of the class decision; a repository classed by an org override, the
+      // default, or an operator request legitimately carries none.
+      required_present: [
+        'README.md',
+        'LICENSE',
+        ...(decision.resolved_from === 'marker' ? [auth.classes.marker_path] : []),
+      ],
       required_absent: [...profile.forbid],
       verify_class_marker: true,
       verify_remote_apply: labelsEnabled || settingsEnabled,
@@ -435,6 +510,14 @@ function compileGovernancePlan({ fs, authority, authoritySha, repository, facts,
  */
 function verifyPlan(plan, { schema, authoritySha, repository, digest } = {}) {
   if (!schema) fail('contract', 'verifyPlan requires the plan schema');
+  // Identity is not optional: a caller that omits it would otherwise verify a
+  // plan compiled for any revision or any repository.
+  if (typeof authoritySha !== 'string' || !SHA_RE.test(authoritySha)) {
+    fail('contract', 'verifyPlan requires the expected 40-hex authoritySha');
+  }
+  if (typeof repository !== 'string' || !REPOSITORY_RE.test(repository)) {
+    fail('contract', 'verifyPlan requires the expected owner/name repository');
+  }
   const errors = compileSchema(schema)(plan);
   if (errors.length) fail('contract', `plan is not schema-valid: ${errors.join('; ')}`);
   const recomputed = computePlanDigest(plan);
@@ -444,14 +527,20 @@ function verifyPlan(plan, { schema, authoritySha, repository, digest } = {}) {
   if (digest != null && digest !== plan.digest.value) {
     fail('digest', `plan digest ${plan.digest.value} is not the expected ${digest}`);
   }
-  if (authoritySha != null && plan.authority.sha !== authoritySha) {
+  if (plan.authority.sha !== authoritySha) {
     fail('authority_identity', `plan compiled at ${plan.authority.sha}, expected ${authoritySha}`);
   }
-  if (repository != null && plan.target.repository !== repository) {
+  if (plan.target.repository !== repository) {
     fail('authority_identity', `plan targets ${plan.target.repository}, invoked for ${repository}`);
   }
+  const seen = new Set();
   for (const file of plan.materialize.files) {
     assertSafeDest(file.path);
+    if (seen.has(file.path)) fail('contract', `plan materializes ${file.path} more than once`);
+    seen.add(file.path);
+    if (!plan.capabilities.includes(file.capability)) {
+      fail('policy_contradiction', `plan materializes ${file.path} under unauthorized capability ${file.capability}`);
+    }
     if (sha256(file.content_utf8) !== file.content_sha256) {
       fail('digest', `content SHA-256 mismatch for ${file.path}`);
     }
@@ -486,12 +575,22 @@ function narrowMaterialization(plan, requested) {
 
 /**
  * Production provenance (B-20): a plan may only name a revision whose bytes
- * are the bytes it compiled. `gitStatus` is `git status --porcelain` over
- * AUTHORITY_INPUTS; any output means the checkout differs from HEAD.
+ * are the bytes it compiled. `gitStatus` is `git status --porcelain
+ * --ignored=matching --untracked-files=all` over AUTHORITY_INPUTS: modified,
+ * untracked, AND git-ignored files all reach the compiler (templates are read
+ * with readdir), so any output means the plan is not HEAD's plan. `toplevel`
+ * must be this repository's own root: inside an enclosing foreign checkout,
+ * HEAD names someone else's commit.
  *
- * @param {{headSha: string, authoritySha: string, gitStatus: string}} facts
+ * @param {{headSha: string, authoritySha: string, gitStatus: string, toplevel: string, root: string}} facts
  */
-function assertCleanAuthority({ headSha, authoritySha, gitStatus }) {
+function assertCleanAuthority({ headSha, authoritySha, gitStatus, toplevel, root }) {
+  if (typeof toplevel !== 'string' || typeof root !== 'string' || !toplevel || !root) {
+    fail('authority_identity', 'cannot resolve the authority checkout root');
+  }
+  if (toplevel !== root) {
+    fail('authority_identity', `git resolves ${toplevel}, not this authority checkout ${root}`);
+  }
   if (!SHA_RE.test(headSha || '')) fail('authority_identity', `cannot resolve checkout HEAD (${headSha})`);
   if (headSha !== authoritySha) {
     fail('authority_identity', `checkout is at ${headSha}, not the asserted authority ${authoritySha}`);
@@ -499,7 +598,8 @@ function assertCleanAuthority({ headSha, authoritySha, gitStatus }) {
   if ((gitStatus || '').trim()) {
     fail(
       'authority_identity',
-      `policy inputs differ from ${authoritySha}; commit or discard them before a production compile:\n${gitStatus.trim()}`,
+      `authority inputs (policy, templates, schema, compiler) differ from ${authoritySha}; ` +
+        `commit or remove them before a production compile:\n${gitStatus.trim()}`,
     );
   }
 }
@@ -510,16 +610,28 @@ function assertCleanAuthority({ headSha, authoritySha, gitStatus }) {
 // entry substitute it (Sonar S4036).
 const GIT_CANDIDATES = Object.freeze(['/usr/bin/git', '/usr/local/bin/git', '/opt/homebrew/bin/git']);
 
+const VALUE_OPTIONS = Object.freeze(['--repo', '--authority-sha', '--marker-file', '--class']);
+const FLAG_OPTIONS = Object.freeze([
+  '--marker-absent',
+  '--has-root-codeowners',
+  '--has-python',
+  '--has-package-json',
+  '--pretty',
+]);
+
 function parseArgs(argv) {
   const args = { flags: new Set() };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    const takesValue = ['--repo', '--authority-sha', '--marker-file', '--class'];
-    if (takesValue.includes(a)) {
+    if (VALUE_OPTIONS.includes(a)) {
       if (i + 1 >= argv.length) fail('contract', `${a} needs a value`);
       args[a.slice(2)] = argv[++i];
-    } else if (a.startsWith('--')) {
+    } else if (FLAG_OPTIONS.includes(a)) {
       args.flags.add(a.slice(2));
+    } else if (a.startsWith('--')) {
+      // A mistyped fact flag would otherwise be dropped and silently change
+      // the target facts, and with them the plan.
+      fail('contract', `unknown option ${a} (known: ${[...VALUE_OPTIONS, ...FLAG_OPTIONS].join(', ')})`);
     } else {
       fail('contract', `unexpected argument ${a}`);
     }
@@ -531,13 +643,17 @@ function main(argv) {
   const fs = require('node:fs');
   const path = require('node:path');
   const { execFileSync } = require('node:child_process');
-  process.chdir(path.resolve(__dirname, '..'));
-
   const args = parseArgs(argv);
+  // Resolve operator paths against the caller's directory before moving to
+  // the authority root.
+  const markerFile = args['marker-file'] ? path.resolve(args['marker-file']) : null;
+  const root = fs.realpathSync(path.resolve(__dirname, '..'));
+  process.chdir(root);
+
   if (!args.repo) fail('contract', '--repo owner/name is required');
   if (!args['authority-sha']) fail('contract', '--authority-sha <40-hex|HEAD> is required');
   const markerAbsent = args.flags.has('marker-absent');
-  if (markerAbsent === Boolean(args['marker-file'])) {
+  if (markerAbsent === Boolean(markerFile)) {
     fail('missing_fact', 'pass exactly one of --marker-absent or --marker-file <path>');
   }
 
@@ -549,7 +665,9 @@ function main(argv) {
   assertCleanAuthority({
     headSha,
     authoritySha,
-    gitStatus: run(['status', '--porcelain', '--', ...AUTHORITY_INPUTS]),
+    gitStatus: run(['status', '--porcelain', '--ignored=matching', '--untracked-files=all', '--', ...AUTHORITY_INPUTS]),
+    toplevel: fs.realpathSync(run(['rev-parse', '--show-toplevel']).trim()),
+    root,
   });
 
   const facts = {
@@ -558,7 +676,13 @@ function main(argv) {
     has_python: args.flags.has('has-python'),
     has_package_json: args.flags.has('has-package-json'),
   };
-  if (!markerAbsent) facts.marker_text = fs.readFileSync(args['marker-file'], 'utf8');
+  if (!markerAbsent) {
+    try {
+      facts.marker_text = fs.readFileSync(markerFile, 'utf8');
+    } catch (err) {
+      fail('missing_fact', `cannot read --marker-file ${markerFile}: ${err.code || err.message}`);
+    }
+  }
 
   const plan = compileGovernancePlan({
     fs,
@@ -587,6 +711,7 @@ module.exports = {
   PLAN_SCHEMA,
   AUTHORITY_REPOSITORY,
   AUTHORITY_INPUTS,
+  COMPILER_SOURCES,
   SCHEMA_PATH,
   ERROR_CODES,
   NEVER_AUTO_APPLIED_SETTINGS,
@@ -599,4 +724,5 @@ module.exports = {
   narrowMaterialization,
   assertCleanAuthority,
   compileRepoSettings,
+  parseArgs,
 };
