@@ -52,8 +52,10 @@ function planFor(repoName, facts = ABSENT) {
  * @param {string[]} [o.unreadable]  exist, but content reads fail
  * @param {object} [o.settings]  current repos.get().data
  * @param {string[]} [o.existingLabels]  labels already on the repo (create → 422)
+ * @param {Record<string, number|null>} [o.probeErrors]  paths whose every read
+ *   fails with that HTTP status (null = network error with no status)
  */
-function makeGithub({ files = {}, unreadable = [], settings = {}, existingLabels = [] } = {}) {
+function makeGithub({ files = {}, unreadable = [], settings = {}, existingLabels = [], probeErrors = {} } = {}) {
   const calls = [];
   const probes = {};
   const record = (name, fn) => async (args) => {
@@ -66,6 +68,10 @@ function makeGithub({ files = {}, unreadable = [], settings = {}, existingLabels
     rest: {
       repos: {
         getContent: async ({ path: p }) => {
+          if (Object.hasOwn(probeErrors, p)) {
+            const status = probeErrors[p];
+            throw Object.assign(new Error(status ? `HTTP ${status}` : 'socket hang up'), status ? { status } : {});
+          }
           if (unreadable.includes(p)) {
             probes[p] = (probes[p] || 0) + 1;
             if (probes[p] > 1) throw new Error('500 transient read failure');
@@ -116,7 +122,7 @@ const labelNames = (r) =>
   r.calls.filter((c) => c.name === 'issues.createLabel').map((c) => `${c.args.name}|${c.args.color}|${c.args.description}`);
 
 /** Run scripts/sync-labels.sh against a gh shim, from a clean copy of this tree. */
-function cliSync(remoteFiles) {
+function cliSync(remoteFiles, { failPath = '' } = {}) {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'sync-labels-'));
   const copy = path.join(tmp, 'org');
   const bin = path.join(tmp, 'bin');
@@ -139,6 +145,7 @@ function cliSync(remoteFiles) {
 echo "$*" >> ${JSON.stringify(log)}
 if [[ "$1" == "api" ]]; then
   p="\${2#repos/Quantum-L9/target/contents/}"
+  if [[ "$p" == "\${FAIL_PATH:-}" ]]; then echo "gh: Server Error (HTTP 500)" >&2; exit 1; fi
   body="$(FILES='${files.replace(/'/g, "'\\''")}' P="$p" node -e 'const f=JSON.parse(process.env.FILES); if (Object.hasOwn(f, process.env.P)) process.stdout.write(Buffer.from(f[process.env.P]).toString("base64")); else process.exit(3)')" || { echo "gh: Not Found (HTTP 404)" >&2; exit 1; }
   if [[ " $* " == *" --jq "* ]]; then echo "$body"; fi
   exit 0
@@ -150,7 +157,7 @@ exit 0
   const bash = ['/usr/bin/bash', '/bin/bash'].find((b) => fs.existsSync(b));
   const out = spawnSync(bash, [path.join(copy, 'scripts/sync-labels.sh'), 'Quantum-L9/target'], {
     encoding: 'utf8',
-    env: { ...process.env, PATH: `${bin}:${process.env.PATH}` },
+    env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, FAIL_PATH: failPath },
   });
   const calls = fs.existsSync(log) ? fs.readFileSync(log, 'utf8').trim().split('\n') : [];
   fs.rmSync(tmp, { recursive: true, force: true });
@@ -186,7 +193,7 @@ exit 0
   const { owner: _o, repo: _r, ...patch } = update.args;
   const expectedPatch = Object.fromEntries(settingsDrift(plan, current).map((d) => [d.key, d.expected]));
   assert.deepStrictEqual(patch, expectedPatch);
-  assert.deepStrictEqual(Object.keys(patch).sort(), ['allow_merge_commit', 'has_wiki']);
+  assert.deepStrictEqual(Object.keys(patch).sort((a, b) => (a < b ? -1 : Number(a > b))), ['allow_merge_commit', 'has_wiki']);
   assert.ok(!('default_branch' in patch), 'default_branch is never auto-changed');
   const inSync = await bootstrap()({ files: { 'README.md': 'x', LICENSE: 'x' }, settings: plan.remote_apply.repo_settings.desired });
   assert.ok(!inSync.calls.some((c) => c.name === 'repos.update'), 'no patch when settings match');
@@ -221,15 +228,43 @@ exit 0
   }
   console.log('ok: unknown, unreadable, or mistyped classes and a missing authority SHA mutate nothing');
 
+  // ── a failed observation is never "absent" (AC-ADV-009) ──────────────────
+  // The first probe of each fact is attacked. Bootstrap refuses before any
+  // mutation; the sweep fails that repository (and the run) with zero writes;
+  // the CLI stops before compiling.
+  for (const [probePath, status] of [[MARKER, 500], [MARKER, 403], [MARKER, null], ['CODEOWNERS', 429], ['package.json', 502]]) {
+    const what = `${status || 'network'} on ${probePath}`;
+    const bx = await bootstrap()({ files: { 'README.md': 'x', LICENSE: 'x' }, probeErrors: { [probePath]: status } });
+    assert.strictEqual(bx.mutated, false, `bootstrap: ${what} must not mutate`);
+    assert.ok(bx.failures.some((f) => /refused before any mutation/.test(f)), `bootstrap: ${what}: ${bx.failures}`);
+    const sx = await sweep()({ probeErrors: { [probePath]: status } });
+    assert.strictEqual(sx.mutated, false, `sweep: ${what} must not label`);
+    assert.ok(sx.failures.length > 0, `sweep: ${what} must fail the run`);
+  }
+  const cliErr = cliSync({}, { failPath: MARKER });
+  assert.notStrictEqual(cliErr.status, 0, 'CLI stops on a non-404 marker probe');
+  assert.strictEqual(cliErr.labelCreates.length, 0, 'CLI applies nothing after a failed probe');
+  // An attestation read that fails is a FAIL, never a pass by omission.
+  const ax = await bootstrap()({ files: { [MARKER]: 'profile: self_governed\n', 'README.md': 'x', LICENSE: 'x' }, probeErrors: { '.github/workflows/governance.yml': 500 } });
+  assert.ok(planFor('target', { ...ABSENT, marker_state: 'present', marker_text: 'profile: self_governed\n' }).attestation.required_absent.includes('.github/workflows/governance.yml'));
+  assert.ok(ax.failures.some((f) => /attestation check/.test(f)), 'a failed FORBID probe fails attestation');
+  console.log('ok: a 403/5xx/429/network failure on any first probe mutates nothing; a failed attestation read fails');
+
   // ── attestation reads back plan.attestation ──────────────────────────────
   const missingLicense = await bootstrap()({ files: { 'README.md': 'x' } });
   assert.ok(missingLicense.failures.some((f) => /attestation check/.test(f)), 'missing required file fails attestation');
   const selfGoverned = { [MARKER]: 'profile: self_governed\n', 'README.md': 'x', LICENSE: 'x', '.github/workflows/governance.yml': 'x' };
   const leaked = await bootstrap()({ files: selfGoverned });
   assert.ok(leaked.failures.length > 0, 'a FORBID path present on the remote fails attestation (GV-007)');
+  // A forced class the marker contradicts is refused before the plan exists —
+  // never discovered at attestation after labels and settings were written.
   const contradicted = await bootstrap({ REPO_CLASS: 'default' })({ files: { [MARKER]: 'profile: self_governed\n', 'README.md': 'x', LICENSE: 'x' } });
-  assert.ok(contradicted.failures.length > 0, 'a marker contradicting the plan class fails attestation');
-  console.log('ok: attestation fails on a missing required file, a present FORBID path, and a contradicting marker');
+  assert.strictEqual(contradicted.mutated, false, 'a contradicted forced class mutates nothing');
+  assert.ok(contradicted.failures.some((f) => /refused before any mutation.*declares self_governed/.test(f)), `${contradicted.failures}`);
+  // A present marker with no readable profile is a FAIL, not "no marker".
+  const garbled = await bootstrap()({ files: { 'README.md': 'x', LICENSE: 'x', [MARKER]: 'profile: default\n' } });
+  assert.deepStrictEqual(garbled.failures, [], 'a matching marker attests');
+  console.log('ok: attestation fails on a missing required file or a present FORBID path; a contradicted forced class is refused before any write');
 })().catch((err) => {
   console.error(err);
   process.exit(1);
