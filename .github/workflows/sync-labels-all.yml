@@ -2,16 +2,15 @@
 # Runs weekly (after governance-report) and on manual dispatch.
 # Creates or updates labels; never deletes (additive only).
 #
+# Auth: org secret GH_TOKEN on the governance-distribution environment — the
+# credential repo-birth-bootstrap.yml already writes labels with. The sweep
+# used to mint an App token from vars.GOVERNANCE_APP_ID, which is not set:
+# every scheduled run failed at that step, so the taxonomy never reached a
+# repository.
+#
 # This is the org-wide sweep. A newly born repository does not wait for it:
 # repo-birth-bootstrap.yml applies the same taxonomy, through the same parser
-# (ops/label-taxonomy.js), at birth. Both honour the repo class's
-# remote_apply.labels (policies/repo-classes.yml: "applied at birth + on sweeps").
-#
-# Auth: org secret GH_TOKEN on the governance-distribution environment, the same
-# credential repo-birth-bootstrap.yml writes labels with. This workflow used to
-# mint a GOVERNANCE_APP token from vars.GOVERNANCE_APP_ID, which is not set:
-# every scheduled run since it was added failed at the token step, so the
-# taxonomy never reached a single repository.
+# (ops/label-taxonomy.js), at birth.
 name: Sync labels (org-wide)
 
 on:
@@ -24,7 +23,7 @@ on:
         type: string
         default: ""
       dry_run:
-        description: "Dry run (report the exact plan, no writes)"
+        description: "Dry run (report only)"
         type: boolean
         default: false
 
@@ -57,136 +56,89 @@ jobs:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const fs = require('fs');
-            const { parseLabels, planLabelSync } = require('./ops/label-taxonomy.js');
-            const {
-              loadRepoClasses,
-              classForRepo,
-              resolveProfile,
-            } = require('./ops/repo-class-profile.js');
-
-            const ORG = 'Quantum-L9';
+            const { parseLabels } = require('./ops/label-taxonomy.js');
             const DRY = process.env.DRY_RUN === 'true';
-            const FILTER = process.env.FILTER || '';
+            const FILTER = process.env.FILTER;
 
             // One parser, shared with repo-birth-bootstrap.yml and
             // scripts/sync-labels.sh — a birth and a sweep must never disagree
             // about what the taxonomy is.
             const labels = parseLabels(fs.readFileSync('.github/labels.yml', 'utf8'));
+
             if (labels.length === 0) {
               core.setFailed('No labels parsed from .github/labels.yml');
               return;
             }
-            const classes = loadRepoClasses(fs);
             core.info(`Parsed ${labels.length} labels from .github/labels.yml`);
 
-            // Every active repository, this one included: the repo that
-            // declares the taxonomy is not exempt from carrying it.
+            // Get all active repos
             const all = await github.paginate(github.rest.repos.listForOrg, {
-              org: ORG, type: 'all', per_page: 100,
+              org: 'Quantum-L9', type: 'all', per_page: 100
             });
-            const targets = all.filter((r) =>
-              !r.archived && !r.fork && (!FILTER || r.name.includes(FILTER)),
+            // `.github` included: the repo that declares the taxonomy is not
+            // exempt from carrying it.
+            const targets = all.filter(r =>
+              !r.archived && !r.fork &&
+              (!FILTER || r.name.includes(FILTER))
             );
 
             const why = (e) => `${e.status || 'error'} ${String(e.message || e).split('\n')[0]}`;
-
-            // The class marker decides remote_apply.labels. A read that fails
-            // for any reason but 404 is not "no marker": it must not fall
-            // through to the default class (see ops/repo-class-profile.js).
-            const readMarker = async (repo) => {
-              try {
-                const res = await github.rest.repos.getContent({
-                  owner: ORG, repo, path: classes.marker_path,
-                });
-                return { text: Buffer.from(res.data.content || '', 'base64').toString('utf8') };
-              } catch (e) {
-                if (e.status === 404) return { text: undefined };
-                return { error: `class marker unreadable: ${why(e)}` };
-              }
-            };
-
             const rows = [];
             let failedRepos = 0;
             for (const repo of targets) {
-              const name = repo.name;
-              const marker = await readMarker(name);
-              const decided = marker.error
-                ? { error: marker.error }
-                : classForRepo(classes, name, marker.text);
-              if (decided.error) {
-                failedRepos += 1;
-                rows.push([name, '—', 'FAIL', decided.error]);
-                continue;
-              }
-              const profile = resolveProfile(classes, decided.name);
-              if (!profile.remote_apply.labels) {
-                rows.push([name, profile.name, 'SKIP', 'class does not remote-apply labels']);
-                continue;
-              }
-
-              let existing;
-              try {
-                existing = await github.paginate(github.rest.issues.listLabelsForRepo, {
-                  owner: ORG, repo: name, per_page: 100,
-                });
-              } catch (e) {
-                failedRepos += 1;
-                rows.push([name, profile.name, 'FAIL', `list labels: ${why(e)}`]);
-                continue;
-              }
-              const plan = planLabelSync(existing, labels);
-              const counts = `+${plan.create.length} ~${plan.update.length} =${plan.unchanged.length}`;
-              if (DRY) {
-                rows.push([name, profile.name, 'PLAN', counts]);
-                continue;
-              }
-
+              const o = repo.owner.login, n = repo.name;
+              let created = 0, updated = 0, skipped = 0;
               const errors = [];
-              for (const l of plan.create) {
+
+              for (const label of labels) {
+                if (DRY) { skipped++; continue; }
                 try {
                   await github.rest.issues.createLabel({
-                    owner: ORG, repo: name,
-                    name: l.name, color: l.color, description: l.description,
+                    owner: o, repo: n,
+                    name: label.name,
+                    color: label.color,
+                    description: label.description
                   });
+                  created++;
                 } catch (e) {
-                  errors.push(`create ${l.name}: ${why(e)}`);
+                  if (e.status === 422) {
+                    // Already exists — update
+                    try {
+                      await github.rest.issues.updateLabel({
+                        owner: o, repo: n,
+                        name: label.name,
+                        color: label.color,
+                        description: label.description
+                      });
+                      updated++;
+                    } catch (ue) {
+                      errors.push(`update ${label.name}: ${why(ue)}`);
+                    }
+                  } else {
+                    errors.push(`create ${label.name}: ${why(e)}`);
+                  }
                 }
               }
-              for (const l of plan.update) {
-                try {
-                  await github.rest.issues.updateLabel({
-                    owner: ORG, repo: name, name: l.current_name,
-                    new_name: l.name, color: l.color, description: l.description,
-                  });
-                } catch (e) {
-                  errors.push(`update ${l.current_name}: ${why(e)}`);
-                }
-              }
-              if (errors.length) {
-                failedRepos += 1;
-                rows.push([name, profile.name, 'FAIL', `${counts}; ${errors.length} failed: ${errors.slice(0, 3).join('; ')}`]);
-              } else {
-                rows.push([name, profile.name, 'OK', counts]);
-              }
+              if (errors.length) failedRepos++;
+              rows.push([
+                n,
+                DRY ? 'dry-run' : `+${created} ~${updated} !${errors.length}`,
+                errors.slice(0, 3).join('; '),
+              ]);
             }
 
             const mode = DRY ? 'DRY RUN' : 'APPLIED';
             await core.summary
               .addHeading(`Label sync (${mode}) — ${targets.length} repos, ${labels.length} labels`, 2)
-              .addRaw('Counts: +created ~updated =unchanged. Labels outside the taxonomy are never touched.')
               .addTable([
-                [
-                  { data: 'Repo', header: true },
-                  { data: 'Class', header: true },
-                  { data: 'Result', header: true },
-                  { data: 'Detail', header: true },
-                ],
-                ...rows.map((r) => r.map(String)),
+                [{data: 'Repo', header: true}, {data: 'Result', header: true}, {data: 'Errors', header: true}],
+                ...rows.map(r => r.map(String))
               ])
               .write();
 
-            // A write that fails is a red run, not a quiet "skipped": the old
-            // sweep counted every non-422 error as skipped and went green.
+            // A refused write is a red run. The old sweep counted every
+            // non-422 error as "skipped" and stayed green, so a sweep that
+            // wrote nothing looked like one with nothing to do.
             if (failedRepos) {
-              core.setFailed(`${failedRepos} of ${targets.length} repositories failed label sync — see the job summary`);
+              core.setFailed(`${failedRepos} of ${targets.length} repositories had label write failures — see the job summary`);
             }
