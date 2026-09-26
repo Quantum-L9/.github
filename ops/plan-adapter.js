@@ -21,13 +21,91 @@ const {
 const { RETIRED_CATEGORIES } = require('./build-seed-payload.js');
 const { parseClassMarker, matchPattern } = require('./repo-class-profile.js');
 
+// ── remote observation (fail closed) ────────────────────────────────────────
+
+/**
+ * The three outcomes of looking at one path on a remote repository. Only an
+ * HTTP 404 proves ABSENT. A 403, 5xx, rate limit, or network failure proves
+ * nothing, and treating it as absent would let an unreadable class marker
+ * resolve to the widest class, an unreadable opt-out read as "not opted out",
+ * an existing file look missing, or a FORBID path vanish from attestation.
+ */
+const PROBE = Object.freeze({ PRESENT: 'PRESENT', ABSENT: 'ABSENT', ERROR: 'ERROR' });
+
+class RemoteProbeError extends Error {
+  /**
+   * @param {string} repository  owner/name
+   * @param {string} path
+   * @param {unknown} cause
+   */
+  constructor(repository, path, cause) {
+    const status = cause && cause.status ? ` (HTTP ${cause.status})` : '';
+    const detail = cause && cause.message ? cause.message : String(cause);
+    super(`cannot observe ${repository}:${path}${status}: ${detail} — refusing to treat it as absent`);
+    this.name = 'RemoteProbeError';
+    this.repository = repository;
+    this.path = path;
+    this.status = cause && cause.status;
+  }
+}
+
+/**
+ * Observe one path. Never throws: the caller receives the tri-state.
+ * @param {object} github  octokit
+ * @param {{owner: string, repo: string, path: string, ref?: string}} where
+ * @returns {Promise<{state: 'PRESENT', data: unknown} | {state: 'ABSENT'} | {state: 'ERROR', error: unknown}>}
+ */
+async function probeContent(github, { owner, repo, path, ref }) {
+  try {
+    const res = await github.rest.repos.getContent({ owner, repo, path, ...(ref ? { ref } : {}) });
+    return { state: PROBE.PRESENT, data: res && res.data };
+  } catch (error) {
+    if (error && error.status === 404) return { state: PROBE.ABSENT };
+    return { state: PROBE.ERROR, error };
+  }
+}
+
+/**
+ * `exists` / `readText` over one repository that fail closed: both throw
+ * RemoteProbeError on ERROR, so a caller can only ever act on a PRESENT or a
+ * proven ABSENT. Every governance adapter reads a target through this.
+ *
+ * `readText` returns null only for a proven ABSENT; a present path without
+ * decodable file content (a directory, an oversized blob) reads as ''.
+ *
+ * @param {object} github
+ * @param {string} owner
+ * @param {string} repo
+ * @returns {{exists: (path: string, ref?: string) => Promise<boolean>, readText: (path: string, ref?: string) => Promise<string|null>}}
+ */
+function remoteReader(github, owner, repo) {
+  const observe = async (path, ref) => {
+    const r = await probeContent(github, { owner, repo, path, ref });
+    if (r.state === PROBE.ERROR) throw new RemoteProbeError(`${owner}/${repo}`, path, r.error);
+    return r;
+  };
+  return {
+    exists: async (path, ref) => (await observe(path, ref)).state === PROBE.PRESENT,
+    readText: async (path, ref) => {
+      const r = await observe(path, ref);
+      if (r.state === PROBE.ABSENT) return null;
+      const d = r.data;
+      if (d && !Array.isArray(d) && typeof d.content === 'string' && d.content) {
+        return Buffer.from(d.content, 'base64').toString('utf8');
+      }
+      return '';
+    },
+  };
+}
+
 /**
  * Collect the explicit target facts the compiler needs.
  *
- * Existence is probed before content is read, so a failed read of a marker
- * that exists becomes an empty (malformed) declaration — which the compiler
- * rejects — instead of reading as "absent" and falling through to the widest
- * class (AC-ADV-009).
+ * `io` must fail closed (remoteReader): any observation that is not a proven
+ * PRESENT or a proven 404 throws, so no fact is ever guessed. A marker that
+ * exists but has no readable content becomes an empty (malformed) declaration
+ * the compiler rejects — never "absent", which would fall through to the
+ * widest class (AC-ADV-009).
  *
  * @param {object} io
  * @param {(path: string) => Promise<boolean>} io.exists
@@ -195,6 +273,10 @@ function planIdentity(plan) {
 module.exports = {
   loadAuthority,
   GovernanceCompileError,
+  PROBE,
+  RemoteProbeError,
+  probeContent,
+  remoteReader,
   gatherTargetFacts,
   compileVerifiedPlan,
   selectPlanFiles,

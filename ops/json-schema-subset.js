@@ -54,11 +54,18 @@ function sameJson(a, b) {
   return JSON.stringify(canonicalize(a)) === JSON.stringify(canonicalize(b));
 }
 
+// UTF-16 code-unit order: what the default sort does, stated explicitly
+// (Sonar S2871) and independent of locale, unlike localeCompare.
+function byCodeUnit(a, b) {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
+}
+
 function canonicalize(value) {
   if (Array.isArray(value)) return value.map(canonicalize);
   if (value && typeof value === 'object') {
     const out = {};
-    for (const k of Object.keys(value).sort()) out[k] = canonicalize(value[k]);
+    for (const k of Object.keys(value).sort(byCodeUnit)) out[k] = canonicalize(value[k]);
     return out;
   }
   return value;
@@ -80,7 +87,7 @@ function checkKeywords(node, where) {
   }
   for (const [name, sub] of Object.entries(node.properties || {})) checkKeywords(sub, `${where}/properties/${name}`);
   for (const [name, sub] of Object.entries(node.$defs || {})) checkKeywords(sub, `${where}/$defs/${name}`);
-  if (node.items) checkKeywords(node.items, `${where}/items`);
+  if (node.items !== undefined) checkKeywords(node.items, `${where}/items`);
   if (node.not) checkKeywords(node.not, `${where}/not`);
 }
 
@@ -137,7 +144,8 @@ function compileSchema(schema) {
           }
         }
       }
-      if (node.items) value.forEach((item, i) => { validate(item, node.items, `${path}[${i}]`, errors); });
+      // `items: false` is a real assertion (no items allowed), not an absent key.
+      if (node.items !== undefined) value.forEach((item, i) => { validate(item, node.items, `${path}[${i}]`, errors); });
     }
     if (typeOf(value) === 'object') {
       for (const key of node.required || []) {
