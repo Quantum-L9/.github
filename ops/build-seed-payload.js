@@ -8,8 +8,10 @@ const { applyProfile } = require('./repo-class-profile.js');
  * Mirrors ops/sync-org-files.sh categories and templates/README.md destinations.
  * Used by seed-governance.yml and auto-seed-new-repo.yml.
  *
- * Default `all` is the DEFAULT_CATEGORIES set (stack-aware L9 pack). Opt-in
- * extras (`labels`, `on-org-update`) stay parseable but are not in `all`.
+ * Default `all` is the DEFAULT_CATEGORIES set (stack-aware L9 pack). `labels`
+ * stays parseable but is not in `all`; whether a repository receives it is
+ * decided by its class plan (ops/compile-repo-governance.js), and an operator
+ * filter can only narrow that plan.
  * Missing-only seed never overwrites an existing consumer file, except two
  * safe upgrades of `.github/workflows/l9-lint-test-node.yml`:
  *   1. a stock ESLint caller (the old pack)

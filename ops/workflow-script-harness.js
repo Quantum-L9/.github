@@ -190,8 +190,32 @@ function makeBranchStubs({ branch, state, calls, openPRs, record }) {
   };
 }
 
+/**
+ * A throwaway git repository holding this working tree's org content
+ * (ops/, policies/, templates/, .github/labels.yml), committed. Adapters that
+ * prove authority provenance (ops/sync-org-files.js) refuse uncommitted
+ * content by design, so a suite runs them here: the code under test is the
+ * working tree, and the checkout it runs in is clean.
+ *
+ * @param {string} root  repo root to copy from
+ * @returns {{dir: string, git: (...args: string[]) => string, cleanup: () => void}}
+ */
+function makeCleanAuthority(root) {
+  const { execFileSync } = require('node:child_process');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'clean-authority-'));
+  for (const p of ['ops', 'policies', 'templates', '.github/labels.yml']) {
+    fs.cpSync(path.join(root, p), path.join(dir, p), { recursive: true });
+  }
+  const git = (...args) => execFileSync('/usr/bin/git', ['-C', dir, ...args], { encoding: 'utf8' });
+  git('init', '-q');
+  git('add', '-A');
+  git('-c', 'user.email=t@t', '-c', 'user.name=t', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'authority');
+  return { dir, git, cleanup: () => fs.rmSync(dir, { recursive: true, force: true }) };
+}
+
 module.exports = {
   extractScript,
+  makeCleanAuthority,
   loadScriptModule,
   notFound,
   makeCore,

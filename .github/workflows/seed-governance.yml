@@ -97,6 +97,7 @@ jobs:
               selectPlanFiles,
               payloadOf,
               planIdentity,
+              remoteReader,
             } = require('./ops/plan-adapter.js');
 
             const MODE = process.env.SEED_MODE || 'dry-run';
@@ -107,24 +108,11 @@ jobs:
             const AUTHORITY_SHA = process.env.GITHUB_SHA;
             const authority = loadAuthority(fs);
 
-            const exists = async (owner, repo, path, ref) => {
-              try {
-                await github.rest.repos.getContent({ owner, repo, path, ...(ref ? { ref } : {}) });
-                return true;
-              } catch {
-                return false;
-              }
-            };
-
-            const readText = async (owner, repo, path) => {
-              try {
-                const res = await github.rest.repos.getContent({ owner, repo, path });
-                if (res.data && res.data.content) {
-                  return Buffer.from(res.data.content, 'base64').toString('utf8');
-                }
-              } catch { /* missing */ }
-              return null;
-            };
+            // Every read of a target fails closed (ops/plan-adapter.js
+            // remoteReader): only a 404 is "absent". A 403, 5xx or rate limit
+            // throws, which fails that repository before anything is written.
+            const exists = (owner, repo, path, ref) => remoteReader(github, owner, repo).exists(path, ref);
+            const readText = (owner, repo, path) => remoteReader(github, owner, repo).readText(path);
 
             const all = await github.paginate(github.rest.repos.listForOrg, {
               org: 'Quantum-L9', type: 'all', per_page: 100,

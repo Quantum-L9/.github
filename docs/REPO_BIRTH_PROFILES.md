@@ -94,8 +94,11 @@ every sweep that ran before profiles existed keeps its exact payload. Adding a
 class is how behavior changes — never by editing the default.
 
 `labels` shows why a class beats a global default. `.github/labels.yml` is
-*required* by `l9-repo-template` and *opt-in* org-wide. Both stay true because
-the class, not the global category list, decides.
+*required* by `l9-repo-template`, so `non_constellation_python` materializes
+it. Everywhere else labels are REMOTE APPLY state (`sync-labels-all.yml`), not
+a file: since G2 an operator category filter can only narrow a compiled plan,
+so `--include labels` on a `default`-class repository is refused rather than
+seeding the file. The class, not the global category list, decides.
 
 ## Consumers
 
@@ -171,6 +174,8 @@ digest — and any change to effective output changes the digest.
 | A class seed category that is not one category name (`all`, a joined list) | error |
 | CLI asked to name a revision the checkout is not at; any authority input modified, untracked, or git-ignored; or run inside a foreign enclosing checkout | error — no plan is printed |
 | CLI given an unknown option | error |
+| An adapter's read of the target fails with anything but 404 (403, 5xx, rate limit, network) | that repository fails with zero writes — only a 404 is "absent" (`remoteReader`, `ops/plan-adapter.js`) |
+| `sync-org-files` run with uncommitted, untracked, or ignored org content or adapter code | error — never synced under HEAD's SHA |
 | Retired category (`l9-ci-pack`, `on-org-update`) requested | error |
 
 ### Usage
