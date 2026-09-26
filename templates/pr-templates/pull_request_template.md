@@ -1,12 +1,14 @@
-<!-- Canonical org-wide PR template. Correct path: .github/pull_request_template.md
-     inside the Quantum-L9/.github repo's own .github/ folder. A copy at repo ROOT
-     does NOT propagate org-wide — GitHub only reads the nested path.
-     See docs/AUDIT.md, finding #1. -->
+<!-- Managed by Quantum-L9/.github (templates/pr-templates/pull_request_template.md).
+     The next org seed PR replaces local edits to this file — change it there.
+     Checked by .github/workflows/governance.yml, which runs Quantum-L9/.github
+     governance-pr.yml. Check a body before opening the PR:
+       node ops/check-pr-body.js body.md   (in a Quantum-L9/.github checkout) -->
 
 ## Problem
 
-<!-- REQUIRED. The error, bug, or gap this fixes. Lead with the symptom a human saw.
-     Paste the actual traceback, failing assertion, alert, or log line. -->
+<!-- REQUIRED. The error, bug, or gap this fixes, in your own words (30+ characters).
+     Lead with the symptom a human saw; paste the traceback, failing assertion, or log line.
+     The block below is a placeholder: it does not count until you replace or delete it. -->
 
 ```
 paste the error / failing output here, or delete this block and describe the gap
@@ -20,7 +22,7 @@ Closes #
 
 ## Risk
 
-<!-- Pick exactly one. This routes how hard reviewers look. -->
+<!-- Tick exactly one. This routes how hard reviewers look. -->
 
 - [ ] Low — additive, reversible, no data or contract change
 - [ ] Medium — touches shared code, config, or a public interface
@@ -31,7 +33,9 @@ Rollback:
 
 ## Evidence
 
-<!-- Show the problem is gone. Pasted output or a CI link. Not "tests pass". -->
+<!-- REQUIRED. Show the problem is gone: paste real command output in a ``` block,
+     or link the CI run (https://github.com/<owner>/<repo>/actions/runs/<id>).
+     "Tests pass" is not evidence. The block below is a placeholder and does not count. -->
 
 ```
 $ pytest -q
@@ -40,8 +44,10 @@ $ ruff check . && pyright
 
 ## Gates
 
-<!-- Leave unchecked if it does not apply, and say why on the line. An unchecked box
-     with no reason blocks merge (see .github/workflows/pr-gates.yml). -->
+<!-- Tick each box that is true. Leave a box unchecked only with a reason on the
+     same line, after a separator (—, --, :, or n/a). The reason needs at least
+     four letters of its own; a bare "n/a" or "—" fails the check. Example:
+     - [ ] Regression test added that fails without this fix — n/a: docs-only change -->
 
 - [ ] Regression test added that fails without this fix
 - [ ] No secrets, tokens, or customer data in code, tests, fixtures, or logs
@@ -57,11 +63,10 @@ $ ruff check . && pyright
 
 ## Changes by intent
 
-<!-- YOU write this. One line per file you meant to touch, with the reason.
-     This is the contract; the bot-generated list below is the actual diff.
-     Any mismatch is flagged by CI — an unexplained file is usually a stray
-     debug edit, a committed artifact, or scope creep.
-     Delete the ADDED or MODIFIED heading if empty. Use `path — why`. -->
+<!-- One line per file you meant to touch, with the reason: `path — why`.
+     This is your contract with the reviewer; the Files touched list below is the
+     actual diff, so an unexplained file there is usually a stray debug edit, a
+     committed artifact, or scope creep. Delete any heading that stays empty. -->
 
 **Added**
 - `path/to/new_file.py` — why this file needs to exist
@@ -74,7 +79,8 @@ $ ruff check . && pyright
 
 ## Files touched
 
-<!-- Auto-filled by .github/workflows/pr-files.yml on every push. Do not edit by hand. -->
+<!-- Filled in automatically only where .github/workflows/pr-files.yml runs
+     (Quantum-L9/.github). Everywhere else, delete this section. -->
 
 <!-- FILES-TOUCHED:START -->
 _pending — the bot fills this in on push_
