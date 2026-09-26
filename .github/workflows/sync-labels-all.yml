@@ -2,11 +2,12 @@
 # Runs weekly (after governance-report) and on manual dispatch.
 # Creates or updates labels; never deletes (additive only).
 #
-# Auth: org secret GH_TOKEN on the governance-distribution environment — the
-# credential repo-birth-bootstrap.yml already writes labels with. The sweep
-# used to mint an App token from vars.GOVERNANCE_APP_ID, which is not set:
-# every scheduled run failed at that step, so the taxonomy never reached a
-# repository.
+# Auth: the governance GitHub App, whose GOVERNANCE_APP_ID /
+# GOVERNANCE_APP_PRIVATE_KEY live on this repo's `governance-distribution`
+# environment (CANONICAL_LAW §14). Environment values resolve only for a job
+# that declares the environment; this job did not, so vars.GOVERNANCE_APP_ID
+# was empty, every scheduled run failed at the token step, and the taxonomy
+# never reached a repository.
 #
 # This is the org-wide sweep. A newly born repository does not wait for it:
 # repo-birth-bootstrap.yml applies the same taxonomy, through the same parser
@@ -38,22 +39,30 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
-      - name: Require org GH_TOKEN
+      - name: Require governance App credentials
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          APP_ID: ${{ vars.GOVERNANCE_APP_ID }}
+          APP_KEY: ${{ secrets.GOVERNANCE_APP_PRIVATE_KEY }}
         run: |
           set -euo pipefail
-          if [ -z "${GH_TOKEN:-}" ]; then
-            echo "::error::org secret GH_TOKEN is empty — sync from AWS openclaw-igorbot/github#token"
+          if [ -z "${APP_ID:-}" ] || [ -z "${APP_KEY:-}" ]; then
+            echo "::error::GOVERNANCE_APP_ID / GOVERNANCE_APP_PRIVATE_KEY did not resolve — they must be visible to environment governance-distribution (CANONICAL_LAW §14)"
             exit 1
           fi
+
+      - id: token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1.12.0
+        with:
+          app-id: ${{ vars.GOVERNANCE_APP_ID }}
+          private-key: ${{ secrets.GOVERNANCE_APP_PRIVATE_KEY }}
+          owner: Quantum-L9
 
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         env:
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
           FILTER: ${{ inputs.repo_filter || '' }}
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ steps.token.outputs.token }}
           script: |
             const fs = require('fs');
             const { parseLabels } = require('./ops/label-taxonomy.js');

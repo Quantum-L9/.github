@@ -5,8 +5,10 @@
  * GitHub API and asserts the org label sweep actually fans the taxonomy out.
  *
  * The sweep had never succeeded. Defects this pins:
- *   - auth: it minted an App token from vars.GOVERNANCE_APP_ID, which is not
- *     set, so every scheduled run failed before writing anything;
+ *   - auth: it minted the governance App token without declaring the
+ *     governance-distribution environment that holds GOVERNANCE_APP_*, so
+ *     vars.GOVERNANCE_APP_ID resolved empty and every scheduled run failed
+ *     before writing anything;
  *   - `.github` itself was excluded, so the repo that declares the taxonomy
  *     was missing a declared label;
  *   - every non-422 write error was counted as "skipped" and the run stayed
@@ -102,16 +104,14 @@ const writesTo = (calls, name) =>
   calls.filter((c) => c.name.startsWith('issues.') && c.args.repo === name);
 
 (async () => {
-  // Auth: the credential birth bootstrap already writes labels with, not an
-  // App id nobody set.
+  // Auth: the governance App token, minted inside the environment that holds
+  // its credentials (CANONICAL_LAW §14). Without the environment the vars are
+  // empty and the token step fails before any label is written.
   const yaml = fs.readFileSync(WORKFLOW, 'utf8');
-  assert.ok(
-    !/\$\{\{\s*vars\.GOVERNANCE_APP_ID/.test(yaml),
-    'sweep must not depend on the unset GOVERNANCE_APP_ID',
-  );
-  assert.match(yaml, /environment:\s*governance-distribution/);
-  assert.match(yaml, /github-token:\s*\$\{\{\s*secrets\.GH_TOKEN\s*\}\}/);
-  console.log('ok: auth uses governance-distribution + GH_TOKEN (as repo-birth-bootstrap does)');
+  assert.match(yaml, /^\s+environment:\s*governance-distribution\s*$/m, 'job declares the App environment');
+  assert.match(yaml, /app-id:\s*\$\{\{\s*vars\.GOVERNANCE_APP_ID\s*\}\}/);
+  assert.match(yaml, /github-token:\s*\$\{\{\s*steps\.token\.outputs\.token\s*\}\}/);
+  console.log('ok: App token minted inside environment governance-distribution');
 
   const repos = [
     repo('.github'),
