@@ -162,10 +162,15 @@ digest — and any change to effective output changes the digest.
 |-----------|--------|
 | Marker present, unparseable | error — never `default` |
 | Marker present, unknown class | error — never `default` |
+| Marker or operator class names an `Object.prototype` member (`__proto__`, `constructor`, …) | error — class names are own policy keys only |
 | Operator class request names an unknown class | error |
+| Operator class request contradicts the repository's marker, or the marker is unreadable | error — decided before any plan exists |
 | A `FORBID` path would be materialized | error — the plan is invalid |
-| Unsafe materialization path (absolute, `..`, backslash, NUL, glob) or non-text content | error |
-| CLI asked to name a revision the checkout is not at, or policy inputs differ from it | error — no plan is printed |
+| Unsafe materialization or mandatory path (absolute, `.`/`..`/empty segment, trailing slash, backslash, NUL, glob) or non-text content | error |
+| A template `source` outside `templates/` | error |
+| A class seed category that is not one category name (`all`, a joined list) | error |
+| CLI asked to name a revision the checkout is not at; any authority input modified, untracked, or git-ignored; or run inside a foreign enclosing checkout | error — no plan is printed |
+| CLI given an unknown option | error |
 | Retired category (`l9-ci-pack`, `on-org-update`) requested | error |
 
 ### Usage
@@ -176,12 +181,17 @@ make governance-plan ARGS='--repo Quantum-L9/example --authority-sha HEAD --mark
 ```
 
 `--authority-sha HEAD` resolves to the checkout's commit. The CLI refuses to
-compile when HEAD is not the asserted SHA or when any policy input
-(`policies/`, `.github/labels.yml`, `templates/`, the schema) differs from it,
-so a printed plan always names the revision whose bytes produced it. Every
-failure exits 2 with a `[code]` prefix: `class_resolution`,
-`policy_contradiction`, `unsafe_path`, `missing_fact`, `authority_identity`,
-`digest`, or `contract`.
+compile when HEAD is not the asserted SHA, when git resolves a different
+repository root than this checkout, or when any authority input differs from
+HEAD — modified, untracked, or git-ignored. Authority inputs are the policy
+files, `.github/labels.yml`, `templates/`, the plan schema, **and the compiler's
+own modules** (`COMPILER_SOURCES`): a modified compiler produces different plan
+bytes from the same policy, so a printed plan always names the revision whose
+bytes — data and code — produced it. `--marker-file` resolves against the
+caller's working directory. Every compile failure exits 2 with a `[code]`
+prefix: `class_resolution`, `policy_contradiction`, `unsafe_path`,
+`missing_fact`, `authority_identity`, `digest`, or `contract`; an unexpected
+internal error exits 1.
 
 ### Migration state: M1
 

@@ -33,6 +33,8 @@ const {
   verifyPlan,
   narrowMaterialization,
   assertCleanAuthority,
+  AUTHORITY_INPUTS,
+  COMPILER_SOURCES,
   GovernanceCompileError,
   NEVER_AUTO_APPLIED_SETTINGS,
 } = require('./compile-repo-governance.js');
@@ -57,6 +59,8 @@ const marker = (cls) => ({ ...ABSENT, marker_state: 'present', marker_text: `pro
 
 // A copy of the real authority that a test can bend without touching disk.
 const clone = (v) => JSON.parse(JSON.stringify(v));
+// Explicit code-unit order (Sonar S2871); identical to a comparator-less sort.
+const byCodeUnit = (a, b) => (a < b ? -1 : Number(a > b));
 const realAuthority = loadAuthority(fs);
 const validate = compileSchema(realAuthority.schema);
 
@@ -110,7 +114,21 @@ try {
   // Present-but-empty is a malformed declaration, not absence (AC-ADV-009).
   throwsCode(() => compile('Quantum-L9/x', { ...ABSENT, marker_state: 'present', marker_text: '' }), 'class_resolution');
   throwsCode(() => compile('Quantum-L9/x', ABSENT, { requestedClass: 'defualt' }), 'class_resolution', /operator requested unknown/);
-  console.log('ok: malformed, empty, or unknown marker and unknown operator class fail closed (GV-002)');
+  // Object.prototype members are not classes (GOV-005): each would otherwise
+  // resolve to an empty class with no FORBID list.
+  for (const proto of ['__proto__', 'constructor', 'toString', 'hasOwnProperty', 'valueOf']) {
+    throwsCode(() => compile('Quantum-L9/x', marker(proto)), 'class_resolution', /unknown class/);
+    throwsCode(() => compile('Quantum-L9/x', ABSENT, { requestedClass: proto }), 'class_resolution', /operator requested unknown/);
+  }
+  // An operator request never overrules or ignores the repository's marker:
+  // the contradiction is refused before a plan exists (no late attestation).
+  throwsCode(() => compile('Quantum-L9/x', marker('non_constellation_python'), { requestedClass: 'default' }), 'class_resolution', /declares non_constellation_python/);
+  throwsCode(() => compile('Quantum-L9/x', { ...ABSENT, marker_state: 'present', marker_text: 'garbage' }, { requestedClass: 'default' }), 'class_resolution', /no parseable profile/);
+  assert.deepStrictEqual(compile('Quantum-L9/x', marker('self_governed'), { requestedClass: 'self_governed' }).repo_class, {
+    name: 'self_governed',
+    resolved_from: 'operator_request',
+  });
+  console.log('ok: malformed, empty, unknown, prototype-named, or contradicted class declarations fail closed (GV-002)');
 
   // ── missing / malformed facts ───────────────────────────────────────────
   throwsCode(() => compile('Quantum-L9/x', { ...ABSENT, marker_state: 'unknown' }), 'missing_fact');
@@ -147,8 +165,8 @@ try {
       });
       const actual = Object.fromEntries(withFacts.materialize.files.map((f) => [f.path, f.content_utf8]));
       assert.deepStrictEqual(
-        Object.keys(actual).sort(),
-        Object.keys(expected).sort(),
+        Object.keys(actual).sort(byCodeUnit),
+        Object.keys(expected).sort(byCodeUnit),
         `class ${cls} ${JSON.stringify(facts)}: write set differs from buildSeedPayload`,
       );
       for (const dest of Object.keys(expected)) {
@@ -268,11 +286,20 @@ try {
     delete broken[key];
     assert.ok(validate(broken).length > 0, `schema rejects a plan missing ${key}`);
   }
-  for (const bad of ['/etc/passwd', '../escape', 'a/../../b', 'a\\..\\b', 'C:\\x', 'nul\u0000byte']) {
+  for (const bad of ['/etc/passwd', '../escape', 'a/../../b', 'a\\..\\b', 'C:\\x', 'nul\u0000byte', 'a/./b', './x', 'x/', 'a//b', 'x/*', '']) {
     const broken = clone(base);
     broken.materialize.files[0].path = bad;
     assert.ok(validate(broken).length > 0, `schema rejects materialize path ${JSON.stringify(bad)}`);
   }
+  // Schema and compiler agree on sources too.
+  for (const bad of ['/proc/self/environ', '../x', 'ops/x.js', 'templates/../x']) {
+    const broken = clone(base);
+    broken.materialize.files[0].source = bad;
+    assert.ok(validate(broken).length > 0, `schema rejects materialize source ${JSON.stringify(bad)}`);
+  }
+  // `items: false` is enforced by the subset validator, not skipped.
+  assert.deepStrictEqual(compileSchema({ type: 'array', items: false })([]), []);
+  assert.ok(compileSchema({ type: 'array', items: false })([1]).length > 0);
   const extraKey = clone(base);
   extraKey.surprise = true;
   assert.ok(validate(extraKey).length > 0, 'schema rejects unknown top-level keys');
@@ -298,6 +325,31 @@ try {
     { path: '.github/CODEOWNERS', mode: 'managed', source: 'templates/CODEOWNERS.repo' },
   );
   assert.deepStrictEqual(dflt.mandatory_files.effective.find((r) => r.path === 'README.md'), { path: 'README.md', mode: 'present' });
+  // A root CODEOWNERS is the repository's ownership authority: the org file
+  // under .github/ (which GitHub would read first) is not required (B-08).
+  const rootOwned = compile('Quantum-L9/unlisted', { ...ABSENT, has_root_codeowners: true });
+  assert.ok(!rootOwned.mandatory_files.effective.some((r) => r.path === '.github/CODEOWNERS'));
+  assert.deepStrictEqual(rootOwned.mandatory_files.waived, ['.github/CODEOWNERS']);
+  assert.ok(!rootOwned.materialize.files.some((f) => f.path === '.github/CODEOWNERS'));
+  // A mandatory source is read from the authority checkout and published into
+  // consumer PRs, so it must name an org template.
+  for (const bad of ['/proc/self/environ', '../secrets', 'templates/../.git/config', 'ops/x.js', 7]) {
+    const bent = clone(realAuthority);
+    bent.mandatory.files.find((f) => f.path === '.github/CODEOWNERS').source = bad;
+    throwsCode(() => compileGovernancePlan({ fs, authority: bent, authoritySha: SHA, repository: 'Quantum-L9/x', facts: ABSENT }), 'unsafe_path');
+  }
+  // Seed categories are checked one entry at a time: `all` (the default set)
+  // and whitespace-joined lists are not categories.
+  for (const bad of [['all'], ['codeowners dependabot'], ['codeowners,dependabot'], [7]]) {
+    const bent = clone(realAuthority);
+    bent.classes.classes.default.seed_categories = bad;
+    throwsCode(() => compileGovernancePlan({ fs, authority: bent, authoritySha: SHA, repository: 'Quantum-L9/x', facts: ABSENT }), 'policy_contradiction', /unknown seed category/);
+  }
+  // The marker is required on the remote only where it decided the class.
+  assert.ok(compile('Quantum-L9/x', marker('default')).attestation.required_present.includes('.l9/org-birth-profile.yaml'));
+  for (const markerless of [compile('Quantum-L9/unlisted'), compile('Quantum-L9/l9-repo-template'), compile('Quantum-L9/x', ABSENT, { requestedClass: 'self_governed' })]) {
+    assert.deepStrictEqual(markerless.attestation.required_present, ['README.md', 'LICENSE'], markerless.repo_class.resolved_from);
+  }
   // Repo-level exceptions exempt every mandatory file, as enforce-policies does.
   const exempt = compile('Quantum-L9/.github');
   assert.deepStrictEqual(exempt.mandatory_files.effective, []);
@@ -351,6 +403,17 @@ try {
   throwsCode(() => verifyPlan(base, { ...expect, digest: 'f'.repeat(64) }), 'digest', /not the expected/);
   throwsCode(() => verifyPlan(base, { ...expect, authoritySha: OTHER_SHA }), 'authority_identity');
   throwsCode(() => verifyPlan(base, { ...expect, repository: 'Quantum-L9/someone-else' }), 'authority_identity');
+  // Identity is mandatory: omitting it must not verify a foreign plan.
+  throwsCode(() => verifyPlan(base, { schema: realAuthority.schema, repository: 'Quantum-L9/determinism' }), 'contract', /authoritySha/);
+  throwsCode(() => verifyPlan(base, { schema: realAuthority.schema, authoritySha: SHA }), 'contract', /repository/);
+  const duplicated = clone(base);
+  duplicated.materialize.files.push(clone(duplicated.materialize.files[0]));
+  duplicated.digest.value = computePlanDigest(duplicated);
+  throwsCode(() => verifyPlan(duplicated, expect), 'contract', /more than once/);
+  const widened = clone(base);
+  widened.materialize.files[0].capability = 'labels';
+  widened.digest.value = computePlanDigest(widened);
+  throwsCode(() => verifyPlan(widened, expect), 'policy_contradiction', /unauthorized capability/);
   const schemaInvalid = clone(base);
   delete schemaInvalid.attestation;
   throwsCode(() => verifyPlan(schemaInvalid, expect), 'contract', /not schema-valid/);
@@ -372,17 +435,75 @@ try {
   const all = narrowMaterialization(dflt, null);
   assert.strictEqual(all.length, dflt.materialize.files.length);
   const narrowed = narrowMaterialization(dflt, ['codeowners', 'dependabot']);
-  assert.deepStrictEqual(narrowed.map((f) => f.path).sort(), ['.github/CODEOWNERS', '.github/dependabot.yml']);
+  assert.deepStrictEqual(narrowed.map((f) => f.path).sort(byCodeUnit), ['.github/CODEOWNERS', '.github/dependabot.yml']);
   throwsCode(() => narrowMaterialization(ncp, ['governance']), 'policy_contradiction', /not authorized/);
   throwsCode(() => narrowMaterialization(dflt, ['l9-ci-pack']), 'policy_contradiction', /not authorized/);
   console.log('ok: an operator filter narrows the plan and refuses any capability it does not authorize (GV-004)');
 
-  // ── production provenance (B-20) ────────────────────────────────────────
-  assert.doesNotThrow(() => assertCleanAuthority({ headSha: SHA, authoritySha: SHA, gitStatus: '' }));
-  throwsCode(() => assertCleanAuthority({ headSha: SHA, authoritySha: OTHER_SHA, gitStatus: '' }), 'authority_identity', /not the asserted/);
-  throwsCode(() => assertCleanAuthority({ headSha: SHA, authoritySha: SHA, gitStatus: ' M policies/repo-settings.yml\n' }), 'authority_identity', /differ/);
-  throwsCode(() => assertCleanAuthority({ headSha: 'garbage', authoritySha: SHA, gitStatus: '' }), 'authority_identity');
-  console.log('ok: a production compile refuses a dirty or mismatched authority checkout');
+  // ── production provenance (B-20, ADR-0003) ──────────────────────────────
+  const where = { toplevel: root, root };
+  assert.doesNotThrow(() => assertCleanAuthority({ headSha: SHA, authoritySha: SHA, gitStatus: '', ...where }));
+  throwsCode(() => assertCleanAuthority({ headSha: SHA, authoritySha: OTHER_SHA, gitStatus: '', ...where }), 'authority_identity', /not the asserted/);
+  throwsCode(() => assertCleanAuthority({ headSha: SHA, authoritySha: SHA, gitStatus: ' M policies/repo-settings.yml\n', ...where }), 'authority_identity', /differ/);
+  throwsCode(() => assertCleanAuthority({ headSha: SHA, authoritySha: SHA, gitStatus: '!! templates/issue-templates/.mcp.json\n', ...where }), 'authority_identity', /differ/);
+  throwsCode(() => assertCleanAuthority({ headSha: 'garbage', authoritySha: SHA, gitStatus: '', ...where }), 'authority_identity');
+  throwsCode(() => assertCleanAuthority({ headSha: SHA, authoritySha: SHA, gitStatus: '', toplevel: path.dirname(root), root }), 'authority_identity', /not this authority checkout/);
+  throwsCode(() => assertCleanAuthority({ headSha: SHA, authoritySha: SHA, gitStatus: '' }), 'authority_identity', /root/);
+  // The compiler's own code is authority: every ops/ module it loads is
+  // covered, so a modified compiler cannot run under a committed SHA.
+  const loaded = Object.keys(require.cache)
+    .map((f) => path.relative(root, f))
+    .filter((f) => f.startsWith('ops/') && !f.startsWith('ops/test-'));
+  for (const mod of loaded) {
+    assert.ok(
+      AUTHORITY_INPUTS.some((input) => mod === input || mod.startsWith(`${input}/`)),
+      `compiler module ${mod} is not an authority input`,
+    );
+  }
+  for (const src of COMPILER_SOURCES) assert.ok(AUTHORITY_INPUTS.includes(src), `${src} is an authority input`);
+  console.log('ok: a production compile refuses a dirty, ignored-file, foreign-root, or mismatched authority checkout; compiler code is authority');
+
+  // The CLI end to end, in a throwaway clone: an edit to compiler code and an
+  // ignored file under templates/ both refuse, a clean clone compiles.
+  const { execFileSync, spawnSync } = require('node:child_process');
+  const os = require('node:os');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-prov-'));
+  const authorityClone = path.join(tmp, 'authority');
+  // A fresh repository holding exactly the authority inputs of this working
+  // tree (no clone, so a shallow CI checkout works the same).
+  fs.mkdirSync(authorityClone);
+  for (const input of AUTHORITY_INPUTS) {
+    fs.cpSync(path.join(root, input), path.join(authorityClone, input), { recursive: true });
+  }
+  const gitIn = (...a) => execFileSync('/usr/bin/git', ['-C', authorityClone, ...a], { encoding: 'utf8' });
+  gitIn('init', '-q');
+  gitIn('add', '-A');
+  gitIn('-c', 'user.email=t@t', '-c', 'user.name=t', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'authority');
+  const cli = (...a) => spawnSync(process.execPath, [path.join(authorityClone, 'ops/compile-repo-governance.js'), '--repo', 'Quantum-L9/x', '--authority-sha', 'HEAD', ...a], { encoding: 'utf8', cwd: tmp });
+  const clean = cli('--marker-absent');
+  assert.strictEqual(clean.status, 0, `clean clone compiles: ${clean.stderr}`);
+  assert.strictEqual(JSON.parse(clean.stdout).authority.sha, gitIn('rev-parse', 'HEAD').trim());
+  assert.match(cli('--marker-absent', '--has-rot-codeowners').stderr, /\[contract\] unknown option --has-rot-codeowners/);
+  assert.strictEqual(cli('--marker-absent', '--has-rot-codeowners').status, 2);
+  const missingMarker = cli('--marker-file', 'nope.yaml');
+  assert.strictEqual(missingMarker.status, 2);
+  assert.match(missingMarker.stderr, /\[missing_fact\].*nope\.yaml/);
+  fs.writeFileSync(path.join(tmp, 'marker.yaml'), 'profile: non_constellation_python\n');
+  const relMarker = cli('--marker-file', 'marker.yaml');
+  assert.strictEqual(relMarker.status, 0, `relative --marker-file resolves from the caller's cwd: ${relMarker.stderr}`);
+  assert.strictEqual(JSON.parse(relMarker.stdout).repo_class.name, 'non_constellation_python');
+  fs.appendFileSync(path.join(authorityClone, 'ops/build-seed-payload.js'), '\n// local edit\n');
+  const dirtyCode = cli('--marker-absent');
+  assert.strictEqual(dirtyCode.status, 2, 'modified compiler code refuses');
+  assert.match(dirtyCode.stderr, /ops\/build-seed-payload\.js/);
+  gitIn('checkout', '--', 'ops/build-seed-payload.js');
+  fs.appendFileSync(path.join(authorityClone, '.git/info/exclude'), 'templates/community-health/ignored.md\n');
+  fs.writeFileSync(path.join(authorityClone, 'templates/community-health/ignored.md'), 'x\n');
+  const ignored = cli('--marker-absent');
+  assert.strictEqual(ignored.status, 2, 'a git-ignored template file refuses');
+  assert.match(ignored.stderr, /ignored\.md/);
+  fs.rmSync(tmp, { recursive: true, force: true });
+  console.log('ok: CLI refuses edited compiler code, ignored template files, unknown options, unreadable markers (all exit 2 with a code)');
 
   // ── purity (AC-ARCH-005) ────────────────────────────────────────────────
   const source = fs.readFileSync('ops/compile-repo-governance.js', 'utf8');
