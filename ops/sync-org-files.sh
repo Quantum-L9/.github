@@ -22,7 +22,7 @@
 #                     are rewritten to the consumer's origin remote
 #   issue-templates   numbered chooser + ci-failure + seed-ci-failure +
 #                     gov-violation + config.yml (no bug_report / feature_request)
-#   pr-templates      pull_request_template.md + PULL_REQUEST_TEMPLATE/agent.md
+#   pr-templates      .github/pull_request_template.md (org-managed; overwritten)
 #   l9-ci-pack        RETIRED — CI is never distributed from this repository;
 #                     Python lint only when pyproject.toml or requirements.txt
 #   labels            OPT-IN — org sync-labels-all.yml already fans labels
@@ -199,10 +199,6 @@ for cat in "${CATEGORIES[@]}"; do
       echo "── PR template ──"
       sync_file "$TEMPLATES_DIR/pr-templates/pull_request_template.md" \
         "$CONSUMER_ROOT/.github/pull_request_template.md"
-      if [[ -f "$TEMPLATES_DIR/pr-templates/agent.md" ]]; then
-        sync_file "$TEMPLATES_DIR/pr-templates/agent.md" \
-          "$CONSUMER_ROOT/.github/PULL_REQUEST_TEMPLATE/agent.md"
-      fi
       ;;
     on-org-update)
       # RETIRED with l9-ci-pack: this receiver's only action was running

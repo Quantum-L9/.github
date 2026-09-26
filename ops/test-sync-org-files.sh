@@ -76,4 +76,17 @@ mkdir -p "$NO_REMOTE"
 [[ -f "$NO_REMOTE/SECURITY.md" ]] || fail "SECURITY.md not synced without a remote"
 echo "✅ no-remote consumer still syncs (verbatim, no invented repository)"
 
+# ── 4. pr-templates: org-managed template overwrites; agent.md is retired ─────
+STALE="$WORK/stale-template"
+make_consumer "$STALE"
+mkdir -p "$STALE/.github"
+printf '## Summary\nold local template\n' > "$STALE/.github/pull_request_template.md"
+(cd "$ORG_ROOT" && bash ops/sync-org-files.sh "$STALE" --include pr-templates) > /dev/null
+cmp -s "$ORG_ROOT/templates/pr-templates/pull_request_template.md" \
+  "$STALE/.github/pull_request_template.md" || \
+  fail "a stale .github/pull_request_template.md was not replaced by the org template"
+[[ ! -e "$STALE/.github/PULL_REQUEST_TEMPLATE/agent.md" ]] || \
+  fail "retired PULL_REQUEST_TEMPLATE/agent.md was synced"
+echo "✅ pr-templates replaces a stale template and syncs no agent.md"
+
 echo "ok: shell seeder preserves root CODEOWNERS and rewrites advisory links"

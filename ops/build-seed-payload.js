@@ -354,8 +354,8 @@ function buildSeedPayload({
       case 'pr-templates': {
         const human = readIfFile(fs, 'templates/pr-templates/pull_request_template.md');
         if (human != null) payload['.github/pull_request_template.md'] = human;
-        const agent = readIfFile(fs, 'templates/pr-templates/agent.md');
-        if (agent != null) payload['.github/PULL_REQUEST_TEMPLATE/agent.md'] = agent;
+        // PULL_REQUEST_TEMPLATE/agent.md is retired: it lives only under
+        // _archived/, and test-build-seed-payload.js fails if it is seeded again.
         break;
       }
       default:

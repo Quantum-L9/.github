@@ -189,8 +189,19 @@ try {
   assert.match(caller, /permissions:\n\s+contents: read\n\s+issues: write/);
   assert.doesNotMatch(caller, /^\s+secrets:\s*inherit\s*$/m);
 
-  assert.ok(defaultPayload['.github/PULL_REQUEST_TEMPLATE/agent.md']);
   assert.ok(defaultPayload['.github/pull_request_template.md']);
+
+  // PULL_REQUEST_TEMPLATE/agent.md is mothballed: archived under _archived/,
+  // seeded by no category, readable by no seed path.
+  for (const cats of ['all', ['pr-templates']]) {
+    const p = buildSeedPayload({ fs, categories: cats, hasPython: true });
+    assert.ok(
+      !Object.keys(p).some((d) => d.startsWith('.github/PULL_REQUEST_TEMPLATE/')),
+      `no seed payload may carry .github/PULL_REQUEST_TEMPLATE/* (categories: ${cats})`,
+    );
+  }
+  assert.ok(!fs.existsSync('templates/pr-templates/agent.md'), 'agent.md stays out of templates/');
+  assert.ok(fs.existsSync('_archived/templates/pr-templates/agent.md'), 'agent.md is archived, not deleted');
   assert.ok(defaultPayload['.github/ISSUE_TEMPLATE/1-bug.yml']);
   assert.ok(defaultPayload['.github/ISSUE_TEMPLATE/2-feature.yml']);
 

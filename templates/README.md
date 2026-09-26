@@ -28,7 +28,7 @@ live in each repo's tree to take effect.
 | `labels.yml` | `.github/labels.yml` | **Opt-in** — org `sync-labels-all.yml` fans labels |
 | `community-health/` | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md` | No LICENSE / FUNDING / SUPPORT in default seed |
 | `issue-templates/` | `.github/ISSUE_TEMPLATE/` | Numbered chooser + ci/seed-ci/gov + config; no `bug_report` / `feature_request` |
-| `pr-templates/` | `pull_request_template.md` + `PULL_REQUEST_TEMPLATE/agent.md` | Human + agent/chore variants |
+| `pr-templates/` | `.github/pull_request_template.md` | Org-managed: a seed PR replaces a stale copy |
 
 ## Inheritance vs. physical copy
 
