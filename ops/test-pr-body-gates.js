@@ -26,11 +26,16 @@ const { extractScript, makeCore } = require("./workflow-script-harness.js");
 const root = path.resolve(__dirname, "..");
 const wf = (name) => path.join(root, ".github", "workflows", name);
 
-/** Load a script body, substituting the `${{ }}` expressions the runner would. */
-function load(file, expressions = {}) {
+/**
+ * Load a script body, substituting the `${{ }}` expressions the runner would.
+ * `rewrites` are [RegExp, replacement] pairs applied after, used to point the
+ * runner's scratch paths at a private temp directory.
+ */
+function load(file, expressions = {}, rewrites = []) {
 	let body = extractScript(file);
 	for (const [expr, value] of Object.entries(expressions))
 		body = body.split(expr).join(value);
+	for (const [pattern, value] of rewrites) body = body.replace(pattern, value);
 	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pr-body-gates-"));
 	const mod = path.join(dir, `${path.basename(file, ".yml")}.script.js`);
 	fs.writeFileSync(
@@ -139,17 +144,24 @@ async function main() {
 	}
 
 	// pr-files: a rename declared by its new path, by its row key, or by make
-	// pr's "(renamed: `old -> new`)" form is declared.
-	const run = load(wf("pr-files.yml"));
-	const saved = ["/tmp/changed.txt", "/tmp/shortstat.txt"].map((f) => [
-		f,
-		fs.existsSync(f) ? fs.readFileSync(f) : null,
+	// pr's "(renamed: `old -> new`)" form is declared. The script reads the
+	// diff the preceding `run:` step wrote to the runner's scratch dir; point
+	// it at a private temp dir so the suite never writes a shared path.
+	const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "pr-files-"));
+	const run = load(wf("pr-files.yml"), {}, [
+		[
+			/(["'])\/tmp\/(changed|shortstat)\.txt\1/g,
+			(_m, q, n) => `${q}${path.join(scratch, `${n}.txt`)}${q}`,
+		],
 	]);
 	fs.writeFileSync(
-		"/tmp/changed.txt",
+		path.join(scratch, "changed.txt"),
 		"M\tsrc/a.py\nR100\told/name.py\tnew/name.py\n",
 	);
-	fs.writeFileSync("/tmp/shortstat.txt", " 2 files changed, 3 insertions(+)\n");
+	fs.writeFileSync(
+		path.join(scratch, "shortstat.txt"),
+		" 2 files changed, 3 insertions(+)\n",
+	);
 	try {
 		for (const declared of [
 			"`new/name.py` — moved",
@@ -192,10 +204,7 @@ async function main() {
 			"pr-files: an undeclared rename still fails",
 		);
 	} finally {
-		for (const [f, data] of saved) {
-			if (data === null) fs.rmSync(f, { force: true });
-			else fs.writeFileSync(f, data);
-		}
+		fs.rmSync(scratch, { recursive: true, force: true });
 	}
 
 	console.log(
