@@ -1,5 +1,12 @@
 name: Governance — PR
 
+# THE org PR-body contract. Every seeded repository runs it through its
+# governance.yml caller (templates/governance-caller.yml); this repository
+# runs it strictly through pr-gates.yml. The template that satisfies it is
+# templates/pr-templates/pull_request_template.md. Check a body locally with
+# `node ops/check-pr-body.js body.md` (runs this exact script);
+# ops/test-pr-body-contract.js is the proof.
+
 on:
   workflow_call:
     inputs:
@@ -9,9 +16,10 @@ on:
                          # Callers opt in per repo with `with: {strict: true}`.
                          # See docs/ADVISORY.md for the promotion ladder.
 
+# Reads the event payload only. A caller may grant more; this never needs it.
 permissions:
   contents: read
-  pull-requests: write
+  pull-requests: read
 
 jobs:
   gates:
@@ -24,26 +32,41 @@ jobs:
             const body = context.payload.pull_request.body || '';
             const fail = [];
             const sec = n => (body.match(new RegExp(`##\\s*${n}([\\s\\S]*?)(?=\\n##\\s|$)`,'i'))||[,''])[1];
+            // The template's own placeholder blocks are not content.
+            const PROBLEM_PLACEHOLDER = /```[^`]*paste the error[\s\S]*?```/gi;
+            const EVIDENCE_PLACEHOLDER = /```\s*\$ pytest -q\s*\n\s*\$ ruff check \. && pyright\s*```/g;
 
-            const problem = sec('Problem').replace(/<!--[\s\S]*?-->/g,'').replace(/Closes #\d*/i,'').trim();
-            if (problem.length < 30) fail.push('**Problem** empty or boilerplate.');
+            const problem = sec('Problem').replace(/<!--[\s\S]*?-->/g,'').replace(PROBLEM_PLACEHOLDER,'').replace(/Closes #\d*/i,'').trim();
+            if (problem.length < 30)
+              fail.push('**Problem** is empty or still the template placeholder — describe the error or gap this fixes (30+ characters).');
 
             const risk = [...sec('Risk').matchAll(/^\s*-\s*\[([ xX])\]/gm)].filter(m => m[1] !== ' ');
-            if (risk.length !== 1) fail.push(`**Risk**: check exactly one (found ${risk.length}).`);
+            if (risk.length !== 1) fail.push(`**Risk**: tick exactly one of Low / Medium / High (found ${risk.length}).`);
 
-            if (!/```[\s\S]*?```/.test(sec('Evidence')) && !/actions\/runs\/\d+/.test(sec('Evidence')))
-              fail.push('**Evidence**: paste output or link a CI run.');
+            const evidence = sec('Evidence').replace(/<!--[\s\S]*?-->/g,'').replace(EVIDENCE_PLACEHOLDER,'');
+            if (!/```[\s\S]*?```/.test(evidence) && !/actions\/runs\/\d+/.test(evidence))
+              fail.push('**Evidence**: paste real command output in a ``` block or link an actions/runs/<id> run — the template placeholder does not count.');
 
+            // An unchecked gate needs a written reason after a separator
+            // (—, --, :, or n/a). What counts is the reason itself: at least
+            // four letters once `n/a`, `not applicable`, and separators are
+            // removed. "n/a — no API change" passes; "n/a", "—", "-- x" fail.
+            const reasonLetters = item => {
+              const at = item.search(/—|--|:|\bn\/a\b|\bnot applicable\b/i);
+              if (at < 0) return 0;
+              const reason = item.slice(at).replace(/\bn\/a\b|\bnot applicable\b|—|--|:/gi, '');
+              return (reason.match(/[A-Za-z]/g) || []).length;
+            };
             for (const line of sec('Gates').split('\n')) {
               const m = line.match(/^\s*-\s*\[ \]\s*(.+)$/);
-              if (m && !/(n\/a|not applicable|—|--|:)\s*\S{4,}/i.test(m[1]))
-                fail.push(`**Gate** unchecked without reason: _${m[1].slice(0,60)}_`);
+              if (m && reasonLetters(m[1]) < 4)
+                fail.push(`**Gate** unchecked without a reason: _${m[1].slice(0,60)}_ — tick it, or write \`- [ ] <gate> — n/a: <why, 4+ letters>\`.`);
             }
 
             if (fail.length) {
               core.summary.addHeading('Governance gates',2).addList(fail).write();
               if (${{ inputs.strict }}) {
-                core.setFailed(`${fail.length} gate issue(s).`);
+                core.setFailed(`${fail.length} gate issue(s). See the job summary, or run: node ops/check-pr-body.js (Quantum-L9/.github).`);
               } else {
                 core.notice(`${fail.length} advisory gate finding(s) — not blocking. See job summary.`);
               }
