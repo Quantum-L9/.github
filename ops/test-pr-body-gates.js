@@ -151,7 +151,7 @@ async function main() {
 	const run = load(wf("pr-files.yml"), {}, [
 		[
 			/(["'])\/tmp\/(changed|shortstat)\.txt\1/g,
-			(_m, q, n) => `${q}${path.join(scratch, `${n}.txt`)}${q}`,
+			(_m, q, n) => q + path.join(scratch, n + ".txt") + q,
 		],
 	]);
 	fs.writeFileSync(
