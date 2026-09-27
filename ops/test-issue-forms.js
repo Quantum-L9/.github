@@ -13,8 +13,10 @@
  * triage workflow read `Environment` and `Breaking change?`, which no form
  * had, and the governance form's Severity carried no S1–S4 token at all.
  *
- * Forms are loaded with the runner's python3 + PyYAML, the same way
- * enforce-policies.yml reads YAML. The rendered body follows GitHub's issue
+ * Forms are loaded with the system python3 and PyYAML, the same dependency
+ * enforce-policies.yml and repo-birth-bootstrap.yml already take on the
+ * ubuntu-latest runner. The interpreter is a fixed path, not a PATH lookup, and
+ * a missing PyYAML fails with the install command rather than a traceback. The rendered body follows GitHub's issue
  * form output: `### <label>`, a blank line, the answer (`_No response_` when
  * empty; a fenced block when the field sets `render`).
  *
@@ -33,14 +35,25 @@ const MIRRORS = ['ISSUE_TEMPLATE', 'templates/issue-templates'];
 const TRIAGE = path.join(root, '.github/workflows/issue-triage.yml');
 const GOV_ISSUE = path.join(root, '.github/workflows/governance-issue.yml');
 
-const loadYaml = (file) =>
-  JSON.parse(
-    execFileSync(
-      'python3',
-      ['-c', 'import json,sys,yaml; print(json.dumps(yaml.safe_load(open(sys.argv[1]))))', file],
-      { encoding: 'utf8' },
-    ),
-  );
+const PYTHON = '/usr/bin/python3';
+function loadYaml(file) {
+  try {
+    return JSON.parse(
+      execFileSync(
+        PYTHON,
+        ['-c', 'import json,sys,yaml; print(json.dumps(yaml.safe_load(open(sys.argv[1]))))', file],
+        { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+      ),
+    );
+  } catch (e) {
+    if (/No module named .?yaml/.test(String(e.stderr))) {
+      throw new Error(
+        `${PYTHON} lacks PyYAML — install it (python3 -m pip install pyyaml) and re-run`,
+      );
+    }
+    throw e;
+  }
+}
 const ymlIn = (dir) =>
   fs
     .readdirSync(path.join(root, dir))
@@ -94,7 +107,7 @@ for (const n of names.filter((f) => f !== 'config.yml')) {
   // Done when closes every form, as Gates closes every PR.
   assert.ok(byId.done && required(byId.done), `${n}: required "Done when"`);
   assert.strictEqual(byId.done.attributes.label, 'Done when');
-  assert.ok(byId.related && byId.related.attributes.label === 'Related', `${n}: Related link`);
+  assert.ok(byId.related?.attributes.label === 'Related', `${n}: Related link`);
 
   if (EVIDENCE_FORMS.has(n)) {
     assert.ok(byId.evidence && required(byId.evidence), `${n}: required Evidence`);
@@ -138,7 +151,10 @@ const read = (file, fn) => {
     let at = line.indexOf(`${fn}(`);
     while (at !== -1) {
       const close = line.indexOf(')', at);
-      const first = line.slice(at + fn.length + 1, close).split(',')[0].trim();
+      const first = line
+        .slice(at + fn.length + 1, close)
+        .split(',')[0]
+        .trim();
       if (first.startsWith("'")) out.push(first.slice(1, -1));
       at = line.indexOf(`${fn}(`, close);
     }
@@ -172,12 +188,15 @@ function render(form, answers) {
     const v = answers[el.id];
     let text;
     if (el.type === 'checkboxes') {
-      text = a.options.map((o, i) => `- [${(v || []).includes(i) ? 'X' : ' '}] ${o.label}`).join('\n');
+      text = a.options
+        .map((o, i) => `- [${(v || []).includes(i) ? 'X' : ' '}] ${o.label}`)
+        .join('\n');
     } else if (v === undefined || v === '') {
       text = '_No response_';
     } else if (el.type === 'dropdown') {
       const picks = Array.isArray(v) ? v : [v];
-      for (const p of picks) assert.ok(a.options.includes(p), `"${p}" is not an option of ${el.id}`);
+      for (const p of picks)
+        assert.ok(a.options.includes(p), `"${p}" is not an option of ${el.id}`);
       text = picks.join(', ');
     } else if (a.render) {
       text = `\`\`\`${a.render}\n${v}\n\`\`\``;
@@ -247,7 +266,9 @@ async function run(script, body, labels = [], action = 'opened') {
   assert.deepStrictEqual(r.failures, []);
   r = await run(triage, render(bug, fill(bug, { environment: 'CI' })));
   assert.ok(r.added.includes('area:ci') && !r.added.includes('env:prod'), 'CI routes to area:ci');
-  console.log('ok: bug Severity/Environment/Last known good route to sev, priority, env, regression');
+  console.log(
+    'ok: bug Severity/Environment/Last known good route to sev, priority, env, regression',
+  );
 
   const feat = forms['2-feature.yml'];
   r = await run(
@@ -272,7 +293,12 @@ async function run(script, body, labels = [], action = 'opened') {
   // Severity is the only priority input: a re-set severity moves the labels.
   const inc = forms['4-incident.yml'];
   const incBody = render(inc, fill(inc));
-  r = await run(triage, incBody, ['type:incident', 'sev:untriaged', 'priority:P0', 'sev:S3'], 'edited');
+  r = await run(
+    triage,
+    incBody,
+    ['type:incident', 'sev:untriaged', 'priority:P0', 'sev:S3'],
+    'edited',
+  );
   assert.deepStrictEqual(r.added, ['priority:P0', 'sev:S1']);
   assert.deepStrictEqual(r.removed, ['sev:S3', 'sev:untriaged']);
   r = await run(triage, incBody, ['type:incident', 'sev:S1', 'priority:P0'], 'edited');
@@ -281,7 +307,9 @@ async function run(script, body, labels = [], action = 'opened') {
 
   for (const n of ['ci-failure.yml', 'seed-ci-failure.yml', 'gov-violation.yml']) {
     const form = forms[n];
-    const s1 = form.body.find((el) => el.id === 'severity').attributes.options.find((o) => o.startsWith('S1'));
+    const s1 = form.body
+      .find((el) => el.id === 'severity')
+      .attributes.options.find((o) => o.startsWith('S1'));
     r = await run(triage, render(form, fill(form, { severity: s1 })));
     assert.ok(r.added.includes('sev:S1') && r.added.includes('priority:P0'), `${n}: S1 → P0`);
     const g = await run(govIssue, render(form, fill(form, { severity: s1 })));
@@ -304,7 +332,37 @@ async function run(script, body, labels = [], action = 'opened') {
     /https:\/\/github\.com\/Quantum-L9\/\.github\/blob\/main\/docs\/issue-templates\/EXAMPLE\.md/,
     'the worked-example link is absolute, so it resolves from a consumer repo',
   );
-  console.log('ok: Evidence nudge accepts a run URL, reads pre-rename bodies, links an absolute example');
+  console.log(
+    'ok: Evidence nudge accepts a run URL, reads pre-rename bodies, links an absolute example',
+  );
+
+  // Consumers run governance-issue.yml, not issue-triage.yml: every routing
+  // label a form advertises must come out of both parsers identically.
+  const routing = {
+    '1-bug.yml': {
+      environment: 'Production',
+      regression: 'v1.0.0',
+      severity: 'S3 — degraded, workaround exists',
+    },
+    '2-feature.yml': {
+      scope: 'L — multi-repo or migration',
+      breaking: 'Yes — consumers must change something',
+    },
+    '3-task.yml': { scope: 'S — under a day' },
+  };
+  for (const [n, form] of Object.entries(forms)) {
+    const body = render(form, fill(form, routing[n] || {}));
+    const labels = ['sev:untriaged', 'priority:P0'];
+    const t = await run(triage, body, labels, 'edited');
+    const c = await run(govIssue, body, labels, 'edited');
+    assert.deepStrictEqual(c.added, t.added, `${n}: consumer labels diverge from triage`);
+    assert.deepStrictEqual(c.removed, t.removed, `${n}: consumer label removals diverge`);
+  }
+  r = await run(govIssue, render(bug, fill(bug, routing['1-bug.yml'])));
+  assert.deepStrictEqual(r.added, ['env:prod', 'priority:P2', 'regression', 'sev:S3']);
+  console.log(
+    'ok: governance-issue.yml (consumers) routes every form exactly like issue-triage.yml',
+  );
 
   const jwt = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.sig';
   r = await run(triage, render(bug, fill(bug, { context: jwt })));
