@@ -29,7 +29,7 @@ diagnose CI failures.
 | Secret scanning | `ops/activate-all.sh` → org API | alerts only | No |
 | Governance seeding | `auto-seed-new-repo.yml` | PR-based | No |
 | Label sync | `sync-labels-all.yml` (weekly) | additive | No |
-| Drift remediation | `continuous-sync.yml` (weekly) | PR-based | No |
+| Drift remediation | `continuous-sync.yml` (manual; schedule paused) | PR-based | No |
 | Policy enforcement | `enforce-policies.yml` (weekly) | auto-correct settings | No |
 | SHA-pin audit | `audit-pins-org.yml` (monthly) | report only | No |
 | Preflight check | `preflight-scheduled.yml` (monthly) | report only | No |
@@ -53,10 +53,10 @@ diagnose CI failures.
     ├── governance-issue.yml             labels only, never fails
     ├── governance-report.yml            weekly read-only posture issue
     ├── seed-governance.yml              dispatch-only, dry-run default
-    ├── auto-seed-new-repo.yml           seeds new/unseeded repos via PR
+    ├── auto-seed-new-repo.yml           seeds new/unseeded repos via PR (manual)
     ├── sync-labels-all.yml              weekly label fan-out
     ├── preflight-scheduled.yml          monthly drift detection
-    ├── continuous-sync.yml              weekly drift remediation
+    ├── continuous-sync.yml              drift remediation (manual; schedule paused)
     ├── audit-pins-org.yml               monthly SHA-pin audit
     ├── dispatch-template-update.yml     notifies consumers on change
     └── enforce-policies.yml             weekly policy enforcement
@@ -105,13 +105,17 @@ After running `ops/activate-all.sh`:
 | Day | Time (UTC) | Workflow | Action |
 | --- | --- | --- | --- |
 | Monday | 09:30 | `sync-labels-all.yml` | Syncs label taxonomy to all repos |
-| Tuesday | 11:00 | `continuous-sync.yml` | Detects drift, opens remediation PRs |
 | Wednesday | 13:00 | `enforce-policies.yml` | Corrects repo settings, reports missing files |
 | Weekly | 08:00 | `governance-report.yml` | Measures org governance coverage |
 | 1st | 10:00 | `preflight-scheduled.yml` | Detects org-wide config drift |
 | 15th | 12:00 | `audit-pins-org.yml` | Reports floating action refs |
 | On push | — | `dispatch-template-update.yml` | Notifies consumers of template changes |
-| On create | — | `auto-seed-new-repo.yml` | Seeds governance into new repos |
+| Manual | — | `auto-seed-new-repo.yml` | Seeds governance into new repos (`make new-repo` or workflow_dispatch) |
+| Manual | — | `continuous-sync.yml` | Detects drift, opens remediation PRs (workflow_dispatch) |
+
+Seeding is manual-only while it is under development: the hourly auto-seed and
+weekly drift re-seed schedules are commented out, not deleted
+(`ops/test-seed-cadence.js` guards this).
 
 ## Quick start
 

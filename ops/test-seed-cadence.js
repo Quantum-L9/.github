@@ -18,26 +18,32 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const MANUAL_ONLY = ['auto-seed-new-repo.yml', 'continuous-sync.yml'];
 
-/** The `on:` block of a workflow, comments stripped. */
+/** The trimmed lines of a workflow's `on:` block, comments stripped. */
 function triggers(text) {
   const lines = text.split('\n');
-  const start = lines.findIndex((l) => /^on:\s*$/.test(l));
+  const start = lines.findIndex((l) => l.trimEnd() === 'on:');
   assert.ok(start >= 0, 'workflow has a block-style `on:`');
   const out = [];
   for (const line of lines.slice(start + 1)) {
-    if (/^\S/.test(line)) break;
-    const code = line.replace(/#.*$/, '');
+    if (line !== '' && line[0] !== ' ' && line[0] !== '\t') break;
+    const hash = line.indexOf('#');
+    const code = hash === -1 ? line : line.slice(0, hash);
     if (code.trim()) out.push(code);
   }
-  return out.join('\n');
+  return out.map((l) => l.trim());
 }
 
 for (const name of MANUAL_ONLY) {
   const file = path.join(root, '.github/workflows', name);
   assert.ok(fs.existsSync(file), `${name} is paused, not deleted`);
   const on = triggers(fs.readFileSync(file, 'utf8'));
-  assert.ok(!/^\s*schedule:/m.test(on), `${name} must have no active schedule`);
-  assert.ok(!/cron:/.test(on), `${name} must have no active cron`);
-  assert.match(on, /^\s*workflow_dispatch:/m, `${name} stays runnable by hand`);
+  assert.ok(!on.some((l) => l.startsWith('schedule:')), `${name} must have no active schedule`);
+  assert.ok(!on.some((l) => l.includes('cron:')), `${name} must have no active cron`);
+  assert.ok(
+    on.some((l) => l.startsWith('workflow_dispatch:')),
+    `${name} stays runnable by hand`,
+  );
 }
-console.log(`ok: ${MANUAL_ONLY.join(', ')} are manual-only (no active schedule, workflow_dispatch kept)`);
+console.log(
+  `ok: ${MANUAL_ONLY.join(', ')} are manual-only (no active schedule, workflow_dispatch kept)`,
+);

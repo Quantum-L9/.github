@@ -73,9 +73,9 @@ manual intervention:
 
 | Event | Automation | Your Action |
 | --- | --- | --- |
-| New repo created | `auto-seed-new-repo.yml` opens a PR with CODEOWNERS + dependabot + governance caller | Merge the PR |
+| New repo created with `make new-repo` (or a manual `auto-seed-new-repo.yml` run) | `auto-seed-new-repo.yml` opens a PR with CODEOWNERS + dependabot + governance caller | Merge the PR |
 | Template changes in `.github` | `dispatch-template-update.yml` notifies your repo | Merge the auto-sync PR (if you have `on-org-update.yml`) |
-| Governance files deleted | `continuous-sync.yml` opens a restoration PR | Merge or opt out (`.l9/no-sync`) |
+| Governance files deleted | A manual `continuous-sync.yml` run opens a restoration PR (schedule paused) | Merge or opt out (`.l9/no-sync`) |
 | Repo settings drift | `enforce-policies.yml` auto-corrects | Nothing — settings are restored |
 | Labels missing | `sync-labels-all.yml` adds them | Nothing — labels appear |
 

@@ -22,7 +22,7 @@ For questions, architectural discussions, and community input:
 
 Many governance tasks are handled automatically. Before opening an issue:
 
-- **Missing CODEOWNERS/dependabot?** → Wait for the weekly `continuous-sync.yml` PR
+- **Missing CODEOWNERS/dependabot?** → Ask a maintainer to run `continuous-sync.yml` (manual while seeding is under development)
 - **Labels missing?** → Wait for the weekly `sync-labels-all.yml` run (Monday)
 - **Repo settings wrong?** → Wait for the weekly `enforce-policies.yml` run (Wednesday)
 - **Need to sync CI?** → Run `make sync-ci` or wait for `dispatch-template-update.yml`
