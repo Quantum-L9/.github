@@ -1,86 +1,121 @@
-name: CI Pipeline Failure
-description: Report a CI pipeline failure for triage by the platform team
-title: "[CI Failure]: "
+name: 🔴 CI failure
+description: A CI run is red and it is not explained by a code bug in the change under test.
+title: "ci: "
 labels: ["type:bug", "area:ci", "needs:triage"]
 assignees: []
 body:
   - type: markdown
     attributes:
       value: |
-        Use this template for CI pipeline failures that are not explained by a code bug.
-        For code bugs that cause test failures, use the Bug Report template instead.
+        Use this when the pipeline itself is the problem — a kernel, a runner, a pin,
+        a required-check collision. A code bug that happens to fail tests is a **Bug**.
+        A red governance seed or auto-seed PR is **Seed CI failure**.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What went red, and what it blocks (a merge, a release, every PR in the repo).
+    validations:
+      required: true
 
   - type: input
     id: workflow-run-url
     attributes:
-      label: Workflow Run URL
-      description: Paste the full URL of the failed GitHub Actions run.
-      placeholder: "https://github.com/Quantum-L9/l9-ci-core/actions/runs/XXXXXXXXX"
+      label: Workflow run URL
+      description: Full URL of the failed GitHub Actions run.
+      placeholder: "https://github.com/Quantum-L9/example/actions/runs/XXXXXXXXX"
     validations:
       required: true
 
   - type: input
     id: failed-job
     attributes:
-      label: Failed Job Name
-      placeholder: "pr-pipeline / security-scan / scorecard"
+      label: Failed job
+      placeholder: "Analyze (central Core)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-workflow
+    attributes:
+      label: Affected workflow
+      description: Which workflow owns the failing job. Current v2 entries first; v1 kernels are legacy wrappers.
+      options:
+        - analyze-semgrep (l9-analysis.yml — v2 central Core)
+        - l9-lint-test.yml (Python hygiene, consumer template)
+        - l9-lint-test-node.yml (Node/TS hygiene, consumer template)
+        - org governance caller (governance-pr / pr-files / PR gates)
+        - v1 kernel (pr-pipeline, release-publish, nightly, pre-commit-ci, trio-governance, security, scorecard, sbom)
+        - repo-local workflow
     validations:
       required: true
 
   - type: dropdown
     id: trigger
     attributes:
-      label: Triggered By
+      label: Triggered by
       options:
-        - Pull Request
+        - Pull request
         - Push to main
         - Scheduled (cron)
-        - Workflow Dispatch
+        - Workflow dispatch
         - Tag push
     validations:
       required: true
 
   - type: textarea
-    id: error-output
+    id: evidence
     attributes:
-      label: Error Output
-      description: Paste the relevant error section from the failed step.
+      label: Evidence
+      description: The error section from the failed step, verbatim.
       render: shell
     validations:
       required: true
 
   - type: dropdown
-    id: bisect-attempted
+    id: severity
     attributes:
-      label: Bisect Attempted?
+      label: Severity
+      description: Pick exactly one.
       options:
-        - "No — first occurrence"
-        - "No — intermittent failure"
-        - "Yes — narrowed to specific commit (paste SHA below)"
-        - "Yes — cannot reproduce locally"
+        - S4 — noisy, does not block anything
+        - S3 — blocks one PR, workaround exists
+        - S2 — blocks every PR in a repo, or a release
+        - S1 — blocks the org, or a security gate is not enforcing
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Reproducibility
+      options:
+        - Every run on this commit
+        - Intermittent — passed on re-run
+        - Also red on the base branch
+        - Narrowed to a commit (Last known good version below)
     validations:
       required: true
 
   - type: input
-    id: bisect-sha
+    id: regression
     attributes:
-      label: Bisect SHA (if applicable)
-      placeholder: "2b330a5aab90cd7781bef08f14c5e7904b61bc56"
+      label: Last known good version
+      description: Last green SHA of this workflow, if known. It becomes the bisect range.
 
-  - type: dropdown
-    id: affected-kernel
+  - type: textarea
+    id: done
     attributes:
-      label: Affected Kernel
-      options:
-        - pr-pipeline.yml
-        - release-publish.yml
-        - nightly.yml
-        - pre-commit-ci.yml
-        - trio-governance.yml
-        - security.yml
-        - scorecard.yml
-        - sbom.yml
-        - l9-self-ci.yml (inline only)
-        - Not a kernel call (repo-local workflow)
+      label: Done when
+      description: The run that proves it is fixed.
+      placeholder: "the same job is green on a re-run of the PR that failed"
     validations:
       required: true
+
+  - type: input
+    id: related
+    attributes:
+      label: Related
+      description: The PR or issue this failure blocks.
+      placeholder: "blocks #34"

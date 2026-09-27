@@ -41,8 +41,8 @@ representing the community in public spaces.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior:
 
-- Open [`gov-violation.yml`](.github/ISSUE_TEMPLATE/gov-violation.yml) for a public, routable report.
-- Use this repository's Security Advisory form for a confidential / reporter-privacy path (see SECURITY.md).
+- Use this repository's Security Advisory form, which is private to the reporter and maintainers (see SECURITY.md).
+- Do not use a public issue form: issues, including `gov-violation.yml`, are public and keep their edit history.
 
 Do not "mention @platform" in markdown as the enforcement action. The resolvable owner is the CODEOWNERS team `@Quantum-L9/platform` on `.github/`, `SECURITY.md`, and `CODEOWNERS` only.
 

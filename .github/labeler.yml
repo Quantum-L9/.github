@@ -25,7 +25,11 @@ area:ops:
 
 area:issue-templates:
   - changed-files:
-      - any-glob-to-any-file: ".github/ISSUE_TEMPLATE/**"
+      - any-glob-to-any-file:
+          - ".github/ISSUE_TEMPLATE/**"
+          - "ISSUE_TEMPLATE/**"
+          - "templates/issue-templates/**"
+          - "docs/issue-templates/**"
 
 area:community-health:
   - changed-files:

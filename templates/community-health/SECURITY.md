@@ -7,7 +7,7 @@ severity_sla:
 routing:
   vulnerability: security-advisory
   conduct: CODE_OF_CONDUCT.md
-  ci_seed_failure: ci-failure.yml
+  ci_seed_failure: seed-ci-failure.yml
 ---
 
 # Security Policy
@@ -33,8 +33,8 @@ The org seeder rewrites that URL to `$GITHUB_REPOSITORY/security/advisories/new`
 for the consumer being seeded. `ISSUE_TEMPLATE/config.yml` `contact_links` use
 the same URL.
 
-Conduct reports go to `CODE_OF_CONDUCT.md` / `gov-violation.yml`. CI seed
-failures go to `ci-failure.yml` or `seed-ci-failure.yml`.
+Conduct reports go through `CODE_OF_CONDUCT.md` (the private advisory form, never a
+public issue). CI failures go to `ci-failure.yml`; a red seed PR to `seed-ci-failure.yml`.
 
 Include:
 

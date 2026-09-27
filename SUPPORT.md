@@ -8,15 +8,21 @@ Open a GitHub Issue in the relevant repository using the appropriate template:
 
 | Issue Type | Template |
 |---|---|
-| Bug report | [Bug Report](https://github.com/Quantum-L9/.github/issues/new?template=bug_report.yml) |
-| Feature request | [Feature Request](https://github.com/Quantum-L9/.github/issues/new?template=feature_request.yml) |
-| Governance violation | [Gov Violation](https://github.com/Quantum-L9/.github/issues/new?template=gov-violation.yml) |
-| CI pipeline failure | [CI Failure](https://github.com/Quantum-L9/.github/issues/new?template=ci-failure.yml) |
+| Bug | [Bug](https://github.com/Quantum-L9/.github/issues/new?template=1-bug.yml) |
+| Feature | [Feature](https://github.com/Quantum-L9/.github/issues/new?template=2-feature.yml) |
+| Task | [Task](https://github.com/Quantum-L9/.github/issues/new?template=3-task.yml) |
+| Incident | [Incident](https://github.com/Quantum-L9/.github/issues/new?template=4-incident.yml) |
+| CI failure | [CI failure](https://github.com/Quantum-L9/.github/issues/new?template=ci-failure.yml) |
+| Seed / auto-seed CI failure | [Seed CI failure](https://github.com/Quantum-L9/.github/issues/new?template=seed-ci-failure.yml) |
+| Governance violation | [Governance violation](https://github.com/Quantum-L9/.github/issues/new?template=gov-violation.yml) |
 
-### Secondary: GitHub Discussions
+A filled-in example: [docs/issue-templates/EXAMPLE.md](docs/issue-templates/EXAMPLE.md).
 
-For questions, architectural discussions, and community input:
-[github.com/Quantum-L9/.github/discussions](https://github.com/Quantum-L9/.github/discussions)
+### Questions
+
+GitHub Discussions are not enabled for this organization. Ask on the PR or issue
+you are working from; file a Task only for work with a known outcome — a question
+filed as a bug is the most common way an issue tracker rots.
 
 ## Automated Governance
 

@@ -6,9 +6,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        CI pipeline failures go to
-        [l9-ci-debt-resolver](https://github.com/Quantum-L9/l9-ci-debt-resolver/issues/new)
-        instead — that component owns failure diagnosis.
+        Symptom first, theory last — the same order as the PR template
+        (Problem → Evidence → Severity → Done when). A red CI run goes to
+        **CI failure**; a vulnerability goes to a private security advisory.
 
   - type: textarea
     id: problem
@@ -21,8 +21,8 @@ body:
   - type: textarea
     id: evidence
     attributes:
-      label: Error output
-      description: Traceback, failing assertion, or log line. Redact secrets.
+      label: Evidence
+      description: Traceback, failing assertion, log line, or run URL. Redact secrets.
       render: shell
     validations:
       required: true
@@ -34,17 +34,36 @@ body:
       description: Steps from a clean checkout. Best effort is fine.
       render: shell
 
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Where you saw it. Production reports are labelled env:prod.
+      options:
+        - Production
+        - Staging
+        - CI
+        - Local
+    validations:
+      required: true
+
   - type: input
     id: version
     attributes:
       label: Version / commit
-      description: Release tag or SHA if you have it.
+      description: Release tag or full SHA — not "main" or "latest".
+
+  - type: input
+    id: regression
+    attributes:
+      label: Last known good version
+      description: If set, this becomes a bisect range and is labelled regression. Blank if unknown.
 
   - type: dropdown
     id: severity
     attributes:
       label: Severity
-      description: Routes triage. Advisory only — nothing is blocked by this.
+      description: Pick exactly one. Triage derives priority from it; inflated severity is ignored.
       options:
         - S4 — cosmetic
         - S3 — degraded, workaround exists
@@ -53,14 +72,24 @@ body:
     validations:
       required: true
 
-  - type: input
-    id: regression
+  - type: textarea
+    id: done
     attributes:
-      label: Last known good version
-      description: If set, implies a bisect range. Leave blank if unknown.
+      label: Done when
+      description: The observable result that closes this issue. The fix PR's Evidence should show exactly this.
+      placeholder: "the reproduction above exits 0 and the report total matches the ledger"
+    validations:
+      required: true
+
+  - type: input
+    id: related
+    attributes:
+      label: Related
+      description: Issues or PRs this blocks, is blocked by, or came from.
+      placeholder: "blocked by #12, blocks #34, from PR #56"
 
   - type: textarea
     id: context
     attributes:
       label: Anything else
-      description: Suspected cause, related issues, workaround in use.
+      description: Suspected cause, workaround in use and why it is unsafe. Theories go here, last.

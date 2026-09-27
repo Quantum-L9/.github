@@ -23,6 +23,9 @@
 
 # Issue templates
 /.github/ISSUE_TEMPLATE/       @Quantum-L9/platform @cryptoxdog
+/ISSUE_TEMPLATE/               @Quantum-L9/platform @cryptoxdog
+/templates/issue-templates/    @Quantum-L9/platform @cryptoxdog
+/docs/issue-templates/         @Quantum-L9/platform @cryptoxdog
 
 # Operational scripts — tag creation, branch protection, SHA pinning
 /ops/                          @Quantum-L9/platform @cryptoxdog
