@@ -1,11 +1,14 @@
 # Continuous Sync: detects governance file drift and auto-opens PRs to restore.
-# Runs weekly. Checks managed files against templates; if drift detected, opens
-# a remediation PR. Repos can opt out with a .l9/no-sync marker file.
+# Cadence: MANUAL ONLY while seeding is under development — the weekly cron is
+# paused (commented out below, not deleted); run with workflow_dispatch
+# (dry_run defaults to true). Checks managed files against templates; if drift
+# is detected, opens a remediation PR. Repos can opt out with .l9/no-sync.
 name: Continuous Sync (drift remediation)
 
 on:
-  schedule:
-    - cron: "0 11 * * 2"  # Tuesday 11:00 UTC
+  # Paused while seeding is under development — manual only (see header).
+  # schedule:
+  #   - cron: "0 11 * * 2"  # Tuesday 11:00 UTC
   workflow_dispatch:
     inputs:
       repo_filter:

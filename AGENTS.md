@@ -10,11 +10,11 @@ scope, schedule, permissions, and interaction model.
 | --- | --- | --- | --- | --- |
 | Governance Reporter | `governance-report.yml` | Weekly (Mon 08:00 UTC) | `.github` repo | Read-only issue |
 | Label Syncer | `sync-labels-all.yml` | Weekly (Mon 09:30 UTC) | All repos | Additive (create/update) |
-| Drift Remediator | `continuous-sync.yml` | Weekly (Tue 11:00 UTC) | All repos | PR-based |
+| Drift Remediator | `continuous-sync.yml` | Manual only — weekly cron paused while seeding is under development | All repos | PR-based |
 | Policy Enforcer | `enforce-policies.yml` | Weekly (Wed 13:00 UTC) | All repos | Auto-correct settings |
 | Preflight Monitor | `preflight-scheduled.yml` | Monthly (1st, 10:00 UTC) | Org-wide | Issue report |
 | Pin Auditor | `audit-pins-org.yml` | Monthly (15th, 12:00 UTC) | All repos | Issue report |
-| Auto-Seeder | `auto-seed-new-repo.yml` | Hourly (:20) + dispatch / repo creation | All repos | PR-based, repo-class aware |
+| Auto-Seeder | `auto-seed-new-repo.yml` | Manual + `repo_created` dispatch — hourly cron paused while seeding is under development | All repos | PR-based, repo-class aware |
 | Birth Bootstrap | `repo-birth-bootstrap.yml` | Dispatch from `l9-repo-template` `make new-repo` | One repo | REMOTE APPLY + remote attestation |
 | Template Dispatcher | `dispatch-template-update.yml` | On push to templates/ | Seeded repos | Event dispatch |
 | Governance PR | `governance-pr.yml` | On PR (workflow_call) | Calling repo | Advisory check |

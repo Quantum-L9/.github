@@ -11,11 +11,12 @@
 # into an l9-repo-template repository, where
 # scripts/inventory_check.py fails closed on exactly those paths.
 #
-# Create-time path: an hourly cron lists org repos and seeds anything
-# missing (or still carrying the stock ESLint node caller). That does not
-# depend on an org webhook or App repository events.
-# repository_dispatch type repo_created remains as an optional fast path
-# if an App/webhook is installed later.
+# Cadence: MANUAL ONLY while the seeding contract is under development. The
+# hourly cron is paused (commented out below, not deleted): there must be no
+# hourly seed. Run it with workflow_dispatch (dry_run defaults to true), or
+# let `make new-repo` fire repository_dispatch repo_created for one new repo.
+# To resume a schedule, restore the cron line in a reviewed PR and update
+# ops/test-seed-cadence.js, which asserts it stays paused.
 #
 # Branch safety: the seed branch is rebuilt as "default branch + one seed
 # commit", so ops/seed-branch-safety.js gates every ref move. A branch with an
@@ -25,8 +26,9 @@
 name: Auto-seed new repository
 
 on:
-  schedule:
-    - cron: '20 * * * *'
+  # Paused while seeding is under development — manual only (see header).
+  # schedule:
+  #   - cron: '20 * * * *'
   repository_dispatch:
     types: [repo_created]
   workflow_dispatch:

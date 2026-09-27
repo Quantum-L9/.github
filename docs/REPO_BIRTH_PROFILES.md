@@ -110,8 +110,9 @@ the class, not the global category list, decides.
 
 ## Birth is immediate, not hourly
 
-`auto-seed-new-repo.yml` still sweeps hourly and still opens a PR — that is the
-**repair** path for repositories that drift or predate their class.
+`auto-seed-new-repo.yml` is the **repair** path for repositories that drift or
+predate their class; it opens a PR. Its hourly sweep is paused while seeding is
+under development — run it manually (`workflow_dispatch`, dry run by default).
 
 A newborn does not wait for it. `make new-repo` dispatches
 `repo-birth-bootstrap.yml` for exactly one repository and waits: labels and
