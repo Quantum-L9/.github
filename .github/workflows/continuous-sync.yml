@@ -1,12 +1,13 @@
 # Continuous Sync: detects governance file drift and auto-opens PRs to restore.
-# Cadence: MANUAL ONLY while seeding is under development — the weekly cron is
-# paused (commented out below, not deleted); run with workflow_dispatch
-# (dry_run defaults to true). Checks managed files against templates; if drift
-# is detected, opens a remediation PR. Repos can opt out with .l9/no-sync.
+# Runs weekly. Checks managed files against templates; if drift detected, opens
+# a remediation PR. Repos can opt out with a .l9/no-sync marker file.
 name: Continuous Sync (drift remediation)
 
 on:
-  # Paused while seeding is under development — manual only (see header).
+  # Cadence: MANUAL ONLY while seeding is under development. The weekly
+  # re-seed is paused (commented out, not deleted); run it with
+  # workflow_dispatch, where dry_run defaults to true. ops/test-seed-cadence.js
+  # keeps it paused until a reviewed change restores the schedule.
   # schedule:
   #   - cron: "0 11 * * 2"  # Tuesday 11:00 UTC
   workflow_dispatch:
