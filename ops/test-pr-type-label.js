@@ -77,7 +77,10 @@ async function run(title, labels = []) {
   // Title edits move the label; area:* and other labels are never touched.
   const retitled = await run('fix: x', ['type:feature', 'breaking', 'area:ci']);
   assert.deepStrictEqual(retitled.added, ['type:bug']);
-  assert.deepStrictEqual(retitled.removed.sort(), ['breaking', 'type:feature']);
+  assert.deepStrictEqual(
+    [...retitled.removed].sort((a, b) => a.localeCompare(b)),
+    ['breaking', 'type:feature'],
+  );
   const same = await run('fix: x', ['type:bug', 'area:ci']);
   assert.deepStrictEqual(same, { added: [], removed: [] }, 'already correct: no API writes');
   console.log('ok: a retitle swaps only the labels this step owns; a correct PR is left alone');

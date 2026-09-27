@@ -27,6 +27,11 @@ const declared = new Set(parseLabels(read('.github/labels.yml')).map((l) => l.na
 /** @type {Array<[string, string]>} [label, where] */
 const refs = [];
 const add = (label, where) => refs.push([label.trim(), where]);
+/** Strip one pair of surrounding quotes (YAML scalar) — no regex backtracking. */
+const unquote = (v) => {
+  const t = v.trim();
+  return /^(["']).*\1$/.test(t) ? t.slice(1, -1) : t;
+};
 
 // Issue forms: this repo's, the root copy, and the copies seeded to consumers.
 for (const dir of ['.github/ISSUE_TEMPLATE', 'ISSUE_TEMPLATE', 'templates/issue-templates']) {
@@ -46,9 +51,9 @@ for (const f of ['.github/dependabot.yml', 'templates/dependabot.yml']) {
     const key = lines[i].match(/^(\s*)labels:\s*$/);
     if (!key) continue;
     for (let j = i + 1; j < lines.length; j++) {
-      const item = lines[j].match(/^\s*-\s*["']?([^"'#]+?)["']?\s*$/);
-      if (!item || lines[j].search(/\S/) <= key[1].length) break;
-      add(item[1], f);
+      const text = lines[j].trim();
+      if (!text.startsWith('-') || lines[j].search(/\S/) <= key[1].length) break;
+      add(unquote(text.slice(1)), f);
     }
   }
 }
@@ -62,8 +67,12 @@ for (const key of [
   'stale-issue-label',
   'stale-pr-label',
 ]) {
-  const m = stale.match(new RegExp(`^\\s*${key}:\\s*"?([^"\\n]+)"?\\s*$`, 'm'));
-  if (m) for (const l of m[1].split(',')) add(l, `stale.yml ${key}`);
+  const line = stale
+    .split('\n')
+    .map((l) => l.trim())
+    .find((l) => l.startsWith(`${key}:`));
+  if (line)
+    for (const l of unquote(line.slice(key.length + 1)).split(',')) add(l, `stale.yml ${key}`);
 }
 
 // PR labeler: every top-level key is a label it applies.

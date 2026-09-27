@@ -39,7 +39,7 @@ const httpError = (status, msg) => Object.assign(new Error(msg), { status });
  */
 function makeGithub({ repos, labels, denyWrites = new Set() }) {
   const calls = [];
-  const state = { labels: JSON.parse(JSON.stringify(labels)) };
+  const state = { labels: structuredClone(labels) };
   const listFor = (repo) => {
     if (!state.labels[repo]) state.labels[repo] = [];
     return state.labels[repo];
@@ -108,7 +108,10 @@ const writesTo = (calls, name) =>
   // its credentials (CANONICAL_LAW §14). Without the environment the vars are
   // empty and the token step fails before any label is written.
   const yaml = fs.readFileSync(WORKFLOW, 'utf8');
-  assert.match(yaml, /^\s+environment:\s*governance-distribution\s*$/m, 'job declares the App environment');
+  assert.ok(
+    yaml.split('\n').some((l) => l.trim() === 'environment: governance-distribution'),
+    'job declares the App environment',
+  );
   assert.match(yaml, /app-id:\s*\$\{\{\s*vars\.GOVERNANCE_APP_ID\s*\}\}/);
   assert.match(yaml, /github-token:\s*\$\{\{\s*steps\.token\.outputs\.token\s*\}\}/);
   console.log('ok: App token minted inside environment governance-distribution');
@@ -135,7 +138,9 @@ const writesTo = (calls, name) =>
   assert.ok(fresh.state.labels.consumer.some((l) => l.name === 'deps'));
   assert.strictEqual(writesTo(fresh.calls, 'old').length, 0, 'archived repos are not swept');
   assert.strictEqual(writesTo(fresh.calls, 'someones-fork').length, 0, 'forks are not swept');
-  console.log('ok: .github and consumers receive the full taxonomy; extras, archives and forks untouched');
+  console.log(
+    'ok: .github and consumers receive the full taxonomy; extras, archives and forks untouched',
+  );
 
   // Re-running on a synced org converges to the same labels.
   const again = await run({ repos, labels: fresh.state.labels });
