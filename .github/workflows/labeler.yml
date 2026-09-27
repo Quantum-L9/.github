@@ -1,11 +1,13 @@
-# Auto-labels PRs by changed path using .github/labeler.yml.
+# Auto-labels PRs by changed path using .github/labeler.yml, and by type from
+# the Conventional Commits PR title (this repo dogfoods the org taxonomy:
+# every PR carries a type:* label, not only area:*).
 # Read-only trigger (pull_request_target) with minimal permissions — never
-# executes PR branch code, only reads the diff and applies labels.
+# executes PR branch code; it reads the diff and the event payload only.
 name: PR Labeler
 
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, edited]
 
 permissions:
   contents: read
@@ -30,3 +32,37 @@ jobs:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           configuration-path: .github/labeler.yml
           sync-labels: true
+
+      # type:* from the PR title: feat -> type:feature, fix -> type:bug, any
+      # other Conventional Commits type -> type:task; `!` adds `breaking`. The
+      # title is read from the event payload, never interpolated into the
+      # script. Only labels this step owns are removed when the title changes;
+      # a title that is not Conventional Commits leaves type labels untouched.
+      - name: Apply type label from the PR title
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const TYPES = { feat: 'type:feature', fix: 'type:bug' };
+            const TASK = new Set(['chore', 'ci', 'docs', 'refactor', 'test', 'build', 'perf', 'style', 'revert']);
+            const OWNED = ['type:feature', 'type:bug', 'type:task', 'breaking'];
+
+            const m = (pr.title || '').match(/^([a-z]+)(\([^)]*\))?(!)?:\s/);
+            const kind = m && (TYPES[m[1]] || (TASK.has(m[1]) ? 'type:task' : null));
+            if (!kind) {
+              core.info(`title is not Conventional Commits; type labels left as they are: ${pr.title}`);
+              return;
+            }
+            const want = new Set([kind]);
+            if (m[3]) want.add('breaking');
+
+            const have = new Set(pr.labels.map((l) => l.name));
+            const add = [...want].filter((l) => !have.has(l));
+            const remove = OWNED.filter((l) => have.has(l) && !want.has(l));
+            for (const name of remove) {
+              await github.rest.issues.removeLabel({ ...context.repo, issue_number: pr.number, name });
+            }
+            if (add.length) {
+              await github.rest.issues.addLabels({ ...context.repo, issue_number: pr.number, labels: add });
+            }
+            core.info(`type labels: +[${add.join(', ')}] -[${remove.join(', ')}]`);
