@@ -10,7 +10,7 @@ on:
 
 jobs:
   l9_security:
-    uses: Quantum-L9/l9-ci-core/.github/workflows/security.yml@059fd45ac2fb5306903b6afcf4fcf48856406418
+    uses: Quantum-L9/l9-ci-core/.github/workflows/security.yml@75c74f1693535897ecc7cba20815921256f6fac6
     secrets: inherit
     with:
       python-version: "3.12"
