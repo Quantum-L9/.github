@@ -128,7 +128,7 @@ jobs:
           set -euo pipefail
           if [ -f requirements-ci.txt ]; then pip install -r requirements-ci.txt; fi
       - name: Install consumer CI toolchain
-        uses: Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@7148fc73dcbf41367f5c5401432dc997b1f4f869  # main@7148fc7
+        uses: Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@059fd45ac2fb5306903b6afcf4fcf48856406418  # main@7148fc7
       - id: srcdir
         name: Resolve source directory
         run: |
@@ -193,7 +193,7 @@ jobs:
       # Core pins land last so a consumer dev extra declaring its own pytest
       # range cannot move the version this job was pinned to.
       - name: Install consumer CI toolchain
-        uses: Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@7148fc73dcbf41367f5c5401432dc997b1f4f869  # main@7148fc7
+        uses: Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@059fd45ac2fb5306903b6afcf4fcf48856406418  # main@7148fc7
       - id: srcdir
         name: Resolve source directory
         run: |
