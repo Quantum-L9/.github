@@ -41,6 +41,7 @@ import argparse
 import hashlib
 import re
 import sys
+from collections import Counter
 from collections.abc import Callable, Iterable, Iterator
 from pathlib import Path
 from typing import Any, cast
@@ -331,11 +332,7 @@ def walk_id_lists(node: Any, path: str) -> Iterator[tuple[str, list[Node]]]:
 
 
 def duplicates(values: Iterable[str]) -> list[str]:
-    seen: set[str] = set()
-    dups: set[str] = set()
-    for v in values:
-        (dups if v in seen else seen).add(v)
-    return sorted(dups)
+    return sorted(v for v, n in Counter(values).items() if n > 1)
 
 
 def has_cycle(edges: dict[str, set[str]]) -> bool:
