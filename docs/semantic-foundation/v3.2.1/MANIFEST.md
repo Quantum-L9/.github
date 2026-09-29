@@ -4,7 +4,7 @@ Release status: **ACTIVE / CANONICAL**
 
 ## Install surface
 
-The release contains 41 files under `semantics/`:
+The release contains 40 files under `semantics/`:
 - `semantics/architecture_patterns.yaml`
 - `semantics/architecture_rules.yaml`
 - `semantics/artifact_model.yaml`
@@ -13,7 +13,6 @@ The release contains 41 files under `semantics/`:
 - `semantics/canonical_sources.yaml`
 - `semantics/capabilities.yaml`
 - `semantics/capability_resolution.yaml`
-- `semantics/compilation_artifacts.yaml`
 - `semantics/compilation_profiles.yaml`
 - `semantics/compiler_contract.yaml`
 - `semantics/compiler_passes.yaml`
@@ -50,6 +49,10 @@ The release contains 41 files under `semantics/`:
 ## Architecture decision records
 
 The release also contains the canonical architecture rationale under `docs/adr/`.
+
+## Removed from the candidate
+
+- `compilation_artifacts.yaml` (formerly under `semantics/`) — duplicate artifact-model authority. `artifact_model.yaml` is the single canonical artifact model (registered in `canonical_sources.yaml`, required by `generic_compiler_manifest.yaml`); no canonical file referenced the removed ledger.
 
 ## Integrity machinery
 

@@ -279,13 +279,13 @@ patterns:
       them consistently across implementations.
     structure:
       nodes:
-        - law_ir
+        - semantic_law_ir
         - fixture_ir
         - conformance_ir
         - target_binding
         - executable_cases
       edges:
-        - from: law_ir
+        - from: semantic_law_ir
           relation: derives
           to: fixture_ir
         - from: fixture_ir

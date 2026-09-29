@@ -39,6 +39,14 @@ properties:
     type: object
   source_spec:
     type: object
+    required:
+      - ref
+      - digest
+    properties:
+      ref:
+        type: semantic_ref
+      digest:
+        type: semantic_digest
   authority:
     type: object
   invariants:
@@ -67,6 +75,14 @@ properties:
     type: array
   compiler:
     type: object
+    required:
+      - profile_ref
+      - profile_digest
+    properties:
+      profile_ref:
+        type: semantic_ref
+      profile_digest:
+        type: semantic_digest
   provenance:
     type: object
   unresolved:

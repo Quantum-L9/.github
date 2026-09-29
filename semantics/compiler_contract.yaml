@@ -20,15 +20,15 @@ inputs:
     - compiler_passes.yaml
     - selector_model.yaml
 operations:
-  - project
-  - derive
-  - synthesize
+  - projection
+  - derivation
+  - synthesis
   - resolution
-  - bind
-  - lower
-  - render
-  - compose
-  - validate
+  - binding_selection
+  - lowering
+  - rendering
+  - composition
+  - validation
 universal_rules:
   deterministic_given_pinned_inputs: true
   source_digest_verification_required: true
@@ -53,7 +53,7 @@ synthesis:
   definition: >
     Construct a candidate satisfying declared constraints. Candidate requires
     subsequent mechanical validation.
-binding:
+binding_selection:
   definition: >
     Select a registered concrete realization for an abstract semantic role.
 lowering:

@@ -28,7 +28,7 @@ irs:
     purpose: JSON-Schema-specific intermediate representation produced from structural requirements 
       under an explicit target binding.
   - id: l9.law-ir/v1
-    semantic_class: law_ir
+    semantic_class: semantic_law_ir
     purpose: Canonical machine-readable representation of normalized laws suitable for deterministic
       derivation, validation, comparison, harvesting, and downstream compilation.
   - id: l9.fixture-ir/v1

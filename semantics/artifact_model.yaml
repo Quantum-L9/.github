@@ -14,6 +14,14 @@ artifacts:
     immutable_by_digest: true
   projection_artifact:
     authority_class: derived
+    schema_ref: l9.schema/projection-artifact@1
+    schema_binding:
+      source_ref: [source_ref]
+      source_digest: [source_digest]
+      projection_profile_ref: [projection_profile_ref]
+      projection_profile_digest: [projection_profile_digest]
+      payload: [payload]
+      artifact_digest: [projection_digest]
     required:
       - source_ref
       - source_digest
@@ -40,6 +48,14 @@ artifacts:
       - artifact_digest
   composed_projection:
     authority_class: derived
+    schema_ref: l9.schema/composed-projection@1
+    schema_binding:
+      component_projection_refs: [components.*.projection_ref]
+      component_projection_digests: [components.*.projection_digest]
+      composition_profile_ref: [composition_profile.ref]
+      composition_profile_digest: [composition_profile.digest]
+      payload: [payload]
+      artifact_digest: [composition_digest]
     required:
       - component_projection_refs
       - component_projection_digests
@@ -91,6 +107,14 @@ artifacts:
       - receipt_digest
   node_spec:
     authority_class: candidate
+    schema_ref: l9.schema/node-spec@1
+    schema_binding:
+      node_identity: [node]
+      purpose: [purpose]
+      invariant_refs: [invariants]
+      desired_capability_refs: [desired_capabilities]
+      technology_intent: [technology]
+      source_coordinates: [authority_ref, source_revision]
     required:
       - node_identity
       - purpose
@@ -103,6 +127,20 @@ artifacts:
       - project_semantic_authority_requires_applicable_owner_or_admission
   node_manifest:
     authority_class: derived
+    schema_ref: l9.schema/node-manifest@1
+    schema_binding:
+      source_node_spec_ref: [source_spec.ref]
+      source_node_spec_digest: [source_spec.digest]
+      resolved_requirement_closure: [requirements]
+      resolved_capability_closure: [capabilities]
+      architecture: [architecture]
+      ports: [ports]
+      provider_bindings: [bindings]
+      conformance_requirements: [conformance]
+      compiler_profile_ref: [compiler.profile_ref]
+      compiler_profile_digest: [compiler.profile_digest]
+      provenance: [provenance]
+      manifest_digest: [manifest_digest]
     required:
       - source_node_spec_ref
       - source_node_spec_digest
@@ -113,6 +151,7 @@ artifacts:
       - provider_bindings
       - conformance_requirements
       - compiler_profile_ref
+      - compiler_profile_digest
       - provenance
       - manifest_digest
     rules:

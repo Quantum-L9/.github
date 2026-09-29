@@ -14,7 +14,7 @@ solvers:
     stage: global_baseline
     handles:
       - invariant_ir
-      - global_baseline
+      - validated_global_baseline
     properties:
       registered: true
       versioned: true
@@ -37,7 +37,7 @@ solvers:
     class: satisfiability
     stage: laws
     handles:
-      - law_ir
+      - semantic_law_ir
     properties:
       registered: true
       versioned: true
@@ -59,6 +59,7 @@ solvers:
     class: conformance
     stage: conformance
     handles:
+      - conformance_requirement_ir
       - conformance_ir
     properties:
       registered: true
@@ -114,7 +115,7 @@ solvers:
     class: conformance
     stage: target_artifacts
     handles:
-      - target_artifact
+      - final_artifacts
     properties:
       registered: true
       versioned: true

@@ -727,7 +727,7 @@ projection_profiles:
 
       solver_catalog:
         selectors:
-          - $.solvers[?(@.handles contains "law_ir")]
+          - $.solvers[?(@.handles contains "semantic_law_ir")]
 
       ir_catalog:
         selectors:
@@ -1060,7 +1060,7 @@ projection_profiles:
 
       solver_catalog:
         selectors:
-          - $.solvers[?(@.handles contains "target_artifact")]
+          - $.solvers[?(@.handles contains "final_artifacts")]
 
       artifact_model:
         selectors:

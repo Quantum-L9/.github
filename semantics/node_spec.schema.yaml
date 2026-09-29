@@ -21,6 +21,8 @@ required:
   - invariants
   - desired_capabilities
   - technology
+  - authority_ref
+  - source_revision
 properties:
   schema:
     const: l9.node-spec/v1

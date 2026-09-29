@@ -5,6 +5,7 @@ authority:
   owner: Quantum-L9/.github
   scope: l9_generic_projection_composition_engine_contract
   authority_class: canonical
+compiler_operation: composition
 inputs:
   required:
     - projection_artifacts

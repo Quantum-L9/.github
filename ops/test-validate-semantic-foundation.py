@@ -20,6 +20,11 @@ from types import ModuleType
 from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
+NODE_BUILD_1 = "l9.compilation/node-build@1"
+NODE_BUILD_2 = "l9.compilation/node-build@2"
+
+Docs = dict[str, Any]
+Mutation = Callable[[Docs], None]
 
 
 def _load_validator() -> ModuleType:
@@ -38,29 +43,358 @@ DOCS, LOAD_ERRORS = V.load_foundation(ROOT)
 FAILURES: list[str] = []
 
 
-def _stage(docs: dict[str, Any], profile_id: str, stage_id: str) -> dict[str, Any]:
-    for p in docs["compilation_profiles.yaml"]["profiles"]:
-        if p["id"] == profile_id:
-            for s in p["stages"]:
-                if s["id"] == stage_id:
-                    return s
-    raise KeyError(f"{profile_id}/{stage_id}")
-
-
-def _stages(docs: dict[str, Any], profile_id: str) -> list[dict[str, Any]]:
+def _stages(docs: Docs, profile_id: str) -> list[dict[str, Any]]:
     for p in docs["compilation_profiles.yaml"]["profiles"]:
         if p["id"] == profile_id:
             return p["stages"]
     raise KeyError(profile_id)
 
 
-def expect_failure(
-    name: str, gate: str, mutate: Callable[[dict[str, Any]], None], needle: str
-) -> None:
+def _stage(docs: Docs, profile_id: str, stage_id: str) -> dict[str, Any]:
+    for s in _stages(docs, profile_id):
+        if s["id"] == stage_id:
+            return s
+    raise KeyError(f"{profile_id}/{stage_id}")
+
+
+def _artifact(docs: Docs, kind: str) -> dict[str, Any]:
+    return docs["artifact_model.yaml"]["artifacts"][kind]
+
+
+def _schema_props(docs: Docs, name: str) -> dict[str, Any]:
+    return docs[name]["properties"]
+
+
+# ─── mutations ───────────────────────────────────────────────────────────────
+
+
+def undeclared_receipt_operation(docs: Docs) -> None:
+    docs["compiler_receipt.schema.yaml"]["properties"]["operation"]["enum"].append(
+        "compilation"
+    )
+
+
+def composition_as_pass(docs: Docs) -> None:
+    docs["compiler_passes.yaml"]["passes"].append(
+        {"id": "l9.pass/compose@1", "operation": "composition"}
+    )
+
+
+def verb_spelling_in_catalog(docs: Docs) -> None:
+    ops = docs["compiler_contract.yaml"]["operations"]
+    ops[ops.index("projection")] = "project"
+
+
+def unreceiptable_operation(docs: Docs) -> None:
+    docs["compiler_receipt.schema.yaml"]["properties"]["operation"]["enum"].remove(
+        "resolution"
+    )
+
+
+def unknown_operation(docs: Docs) -> None:
+    _stage(docs, NODE_BUILD_2, "laws")["operations"].append("formalization")
+
+
+def unknown_solver(docs: Docs) -> None:
+    _stage(docs, NODE_BUILD_2, "ports")["validation"]["solver_ref"] = (
+        "l9.solver/interface-compatibility-validator@1"
+    )
+
+
+def wrong_stage_solver(docs: Docs) -> None:
+    _stage(docs, NODE_BUILD_2, "ports")["validation"]["solver_ref"] = (
+        "graph-constraint-validator/v1"
+    )
+
+
+def dangling_solver_selector(docs: Docs) -> None:
+    for s in docs["solver_catalog.yaml"]["solvers"]:
+        if s["id"] == "logic-sat/v1":
+            s["handles"] = ["law_ir"]
+
+
+def no_validation_subjects(docs: Docs) -> None:
+    del _stage(docs, NODE_BUILD_2, "laws")["validation"]["subjects"]
+
+
+def subject_not_produced(docs: Docs) -> None:
+    _stage(docs, NODE_BUILD_2, "ports")["validation"]["subjects"] = ["architecture_ir"]
+
+
+def subject_not_handled(docs: Docs) -> None:
+    _stage(docs, NODE_BUILD_1, "global_baseline")["validation"]["subjects"] = [
+        "global_baseline"
+    ]
+    _stage(docs, NODE_BUILD_1, "global_baseline")["produces"].append("global_baseline")
+
+
+def future_stage_dependency(docs: Docs) -> None:
+    _stage(docs, NODE_BUILD_2, "architecture")["consumes"].append(
+        "conformance_requirement_ir"
+    )
+
+
+def conformance_before_bindings(docs: Docs) -> None:
+    stages = _stages(docs, NODE_BUILD_2)
+    ids = [s["id"] for s in stages]
+    i, j = ids.index("provider_bindings"), ids.index("conformance")
+    stages[i], stages[j] = stages[j], stages[i]
+    stages[i]["ordinal"], stages[j]["ordinal"] = i + 1, j + 1
+
+
+def stage_identity_drift(docs: Docs) -> None:
+    _stage(docs, NODE_BUILD_2, "provider_bindings")["id"] = "technology_bindings"
+
+
+def drifted_derivation_input(docs: Docs) -> None:
+    inputs = docs["conformance_model.yaml"]["requirement_derivation_inputs"]
+    inputs[inputs.index("provider_bindings")] = "technology_bindings"
+
+
+def drifted_dependency_node(docs: Docs) -> None:
+    deps = docs["semantic_dependency_model.yaml"]["dependency_rules"]["node_manifest"][
+        "depends_on"
+    ]
+    deps[deps.index("provider_binding_resolution")] = "technology_binding_resolution"
+
+
+def dependency_cycle(docs: Docs) -> None:
+    docs["semantic_dependency_model.yaml"]["dependency_rules"]["node_spec"][
+        "depends_on"
+    ].append("node_manifest")
+
+
+def missing_manifest_digest(docs: Docs) -> None:
+    docs["node_manifest.schema.yaml"]["required"].remove("manifest_digest")
+
+
+def second_artifact_model(docs: Docs) -> None:
+    docs["compilation_artifacts.yaml"] = {
+        "artifact_id": "l9.compilation-artifacts/global@1",
+        "artifact_types": {
+            "node_manifest": {"authority_class": "derived", "required": ["x"]}
+        },
+    }
+
+
+def unbound_requirement(docs: Docs) -> None:
+    _artifact(docs, "node_manifest")["required"].append("runtime_image")
+
+
+def unresolvable_binding(docs: Docs) -> None:
+    _artifact(docs, "node_manifest")["schema_binding"]["ports"] = ["port_list"]
+
+
+def missing_node_spec_source_coordinate(docs: Docs) -> None:
+    docs["node_spec.schema.yaml"]["required"].remove("source_revision")
+
+
+def missing_source_spec_digest(docs: Docs) -> None:
+    _schema_props(docs, "node_manifest.schema.yaml")["source_spec"]["required"].remove(
+        "digest"
+    )
+
+
+def missing_compiler_profile_digest(docs: Docs) -> None:
+    _schema_props(docs, "node_manifest.schema.yaml")["compiler"]["required"].remove(
+        "profile_digest"
+    )
+
+
+def unschematized_binding(docs: Docs) -> None:
+    del _artifact(docs, "node_spec")["schema_ref"]
+
+
+def unresolved_contract(docs: Docs) -> None:
+    docs["compilation_profiles.yaml"]["profiles"][1]["input_contract"] = (
+        "l9.contract/node-birth@9"
+    )
+
+
+def unregistered_ir(docs: Docs) -> None:
+    _stage(docs, NODE_BUILD_2, "ports")["produces"].append("port_contract_ir")
+
+
+def undeclared_input(docs: Docs) -> None:
+    _stage(docs, NODE_BUILD_2, "ports")["consumes"].append("provider_api_surface")
+
+
+# (name, gate, mutation, expected error fragment)
+CASES: list[tuple[str, str, Mutation, str]] = [
+    # F146-08 compiler operation identity
+    (
+        "undeclared receipt operation",
+        "operation_catalog",
+        undeclared_receipt_operation,
+        "receipt operation 'compilation' is not a declared compiler operation",
+    ),
+    (
+        "composition registered as a pass",
+        "operation_catalog",
+        composition_as_pass,
+        "'composition' is an engine operation",
+    ),
+    (
+        "verb spelling in operation catalog",
+        "operation_catalog",
+        verb_spelling_in_catalog,
+        "compiler pass 'projection' is not a declared compiler operation",
+    ),
+    (
+        "operation not receiptable",
+        "operation_catalog",
+        unreceiptable_operation,
+        "compiler operation 'resolution' cannot be receipted",
+    ),
+    (
+        "unknown stage operation",
+        "pass_closure",
+        unknown_operation,
+        "'formalization' is not an admitted compiler pass",
+    ),
+    # F146-09 solver validation subjects
+    (
+        "unknown solver",
+        "solver_closure",
+        unknown_solver,
+        "does not resolve in solver_catalog",
+    ),
+    (
+        "solver registered to the wrong stage",
+        "solver_closure",
+        wrong_stage_solver,
+        "is registered for stage 'architecture'",
+    ),
+    (
+        "projection selector names unhandled class",
+        "solver_closure",
+        dangling_solver_selector,
+        "names solver class 'semantic_law_ir'",
+    ),
+    (
+        "required validation without subjects",
+        "validation_subjects",
+        no_validation_subjects,
+        "declares no subjects",
+    ),
+    (
+        "subject not produced by its stage",
+        "validation_subjects",
+        subject_not_produced,
+        "'architecture_ir' is not produced by this stage",
+    ),
+    (
+        "subject not handled by its solver",
+        "validation_subjects",
+        subject_not_handled,
+        "'global_baseline' is not handled by solver 'predicate-validator/v1'",
+    ),
+    # F146-10 artifact authority and schema binding
+    (
+        "second canonical artifact model",
+        "artifact_authority",
+        second_artifact_model,
+        "compilation_artifacts.yaml.artifact_types declares artifact types",
+    ),
+    (
+        "unbound artifact-model requirement",
+        "schema_binding",
+        unbound_requirement,
+        "required 'runtime_image' has no schema binding",
+    ),
+    (
+        "binding to a nonexistent schema path",
+        "schema_binding",
+        unresolvable_binding,
+        "bound path 'port_list' does not exist",
+    ),
+    (
+        "schematized type without schema_ref",
+        "schema_binding",
+        unschematized_binding,
+        "node_spec: schematized by l9.schema/node-spec@1",
+    ),
+    (
+        "missing NodeSpec source coordinate",
+        "schema_binding",
+        missing_node_spec_source_coordinate,
+        "bound path 'source_revision' is not required",
+    ),
+    (
+        "missing NodeManifest source-spec digest",
+        "schema_binding",
+        missing_source_spec_digest,
+        "bound path 'source_spec.digest' is not required",
+    ),
+    (
+        "missing compiler-profile digest",
+        "schema_binding",
+        missing_compiler_profile_digest,
+        "bound path 'compiler.profile_digest' is not required",
+    ),
+    (
+        "missing required manifest digest",
+        "schema_binding",
+        missing_manifest_digest,
+        "bound path 'manifest_digest' is not required",
+    ),
+    # F146-01..07 regressions
+    (
+        "future-stage dependency",
+        "stage_dataflow",
+        future_stage_dependency,
+        "produced by later-or-same stage 'conformance'",
+    ),
+    (
+        "undeclared stage input",
+        "stage_dataflow",
+        undeclared_input,
+        "consumes 'provider_api_surface'",
+    ),
+    (
+        "conformance before provider bindings",
+        "derivation_inputs",
+        conformance_before_bindings,
+        "'provider_bindings' is produced by a later stage",
+    ),
+    (
+        "stage identity drift",
+        "stage_identity",
+        stage_identity_drift,
+        "more than one stage identity",
+    ),
+    (
+        "drifted derivation input",
+        "derivation_inputs",
+        drifted_derivation_input,
+        "'technology_bindings' resolves to no canonical source or stage identity",
+    ),
+    (
+        "drifted dependency node",
+        "dependency_closure",
+        drifted_dependency_node,
+        "unknown dependency node 'technology_binding_resolution'",
+    ),
+    ("dependency cycle", "dependency_closure", dependency_cycle, "contains a cycle"),
+    (
+        "unresolved contract",
+        "reference_closure",
+        unresolved_contract,
+        "input_contract 'l9.contract/node-birth@9' does not resolve",
+    ),
+    (
+        "unregistered IR",
+        "ir_registration",
+        unregistered_ir,
+        "'port_contract_ir' is not registered",
+    ),
+]
+
+
+def expect_failure(name: str, gate: str, mutate: Mutation, needle: str) -> None:
     docs = copy.deepcopy(DOCS)
     mutate(docs)
-    results = V.run_checks(ROOT, docs, [])
-    errors: list[str] = results[gate]
+    errors: list[str] = V.run_checks(ROOT, docs, [])[gate]
     if any(needle in e for e in errors):
         print(f"✅ {name}: {gate} fails closed")
     else:
@@ -76,85 +410,6 @@ def test_current_foundation_passes() -> None:
         print(f"❌ current foundation: failing gates {failed}")
     else:
         print(f"✅ current foundation: all {len(results)} gates pass")
-
-
-def unknown_solver(docs: dict[str, Any]) -> None:
-    _stage(docs, "l9.compilation/node-build@2", "ports")["validation"]["solver_ref"] = (
-        "l9.solver/interface-compatibility-validator@1"
-    )
-
-
-def unknown_operation(docs: dict[str, Any]) -> None:
-    _stage(docs, "l9.compilation/node-build@2", "laws")["operations"].append(
-        "formalization"
-    )
-
-
-def future_stage_dependency(docs: dict[str, Any]) -> None:
-    # architecture consumes the conformance requirements derived after it
-    _stage(docs, "l9.compilation/node-build@2", "architecture")["consumes"].append(
-        "conformance_requirement_ir"
-    )
-
-
-def conformance_before_bindings(docs: dict[str, Any]) -> None:
-    stages = _stages(docs, "l9.compilation/node-build@2")
-    ids = [s["id"] for s in stages]
-    i, j = ids.index("provider_bindings"), ids.index("conformance")
-    stages[i], stages[j] = stages[j], stages[i]
-    stages[i]["ordinal"], stages[j]["ordinal"] = i + 1, j + 1
-
-
-def stage_identity_drift(docs: dict[str, Any]) -> None:
-    _stage(docs, "l9.compilation/node-build@2", "provider_bindings")["id"] = (
-        "technology_bindings"
-    )
-
-
-def drifted_derivation_input(docs: dict[str, Any]) -> None:
-    inputs = docs["conformance_model.yaml"]["requirement_derivation_inputs"]
-    inputs[inputs.index("provider_bindings")] = "technology_bindings"
-
-
-def drifted_dependency_node(docs: dict[str, Any]) -> None:
-    deps = docs["semantic_dependency_model.yaml"]["dependency_rules"]["node_manifest"][
-        "depends_on"
-    ]
-    deps[deps.index("provider_binding_resolution")] = "technology_binding_resolution"
-
-
-def dependency_cycle(docs: dict[str, Any]) -> None:
-    docs["semantic_dependency_model.yaml"]["dependency_rules"]["node_spec"][
-        "depends_on"
-    ].append("node_manifest")
-
-
-def missing_manifest_digest(docs: dict[str, Any]) -> None:
-    docs["node_manifest.schema.yaml"]["required"].remove("manifest_digest")
-
-
-def unresolved_contract(docs: dict[str, Any]) -> None:
-    docs["compilation_profiles.yaml"]["profiles"][1]["input_contract"] = (
-        "l9.contract/node-birth@9"
-    )
-
-
-def unregistered_ir(docs: dict[str, Any]) -> None:
-    _stage(docs, "l9.compilation/node-build@2", "ports")["produces"].append(
-        "port_contract_ir"
-    )
-
-
-def undeclared_input(docs: dict[str, Any]) -> None:
-    _stage(docs, "l9.compilation/node-build@2", "ports")["consumes"].append(
-        "provider_api_surface"
-    )
-
-
-def unreceiptable_pass(docs: dict[str, Any]) -> None:
-    docs["compiler_receipt.schema.yaml"]["properties"]["operation"]["enum"].remove(
-        "resolution"
-    )
 
 
 def test_duplicate_yaml_key_rejected() -> None:
@@ -191,87 +446,15 @@ def test_release_tamper_detected() -> None:
 def main() -> int:
     print("=== semantic foundation validator regression ===")
     test_current_foundation_passes()
-    expect_failure(
-        "unknown solver",
-        "solver_closure",
-        unknown_solver,
-        "does not resolve in solver_catalog",
-    )
-    expect_failure(
-        "unknown operation",
-        "pass_closure",
-        unknown_operation,
-        "'formalization' is not an admitted compiler pass",
-    )
-    expect_failure(
-        "future-stage dependency",
-        "stage_dataflow",
-        future_stage_dependency,
-        "produced by later-or-same stage 'conformance'",
-    )
-    expect_failure(
-        "conformance before provider bindings",
-        "derivation_inputs",
-        conformance_before_bindings,
-        "'provider_bindings' is produced by a later stage",
-    )
-    expect_failure(
-        "stage identity drift",
-        "stage_identity",
-        stage_identity_drift,
-        "more than one stage identity",
-    )
-    expect_failure(
-        "drifted derivation input",
-        "derivation_inputs",
-        drifted_derivation_input,
-        "'technology_bindings' resolves to no canonical source or stage identity",
-    )
-    expect_failure(
-        "drifted dependency node",
-        "dependency_closure",
-        drifted_dependency_node,
-        "unknown dependency node 'technology_binding_resolution'",
-    )
-    expect_failure(
-        "dependency cycle", "dependency_closure", dependency_cycle, "contains a cycle"
-    )
-    expect_failure(
-        "missing required manifest digest",
-        "artifact_schema",
-        missing_manifest_digest,
-        "requires 'manifest_digest'",
-    )
-    expect_failure(
-        "unresolved contract",
-        "reference_closure",
-        unresolved_contract,
-        "input_contract 'l9.contract/node-birth@9' does not resolve",
-    )
-    expect_failure(
-        "unregistered IR",
-        "ir_registration",
-        unregistered_ir,
-        "'port_contract_ir' is not registered",
-    )
-    expect_failure(
-        "undeclared stage input",
-        "stage_dataflow",
-        undeclared_input,
-        "consumes 'provider_api_surface'",
-    )
-    expect_failure(
-        "unreceiptable pass",
-        "pass_closure",
-        unreceiptable_pass,
-        "cannot receipt admitted pass 'resolution'",
-    )
+    for case in CASES:
+        expect_failure(*case)
     test_duplicate_yaml_key_rejected()
     test_release_tamper_detected()
+    total = len(CASES) + 2
     if FAILURES:
         print(f"\n{len(FAILURES)} case(s) failed: {FAILURES}")
         return 1
-    print("\nall cases passed")
+    print(f"\nall {total} negative cases passed")
     return 0
 
 

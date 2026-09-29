@@ -41,6 +41,8 @@ profiles:
         validation:
           required: true
           solver_ref: predicate-validator/v1
+          subjects:
+            - validated_global_baseline
       - ordinal: 2
         id: project_contracts
         consumes:
@@ -57,6 +59,8 @@ profiles:
         validation:
           required: true
           solver_ref: schema-contract-validator/v1
+          subjects:
+            - project_contract_ir
       - ordinal: 3
         id: laws
         consumes:
@@ -71,6 +75,8 @@ profiles:
         validation:
           required: true
           solver_ref: logic-sat/v1
+          subjects:
+            - semantic_law_ir
       - ordinal: 4
         id: fixtures
         consumes:
@@ -85,6 +91,8 @@ profiles:
         validation:
           required: true
           solver_ref: fixture-derivation-validator/v1
+          subjects:
+            - fixture_ir
       - ordinal: 5
         id: conformance
         consumes:
@@ -100,6 +108,8 @@ profiles:
         validation:
           required: true
           solver_ref: reference-conformance/v1
+          subjects:
+            - conformance_ir
       - ordinal: 6
         id: architecture
         consumes:
@@ -121,6 +131,8 @@ profiles:
         validation:
           required: true
           solver_ref: graph-constraint-validator/v1
+          subjects:
+            - architecture_ir
       - ordinal: 7
         id: ports
         consumes:
@@ -135,6 +147,8 @@ profiles:
         validation:
           required: true
           solver_ref: interface-compatibility/v1
+          subjects:
+            - port_ir
       - ordinal: 8
         id: provider_bindings
         consumes:
@@ -149,6 +163,8 @@ profiles:
         validation:
           required: true
           solver_ref: capability-set-validator/v1
+          subjects:
+            - provider_binding_ir
       - ordinal: 9
         id: implementation
         consumes:
@@ -165,6 +181,8 @@ profiles:
         validation:
           required: true
           solver_ref: implementation-contract-validator/v1
+          subjects:
+            - implementation_ir
       - ordinal: 10
         id: target_artifacts
         consumes:
@@ -183,6 +201,8 @@ profiles:
           required: true
           final_conformance_required: true
           solver_ref: final-conformance/v1
+          subjects:
+            - final_artifacts
   - id: l9.compilation/node-build@2
     purpose: |
       Compile a node from minimal declarative intent through requirement closure, semantic resolution, contracts, laws, fixtures, architecture, ports, provider bindings, conformance, a proof-carrying NodeManifest, implementation IR, and target artifacts.
@@ -202,6 +222,8 @@ profiles:
         validation:
           required: true
           solver_ref: node-spec-validator/v1
+          subjects:
+            - node_spec_ir
       - ordinal: 2
         id: global_baseline
         consumes:
@@ -218,6 +240,8 @@ profiles:
         validation:
           required: true
           solver_ref: predicate-validator/v1
+          subjects:
+            - validated_global_baseline
       - ordinal: 3
         id: requirement_resolution
         consumes:
@@ -234,6 +258,8 @@ profiles:
         validation:
           required: true
           solver_ref: requirement-closure-validator/v1
+          subjects:
+            - requirement_ir
       - ordinal: 4
         id: semantic_resolution
         consumes:
@@ -254,6 +280,10 @@ profiles:
         validation:
           required: true
           solver_ref: semantic-resolution-validator/v1
+          subjects:
+            - capability_closure_ir
+            - architecture_obligations
+            - port_requirements
       - ordinal: 5
         id: project_contracts
         consumes:
@@ -270,6 +300,8 @@ profiles:
         validation:
           required: true
           solver_ref: schema-contract-validator/v1
+          subjects:
+            - project_contract_ir
       - ordinal: 6
         id: laws
         consumes:
@@ -284,6 +316,8 @@ profiles:
         validation:
           required: true
           solver_ref: logic-sat/v1
+          subjects:
+            - semantic_law_ir
       - ordinal: 7
         id: fixtures
         consumes:
@@ -298,6 +332,8 @@ profiles:
         validation:
           required: true
           solver_ref: fixture-derivation-validator/v1
+          subjects:
+            - fixture_ir
       - ordinal: 8
         id: architecture
         consumes:
@@ -317,6 +353,8 @@ profiles:
         validation:
           required: true
           solver_ref: graph-constraint-validator/v1
+          subjects:
+            - architecture_ir
       - ordinal: 9
         id: ports
         consumes:
@@ -333,6 +371,8 @@ profiles:
         validation:
           required: true
           solver_ref: interface-compatibility/v1
+          subjects:
+            - port_ir
       - ordinal: 10
         id: provider_bindings
         consumes:
@@ -348,6 +388,8 @@ profiles:
         validation:
           required: true
           solver_ref: capability-set-validator/v1
+          subjects:
+            - provider_binding_ir
       - ordinal: 11
         id: conformance
         consumes:
@@ -372,6 +414,9 @@ profiles:
         validation:
           required: true
           solver_ref: reference-conformance/v1
+          subjects:
+            - conformance_requirement_ir
+            - conformance_ir
       - ordinal: 12
         id: node_manifest
         consumes:
@@ -392,6 +437,9 @@ profiles:
         validation:
           required: true
           solver_ref: node-manifest-validator/v1
+          subjects:
+            - node_manifest_ir
+            - node_manifest
           resolved_manifest_gate_required: true
       - ordinal: 13
         id: implementation
@@ -408,6 +456,8 @@ profiles:
         validation:
           required: true
           solver_ref: implementation-contract-validator/v1
+          subjects:
+            - implementation_ir
       - ordinal: 14
         id: target_artifacts
         consumes:
@@ -426,6 +476,8 @@ profiles:
           required: true
           final_conformance_required: true
           solver_ref: final-conformance/v1
+          subjects:
+            - final_artifacts
 stage_rules:
   context:
     expression: "StageContext_n = π_stage(ValidatedState_n)"
