@@ -36,12 +36,11 @@ profiles:
           - canonical_l9_vocabulary
         operations:
           - projection
-          - normalization
         produces:
           - validated_global_baseline
         validation:
           required: true
-          solver_ref: l9.solver/global-baseline-validator@1
+          solver_ref: predicate-validator/v1
       - ordinal: 2
         id: project_contracts
         consumes:
@@ -53,12 +52,11 @@ profiles:
         operations:
           - projection
           - synthesis
-          - compilation
         produces:
           - project_contract_ir
         validation:
           required: true
-          solver_ref: l9.solver/contract-validator@1
+          solver_ref: schema-contract-validator/v1
       - ordinal: 3
         id: laws
         consumes:
@@ -68,13 +66,11 @@ profiles:
         operations:
           - projection
           - derivation
-          - formalization
-          - normalization
         produces:
           - semantic_law_ir
         validation:
           required: true
-          solver_ref: l9.solver/law-validator@1
+          solver_ref: logic-sat/v1
       - ordinal: 4
         id: fixtures
         consumes:
@@ -83,13 +79,12 @@ profiles:
         operations:
           - projection
           - derivation
-          - fixture_case_expansion
         produces:
           - fixture_ir
           - fixture_candidate_packets
         validation:
           required: true
-          solver_ref: l9.solver/fixture-derivation-validator@1
+          solver_ref: fixture-derivation-validator/v1
       - ordinal: 5
         id: conformance
         consumes:
@@ -99,13 +94,12 @@ profiles:
         operations:
           - binding_selection
           - lowering
-          - compilation
         produces:
           - conformance_ir
           - executable_conformance_cases
         validation:
           required: true
-          solver_ref: l9.solver/conformance-validator@1
+          solver_ref: reference-conformance/v1
       - ordinal: 6
         id: architecture
         consumes:
@@ -121,14 +115,12 @@ profiles:
         operations:
           - projection
           - synthesis
-          - constraint_solving
-          - pattern_composition
         produces:
           - architecture_ir
           - selected_pattern_refs
         validation:
           required: true
-          solver_ref: l9.solver/architecture-constraint-validator@1
+          solver_ref: graph-constraint-validator/v1
       - ordinal: 7
         id: ports
         consumes:
@@ -138,12 +130,11 @@ profiles:
         operations:
           - projection
           - synthesis
-          - compilation
         produces:
           - port_ir
         validation:
           required: true
-          solver_ref: l9.solver/interface-compatibility-validator@1
+          solver_ref: interface-compatibility/v1
       - ordinal: 8
         id: provider_bindings
         consumes:
@@ -153,13 +144,11 @@ profiles:
         operations:
           - projection
           - binding_selection
-          - compatibility_analysis
-          - compilation
         produces:
           - provider_binding_ir
         validation:
           required: true
-          solver_ref: l9.solver/provider-capability-validator@1
+          solver_ref: capability-set-validator/v1
       - ordinal: 9
         id: implementation
         consumes:
@@ -175,7 +164,7 @@ profiles:
           - implementation_ir
         validation:
           required: true
-          solver_ref: l9.solver/implementation-contract-validator@1
+          solver_ref: implementation-contract-validator/v1
       - ordinal: 10
         id: target_artifacts
         consumes:
@@ -193,10 +182,10 @@ profiles:
         validation:
           required: true
           final_conformance_required: true
-          solver_ref: l9.solver/final-conformance-validator@1
+          solver_ref: final-conformance/v1
   - id: l9.compilation/node-build@2
     purpose: |
-      Compile a node from minimal declarative intent through requirement closure, semantic resolution, contracts, laws, conformance, architecture, ports, technology binding, a proof-carrying NodeManifest, implementation IR, and target artifacts.
+      Compile a node from minimal declarative intent through requirement closure, semantic resolution, contracts, laws, fixtures, architecture, ports, provider bindings, conformance, a proof-carrying NodeManifest, implementation IR, and target artifacts.
     input_contract: l9.contract/node-spec@1
     input_schema: l9.schema/node-spec@1
     resolved_output_contract: l9.contract/node-manifest@1
@@ -207,7 +196,6 @@ profiles:
         consumes:
           - node_spec
         operations:
-          - normalization
           - validation
         produces:
           - node_spec_ir
@@ -225,7 +213,6 @@ profiles:
           - canonical_l9_vocabulary
         operations:
           - projection
-          - normalization
         produces:
           - validated_global_baseline
         validation:
@@ -241,7 +228,6 @@ profiles:
         operations:
           - projection
           - derivation
-          - constraint_solving
           - resolution
         produces:
           - requirement_ir
@@ -260,8 +246,6 @@ profiles:
         operations:
           - projection
           - derivation
-          - constraint_solving
-          - pattern_resolution
           - resolution
         produces:
           - capability_closure_ir
@@ -281,7 +265,6 @@ profiles:
         operations:
           - projection
           - synthesis
-          - compilation
         produces:
           - project_contract_ir
         validation:
@@ -296,8 +279,6 @@ profiles:
         operations:
           - projection
           - derivation
-          - formalization
-          - normalization
         produces:
           - semantic_law_ir
         validation:
@@ -311,7 +292,6 @@ profiles:
         operations:
           - projection
           - derivation
-          - fixture_case_expansion
         produces:
           - fixture_ir
           - fixture_candidate_packets
@@ -319,27 +299,6 @@ profiles:
           required: true
           solver_ref: fixture-derivation-validator/v1
       - ordinal: 8
-        id: conformance
-        consumes:
-          - fixture_ir
-          - conformance_model
-          - capability_closure_ir
-          - applicable_conformance_bindings
-          - fixture_profiles
-        operations:
-          - projection
-          - derivation
-          - binding_selection
-          - lowering
-          - compilation
-        produces:
-          - conformance_requirement_ir
-          - conformance_ir
-          - executable_conformance_cases
-        validation:
-          required: true
-          solver_ref: reference-conformance/v1
-      - ordinal: 9
         id: architecture
         consumes:
           - requirement_ir
@@ -352,15 +311,13 @@ profiles:
         operations:
           - projection
           - synthesis
-          - constraint_solving
-          - pattern_composition
         produces:
           - architecture_ir
           - selected_pattern_refs
         validation:
           required: true
           solver_ref: graph-constraint-validator/v1
-      - ordinal: 10
+      - ordinal: 9
         id: ports
         consumes:
           - architecture_ir
@@ -371,14 +328,13 @@ profiles:
         operations:
           - projection
           - synthesis
-          - compilation
         produces:
           - port_ir
         validation:
           required: true
           solver_ref: interface-compatibility/v1
-      - ordinal: 11
-        id: technology_bindings
+      - ordinal: 10
+        id: provider_bindings
         consumes:
           - port_ir
           - technology_profile
@@ -387,13 +343,35 @@ profiles:
         operations:
           - projection
           - binding_selection
-          - compatibility_analysis
-          - compilation
         produces:
           - provider_binding_ir
         validation:
           required: true
           solver_ref: capability-set-validator/v1
+      - ordinal: 11
+        id: conformance
+        consumes:
+          - fixture_ir
+          - conformance_model
+          - capability_closure_ir
+          - architecture_ir
+          - selected_pattern_refs
+          - port_ir
+          - provider_binding_ir
+          - applicable_conformance_bindings
+          - fixture_profiles
+        operations:
+          - projection
+          - derivation
+          - binding_selection
+          - lowering
+        produces:
+          - conformance_requirement_ir
+          - conformance_ir
+          - executable_conformance_cases
+        validation:
+          required: true
+          solver_ref: reference-conformance/v1
       - ordinal: 12
         id: node_manifest
         consumes:
@@ -406,7 +384,7 @@ profiles:
           - conformance_requirement_ir
           - compiler_coordinates
         operations:
-          - composition
+          - derivation
           - validation
         produces:
           - node_manifest_ir

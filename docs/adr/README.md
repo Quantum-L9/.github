@@ -10,8 +10,9 @@ This ADR pack formalizes how `Quantum-L9/.github` acts as the organization-level
 NodeSpec(invariants, desired capabilities, technology intent)
     -> requirement closure
     -> semantic resolution
-    -> contracts / laws / conformance
-    -> architecture / ports / bindings
+    -> contracts / laws / fixtures
+    -> architecture / ports / provider bindings
+    -> conformance requirements
     -> NodeManifest
     -> implementation / target artifacts
 ```
@@ -33,8 +34,10 @@ NodeSpec(invariants, desired capabilities, technology intent)
 
 # Architecture Decision Records (ADRs)
 
-This directory holds the org-wide ADR template. ADRs record significant,
-hard-to-reverse technical or architectural decisions — not routine changes.
+This directory holds the org-wide ADR template and the accepted ADRs for
+the L9 semantic foundation that this repository owns (ADR-001..010 above).
+ADRs record significant, hard-to-reverse technical or architectural
+decisions — not routine changes.
 
 ## When to write an ADR
 
@@ -51,8 +54,9 @@ single PR revert.
 ## How to use this template
 
 1. Copy [`template.md`](./template.md) into **your repository's own**
-   `docs/adr/` directory (this `.github` repo only hosts the template; ADRs
-   themselves are recorded per-repo, next to the code they govern).
+   `docs/adr/` directory. ADRs are recorded next to the code or semantics
+   they govern: this `.github` repo records only the ADRs for the semantics it
+   owns (`semantics/`); other repositories record theirs per-repo.
 2. Name the file `docs/adr/NNNN-short-title.md`, using the next sequential
    4-digit number for that repo.
 3. Fill in every section. Leave `Considered Options` even if only one option

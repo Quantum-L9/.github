@@ -89,39 +89,31 @@ allowed_transitions:
     to: l9.law-ir/v1
     operations:
       - derivation
-      - formalization
   - from: l9.law-ir/v1
     to: l9.fixture-ir/v1
     operations:
       - derivation
-      - fixture_case_expansion
   - from: l9.fixture-ir/v1
     to: l9.conformance-ir/v1
     operations:
       - binding_selection
       - lowering
-      - compilation
   - from: l9.conformance-ir/v1
     to: l9.architecture-ir/v1
     operations:
       - projection
       - synthesis
-      - constraint_solving
-      - pattern_composition
     requires_additional_inputs: true
   - from: l9.architecture-ir/v1
     to: l9.port-ir/v1
     operations:
       - projection
       - synthesis
-      - compilation
   - from: l9.port-ir/v1
     to: l9.provider-binding-ir/v1
     operations:
       - projection
       - binding_selection
-      - compatibility_analysis
-      - compilation
   - from: l9.provider-binding-ir/v1
     to: l9.implementation-ir/v1
     operations:
@@ -139,12 +131,11 @@ allowed_transitions:
     to: l9.requirement-ir/v1
     operations:
       - derivation
-      - normalization
   - from: l9.requirement-ir/v1
     to: l9.capability-closure-ir/v1
     operations:
       - derivation
-      - constraint_solving
+      - resolution
   - from: l9.capability-closure-ir/v1
     to: l9.contract-ir/v1
     operations:
@@ -156,8 +147,6 @@ allowed_transitions:
     operations:
       - projection
       - synthesis
-      - constraint_solving
-      - pattern_composition
     requires_additional_inputs: true
   - from: l9.architecture-ir/v1
     to: l9.conformance-requirement-ir/v1
@@ -169,7 +158,7 @@ allowed_transitions:
   - from: l9.provider-binding-ir/v1
     to: l9.node-manifest-ir/v1
     operations:
-      - composition
+      - derivation
       - validation
     requires_additional_inputs:
       - l9.node-spec-ir/v1

@@ -1176,7 +1176,6 @@ semantic_build_stages:
       - canonical_l9_vocabulary
     operations:
       - projection
-      - normalization
     validation:
       required: true
       solver_source: canonical_compilation_profile
@@ -1195,7 +1194,6 @@ semantic_build_stages:
     operations:
       - projection
       - synthesis
-      - compilation
     validation:
       required: true
       solver_source: canonical_compilation_profile
@@ -1212,8 +1210,6 @@ semantic_build_stages:
     operations:
       - projection
       - derivation
-      - formalization
-      - normalization
     validation:
       required: true
       solver_source: canonical_compilation_profile
@@ -1229,7 +1225,6 @@ semantic_build_stages:
     operations:
       - projection
       - derivation
-      - fixture_case_expansion
     validation:
       required: true
       solver_source: canonical_compilation_profile
@@ -1247,7 +1242,6 @@ semantic_build_stages:
     operations:
       - binding_selection
       - lowering
-      - compilation
     validation:
       required: true
       solver_source: canonical_compilation_profile
@@ -1271,8 +1265,6 @@ semantic_build_stages:
     operations:
       - projection
       - synthesis
-      - constraint_solving
-      - pattern_composition
     validation:
       required: true
       solver_source: canonical_compilation_profile
@@ -1289,7 +1281,6 @@ semantic_build_stages:
     operations:
       - projection
       - synthesis
-      - compilation
     validation:
       required: true
       solver_source: canonical_compilation_profile
@@ -1305,8 +1296,6 @@ semantic_build_stages:
       - provider_constraints
     operations:
       - binding_selection
-      - compatibility_analysis
-      - compilation
     validation:
       required: true
       solver_source: canonical_compilation_profile

@@ -110,7 +110,7 @@ artifacts:
       - resolved_capability_closure
       - architecture
       - ports
-      - technology_bindings
+      - provider_bindings
       - conformance_requirements
       - compiler_profile_ref
       - provenance

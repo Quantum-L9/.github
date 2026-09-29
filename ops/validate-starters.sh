@@ -7,6 +7,7 @@
 # Runs the ops/test-*.js suites: seed payload selection, the repo-class birth
 # profile contract, the shared label taxonomy parser, the seed-branch safety
 # gate, and the branch guard inside both seed workflows.
+# Runs the semantic-foundation closure validator and its regression cases.
 # Run from the root of the Quantum-L9/.github repo.
 set -euo pipefail
 
@@ -56,6 +57,20 @@ else
   echo "❌ ops/test-sync-org-files.sh"
   FAIL=$((FAIL+1))
 fi
+
+# Semantic-foundation closure (semantics/ + the current release record) and
+# the regression cases proving that validator fails closed.
+for t in \
+  ops/validate-semantic-foundation.py \
+  ops/test-validate-semantic-foundation.py; do
+  if python3 "$t"; then
+    echo "✅ $t"
+    PASS=$((PASS+1))
+  else
+    echo "❌ $t"
+    FAIL=$((FAIL+1))
+  fi
+done
 echo ""
 echo "Templates directory: $TEMPLATES_DIR"
 echo ""

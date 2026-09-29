@@ -768,7 +768,7 @@ contracts:
       - resolved_capability_closure
       - resolved_architecture_obligations
       - resolved_required_ports
-      - admissible_technology_bindings
+      - admissible_provider_bindings
       - resolved_conformance_requirements
       - compiler_profile_coordinates
       - provenance

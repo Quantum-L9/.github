@@ -32,6 +32,7 @@ properties:
     enum:
       - projection
       - derivation
+      - resolution
       - synthesis
       - binding_selection
       - lowering

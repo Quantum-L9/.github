@@ -1,4 +1,4 @@
-# Semantic Foundation Manifest v3.2.0
+# Semantic Foundation Manifest v3.2.1
 
 Release status: **ACTIVE / CANONICAL**
 
@@ -50,3 +50,15 @@ The release contains 41 files under `semantics/`:
 ## Architecture decision records
 
 The release also contains the canonical architecture rationale under `docs/adr/`.
+
+## Integrity machinery
+
+Not part of the canonical semantic surface; verifies it:
+- `ops/validate-semantic-foundation.py`
+- `ops/test-validate-semantic-foundation.py`
+
+## Provenance
+
+- Supersedes: unmerged v3.2.0 candidate, `Quantum-L9/.github@12ddcfd0b155a8956ff9130e835ad610de416699`
+- v3.2.0 candidate `HASHES.sha256` digest: `d6fe8933451f7e7692b817505999f57a1c78ae958efef307395c5aa88ebd6e11`
+- v3.2.1 digests: `HASHES.sha256` in this directory (repository-root-relative paths)

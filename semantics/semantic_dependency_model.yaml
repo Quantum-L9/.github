@@ -90,8 +90,8 @@ dependency_rules:
       - port_catalog
       - contracts
       - capabilities
-    change_effect: technology_binding_and_node_manifest_stale
-  technology_binding_resolution:
+    change_effect: provider_binding_and_node_manifest_stale
+  provider_binding_resolution:
     depends_on:
       - port_resolution
       - technology_profiles
@@ -105,6 +105,7 @@ dependency_rules:
       - capabilities
       - architecture_resolution
       - port_resolution
+      - provider_binding_resolution
       - conformance_model
     change_effect: node_manifest_and_conformance_closure_stale
   node_manifest:
@@ -114,7 +115,7 @@ dependency_rules:
       - capability_closure
       - architecture_resolution
       - port_resolution
-      - technology_binding_resolution
+      - provider_binding_resolution
       - conformance_requirement_resolution
       - compilation_profile
       - compiler_coordinates
