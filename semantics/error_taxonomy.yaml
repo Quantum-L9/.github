@@ -1,0 +1,70 @@
+schema: l9.error-taxonomy/v1
+artifact_id: l9.error-taxonomy/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_error_taxonomy
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: error_taxonomy.yaml
+result_domains:
+  validation:
+  - PASS
+  - FAIL
+  - UNSAT
+  - INVALID
+  - UNKNOWN
+  fixture_admission:
+  - ADMITTED_DOMAIN
+  - ADMITTED_GLOBAL
+  - ADMITTED_MIXED
+  - PROPOSE_GLOBAL_LAW
+  - UNRESOLVED
+  - REJECTED
+errors:
+  semantic:
+    SEMANTIC_CONFLICT:
+      result: INVALID
+    AUTHORITY_VIOLATION:
+      result: INVALID
+    UNRESOLVED_SEMANTICS:
+      result: UNKNOWN
+    UNSAT:
+      result: UNSAT
+  compiler:
+    INVALID_SOURCE:
+      result: INVALID
+    STALE_SOURCE:
+      result: INVALID
+    UNKNOWN_PROFILE:
+      result: INVALID
+    PROFILE_DIGEST_MISMATCH:
+      result: INVALID
+    UNSUPPORTED_OPERATION:
+      result: INVALID
+    INVALID_OUTPUT:
+      result: INVALID
+    UNKNOWN:
+      result: UNKNOWN
+  binding:
+    no_registered_binding:
+      result: FAIL
+    insufficient_capabilities:
+      result: FAIL
+    unknown_capability:
+      result: UNKNOWN
+    conflicting_capability_facts:
+      result: INVALID
+  conformance:
+    UNRESOLVED:
+      meaning: source semantics insufficient
+    REJECTED:
+      meaning: mechanically fails admission
+    contract_incompatible: {}
+    authority_missing: {}
+    capability_unavailable: {}
+    context_required: {}
+    operation_conflict: {}
+    unknown_outcome:
+      rule: must_not_be_collapsed_to_success_or_failure_without authoritative reconciliation

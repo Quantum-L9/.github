@@ -1,0 +1,194 @@
+schema: l9.ir-catalog/v1
+artifact_id: l9.ir-catalog/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_ir_catalog
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: ir_catalog.yaml
+global_rules:
+  irs_are_machine_readable: true
+  irs_are_versioned: true
+  irs_preserve_provenance: true
+  admitted_irs_are_digest_addressable: true
+  lowering_must_not_increase_abstraction: true
+  required_semantics_must_be_preserved: true
+irs:
+  - id: l9.contract-ir/v1
+    semantic_class: contract_ir
+    purpose: Normalized machine-readable contract semantics used as compiler input.
+  - id: l9.structural-requirements-ir/v1
+    semantic_class: structural_requirements_ir
+    purpose: Structural obligations derived from an admitted contract without inventing unspecified 
+      structure.
+  - id: l9.json-schema-ir/v1
+    semantic_class: json_schema_ir
+    purpose: JSON-Schema-specific intermediate representation produced from structural requirements 
+      under an explicit target binding.
+  - id: l9.law-ir/v1
+    semantic_class: law_ir
+    purpose: Canonical machine-readable representation of normalized laws suitable for deterministic
+      derivation, validation, comparison, harvesting, and downstream compilation.
+  - id: l9.fixture-ir/v1
+    semantic_class: fixture_ir
+    purpose: Canonical language-neutral representation of a fixture including setup, semantic 
+      action, expected consequence, source law references, and provenance.
+  - id: l9.conformance-ir/v1
+    semantic_class: conformance_ir
+    purpose: Canonical representation of executable conformance obligations before target-specific 
+      rendering or execution.
+  - id: l9.architecture-ir/v1
+    semantic_class: architecture_ir
+    purpose: Validated architecture representation synthesized from admitted semantic obligations, 
+      constraints, applicable patterns, archetype, and capability facts.
+  - id: l9.port-ir/v1
+    semantic_class: port_ir
+    purpose: Provider-neutral interface obligations compiled from validated architecture and 
+      applicable conformance/contract requirements.
+  - id: l9.provider-binding-ir/v1
+    semantic_class: provider_binding_ir
+    purpose: Concrete provider realization selected against Port IR requirements and registered 
+      technology capability facts.
+  - id: l9.implementation-ir/v1
+    semantic_class: implementation_ir
+    purpose: Implementation representation synthesized/lowered from ports, provider bindings, 
+      conformance obligations, and implementation constraints.
+  - id: l9.target-ir/v1
+    semantic_class: target_ir
+    purpose: Concrete target representation immediately preceding deterministic rendering into final
+      artifacts.
+  - id: l9.node-spec-ir/v1
+    abstraction_level: 100
+    purpose: Normalized semantic birth intent from an admitted node specification.
+  - id: l9.requirement-ir/v1
+    abstraction_level: 95
+    purpose: Typed requirement closure with hardness, provenance, and satisfaction semantics.
+  - id: l9.capability-closure-ir/v1
+    abstraction_level: 92
+    purpose: Resolved desired and transitive semantic capability closure.
+  - id: l9.conformance-requirement-ir/v1
+    abstraction_level: 72
+    purpose: Traceable proof obligations prior to executable conformance binding.
+  - id: l9.node-manifest-ir/v1
+    abstraction_level: 25
+    purpose: Resolved proof-carrying node semantic closure used as the only admissible input to 
+      implementation lowering.
+allowed_transitions:
+  - from: l9.contract-ir/v1
+    to: l9.structural-requirements-ir/v1
+    operations:
+      - derivation
+  - from: l9.structural-requirements-ir/v1
+    to: l9.json-schema-ir/v1
+    operations:
+      - binding_selection
+      - lowering
+  - from: l9.contract-ir/v1
+    to: l9.law-ir/v1
+    operations:
+      - derivation
+      - formalization
+  - from: l9.law-ir/v1
+    to: l9.fixture-ir/v1
+    operations:
+      - derivation
+      - fixture_case_expansion
+  - from: l9.fixture-ir/v1
+    to: l9.conformance-ir/v1
+    operations:
+      - binding_selection
+      - lowering
+      - compilation
+  - from: l9.conformance-ir/v1
+    to: l9.architecture-ir/v1
+    operations:
+      - projection
+      - synthesis
+      - constraint_solving
+      - pattern_composition
+    requires_additional_inputs: true
+  - from: l9.architecture-ir/v1
+    to: l9.port-ir/v1
+    operations:
+      - projection
+      - synthesis
+      - compilation
+  - from: l9.port-ir/v1
+    to: l9.provider-binding-ir/v1
+    operations:
+      - projection
+      - binding_selection
+      - compatibility_analysis
+      - compilation
+  - from: l9.provider-binding-ir/v1
+    to: l9.implementation-ir/v1
+    operations:
+      - projection
+      - synthesis
+      - lowering
+    requires_additional_inputs:
+      - l9.port-ir/v1
+  - from: l9.implementation-ir/v1
+    to: l9.target-ir/v1
+    operations:
+      - binding_selection
+      - lowering
+  - from: l9.node-spec-ir/v1
+    to: l9.requirement-ir/v1
+    operations:
+      - derivation
+      - normalization
+  - from: l9.requirement-ir/v1
+    to: l9.capability-closure-ir/v1
+    operations:
+      - derivation
+      - constraint_solving
+  - from: l9.capability-closure-ir/v1
+    to: l9.contract-ir/v1
+    operations:
+      - projection
+      - synthesis
+    requires_additional_inputs: true
+  - from: l9.capability-closure-ir/v1
+    to: l9.architecture-ir/v1
+    operations:
+      - projection
+      - synthesis
+      - constraint_solving
+      - pattern_composition
+    requires_additional_inputs: true
+  - from: l9.architecture-ir/v1
+    to: l9.conformance-requirement-ir/v1
+    operations:
+      - derivation
+    requires_additional_inputs:
+      - l9.contract-ir/v1
+      - l9.port-ir/v1
+  - from: l9.provider-binding-ir/v1
+    to: l9.node-manifest-ir/v1
+    operations:
+      - composition
+      - validation
+    requires_additional_inputs:
+      - l9.node-spec-ir/v1
+      - l9.requirement-ir/v1
+      - l9.capability-closure-ir/v1
+      - l9.architecture-ir/v1
+      - l9.port-ir/v1
+      - l9.conformance-requirement-ir/v1
+  - from: l9.node-manifest-ir/v1
+    to: l9.implementation-ir/v1
+    operations:
+      - projection
+      - synthesis
+      - lowering
+abstraction_rules:
+  - ir_must_have_defined_semantics
+  - ir_must_have_version
+  - ir_must_support_provenance
+  - admitted_ir_should_have_content_digest
+  - lowering_moves_toward_more_concrete_representation
+  - lowering_must_preserve_required_semantics
+  - rendering_must_not_introduce_new_semantic_decisions

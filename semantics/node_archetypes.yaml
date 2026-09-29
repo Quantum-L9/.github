@@ -1,0 +1,197 @@
+schema: l9.node-archetypes/v1
+artifact_id: l9.node-archetypes/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_node_archetypes
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: node_archetypes.yaml
+global_rules:
+  archetype_does_not_define_domain_semantics: true
+  archetype_does_not_create_semantic_ownership: true
+  archetypes_compose_architecture_patterns: true
+  archetypes_declare_required_structural_properties: true
+  archetypes_declare_required_conformance_classes: true
+  deployment_topology_does_not_imply_semantic_ownership: true
+archetypes:
+  - id: l9.archetype/semantic-node@1
+    purpose: >
+      Independently runnable L9 semantic capability with explicit semantic
+      ownership, Gate-facing capability exposure, independent runtime identity,
+      validation evidence, and conformance obligations.
+    properties:
+      - semantic_owner
+      - independent_runtime_identity
+      - independently_admitted_capabilities
+      - independent_health_and_readiness
+      - gate_routed
+    requires:
+      architecture_patterns:
+        - l9.pattern/semantic-core-gate-adapter@1
+        - l9.pattern/runnable-node@1
+        - l9.pattern/authority-candidate-admission@1
+      semantic_surfaces:
+        - semantic_core
+        - capability_contract
+        - capability_manifest
+      runtime_surfaces:
+        - gate_integration
+        - health
+        - readiness
+        - receipts
+      conformance_classes:
+        - core
+        - capability
+        - runtime
+    optional_patterns:
+      - l9.pattern/semantic-core-provider-adapter@1
+      - l9.pattern/reference-model-conformance@1
+      - l9.pattern/fixture-backed-conformance@1
+      - l9.pattern/provider-neutral-persistence@1
+    forbidden:
+      - semantic_ownership_inferred_from_transport
+      - direct_peer_routing_when_gate_is_required
+      - provider_becomes_semantic_owner
+  - id: l9.archetype/dependency-package@1
+    purpose: >
+      Reusable in-process semantic implementation consumed by another process
+      without receiving independent constellation runtime identity.
+    properties:
+      - importable
+      - consumer_owned_lifecycle
+      - no_independent_runtime_identity
+    requires:
+      architecture_patterns:
+        - l9.pattern/dependency-package@1
+      semantic_surfaces:
+        - public_programmatic_contract
+      conformance_classes:
+        - core
+    optional_patterns:
+      - l9.pattern/semantic-core-provider-adapter@1
+      - l9.pattern/reference-model-conformance@1
+      - l9.pattern/fixture-backed-conformance@1
+    runtime_identity:
+      expression: >
+        RuntimeIdentity(package_instance) =
+        RuntimeIdentity(consumer)
+    forbidden:
+      - implicit_gate_registration
+      - independent_runtime_identity_without_explicit_node_surface
+  - id: l9.archetype/dual-surface-semantic-component@1
+    purpose: >
+      One semantic implementation exposed both as an in-process dependency
+      package and as an independently runnable Gate-facing node.
+    properties:
+      - dependency_package_surface
+      - runnable_node_surface
+      - shared_semantic_core
+    requires:
+      architecture_patterns:
+        - l9.pattern/dual-surface-sdk-node@1
+        - l9.pattern/semantic-core-gate-adapter@1
+      semantic_surfaces:
+        - shared_semantic_core
+        - sdk_surface
+        - node_surface
+      conformance_classes:
+        - core
+        - capability
+        - runtime
+    guarantees:
+      - sdk_and_node_share_semantics
+      - deployment_topology_does_not_change_semantic_identity
+    forbidden:
+      - duplicated_semantic_core
+      - sdk_node_semantic_drift
+  - id: l9.archetype/projection-owner@1
+    purpose: >
+      Component owning one canonical semantic source and compiling multiple
+      derived consumer-specific representations.
+    properties:
+      - canonical_source_owner
+      - multiple_derived_projections
+      - projection_lineage
+      - digest_based_staleness
+    requires:
+      architecture_patterns:
+        - l9.pattern/canonical-source-derived-projections@1
+      semantic_surfaces:
+        - canonical_source
+        - projection_profiles
+        - projection_compiler
+      conformance_classes:
+        - core
+        - projection
+    optional_patterns:
+      - l9.pattern/facts-plus-lineage-compiled-views@1
+      - l9.pattern/session-projection-cache@1
+    forbidden:
+      - derived_projection_becomes_canonical_source
+      - separately_maintained_duplicate_semantics
+  - id: l9.archetype/authoritative-state-node@1
+    purpose: >
+      Semantic node owning durable authoritative revisioned state and
+      consequential state transitions.
+    extends:
+      - l9.archetype/semantic-node@1
+    properties:
+      - authoritative_state
+      - revisioned_mutation
+      - durable_history
+      - consequential_operations
+    requires:
+      architecture_patterns:
+        - l9.pattern/immutable-revisioned-state@1
+      conformance_classes:
+        - core
+        - capability
+        - runtime
+        - adapter
+    optional_patterns:
+      - l9.pattern/atomic-state-receipt-journal-outbox@1
+      - l9.pattern/provider-neutral-persistence@1
+    guarantees:
+      - historical_state_is_not_mutated
+      - corrections_create_new_revisions
+    forbidden:
+      - silent_revision_overwrite
+      - provider_becomes_state_semantic_owner
+  - id: l9.archetype/conformance-system@1
+    purpose: >
+      Semantic system responsible for executable conformance artifacts,
+      fixture admission, profile composition and resolution, conformance
+      execution semantics, and conformance receipts.
+    properties:
+      - executable_conformance_owner
+      - fixture_admission
+      - fixture_profiles
+      - conformance_receipts
+    requires:
+      architecture_patterns:
+        - l9.pattern/fixture-backed-conformance@1
+        - l9.pattern/reference-model-conformance@1
+        - l9.pattern/authority-candidate-admission@1
+        - l9.pattern/canonical-source-derived-projections@1
+      semantic_surfaces:
+        - fixture_catalog
+        - profile_catalog
+        - admission_surface
+        - conformance_runner
+        - receipt_surface
+      conformance_classes:
+        - core
+        - capability
+    authority_boundaries:
+      owns:
+        - executable_conformance_semantics
+        - fixture_admission_semantics
+        - fixture_profile_semantics
+      does_not_own:
+        - global_constitutional_law
+        - organization_distribution_policy
+    forbidden:
+      - conformance_creates_global_law
+      - generated_candidate_self_admission

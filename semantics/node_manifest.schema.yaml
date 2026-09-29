@@ -1,0 +1,91 @@
+schema: l9.schema-definition/v1
+artifact_id: l9.schema/node-manifest@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_node_manifest_schema
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: node_manifest.schema.yaml
+governed_by:
+  contracts:
+    - l9.contract/node-manifest@1
+    - l9.contract/provenance-and-coordinate@1
+    - l9.contract/revision-and-supersession@1
+type: object
+required:
+  - schema
+  - node
+  - source_spec
+  - authority
+  - invariants
+  - contracts
+  - requirements
+  - capabilities
+  - architecture
+  - ports
+  - technology
+  - bindings
+  - conformance
+  - compiler
+  - provenance
+  - unresolved
+properties:
+  schema:
+    const: l9.node-manifest/v1
+  node:
+    type: object
+  source_spec:
+    type: object
+  authority:
+    type: object
+  invariants:
+    type: array
+  contracts:
+    type: object
+  requirements:
+    type: object
+  capabilities:
+    type: object
+  architecture:
+    type: object
+  ports:
+    type: array
+  technology:
+    type: object
+  bindings:
+    type: array
+  conformance:
+    type: object
+  lifecycle:
+    type: object
+  packets:
+    type: array
+  receipts:
+    type: array
+  compiler:
+    type: object
+  provenance:
+    type: object
+  unresolved:
+    type: array
+  manifest_digest:
+    type: semantic_digest
+resolved_manifest_gate:
+  all_of:
+    - hard_requirements_resolved
+    - capability_closure_resolved
+    - architecture_obligations_resolved
+    - required_ports_resolved
+    - technology_bindings_admissible
+    - conformance_requirements_resolved
+    - authority_boundaries_valid
+    - unresolved_hard_semantic_gaps_empty
+  rule: A node manifest may exist while unresolved, but implementation lowering may consume only a 
+    manifest that satisfies the resolved_manifest_gate.
+semantic_rules:
+  - manifest_is_proof_carrying_derived_semantics
+  - manifest_does_not_become_domain_owner
+  - exact_source_and_profile_coordinates_are_preserved
+  - material_upstream_change_invalidates_currentness_until_recompiled_or_compatibility_proven

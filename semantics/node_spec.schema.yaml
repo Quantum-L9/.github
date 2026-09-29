@@ -1,0 +1,79 @@
+schema: l9.schema-definition/v1
+artifact_id: l9.schema/node-spec@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_node_spec_schema
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: node_spec.schema.yaml
+governed_by:
+  contracts:
+    - l9.contract/node-spec@1
+    - l9.contract/authority-boundary@1
+    - l9.contract/hard-constraint@1
+type: object
+required:
+  - schema
+  - node
+  - purpose
+  - invariants
+  - desired_capabilities
+  - technology
+properties:
+  schema:
+    const: l9.node-spec/v1
+  node:
+    type: object
+    required:
+      - id
+      - archetype
+    properties:
+      id:
+        type: semantic_ref
+      archetype:
+        type: semantic_ref
+  purpose:
+    type: array
+    min_items: 1
+    items:
+      type: string
+  invariants:
+    type: array
+    min_items: 1
+    items:
+      type: semantic_ref
+  desired_capabilities:
+    type: array
+    min_items: 1
+    items:
+      type: semantic_ref
+  technology:
+    type: object
+    required:
+      - language
+      - transport
+    additional_properties: true
+  domain_contract_refs:
+    type: array
+    items:
+      type: semantic_ref
+  constraints:
+    type: array
+    items:
+      type: semantic_ref_or_inline_constraint
+  preferences:
+    type: array
+    items:
+      type: semantic_ref_or_inline_objective
+  authority_ref:
+    type: semantic_ref
+  source_revision:
+    type: semantic_ref
+semantic_rules:
+  - node_spec_declares_intent_not_derived_consequences
+  - project_invariants_are_never_invented_by_compiler
+  - provider_identity_does_not_define_capability_meaning
+  - omitted_derivable_structure_is_not_a_schema_error
+  - hard_semantic_decisions_must_not_be_hidden_in_preferences

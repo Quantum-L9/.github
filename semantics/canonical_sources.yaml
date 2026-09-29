@@ -1,0 +1,181 @@
+schema: l9.canonical-sources/v1
+artifact_id: l9.canonical-sources/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_canonical_source_registry
+  authority_class: canonical
+sources:
+  - id: l9.source/vocabulary@1
+    path: semantics/vocabulary.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/invariants@1
+    path: semantics/invariants.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/contracts@1
+    path: semantics/contracts.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/capabilities@1
+    path: semantics/capabilities.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/compilation-profiles@1
+    path: semantics/compilation_profiles.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/projection-profiles@1
+    path: semantics/projection_profiles.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/architecture-patterns@1
+    path: semantics/architecture_patterns.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/node-archetypes@1
+    path: semantics/node_archetypes.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/technology-capabilities@1
+    path: semantics/technology_capabilities.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/ir-catalog@1
+    path: semantics/ir_catalog.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/solver-catalog@1
+    path: semantics/solver_catalog.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/binding-catalog@1
+    path: semantics/binding_catalog.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/authority-model@1
+    path: semantics/authority_model.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/artifact-model@1
+    path: semantics/artifact_model.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/packet-catalog@1
+    path: semantics/packet_catalog.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/lifecycle@1
+    path: semantics/lifecycle.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/receipt-catalog@1
+    path: semantics/receipt_catalog.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/error-taxonomy@1
+    path: semantics/error_taxonomy.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/semantic-dependency-model@1
+    path: semantics/semantic_dependency_model.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/node-spec-schema@1
+    path: semantics/node_spec.schema.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+  - id: l9.source/requirement-model@1
+    path: semantics/requirement_model.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/resolution-model@1
+    path: semantics/resolution_model.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/capability-resolution@1
+    path: semantics/capability_resolution.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/architecture-rules@1
+    path: semantics/architecture_rules.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/port-catalog@1
+    path: semantics/port_catalog.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/technology-profiles@1
+    path: semantics/technology_profiles.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/conformance-model@1
+    path: semantics/conformance_model.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: true
+  - id: l9.source/node-manifest-schema@1
+    path: semantics/node_manifest.schema.yaml
+    format: yaml
+    canonical: true
+    projection_allowed: true
+    derivation_allowed: false
+rules:
+  canonical_sources_must_be_registered: true
+  source_ids_are_immutable: true
+  breaking_semantic_change_requires_version_increment: true
+  derived_artifacts_cannot_be_registered_as_canonical_without_admission: true

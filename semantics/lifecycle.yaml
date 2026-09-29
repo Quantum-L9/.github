@@ -1,0 +1,294 @@
+schema: l9.lifecycle/v1
+artifact_id: l9.lifecycle/global@1
+status: active
+canonical: true
+
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_lifecycle_semantics
+  authority_class: canonical
+
+canonical_source:
+  format: yaml
+  artifact: lifecycle.yaml
+
+derivation:
+  source_artifacts:
+    - artifact: invariants.yaml
+      artifact_id: l9.invariants/global@1
+      sha256: 767a57860ea4156c4123a37aede249983f57a50084ab8c7107fe994dc45bd765
+      admission: canonical_active
+    - artifact: contracts.yaml
+      artifact_id: l9.contracts/global@1
+      sha256: 9a79b1ba83535d77a09c4caebbd58fd64c66411886cba7e23256f004895bffcb
+      admission: canonical_active
+    - artifact: capabilities.yaml
+      artifact_id: l9.capabilities/global@1
+      sha256: 97759b0298b7c56138569e798a5ac8896ac7688be93c662faa74fca39e85ddc5
+      admission: canonical_active
+  rule: >
+    Define typed lifecycle families already evidenced by the L9 semantic corpus.
+    No universal state machine is imposed, and capability-state dimensions are
+    not converted into lifecycle stages.
+
+global_rules:
+  lifecycles_are_typed_not_universal: true
+  lifecycle_state_does_not_create_authority: true
+  transition_authority_must_be_explicit_when_transition_requires_authority: true
+  admission_binds_exact_subject_revision_or_digest: true
+  admitted_revision_content_is_immutable: true
+  material_semantic_change_creates_successor_or_supersession: true
+  prior_revisions_remain_addressable: true
+  unknown_or_unresolved_state_remains_explicit: true
+  derived_currentness_is_not_authority: true
+  capability_state_dimensions_are_not_lifecycle_states: true
+  lifecycle_transition_does_not_imply_capability_authorization: true
+  receipt_emission_does_not_imply_subject_admission_or_authorization: true
+  published_is_stronger_than_file_presence: true
+
+state_semantics:
+  candidate: proposed_subject_not_yet_admitted
+  admission_evaluated: mechanical_or_contractual_admission_evaluation_completed
+  awaiting_authority: evaluation_complete_but_required_authority_decision_not_yet_bound
+  admitted: exact_subject_accepted_by_applicable_admission_authority
+  published: admitted_subject_satisfies_its_semantic_owner_defined_canonical_publication_contract
+  resolvable: consumers_can_resolve_exact_identity_and_digest
+  executed: declared operation_or_conformance_case_was_run_against_exact_coordinates
+  receipted: execution_or_evaluation_has_bound_evidence_receipt
+  current: declared_material_coordinates_still_match_or_compatibility_preserves_applicability
+  non_current: one_or_more_material_coordinates_changed_without_compatibility_preservation
+  superseded: newer_authoritative_revision_or_version_replaces_current_use_without_rewriting_history
+  retired: authoritative_owner_has_ended_future_use_while_preserving_history
+  rejected: applicable_authority_or_mechanical_gate_refused_admission_or_progression
+  unresolved: required semantics_authority_or_evidence_cannot_be_resolved
+
+lifecycles:
+  architecture_pattern:
+    semantic_owner: Quantum-L9/.github
+    purpose: >
+      Govern observation and graduation of recurring architecture patterns
+      without letting recognition create global authority.
+    stages:
+      - seed
+      - observed
+      - cross_domain
+      - semantically_stable
+      - graduation_candidate
+      - harvest_packet
+      - authority_resolution
+    branches:
+      admitted_global_pattern: applicable_global_authority_admits_exact_candidate
+      domain_pattern: domain_specific_authority_is_required_or_globalization_is_not_supported
+      rejected: applicable_authority_refuses_candidate
+      unresolved: evidence_or_authority_is_insufficient
+    rules:
+      - recurrence_does_not_create_global_law
+      - harvest_packet_is_proposal_not_admission
+      - authority_resolution_binds_exact_candidate
+
+  globalization_candidate:
+    semantic_owner: Quantum-L9/.github
+    purpose: >
+      Govern a normalized cross-domain candidate from evidence accumulation to
+      an explicit global-authority resolution.
+    stages:
+      - candidate
+      - evidence_accumulating
+      - awaiting_authority
+      - authority_resolution
+    terminal_resolutions:
+      - admitted_global_law
+      - retained_domain_local
+      - rejected
+      - unresolved
+    rules:
+      - candidate_generation_is_not_global_admission
+      - target_global_authority_owns_resolution
+      - material_candidate_change_requires_new_resolution
+
+  harvest_packet:
+    semantic_owner: packet_semantic_owner
+    purpose: >
+      Preserve an emitted harvest proposal as an immutable evidence-bearing
+      packet while the target authority resolves the candidate it carries.
+    artifact_state: immutable_after_emission
+    stages:
+      - emitted
+      - awaiting_authority_resolution
+      - resolved
+    rules:
+      - packet_does_not_create_authority
+      - packet_resolution_does_not_rewrite_emitted_packet
+      - resolution_ref_may_be_attached_by_new_artifact_or_receipt
+
+  fixture:
+    semantic_owner: l9-conformance
+    purpose: >
+      Govern fixture compilation, admission, publication, resolution, execution,
+      and evidence without transferring fixture semantic ownership to the
+      compiler or implementation under test.
+    stages:
+      - candidate
+      - derived
+      - classified
+      - admission_evaluated
+      - awaiting_authority
+      - admitted
+      - published
+      - resolvable
+      - inherited_by_profiles
+      - executed
+      - receipted
+    branches:
+      rejected: mechanical_or_authority_gate_refuses_candidate
+      unresolved: source_semantics_or_authority_are_insufficient
+      globalization_candidate: proposed_global_scope_lacks_global_authority
+    publication_gate:
+      all_of:
+        - admitted
+        - canonical_identity_exists
+        - immutable_digest_exists
+        - catalog_contains_subject
+        - admitted_profile_references_subject
+        - distribution_available
+    rules:
+      - compiler_candidate_is_not_admitted_fixture
+      - system_under_test_does_not_define_expected_fixture_semantics
+      - fixture_history_is_immutable_by_version_and_digest
+
+  fixture_profile:
+    semantic_owner: l9-conformance
+    purpose: >
+      Govern versioned conformance-profile membership and publication while
+      preserving exact fixture closure and immutable prior versions.
+    stages:
+      - candidate
+      - admitted
+      - published
+      - resolvable
+      - superseded
+    rules:
+      - membership_change_requires_new_profile_version
+      - existing_profile_versions_are_immutable
+      - published_profile_requires_exact_digest
+      - profile_currentness_depends_on_exact_membership_and_source_coordinates
+
+  conformance_receipt:
+    semantic_owner: l9-conformance
+    purpose: >
+      Model receipt emission as immutable evidence while treating currentness as
+      a derived coordinate evaluation rather than a mutable authority state.
+    artifact_state: immutable_after_emission
+    emitted_state: receipted
+    derived_statuses:
+      - current
+      - non_current
+    rules:
+      - currentness_depends_on_subject_profile_fixture_and_binding_coordinates
+      - material_coordinate_change_makes_receipt_non_current_unless_compatibility_preserves_it
+      - newer_receipt_does_not_rewrite_prior_receipt
+      - receipt_currentness_does_not_grant_authority
+
+  published_artifact:
+    semantic_owner: applicable_artifact_semantic_owner
+    purpose: >
+      Govern canonical publication and later supersession without collapsing
+      admission, publication, or currentness into one state.
+    stages:
+      - admitted
+      - published
+      - current
+      - superseded
+      - retired
+    publication_gate:
+      all_of:
+        - canonical_identity_exists
+        - immutable_digest_exists
+        - catalog_presence_exists
+        - owner_defined_publication_requirements_satisfied
+      when_applicable:
+        - required_profile_reachability_exists
+        - required_distribution_availability_exists
+    rules:
+      - admission_does_not_imply_publication
+      - publication_does_not_erase_prior_versions
+      - material_change_requires_successor_revision_or_version
+
+  profile:
+    semantic_owner: applicable_profile_semantic_owner
+    purpose: >
+      Govern exact profile versions from candidate through publication and
+      supersession.
+    stages:
+      - candidate
+      - admitted
+      - published
+      - resolvable
+      - superseded
+    rules:
+      - profile_identity_and_digest_are_required_for_publication
+      - membership_change_requires_new_version
+      - existing_published_versions_are_immutable
+
+  distribution:
+    semantic_owner: Quantum-L9/.github
+    purpose: >
+      Govern deterministic distribution of exact published coordinates and
+      bounded reconciliation of consumer state without semantic reinterpretation.
+    stages:
+      - prepared
+      - dispatched
+      - reconciliation_pending
+      - reconciled
+    branches:
+      unresolved: target_state_cannot_be_observed_or_verified
+      non_current: distributed_coordinates_no_longer_match_required_published_coordinates
+    rules:
+      - distribution_requires_exact_published_identity_and_digest
+      - distribution_does_not_reinterpret_payload_semantics
+      - reconciliation_binds_exact_target_and_published_coordinates
+      - distribution_receipt_does_not_replace_conformance_receipt
+
+  node_spec:
+    semantic_owner: project_or_domain_owner
+    purpose: |
+      Govern a node birth specification from proposal through validation and revision without allowing compiler resolution to overwrite author-owned semantic intent.
+    stages:
+      - candidate
+      - validated
+      - admitted
+      - current
+      - superseded
+    branches:
+      rejected: schema_or_authority_gate_refuses_spec
+      unresolved: referenced_semantics_or_authority_cannot_be_resolved
+    rules:
+      - material_intent_change_creates_new_revision
+      - compiler_does_not_mutate_admitted_node_spec
+      - node_spec_admission_does_not_imply_compiled_node_conformance
+  node_manifest:
+    semantic_owner: l9-semantic-compiler
+    purpose: |
+      Govern a derived proof-carrying node semantic closure while preserving exact upstream coordinates and non-authoritative derived status.
+    stages:
+      - derived
+      - validated
+      - current
+      - non_current
+      - superseded
+    branches:
+      blocked: resolved_manifest_gate_fails
+      unresolved: required_semantic_resolution_is_incomplete
+    rules:
+      - node_manifest_is_derived_not_domain_authority
+      - implementation_lowering_requires_validated_current_resolved_manifest
+      - upstream_material_change_makes_manifest_non_current_unless_compatibility_preserves_it
+lifecycle_relations:
+  successor_of:
+    semantics: 
+      new_authoritative_revision_or_version_preserves_history_while_replacing_future_current_use
+  supersedes:
+    semantics: 
+      newer_authoritative_subject_displaces_prior_subject_for_current_use_without_rewriting_prior_meaning
+  current_for:
+    semantics: subject_remains_applicable_to_exact_declared_material_coordinates

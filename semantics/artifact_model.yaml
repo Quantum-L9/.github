@@ -1,0 +1,140 @@
+schema: l9.artifact-model/v1
+artifact_id: l9.artifact-model/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_artifact_model
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: artifact_model.yaml
+artifacts:
+  canonical_artifact:
+    authority_class: canonical
+    immutable_by_digest: true
+  projection_artifact:
+    authority_class: derived
+    required:
+      - source_ref
+      - source_digest
+      - projection_profile_ref
+      - projection_profile_digest
+      - payload
+      - artifact_digest
+  derived_artifact:
+    authority_class: derived
+    required:
+      - source_refs
+      - source_digests
+      - derivation_profile_ref
+      - derivation_profile_digest
+      - payload
+      - artifact_digest
+  candidate_artifact:
+    authority_class: candidate
+    required:
+      - source_refs
+      - source_digests
+      - compilation_profile_ref
+      - payload
+      - artifact_digest
+  composed_projection:
+    authority_class: derived
+    required:
+      - component_projection_refs
+      - component_projection_digests
+      - composition_profile_ref
+      - composition_profile_digest
+      - payload
+      - artifact_digest
+  validation_receipt:
+    authority_class: evidence
+    required:
+      - candidate_digest
+      - solver_ref
+      - solver_version
+      - solver_profile_digest
+      - result
+  compiled_artifact:
+    authority_class: derived
+    required:
+      - source_refs
+      - source_digests
+      - compiler_version
+      - compilation_profile_ref
+      - artifact_digest
+  published_profile:
+    authority_class: canonical
+    required:
+      - profile_ref
+      - version
+      - digest
+      - status
+  distribution_packet:
+    authority_class: derived
+    required:
+      - profile_coordinates
+      - digests
+      - consumer_selectors
+      - rollout_mode
+      - distribution_metadata
+  receipt:
+    authority_class: evidence
+    semantics_source: receipt_catalog.yaml
+    required:
+      - receipt_type
+      - exact_subject_ref
+      - claim
+      - governing_coordinates
+      - observation_or_outcome
+      - verification_basis
+      - receipt_digest
+  node_spec:
+    authority_class: candidate
+    required:
+      - node_identity
+      - purpose
+      - invariant_refs
+      - desired_capability_refs
+      - technology_intent
+      - source_coordinates
+    rules:
+      - node_spec_declares_intent_not_derived_structure
+      - project_semantic_authority_requires_applicable_owner_or_admission
+  node_manifest:
+    authority_class: derived
+    required:
+      - source_node_spec_ref
+      - source_node_spec_digest
+      - resolved_requirement_closure
+      - resolved_capability_closure
+      - architecture
+      - ports
+      - technology_bindings
+      - conformance_requirements
+      - compiler_profile_ref
+      - provenance
+      - manifest_digest
+    rules:
+      - node_manifest_is_non_owning
+      - implementation_lowering_requires_resolved_manifest_gate
+authority_classes:
+  canonical:
+    authoritative: true
+    implicit_derivation: false
+  derived:
+    authoritative: false
+    authority_expansion_allowed: false
+    implicit_promotion_forbidden: true
+  candidate:
+    authoritative: false
+    requires_validation_and_admission: true
+  evidence:
+    authoritative: false
+    attests_declared_observation_or_outcome: true
+    grants_authority: false
+derivation_rules:
+  - artifact_digest_is_deterministic
+  - derived_artifact_never_implicitly_becomes_canonical
+  - provenance_must_be_complete
+  - authority_must_not_expand

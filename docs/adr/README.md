@@ -1,3 +1,36 @@
+# L9 `.github` Node-Compilation Architecture ADR Pack
+
+Status: **ACTIVE / CANONICAL ARCHITECTURE**
+
+This ADR pack formalizes how `Quantum-L9/.github` acts as the organization-level semantic authority that makes node birth increasingly declarative. It governs the canonical ledgers and their wiring, not runtime implementation details.
+
+## North-star equation
+
+```text
+NodeSpec(invariants, desired capabilities, technology intent)
+    -> requirement closure
+    -> semantic resolution
+    -> contracts / laws / conformance
+    -> architecture / ports / bindings
+    -> NodeManifest
+    -> implementation / target artifacts
+```
+
+## ADRs
+
+- ADR-001: `.github` as the L9 global semantic authority
+- ADR-002: One flat canonical semantic surface and one global contract catalog
+- ADR-003: NodeSpec as the minimal declarative birth interface
+- ADR-004: Requirement and resolution algebra
+- ADR-005: Capability -> architecture -> port semantic resolution
+- ADR-006: Technology binding after semantic resolution
+- ADR-007: Conformance requirements and independent correctness
+- ADR-008: NodeManifest as proof-carrying semantic genome
+- ADR-009: Contract wiring, projections, compilation profiles, and invalidation
+- ADR-010: Ownership boundaries and anti-recipe constraint
+
+---
+
 # Architecture Decision Records (ADRs)
 
 This directory holds the org-wide ADR template. ADRs record significant,

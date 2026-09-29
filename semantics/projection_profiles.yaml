@@ -1,0 +1,1337 @@
+schema: l9.projection-profile-catalog/v1
+artifact_id: l9.projection-profile-catalog/global@1
+canonical: true
+
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_projection_profiles
+  authority_class: canonical
+
+canonical_source:
+  format: yaml
+  artifact: projection_profiles.yaml
+
+global_rules:
+  projection_profiles_are_canonical: true
+  projections_are_derived_artifacts: true
+  projections_do_not_create_authority: true
+  projections_must_preserve_relevant_source_semantics: true
+  projections_must_preserve_provenance: true
+  projections_must_be_digest_addressable: true
+  projection_profiles_must_be_versioned: true
+  profile_consumers_must_not_modify_projection_semantics: true
+  composed_projections_are_downstream_artifacts: true
+  composed_projections_are_not_canonical_projection_profiles: true
+  derivation_must_be_declared_separately_from_projection: true
+  projection_engine_must_be_deterministic: true
+
+profile_classes:
+
+  consumer:
+    definition: >
+      Projection profile selecting canonical semantics for a specific
+      long-lived L9 consumer.
+
+  stage:
+    definition: >
+      Projection profile selecting the minimum sufficient validated semantics
+      required by one semantic compilation stage.
+
+  documentation:
+    definition: >
+      Projection profile selecting canonical semantics for human-readable
+      derived documentation.
+
+  runtime:
+    definition: >
+      Projection profile selecting semantics required by runtime components,
+      admission surfaces, control planes, or execution systems.
+
+  governance:
+    definition: >
+      Projection profile selecting semantics required for governance,
+      authority, admission, distribution, or policy evaluation.
+
+  conformance:
+    definition: >
+      Projection profile selecting semantics required for fixture resolution,
+      validation, conformance execution, or receipt generation.
+
+source_classes:
+
+  vocabulary:
+    canonical_artifact: vocabulary.yaml
+
+  invariants:
+    canonical_artifact: invariants.yaml
+
+  contracts:
+    canonical_artifact: contracts.yaml
+
+  capabilities:
+    canonical_artifact: capabilities.yaml
+
+  compilation_profiles:
+    canonical_artifact: compilation_profiles.yaml
+
+  architecture_patterns:
+    canonical_artifact: architecture_patterns.yaml
+
+  ir_catalog:
+    canonical_artifact: ir_catalog.yaml
+
+  solver_catalog:
+    canonical_artifact: solver_catalog.yaml
+
+  binding_catalog:
+    canonical_artifact: binding_catalog.yaml
+
+  authority_model:
+    canonical_artifact: authority_model.yaml
+
+  artifact_model:
+    canonical_artifact: artifact_model.yaml
+
+  lifecycle:
+    canonical_artifact: lifecycle.yaml
+
+  packet_catalog:
+    canonical_artifact: packet_catalog.yaml
+
+  node_archetypes:
+    canonical_artifact: node_archetypes.yaml
+
+  technology_capabilities:
+    canonical_artifact: technology_capabilities.yaml
+
+  error_taxonomy:
+    canonical_artifact: error_taxonomy.yaml
+
+  receipt_catalog:
+    canonical_artifact: receipt_catalog.yaml
+
+  semantic_dependency_model:
+    canonical_artifact: semantic_dependency_model.yaml
+
+  conformance_profiles:
+    canonical_owner: l9-conformance
+
+  node_spec:
+    canonical_artifact: node_spec.schema.yaml
+  requirement_model:
+    canonical_artifact: requirement_model.yaml
+  resolution_model:
+    canonical_artifact: resolution_model.yaml
+  capability_resolution:
+    canonical_artifact: capability_resolution.yaml
+  architecture_rules:
+    canonical_artifact: architecture_rules.yaml
+  port_catalog:
+    canonical_artifact: port_catalog.yaml
+  technology_profiles:
+    canonical_artifact: technology_profiles.yaml
+  conformance_model:
+    canonical_artifact: conformance_model.yaml
+  node_manifest:
+    canonical_artifact: node_manifest.schema.yaml
+projection_profiles:
+
+  - id: l9.projection/gar-architecture-observer@1
+    class: consumer
+    consumer: l9-global-architect
+
+    purpose: >
+      Supply GAR with the minimum canonical architecture vocabulary, patterns,
+      invariants, contracts, capabilities, authority rules, and lifecycle
+      semantics needed to reason about architecture and observe candidate
+      patterns for upstream graduation.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.projection
+          - $.terms.derivation
+          - $.terms.synthesis
+          - $.terms.binding
+          - $.terms.lowering
+          - $.terms.rendering
+          - $.terms.semantic_owner
+          - $.terms.provider
+          - $.terms.harvest
+          - $.terms.globalization_candidate
+          - $.terms.admission
+          - $.terms.provenance
+
+      invariants:
+        selectors:
+          - $.invariants[*].id
+          - $.invariants[*].statement
+          - $.invariants[*].scope
+          - $.invariants[*].owner
+
+      contracts:
+        selectors:
+          - $.contracts[*].id
+          - $.contracts[*].purpose
+          - $.contracts[*].scope
+          - $.contracts[*].guarantees
+          - $.contracts[*].forbidden
+
+      capabilities:
+        selectors:
+          - $.global_rules
+          - $.capability_entry_contract
+          - $.capability_state_dimensions
+          - $.invocability_contract
+          - $.capability_relations
+          - $.capabilities[*].id
+          - $.capabilities[*].semantic_owner
+          - $.capabilities[*].effect_class
+          - $.capabilities[*].requires
+
+      architecture_patterns:
+        selectors:
+          - $.patterns[*].id
+          - $.patterns[*].class
+          - $.patterns[*].purpose
+          - $.patterns[*].preconditions
+          - $.patterns[*].guarantees
+          - $.patterns[*].forbidden
+          - $.patterns[*].compatible_with
+          - $.patterns[*].common_examples
+          - $.composition_rules[*]
+
+      authority_model:
+        selectors:
+          - $.authority_classes
+          - $.admission_rules
+          - $.promotion_rules
+
+      lifecycle:
+        selectors:
+          - $.lifecycles.architecture_pattern
+          - $.lifecycles.globalization_candidate
+          - $.lifecycles.harvest_packet
+
+    output:
+      schema: l9.projection.gar-architecture-observer/v1
+
+    forbidden:
+      - provider_implementation_details
+      - target_rendering_details
+      - unrelated_domain_payloads
+
+
+  - id: l9.projection/semantic-compiler-core@1
+    class: consumer
+    consumer: l9-semantic-compiler
+
+    purpose: |
+      Supply Semantic Compiler with canonical transformation semantics, node-birth input/output models, requirement and resolution semantics, compilation stages, IR definitions, solvers, bindings, architecture patterns, capabilities, authority boundaries, artifacts, and dependency rules required to compile nodes from minimal declarative intent.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms
+          - $.relationships
+          - $.semantic_build_stages
+          - $.stage_rules
+
+      compilation_profiles:
+        selectors:
+          - $.profiles
+          - $.stage_rules
+          - $.validation_results
+
+      ir_catalog:
+        selectors:
+          - $.irs
+          - $.allowed_transitions
+          - $.abstraction_rules
+
+      solver_catalog:
+        selectors:
+          - $.solvers
+          - $.compatibility
+          - $.verification_requirements
+
+      binding_catalog:
+        selectors:
+          - $.bindings
+          - $.binding_families
+          - $.compatibility
+
+      architecture_patterns:
+        selectors:
+          - $.patterns[*].id
+          - $.patterns[*].class
+          - $.patterns[*].structure
+          - $.patterns[*].preconditions
+          - $.patterns[*].guarantees
+          - $.patterns[*].required_capabilities
+          - $.patterns[*].forbidden
+          - $.patterns[*].compatible_with
+          - $.composition_rules
+          - $.architecture_synthesis
+
+      capabilities:
+        selectors:
+          - $.global_rules
+          - $.capability_entry_contract
+          - $.requirement_model
+          - $.effect_class_model
+          - $.capability_state_dimensions
+          - $.invocability_contract
+          - $.capability_relations
+          - $.provider_realization_model
+          - $.capabilities
+
+      authority_model:
+        selectors:
+          - $.authority_classes
+          - $.compiler_authority
+          - $.admission_rules
+
+      artifact_model:
+        selectors:
+          - $.artifacts
+          - $.authority_classes
+          - $.derivation_rules
+
+      semantic_dependency_model:
+        selectors:
+          - $.dependency_rules
+          - $.invalidation_rules
+
+      error_taxonomy:
+        selectors:
+          - $.errors.semantic
+          - $.errors.compiler
+          - $.errors.binding
+          - $.errors.conformance
+
+      receipt_catalog:
+        selectors:
+          - $.receipts.validation
+          - $.receipts.compilation
+          - $.receipts.conformance
+
+      node_spec:
+        selectors:
+          - $.type
+          - $.required
+          - $.properties
+          - $.semantic_rules
+      requirement_model:
+        selectors:
+          - $.global_rules
+          - $.requirement_classes
+          - $.requirement_entry_contract
+          - $.closure_rules
+      resolution_model:
+        selectors:
+          - $.global_rules
+          - $.result_domain
+          - $.resolution_record
+          - $.selection_rules
+      capability_resolution:
+        selectors:
+          - $.inputs
+          - $.resolution_order
+          - $.outputs
+          - $.rules
+      architecture_rules:
+        selectors:
+          - $.global_rules
+          - $.rule_shape
+          - $.rules
+          - $.resolution_rule
+      port_catalog:
+        selectors:
+          - $.global_rules
+          - $.port_entry_contract
+          - $.ports
+      technology_profiles:
+        selectors:
+          - $.global_rules
+          - $.profile_shape
+          - $.profiles
+          - $.resolution
+      conformance_model:
+        selectors:
+          - $.ownership_boundary
+          - $.global_rules
+          - $.requirement_derivation_inputs
+          - $.conformance_requirement_shape
+      node_manifest:
+        selectors:
+          - $.required
+          - $.properties
+          - $.resolved_manifest_gate
+          - $.semantic_rules
+    output:
+      schema: l9.projection.semantic-compiler-core/v1
+
+
+  - id: l9.projection/conformance-system@1
+    class: conformance
+    consumer: l9-conformance
+
+    purpose: >
+      Supply l9-conformance with canonical fixture, law, authority, profile,
+      admission, lifecycle, packet, receipt, and dependency semantics required
+      to admit, publish, resolve, execute, and receipt conformance artifacts.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.fixture
+          - $.terms.normative_fixture
+          - $.terms.derived_fixture
+          - $.terms.fixture_ir
+          - $.terms.fixture_profile
+          - $.terms.fixture_profile_closure
+          - $.terms.fixture_closure
+          - $.terms.global_fixture
+          - $.terms.domain_fixture
+          - $.terms.mixed_fixture
+          - $.terms.globalization_candidate
+          - $.terms.conformance
+          - $.terms.conformance_case
+          - $.terms.admission
+          - $.terms.published
+          - $.terms.receipt
+          - $.terms.conformance_receipt
+          - $.terms.harvest
+
+      invariants:
+        selectors:
+          - $.invariants[*].id
+          - $.invariants[*].scope
+          - $.invariants[*].statement
+          - $.invariants[*].owner
+
+      contracts:
+        selectors:
+          - $.contracts[*].id
+          - $.contracts[*].scope
+          - $.contracts[*].guarantees
+          - $.contracts[*].forbidden
+
+      authority_model:
+        selectors:
+          - $.authority_classes
+          - $.fixture_admission
+          - $.global_promotion
+          - $.profile_publication
+
+      lifecycle:
+        selectors:
+          - $.lifecycles.fixture
+          - $.lifecycles.fixture_profile
+          - $.lifecycles.conformance_receipt
+
+      packet_catalog:
+        selectors:
+          - $.packets.fixture_candidate
+          - $.packets.fixture_admission
+          - $.packets.fixture_harvest
+          - $.packets.conformance
+          - $.packets.conformance_distribution
+
+      receipt_catalog:
+        selectors:
+          - $.receipts.validation
+          - $.receipts.conformance
+          - $.receipts.admission
+
+      semantic_dependency_model:
+        selectors:
+          - $.dependency_rules.fixture
+          - $.dependency_rules.fixture_profile
+          - $.dependency_rules.conformance
+
+    output:
+      schema: l9.projection.conformance-system/v1
+
+
+  - id: l9.projection/cursor-governance-operating-plane@1
+    class: consumer
+    consumer: Cursor-Governance
+
+    purpose: >
+      Supply the user and agent operating plane with canonical vocabulary,
+      authority rules, capability semantics, lifecycle states, operating
+      contracts, conformance coordinates, and error semantics without exposing
+      unnecessary compiler internals.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.authority
+          - $.terms.capability
+          - $.terms.semantic_owner
+          - $.terms.provider
+          - $.terms.bounded_autonomy
+          - $.terms.state_change
+          - $.terms.receipt
+          - $.terms.packet
+          - $.terms.conformance
+
+      capabilities:
+        selectors:
+          - $.capability_entry_contract
+          - $.capability_state_dimensions
+          - $.invocability_contract
+          - $.capabilities[*].id
+          - $.capabilities[*].semantic_owner
+          - $.capabilities[*].effect_class
+          - $.capabilities[*].authorization_requirements
+
+      authority_model:
+        selectors:
+          - $.authority_classes
+          - $.agent_authority
+          - $.human_authority
+          - $.escalation_rules
+
+      lifecycle:
+        selectors:
+          - $.lifecycles
+
+      contracts:
+        selectors:
+          - $.contracts[*].id
+          - $.contracts[*].purpose
+          - $.contracts[*].scope
+          - $.contracts[*].outcomes
+
+      error_taxonomy:
+        selectors:
+          - $.errors
+
+      receipt_catalog:
+        selectors:
+          - $.receipts
+
+      conformance_profiles:
+        selectors:
+          - $.published_profiles[*].id
+          - $.published_profiles[*].digest
+          - $.published_profiles[*].status
+
+    output:
+      schema: l9.projection.cursor-governance-operating-plane/v1
+
+    forbidden:
+      - solver_implementation_details
+      - rendering_internals
+      - unrelated_ir_catalog_entries
+
+
+  - id: l9.projection/global-distribution-plane@1
+    class: governance
+    consumer: Quantum-L9/.github
+
+    purpose: >
+      Supply the organization governance and distribution plane with canonical
+      governance coordinates, published artifact identities, rollout metadata,
+      consumer selectors, profile digests, lifecycle state, and reconciliation
+      requirements without assigning semantic reinterpretation authority.
+
+    sources:
+
+      authority_model:
+        selectors:
+          - $.authority_classes.global_governance
+          - $.distribution_authority
+          - $.rollout_authority
+
+      lifecycle:
+        selectors:
+          - $.lifecycles.published_artifact
+          - $.lifecycles.profile
+          - $.lifecycles.distribution
+
+      packet_catalog:
+        selectors:
+          - $.packets.conformance_distribution
+          - $.packets.admission_decision
+          - $.packets.state_change
+
+      receipt_catalog:
+        selectors:
+          - $.receipts.distribution
+          - $.receipts.conformance
+          - $.receipts.reconciliation
+
+      conformance_profiles:
+        selectors:
+          - $.published_profiles[*].id
+          - $.published_profiles[*].version
+          - $.published_profiles[*].digest
+          - $.published_profiles[*].consumer_selectors
+          - $.published_profiles[*].rollout_mode
+
+      artifact_model:
+        selectors:
+          - $.artifacts.published_profile
+          - $.artifacts.distribution_packet
+          - $.artifacts.receipt
+
+    output:
+      schema: l9.projection.global-distribution-plane/v1
+
+    forbidden:
+      - fixture_semantic_mutation
+      - global_law_reinterpretation
+      - consumer_specific_semantic_rewriting
+
+
+  - id: l9.projection/stage-global-baseline@1
+    class: stage
+    consumer: semantic_build_stage.global_baseline
+
+    purpose: >
+      Supply Bag 1 with the project-applicable global authority, invariants,
+      contracts, vocabulary, archetype semantics, and compilation-profile
+      coordinates.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.authority
+          - $.terms.invariant
+          - $.terms.contract
+          - $.terms.global_semantic_baseline
+          - $.terms.project_contract
+          - $.terms.compilation_profile
+          - $.terms.validation
+
+      invariants:
+        selectors:
+          - $.invariants[?(@.scope=="global")]
+
+      contracts:
+        selectors:
+          - $.contracts[?(@.scope=="global")]
+
+      capabilities:
+        selectors:
+          - $.global_rules
+          - $.capability_entry_contract
+          - $.capability_state_dimensions
+          - $.invocability_contract
+          - $.capability_relations
+          - $.capabilities
+
+      authority_model:
+        selectors:
+          - $.authority_classes
+          - $.global_admission_rules
+
+      node_archetypes:
+        selectors:
+          - $.archetypes
+
+      compilation_profiles:
+        selectors:
+          - $.profiles
+
+    output:
+      schema: l9.projection.stage.global-baseline/v1
+
+
+  - id: l9.projection/stage-project-contracts@1
+    class: stage
+    consumer: semantic_build_stage.project_contracts
+
+    purpose: >
+      Supply Bag 2 with the validated global baseline and only the canonical
+      semantics needed to synthesize project-specific contracts.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.project_contract
+          - $.terms.synthesis
+          - $.terms.contract
+          - $.terms.hard_constraint
+          - $.terms.authority
+
+      contracts:
+        selectors:
+          - $.contracts[?(@.scope=="global")]
+
+      invariants:
+        selectors:
+          - $.invariants[?(@.scope=="global")]
+
+      capabilities:
+        selectors:
+          - $.capability_entry_contract
+          - $.requirement_model
+          - $.effect_class_model
+          - $.capability_state_dimensions
+          - $.invocability_contract
+          - $.capability_relations
+          - $.capabilities
+
+      node_archetypes:
+        selectors:
+          - $.archetypes
+
+      authority_model:
+        selectors:
+          - $.project_contract_admission
+
+      solver_catalog:
+        selectors:
+          - $.solvers[?(@.handles contains "contract_ir")]
+
+    output:
+      schema: l9.projection.stage.project-contracts/v1
+
+
+  - id: l9.projection/stage-laws@1
+    class: stage
+    consumer: semantic_build_stage.laws
+
+    purpose: >
+      Supply Bag 3 with applicable invariants and admitted contracts required
+      to derive and normalize project Law IR.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.law
+          - $.terms.semantic_law_ir
+          - $.terms.derivation
+          - $.terms.constraint
+          - $.terms.hard_constraint
+
+      invariants:
+        selectors:
+          - $.invariants
+
+      contracts:
+        selectors:
+          - $.contracts
+
+      solver_catalog:
+        selectors:
+          - $.solvers[?(@.handles contains "law_ir")]
+
+      ir_catalog:
+        selectors:
+          - $.irs[?(@.id=="l9.law-ir/v1")]
+          - $.allowed_transitions[?(@.to=="l9.law-ir/v1")]
+
+    output:
+      schema: l9.projection.stage.laws/v1
+
+
+  - id: l9.projection/stage-fixtures@1
+    class: stage
+    consumer: semantic_build_stage.fixtures
+
+    purpose: >
+      Supply Bag 4 with admitted Law IR semantics, fixture derivation
+      vocabulary, fixture lifecycle, admission requirements, and fixture-stage
+      solver coordinates.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.fixture
+          - $.terms.derived_fixture
+          - $.terms.normative_fixture
+          - $.terms.fixture_ir
+          - $.terms.fixture_derivation_operator
+          - $.terms.derivation
+          - $.terms.provenance
+          - $.terms.global_fixture
+          - $.terms.domain_fixture
+          - $.terms.mixed_fixture
+
+      lifecycle:
+        selectors:
+          - $.lifecycles.fixture
+
+      authority_model:
+        selectors:
+          - $.fixture_admission
+
+      solver_catalog:
+        selectors:
+          - $.solvers[?(@.handles contains "fixture_ir")]
+
+      ir_catalog:
+        selectors:
+          - $.irs[?(@.id=="l9.fixture-ir/v1")]
+          - $.allowed_transitions[?(@.to=="l9.fixture-ir/v1")]
+
+    output:
+      schema: l9.projection.stage.fixtures/v1
+
+
+  - id: l9.projection/stage-conformance@1
+    class: stage
+    consumer: semantic_build_stage.conformance
+
+    purpose: >
+      Supply Bag 5 with Fixture IR semantics, conformance target bindings,
+      applicable profiles, fixture execution requirements, and conformance
+      validators.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.conformance
+          - $.terms.conformance_case
+          - $.terms.conformance_ir
+          - $.terms.binding
+          - $.terms.target_binding
+          - $.terms.lowering
+          - $.terms.rendering
+          - $.terms.fixture_profile
+          - $.terms.fixture_closure
+
+      binding_catalog:
+        selectors:
+          - $.bindings[?(@.source_ir=="fixture_ir")]
+
+      solver_catalog:
+        selectors:
+          - $.solvers[?(@.handles contains "conformance_ir")]
+
+      conformance_profiles:
+        selectors:
+          - $.published_profiles
+
+      receipt_catalog:
+        selectors:
+          - $.receipts.conformance
+          - $.receipts.validation
+
+      ir_catalog:
+        selectors:
+          - $.irs[?(@.id=="l9.conformance-ir/v1")]
+
+    output:
+      schema: l9.projection.stage.conformance/v1
+
+
+  - id: l9.projection/stage-architecture@1
+    class: stage
+    consumer: semantic_build_stage.architecture
+
+    purpose: >
+      Supply Bag 6 with the minimum validated semantic obligations required to
+      synthesize Architecture IR from admitted L9 patterns.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.synthesis
+          - $.terms.constraint
+          - $.terms.hard_constraint
+          - $.terms.feasible_set
+          - $.terms.unsat
+          - $.terms.unsat_core
+          - $.terms.semantic_owner
+          - $.terms.provider
+
+      architecture_patterns:
+        selectors:
+          - $.patterns[*].id
+          - $.patterns[*].class
+          - $.patterns[*].purpose
+          - $.patterns[*].structure
+          - $.patterns[*].preconditions
+          - $.patterns[*].guarantees
+          - $.patterns[*].required_capabilities
+          - $.patterns[*].forbidden
+          - $.patterns[*].compatible_with
+          - $.composition_rules
+          - $.architecture_synthesis
+
+      capabilities:
+        selectors:
+          - $.capability_entry_contract
+          - $.requirement_model
+          - $.effect_class_model
+          - $.capability_state_dimensions
+          - $.invocability_contract
+          - $.capability_relations
+          - $.capabilities
+
+      technology_capabilities:
+        selectors:
+          - $.technologies[*].id
+          - $.technologies[*].provides
+          - $.technologies[*].constraints
+
+      node_archetypes:
+        selectors:
+          - $.archetypes
+
+      solver_catalog:
+        selectors:
+          - $.solvers[?(@.handles contains "architecture_ir")]
+
+      ir_catalog:
+        selectors:
+          - $.irs[?(@.id=="l9.architecture-ir/v1")]
+
+    output:
+      schema: l9.projection.stage.architecture/v1
+
+
+  - id: l9.projection/stage-ports@1
+    class: stage
+    consumer: semantic_build_stage.ports
+
+    purpose: >
+      Supply Bag 7 with selected architecture structures, applicable contracts,
+      capabilities, conformance obligations, and interface-validation semantics
+      needed to compile Port IR.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.contract
+          - $.terms.binding
+          - $.terms.provider_binding
+          - $.terms.lowering
+          - $.terms.provider_substitution
+
+      architecture_patterns:
+        selectors:
+          - $.patterns[*].id
+          - $.patterns[*].structure
+          - $.patterns[*].required_capabilities
+          - $.patterns[*].guarantees
+          - $.patterns[*].forbidden
+
+      contracts:
+        selectors:
+          - $.contracts
+
+      capabilities:
+        selectors:
+          - $.capability_entry_contract
+          - $.requirement_model
+          - $.capability_relations
+          - $.capabilities
+
+      solver_catalog:
+        selectors:
+          - $.solvers[?(@.handles contains "port_ir")]
+
+      ir_catalog:
+        selectors:
+          - $.irs[?(@.id=="l9.port-ir/v1")]
+
+    output:
+      schema: l9.projection.stage.ports/v1
+
+
+  - id: l9.projection/stage-provider-bindings@1
+    class: stage
+    consumer: semantic_build_stage.provider_bindings
+
+    purpose: >
+      Supply Bag 8 with Port IR requirements, provider capability facts,
+      provider-binding rules, compatibility constraints, and the stage-specific
+      capability solver.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.provider
+          - $.terms.provider_binding
+          - $.terms.binding
+          - $.terms.provider_substitution
+          - $.terms.semantic_owner
+
+      technology_capabilities:
+        selectors:
+          - $.technologies
+
+      binding_catalog:
+        selectors:
+          - $.bindings[?(@.class=="provider")]
+
+      solver_catalog:
+        selectors:
+          - $.solvers[?(@.handles contains "provider_binding_ir")]
+
+      architecture_patterns:
+        selectors:
+          - $.patterns[*].id
+          - $.patterns[*].required_capabilities
+          - $.patterns[*].forbidden
+
+      ir_catalog:
+        selectors:
+          - $.irs[?(@.id=="l9.provider-binding-ir/v1")]
+
+    output:
+      schema: l9.projection.stage.provider-bindings/v1
+
+
+  - id: l9.projection/stage-implementation@1
+    class: stage
+    consumer: semantic_build_stage.implementation
+
+    purpose: >
+      Supply Bag 9 with validated Port IR obligations, provider bindings,
+      applicable conformance cases, implementation constraints, and allowed
+      implementation-level lowering rules.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.synthesis
+          - $.terms.lowering
+          - $.terms.binding
+          - $.terms.compilation
+          - $.terms.semantic_preservation
+
+      binding_catalog:
+        selectors:
+          - $.bindings[?(@.class=="provider")]
+          - $.bindings[?(@.class=="target")]
+
+      solver_catalog:
+        selectors:
+          - $.solvers[?(@.handles contains "implementation_ir")]
+
+      conformance_profiles:
+        selectors:
+          - $.published_profiles
+
+      ir_catalog:
+        selectors:
+          - $.irs[?(@.id=="l9.implementation-ir/v1")]
+          - $.allowed_transitions[?(@.from=="l9.implementation-ir/v1")]
+
+    output:
+      schema: l9.projection.stage.implementation/v1
+
+
+  - id: l9.projection/stage-target-artifacts@1
+    class: stage
+    consumer: semantic_build_stage.target_artifacts
+
+    purpose: >
+      Supply Bag 10 with validated Implementation IR, target bindings,
+      rendering rules, final conformance requirements, artifact semantics,
+      and final validation coordinates.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms.target_binding
+          - $.terms.lowering
+          - $.terms.rendering
+          - $.terms.compiled_artifact
+          - $.terms.semantic_preservation
+          - $.terms.receipt
+
+      binding_catalog:
+        selectors:
+          - $.bindings[?(@.class=="target")]
+
+      solver_catalog:
+        selectors:
+          - $.solvers[?(@.handles contains "target_artifact")]
+
+      artifact_model:
+        selectors:
+          - $.artifacts
+
+      receipt_catalog:
+        selectors:
+          - $.receipts.validation
+          - $.receipts.conformance
+          - $.receipts.compilation
+
+      conformance_profiles:
+        selectors:
+          - $.published_profiles
+
+    output:
+      schema: l9.projection.stage.target-artifacts/v1
+
+
+  - id: l9.projection/human-vocabulary-doc@1
+    class: documentation
+    consumer: human
+
+    purpose: >
+      Produce the human-readable L9 vocabulary projection from the canonical
+      machine-readable vocabulary source.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $.terms[*].definition
+          - $.terms[*].question
+          - $.terms[*].notation
+          - $.terms[*].examples
+          - $.relationships
+          - $.semantic_build_stages
+
+    output:
+      schema: l9.projection.human-vocabulary-doc/v1
+      target: vocabulary.md
+
+
+  - id: l9.projection/machine-vocabulary-json@1
+    class: documentation
+    consumer: machine_json
+
+    purpose: >
+      Produce a JSON representation of the canonical L9 vocabulary without
+      changing semantic content.
+
+    sources:
+
+      vocabulary:
+        selectors:
+          - $
+
+    output:
+      schema: l9.projection.machine-vocabulary-json/v1
+      target: vocabulary.json
+
+
+  - id: l9.projection/stage-node-spec@1
+    class: stage
+    consumer: semantic_build_stage.node_spec
+    purpose: |
+      Supply node-spec intake with the canonical NodeSpec schema, authority rules, capability semantics, archetype identities, and technology-profile vocabulary required to normalize declarative node intent.
+    sources:
+      node_spec:
+        selectors:
+          - $.type
+          - $.required
+          - $.properties
+          - $.semantic_rules
+      contracts:
+        selectors:
+          - $.contracts[?(@.id=="l9.contract/node-spec@1")]
+      authority_model:
+        selectors:
+          - $.authority_classes
+          - $.project_contract_admission
+      node_archetypes:
+        selectors:
+          - $.archetypes[*].id
+          - $.archetypes[*].purpose
+      technology_profiles:
+        selectors:
+          - $.profile_shape
+          - $.global_rules
+    output:
+      schema: l9.projection.stage.node-spec/v1
+  - id: l9.projection/stage-requirement-resolution@1
+    class: stage
+    consumer: semantic_build_stage.requirement_resolution
+    purpose: |
+      Supply requirement resolution with the minimum canonical model for typed requirements, hard constraints, authority, provenance, and shared resolution results.
+    sources:
+      requirement_model:
+        selectors:
+          - $.global_rules
+          - $.requirement_classes
+          - $.requirement_entry_contract
+          - $.closure_rules
+      resolution_model:
+        selectors:
+          - $.result_domain
+          - $.resolution_record
+          - $.selection_rules
+      contracts:
+        selectors:
+          - $.contracts[?(@.id=="l9.contract/requirement-resolution@1")]
+      invariants:
+        selectors:
+          - $.invariants
+      capabilities:
+        selectors:
+          - $.capability_entry_contract
+          - $.capability_relations
+    output:
+      schema: l9.projection.stage.requirement-resolution/v1
+  - id: l9.projection/stage-semantic-resolution@1
+    class: stage
+    consumer: semantic_build_stage.semantic_resolution
+    purpose: |
+      Supply semantic resolution with capability closure rules, admitted architecture entailment, node archetypes, and provider-neutral port semantics without selecting concrete technology.
+    sources:
+      capability_resolution:
+        selectors:
+          - $.inputs
+          - $.resolution_order
+          - $.outputs
+          - $.rules
+      architecture_rules:
+        selectors:
+          - $.global_rules
+          - $.rules
+          - $.resolution_rule
+      port_catalog:
+        selectors:
+          - $.global_rules
+          - $.port_entry_contract
+          - $.ports
+      capabilities:
+        selectors:
+          - $.capability_entry_contract
+          - $.capability_relations
+          - $.capabilities
+      architecture_patterns:
+        selectors:
+          - $.patterns
+          - $.composition_rules
+      node_archetypes:
+        selectors:
+          - $.archetypes
+      contracts:
+        selectors:
+          - $.contracts[?(@.id=="l9.contract/semantic-resolution@1")]
+    output:
+      schema: l9.projection.stage.semantic-resolution/v1
+  - id: l9.projection/stage-node-manifest@1
+    class: stage
+    consumer: semantic_build_stage.node_manifest
+    purpose: |
+      Supply NodeManifest composition with the canonical resolved-manifest gate and exact semantic closure models required before implementation lowering.
+    sources:
+      node_manifest:
+        selectors:
+          - $.required
+          - $.properties
+          - $.resolved_manifest_gate
+          - $.semantic_rules
+      contracts:
+        selectors:
+          - $.contracts[?(@.id=="l9.contract/node-manifest@1")]
+      resolution_model:
+        selectors:
+          - $.result_domain
+          - $.resolution_record
+      artifact_model:
+        selectors:
+          - $.artifacts.node_manifest
+      semantic_dependency_model:
+        selectors:
+          - $.dependency_rules.node_manifest
+    output:
+      schema: l9.projection.stage.node-manifest/v1
+projection_engine_contract_ref:
+  artifact: projection_engine_contract.yaml
+  artifact_id: l9.compiler/projection-engine@1
+  rule: >
+    Projection-engine behavior is owned by the standalone canonical contract.
+    This profile catalog selects projection semantics and MUST NOT redefine the
+    engine contract.
+
+composed_projection_rules:
+
+  canonical: false
+
+  definition: >
+    A downstream projection artifact assembled from two or more independently
+    produced canonical-source projections for one bounded consumer or
+    compilation stage.
+
+  creation:
+    expression: >
+      ComposedProjection =
+      Compose(
+        Projection_1,
+        Projection_2,
+        ...,
+        Projection_n
+      )
+
+  requirements:
+    - every_component_projection_is_valid
+    - every_component_projection_has_provenance
+    - composition_profile_is_declared
+    - collisions_are_detected
+    - conflicting_semantics_are_not_silently_reconciled
+    - output_digest_is_computed
+    - source_projection_digests_are_preserved
+
+  authority:
+    class: derived
+
+  may_be_consumed_by:
+    - semantic_compilation_stage
+    - agent
+    - runtime
+    - conformance_system
+    - documentation_renderer
+
+  may_not:
+    - become_canonical_source
+    - modify_component_projection_semantics
+    - hide_semantic_conflicts
+
+validation_rules:
+
+  - id: PROJECTION-001
+    rule: every_projection_profile_has_unique_versioned_id
+
+  - id: PROJECTION-002
+    rule: every_source_reference_resolves_to_canonical_source_class
+
+  - id: PROJECTION-003
+    rule: every_selector_is_deterministic
+
+  - id: PROJECTION-004
+    rule: projection_must_not_create_new_semantic_authority
+
+  - id: PROJECTION-005
+    rule: projection_must_preserve_source_provenance
+
+  - id: PROJECTION-006
+    rule: projection_digest_must_be_deterministic
+
+  - id: PROJECTION-007
+    rule: source_digest_change_marks_projection_stale
+
+  - id: PROJECTION-008
+    rule: profile_digest_change_marks_projection_stale
+
+  - id: PROJECTION-009
+    rule: undeclared_derivation_inside_projection_is_invalid
+
+  - id: PROJECTION-010
+    rule: composed_projection_conflicts_must_fail_closed
+
+  - id: PROJECTION-011
+    rule: composed_projection_is_downstream_and_noncanonical
+
+  - id: PROJECTION-012
+    rule: stage_projection_must_be_minimum_sufficient_for_declared_stage

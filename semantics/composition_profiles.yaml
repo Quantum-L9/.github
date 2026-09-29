@@ -1,0 +1,47 @@
+schema: l9.composition-profiles/v1
+artifact_id: l9.composition-profiles/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_projection_composition_profiles
+  authority_class: canonical
+global_rules:
+  composed_artifacts_are_derived: true
+  source_projection_provenance_required: true
+  conflicts_fail_closed: true
+  silent_precedence_is_forbidden: true
+  composition_does_not_create_authority: true
+profiles:
+  - id: l9.compose/stage-context@1
+    purpose: >
+      Compose independently projected validated semantics into one bounded
+      stage compilation context.
+    accepts:
+      - projection_artifact
+    merge_strategy:
+      mappings: deep_merge_if_disjoint
+      sequences: preserve_source_order
+      scalar_collision: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.stage-context/v1
+    required_provenance:
+      - source_projection_refs
+      - source_projection_digests
+      - composition_profile_ref
+      - composition_profile_digest
+  - id: l9.compose/consumer-view@1
+    purpose: >
+      Compose multiple canonical-source projections into a bounded view for a
+      named long-lived consumer.
+    accepts:
+      - projection_artifact
+    merge_strategy:
+      mappings: deep_merge_if_disjoint
+      sequences: preserve_source_order
+      scalar_collision: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.consumer-view/v1

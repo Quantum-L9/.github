@@ -1,0 +1,81 @@
+schema: l9.binding-catalog/v1
+artifact_id: l9.binding-catalog/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_binding_catalog
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: binding_catalog.yaml
+binding_families:
+  provider:
+    purpose: Map an abstract semantic port or capability requirement onto a concrete implementation provider.
+  target:
+    purpose: Map semantic or intermediate-representation concepts onto a concrete target artifact, runtime,
+      language, framework, protocol, or execution environment.
+  validation:
+    purpose: Map a validation contract onto a mechanically checkable validator implementation without
+      changing validation semantics.
+bindings:
+- id: l9.binding/json-schema-2020-12@1
+  class: target
+  source_ir: structural_requirements_ir
+  target_ir: json_schema_ir
+  target:
+    technology: json-schema
+    version: 2020-12
+  schema_uri: https://json-schema.org/draft/2020-12/schema
+  semantic_type_map:
+    string:
+      type: string
+    integer:
+      type: integer
+    number:
+      type: number
+    boolean:
+      type: boolean
+    object:
+      type: object
+    array:
+      type: array
+    semantic_digest:
+      type: string
+      pattern: ^sha256:[0-9a-f]{64}$
+    reference:
+      type: string
+      minLength: 1
+    any: {}
+  rules:
+  - required_contract_field_maps_to_required_json_schema_field
+  - enum_maps_to_enum
+  - descriptions_may_be_preserved
+  - unknown_semantic_type_fails_closed
+  - binding_does_not_invent_field_type
+- id: pytest/v1
+  class: target
+  source_ir: fixture_ir
+  target_ir: pytest_ir
+  target:
+    technology: pytest
+  maps:
+    fixture_case: pytest_test_function
+    given: setup_phase
+    when.operation: system_under_test_call
+    expect: pytest_assertions
+  rules:
+  - binding_declares_mapping
+  - binding_does_not_perform_lowering
+validation_binding_families:
+- LocalSATBinding
+- GraphConstraintBinding
+- SchemaBinding
+- FixtureBinding
+- ConformanceBinding
+compatibility:
+  provider: RequiredCapabilities ⊆ ProviderCapabilities
+  target: RequiredTargetCapabilities ⊆ TargetCapabilities
+  unknown_capability: unsupported_until_resolved
+  optimization_permitted_only_after_compatibility: true
+  provider_does_not_become_semantic_owner: true
+  binding_selection_does_not_transform_source_ir: true

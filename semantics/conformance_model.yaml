@@ -1,0 +1,49 @@
+schema: l9.conformance-model/v1
+artifact_id: l9.conformance-model/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_conformance_requirement_semantics
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: conformance_model.yaml
+governed_by:
+  contracts:
+    - l9.contract/conformance-resolution@1
+    - l9.contract/validation-and-correctness@1
+    - l9.contract/assurance-and-verification@1
+ownership_boundary:
+  this_file_owns: global_semantics_for_deriving_conformance_requirements
+  l9_conformance_owns:
+    - fixture_identity
+    - fixture_admission
+    - profile_resolution
+    - executable_conformance
+    - conformance_receipts
+global_rules:
+  proof_obligations_preexist_candidate_implementation: true
+  every_conformance_requirement_traces_to_governing_semantics: true
+  fixture_or_test_must_not_invent_law: true
+  system_under_test_must_not_define_expected_result: true
+  unresolved_semantics_do_not_compile_to_false_conformance: true
+  conformance_evidence_does_not_grant_authority: true
+requirement_derivation_inputs:
+  - invariants
+  - contracts
+  - capabilities
+  - architecture_patterns
+  - ports
+  - technology_bindings
+conformance_requirement_shape:
+  required:
+    - id
+    - subject_class
+    - governing_refs
+    - observable_semantics
+    - verification_class
+  optional:
+    - profile_hint
+    - binding_constraints
+    - evidence_requirements
+output: conformance_requirement_ir
