@@ -1,0 +1,40 @@
+schema: l9.port-catalog/v1
+artifact_id: l9.port-catalog/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_port_semantics
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: port_catalog.yaml
+governed_by:
+  contracts:
+    - l9.contract/semantic-resolution@1
+    - l9.contract/semantic-identity-and-compatibility@1
+    - l9.contract/semantic-ownership@1
+global_rules:
+  port_identity_is_semantic_not_provider_specific: true
+  ports_require_explicit_owner: true
+  ports_require_contract_refs: true
+  provider_native_api_is_not_canonical_port_contract: true
+  port_compatibility_must_be_declared: true
+port_entry_contract:
+  required:
+    - id
+    - semantic_owner
+    - purpose
+    - contract_refs
+    - required_capabilities
+    - effect_class
+  optional:
+    - input_semantics
+    - output_semantics
+    - failure_semantics
+    - compatibility_refs
+    - conformance_requirement_refs
+ports: []
+catalog_status:
+  concrete_global_ports_admitted: 0
+  rule: Domain ports remain owned by their semantic owners and are referenced through canonical 
+    coordinates rather than copied into this catalog.

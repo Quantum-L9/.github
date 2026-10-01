@@ -1,0 +1,39 @@
+schema: l9.composition-engine-contract/v1
+artifact_id: l9.compiler/composition-engine@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_generic_projection_composition_engine_contract
+  authority_class: canonical
+inputs:
+  required:
+    - projection_artifacts
+    - composition_profile_ref
+    - composition_profile_digest
+pipeline:
+  - verify_component_projection_digests
+  - verify_component_projection_freshness
+  - resolve_composition_profile
+  - verify_composition_profile_digest
+  - detect_identity_collisions
+  - detect_semantic_conflicts
+  - merge_compatible_payloads
+  - validate_composed_payload
+  - canonicalize_payload
+  - compute_composition_digest
+  - emit_composed_projection
+  - emit_compiler_receipt
+output:
+  artifact_type: composed_projection
+conflict_policy:
+  default: fail_closed
+guarantees:
+  - component_semantics_preserved
+  - component_provenance_preserved
+  - composition_is_downstream
+  - composition_is_noncanonical
+  - deterministic
+forbidden:
+  - silent_semantic_precedence
+  - source_authority_creation
+  - semantic_conflict_reconciliation_without_declared_rule

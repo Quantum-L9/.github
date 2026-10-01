@@ -1,0 +1,141 @@
+schema: l9.technology-capabilities/v1
+artifact_id: l9.technology-capabilities/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_technology_capability_catalog
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: technology_capabilities.yaml
+global_rules:
+  technology_identity_does_not_imply_semantic_ownership: true
+  technology_must_be_registered_before_mechanical_binding: true
+  capability_claims_must_be_explicit: true
+  missing_capability_is_not_assumed: true
+  unknown_capability_is_not_equivalent_to_supported: true
+  provider_binding_requires_capability_coverage: true
+  technology_registration_does_not_authorize_use: true
+capability_classes:
+  language:
+    definition: >
+      Capabilities provided by a programming language or language runtime.
+  framework:
+    definition: >
+      Capabilities provided by an application, orchestration, testing, or
+      execution framework.
+  datastore:
+    definition: >
+      Persistence, transaction, indexing, consistency, and query capabilities
+      exposed by a storage technology.
+  transport:
+    definition: >
+      Communication, routing, packet, or protocol capabilities.
+  target:
+    definition: >
+      Capabilities relevant to lowering or rendering compiled artifacts.
+technologies:
+  - id: python
+    class: language
+    provides:
+      - modules
+      - packages
+      - async_functions
+      - type_annotations
+      - exceptions
+      - context_managers
+    target_roles:
+      - implementation_language
+  - id: pytest
+    class: framework
+    provides:
+      - test_functions
+      - fixtures
+      - assertions
+      - exception_assertions
+      - parametrization
+    target_roles:
+      - conformance_target
+    compatible_with:
+      - python
+  - id: mongodb
+    class: datastore
+    provides:
+      - transactions
+      - conditional_updates
+      - unique_indexes
+      - document_storage
+      - change_notifications
+    target_roles:
+      - persistence_provider
+    semantic_ownership:
+      implied: false
+  - id: postgresql
+    class: datastore
+    provides:
+      - transactions
+      - conditional_updates
+      - unique_constraints
+      - relational_storage
+      - serializable_isolation
+      - json_storage
+    target_roles:
+      - persistence_provider
+    semantic_ownership:
+      implied: false
+  - id: gate-sdk
+    class: transport
+    provides:
+      - gate_routed_transport
+      - TransportPacket
+      - gate_client_surface
+    target_roles:
+      - constellation_transport_binding
+    constraints:
+      - gate_is_routing_authority
+      - application_does_not_require_peer_urls
+    semantic_ownership:
+      implied: false
+  - id: jinja
+    class: target
+    provides:
+      - deterministic_template_rendering
+    target_roles:
+      - late_stage_renderer
+    constraints:
+      - semantic_decisions_must_be_resolved_before_rendering
+      - template_does_not_define_architecture
+binding_rules:
+  provider_compatibility:
+    expression: >
+      RequiredCapabilities
+      ⊆
+      ProviderCapabilities
+  target_compatibility:
+    expression: >
+      RequiredTargetCapabilities
+      ⊆
+      TargetCapabilities
+  unknown_capability:
+    result: incompatible_until_resolved
+  missing_technology:
+    result: unregistered_technology
+  unregistered_technology:
+    compiler_action:
+      - stop_binding
+      - require_technology_registration
+registration_requirements:
+  required:
+    - id
+    - class
+    - provides
+    - target_roles
+  optional:
+    - constraints
+    - compatible_with
+    - incompatible_with
+    - semantic_ownership
+  rules:
+    - technology_registration_precedes_provider_binding
+    - capability_names_must_reference_canonical_vocabulary_or_capability_catalog
+    - registration_does_not_grant_authority

@@ -1,0 +1,375 @@
+schema: l9.compilation-profiles/v1
+artifact_id: l9.compilation-profiles/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_compilation_profiles
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: compilation_profiles.yaml
+global_rules:
+  stages_are_ordered: true
+  downstream_stage_requires_validated_upstream_state: true
+  stage_context_is_projected_from_validated_state: true
+  stage_solver_is_projected_from_compilation_profile: true
+  validation_is_mechanical: true
+  historical_stage_artifacts_are_immutable: true
+  corrections_create_new_revisions: true
+  failed_stage_blocks_downstream_advancement: true
+  upstream_semantic_change_invalidates_affected_dependents: true
+  compiler_must_not_select_solver_ad_hoc: true
+  compiler_must_not_expand_authority: true
+  product_topology_is_universal_build_input: true
+  product_kind_selects_kind_specific_obligations: true
+  separate_node_and_dependency_build_languages_forbidden: true
+profiles:
+- id: l9.compilation/product-build@1
+  purpose: Compile any admitted L9 ProductTopology through shared requirement, semantic, architecture, port, binding,
+    conformance, ProductManifest, implementation, and target-artifact stages. ProductKind and archetype select kind-specific
+    obligations without creating separate build languages.
+  input_contract: l9.contract/product-topology@1
+  input_schema: l9.schema/product-topology@1
+  resolved_output_contract: l9.contract/product-manifest@1
+  resolved_output_schema: l9.schema/product-manifest@1
+  stages:
+  - ordinal: 1
+    id: product_topology
+    consumes:
+    - product_topology
+    - product_kinds
+    - node_archetypes
+    - dependency_archetypes
+    operations:
+    - projection
+    - validation
+    produces:
+    - product_topology_ir
+    - product_kind_resolution
+    - product_archetype_resolution
+    validation:
+      required: true
+      solver_ref: product-topology-validator/v1
+      subjects:
+      - product_topology_ir
+      - product_kind_resolution
+      - product_archetype_resolution
+  - ordinal: 2
+    id: identity_topology_resolution
+    consumes:
+    - product_topology_ir
+    - identity_model
+    - applicable_identity_contracts
+    - product_kind_resolution
+    - product_archetype_resolution
+    operations:
+    - projection
+    - derivation
+    - resolution
+    produces:
+    - identity_topology_ir
+    - identity_binding_requirements
+    validation:
+      required: true
+      solver_ref: identity-topology-validator/v1
+      subjects:
+      - identity_topology_ir
+      - identity_binding_requirements
+  - ordinal: 3
+    id: global_baseline
+    consumes:
+    - product_topology_ir
+    - product_kind_resolution
+    - product_archetype_resolution
+    - global_authority
+    - global_invariants
+    - global_contracts
+    - global_capability_semantics
+    - canonical_l9_vocabulary
+    operations:
+    - projection
+    produces:
+    - validated_global_baseline
+    validation:
+      required: true
+      solver_ref: predicate-validator/v1
+  - ordinal: 4
+    id: requirement_resolution
+    consumes:
+    - product_topology_ir
+    - product_kind_resolution
+    - product_archetype_resolution
+    - validated_global_baseline
+    - requirement_model
+    - authority_model
+    - identity_topology_ir
+    operations:
+    - projection
+    - derivation
+    - resolution
+    produces:
+    - requirement_ir
+    validation:
+      required: true
+      solver_ref: requirement-closure-validator/v1
+  - ordinal: 5
+    id: semantic_resolution
+    consumes:
+    - requirement_ir
+    - product_kind_resolution
+    - product_archetype_resolution
+    - capability_resolution
+    - capabilities
+    - architecture_rules
+    - node_archetypes
+    - dependency_archetypes
+    - applicable_contracts
+    operations:
+    - projection
+    - derivation
+    - resolution
+    produces:
+    - capability_closure_ir
+    - architecture_obligations
+    - port_requirements
+    - adapter_requirements
+    - relationship_requirements
+    validation:
+      required: true
+      solver_ref: semantic-resolution-validator/v1
+      subjects:
+      - capability_closure_ir
+      - architecture_obligations
+      - port_requirements
+      - adapter_requirements
+      - relationship_requirements
+  - ordinal: 6
+    id: product_contracts
+    consumes:
+    - validated_global_baseline
+    - product_topology_ir
+    - requirement_ir
+    - capability_closure_ir
+    - declared_product_contract_refs
+    operations:
+    - projection
+    - synthesis
+    produces:
+    - product_contract_ir
+    validation:
+      required: true
+      solver_ref: schema-contract-validator/v1
+      subjects:
+      - product_contract_ir
+  - ordinal: 7
+    id: laws
+    consumes:
+    - applicable_invariants
+    - global_contracts
+    - admitted_product_contracts
+    operations:
+    - projection
+    - derivation
+    produces:
+    - semantic_law_ir
+    validation:
+      required: true
+      solver_ref: logic-sat/v1
+  - ordinal: 8
+    id: fixtures
+    consumes:
+    - semantic_law_ir
+    - law_provenance
+    operations:
+    - projection
+    - derivation
+    produces:
+    - fixture_ir
+    - fixture_candidate_packets
+    validation:
+      required: true
+      solver_ref: fixture-derivation-validator/v1
+  - ordinal: 9
+    id: architecture
+    consumes:
+    - product_topology_ir
+    - product_kind_resolution
+    - product_archetype_resolution
+    - requirement_ir
+    - capability_closure_ir
+    - architecture_obligations
+    - admitted_product_contracts
+    - applicable_conformance_projection
+    - applicable_architecture_patterns
+    operations:
+    - projection
+    - synthesis
+    - resolution
+    produces:
+    - architecture_ir
+    - selected_pattern_refs
+    validation:
+      required: true
+      solver_ref: graph-constraint-validator/v1
+  - ordinal: 10
+    id: ports
+    consumes:
+    - architecture_ir
+    - port_requirements
+    - adapter_requirements
+    - relationship_requirements
+    - port_catalog
+    - applicable_contract_projection
+    - applicable_conformance_projection
+    operations:
+    - projection
+    - synthesis
+    produces:
+    - port_ir
+    - adapter_requirement_ir
+    - product_relationship_ir
+    validation:
+      required: true
+      solver_ref: interface-compatibility/v1
+      subjects:
+      - port_ir
+      - adapter_requirement_ir
+      - product_relationship_ir
+  - ordinal: 11
+    id: provider_bindings
+    consumes:
+    - port_ir
+    - adapter_requirement_ir
+    - product_relationship_ir
+    - technology_profile
+    - technology_capabilities
+    - binding_catalog
+    operations:
+    - projection
+    - binding_selection
+    - resolution
+    - synthesis
+    produces:
+    - provider_binding_ir
+    validation:
+      required: true
+      solver_ref: capability-set-validator/v1
+  - ordinal: 12
+    id: conformance
+    consumes:
+    - product_kind_resolution
+    - product_archetype_resolution
+    - fixture_ir
+    - conformance_model
+    - capability_closure_ir
+    - architecture_ir
+    - selected_pattern_refs
+    - port_ir
+    - adapter_requirement_ir
+    - product_relationship_ir
+    - provider_binding_ir
+    - applicable_conformance_bindings
+    - fixture_profiles
+    operations:
+    - projection
+    - derivation
+    - binding_selection
+    - lowering
+    - synthesis
+    produces:
+    - conformance_requirement_ir
+    - conformance_ir
+    - executable_conformance_cases
+    validation:
+      required: true
+      solver_ref: reference-conformance/v1
+  - ordinal: 13
+    id: product_manifest
+    consumes:
+    - product_topology_ir
+    - identity_topology_ir
+    - product_kind_resolution
+    - product_archetype_resolution
+    - requirement_ir
+    - capability_closure_ir
+    - architecture_ir
+    - port_ir
+    - adapter_requirement_ir
+    - product_relationship_ir
+    - provider_binding_ir
+    - conformance_requirement_ir
+    - compiler_coordinates
+    operations:
+    - synthesis
+    - validation
+    produces:
+    - product_manifest_ir
+    - product_manifest
+    validation:
+      required: true
+      solver_ref: product-manifest-validator/v1
+      resolved_manifest_gate_required: true
+  - ordinal: 14
+    id: implementation
+    consumes:
+    - product_manifest_ir
+    - applicable_conformance_projection
+    - implementation_constraints
+    operations:
+    - projection
+    - synthesis
+    - lowering
+    produces:
+    - implementation_ir
+    validation:
+      required: true
+      solver_ref: implementation-contract-validator/v1
+  - ordinal: 15
+    id: target_artifacts
+    consumes:
+    - implementation_ir
+    - target_binding
+    - rendering_profile
+    - final_conformance_projection
+    operations:
+    - binding_selection
+    - lowering
+    - rendering
+    produces:
+    - final_artifacts
+    - final_conformance_receipt
+    validation:
+      required: true
+      final_conformance_required: true
+      solver_ref: final-conformance/v1
+stage_rules:
+  context:
+    expression: "StageContext_n = \u03C0_stage(ValidatedState_n)"
+  solver:
+    expression: "Solver(Stage_n) = \u03C0_solver(CanonicalCompilationProfile, Stage_n)"
+  compile:
+    expression: "Candidate_(n+1) = Compile_(n+1)(\n  Project_(n+1)(S_n),\n  Input_(n+1)\n)\n"
+  validate:
+    expression: "Receipt_(n+1) = Validate_(Solver(n+1))(\n  Candidate_(n+1),\n  Project_(n+1)(S_n)\n)\n"
+  advance:
+    expression: "Advance(n -> n+1) iff AuthorityValid \u2227 UpstreamValid(n) \u2227 OutputValid(n+1) \u2227 PreconditionsSatisfied\n"
+  commit:
+    expression: "S_(n+1) = Commit(\n  S_n,\n  Candidate_(n+1),\n  Receipt_(n+1)\n) iff Receipt_(n+1) = PASS\n"
+  failure:
+    default_action: repair_current_stage
+    upstream_exception: 'When mechanical evidence proves an admitted upstream semantic assumption invalid or unsatisfiable,
+      create a new upstream revision and invalidate only its affected transitive dependents.
+
+      '
+  historical_state:
+    mutate_previous_revision: false
+  recompilation:
+    expression: 'Affected(change) = TransitiveDependents(changed_semantics)
+
+      '
+validation_results:
+- pass
+- fail
+- unsat
+- invalid
+- unknown

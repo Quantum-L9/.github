@@ -1,0 +1,285 @@
+schema: l9.capabilities/v1
+artifact_id: l9.capabilities/global@1
+status: active
+canonical: true
+
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_capability_semantics
+  authority_class: canonical
+
+canonical_source:
+  format: yaml
+  artifact: capabilities.yaml
+
+derivation:
+  source_artifacts:
+    - artifact: invariants.yaml
+      artifact_id: l9.invariants/global@1
+      sha256: 767a57860ea4156c4123a37aede249983f57a50084ab8c7107fe994dc45bd765
+      item_count: 24
+      admission: canonical_active
+    - artifact: contracts.yaml
+      artifact_id: l9.contracts/global@1
+      sha256: 9a79b1ba83535d77a09c4caebbd58fd64c66411886cba7e23256f004895bffcb
+      item_count: 21
+      admission: canonical_active
+  rule: >
+    This artifact defines the minimum global semantic model for capabilities.
+    It does not promote component-local capability identities, provider
+    implementations, runtime state, or authority decisions into global law.
+
+global_rules:
+  capability_identity_is_semantic: true
+  capability_identity_is_not_provider_identity: true
+  semantic_owner_must_be_explicit: true
+  semantic_scope_must_be_explicit: true
+  effect_class_must_be_explicit: true
+  effect_class_does_not_grant_authority: true
+  declaration_admission_availability_authorization_and_invocability_are_distinct: true
+  state_dimensions_do_not_imply_a_lifecycle_order: true
+  invocability_is_derived_not_self_granted: true
+  unknown_state_must_remain_explicit: true
+  requirements_must_be_declared: true
+  provider_realization_is_separate_from_semantic_capability_identity: true
+  provider_realization_does_not_transfer_semantic_ownership: true
+  technology_registration_does_not_authorize_capability_use: true
+  component_capabilities_are_not_globalized_by_recurrence: true
+  catalog_registration_does_not_expand_authority: true
+
+catalog_authority_boundaries:
+  owns:
+    - global_capability_entry_grammar
+    - capability_state_dimension_semantics
+    - capability_relation_semantics
+    - provider_realization_separation_rules
+    - global_catalog_registration_rules
+  does_not_own:
+    - component_local_capability_meaning_without_explicit_owner_admission
+    - provider_implementation_semantics
+    - runtime_availability_truth
+    - authorization_decisions
+    - lifecycle_state_machines
+    - receipt_type_semantics
+    - global_error_or_result_taxonomy
+
+capability_entry_contract:
+  required_fields:
+    - id
+    - semantic_owner
+    - semantic_scope
+    - purpose
+    - effect_class
+    - requires
+    - authorization_requirements
+  field_semantics:
+    id: >
+      Stable semantic capability identity. Provider, implementation, transport,
+      or storage identity must not define this identity.
+    semantic_owner: >
+      Authority that owns the capability meaning. Registration in this global
+      catalog does not transfer that ownership to the catalog owner.
+    semantic_scope: >
+      Scope within which the capability meaning is authoritative. Global
+      registration does not imply global semantic scope.
+    purpose: >
+      Bounded description of the semantic function exposed by the capability.
+    effect_class: >
+      Explicit semantic classification of the kind of governed effect the
+      capability may produce. The class must resolve within the capability's
+      semantic scope. Effect class informs applicable contracts and policy but
+      does not itself grant authority or imply global scope.
+    requires: >
+      Explicit semantic capability dependencies and global contract
+      dependencies that must be satisfied for applicable use.
+    authorization_requirements: >
+      Explicit authority conditions that apply to invocation. These
+      requirements do not themselves constitute an authorization decision.
+  prohibited_fields:
+    - provider_as_semantic_owner
+    - implicit_authorization
+    - implicit_availability
+    - implicit_admission
+    - inline_provider_implementation
+
+requirement_model:
+  requires_shape:
+    capabilities: >
+      Semantic capability identities required by this capability. Dependency
+      does not imply admission, availability, authorization, or invocability.
+    contracts: >
+      Canonical contract identities whose obligations apply to this capability.
+  authorization_requirements_shape:
+    type: list
+    item: authority_requirement_ref
+    rule: >
+      Authorization requirements identify governing authority conditions and
+      scopes. They do not encode an actor-specific authorization decision.
+  unknown_requirement_rule: >
+    A missing or unresolved required capability, contract, or authorization
+    condition remains unresolved and must not be coerced to satisfied.
+
+effect_class_model:
+  definition: >
+    Effect class is a provider-independent semantic classification used to
+    determine which authority, policy, and validation obligations apply to a
+    capability invocation or realization. An effect class may be owner-scoped;
+    presence in this catalog does not make the class globally owned.
+  rules:
+    - effect_class_is_part_of_capability_semantics
+    - effect_class_scope_must_be_resolvable
+    - effect_class_must_not_be_inferred_from_provider_identity
+    - effect_class_must_not_be_inferred_from_successful_execution
+    - effect_class_does_not_authorize_invocation
+    - unknown_effect_class_remains_unresolved_where_policy_depends_on_it
+  admitted_global_classes: []
+  admission_note: >
+    The approved invariants and contracts establish that effect class is a
+    distinct required semantic coordinate, but they do not yet establish a
+    defensible globally owned enumeration. No global effect-class values are
+    invented in this pass.
+
+capability_state_dimensions:
+  declared:
+    definition: >
+      The semantic owner has explicitly defined the capability identity and its
+      semantic definition at an exact version or revision.
+    authority_source: semantic_owner
+    implies: []
+
+  admitted:
+    definition: >
+      The exact capability declaration has been accepted by the applicable
+      admission authority for the relevant semantic scope.
+    authority_source: applicable_admission_authority
+    implies: []
+
+  available:
+    definition: >
+      A realization is reported as currently usable at the relevant runtime
+      coordinates. Availability is a runtime fact and does not itself establish
+      authorization, conformance, or semantic ownership.
+    authority_source: applicable_availability_fact_source
+    implies: []
+
+  authorized:
+    definition: >
+      The governing authority permits the subject to invoke the capability
+      within the declared scope and context.
+    authority_source: governing_authority
+    implies: []
+
+  invocable:
+    definition: >
+      A derived evaluation that all capability states, requirements, authority,
+      and preconditions required by the applicable canonical contracts are
+      satisfied for a specific invocation attempt.
+    authority_source: derived_contract_evaluation
+    implies: []
+    derived: true
+
+state_dimension_rules:
+  - dimensions_are_independently_evaluated
+  - declaration_does_not_imply_admission
+  - admission_does_not_imply_availability
+  - availability_does_not_imply_authorization
+  - authorization_does_not_imply_availability
+  - no_single_dimension_implies_invocability
+  - invocability_does_not_create_missing_admission_or_authorization
+  - dimensions_do_not_define_a_lifecycle_state_machine
+  - no_transition_order_is_defined_here
+
+invocability_contract:
+  kind: derived_predicate
+  rule: >
+    A capability is invocable only when every state dimension required by its
+    applicable canonical contracts is satisfied, all declared semantic
+    requirements and applicable authorization requirements are satisfied for
+    the invocation scope, and no applicable hard constraint is unresolved or
+    violated.
+  forbidden:
+    - self_authorization
+    - inference_from_declaration_only
+    - inference_from_availability_only
+    - inference_from_provider_presence
+    - inference_from_previous_success
+    - inference_from_unknown_or_unresolved_state
+
+provider_realization_model:
+  semantic_capability_source: capabilities.yaml
+  provider_capability_fact_source: technology_capabilities.yaml
+  provider_binding_source: binding_catalog.yaml
+  rules:
+    - provider_realization_is_a_binding_not_semantic_ownership
+    - provider_capability_facts_must_be_explicit
+    - required_provider_capabilities_must_be_satisfied_before_binding
+    - missing_or_unknown_provider_capability_is_not_assumed_supported
+    - provider_substitution_requires_declared_compatibility
+    - provider_registration_does_not_admit_or_authorize_semantic_capability_use
+    - provider_realization_does_not_change_capability_identity
+  does_not_define:
+    - provider_implementations
+    - provider_credentials
+    - deployment_topology
+    - runtime_availability_truth
+
+capability_relations:
+  requires:
+    subject: semantic_capability
+    object: semantic_capability
+    semantics: >
+      The subject capability depends on the object capability being satisfied
+      according to the subject capability's applicable contracts.
+    authority_implication: none
+    state_implication: none
+
+  realized_by:
+    subject: semantic_capability
+    object: provider_binding
+    semantics: >
+      A provider binding realizes the semantic capability without changing the
+      capability identity or semantic owner.
+    authority_implication: none
+    ownership_implication: none
+
+  compatible_with:
+    subject: semantic_capability
+    object: semantic_capability
+    semantics: >
+      Capability compatibility exists only when an applicable declared
+      compatibility contract establishes it. Similarity or successful
+      execution is insufficient. Compatibility among concrete realizations is
+      outside this relation and remains owned by binding_catalog.yaml.
+    authority_implication: none
+
+catalog_registration_contract:
+  admission_subject: exact_capability_declaration
+  requirements:
+    - stable_capability_id
+    - explicit_semantic_owner
+    - explicit_semantic_scope
+    - explicit_effect_class
+    - explicit_requires
+    - explicit_authorization_requirements
+    - no_provider_identity_as_semantic_identity
+    - no_authority_expansion
+  guarantees:
+    - registration_preserves_semantic_owner
+    - registration_preserves_semantic_scope
+    - registration_does_not_imply_availability
+    - registration_does_not_imply_authorization
+    - registration_does_not_imply_invocability
+  material_change_rule: >
+    A material semantic change to an admitted capability declaration requires a
+    successor identity or version and a new admission decision unless an
+    explicit governing compatibility contract preserves the prior decision.
+
+capabilities: []
+
+catalog_status:
+  admitted_capability_count: 0
+  reason: >
+    The approved global invariants and contracts establish the capability model
+    and state semantics but do not, by themselves, admit any component-local
+    capability identity as global semantic law. Component capabilities remain
+    with their semantic owners until explicitly proposed and admitted.

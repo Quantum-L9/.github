@@ -1,0 +1,29 @@
+schema: l9.schema-definition/v1
+artifact_id: l9.schema/composed-projection@1
+canonical: true
+type: object
+required:
+  - schema
+  - composition_profile
+  - components
+  - payload
+  - composition_digest
+properties:
+  schema:
+    const: l9.composed-projection/v1
+  composition_profile:
+    type: object
+    required:
+      - ref
+      - digest
+  components:
+    type: array
+    min_items: 1
+    items:
+      required:
+        - projection_ref
+        - projection_digest
+  payload:
+    type: any
+  composition_digest:
+    type: semantic_digest

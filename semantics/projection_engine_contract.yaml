@@ -1,0 +1,39 @@
+schema: l9.projection-engine-contract/v1
+artifact_id: l9.compiler/projection-engine@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_generic_projection_engine_contract
+  authority_class: canonical
+inputs:
+  required:
+    - canonical_source_ref
+    - canonical_source_digest
+    - projection_profile_ref
+    - projection_profile_digest
+pipeline:
+  - resolve_canonical_source
+  - verify_source_digest
+  - resolve_projection_profile
+  - verify_profile_digest
+  - execute_selectors
+  - reshape_if_declared
+  - validate_projected_payload
+  - canonicalize_payload
+  - compute_projection_digest
+  - emit_projection_artifact
+  - emit_compiler_receipt
+output:
+  artifact_type: projection_artifact
+guarantees:
+  - deterministic
+  - source_immutable
+  - projection_non_authoritative
+  - provenance_complete
+  - digest_addressable
+forbidden:
+  - derivation
+  - synthesis
+  - authority_expansion
+  - arbitrary_consumer_mutation
+  - executable_selector_code

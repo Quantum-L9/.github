@@ -1,0 +1,1672 @@
+schema: l9.vocabulary/v1
+artifact_id: l9.vocabulary/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_semantics
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: vocabulary.yaml
+projections:
+  vocabulary_md:
+    target: vocabulary.md
+    derived_from: vocabulary.yaml
+    authority_class: derived
+    semantic_mutation_allowed: false
+  vocabulary_json:
+    target: vocabulary.json
+    derived_from: vocabulary.yaml
+    authority_class: derived
+    semantic_mutation_allowed: false
+global_rules:
+  one_canonical_source: true
+  derived_artifacts_are_not_authority: true
+  projections_must_preserve_source_semantics: true
+  derivations_must_not_create_authority: true
+  compilation_must_not_expand_authority: true
+  rendering_should_have_zero_semantic_freedom: true
+  solver_selection_must_be_projected_from_canonical_compilation_profile: true
+  validation_must_be_mechanical: true
+  stage_advancement_requires_validation: true
+  historical_artifacts_are_immutable: true
+  corrections_create_new_revisions: true
+  downstream_invalidation_is_dependency_scoped: true
+terms:
+  authority:
+    semantic_class: governance
+    definition: 'The recognized right to establish, admit, modify, approve, reject, or govern a semantic fact, artifact,
+      operation, or state transition.
+
+      '
+    question: Who is permitted to make this authoritative?
+    rules:
+    - authority_must_be_explicit
+    - derived_artifacts_do_not_gain_authority_automatically
+    - conformance_does_not_grant_authority
+    - agents_must_not_self_expand_authority
+  invariant:
+    semantic_class: semantic_constraint
+    definition: 'A property that must remain true across all admissible states, implementations, transitions, or
+      representations within its scope.
+
+      '
+    question: What must always remain true?
+    produces:
+    - law_candidates
+    authority_rule: 'An invariant is authoritative only when admitted by its semantic owner.
+
+      '
+  global_invariant:
+    semantic_class: semantic_constraint
+    subtype_of: invariant
+    definition: 'An invariant whose authoritative scope applies across the L9 constellation or across every component
+      matching its declared global profile.
+
+      '
+    owner_class: global_governance
+  domain_invariant:
+    semantic_class: semantic_constraint
+    subtype_of: invariant
+    definition: 'An invariant owned by a specific semantic domain and applicable only within that domain or declared
+      domain profile.
+
+      '
+    owner_class: domain_semantic_owner
+  kernel:
+    semantic_class: artifact
+    definition: 'The canonical semantic owner of one irreducible reasoning primitive. A kernel answers one fundamental
+      reasoning question, owns the minimum semantics required to answer it faithfully, declares material neighboring
+      concerns it does not own, and remains reusable outside any one host, mode, repository, tool, or workflow.
+
+      '
+    question: What irreducible reasoning question does this kernel answer?
+    properties:
+      owns_one_irreducible_reasoning_primitive: true
+      thin_semantic_artifact: true
+      semantically_self_complete: true
+      context_independent: true
+    authority_rule: 'Kernel canonicality requires acceptance by the applicable authoritative owner. Kernel identity
+      does not imply runtime activation, execution, tool permission, or governance authority.
+
+      '
+    rules:
+    - kernel_owns_meaning_not_orchestration
+    - kernel_must_not_duplicate_existing_kernel_authority
+    - existing_kernel_plus_composition_contract_is_preferred_when_semantically_faithful
+    - cross_kernel_reasoning_is_composed_above_kernel_layer
+  contract:
+    semantic_class: semantic_interface
+    definition: 'A machine-usable declaration of an operation, capability, interface, accepted inputs, outputs,
+      outcomes, obligations, boundaries, or compatibility requirements.
+
+      '
+    question: What behavior or interface is explicitly promised or required?
+    rules:
+    - contracts_must_not_violate_applicable_invariants
+    - contracts_must_have_explicit_scope
+    - contract_compatibility_must_be_explicit
+  global_contract:
+    semantic_class: semantic_interface
+    subtype_of: contract
+    definition: 'A contract whose scope applies across the L9 constellation or across every component matching its
+      declared global profile.
+
+      '
+    owner_class: global_governance
+  project_contract:
+    semantic_class: semantic_interface
+    subtype_of: contract
+    definition: A product- or domain-specific contract synthesized or normalized under the applicable global semantic
+      baseline from authoritative ProductTopology semantics, requirements, capabilities, and boundaries.
+    synthesized_from:
+    - product_topology
+    - product_requirements
+    - applicable_global_invariants
+    - applicable_global_contracts
+    rules:
+    - project_contracts_are_candidates_until_validated_and_admitted
+    - project_contracts_must_satisfy_applicable_global_invariants
+    - project_contracts_must_satisfy_applicable_global_contracts
+  law:
+    semantic_class: formal_semantics
+    definition: 'A formal semantic rule expressing consequences, relationships, prohibitions, requirements, equivalences,
+      ordering, or other mechanically evaluable semantics supported by authoritative invariants and contracts.
+
+      '
+    question: What formally follows from the authoritative semantics?
+    derived_from:
+    - invariants
+    - contracts
+    authority_rule: 'A law formalizes authoritative semantics but does not independently create new semantic authority.
+
+      '
+  semantic_law_ir:
+    semantic_class: intermediate_representation
+    subtype_of: intermediate_representation
+    definition: 'Canonical machine-readable representation of normalized laws suitable for deterministic derivation,
+      validation, comparison, harvesting, and downstream compilation.
+
+      '
+    common_operators:
+    - require
+    - forbid
+    - imply
+    - equivalent
+    - all_of
+    - any_of
+    - exactly_one
+    - monotonic
+    - idempotent
+    - immutable
+    - ordered
+    - atomic
+    - compatible
+  projection:
+    semantic_class: compiler_operation
+    definition: 'A bounded view of existing authoritative or validated semantics selected and optionally reshaped
+      for a specific consumer, concern, or stage without introducing new semantic consequences or authority.
+
+      '
+    notation:
+    - P = π(S)
+    question: Which existing semantics are relevant here?
+    properties:
+      creates_new_semantic_consequence: false
+      may_reduce_information: true
+      may_change_representation: true
+      may_create_authority: false
+    rules:
+    - projection_must_trace_to_source
+    - projection_must_preserve_relevant_source_semantics
+  derivation:
+    semantic_class: compiler_operation
+    definition: 'Production of an explicit semantic consequence that is logically entailed by already-authoritative
+      or validated semantics.
+
+      '
+    notation:
+    - S ⊢ D
+    question: What follows from what is already known?
+    properties:
+      may_create_new_explicit_knowledge: true
+      may_create_authority: false
+      representation_change_required: false
+    examples:
+    - laws_to_fixture_cases
+    - conjunction_to_truth_table_cases
+    - idempotency_law_to_replay_cases
+  synthesis:
+    semantic_class: compiler_operation
+    definition: 'Construction of a candidate artifact satisfying declared requirements and constraints when the
+      complete artifact is not uniquely entailed by existing semantics.
+
+      '
+    question: What admissible candidate can satisfy these constraints?
+    properties:
+      creates_candidate_structure: true
+      candidate_requires_validation: true
+      candidate_is_not_authoritative_until_admitted: true
+    examples:
+    - project_contract_synthesis
+    - architecture_synthesis
+    - implementation_synthesis
+  compilation:
+    semantic_class: compiler_operation
+    definition: 'A semantics-preserving transformation process that converts source semantics or an intermediate
+      representation into another representation, intermediate representation, or artifact under a declared compilation
+      profile.
+
+      '
+    question: How are these semantics transformed into the next valid representation?
+    may_include:
+    - projection
+    - derivation
+    - synthesis
+    - binding_selection
+    - lowering
+    - rendering
+    - validation
+    rules:
+    - compilation_must_preserve_required_semantics
+    - compilation_must_preserve_provenance
+    - compilation_must_not_expand_authority
+  binding:
+    semantic_class: realization_mapping
+    definition: 'A declaration mapping an abstract semantic role, concept, operation, port, or expectation onto
+      a concrete realization mechanism.
+
+      '
+    question: What concrete mechanism realizes this abstract role?
+    properties:
+      may_exist_without_lowering: true
+      performs_lowering: false
+      declares_realization_rules: true
+  target_binding:
+    semantic_class: realization_mapping
+    subtype_of: binding
+    definition: 'A binding that maps semantic or intermediate representation concepts onto concepts of a target
+      artifact, runtime, language, framework, protocol, or execution environment.
+
+      '
+    examples:
+    - fixture_ir_to_pytest
+    - workflow_ir_to_github_actions
+    - implementation_ir_to_python
+  provider_binding:
+    semantic_class: realization_mapping
+    subtype_of: binding
+    definition: 'A binding that maps an abstract semantic port or capability requirement onto the capabilities of
+      a concrete implementation provider.
+
+      '
+    examples:
+    - state_storage_port_to_mongodb
+    - semantic_memory_port_to_graph_provider
+    rules:
+    - provider_does_not_become_semantic_owner
+    - provider_must_satisfy_required_port_contract
+  lowering:
+    semantic_class: compiler_operation
+    definition: 'A compilation step that transforms an abstract intermediate representation into a more concrete
+      intermediate representation using an applicable binding.
+
+      '
+    question: How is this abstract representation realized more concretely?
+    requires:
+    - source_ir
+    - applicable_binding
+    - target_abstraction_level
+    produces:
+    - lower_level_ir
+    rules:
+    - lowering_requires_applicable_binding
+    - lowering_must_not_expand_semantic_authority
+    - output_should_reduce_remaining_realization_freedom
+  rendering:
+    semantic_class: compiler_operation
+    definition: 'Final materialization of sufficiently concrete intermediate representation into target syntax,
+      bytes, files, or another final artifact representation.
+
+      '
+    question: How is the already-decided artifact serialized into final form?
+    properties:
+      semantic_freedom_target: approximately_zero
+      usually_final_compiler_pass: true
+    rules:
+    - rendering_must_not_invent_semantics
+    - rendering_must_not_change_authority
+    - rendering_must_preserve_concrete_ir_meaning
+  intermediate_representation:
+    semantic_class: compiler_structure
+    abbreviation: IR
+    definition: 'A canonical machine-readable representation used between compilation stages to preserve, refine,
+      validate, or lower semantics without relying on final target syntax.
+
+      '
+    rules:
+    - ir_must_have_defined_semantics
+    - ir_must_have_version
+    - ir_must_support_provenance
+    - admitted_ir_should_have_content_digest
+  fixture:
+    semantic_class: conformance_semantics
+    definition: 'A concrete semantic witness, counterexample, boundary case, or scenario derived from a law and
+      used to pin an observable consequence of that law.
+
+      '
+    question: What concrete example demonstrates this law?
+    derived_from:
+    - laws
+    properties:
+      may_be_language_neutral: true
+      may_be_executable_directly: false
+      authority_traces_upstream: true
+    rules:
+    - fixture_must_trace_to_law
+    - fixture_must_not_create_law
+    - fixture_expected_outcome_must_be_supported_by_source_semantics
+  normative_fixture:
+    semantic_class: conformance_semantics
+    subtype_of: fixture
+    definition: 'An independently authored or explicitly approved fixture serving as a stable semantic anchor whose
+      expected result is not generated solely by the implementation it validates.
+
+      '
+    purpose:
+    - independent_semantic_anchor
+    - golden_vector
+    - interoperability_anchor
+  derived_fixture:
+    semantic_class: conformance_semantics
+    subtype_of: fixture
+    definition: 'A fixture mechanically derived from formal laws using declared fixture derivation operators.
+
+      '
+    purpose:
+    - breadth
+    - systematic_boundary_coverage
+    - mechanical_case_expansion
+  fixture_ir:
+    semantic_class: intermediate_representation
+    subtype_of: intermediate_representation
+    definition: 'Canonical language-neutral representation of a fixture including setup, semantic action, expected
+      consequence, source law references, and provenance.
+
+      '
+  fixture_derivation_operator:
+    semantic_class: compiler_operator
+    definition: 'A deterministic operator that expands a supported law form into one or more fixture scenarios.
+
+      '
+    operators:
+    - positive
+    - negative
+    - boundary
+    - permutation
+    - conjunction_matrix
+    - implication_countercase
+    - replay
+    - collision
+    - mutation
+    - substitution
+    - version_mismatch
+    - failure_injection
+    - metamorphic
+  conformance_case:
+    semantic_class: conformance_semantics
+    definition: 'An executable realization of one or more fixture expectations against a system under test using
+      an applicable target binding.
+
+      '
+    compiled_from:
+    - fixture_ir
+    - target_binding
+    rules:
+    - conformance_case_must_preserve_fixture_semantics
+    - implementation_under_test_must_not_define_expected_result
+  conformance:
+    semantic_class: verification
+    definition: 'Mechanical evaluation of whether an implementation, provider, artifact, or system satisfies the
+      applicable admitted fixture and contract requirements.
+
+      '
+    question: Does this candidate satisfy the required observable semantics?
+    authority_rule: 'Conformance produces evidence and does not independently grant execution or governance authority.
+
+      '
+  conformance_ir:
+    semantic_class: intermediate_representation
+    subtype_of: intermediate_representation
+    definition: 'Canonical representation of executable conformance obligations before target-specific rendering
+      or execution.
+
+      '
+  fixture_profile:
+    semantic_class: conformance_configuration
+    definition: 'A versioned composition of admitted fixtures defining a reusable conformance baseline for a declared
+      semantic scope.
+
+      '
+    properties:
+      immutable_when_published: true
+      content_addressable: true
+      composable: true
+    examples:
+    - l9.core
+    - l9.capability
+    - l9.runtime
+    - l9.adapter
+    - l9.projection
+    - l9.codegen
+  fixture_profile_closure:
+    semantic_class: conformance_configuration
+    definition: 'The transitive resolved set of fixtures inherited from all directly and indirectly referenced fixture
+      profiles.
+
+      '
+  fixture_closure:
+    semantic_class: conformance_configuration
+    definition: 'The complete deduplicated set of fixtures applicable to a specific consumer after resolving global
+      profiles, domain profiles, mixed bindings, and profile inheritance.
+
+      '
+  global_fixture:
+    semantic_class: conformance_semantics
+    subtype_of: fixture
+    definition: 'An admitted fixture derived from an authoritative global L9 law and published for reuse across
+      every applicable L9 consumer.
+
+      '
+  domain_fixture:
+    semantic_class: conformance_semantics
+    subtype_of: fixture
+    definition: 'An admitted fixture derived from law owned by a specific semantic domain.
+
+      '
+  mixed_fixture:
+    semantic_class: conformance_semantics
+    subtype_of: fixture
+    definition: 'A fixture composed from a global semantic template and a domain-specific binding or instantiation.
+
+      '
+    structure:
+      global_template: true
+      domain_binding: true
+  globalization_candidate:
+    semantic_class: governance_candidate
+    definition: 'A recurring normalized domain law or fixture pattern that appears broadly reusable across L9 but
+      lacks sufficient global semantic authority to be admitted as global.
+
+      '
+    rules:
+    - globalization_candidate_is_not_global_authority
+    - promotion_requires_authorized_global_state_change
+  harvest:
+    semantic_class: compiler_operation
+    definition: 'Deterministic or evidence-bound discovery of recurring normalized laws, fixtures, patterns, or
+      semantic structures across domains for possible promotion into reusable higher-scope semantics.
+
+      '
+    question: Which repeated domain semantics may deserve promotion upstream?
+    produces:
+    - globalization_candidates
+    - promotion_packets
+  admission:
+    semantic_class: governance_operation
+    definition: 'Deterministic evaluation and authorized state transition that determines whether a candidate semantic
+      artifact becomes an admitted artifact within a declared scope.
+
+      '
+    hard_checks:
+    - authority_valid
+    - source_traceable
+    - derivation_valid
+    - deterministic
+    - reproducible
+    - non_vacuous
+    - independent
+    - executable
+    - non_conflicting
+    - version_valid
+  admission_decision:
+    semantic_class: governance_artifact
+    definition: 'Immutable decision bound to the exact digest of a candidate artifact and issued by an actor holding
+      the required authority.
+
+      '
+    rules:
+    - decision_must_bind_candidate_digest
+    - changed_candidate_requires_new_decision
+    - approval_does_not_float_across_revisions
+  published:
+    semantic_class: lifecycle_state
+    definition: 'State in which an admitted artifact has canonical identity, immutable digest, catalog presence,
+      profile reachability, and distribution availability.
+
+      '
+    predicate:
+      all_of:
+      - admitted
+      - catalogued
+      - addressable
+      - profile_reachable
+      - distribution_available
+  capability:
+    semantic_class: semantic_function
+    definition: 'A stable provider-independent semantic function identity with an explicit semantic owner, semantic
+      scope, effect class, requirements, and applicable authorization requirements. Declaration, admission, availability,
+      authorization, and invocability remain distinct dimensions.
+
+      '
+    authority_rule: 'Capability identity and functional ability do not grant governing authority, and provider realization
+      does not transfer semantic ownership.
+
+      '
+    detailed_model: capabilities.yaml
+  semantic_owner:
+    semantic_class: ownership
+    definition: 'The authority responsible for defining and governing the semantics of a capability, domain, contract,
+      or artifact.
+
+      '
+    rules:
+    - semantic_owner_is_not_implied_by_provider
+    - semantic_owner_is_not_implied_by_deployment_location
+  provider:
+    semantic_class: realization
+    definition: 'A concrete implementation, service, framework, datastore, runtime, or technology that realizes
+      an abstract semantic capability or port.
+
+      '
+    rules:
+    - provider_does_not_become_semantic_owner
+    - provider_is_replaceable_when_contract_and_conformance_hold
+  semantic_ownership:
+    semantic_class: ownership
+    definition: 'Assignment of authoritative semantic responsibility independently of implementation provider or
+      deployment topology.
+
+      '
+  deployment_topology:
+    semantic_class: runtime_structure
+    definition: 'Physical or logical placement of implementations, services, nodes, or providers within an execution
+      environment.
+
+      '
+    rule:
+      semantic_ownership_not_equal_deployment_topology: true
+  validation:
+    semantic_class: verification
+    definition: 'Mechanical determination of whether a candidate satisfies the constraints and rules applicable
+      to its compilation stage.
+
+      '
+    outputs:
+    - pass
+    - fail
+    - unsat
+    - invalid
+    - unknown
+  mechanical_validation:
+    semantic_class: verification
+    subtype_of: validation
+    definition: 'Validation performed by a declared deterministic or mechanically checkable solver under a pinned
+      validation profile.
+
+      '
+    rules:
+    - llm_opinion_is_not_mechanical_validation
+    - same_inputs_and_profile_must_produce_same_semantic_result
+    - unknown_is_valid_when_proof_is_unavailable
+    - probably_ok_is_not_a_result
+  solver:
+    semantic_class: verification_mechanism
+    definition: 'A stage-appropriate deterministic or mechanically verifiable mechanism used to evaluate constraints,
+      compatibility, satisfiability, or conformance.
+
+      '
+    rules:
+    - solver_must_be_declared_by_compilation_profile
+    - stage_must_not_select_solver_ad_hoc
+    - solver_version_must_be_pinned
+    - solver_output_must_be_receiptable
+  solver_projection:
+    semantic_class: projection
+    subtype_of: projection
+    definition: 'Stage-specific projection of the canonical compilation profile defining the exact solver, version,
+      ruleset, and validation parameters required for that stage.
+
+      '
+    notation:
+    - Solver(Stage_n) = π_solver(CompilationProfile, Stage_n)
+  compilation_profile:
+    semantic_class: compiler_configuration
+    definition: 'Canonical versioned declaration of compilation stages, required inputs, allowed transformations,
+      bindings, validators, solvers, target surfaces, and stage ordering.
+
+      '
+    rules:
+    - compiler_must_not_invent_profile_locally
+    - solver_choice_must_be_projected_from_profile
+    - profile_digest_must_be_recorded_in_receipts
+  stage:
+    semantic_class: compiler_structure
+    definition: 'A bounded compilation phase that consumes validated upstream projections plus stage-specific inputs
+      and produces a candidate intermediate representation for mechanical validation.
+
+      '
+  stage_context_projection:
+    semantic_class: projection
+    subtype_of: projection
+    definition: 'Minimum sufficient validated context projected from accumulated build state for one specific compilation
+      stage.
+
+      '
+    notation:
+    - C_n = π_stage(S_n)
+    rule:
+      include_only_stage_relevant_validated_semantics: true
+  stage_compilation_packet:
+    semantic_class: packet
+    subtype_of: packet
+    definition: 'Bounded packet containing the validated stage context projection, stage-specific input, applicable
+      instructions, constraint projection, fixture projection, solver projection, and source provenance required
+      to execute one compilation stage.
+
+      '
+  constraint:
+    semantic_class: formal_semantics
+    definition: 'A mechanically evaluable condition restricting the admissible solution space of a semantic artifact
+      or compilation stage.
+
+      '
+  hard_constraint:
+    semantic_class: formal_semantics
+    subtype_of: constraint
+    definition: 'A non-compensable requirement whose violation makes a candidate inadmissible regardless of optimization
+      score or utility.
+
+      '
+    notation:
+    - HardConstraint = false => Feasible = false
+  objective:
+    semantic_class: optimization
+    definition: 'A declared optimization criterion evaluated only among candidates that satisfy all applicable hard
+      constraints.
+
+      '
+    examples:
+    - minimize_critical_path
+    - minimize_cost
+    - minimize_risk
+    - maximize_leverage
+  feasible_set:
+    semantic_class: optimization
+    definition: 'Set of candidate solutions satisfying all accumulated hard constraints at a given compilation stage.
+
+      '
+    notation:
+    - F_n = {x ∈ F_(n-1) | C_n(x)}
+    - F_0 ⊇ F_1 ⊇ F_2 ⊇ ... ⊇ F_n
+  satisfiable:
+    semantic_class: verification_result
+    definition: 'State in which at least one candidate exists that satisfies all applicable hard constraints.
+
+      '
+  unsat:
+    semantic_class: verification_result
+    definition: 'State in which no candidate can satisfy the complete applicable constraint set.
+
+      '
+  unsat_core:
+    semantic_class: verification_evidence
+    definition: 'A minimal or reduced subset of constraints sufficient to demonstrate unsatisfiability.
+
+      '
+    purpose:
+    - localize_semantic_conflict
+    - identify_earliest_affected_assumption
+    - support_surgical_revision
+  incremental_semantic_constraint_solver:
+    semantic_class: compiler_architecture
+    definition: 'Layered semantic compilation architecture in which each stage projects bounded validated context,
+      compiles a specialized IR, applies the stage-specific mechanical solver, commits validated state, and narrows
+      the feasible solution space for subsequent stages.
+
+      '
+    notation:
+    - S_(n+1) = Commit(S_n, Validate_n(Compile_n(Project_n(S_n), Input_n)))
+    - Advance(n -> n+1) iff AuthorityValid ∧ UpstreamValid(n) ∧ OutputValid(n+1) ∧ PreconditionsSatisfied
+  semantic_refinement:
+    semantic_class: compiler_operation
+    definition: 'Progressive addition of valid constraints or concrete realization detail that narrows the feasible
+      solution space while preserving admitted upstream semantics.
+
+      '
+    notation:
+    - IR_(n+1) = Refine(IR_n, Constraints_n)
+  semantic_freedom:
+    semantic_class: compiler_metric
+    definition: 'Remaining degree of admissible semantic choice available at a compilation stage.
+
+      '
+    expected_direction:
+      through_pipeline: decreasing
+  bounded_autonomy:
+    semantic_class: execution_policy
+    definition: 'Authorization for an agent or compiler to act independently within an explicitly constrained semantic,
+      capability, fixture-backed, and authority-valid region.
+
+      '
+    principle:
+    - semantic_freedom_decreases_as_safe_automation_increases
+    - conformance_evidence_does_not_replace_authority
+  proof_carrying_semantic_state:
+    semantic_class: state_model
+    definition: 'Validated build state in which each admitted stage artifact is bound to provenance, source digests,
+      validation evidence, and revision identity.
+
+      '
+    structure:
+    - artifact
+    - provenance
+    - validation_receipt
+    - source_digests
+    - state_revision
+  state:
+    semantic_class: authoritative_record
+    definition: 'Authoritative revisioned record of the current admitted semantic build position and references
+      to its validated artifacts and evidence.
+
+      '
+  state_change:
+    semantic_class: authoritative_operation
+    definition: 'Authorized append-only transition creating a new authoritative revision rather than mutating historical
+      semantic state.
+
+      '
+    rules:
+    - expected_revision_must_match
+    - authority_must_be_valid
+    - transition_must_be_allowed
+    - required_evidence_must_be_present
+  surgical_revision:
+    semantic_class: repair_operation
+    definition: 'Creation of a new revision of the earliest affected semantic artifact using newly available evidence
+      while preserving historical revisions and invalidating only dependent downstream artifacts.
+
+      '
+  invalidation:
+    semantic_class: compiler_operation
+    definition: 'Marking previously validated downstream artifacts as stale when an upstream semantic dependency
+      changes.
+
+      '
+  dependency_scoped_invalidation:
+    semantic_class: compiler_operation
+    subtype_of: invalidation
+    definition: 'Invalidation restricted to the transitive semantic dependents of the changed artifact rather than
+      the complete compilation suffix when dependency precision is available.
+
+      '
+    notation:
+    - Affected(change) = TransitiveDependents(changed_semantics)
+  impact_analysis:
+    semantic_class: compiler_operation
+    definition: 'Determination of which fixtures, profiles, intermediate representations, artifacts, consumers,
+      or receipts are affected by a semantic change.
+
+      '
+  packet:
+    semantic_class: transport_or_work_unit
+    definition: 'A bounded transferable unit containing semantic payload plus the metadata required for its declared
+      L9 operation or workflow.
+
+      '
+    vocabulary_rule:
+      preferred_l9_term: packet
+      envelope_synonym_allowed: false
+  transport_packet:
+    semantic_class: transport_or_work_unit
+    subtype_of: packet
+    definition: 'Canonical Gate transport object used to carry routed work and metadata between L9 participants.
+
+      '
+    canonical_name: TransportPacket
+  fixture_candidate_packet:
+    semantic_class: packet
+    subtype_of: packet
+    definition: 'Packet carrying a candidate fixture, source semantics, derivation provenance, proposed classification,
+      and candidate digest for admission.
+
+      '
+  fixture_admission_packet:
+    semantic_class: packet
+    subtype_of: packet
+    definition: 'Packet carrying fixture admission inputs or decisions bound to exact candidate identity and authority
+      evidence.
+
+      '
+  fixture_harvest_packet:
+    semantic_class: packet
+    subtype_of: packet
+    definition: 'Packet carrying normalized cross-domain fixture or law evidence and a proposed globalization candidate
+      for upstream authority review.
+
+      '
+  conformance_packet:
+    semantic_class: packet
+    subtype_of: packet
+    definition: 'Packet carrying resolved fixture profiles, fixture identities, digests, bindings, and execution
+      requirements for a conformance operation.
+
+      '
+  conformance_distribution_packet:
+    semantic_class: packet
+    subtype_of: packet
+    definition: 'Packet carrying a published conformance release, profile coordinates, digests, consumer selectors,
+      rollout mode, and distribution metadata.
+
+      '
+  receipt:
+    semantic_class: evidence
+    definition: 'Immutable evidence recording what operation or validation occurred against which exact inputs,
+      revisions, profiles, and digests and what result was observed.
+
+      '
+    rule:
+      receipt_proves_observed_result_not_authority: true
+  validation_receipt:
+    semantic_class: evidence
+    subtype_of: receipt
+    definition: 'Receipt binding a stage candidate digest to the exact validator, solver, ruleset, compilation profile,
+      source digests, and mechanical result.
+
+      '
+  conformance_receipt:
+    semantic_class: evidence
+    subtype_of: receipt
+    definition: 'Receipt binding a repository or implementation revision to the exact fixture/profile closure executed
+      and the resulting conformance outcome.
+
+      '
+  provenance:
+    semantic_class: lineage
+    definition: 'Machine-readable lineage linking an artifact to the authoritative sources, revisions, transformations,
+      bindings, validators, and decisions from which it originated.
+
+      '
+    rules:
+    - provenance_must_survive_compilation
+    - provenance_must_support_upstream_conflict_localization
+  semantic_digest:
+    semantic_class: identity
+    definition: 'Deterministic digest of canonical semantic content used for identity, comparison, staleness detection,
+      receipt binding, and reproducibility.
+
+      '
+  semantic_identity:
+    semantic_class: identity
+    definition: 'Stable identity determined by canonical semantics rather than incidental formatting, serialization,
+      provider, or storage representation.
+
+      '
+  semantic_equivalence:
+    semantic_class: formal_semantics
+    definition: 'Relationship in which two representations preserve the same required semantics despite differences
+      in syntax, representation, provider, or target format.
+
+      '
+  semantic_preservation:
+    semantic_class: compiler_property
+    definition: 'Property requiring a compiled, lowered, rendered, or projected artifact to preserve the authoritative
+      semantics applicable to its source.
+
+      '
+  canonical_source:
+    semantic_class: authority
+    definition: 'Authoritative source from which derived views, projections, rendered artifacts, and compiled representations
+      obtain their semantic meaning.
+
+      '
+  derived_artifact:
+    semantic_class: artifact
+    definition: 'Artifact produced from an authoritative source through projection, derivation, compilation, lowering,
+      rendering, or another governed transformation.
+
+      '
+    authority_rule:
+      canonical_by_default: false
+  profile:
+    semantic_class: configuration
+    definition: 'Versioned canonical configuration selecting a bounded composition of semantics, transformations,
+      bindings, validators, or fixtures for a defined purpose.
+
+      '
+  profile_projection:
+    semantic_class: projection
+    subtype_of: projection
+    definition: 'Consumer- or stage-specific view selected from a canonical profile.
+
+      '
+  profile_digest:
+    semantic_class: identity
+    definition: 'Deterministic digest representing the exact immutable contents and coordinates of a published profile
+      version.
+
+      '
+  provider_substitution:
+    semantic_class: architecture_operation
+    definition: 'Replacement of one provider with another while preserving the semantic contract, port requirements,
+      and conformance obligations.
+
+      '
+    admissibility:
+    - required_capabilities_subset_of_provider_capabilities
+    - applicable_conformance_passes
+  global_semantic_baseline:
+    semantic_class: compilation_input
+    definition: 'Applicable global authority, invariants, contracts, vocabulary, profiles, and other upstream semantics
+      inherited by a project before product-specific contract synthesis.
+
+      '
+  product_topology:
+    semantic_class: product_contract
+    subtype_of: contract
+    definition: 'Authoritative first-class product contract describing an L9 product through the universal topology
+      vocabulary: identity, kind, archetype, purpose, boundary, requirements, capabilities, consumption, deployment,
+      contracts, architecture, interfaces, ports, adapters, relationships, bindings, providers, runtime, security,
+      state, failures, receipts, observability, admission, lifecycle, conformance, distribution, provenance, and
+      Unknowns.'
+    question: What product is this, what does it own, how is it consumed and deployed, and which obligations govern
+      its realization?
+    schema_ref: l9.schema/product-topology@1
+    rules:
+    - product_topology_is_authoritative_only_when_admitted
+    - one_topology_vocabulary_for_all_products
+    - compiler_derives_consequences_without_rewriting_declared_product_semantics
+  compiled_artifact:
+    semantic_class: artifact
+    definition: 'Artifact produced by a declared compilation process from authoritative or validated source semantics
+      under a pinned compilation profile.
+
+      '
+  requirement:
+    definition: Typed obligation or objective with explicit source, hardness, and satisfaction semantics used during
+      semantic resolution.
+    semantic_owner: Quantum-L9/.github
+  requirement_closure:
+    definition: Transitive, provenance-preserving set of applicable requirements after dependency expansion and
+      canonicalization.
+    semantic_owner: Quantum-L9/.github
+  resolution:
+    definition: Evidence-bound determination of whether a semantic subject is resolved, unresolved, incompatible,
+      unsatisfiable, or ambiguous under governing coordinates.
+    semantic_owner: Quantum-L9/.github
+  capability_closure:
+    definition: Desired capabilities plus all transitively required capabilities and their governing contract and
+      ownership coordinates.
+    semantic_owner: Quantum-L9/.github
+  technology_profile:
+    definition: Declarative technology intent and constraints used for binding selection; it does not define provider
+      capability facts or semantic ownership.
+    semantic_owner: Quantum-L9/.github
+  port:
+    definition: Provider-neutral semantic interface owned by a semantic domain and governed by explicit contracts,
+      capability requirements, effect semantics, and compatibility rules.
+    semantic_owner: Quantum-L9/.github
+  conformance_requirement:
+    definition: Traceable proof obligation derived from governing semantics and resolved by the executable conformance
+      owner without creating new law.
+    semantic_owner: Quantum-L9/.github
+  product_manifest:
+    semantic_class: derived_artifact
+    definition: Proof-carrying derived realization closure compiled from one exact ProductTopology, preserving ProductKind,
+      archetype, requirements, capabilities, architecture, ports, adapters, relationships, technology/provider bindings,
+      admission, conformance, compiler coordinates, provenance, and unresolved gaps.
+    schema_ref: l9.schema/product-manifest@1
+    rules:
+    - product_manifest_is_derived_not_product_authority
+    - implementation_lowering_requires_resolved_manifest_gate
+  product:
+    semantic_class: architecture_identity
+    definition: An L9-owned software product described by one ProductTopology and governed by an explicit semantic
+      owner, ProductKind, archetype, capability boundary, contracts, lifecycle, admission, and provenance.
+    rules:
+    - repository_identity_is_not_product_kind
+    - provider_identity_is_not_product_identity
+  product_identity:
+    semantic_class: identity
+    definition: Stable semantic identity of an L9 product independent of release artifact, provider, deployment
+      instance, or repository layout.
+    rules:
+    - product_identity_must_be_explicit
+    - product_identity_does_not_imply_product_kind
+    detailed_model: identity_model.yaml
+  product_kind:
+    semantic_class: architecture_classification
+    definition: Primary architectural participation form of an L9 product, determined by its canonical consumption
+      and deployment model.
+    detailed_model: product_kinds.yaml
+    rules:
+    - kind_is_not_inferred_from_provider
+    - kind_is_not_inferred_from_repository_shape
+    - kind_is_not_inferred_from_semantic_complexity
+  product_archetype:
+    semantic_class: architecture_classification
+    definition: Kind-specific reusable specialization that adds structural, pattern, and conformance obligations
+      without redefining ProductKind or domain semantics.
+    rules:
+    - archetype_must_belong_to_product_kind
+    - archetype_does_not_create_semantic_ownership
+  consumption_model:
+    semantic_class: runtime_structure
+    definition: Canonical way another product consumes a product capability across the product boundary.
+    admitted_values:
+      remote_invocation: Consumer invokes another independently running product through its admitted remote capability
+        boundary.
+      local_composition: Consumer installs and directly composes the product into its own runtime boundary.
+  deployment_model:
+    semantic_class: runtime_structure
+    definition: Canonical operational placement and lifecycle model by which a product realization runs.
+    admitted_values:
+      independent_runtime: Product operates as an independently deployed, independently lifecycle-managed runtime.
+      consumer_bound_artifact: Product is distributed as an installable artifact whose running instance is owned
+        by the consuming runtime.
+  remote_invocation:
+    semantic_class: consumption_model
+    subtype_of: consumption_model
+    definition: Consumption by requesting capability from another independently running product across a communication
+      boundary.
+  local_composition:
+    semantic_class: consumption_model
+    subtype_of: consumption_model
+    definition: Consumption by installing, importing, injecting, or otherwise composing the product directly into
+      the consumer runtime.
+  independent_runtime:
+    semantic_class: deployment_model
+    subtype_of: deployment_model
+    definition: Deployment in which product process, lifecycle, health, scaling, upgrade, and failure boundaries
+      are operationally independent of consumers.
+  consumer_bound_artifact:
+    semantic_class: deployment_model
+    subtype_of: deployment_model
+    definition: Installable distribution artifact whose runtime instance exists within and inherits the outer process
+      lifecycle of its consumer.
+  node:
+    semantic_class: product_kind
+    subtype_of: product_kind
+    definition: L9 product whose canonical consumption is remote invocation and canonical deployment is an independent
+      runtime participating through canonical Constellation communication.
+  dependency:
+    semantic_class: product_kind
+    subtype_of: product_kind
+    definition: L9 product whose canonical consumption is local composition and canonical deployment is a consumer-bound
+      installable artifact.
+  adapter:
+    semantic_class: realization_boundary
+    definition: Concrete translator or realization boundary that implements an owner-defined port using a provider,
+      protocol, or external mechanism without acquiring the port owner's semantic authority.
+    rules:
+    - adapter_implements_port
+    - adapter_does_not_redefine_port_semantics
+    - provider_details_should_not_escape_adapter_boundary
+  product_relationship:
+    semantic_class: architecture_relation
+    definition: Declared directed relationship between two L9 products preserving product boundaries, consumption
+      direction, capability references, contract coordinates, and authority separation.
+    relations:
+      invoke: Remote capability consumption of an independently running product.
+      compose: Local composition of an installable product inside a consumer runtime.
+      integrate: Explicit integration across a declared public contract without implying ownership transfer.
+      provide_to: Declaration that a product exposes a capability or contract intended for another product or product
+        family.
+  release_identity:
+    semantic_class: identity
+    definition: Immutable realization coordinate for one exact released product artifact, binding product identity
+      to version, source revision, artifact digest, public-contract coordinates, and applicable compatibility coordinates.
+    rules:
+    - release_identity_does_not_replace_product_identity
+    - version_alone_is_not_sufficient_release_identity
+  runtime_identity:
+    semantic_class: identity
+    definition: Identity of one concrete running realization or consumer-inherited runtime, distinct from ProductIdentity,
+      ActorIdentity, SurfaceIdentity, provider identity, and governance profile.
+    detailed_model: identity_model.yaml
+  constellation_identity:
+    semantic_class: identity
+    definition: Admitted distributed participation identity through which an L9 Node is recognized as a Constellation
+      participant. It is distinct from product identity and deployment instance metadata.
+  consumer_binding:
+    semantic_class: realization_mapping
+    subtype_of: binding
+    definition: Binding of one exact admitted installable product release to one consumer, including compatibility,
+      artifact digest, dependency closure, configuration/extension bindings, and consumer-specific conformance evidence.
+    rules:
+    - product_admission_does_not_imply_consumer_compatibility
+    - consumer_binding_does_not_transfer_semantic_ownership
+  product_admission:
+    semantic_class: governance_operation
+    subtype_of: admission
+    definition: Admission decision over an exact ProductTopology or product release proving that the subject satisfies
+      applicable identity, contract, provenance, conformance, kind, and compatibility requirements.
+    rules:
+    - admission_binds_exact_subject
+    - admission_does_not_imply_runtime_availability
+    - admission_does_not_authorize_capability_invocation
+  actor_identity:
+    semantic_class: identity
+    definition: Identity of the admitted actor attributable for an operation, authorship event, memory write, or
+      consequential action.
+    question: Who performed or authored this operation?
+    detailed_model: identity_model.yaml
+    rules:
+    - actor_identity_is_not_governance_profile
+    - actor_identity_is_not_adapter_identity
+    - actor_identity_is_not_provider_identity
+  surface_identity:
+    semantic_class: identity
+    definition: Identity of the execution or interaction surface through which an actor operates, distinct from
+      actor and governance profile.
+    question: Through which surface is this actor operating?
+    detailed_model: identity_model.yaml
+  identity_binding:
+    semantic_class: identity_relation
+    definition: Declared relation among distinct identity dimensions and realization coordinates without aliasing
+      their meanings or transferring authority.
+    detailed_model: identity_model.yaml
+  identity_resolution:
+    semantic_class: resolution
+    definition: Evidence-bound determination of applicable dynamic identity dimensions for one runtime context under
+      canonical identity contracts.
+    detailed_model: identity_model.yaml
+  identity_assertion:
+    semantic_class: evidence
+    definition: Typed provenance-bearing evidence artifact recording resolved identity dimensions for one bounded
+      runtime or operation context.
+    schema_ref: l9.schema/identity-assertion@1
+    detailed_model: identity_model.yaml
+  governance_profile:
+    semantic_class: governance_configuration
+    definition: Versioned policy/autonomy profile selected for a runtime or surface. A GovernanceProfile is not
+      an identity and must not be used as operation authorship.
+    rules:
+    - governance_profile_is_not_actor_identity
+    - governance_profile_selection_does_not_change_identity
+relationships:
+  authority_flow:
+    sequence:
+    - authority
+    - invariant
+    - law
+    - fixture
+    - conformance
+  project_contract_flow:
+    inputs:
+    - global_semantic_baseline
+    - product_topology
+    - project_requirements
+    operation: synthesis
+    output: project_contract
+  law_flow:
+    inputs:
+    - applicable_invariants
+    - admitted_contracts
+    operation: derivation
+    output: semantic_law_ir
+  fixture_flow:
+    input: semantic_law_ir
+    operation: derivation
+    output: fixture_ir
+  conformance_case_flow:
+    inputs:
+    - fixture_ir
+    - target_binding
+    operations:
+    - lowering
+    - rendering
+    output: conformance_case
+  compilation_relationship:
+    compilation_may_contain:
+    - projection
+    - derivation
+    - synthesis
+    - binding_selection
+    - lowering
+    - rendering
+  binding_lowering_relationship:
+    binding_can_exist_without_lowering: true
+    target_lowering_requires_binding: true
+    binding_declares_mapping: true
+    lowering_applies_mapping: true
+  rendering_relationship:
+    rendering_is_compiler_pass: true
+    usually_last_compiler_pass: true
+    rendering_should_not_make_semantic_decisions: true
+  projection_derivation_distinction:
+    projection_selects_existing_semantics: true
+    derivation_exposes_entailed_consequences: true
+  harvest_promotion_flow:
+    sequence:
+    - admitted_domain_laws
+    - harvest
+    - globalization_candidate
+    - authorized_global_state_change
+    - global_invariant_or_contract
+    - canonical_global_law
+    - global_fixture
+    - published_global_profile
+  conformance_lifecycle:
+    sequence:
+    - candidate
+    - admission_evaluated
+    - awaiting_authority
+    - admitted
+    - published
+    - resolvable
+    - inherited_by_profiles
+    - executed
+    - receipted
+  surgical_repair_flow:
+    sequence:
+    - validation_failure
+    - unsat_core_or_failure_evidence
+    - provenance_resolution
+    - earliest_affected_semantic_artifact
+    - new_revision
+    - dependency_scoped_invalidation
+    - affected_recompilation
+    - revalidation
+  stage_context_formula:
+    expression: StageContext_n = π_stage(ValidatedState_n)
+  stage_solver_formula:
+    expression: Solver(Stage_n) = π_solver(CanonicalCompilationProfile, Stage_n)
+  stage_compile_formula:
+    expression: Candidate_(n+1) = Compile_(n+1)(Project_(n+1)(S_n), Input_(n+1))
+  stage_validation_formula:
+    expression: Receipt_(n+1) = Validate_(Solver(n+1))(Candidate_(n+1), Project_(n+1)(S_n))
+  stage_commit_formula:
+    expression: S_(n+1) = Commit(S_n, Candidate_(n+1), Receipt_(n+1)) iff Receipt_(n+1) = PASS
+  incremental_solver_formula:
+    expression: S_(n+1) = Commit(S_n, Validate_n(Compile_n(Project_n(S_n), Input_n)))
+  feasible_set_formula:
+    expression: F_n = {x ∈ F_(n-1) | C_n(x)}
+  feasible_set_monotonicity:
+    expression: F_0 ⊇ F_1 ⊇ F_2 ⊇ ... ⊇ F_n
+  logical_and:
+    canonical_symbol: ∧
+    plain_text_alias: /\
+    meaning: logical_and
+    discouraged_alias:
+    - '&'
+  identity_resolution_flow:
+    sequence:
+    - runtime_evidence
+    - identity_resolution
+    - identity_assertion
+    - downstream_consumers
+    rules:
+    - resolution_occurs_once_per_materially_identical_evidence_and_coordinates
+    - downstream_consumers_validate_or_challenge_assertion_but_do_not_silently_rederive
+    - governance_profile_selection_is_downstream_of_identity_and_does_not_rewrite_it
+semantic_build_stages:
+- ordinal: 1
+  id: product_topology
+  label: Product Topology
+  consumes:
+  - product_topology
+  - product_kinds
+  - node_archetypes
+  - dependency_archetypes
+  operations:
+  - validation
+  - resolution
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - product_topology_ir
+  - product_kind_resolution
+  - product_archetype_resolution
+- ordinal: 2
+  id: global_baseline
+  label: Global Baseline
+  consumes:
+  - product_topology_ir
+  - global_authority
+  - global_invariants
+  - global_contracts
+  - global_capability_semantics
+  - canonical_l9_vocabulary
+  operations:
+  - projection
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - validated_global_baseline
+- ordinal: 3
+  id: requirement_resolution
+  label: Requirement Resolution
+  consumes:
+  - product_topology_ir
+  - validated_global_baseline
+  - requirement_model
+  - authority_model
+  operations:
+  - projection
+  - derivation
+  - resolution
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - requirement_ir
+- ordinal: 4
+  id: semantic_resolution
+  label: Semantic Resolution
+  consumes:
+  - requirement_ir
+  - product_kind_resolution
+  - product_archetype_resolution
+  - capabilities
+  - architecture_rules
+  - applicable_contracts
+  operations:
+  - projection
+  - derivation
+  - resolution
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - capability_closure_ir
+  - architecture_obligations
+  - port_requirements
+  - adapter_requirements
+  - relationship_requirements
+- ordinal: 5
+  id: product_contracts
+  label: Product Contracts
+  consumes:
+  - validated_global_baseline
+  - product_topology_ir
+  - requirement_ir
+  - capability_closure_ir
+  - declared_product_contract_refs
+  operations:
+  - projection
+  - synthesis
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - product_contract_ir
+- ordinal: 6
+  id: laws
+  label: Laws
+  consumes:
+  - applicable_invariants
+  - global_contracts
+  - admitted_product_contracts
+  operations:
+  - projection
+  - derivation
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - semantic_law_ir
+- ordinal: 7
+  id: fixtures
+  label: Fixtures
+  consumes:
+  - semantic_law_ir
+  - law_provenance
+  operations:
+  - projection
+  - derivation
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - fixture_ir
+  - fixture_candidate_packets
+- ordinal: 8
+  id: architecture
+  label: Architecture
+  consumes:
+  - product_topology_ir
+  - product_kind_resolution
+  - product_archetype_resolution
+  - requirement_ir
+  - capability_closure_ir
+  - architecture_obligations
+  - admitted_product_contracts
+  - applicable_conformance_projection
+  - applicable_architecture_patterns
+  operations:
+  - projection
+  - synthesis
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - architecture_ir
+  - selected_pattern_refs
+- ordinal: 9
+  id: ports
+  label: Ports and Boundaries
+  consumes:
+  - architecture_ir
+  - port_requirements
+  - adapter_requirements
+  - relationship_requirements
+  - port_catalog
+  - applicable_contract_projection
+  operations:
+  - projection
+  - synthesis
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - port_ir
+  - adapter_requirement_ir
+  - product_relationship_ir
+- ordinal: 10
+  id: provider_bindings
+  label: Provider Bindings
+  consumes:
+  - port_ir
+  - adapter_requirement_ir
+  - product_relationship_ir
+  - technology_capabilities
+  - provider_constraints
+  operations:
+  - binding_selection
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - provider_binding_ir
+- ordinal: 11
+  id: conformance
+  label: Conformance
+  consumes:
+  - fixture_ir
+  - capability_closure_ir
+  - architecture_ir
+  - port_ir
+  - provider_binding_ir
+  - applicable_conformance_bindings
+  operations:
+  - projection
+  - derivation
+  - binding_selection
+  - lowering
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - conformance_requirement_ir
+  - conformance_ir
+  - executable_conformance_cases
+- ordinal: 12
+  id: product_manifest
+  label: Product Manifest
+  consumes:
+  - product_topology_ir
+  - product_kind_resolution
+  - product_archetype_resolution
+  - requirement_ir
+  - capability_closure_ir
+  - architecture_ir
+  - port_ir
+  - adapter_requirement_ir
+  - product_relationship_ir
+  - provider_binding_ir
+  - conformance_requirement_ir
+  - compiler_coordinates
+  operations:
+  - derivation
+  - validation
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - product_manifest_ir
+  - product_manifest
+- ordinal: 13
+  id: implementation
+  label: Implementation IR
+  consumes:
+  - product_manifest_ir
+  - applicable_conformance_projection
+  - implementation_constraints
+  operations:
+  - projection
+  - synthesis
+  - lowering
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - implementation_ir
+- ordinal: 14
+  id: target_artifacts
+  label: Target Artifacts
+  consumes:
+  - implementation_ir
+  - target_binding
+  - rendering_profile
+  - final_conformance_projection
+  operations:
+  - binding_selection
+  - lowering
+  - rendering
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+    final_conformance_required: true
+  produces:
+  - final_artifacts
+  - final_conformance_receipt
+stage_rules:
+  stage_input_formula:
+    expression: Input(Stage_n) = Project(ValidatedOutputs(Stage_0...Stage_(n-1)), Stage_n) ∪ StageSpecificInputs_n
+  stage_advance_rule:
+    expression: Advance(n -> n+1) iff AuthorityValid ∧ UpstreamValid(n) ∧ OutputValid(n+1) ∧ PreconditionsSatisfied
+  current_stage_failure_rule:
+    default: repair_current_stage
+    exception: 'If mechanical validation proves that an admitted upstream assumption is unsatisfiable under newly
+      available evidence, create a surgical upstream revision and invalidate only transitive dependents.
+
+      '
+  downstream_authority_rule:
+    rule: 'A downstream stage MUST NOT become authoritative until all required upstream stages are admitted and
+      validated.
+
+      '
+  historical_state_rule:
+    rule: 'Historical admitted artifacts MUST NOT be mutated. Corrections produce new revisions.
+
+      '
+  context_rule:
+    rule: 'Each stage receives only the minimum sufficient validated semantic projection plus stage-specific inputs,
+      instructions, constraints, bindings, and solver projection.
+
+      '
+  solver_rule:
+    rule: 'Each stage MUST use only the solver declared for that stage by the canonical compilation profile.
+
+      '
+  reasoning_plane_rule:
+    current_dependency_allowed: false
+    future_integration:
+      transport: Gate
+      packet: TransportPacket
+      compiler_dependency: validation_binding_only
+    rule: 'Semantic Compiler MUST remain independent of the Reasoning Plane. Future Reasoning Plane capabilities
+      may be reached through Gate via an applicable validation or synthesis binding without changing compiler semantic
+      ownership.
+
+      '
+fixture_admission_results:
+- admitted_domain
+- admitted_global
+- admitted_mixed
+- propose_global_law
+- unresolved
+- rejected
+fixture_scope_classes:
+- global
+- domain
+- mixed
+- globalization_candidate
+- unresolved
+fixture_publication_rules:
+  canonical_identity_required: true
+  immutable_digest_required: true
+  catalog_entry_required: true
+  profile_membership_required: true
+  distribution_availability_required: true
+  existing_profile_versions_are_immutable: true
+organizational_target:
+  Quantum-L9/.github:
+    role:
+    - organization_governance_plane
+    - organization_control_plane
+    - organization_distribution_plane
+    - canonical_l9_vocabulary_owner
+    does_not_own:
+    - executable_conformance_semantics
+  l9-conformance:
+    role:
+    - executable_conformance_system
+    - fixture_admission_semantics
+    - canonical_global_fixture_catalog
+    - fixture_profile_composition
+    - fixture_profile_resolution
+    - conformance_execution_semantics
+    - conformance_receipts
+    does_not_own:
+    - global_constitutional_law
+    - organization_distribution_policy
+  Cursor-Governance:
+    role:
+    - user_operating_plane
+    - agent_operating_plane
+    - consumer_of_global_governance
+    - consumer_of_l9_conformance
+    target_direction:
+    - consume_conformance_instead_of_owning_canonical_conformance
+  l9-semantic-compiler:
+    role:
+    - semantic_compilation
+    - projection
+    - derivation
+    - synthesis
+    - lowering
+    - rendering
+    - fixture_compilation
+    - law_normalization
+    - semantic_harvesting
+    does_not_own:
+    - global_law
+    - conformance_authority
+canonical_artifact_flow:
+  sequence:
+  - authoritative_semantics
+  - projection
+  - synthesis_or_derivation
+  - specialized_ir
+  - mechanical_validation
+  - authorized_state_change
+  - next_stage_projection
+  - lowering
+  - rendering
+  - final_conformance
+  - receipt
+canonical_semantic_chain:
+  global_baseline:
+    expression: GlobalAuthority + GlobalInvariants + GlobalContracts
+  project_contracts:
+    expression: Synthesize(ProductTopology, ProductRequirements, GlobalBaseline)
+  laws:
+    expression: Derive(ApplicableInvariants, AdmittedContracts)
+  fixtures:
+    expression: Derive(Laws)
+  conformance_cases:
+    expression: Compile(FixtureIR, ConformanceBinding)
+  architecture:
+    expression: Synthesize(ProductTopology, ProductKind, Archetype, ValidatedSemantics, Constraints, ConformanceObligations)
+  ports:
+    expression: Compile(ArchitectureIR, InterfaceObligations)
+  provider_bindings:
+    expression: Bind(PortIR, ProviderCapabilities)
+  implementation:
+    expression: SynthesizeAndLower(PortIR, ProviderBindingIR, ConformanceProjection)
+  target_artifacts:
+    expression: Render(Lower(ImplementationIR, TargetBinding))

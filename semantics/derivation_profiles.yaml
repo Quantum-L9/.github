@@ -1,0 +1,51 @@
+schema: l9.derivation-profiles/v1
+artifact_id: l9.derivation-profiles/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_derivation_profiles
+  authority_class: canonical
+profiles:
+  - id: l9.derivation/law-to-fixture@1
+    source_semantic_class: law
+    target_semantic_class: fixture
+    allowed_operators:
+      - positive
+      - negative
+      - boundary
+      - permutation
+      - conjunction_matrix
+      - implication_countercase
+      - replay
+      - collision
+      - mutation
+      - substitution
+      - version_mismatch
+      - failure_injection
+      - metamorphic
+    requires:
+      - source_law_identity
+      - source_law_digest
+      - derivation_operator
+      - derivation_parameters
+    produces:
+      - fixture_ir
+    rules:
+      - expected_outcome_must_be_entailed
+      - no_new_law_created
+      - provenance_required
+  - id: l9.derivation/pattern-to-port-obligations@1
+    source_semantic_class: architecture_pattern
+    target_semantic_class: port_obligation
+    allowed_operators:
+      - structural_requirement
+      - capability_requirement
+      - forbidden_surface
+    requires:
+      - admitted_pattern
+      - selected_pattern_identity
+    produces:
+      - port_obligation_ir
+    rules:
+      - obligation_must_follow_from_pattern_structure_or_guarantees
+      - no_provider_specific_semantics_unless_pattern_explicitly_requires_them
