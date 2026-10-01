@@ -1,146 +1,114 @@
-# Quantum-L9 — org defaults & governance v4.0
+# Quantum-L9/.github
 
-Advisory-first governance control plane for the Quantum-L9 constellation. Everything
-here **reports and remediates**; nothing blocks until explicitly promoted. See
-`docs/ADVISORY.md` for the promotion ladder and `docs/BOUNDARIES.md` for what this
-repo deliberately does not do.
+`semantics/` is the Semantic Foundation v3.5.0. This repository owns that
+language for the organization. A domain repository owns the meaning of its own
+capability. Do not copy this tree into a product repository. Cite the ledger's
+`artifact_id`.
 
-## Scope boundary (read this first)
+The release record is [`docs/semantic-foundation/v3.5.0/`](docs/semantic-foundation/v3.5.0/README.md).
+The decisions are ADR-001 through ADR-012 in [`docs/adr/`](docs/adr/README.md).
+Agent instructions for the language are [`AGENTS.md`](AGENTS.md).
 
-This repo owns **governance metadata, advisory reporting, policy enforcement, and
-org-wide automation**. It does not run tests, lint, typecheck, scan code, or
-diagnose CI failures.
+**ProductTopology** is the product contract
+(`semantics/product_topology.schema.yaml`). **ProductManifest** is the derived
+realization of one topology (`semantics/product_manifest.schema.yaml`). A
+manifest records what was resolved. It cannot rewrite its topology. The
+compiler carries out decisions recorded in these ledgers
+(`semantics/compiler_contract.yaml`). It does not invent product meaning.
 
-| Concern | Owner |
+## What a product declares
+
+v3.5.0 admits two ProductKinds in `semantics/product_kinds.yaml`. Kind follows
+consumption and deployment. It is not inferred from repository shape, package
+format, provider, complexity, or the presence of a process.
+
+| Kind | Consumption | Deployment |
+| --- | --- | --- |
+| Node | remote invocation | independent runtime |
+| Dependency | installed, composed inside the consumer | consumer-bound |
+
+SDK is not an admitted kind. Archetypes specialize a kind without redefining
+it: `semantics/node_archetypes.yaml` and
+`semantics/dependency_archetypes.yaml`.
+
+Identity dimensions stay distinct in `semantics/identity_model.yaml`.
+GovernanceProfile selects policy. ActorIdentity names who acted. Downstream
+work consumes an assertion that matches
+`semantics/identity_assertion.schema.yaml`.
+
+Architecture patterns in `semantics/architecture_patterns.yaml` are composable
+obligations. A pattern is not a complete architecture, and it does not create
+semantic ownership. Provider identity does not define pattern identity.
+
+```text
+ProductTopology
+    -> ProductKind + archetype
+    -> requirement and capability closure
+    -> architecture patterns, ports, adapters
+    -> technology bindings
+    -> conformance closure
+    -> ProductManifest
+    -> implementation IR
+    -> target artifacts
+    -> admission evidence
+```
+
+A downstream repository references these coordinates, declares its own
+topology, and lets the semantic compiler derive what the profiles allow. The
+direction is `.github` semantic authority, then product-owned topology, then
+derived realization, then implementation.
+
+Add a ledger here only when it retires a decision that would otherwise be
+remade in every product ([ADR-010](docs/adr/ADR-010-ownership-boundaries-no-recipes.md)).
+Register it in `semantics/canonical_sources.yaml`. Leave a material Unknown
+explicit.
+
+## Organization plane
+
+The same repository still runs organization governance, control, and
+distribution. That plane reports and remediates. It does not decide whether
+code is correct, and it does not block a merge or a push until a control is
+explicitly promoted. [`docs/BOUNDARIES.md`](docs/BOUNDARIES.md) is the scope
+constraint. [`docs/ADVISORY.md`](docs/ADVISORY.md) is the promotion ladder.
+[`docs/DISTRIBUTION.md`](docs/DISTRIBUTION.md) is how files reach other
+repositories. [`docs/REPO_BIRTH_PROFILES.md`](docs/REPO_BIRTH_PROFILES.md) is
+INHERIT, MATERIALIZE, REMOTE APPLY, and FORBID.
+
+Canonical CI is `Quantum-L9/l9-ci-core` (`org-ci.yml`).
+
+| Capability | Implementation | Mode |
+| --- | --- | --- |
+| Org rulesets | `rulesets/*.json` | `evaluate` |
+| Governance seeding | `auto-seed-new-repo.yml` | PR, class-aware |
+| Label sync | `sync-labels-all.yml` | additive |
+| Drift remediation | `continuous-sync.yml` | PR |
+| Policy enforcement | `enforce-policies.yml` | settings correction |
+| SHA-pin audit | `audit-pins-org.yml` | report |
+| Preflight | `preflight-scheduled.yml` | report |
+| Template dispatch | `dispatch-template-update.yml` | event |
+| Birth bootstrap | `repo-birth-bootstrap.yml` | REMOTE APPLY for one repo |
+| Copilot governance | `.github/copilot-instructions.md` | advisory |
+| Custom properties | `ops/properties-schema.json` | metadata |
+
+Seeding is capability-scoped. A consumer declares its class in
+`.l9/org-birth-profile.yaml`. `policies/repo-classes.yml` decides what that
+class receives. An absent marker resolves to `default`. A FORBID hit throws.
+
+| Marker | Effect |
 | --- | --- |
-| Test / lint / build execution | `l9-ci-sdk`, `l9-ci-core` |
-| CI failure diagnosis and bounded remediation | `l9-ci-debt-resolver` |
-| CI debt measurement | `l9-ci-debt-intelligence` |
-| PR/issue metadata, community health, org posture, policy enforcement | **this repo** |
-| AI coding governance (Copilot instructions, content exclusion) | **this repo** |
-| Cross-repo orchestration and dispatch | **this repo** |
+| `.l9/no-sync` | Drift remediation skips the repo |
+| `.l9/no-policy-enforcement` | Policy enforcement skips the repo |
 
-## What ships
-
-| Capability | Implementation | Mode | Blocks? |
-| --- | --- | --- | --- |
-| Org rulesets | `rulesets/*.json` | `evaluate` | No |
-| Required analysis workflow | `rulesets/org-required-analysis.json` | `evaluate` | No |
-| Secret scanning | `ops/activate-all.sh` → org API | alerts only | No |
-| Governance seeding | `auto-seed-new-repo.yml` | PR-based | No |
-| Label sync | `sync-labels-all.yml` (weekly) | additive | No |
-| Drift remediation | `continuous-sync.yml` (weekly) | PR-based | No |
-| Policy enforcement | `enforce-policies.yml` (weekly) | auto-correct settings | No |
-| SHA-pin audit | `audit-pins-org.yml` (monthly) | report only | No |
-| Preflight check | `preflight-scheduled.yml` (monthly) | report only | No |
-| Template dispatch | `dispatch-template-update.yml` | event-driven | No |
-| Copilot governance | `.github/copilot-instructions.md` | advisory | No |
-| Custom properties | `ops/properties-schema.json` | metadata | No |
+`ops/activate-all.sh` refuses to set anything above `evaluate`.
 
 ## Layout
 
+```text
+semantics/          Semantic Foundation v3.5.0 — the language this repo owns
+docs/adr/           ADR-001 … ADR-012
+docs/semantic-foundation/v3.5.0/   release record
+policies/           repo classes, settings, mandatory files, consumer CODEOWNERS, governance caller
+rulesets/           org rulesets, evaluate only
+ops/                activation, seed payload, birth, pin audit
+.github/workflows/  organization-plane agents
 ```
-.github/
-├── copilot-instructions.md              org-wide AI coding governance
-├── pull_request_template.md             inherited org-wide
-├── CODEOWNERS                           this repo only
-├── labels.yml                           org label taxonomy
-├── ISSUE_TEMPLATE/                      inherited org-wide
-├── actions/
-│   └── immutable-checkout/              reusable: SHA-pinned checkout
-└── workflows/
-    ├── governance-pr.yml                workflow_call, strict=false
-    ├── governance-issue.yml             labels only, never fails
-    ├── governance-report.yml            weekly read-only posture issue
-    ├── seed-governance.yml              dispatch-only, dry-run default
-    ├── auto-seed-new-repo.yml           seeds new/unseeded repos via PR
-    ├── sync-labels-all.yml              weekly label fan-out
-    ├── preflight-scheduled.yml          monthly drift detection
-    ├── continuous-sync.yml              weekly drift remediation
-    ├── audit-pins-org.yml               monthly SHA-pin audit
-    ├── dispatch-template-update.yml     notifies consumers on change
-    └── enforce-policies.yml             weekly policy enforcement
-policies/
-├── repo-settings.yml                    declarative repo settings
-└── mandatory-files.yml                  required files (managed/seeded/present)
-rulesets/
-├── org-advisory-pr.json                 evaluate: PR + governance check
-├── org-advisory-hygiene.json            evaluate: branch deletion + force-push
-└── org-required-analysis.json           evaluate: requires l9-analysis workflow
-templates/
-├── CODEOWNERS.repo                      seeded into consumer repos
-├── dependabot.yml                       seeded into consumer repos
-├── governance-caller.yml                seeded into consumer repos
-├── on-org-update.yml                    receiver for cross-repo dispatch
-├── community-health/                    LICENSE, CONTRIBUTING, etc.
-├── issue-templates/                     full issue template set
-└── pr-templates/                        PR template
-ops/
-├── activate-all.sh                      one-shot: enables everything
-├── set-repo-properties.sh              bulk-set custom properties
-├── properties-schema.json               custom properties definition
-├── sync-v2-starters.sh                  syncs from l9-ci-core
-├── sync-org-files.sh                    seeds templates into consumers
-├── apply-rulesets.sh                    applies org rulesets
-├── validate-starters.sh                 validates pack integrity
-├── pin-actions-sha.sh                   pins floating action refs
-└── audit-sha-pins.sh                    audits this repo's pins
-docs/
-├── ADVISORY.md                          promotion ladder
-├── BOUNDARIES.md                        scope constraints
-├── DISTRIBUTION.md                      distribution model
-├── copilot-exclusions.md                content exclusion source of truth
-└── adr/                                 architecture decision records
-scripts/
-├── preflight.sh                         comprehensive org health check
-├── enable-secret-scanning.sh            alerts only
-├── sync-labels.sh                       per-repo label sync
-└── bootstrap.sh                         local inheritance check
-```
-
-## Automation schedule
-
-After running `ops/activate-all.sh`:
-
-| Day | Time (UTC) | Workflow | Action |
-| --- | --- | --- | --- |
-| Monday | 09:30 | `sync-labels-all.yml` | Syncs label taxonomy to all repos |
-| Tuesday | 11:00 | `continuous-sync.yml` | Detects drift, opens remediation PRs |
-| Wednesday | 13:00 | `enforce-policies.yml` | Corrects repo settings, reports missing files |
-| Weekly | 08:00 | `governance-report.yml` | Measures org governance coverage |
-| 1st | 10:00 | `preflight-scheduled.yml` | Detects org-wide config drift |
-| 15th | 12:00 | `audit-pins-org.yml` | Reports floating action refs |
-| On push | — | `dispatch-template-update.yml` | Notifies consumers of template changes |
-| On create | — | `auto-seed-new-repo.yml` | Seeds governance into new repos |
-
-## Quick start
-
-```bash
-# 1. First-time activation (run once after initial setup)
-ops/activate-all.sh
-
-# 2. Set custom properties on all repos
-ops/set-repo-properties.sh --apply
-
-# 3. Everything else is automated from this point
-```
-
-## Consumer repos
-
-Consumer repos receive governance automatically. No action required. They can:
-
-- **Opt out of sync:** Create `.l9/no-sync` in the repo
-- **Opt out of policy enforcement:** Create `.l9/no-policy-enforcement` in the repo
-- **Receive template updates:** Add `templates/on-org-update.yml` to `.github/workflows/`
-- **Use composite actions:** Reference `Quantum-L9/.github/actions/<name>@<sha>`
-
-## Advisory guarantees
-
-All controls are advisory by default. The promotion path is:
-
-1. **Evaluate** (4 weeks) — observe, report, measure
-2. **Advisory** (4 weeks) — warn on PR, never block
-3. **Active** — block on violation (requires explicit promotion decision)
-
-`ops/activate-all.sh` refuses to set anything above `evaluate`. Promotion is a
-deliberate, documented decision recorded in `docs/adr/`.

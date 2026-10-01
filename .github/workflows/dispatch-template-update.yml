@@ -1,14 +1,22 @@
-# Dispatches a repository_dispatch event to all seeded consumer repos when
-# org templates change. Consumer repos with an on-org-update.yml receiver
-# will auto-sync on the next event.
+# Dispatches a repository_dispatch event when governance templates change.
+# CI is not part of this dispatch. Canonical CI is
+# Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml.
 name: Dispatch template update
 
 on:
   push:
     branches: [main]
     paths:
-      - "templates/**"
-      - "l9-ci-pack/**"
+      - "policies/CODEOWNERS"
+      - "policies/governance-caller.yml"
+      - ".github/dependabot.yml"
+      - ".github/labels.yml"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
+      - ".github/PULL_REQUEST_TEMPLATE/**"
+      - "CODE_OF_CONDUCT.md"
+      - "CONTRIBUTING.md"
+      - "SECURITY.md"
   workflow_dispatch:
     inputs:
       target_repo:
@@ -75,7 +83,7 @@ jobs:
                   client_payload: {
                     org_sha: SHA,
                     source: 'Quantum-L9/.github',
-                    action: 'sync-ci recommended'
+                    action: 'governance-templates-updated'
                   }
                 });
                 rows.push([n, 'dispatched']);

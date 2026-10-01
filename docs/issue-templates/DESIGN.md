@@ -55,7 +55,7 @@ blocked on a reporter who has gone quiet.
 
 ## The example is the standard
 
-`ISSUE_TEMPLATE/EXAMPLE.md` is a filled-in bug report with a complete traceback, an
+`.github/ISSUE_TEMPLATE/EXAMPLE.md` is a filled-in bug report with a complete traceback, an
 independent measurement proving the number is wrong, a clean-clone reproduction, a
 last-known-good version that turns the bug into a bisect range, and a workaround
 stated together with why it is unsafe. It ends with a short "why this is good"

@@ -1,13 +1,11 @@
 name: Seed org templates into consumers
 
-# Physically seeds templates/ health + ownership files. CI is never seeded.
+# Physically seeds health and ownership files. CI is never seeded.
 # Default `all` omits labels.yml (org sync-labels-all),
 # LICENSE, FUNDING.yml, SUPPORT.md, and duplicate issue templates.
-# Python l9-lint-test.yml is seeded only when the consumer has
-# pyproject.toml or requirements.txt.
 #
-# Matches ops/sync-org-files.sh + templates/README.md. This repo distributes
-# Core pack callers; l9-ci-core executes CI — see docs/BOUNDARIES.md.
+# Matches ops/sync-org-files.sh. CI is not distributed from here — see
+# docs/BOUNDARIES.md.
 #
 # Auth: org secret `GH_TOKEN` (SSOT = AWS openclaw-igorbot/github#token).
 # A fine-grained PAT / classic admin PAT can write `.github/workflows/*`.
@@ -15,8 +13,7 @@ name: Seed org templates into consumers
 # only gains that scope after a browser "Accept new permissions" — there is no
 # REST accept endpoint. Prefer the PAT so seed is not blocked on that click.
 #
-# Default behavior: add missing files only (never overwrite existing content),
-# except replace a stock ESLint l9-lint-test-node.yml with the Biome caller.
+# Default behavior: add missing files only (never overwrite existing content).
 # Root CODEOWNERS takes precedence — .github/CODEOWNERS is not seeded over it.
 #
 # Branch safety: the seed branch is rebuilt as "default branch + one seed
@@ -39,8 +36,7 @@ on:
         description: >-
           Comma-separated categories, or "all" (default set: codeowners,
           dependabot, governance, community-health, issue-templates,
-          pr-templates). Opt-in: labels. Retired (fail closed): l9-ci-pack,
-          on-org-update.
+          pr-templates). Opt-in: labels. Retired (fail closed): on-org-update.
         type: string
         default: all
 
@@ -79,8 +75,6 @@ jobs:
               parseCategories,
               ALL_CATEGORIES,
               DEFAULT_CATEGORIES,
-              STOCK_ESLINT_NODE_DEST,
-              STOCK_BIOME_DEST,
               selectSeedWrites,
             } = require('./ops/build-seed-payload.js');
             const {
@@ -158,11 +152,9 @@ jobs:
                     existingByPath[p] = null;
                     continue;
                   }
-                  existingByPath[p] = (p === STOCK_ESLINT_NODE_DEST || p === STOCK_BIOME_DEST)
-                    ? await readText(o, n, p)
-                    : true;
+                  existingByPath[p] = true;
                 }
-                const { writes, replaced } = selectSeedWrites(payload, existingByPath);
+                const { writes } = selectSeedWrites(payload, existingByPath);
                 if (!writes.length) {
                   rows.push([n, hasRootCodeowners
                     ? 'already seeded (root CODEOWNERS preserved)'
@@ -189,12 +181,11 @@ jobs:
 
                 if (MODE === 'dry-run') {
                   const note = hasRootCodeowners ? '; preserve root CODEOWNERS' : '';
-                  const upgrade = replaced.length ? `; replace stock ESLint ${replaced.join(', ')}` : '';
                   const preview = writes.length <= 6
                     ? writes.join(', ')
                     : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
                   const onto = branchSha ? `; rebuild ${BRANCH}` : '';
-                  rows.push([n, `would seed ${writes.length} file(s): ${preview}${upgrade}${note}${onto}`]);
+                  rows.push([n, `would seed ${writes.length} file(s): ${preview}${note}${onto}`]);
                   continue;
                 }
                 const baseRef = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
@@ -204,7 +195,7 @@ jobs:
                 // Atomic single commit: all writes or none (no orphan partial branches).
                 const treeItems = [];
                 for (const path of writes) {
-                  if (!replaced.includes(path) && await exists(o, n, path, base)) continue;
+                  if (await exists(o, n, path, base)) continue;
                   const blob = await github.rest.git.createBlob({
                     owner: o, repo: n,
                     content: Buffer.from(payload[path]).toString('base64'),
@@ -241,7 +232,7 @@ jobs:
 
                 const listed = treeItems.map(t => `- \`${t.path}\``);
                 const bodyLines = [
-                  'Seeds org template health and ownership files from `Quantum-L9/.github/templates/`. CI is not distributed from this repository.',
+                  'Seeds org health and ownership files from `Quantum-L9/.github`. CI is not distributed from this repository.',
                   '',
                   `Categories: \`${categories.join('`, `')}\`.`,
                   '',
@@ -251,11 +242,11 @@ jobs:
                     ? '- root `CODEOWNERS` already present — **not** overwritten by `.github/CODEOWNERS`'
                     : '',
                   '',
-                  'Existing files were left untouched (missing-only seed), except a stock ESLint `l9-lint-test-node.yml` which is replaced with the Biome SDK caller.',
+                  'Existing files were left untouched (missing-only seed).',
                   '`.github/workflows/governance.yml` is **advisory** (`strict` defaults false).',
-                  'Core pack callers (`l9-analysis.yml`, lint templates, `.github/governance/`) and the locked Biome contract (`biome.json`) are distributed here; `l9-ci-core` executes CI.',
+                  'CI callers are not distributed from this repository. See `docs/BOUNDARIES.md`.',
                   '',
-                  'Source map: `templates/README.md` · sync twin: `ops/sync-org-files.sh`.',
+                  'Source map: `policies/mandatory-files.yml` · sync twin: `ops/sync-org-files.sh`.',
                   '',
                   'While this PR is open the seeder leaves the branch alone — commit review fixes onto it freely.',
                 ].filter((line, idx, arr) => !(line === '' && arr[idx - 1] === ''));

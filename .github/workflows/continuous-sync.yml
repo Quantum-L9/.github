@@ -49,8 +49,8 @@ jobs:
 
             // Managed files: if these drift from template, auto-restore via PR
             const MANAGED = {
-              '.github/CODEOWNERS': fs.readFileSync('templates/CODEOWNERS.repo', 'utf8'),
-              '.github/dependabot.yml': fs.readFileSync('templates/dependabot.yml', 'utf8'),
+              '.github/CODEOWNERS': fs.readFileSync('policies/CODEOWNERS', 'utf8'),
+              '.github/dependabot.yml': fs.readFileSync('.github/dependabot.yml', 'utf8'),
             };
 
             const all = await github.paginate(github.rest.repos.listForOrg, {

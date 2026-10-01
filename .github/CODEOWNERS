@@ -5,18 +5,12 @@
 # Default — platform team owns everything
 *                              @Quantum-L9/platform
 
-# Workflow starter templates — highest blast-radius: surface in every repo's Actions tab
-/workflow-templates/           @Quantum-L9/platform @cryptoxdog
-
 # Community health files — propagate org-wide
 /CONTRIBUTING.md               @Quantum-L9/platform @cryptoxdog
 /SECURITY.md                   @Quantum-L9/platform @cryptoxdog
 /CODE_OF_CONDUCT.md            @Quantum-L9/platform @cryptoxdog
 /SUPPORT.md                    @Quantum-L9/platform @cryptoxdog
-/PULL_REQUEST_TEMPLATE.md      @Quantum-L9/platform @cryptoxdog
-
-# Org profile — public-facing landing page
-/profile/                      @Quantum-L9/platform @cryptoxdog
+/.github/pull_request_template.md @Quantum-L9/platform @cryptoxdog
 
 # CI API contract — machine-readable, downstream consumers depend on it
 /workflow-interface-registry.yml  @Quantum-L9/platform @cryptoxdog

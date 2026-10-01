@@ -50,6 +50,7 @@ echo ""
 
 # ── 2. Auto-detect and set values per repo ──────────────────────────────────
 echo "── Per-repo values ──"
+CANONICAL_CI=$(gh api "repos/$ORG/l9-ci-core/contents/.github/workflows/org-ci.yml" --silent 2>/dev/null && echo "yes" || echo "no")
 REPOS=$(gh repo list "$ORG" --limit 200 --json name,isArchived,isFork \
   --jq '.[] | select(.isArchived==false and .isFork==false and .name!=".github") | .name')
 
@@ -65,11 +66,8 @@ while IFS= read -r REPO; do
   [[ "$HAS_TS" == "yes" ]] && LANGS="${LANGS:+$LANGS,}typescript"
   [[ "$HAS_PKG" == "yes" && "$HAS_TS" != "yes" ]] && LANGS="${LANGS:+$LANGS,}javascript"
 
-  # Detect CI version
-  HAS_V2=$(gh api "repos/$ORG/$REPO/contents/.github/workflows/l9-analysis.yml" --silent 2>/dev/null && echo "yes" || echo "no")
-  HAS_V1=$(gh api "repos/$ORG/$REPO/contents/.github/workflows/pr-pipeline.yml" --silent 2>/dev/null && echo "yes" || echo "no")
-  if [[ "$HAS_V2" == "yes" ]]; then CI_VER="v2"
-  elif [[ "$HAS_V1" == "yes" ]]; then CI_VER="v1"
+  # CI version is the org workflow, not a caller copied into the consumer.
+  if [[ "$CANONICAL_CI" == "yes" ]]; then CI_VER="v2"
   else CI_VER="none"; fi
 
   # Detect seeded

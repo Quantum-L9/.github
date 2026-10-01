@@ -1,5 +1,5 @@
 # Managed by Quantum-L9/.github — do not edit here.
-# Edit templates/CODEOWNERS.repo in the .github repo; changes are re-seeded by PR.
+# Edit policies/CODEOWNERS in the .github repo; changes are re-seeded by PR.
 # CODEOWNERS is not inheritable, so this file is physically copied per repo.
 #
 # Path-scoped only. Do not seed `* @Quantum-L9/platform` — that makes every

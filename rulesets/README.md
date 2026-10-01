@@ -15,6 +15,12 @@ advisory posture for availability.
 | `org-advisory-pr.json` | default branch, all non-archived repos | PR required, governance check reported |
 | `org-advisory-hygiene.json` | all branches | deletion + force-push observed |
 
+Analysis is not a ruleset in this directory. Canonical CI is
+`Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml`, required by the
+organization ruleset **L9 canonical CI required**. A required-workflow rule
+that names `.github/workflows/l9-analysis.yml` demands a path the birth
+profiles forbid.
+
 ## Promotion is a deliberate, dated decision
 
 ```bash

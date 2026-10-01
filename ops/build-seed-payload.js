@@ -3,21 +3,15 @@
 const { applyProfile } = require('./repo-class-profile.js');
 
 /**
- * Build the consumer-repo seed payload from templates/ plus l9-ci-pack/.
+ * Build the consumer-repo seed payload from the canonical files in this repo.
  *
- * Mirrors ops/sync-org-files.sh categories and templates/README.md destinations.
+ * Mirrors ops/sync-org-files.sh. Consumer-only files live in policies/.
  * Used by seed-governance.yml and auto-seed-new-repo.yml.
  *
- * Default `all` is the DEFAULT_CATEGORIES set (stack-aware L9 pack). Opt-in
- * extras (`labels`, `on-org-update`) stay parseable but are not in `all`.
- * Missing-only seed never overwrites an existing consumer file, except two
- * safe upgrades of `.github/workflows/l9-lint-test-node.yml`:
- *   1. a stock ESLint caller (the old pack)
- *   2. the stock Biome caller that ran `tsc` / `Test Suite` with
- *      `cache: ${{ env.PACKAGE_MANAGER }}` (hard-fails without a lockfile)
- * Customized workflows (for example Cursor-Governance's Biome-only file)
- * are kept. A consumer `biome.json` with a different `$schema` is never
- * replaced.
+ * Default `all` is the DEFAULT_CATEGORIES set. Opt-in extras (`labels`)
+ * stay parseable but are not in `all`. Missing-only: an existing consumer
+ * file is left untouched. CI workflows are not in the payload. Canonical CI
+ * is Quantum-L9/l9-ci-core `.github/workflows/org-ci.yml`.
  *
  * @param {object} opts
  * @param {typeof import('fs')} opts.fs
@@ -44,27 +38,11 @@ const DEFAULT_CATEGORIES = Object.freeze([
 
 const OPT_IN_CATEGORIES = Object.freeze(['labels']);
 
-// RETIRED — the copy-first CI era. `l9-ci-pack` physically copied Core callers
-// (`l9-analysis.yml`, the lint callers) and a governance pack into every
-// unclassified repository. Quantum-L9/l9-ci-core now declares that model
-// prohibited in `.l9/org-runtime-contract.yaml`:
-//
-//   ownership.prohibited:
-//     - CI distribution from Quantum-L9/.github
-//     - copied L9 workflows in consumer repositories as an enforcement mechanism
-//
-// and both governed repo classes already FORBID exactly the destinations this
-// category writes. Canonical CI is `l9-ci-core/.github/workflows/org-ci.yml`,
-// reached through a GitHub organization required-workflow ruleset — no copied
-// file, no consumer-selected Core pin.
-//
-// The category is refused rather than deleted: `l9-ci-pack/` stays in this
-// repository as frozen reference material (still actionlint-ed, still
-// pin-audited), but nothing can seed it into a repository again.
-// `on-org-update` retires with it: that receiver's only action was to run
-// `scripts/sync_ci_from_pack.py`, the consumer half of the same copy loop, and
-// it is FORBID in both governed classes.
-const RETIRED_CATEGORIES = Object.freeze(['l9-ci-pack', 'on-org-update']);
+// RETIRED — `on-org-update` only ran `scripts/sync_ci_from_pack.py`, the
+// consumer half of the old copy-first CI loop. `l9-ci-pack` was the pack
+// those files came from. The names stay so a request fails closed.
+// Canonical CI is `l9-ci-core/.github/workflows/org-ci.yml`.
+const RETIRED_CATEGORIES = Object.freeze(['on-org-update', 'l9-ci-pack']);
 
 const ALL_CATEGORIES = Object.freeze([...DEFAULT_CATEGORIES, ...OPT_IN_CATEGORIES]);
 
@@ -74,11 +52,13 @@ const COMMUNITY_HEALTH_DEFAULT = Object.freeze([
   'SECURITY.md',
 ]);
 
-const SKIP_ISSUE_TEMPLATES = Object.freeze(['bug_report.yml', 'feature_request.yml']);
+const SKIP_ISSUE_TEMPLATES = Object.freeze([
+  'bug_report.yml',
+  'feature_request.yml',
+  'EXAMPLE.md',
+]);
 
 const PYTHON_LINT_DEST = '.github/workflows/l9-lint-test.yml';
-const STOCK_BIOME_DEST = 'biome.json';
-const STOCK_ESLINT_NODE_DEST = '.github/workflows/l9-lint-test-node.yml';
 const STOCK_BIOME_SCHEMA = 'https://biomejs.dev/schemas/2.5.8/schema.json';
 
 const ADVISORY_INBOX_STOCK = 'https://github.com/Quantum-L9/.github/security/advisories/new';
@@ -106,105 +86,6 @@ function readIfFile(fs, path) {
   return fs.readFileSync(path, 'utf8');
 }
 
-function isStockEslintNodeWorkflow(text) {
-  if (typeof text !== 'string' || !text.trim()) return false;
-  if (/l9-biome-scan\.yml/.test(text)) return false;
-  const named = /^\s*name:\s*L9 Lint and Test \(Node\)\s*$/m.test(text);
-  const eslintJob = /^\s*name:\s*ESLint\s*$/m.test(text);
-  const eslintRun = /npx(?:\s+--no-install)?\s+eslint\b/.test(text);
-  return named && eslintJob && eslintRun;
-}
-
-/**
- * Stock Biome node caller that fails CI on non-Node repos.
- * Matches the pack file shipped before the #276 remediating:
- * workflow name + job named `Test Suite` + setup-node cache on PACKAGE_MANAGER.
- */
-function isStockUnsafeNodeWorkflow(text) {
-  if (typeof text !== 'string' || !text.trim()) return false;
-  if (!/l9-biome-scan\.yml/.test(text)) return false;
-  const named = /^\s*name:\s*L9 Lint and Test \(Node\)\s*$/m.test(text);
-  const testSuite = /^\s*name:\s*Test Suite\s*$/m.test(text);
-  const cachePm = /cache:\s*\$\{\{\s*env\.PACKAGE_MANAGER\s*\}\}/.test(text);
-  return named && testSuite && cachePm;
-}
-
-function isReplaceableStockNodeWorkflow(text) {
-  return isStockEslintNodeWorkflow(text) || isStockUnsafeNodeWorkflow(text);
-}
-
-/**
- * `env:` keys l9-ci-pack/README.md §5.4 tells consumers to tune in their copy
- * of `l9-lint-test-node.yml`. Tuning them leaves every stock marker intact, so
- * the replaceable-stock predicates still fire on re-seed. Carry the tuned
- * values into the replacement instead of silently reverting them to defaults.
- */
-const TUNABLE_NODE_ENV_KEYS = Object.freeze([
-  'NODE_VERSION',
-  'PACKAGE_MANAGER',
-  'SOURCE_DIR',
-  'HAS_TYPESCRIPT',
-]);
-
-/**
- * Read the top-level `env:` mapping of a workflow. Only scalar `KEY: value`
- * entries at one indent level are read; the block ends at the first
- * non-indented, non-blank line.
- * @param {string} text
- * @returns {Record<string, string>} key → raw value (quotes preserved)
- */
-function readTopLevelEnv(text) {
-  const out = {};
-  if (typeof text !== 'string') return out;
-  const lines = text.split('\n');
-  let inEnv = false;
-  for (const line of lines) {
-    if (!inEnv) {
-      if (/^env:\s*$/.test(line)) inEnv = true;
-      continue;
-    }
-    if (!line.trim()) continue;
-    if (!/^\s/.test(line)) break;
-    const m = line.match(/^\s+([A-Za-z_][A-Za-z0-9_]*):\s*(\S.*?)\s*$/);
-    if (m) out[m[1]] = m[2];
-  }
-  return out;
-}
-
-/**
- * Rewrite the tunable `env:` entries of `incoming` with the values the
- * consumer already set in `existing`. Keys absent from either side are left
- * alone, so a replacement never invents configuration.
- * @param {string} incoming  payload contents about to be written
- * @param {string} existing  the consumer file being replaced
- * @returns {string}
- */
-function preserveTunedNodeEnv(incoming, existing) {
-  if (typeof incoming !== 'string' || typeof existing !== 'string') return incoming;
-  const tuned = readTopLevelEnv(existing);
-  const shipped = readTopLevelEnv(incoming);
-  let out = incoming;
-  for (const key of TUNABLE_NODE_ENV_KEYS) {
-    if (!(key in tuned) || !(key in shipped)) continue;
-    if (tuned[key] === shipped[key]) continue;
-    out = out.replace(
-      new RegExp(`^(\\s+${key}:\\s*).*$`, 'm'),
-      (_m, indent) => `${indent}${tuned[key]}`,
-    );
-  }
-  return out;
-}
-
-function biomeSchemaOf(text) {
-  if (typeof text !== 'string' || !text.trim()) return null;
-  try {
-    const parsed = JSON.parse(text);
-    return typeof parsed.$schema === 'string' ? parsed.$schema : '';
-  } catch {
-    return null;
-  }
-}
-
 function assertJsonInYaml(text, dest) {
   try {
     JSON.parse(text);
@@ -225,12 +106,9 @@ function applyRepoPlaceholders(text, repository) {
  * @param {Record<string, string>} payload
  * @param {Record<string, string|null|true>} existingByPath
  *   null/absent = missing (write);
- *   true = present, content not fetched (keep);
- *   string = fetched content (replace only if a stock replaceable node caller
- *            or biome.json with the same $schema — different $schema is keep).
- * Replacing a stock node caller rewrites `payload[dest]` in place so the
- * consumer's tuned `env:` values survive the upgrade; callers write
- * `payload[dest]` after this returns.
+ *   anything else = present (keep).
+ * CI callers are never overwritten. Canonical CI is
+ * Quantum-L9/l9-ci-core `.github/workflows/org-ci.yml`.
  * @returns {{ writes: string[], replaced: string[], kept: string[] }}
  */
 function selectSeedWrites(payload, existingByPath = {}) {
@@ -242,43 +120,9 @@ function selectSeedWrites(payload, existingByPath = {}) {
       writes.push(dest);
       continue;
     }
-    const existing = existingByPath[dest];
-    if (
-      dest === STOCK_ESLINT_NODE_DEST &&
-      typeof existing === 'string' &&
-      isReplaceableStockNodeWorkflow(existing)
-    ) {
-      // Upgrade the caller, keep the consumer's tuned env: block.
-      payload[dest] = preserveTunedNodeEnv(payload[dest], existing);
-      writes.push(dest);
-      replaced.push(dest);
-      continue;
-    }
-    if (dest === STOCK_BIOME_DEST && typeof existing === 'string') {
-      const existingSchema = biomeSchemaOf(existing);
-      const incomingSchema = biomeSchemaOf(payload[dest]);
-      if (
-        existingSchema != null &&
-        incomingSchema != null &&
-        existingSchema !== incomingSchema
-      ) {
-        kept.push(dest);
-        continue;
-      }
-    }
     kept.push(dest);
   }
   return { writes, replaced, kept };
-}
-
-function addDirFiles(fs, srcDir, destPrefix, payload, { skipNames = [] } = {}) {
-  if (!fs.existsSync(srcDir) || !fs.statSync(srcDir).isDirectory()) return;
-  const skip = new Set(skipNames);
-  for (const name of fs.readdirSync(srcDir)) {
-    if (skip.has(name)) continue;
-    const body = readIfFile(fs, `${srcDir}/${name}`);
-    if (body != null) payload[`${destPrefix}/${name}`] = body;
-  }
 }
 
 function buildSeedPayload({
@@ -313,34 +157,34 @@ function buildSeedPayload({
     switch (cat) {
       case 'codeowners': {
         if (hasRootCodeowners) break;
-        const body = readIfFile(fs, 'templates/CODEOWNERS.repo');
+        const body = readIfFile(fs, 'policies/CODEOWNERS');
         if (body != null) payload['.github/CODEOWNERS'] = body;
         break;
       }
       case 'dependabot': {
-        const body = readIfFile(fs, 'templates/dependabot.yml');
+        const body = readIfFile(fs, '.github/dependabot.yml');
         if (body != null) payload['.github/dependabot.yml'] = body;
         break;
       }
       case 'governance': {
-        const body = readIfFile(fs, 'templates/governance-caller.yml');
+        const body = readIfFile(fs, 'policies/governance-caller.yml');
         if (body != null) payload['.github/workflows/governance.yml'] = body;
         break;
       }
       case 'labels': {
-        const body = readIfFile(fs, 'templates/labels.yml');
+        const body = readIfFile(fs, '.github/labels.yml');
         if (body != null) payload['.github/labels.yml'] = body;
         break;
       }
       case 'community-health': {
         for (const f of COMMUNITY_HEALTH_DEFAULT) {
-          const body = readIfFile(fs, `templates/community-health/${f}`);
+          const body = readIfFile(fs, f);
           if (body != null) payload[f] = applyRepoPlaceholders(body, repository);
         }
         break;
       }
       case 'issue-templates': {
-        const dir = 'templates/issue-templates';
+        const dir = '.github/ISSUE_TEMPLATE';
         if (!fs.existsSync(dir)) break;
         for (const name of fs.readdirSync(dir)) {
           if (SKIP_ISSUE_TEMPLATES.includes(name)) continue;
@@ -352,10 +196,8 @@ function buildSeedPayload({
         break;
       }
       case 'pr-templates': {
-        const human = readIfFile(fs, 'templates/pr-templates/pull_request_template.md');
+        const human = readIfFile(fs, '.github/pull_request_template.md');
         if (human != null) payload['.github/pull_request_template.md'] = human;
-        const agent = readIfFile(fs, 'templates/pr-templates/agent.md');
-        if (agent != null) payload['.github/PULL_REQUEST_TEMPLATE/agent.md'] = agent;
         break;
       }
       default:
@@ -382,18 +224,9 @@ module.exports = {
   COMMUNITY_HEALTH_DEFAULT,
   SKIP_ISSUE_TEMPLATES,
   PYTHON_LINT_DEST,
-  STOCK_BIOME_DEST,
   STOCK_BIOME_SCHEMA,
-  STOCK_ESLINT_NODE_DEST,
   parseCategories,
   buildSeedPayload,
-  isStockEslintNodeWorkflow,
-  isStockUnsafeNodeWorkflow,
-  isReplaceableStockNodeWorkflow,
-  preserveTunedNodeEnv,
-  readTopLevelEnv,
-  TUNABLE_NODE_ENV_KEYS,
-  biomeSchemaOf,
   selectSeedWrites,
   applyRepoPlaceholders,
 };

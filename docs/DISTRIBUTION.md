@@ -1,186 +1,83 @@
-# Distribution model — what the token actually blocks
+# Distribution
 
-## Short answer
+Files leave this repository in three ways. CI does not. `on-org-update` is a
+retired seed category and throws. Canonical CI is
+`Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml`, enforced by an
+organization required-workflow ruleset.
 
-**No. The missing token does not block pushing the current version of
-`Quantum-L9/.github` to org repos — because most of it is never pushed at all.**
+Which files a repository actually receives is `policies/repo-classes.yml`.
+The mode names are `docs/REPO_BIRTH_PROFILES.md`.
 
-GitHub *inherits* community health files by reference. There is no copy, no sync,
-and no token involved. Repos read the latest `main` of `Quantum-L9/.github` live.
-Merge a fix to `SECURITY.md` and all 29 repos reflect it on the next page load.
+## Mechanisms
 
-The token gated exactly three files, and only for a **one-time seed** — not for
-ongoing updates.
-
-## The three distribution mechanisms
-
-| Mechanism | Files | Token needed? | Update propagation |
+| Mechanism | What moves | Credential | How an edit propagates |
 | --- | --- | --- | --- |
-| **Inheritance** (automatic) | `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SUPPORT.md`, `FUNDING.yml`, `pull_request_template.md`, `ISSUE_TEMPLATE/*` | No | Instant, live from `main` |
-| **Reference** (`workflow_call`) | governance workflow *logic* | No | Instant, on tag move |
-| **Physical copy** (seed) | Full `templates/` bundle (CODEOWNERS, caller, dependabot, labels, community-health, issue/PR templates, on-org-update) | **Yes, once** (or when new surfaces are added) | Re-run seed / consumer `make sync-ci` |
+| **Inheritance** | A community-health file the consumer does not already have (`SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SUPPORT.md`, `FUNDING.yml`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`) | None | Live from `main`. One local copy blocks inheritance for that file. There is no merge. |
+| **Reference** | `governance-pr.yml` and `governance-issue.yml`, called from the consumer's `.github/workflows/governance.yml` | None for the callee | The caller pins a full commit SHA (`policies/governance-caller.yml`). Moving a tag does not retarget a caller that already pins a SHA. Missing-only seed does not overwrite an existing caller. |
+| **Physical copy** | Default categories: `codeowners`, `dependabot`, `governance`, `community-health`, `issue-templates`, `pr-templates`. `labels` is opt-in. | Org secret `GH_TOKEN` | Missing-only pull request. An existing file is left as-is. |
 
-### Inheritance covers most of the repo
+Seed sources that are also this repository's own files are read from those
+files. Consumer-only files live in `policies/`:
 
-Any repo without its own copy falls back to the org default automatically. Caveats:
+- `policies/CODEOWNERS` → `.github/CODEOWNERS` (skipped when the consumer already has a root `CODEOWNERS`)
+- `policies/governance-caller.yml` → `.github/workflows/governance.yml`
+- `.github/dependabot.yml`, `.github/labels.yml` (opt-in), root community-health files, `.github/ISSUE_TEMPLATE/*`, `.github/pull_request_template.md`
 
-- The `.github` repo must be **public** — a private one disables inheritance entirely.
-- Files must sit in the repo root, `.github/`, or `docs/`; issue templates must be
-  in `.github/ISSUE_TEMPLATE/`.
-- Override is **all-or-nothing per file**. One local `SECURITY.md` in a repo means
-  that repo ignores the org default for that file. There is no merging.
+`continuous-sync.yml` is the exception to missing-only. It restores
+`.github/CODEOWNERS` and `.github/dependabot.yml` when they drift, unless the
+repo has `.l9/no-sync`. That workflow uses the governance GitHub App
+(`GOVERNANCE_APP_ID`), not `GH_TOKEN`.
 
-### Reference covers workflow logic
+The `.github` repository must be public. A private one disables inheritance,
+and cross-repo `workflow_call` needs the callee to be readable.
 
-Workflows are *not* community health files and are never inherited. But they do not
-need copying either. `governance-pr.yml` and `governance-issue.yml` live here as
-`workflow_call` callees; each repo has a caller pinned to `@v1`. Cross-repo
-`workflow_call` requires the callee repo be accessible — public satisfies this,
-which the inheritance requirement already forces.
+## Credentials
 
-**Consequence**: to change a governance rule org-wide, edit `governance-pr.yml`
-here and move the `v1` tag. All 29 repos pick it up on their next PR. Zero token
-use, zero fan-out, zero PRs.
+`seed-governance.yml` and `auto-seed-new-repo.yml` read the org secret
+`GH_TOKEN`. A token that can write `.github/workflows/*` is required for the
+governance caller. The governance App can request that permission, but an org
+install only gains it after a browser approval, so seed does not depend on
+that click.
 
-### Physical copy covers the full `templates/` bundle
+Those workflows, and `repo-birth-bootstrap.yml`, run in the
+`governance-distribution` environment.
 
-Org inheritance is convenient for repos that stay inside Quantum-L9, but it is the
-wrong distribution model for **repo templates**, forks, and contributors who need
-files visible in-tree. `templates/` is therefore the SSOT for a **physical** seed:
+## Steady state
 
-1. **`CODEOWNERS`**, **`dependabot.yml`**, **governance caller**, **labels**
-2. **Community health** (`CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md`,
-   `SUPPORT.md`, `LICENSE`, `.github/FUNDING.yml`)
-3. **Issue + PR templates**
-**Not distributed: CI.** The `l9-ci-pack` and `on-org-update` categories are
-RETIRED and fail closed. Canonical CI is `Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml`, enforced by a GitHub organization required-workflow ruleset. `l9-ci-pack/` remains as
-frozen reference material only — see [`../l9-ci-pack/README.md`](../l9-ci-pack/README.md).
+| Change | What to do |
+| --- | --- |
+| Security policy, contributing guide, code of conduct | Edit the root file and merge. Repos with no local copy inherit it. Repos that were seeded a copy keep the old file; seed will not overwrite it. |
+| PR or issue template | Same. The seed source for the human PR template is `.github/pull_request_template.md`. |
+| Governance gate rule | Edit `governance-pr.yml` or `governance-issue.yml`, then re-pin the SHA in `policies/governance-caller.yml` and update consumers that already have a caller. |
+| CODEOWNERS or dependabot | Edit `policies/CODEOWNERS` or `.github/dependabot.yml`. `continuous-sync.yml` opens a restore PR where those files drifted. |
+| New repository | `auto-seed-new-repo.yml`, or `workflow_dispatch` on `seed-governance.yml`. `l9-repo-template` `make new-repo` dispatches `repo-birth-bootstrap.yml` for one repo. |
 
-`seed-governance.yml` (and `auto-seed-new-repo.yml`) seed these once per repo via
-PR using `ops/build-seed-payload.js`, matching `ops/sync-org-files.sh`. Existing
-files are left untouched (missing-only). Root `CODEOWNERS` is never overwritten by
-`.github/CODEOWNERS`. New repos from `l9-dependency-template` inherit the pack
-because it is in the template tree; `make sync-ci` is refresh-only.
+## Appendix A — secrets and called workflows
 
-## Corrected assessment of the earlier claim
+`governance-pr.yml` and `governance-issue.yml` use the automatic `GITHUB_TOKEN`
+only. `policies/governance-caller.yml` does not pass `secrets: inherit`. A
+called workflow does not receive the caller's secrets unless the caller passes
+them by name. Prefer a named `secrets:` entry.
 
-The previous statement — "does not open PRs yet, needs a token with write scope
-across 29 repos" — was **true but badly framed**. It implied governance updates were
-blocked pending a token decision. They are not:
-
-- Findings 1, 3, 4 (PR template path, SECURITY.md, CONTRIBUTING.md) propagate on
-  merge with **no token whatsoever**.
-- Finding 2 (CODEOWNERS) needs the one-time seed.
-- Finding 5's real deliverable was never fan-out — it is the `workflow_call`
-  indirection that makes fan-out unnecessary. The earlier version proposed
-  recurring distribution, which was the wrong architecture: it would have required
-  standing write access to 29 repos forever, to solve a problem that a pinned tag
-  solves with none.
-
-## Credential recommendation
-
-Do **not** use a PAT. Use a **GitHub App** installed on the org, scoped to
-`contents: write` and `pull_requests: write`:
-
-- No human owner; survives offboarding.
-- Installation token expires in one hour.
-- `create-github-app-token` mints it per run — nothing long-lived in secrets.
-- The workflow is `workflow_dispatch`-only and pinned to a protected
-  `governance-distribution` environment, so a required reviewer approves each run.
-
-Since seeding runs roughly once ever, App credentials can be uninstalled afterward
-and reinstalled only if a new repo needs seeding.
-
-## Order of operations
-
-1. `./scripts/preflight.sh` — verify team slugs resolve, `.github` is public, list
-   which repos already have local overrides blocking inheritance.
-2. Fix any placeholder team slug that preflight flags as nonexistent.
-3. Merge to `main`. **Findings 1, 3, 4 are live at this point, no token.**
-4. Tag `v1` so callers have something to pin:
-
-   ```bash
-   # immutable release tag + moving alias
-   git tag v1.0.0
-   git push origin v1.0.0
-   git tag -f v1 v1.0.0
-   git push origin v1 --force
-   ```
-
-   Callers pin `@v1`. To ship a governance change later, repeat with a new
-   immutable tag and re-point the alias:
-
-   ```bash
-   git tag v1.1.0 && git push origin v1.1.0
-   git tag -f v1 v1.1.0 && git push origin v1 --force
-   ```
-
-   Never delete `v1`; force-move it. Deleting breaks every caller until it reappears.
-5. Install the GitHub App; configure `governance-distribution` environment reviewers.
-6. Run `seed-governance.yml` with `mode: dry-run`, `repo_filter: l9-` — inspect the
-   summary table.
-7. Re-run with `mode: seed` on the filtered subset, review those PRs, then drop the
-   filter.
-8. Optionally uninstall the App.
-
-## Ongoing steady state
-
-| Change | Action | Token? |
-| --- | --- | --- |
-| Security policy text | Edit `SECURITY.md`, merge | No |
-| PR template structure | Edit `pull_request_template.md`, merge | No |
-| A governance gate rule | Edit `governance-pr.yml`, move `v1` tag | No |
-| Code ownership routing | Edit `templates/CODEOWNERS.repo`, re-run seed | Yes |
-| New repo from `l9-dependency-template` | Files already in the template tree | No |
-| Blank repo (no template) | `workflow_dispatch` `seed-governance.yml` or `auto-seed-new-repo.yml` | Yes |
-| New repo joins the org (legacy) | Run seed filtered to that repo | Yes |
-
-Only the last two rows ever need it.
-
-
----
-
-## Appendix A — `secrets: inherit`
-
-Both callees currently use only the automatic `GITHUB_TOKEN`, so callers pass
-nothing. The token is minted per job with the `permissions:` block declared in the
-callee, and expires when the job ends.
-
-The moment a governance job needs a real secret, that changes. Secrets are **not**
-visible to a called workflow automatically — the caller must pass them explicitly:
-
-```yaml
-jobs:
-  pr:
-    uses: Quantum-L9/.github/.github/workflows/governance-pr.yml@v1
-    secrets: inherit          # passes all caller secrets
-    # or, preferred, be explicit:
-    # secrets:
-    #   SEMGREP_TOKEN: ${{ secrets.SEMGREP_TOKEN }}
-```
-
-`inherit` works for callers in the same organization. Prefer named passing where
-practical — `inherit` hands the callee every secret the caller can see, which is
-broader than least privilege.
-
-Failure mode if forgotten: the callee sees an empty string rather than an error, so
-it fails at the point of use with a confusing auth message rather than at the call.
+If a secret is omitted, the callee sees an empty string and fails at the point
+of use.
 
 ## Appendix B — Actions access policy (the rollout trap)
 
-Cross-repo `workflow_call` is subject to the **consumer** repo's Actions policy, not
-just this repo's visibility. Under a repo or org setting of *Allow OWNER actions and
-reusable workflows* — or a narrower allow-list — a caller referencing
-`Quantum-L9/.github/...@v1` fails before any step runs.
+Cross-repo `workflow_call` is subject to the **consumer** repo's Actions
+policy, not just this repo's visibility. Under *Allow OWNER actions and
+reusable workflows*, or a narrower allow-list, a caller referencing
+`Quantum-L9/.github/...` fails before any step runs.
 
 Because both repos are in the same org and this one is public, the default
 *Allow all* and *Allow OWNER* settings both work. It breaks when:
 
 - Actions are **disabled** entirely on a consumer repo.
-- `allowed_actions` is `selected` with an allow-list that omits `Quantum-L9/*`.
-- An **enterprise-level** policy overrides the org. Note the settings hierarchy:
-  enterprise → org → repo. If the setting appears locked at repo level, it is set
-  at org level; if locked there, it is set at the enterprise level.
+- `allowed_actions` is `local_only`.
+- `allowed_actions` is `selected` and the allow-list omits `Quantum-L9/*`.
+- An **enterprise-level** policy overrides the org. Enterprise, then org, then
+  repo. A setting locked at repo level is set at org level; locked there, it
+  is set at the enterprise level.
 
 Diagnose per repo:
 
@@ -199,12 +96,13 @@ gh api -X PUT repos/Quantum-L9/<repo>/actions/permissions \
   -F enabled=true -f allowed_actions=all
 ```
 
-Or at org level once, which is the higher-leverage fix:
+Or at org level once:
 
 ```bash
 gh api -X PUT orgs/Quantum-L9/actions/permissions \
   -f enabled_repositories=all -f allowed_actions=all
 ```
 
-`scripts/preflight.sh` now checks this for every repo (section 5) so the trap is
-caught before seeding rather than after.
+`scripts/preflight.sh` checks this for every repo before seeding. The weekly
+governance report names repos whose Actions policy would stop the caller, and
+points here.

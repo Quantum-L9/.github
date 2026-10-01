@@ -80,8 +80,6 @@ jobs:
             const fs = require('fs');
             const {
               buildSeedPayload,
-              STOCK_ESLINT_NODE_DEST,
-              STOCK_BIOME_DEST,
               selectSeedWrites,
             } = require('./ops/build-seed-payload.js');
             const {
@@ -197,11 +195,9 @@ jobs:
                     existingByPath[p] = null;
                     continue;
                   }
-                  existingByPath[p] = (p === STOCK_ESLINT_NODE_DEST || p === STOCK_BIOME_DEST)
-                    ? await readText(o, n, p)
-                    : true;
+                  existingByPath[p] = true;
                 }
-                const { writes, replaced } = selectSeedWrites(payload, existingByPath);
+                const { writes } = selectSeedWrites(payload, existingByPath);
                 if (!writes.length) {
                   rows.push([n, profile.name, 'already seeded']);
                   continue;
@@ -225,12 +221,11 @@ jobs:
                 const branchSha = gate.sha;
 
                 if (DRY) {
-                  const upgrade = replaced.length ? `; replace stock ESLint` : '';
                   const preview = writes.length <= 6
                     ? writes.join(', ')
                     : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
                   const onto = branchSha ? `; rebuild ${BRANCH}` : '';
-                  rows.push([n, profile.name, `would seed ${writes.length}: ${preview}${upgrade}${onto}`]);
+                  rows.push([n, profile.name, `would seed ${writes.length}: ${preview}${onto}`]);
                   continue;
                 }
                 const baseRef = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
@@ -239,7 +234,7 @@ jobs:
 
                 const treeItems = [];
                 for (const path of writes) {
-                  if (!replaced.includes(path) && await exists(o, n, path, base)) continue;
+                  if (await exists(o, n, path, base)) continue;
                   const blob = await github.rest.git.createBlob({
                     owner: o, repo: n,
                     content: Buffer.from(payload[path]).toString('base64'),
@@ -278,7 +273,7 @@ jobs:
                   owner: o, repo: n, head: BRANCH, base,
                   title: 'chore(governance): auto-seed org templates from Quantum-L9/.github',
                   body: [
-                    'Automatically seeds the org capabilities applicable to this repository from `Quantum-L9/.github/templates/`. CI is not distributed from this repository.',
+                    'Automatically seeds the org capabilities applicable to this repository from `Quantum-L9/.github`. CI is not distributed from this repository.',
                     '',
                     `**Repo class:** \`${profile.name}\` (${profile.resolved_from}) — see \`policies/repo-classes.yml\`.`,
                     profile.inherit.length
@@ -288,9 +283,9 @@ jobs:
                     '### Files in this PR',
                     ...treeItems.map(t => `- \`${t.path}\``),
                     '',
-                    'Existing files were left untouched (missing-only seed), except a stock ESLint `l9-lint-test-node.yml` which is replaced with the Biome SDK caller.',
+                    'Existing files were left untouched (missing-only seed).',
                     'Governance caller is **advisory** (`strict` defaults false).',
-                    'Core pack callers are distributed here; `l9-ci-core` executes CI.',
+                    'CI callers are not distributed from this repository. See `docs/BOUNDARIES.md`.',
                     '',
                     'While this PR is open the seeder leaves the branch alone — commit review fixes onto it freely.',
                     '',

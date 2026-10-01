@@ -32,46 +32,45 @@ ProductTopology
 - ADR-009: Contract wiring, projections, compilation profiles, and invalidation
 - ADR-010: Ownership boundaries and anti-recipe constraint
 - ADR-011: ProductKind from canonical consumption and deployment
+- ADR-012: Identity as a first-class topology primitive
 
-- `ADR-012-identity-topology-first-class-primitive.md` — identity dimensions, canonical resolution, typed assertions, and governance-profile separation.
+ADR-001 through ADR-012 are the global semantic decisions. They live in this
+directory because this repository owns that law.
 
----
+## Domain decisions
 
-# Architecture Decision Records (ADRs)
+[`template.md`](./template.md) is for a decision a domain repository makes
+about its own capability. Copy it into that repository's `docs/adr/` and
+number it in that repository's sequence. A domain record sits next to the
+code it governs. It does not replace a ledger in `semantics/`.
 
-This directory holds the org-wide ADR template. ADRs record significant,
-hard-to-reverse technical or architectural decisions — not routine changes.
+When the same decision would otherwise be remade in every product, it belongs
+here as global law ([ADR-010](./ADR-010-ownership-boundaries-no-recipes.md)),
+registered in `semantics/canonical_sources.yaml`.
 
-## When to write an ADR
+Write a domain ADR when a decision:
 
-Write one when a decision:
-
-- Changes a public contract (kernel API, CLI, schema, workflow interface)
+- Changes a public contract that repository owns
 - Introduces, replaces, or retires a dependency, provider, or kernel
-- Establishes a convention other repos/teams are expected to follow
-- Reverses or supersedes a prior decision
+- Establishes a convention other teams are expected to follow inside that boundary
+- Reverses or supersedes a prior decision in that repository
 
-Skip it for routine bug fixes, dependency bumps, or anything reversible with a
-single PR revert.
+Skip it for a routine bug fix, a dependency bump, or anything a single revert
+undoes.
 
-## How to use this template
-
-1. Copy [`template.md`](./template.md) into **your repository's own**
-   `docs/adr/` directory (this `.github` repo only hosts the template; ADRs
-   themselves are recorded per-repo, next to the code they govern).
-2. Name the file `docs/adr/NNNN-short-title.md`, using the next sequential
-   4-digit number for that repo.
-3. Fill in every section. Leave `Considered Options` even if only one option
-   was viable — record *why* alternatives were rejected.
-4. Set `Status: Proposed` and open a PR. Reviewers should not approve a
-   status change to `Accepted` without discussion of the tradeoffs section.
-5. If a later ADR reverses this one, do not delete the old file — set its
-   status to `Superseded by ADR-NNNN` and link both directions.
+1. Copy [`template.md`](./template.md) to `docs/adr/NNNN-short-title.md` in the
+   repository that owns the decision.
+2. Fill in every section. Leave `Considered Options` even when only one option
+   was viable, and record why the others were rejected.
+3. Set `Status: Proposed` and open a pull request. Acceptance follows discussion
+   of the tradeoffs.
+4. When a later ADR reverses an earlier one, keep the old file. Set its status
+   to `Superseded by ADR-NNNN` and link both directions.
 
 ## Relationship to CANONICAL_LAW.md
 
-ADRs are decision *history* (why we chose X over Y, and when). They do not
-replace or override [`CANONICAL_LAW.md`](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md),
-which is the current, binding policy source of truth. If an ADR's outcome
-changes a rule in `CANONICAL_LAW.md`, that document must be updated in the
-same PR — the ADR records the reasoning, `CANONICAL_LAW.md` records the rule.
+These ADRs record why global semantic law was admitted. Workspace policy for
+agent conduct and symlink wiring stays in
+[`CANONICAL_LAW.md`](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md)
+in `Quantum-L9/Cursor-Governance`. A semantic ledger is edited in `semantics/`.
+A workspace rule is edited in that policy file.

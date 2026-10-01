@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ops/pin-actions-sha.sh
-# SHA-pins all GitHub Actions 'uses:' references in workflow-templates/ and thin caller YAMLs.
+# SHA-pins all GitHub Actions 'uses:' references in thin caller YAMLs.
 # Uses ratchet (preferred) with fallback to pin-github-action (pip).
 # Run from the root of the Quantum-L9/.github repo.
 set -euo pipefail
@@ -9,7 +9,6 @@ echo "=== Quantum-L9 GitHub Actions SHA Pinner ==="
 echo ""
 
 WORKFLOW_DIRS=(
-  "workflow-templates"
   "Cursor-Governance/.github/workflows"
   "l9-assurance/.github/workflows"
 )
@@ -59,5 +58,5 @@ for dir in "${WORKFLOW_DIRS[@]}"; do
 done
 
 echo "✅ SHA pinning complete."
-echo "Review changes with: git diff workflow-templates/ Cursor-Governance/.github/ l9-assurance/.github/"
+echo "Review changes with: git diff Cursor-Governance/.github/ l9-assurance/.github/"
 echo "Commit with: git commit -am 'chore(deps): pin GitHub Actions to SHAs'"
