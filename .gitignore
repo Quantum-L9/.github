@@ -8,3 +8,5 @@
 # local to this repository and does not cascade to consumers.
 .claude/
 .mcp.json
+# Created by make validate when the system python3 has no PyYAML.
+.venv/

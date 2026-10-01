@@ -995,6 +995,9 @@ def main(argv: list[str]) -> int:
         "RC-001", "semantics/capabilities.yaml", root, docs, report
     )
     check_derivation_sources("RC-002", "semantics/lifecycle.yaml", root, docs, report)
+    check_derivation_sources(
+        "RC-011", "semantics/receipt_catalog.yaml", root, docs, report
+    )
     check_rc004(docs, report)
     check_rc006(docs, report)
     check_rc009(docs, report)

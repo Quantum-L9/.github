@@ -67,8 +67,9 @@ Corrections in this pass:
 3. `projection_profiles.yaml`: `identity_model` registered as a source class (`identity_model.yaml`) so the product identity projection's sources resolve.
 4. `artifact_model.yaml`: duplicate `provider_bindings` removed from `artifacts.product_manifest.required` (structural; semantic effect none).
 5. `HASHES.sha256` regenerated over the same inventory.
+6. `receipt_catalog.yaml` derivation: invariants → c6e4d355…, contracts → f05239b7…, capabilities → 959acf1e…. RC-011 checks that ledger on every `make validate`.
 
-Left unchanged, recorded as successor concerns: `receipt_catalog.yaml` still records the pre-#147 invariant/contract/capability digests (outside both repair contracts); the product identity projection keeps class `semantic_projection` and its instance-level selectors until its profile class is decided (evidence points to the `stage` class for `identity_topology_resolution`, the only compilation stage without a stage projection); architecture-pattern `required_capabilities` is still untyped pending a coordinated rename with the `projection_profiles.yaml` selectors; `pytest/v1` keeps its coordinate until a binding-ID grammar is declared.
+Left unchanged, recorded as successor concerns: the product identity projection keeps class `semantic_projection` and its instance-level selectors until its profile class is decided (evidence points to the `stage` class for `identity_topology_resolution`, the only compilation stage without a stage projection); architecture-pattern `required_capabilities` is still untyped pending a coordinated rename with the `projection_profiles.yaml` selectors; `pytest/v1` keeps its coordinate until a binding-ID grammar is declared.
 
 ## Corrective changes from v3.4
 

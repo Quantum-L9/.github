@@ -1,6 +1,6 @@
 cdf88a6a370a2c2ed65c4b03c6b25bb04ed756f26bf1af84b6f8c99a63a2deee  ./MANIFEST.md
 fa8b8b8e78b7c1bf303d9782c586d0574b048544c4d4994dcbb7748e1c69c439  ./README.md
-2fa9821bc388128fda148ef46991937157bf3b6c73541f356785aa85449259ae  ./RELEASE_VALIDATION.md
+f8e6e595eebbffa1943a8abaf7a4f7af3bd89776e6c87205d367e8e132477297  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -49,7 +49,7 @@ e1676c73cc1a26a69613055f9d5ee8e1f3392dbb7eee60122cb59f6c91965f9a  ./semantics/pr
 92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e  ./semantics/projection_artifact.schema.yaml
 fe5d79a65acd7e2587337136d4874b04399d9166d2b652accefd2309fc986be2  ./semantics/projection_engine_contract.yaml
 d75312c29326fd4e703a6fd035c8ac00604f7ea206ed46dc393401f55845591f  ./semantics/projection_profiles.yaml
-cf7553196a537e94980e52630892fc4d660b2e78eaca35e62f764da4e20aa449  ./semantics/receipt_catalog.yaml
+207e73afab0657d820f53a8c6c3ad800b78885f0c81a8d38426ac3119ea3b014  ./semantics/receipt_catalog.yaml
 7865723e78b7f02817db9d5f54aedb1350cb08b45d42759c8bdafeba1320c7c2  ./semantics/requirement_model.yaml
 3c0636b0eaca00789d6ced5425fb1c3a314319dd00525dd5f811f38f81c365fc  ./semantics/resolution_model.yaml
 2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56  ./semantics/selector_model.yaml
