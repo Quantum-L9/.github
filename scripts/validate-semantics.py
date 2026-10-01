@@ -845,6 +845,8 @@ IDENTITY_TOPOLOGY_SELECTORS = (
 STAGE_CONSUMER_PREFIX = "semantic_build_stage."
 OLD_PATTERN_FIELD = "required_capabilities"
 OBLIGATION_FIELD = "architecture_obligations"
+COMPILATION_PROFILES_PATH = "semantics/compilation_profiles.yaml"
+VOCABULARY_PATH = "semantics/vocabulary.yaml"
 
 
 def _profile_label(index: int, profile: dict) -> str:
@@ -1112,6 +1114,168 @@ def check_rc012(docs: dict[str, dict], report: Report) -> None:
         )
 
 
+def _stage_sequence(
+    check: str, path: str, field: str, stages: object, report: Report
+) -> list[tuple[int, str]] | None:
+    """Return [(ordinal, id)] in list order, or None after failing closed.
+
+    Each entry must be a mapping with a non-empty string ``id`` and an integer
+    ``ordinal``; ids and ordinals must be unique; ordinals must equal the list
+    position (1..N) because both ledgers declare stages as ordered.
+    """
+    if not isinstance(stages, list) or not stages:
+        report.fail(check, path, field, stages, "stage list missing or empty")
+        return None
+    sequence: list[tuple[int, str]] = []
+    before = len(report.failures)
+    for index, stage in enumerate(stages):
+        label = f"{field}[{index}]"
+        if not isinstance(stage, dict):
+            report.fail(check, path, label, stage, "stage entry is not a mapping")
+            continue
+        stage_id = stage.get("id")
+        ordinal = stage.get("ordinal")
+        if not isinstance(stage_id, str) or not stage_id:
+            report.fail(check, path, f"{label}.id", stage_id, "stage id missing")
+            continue
+        if not isinstance(ordinal, int) or isinstance(ordinal, bool):
+            report.fail(
+                check, path, f"{label}.ordinal", ordinal, "stage ordinal missing"
+            )
+            continue
+        if ordinal != index + 1:
+            report.fail(
+                check,
+                path,
+                f"{label}.ordinal",
+                ordinal,
+                f"stage {stage_id!r} is listed at position {index + 1}; ordinals must follow list order",
+            )
+        sequence.append((ordinal, stage_id))
+    ids = [stage_id for _, stage_id in sequence]
+    for stage_id in sorted(set(ids)):
+        if ids.count(stage_id) > 1:
+            report.fail(check, path, field, stage_id, "duplicate stage id")
+    ordinals = [ordinal for ordinal, _ in sequence]
+    for ordinal in sorted(set(ordinals)):
+        if ordinals.count(ordinal) > 1:
+            report.fail(check, path, field, ordinal, "duplicate stage ordinal")
+    return sequence if len(report.failures) == before else None
+
+
+def check_rc013(docs: dict[str, dict], report: Report) -> None:
+    """Stage-domain equality: vocabulary.semantic_build_stages must list exactly
+    the stages of the canonical compilation profile, in the same order, with
+    the same ordinals. The vocabulary projects the profile; it never defines a
+    stage of its own."""
+    ledger = docs.get(COMPILATION_PROFILES_PATH)
+    if ledger is None:
+        report.fail(
+            "RC-013",
+            COMPILATION_PROFILES_PATH,
+            "file",
+            "-",
+            "compilation profile ledger missing or unparsable",
+        )
+        return
+    if ledger.get("canonical") is not True:
+        report.fail(
+            "RC-013",
+            COMPILATION_PROFILES_PATH,
+            "canonical",
+            ledger.get("canonical"),
+            "compilation profile ledger must declare canonical: true",
+        )
+        return
+    profiles = ledger.get("profiles")
+    if not isinstance(profiles, list) or len(profiles) != 1:
+        report.fail(
+            "RC-013",
+            COMPILATION_PROFILES_PATH,
+            "profiles",
+            len(profiles) if isinstance(profiles, list) else profiles,
+            "exactly one canonical compilation profile is expected; no ledger "
+            "declares a selection rule for several",
+        )
+        return
+    profile = profiles[0]
+    if not isinstance(profile, dict):
+        report.fail(
+            "RC-013", COMPILATION_PROFILES_PATH, "profiles[0]", profile, "not a mapping"
+        )
+        return
+    profile_id = profile.get("id") or "no id"
+    canonical = _stage_sequence(
+        "RC-013",
+        COMPILATION_PROFILES_PATH,
+        f"profiles[0] ({profile_id}).stages",
+        profile.get("stages"),
+        report,
+    )
+    vocabulary = docs.get(VOCABULARY_PATH)
+    if vocabulary is None:
+        report.fail(
+            "RC-013", VOCABULARY_PATH, "file", "-", "vocabulary missing or unparsable"
+        )
+        return
+    declared = _stage_sequence(
+        "RC-013",
+        VOCABULARY_PATH,
+        "semantic_build_stages",
+        vocabulary.get("semantic_build_stages"),
+        report,
+    )
+    if canonical is None or declared is None:
+        return
+    before = len(report.failures)
+    canonical_ids = {stage_id: ordinal for ordinal, stage_id in canonical}
+    declared_ids = {stage_id: ordinal for ordinal, stage_id in declared}
+    for stage_id, ordinal in canonical_ids.items():
+        if stage_id not in declared_ids:
+            report.fail(
+                "RC-013",
+                VOCABULARY_PATH,
+                "semantic_build_stages",
+                stage_id,
+                f"stage declared at ordinal {ordinal} by {profile_id} is absent from the vocabulary",
+            )
+    for stage_id, ordinal in declared_ids.items():
+        if stage_id not in canonical_ids:
+            report.fail(
+                "RC-013",
+                VOCABULARY_PATH,
+                f"semantic_build_stages[{ordinal - 1}].id",
+                stage_id,
+                f"stage is not declared by the canonical compilation profile {profile_id}",
+            )
+    for index, (ordinal, stage_id) in enumerate(declared):
+        expected = canonical_ids.get(stage_id)
+        if expected is not None and expected != ordinal:
+            report.fail(
+                "RC-013",
+                VOCABULARY_PATH,
+                f"semantic_build_stages[{index}].ordinal",
+                ordinal,
+                f"stage {stage_id!r} has ordinal {expected} in {profile_id}",
+            )
+    if len(report.failures) == before and [s for _, s in declared] != [
+        s for _, s in canonical
+    ]:
+        report.fail(
+            "RC-013",
+            VOCABULARY_PATH,
+            "semantic_build_stages",
+            [s for _, s in declared],
+            f"stage order differs from {profile_id}: {[s for _, s in canonical]}",
+        )
+    if len(report.failures) == before:
+        report.ok(
+            "RC-013",
+            f"vocabulary.semantic_build_stages equals the {len(canonical)}-stage domain of "
+            f"{profile_id}: ids, order, and ordinals agree",
+        )
+
+
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
@@ -1280,6 +1444,7 @@ def main(argv: list[str]) -> int:
     check_rc006(docs, report)
     check_rc009(docs, report)
     check_rc012(docs, report)
+    check_rc013(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
