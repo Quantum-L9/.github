@@ -1280,8 +1280,8 @@ semantic_build_stages:
   - node_archetypes
   - dependency_archetypes
   operations:
+  - projection
   - validation
-  - resolution
   validation:
     required: true
     solver_source: canonical_compilation_profile
@@ -1313,6 +1313,8 @@ semantic_build_stages:
   label: Global Baseline
   consumes:
   - product_topology_ir
+  - product_kind_resolution
+  - product_archetype_resolution
   - global_authority
   - global_invariants
   - global_contracts
@@ -1330,9 +1332,12 @@ semantic_build_stages:
   label: Requirement Resolution
   consumes:
   - product_topology_ir
+  - product_kind_resolution
+  - product_archetype_resolution
   - validated_global_baseline
   - requirement_model
   - authority_model
+  - identity_topology_ir
   operations:
   - projection
   - derivation
@@ -1349,8 +1354,11 @@ semantic_build_stages:
   - requirement_ir
   - product_kind_resolution
   - product_archetype_resolution
+  - capability_resolution
   - capabilities
   - architecture_rules
+  - node_archetypes
+  - dependency_archetypes
   - applicable_contracts
   operations:
   - projection
@@ -1428,6 +1436,7 @@ semantic_build_stages:
   operations:
   - projection
   - synthesis
+  - resolution
   validation:
     required: true
     solver_source: canonical_compilation_profile
@@ -1444,6 +1453,7 @@ semantic_build_stages:
   - relationship_requirements
   - port_catalog
   - applicable_contract_projection
+  - applicable_conformance_projection
   operations:
   - projection
   - synthesis
@@ -1461,10 +1471,14 @@ semantic_build_stages:
   - port_ir
   - adapter_requirement_ir
   - product_relationship_ir
+  - technology_profile
   - technology_capabilities
-  - provider_constraints
+  - binding_catalog
   operations:
+  - projection
   - binding_selection
+  - resolution
+  - synthesis
   validation:
     required: true
     solver_source: canonical_compilation_profile
@@ -1474,17 +1488,25 @@ semantic_build_stages:
   id: conformance
   label: Conformance
   consumes:
+  - product_kind_resolution
+  - product_archetype_resolution
   - fixture_ir
+  - conformance_model
   - capability_closure_ir
   - architecture_ir
+  - selected_pattern_refs
   - port_ir
+  - adapter_requirement_ir
+  - product_relationship_ir
   - provider_binding_ir
   - applicable_conformance_bindings
+  - fixture_profiles
   operations:
   - projection
   - derivation
   - binding_selection
   - lowering
+  - synthesis
   validation:
     required: true
     solver_source: canonical_compilation_profile
@@ -1497,6 +1519,7 @@ semantic_build_stages:
   label: Product Manifest
   consumes:
   - product_topology_ir
+  - identity_topology_ir
   - product_kind_resolution
   - product_archetype_resolution
   - requirement_ir
@@ -1509,7 +1532,7 @@ semantic_build_stages:
   - conformance_requirement_ir
   - compiler_coordinates
   operations:
-  - derivation
+  - synthesis
   - validation
   validation:
     required: true

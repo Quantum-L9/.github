@@ -1,6 +1,6 @@
 cdf88a6a370a2c2ed65c4b03c6b25bb04ed756f26bf1af84b6f8c99a63a2deee  ./MANIFEST.md
 fa8b8b8e78b7c1bf303d9782c586d0574b048544c4d4994dcbb7748e1c69c439  ./README.md
-78cf944f8f2580d15dbb925943f0a00990644e37502eef3525300f7e7064d070  ./RELEASE_VALIDATION.md
+84be7e1f437cd855fe5789cb30f946d85db192becd2075669a105dcfc8b768c6  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -57,4 +57,4 @@ a3b035834a4d84c1364bcd7da541bc99dd45f71c27f6c15d1466a52d80e54648  ./semantics/pr
 9d1af2e109224e36a43459c73709bc8354650b05a41df1b61dc1ae57914a2202  ./semantics/solver_catalog.yaml
 b8024cf485402c1405d4eefc7ef8692b103425af75638faeba00f960690accb6  ./semantics/technology_capabilities.yaml
 423a6da9cbf80f89d40fb3d524a5ee6c9ae7acff360fc89e25bb997014546246  ./semantics/technology_profiles.yaml
-f5a9dd775665d834c72948f732cc8e76054c98ab4788e027717957e55217a78b  ./semantics/vocabulary.yaml
+75e146e90e9f3e976c75382a5928d04c18531fa076f4096f8e5c5d4f468b0084  ./semantics/vocabulary.yaml

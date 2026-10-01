@@ -847,6 +847,10 @@ OLD_PATTERN_FIELD = "required_capabilities"
 OBLIGATION_FIELD = "architecture_obligations"
 COMPILATION_PROFILES_PATH = "semantics/compilation_profiles.yaml"
 VOCABULARY_PATH = "semantics/vocabulary.yaml"
+# Stage fields the canonical compilation profile owns and the vocabulary only
+# represents. Presentation and indirection fields (label, validation.*) are
+# vocabulary-owned and intentionally not compared.
+STAGE_PARITY_FIELDS = ("consumes", "operations", "produces")
 
 
 def _profile_label(index: int, profile: dict) -> str:
@@ -1269,11 +1273,52 @@ def check_rc013(docs: dict[str, dict], report: Report) -> None:
             f"stage order differs from {profile_id}: {[s for _, s in canonical]}",
         )
     if len(report.failures) == before:
+        _compare_stage_fields(
+            profile_id,
+            profile.get("stages"),
+            vocabulary.get("semantic_build_stages"),
+            report,
+        )
+    if len(report.failures) == before:
         report.ok(
             "RC-013",
-            f"vocabulary.semantic_build_stages equals the {len(canonical)}-stage domain of "
-            f"{profile_id}: ids, order, and ordinals agree",
+            f"vocabulary.semantic_build_stages equals the {len(canonical)}-stage canonical "
+            f"profile {profile_id}: ids, order, ordinals, "
+            + ", ".join(STAGE_PARITY_FIELDS[:-1])
+            + f", and {STAGE_PARITY_FIELDS[-1]} agree",
         )
+
+
+def _compare_stage_fields(
+    profile_id: str, canonical: list, declared: list, report: Report
+) -> None:
+    """Field-level parity: every vocabulary stage carries the canonical
+    profile's exact consumes, operations, and produces lists (same values,
+    same order). Called only after ids, order, and ordinals already agree."""
+    canonical_by_id = {stage["id"]: stage for stage in canonical}
+    for index, stage in enumerate(declared):
+        stage_id = stage["id"]
+        canonical_stage = canonical_by_id[stage_id]
+        for field in STAGE_PARITY_FIELDS:
+            expected = canonical_stage.get(field)
+            if not isinstance(expected, list) or not expected:
+                report.fail(
+                    "RC-013",
+                    COMPILATION_PROFILES_PATH,
+                    f"stages ({stage_id}).{field}",
+                    expected,
+                    f"canonical profile {profile_id} must declare a non-empty list",
+                )
+                continue
+            actual = stage.get(field)
+            if actual != expected:
+                report.fail(
+                    "RC-013",
+                    VOCABULARY_PATH,
+                    f"semantic_build_stages[{index}] ({stage_id}).{field}",
+                    actual,
+                    f"canonical profile {profile_id} declares {expected!r}",
+                )
 
 
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
