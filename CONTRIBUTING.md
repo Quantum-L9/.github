@@ -1,111 +1,72 @@
 # Contributing to Quantum-L9
 
-## Governance Setup Checklist {#governance-setup}
+## Live activation (do this once per machine)
 
-Before opening any pull request, verify each item:
+Governance loads automatically. Do **not** clone Cursor-Governance into a
+consumer workspace root, and do **not** create whole-directory Cursor
+rules, skills, or commands symlinks — that is the retired v2 ritual and
+it creates a second governance tree.
 
-- [ ] Cloned `Cursor-Governance` into your local workspace root
-- [ ] Ran `setup_workspace_symlinks.sh` (see [§2 symlink contract](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md#2-symlink-contract))
-- [ ] Validated symlinks resolve correctly: `ls -la .cursor/rules .cursor/skills .cursor/commands`
-- [ ] Read [CANONICAL_LAW.md §8](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md#8) for workspace wiring requirements
-- [ ] Reviewed [CANONICAL_LAW.md §7 Anti-Patterns](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md#7-anti-patterns) — never violate these
-- [ ] All CI gates green (no bypassing required status checks)
-- [ ] CODEOWNERS notified for blast-radius files
+What actually wires:
 
----
+1. **sessionStart** — `ops/hooks/session_start_bootstrap.sh` activates the
+   GitHub tip at `$HOME/.cursor-governance` (fast-forward or clone+swap).
+2. **`l9-governance` plugin** — `~/.cursor/plugins/local/l9-governance` →
+   the governance clone. Cursor discovers `rules/`, `skills/`, and
+   `commands/` under the plugin root.
+3. **`.cursor-commands`** — consumers only: a symlink to
+   `$HOME/.cursor-governance`. The SSOT clone must never self-alias.
 
-## Quick Setup (3 Steps)
+If a consumer workspace is missing those links:
 
 ```bash
-# Step 1: Clone Cursor-Governance alongside your target repo
-git clone https://github.com/Quantum-L9/Cursor-Governance.git
-
-# Step 2: Run workspace symlink wiring
-cd Cursor-Governance
-bash scripts/setup_workspace_symlinks.sh
-
-# Step 3: Validate symlinks
-ls -la .cursor/rules .cursor/skills .cursor/commands
-# Expected: all three resolve without error
+bash "$HOME/.cursor-governance/ops/scripts/ensure_workspace_wired.sh" "$(pwd)"
 ```
 
-Per [CANONICAL_LAW.md §2](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md#2-symlink-contract):
-the workspace root must have `.cursor/` symlinks resolving to `Cursor-Governance/rules/`, `skills/`, and `commands/`.
+Read [CANONICAL_LAW.md](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md)
+for the symlink contract and anti-patterns.
 
----
+## How an agent ships
 
-## CI Gate Requirements
+1. Local commits on a feature branch (L4 local autonomy).
+2. Run `kernels/Recursive Alignment.md` then `kernels/Validate & Repair.md`.
+3. Publish **only** with:
 
-All pull requests are checked by the L9 v2 CI pipeline:
-
-| Gate | Tool | Source |
-|---|---|---|
-| Lint + format | ruff (Python) / Biome (TypeScript) | `l9-lint-test.yml` via `l9-ci-core` |
-| Type-check | mypy (Python) / tsc (TypeScript) | `l9-lint-test.yml` via `l9-ci-core` |
-| Unit tests | pytest (Python) / vitest (TypeScript) | `l9-lint-test.yml` via `l9-ci-core` |
-| Analysis pipeline | Semgrep + normalize + publish | `l9-analysis.yml` via `l9-ci-core` |
-| Governance check | PR metadata quality | `governance-pr.yml` (advisory) |
-
-Consumer repos use the centralized composite actions for setup:
-
-```yaml
-- uses: Quantum-L9/.github/actions/immutable-checkout@<sha>
+```bash
+PR_REMEDIATE=0 make pr
 ```
 
-> **Anti-patterns** ([§7](https://github.com/Quantum-L9/Cursor-Governance/blob/main/CANONICAL_LAW.md#7-anti-patterns)):
-> Never duplicate logic across workflows. Never add business logic to thin callers.
-> Never reference `@main` from workflow uses — always pin to full 40-char SHA.
+Do **not** `git push`, `gh pr create`, or `gh pr edit` to reach GitHub.
+`make pr` runs the checkers; the alternatives skip them.
 
----
+Campaign PRs set `PR_BASE=origin/campaign/<campaign_id>` and never target
+`main`. Merge is a separate `/l9-pr-remediation` (Converge) step — opening
+a PR is not merge authorization.
 
-## Branch Naming & Commit Conventions
+## CI gates
+
+Consumer CI is `Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml`, enforced by a GitHub organization required-workflow ruleset. Nothing is copied into this repository:
+
+| Gate | When it runs |
+| --- | --- |
+| Biome | Always (JS/TS/JSON). Idle and green when the tree has no matching files. |
+| Python lint + `Python Test Suite` | Only when `pyproject.toml` or `requirements.txt` exists. |
+| Node typecheck + `Node Test Suite` | Only when a root `package.json` exists. |
+| L9 Analysis | Semgrep and SDK publish, inside `org-ci.yml`. This repository does not seed `.github/governance/`. |
+| Governance caller | PR body and issue triage. The caller lives at `.github/workflows/governance.yml` and calls the workflows in this repo. |
+
+Do not invent a second `biome.json` or a competing `ci.yml`. Extra Biome
+excludes append to `files.includes` only.
+
+## Branch naming and commits
 
 - Branches: `feat/<scope>`, `fix/<scope>`, `chore/<scope>`, `docs/<scope>`
-- Commits: Conventional Commits format — `feat(scope): message`
-- PRs targeting `main` require CODEOWNERS approval for blast-radius paths
+- Commits: Conventional Commits — `feat(scope): message`
+- Blast-radius paths (`.github/`, `infra/`, `SECURITY.md`, `CODEOWNERS`)
+  require the CODEOWNERS team plus the extra reviewer on those paths only.
 
----
+## Kernel authoring (l9-ci-core contributors only)
 
-## Org-Wide Automation (What Happens Automatically)
-
-When you create a new repo or push code, the org governance system acts without
-manual intervention:
-
-| Event | Automation | Your Action |
-| --- | --- | --- |
-| New repo created | `auto-seed-new-repo.yml` opens a PR with CODEOWNERS + dependabot + governance caller | Merge the PR |
-| Template changes in `.github` | `dispatch-template-update.yml` notifies your repo | Merge the auto-sync PR (if you have `on-org-update.yml`) |
-| Governance files deleted | `continuous-sync.yml` opens a restoration PR | Merge or opt out (`.l9/no-sync`) |
-| Repo settings drift | `enforce-policies.yml` auto-corrects | Nothing — settings are restored |
-| Labels missing | `sync-labels-all.yml` adds them | Nothing — labels appear |
-
----
-
-## Opting Out
-
-Consumer repos can opt out of specific automation:
-
-| Opt-out | How | Effect |
-| --- | --- | --- |
-| Drift remediation | Create `.l9/no-sync` | `continuous-sync.yml` skips this repo |
-| Policy enforcement | Create `.l9/no-policy-enforcement` | `enforce-policies.yml` skips this repo |
-
----
-
-## This Repo's Own CI
-
-`Quantum-L9/.github` validates itself on every PR/push to `main`:
-
-- **`validate-starters.sh`** — `l9-ci-pack/` completeness and `@main`-ref check
-- **`actionlint`** — lints all workflow files for YAML/expression/shellcheck errors
-- **`SHA-pin audit`** — every `uses:` ref must be pinned by full 40-char commit SHA
-- **`properties.json schema validation`** — workflow-template metadata
-
----
-
-## Kernel Authoring (l9-ci-core contributors only)
-
-- Kernels must use `on: workflow_call` only
-- `l9-self-ci.yml` must remain `on: pull_request/push` — **never convert to workflow_call** (circular dependency)
-- SHA-pin discipline: force-update moving tag for backward-compatible changes; cut new major for breaking
-- See [workflow-interface-registry.yml](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml) for the full kernel API contract
+- Kernels must use `on: workflow_call` only.
+- Never reference `@main` from thin callers.
+- See [workflow-interface-registry.yml](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml).

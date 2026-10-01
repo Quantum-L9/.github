@@ -1,0 +1,49 @@
+# Quantum-L9/.github
+
+> Semantic Foundation v3.5.0 for the Quantum-L9 organization. `semantics/` is the canonical language for product topology, kinds, identity, architecture law, and compilation. Domain repositories own domain meaning. This repository also runs the organization governance, control, and distribution plane, and that plane does not own product meaning.
+
+Do not copy `semantics/` into a product repository. Cite `artifact_id`. The compiler carries out recorded decisions. It does not invent what a product means. SDK is not an admitted ProductKind. Canonical CI is `Quantum-L9/l9-ci-core`.
+
+## The language
+
+- [README](README.md): what this repository is becoming, and the organization plane it still runs
+- [Agent instructions](AGENTS.md): ledger index an agent must follow before editing `semantics/`
+- [Semantic foundation v3.5.0](docs/semantic-foundation/v3.5.0/README.md): ProductTopology, Node, Dependency, identity, and how consumers reference upstream
+- [Release manifest](docs/semantic-foundation/v3.5.0/MANIFEST.md): files and contracts admitted in v3.5.0
+- [Canonical sources](semantics/canonical_sources.yaml): which ledgers are registered, and whether each may be projected or derived
+- [Vocabulary](semantics/vocabulary.yaml): global terms
+- [Authority model](semantics/authority_model.yaml): who may admit global law
+- [Contracts](semantics/contracts.yaml): the single global contract catalog
+- [Invariants](semantics/invariants.yaml): global invariants
+- [Product topology schema](semantics/product_topology.schema.yaml): shape of the authoritative product contract
+- [Product kinds](semantics/product_kinds.yaml): Node and Dependency; kind follows consumption and deployment
+- [Node archetypes](semantics/node_archetypes.yaml): architecture obligations for a Node
+- [Dependency archetypes](semantics/dependency_archetypes.yaml): architecture obligations for a Dependency
+- [Identity model](semantics/identity_model.yaml): identity dimensions stay distinct
+- [Identity assertion schema](semantics/identity_assertion.schema.yaml): shape of a resolved identity assertion
+- [Product manifest schema](semantics/product_manifest.schema.yaml): shape of a derived realization
+- [Architecture patterns](semantics/architecture_patterns.yaml): composable patterns; not complete architectures and not semantic ownership
+- [Architecture rules](semantics/architecture_rules.yaml): architecture law applied after resolution
+- [Port catalog](semantics/port_catalog.yaml): ports in owner vocabulary
+- [Compiler contract](semantics/compiler_contract.yaml): what the compiler may carry out and what it must not invent
+- [Conformance model](semantics/conformance_model.yaml): what must be proven for a realization
+
+## Decisions
+
+- [ADR index](docs/adr/README.md): ADR-001 through ADR-012
+- [ADR-001](docs/adr/ADR-001-github-global-semantic-authority.md): `.github` is the global semantic authority
+- [ADR-010](docs/adr/ADR-010-ownership-boundaries-no-recipes.md): add a ledger only when it retires a recurring decision; do not publish node recipes
+
+## Organization plane
+
+- [Boundaries](docs/BOUNDARIES.md): this plane does not test, lint, scan, or diagnose CI
+- [Advisory posture](docs/ADVISORY.md): promotion ladder; controls stay at evaluate until promoted
+- [Distribution](docs/DISTRIBUTION.md): inheritance, workflow_call reference, and physical seed
+- [Repo birth profiles](docs/REPO_BIRTH_PROFILES.md): INHERIT, MATERIALIZE, REMOTE APPLY, FORBID
+- [Repo classes](policies/repo-classes.yml): which capabilities each class receives
+
+## Optional
+
+- [Copilot instructions](.github/copilot-instructions.md): org-wide AI coding rules for consumer repositories
+- [Contributing](CONTRIBUTING.md): inherited contributor checklist for the organization
+- [Support](SUPPORT.md): inherited support routes

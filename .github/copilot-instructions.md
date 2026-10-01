@@ -5,7 +5,7 @@
 This organization uses a governed CI constellation. All CI pipelines are owned by
 `l9-ci-core` (thin control plane) and `l9-ci-sdk` (execution engine). Never write
 CI workflows at all — canonical CI is `Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml`,
-enforced by an organization required-workflow ruleset. `l9-ci-pack/` is retired.
+enforced by an organization required-workflow ruleset.
 
 The policy source of truth is `CANONICAL_LAW.md` in `Quantum-L9/Cursor-Governance`.
 
@@ -48,7 +48,7 @@ The policy source of truth is `CANONICAL_LAW.md` in `Quantum-L9/Cursor-Governanc
 - Never suggest auto-merge for Dependabot PRs.
 - Never generate CI that duplicates `l9-ci-core`'s analysis pipeline (semgrep,
   normalize, publish).
-- Never use `workflow-templates/` v1 starters for new work.
+- Never restore `workflow-templates/`. Organization CI is the l9-ci-core required workflow.
 - Never add Sonar, Prettier, Poetry, or PacketEnvelope to any repo.
 - Never reference `cryptoxdog/golden-repo` — it is superseded.
 

@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 # ops/sync-org-files.sh
-# Syncs all org-level template files from Quantum-L9/.github/templates/ into a
-# consumer repo. Designed to be called FROM the consumer repo (or by a seeding
-# script that targets a consumer checkout).
+# Syncs org-level files into a consumer repo. Inheritable files are read from
+# the canonical copies GitHub serves (repo root and .github/). Consumer-only
+# CODEOWNERS and the governance caller live in policies/.
 #
 # Org-side seeding of community-health and ownership files. CI is NOT seeded
-# from this repository (see l9-ci-pack/README.md).
-# Health files come from templates/. The l9-ci-pack and on-org-update
-# categories are RETIRED and fail closed.
-# This repo distributes those callers; l9-ci-core executes CI.
+# from this repository. The on-org-update category is RETIRED and fails closed.
+# Canonical CI is l9-ci-core.
 #
 # Usage (from the org repo root):
 #   ops/sync-org-files.sh <consumer-repo-path> [--include-all|--include <category>...]
@@ -20,13 +18,11 @@
 #   community-health  CODE_OF_CONDUCT.md, CONTRIBUTING.md, SECURITY.md
 #                     (no LICENSE, FUNDING.yml, SUPPORT.md); advisory links
 #                     are rewritten to the consumer's origin remote
-#   issue-templates   numbered chooser + ci-failure + seed-ci-failure +
+#   issue-templates   numbered chooser + ci-failure +
 #                     gov-violation + config.yml (no bug_report / feature_request)
-#   pr-templates      pull_request_template.md + PULL_REQUEST_TEMPLATE/agent.md
-#   l9-ci-pack        RETIRED — CI is never distributed from this repository;
-#                     Python lint only when pyproject.toml or requirements.txt
+#   pr-templates      .github/pull_request_template.md (the file make pr fills)
 #   labels            OPT-IN — org sync-labels-all.yml already fans labels
-#   on-org-update     OPT-IN — legacy receiver; the pack it pulled is retired
+#   on-org-update     RETIRED — legacy receiver; fails closed
 #
 # Default (no --include flag): DEFAULT_CATEGORIES (not labels).
 # Actions twin: .github/workflows/seed-governance.yml (ops/build-seed-payload.js).
@@ -34,13 +30,13 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ORG_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-TEMPLATES_DIR="$ORG_ROOT/templates"
+POLICIES_DIR="$ORG_ROOT/policies"
 
 usage() {
   echo "Usage: $0 <consumer-repo-path> [--include-all|--include <category>...]" >&2
   echo "Default: codeowners dependabot governance community-health issue-templates pr-templates" >&2
   echo "Opt-in:  labels" >&2
-  echo "Retired: l9-ci-pack on-org-update (fail closed)" >&2
+  echo "Retired: on-org-update (fail closed)" >&2
   exit 1
 }
 
@@ -59,8 +55,7 @@ fi
 # Parse categories
 DEFAULT_CATEGORIES=(codeowners dependabot governance community-health issue-templates pr-templates)
 ALL_CATEGORIES=("${DEFAULT_CATEGORIES[@]}" labels)
-RETIRED_CATEGORIES=(l9-ci-pack on-org-update)
-PACK_DIR="$ORG_ROOT/l9-ci-pack"
+RETIRED_CATEGORIES=(on-org-update)
 CATEGORIES=()
 HAS_PYTHON=0
 if [[ -f "$CONSUMER_ROOT/pyproject.toml" || -f "$CONSUMER_ROOT/requirements.txt" ]]; then
@@ -160,33 +155,33 @@ for cat in "${CATEGORIES[@]}"; do
       if [[ "$HAS_ROOT_CODEOWNERS" -eq 1 ]]; then
         echo "  skip .github/CODEOWNERS (root CODEOWNERS present; it stays authoritative)"
       else
-        sync_file "$TEMPLATES_DIR/CODEOWNERS.repo" "$CONSUMER_ROOT/.github/CODEOWNERS"
+        sync_file "$POLICIES_DIR/CODEOWNERS" "$CONSUMER_ROOT/.github/CODEOWNERS"
       fi
       ;;
     dependabot)
       echo "── dependabot.yml ──"
-      sync_file "$TEMPLATES_DIR/dependabot.yml" "$CONSUMER_ROOT/.github/dependabot.yml"
+      sync_file ".github/dependabot.yml" "$CONSUMER_ROOT/.github/dependabot.yml"
       ;;
     governance)
       echo "── governance caller ──"
-      sync_file "$TEMPLATES_DIR/governance-caller.yml" "$CONSUMER_ROOT/.github/workflows/governance.yml"
+      sync_file "$POLICIES_DIR/governance-caller.yml" "$CONSUMER_ROOT/.github/workflows/governance.yml"
       ;;
     labels)
       echo "── labels.yml ──"
-      sync_file "$TEMPLATES_DIR/labels.yml" "$CONSUMER_ROOT/.github/labels.yml"
+      sync_file ".github/labels.yml" "$CONSUMER_ROOT/.github/labels.yml"
       ;;
     community-health)
       echo "── community health ──"
       for f in CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md; do
-        if [[ -f "$TEMPLATES_DIR/community-health/$f" ]]; then
-          sync_file_with_placeholders "$TEMPLATES_DIR/community-health/$f" "$CONSUMER_ROOT/$f"
+        if [[ -f "$f" ]]; then
+          sync_file_with_placeholders "$f" "$CONSUMER_ROOT/$f"
         fi
       done
       ;;
     issue-templates)
       echo "── issue templates ──"
       mkdir -p "$CONSUMER_ROOT/.github/ISSUE_TEMPLATE"
-      for f in "$TEMPLATES_DIR/issue-templates/"*; do
+      for f in .github/ISSUE_TEMPLATE/*; do
         [[ -f "$f" ]] || continue
         name="$(basename "$f")"
         case "$name" in
@@ -197,33 +192,14 @@ for cat in "${CATEGORIES[@]}"; do
       ;;
     pr-templates)
       echo "── PR template ──"
-      sync_file "$TEMPLATES_DIR/pr-templates/pull_request_template.md" \
+      sync_file ".github/pull_request_template.md" \
         "$CONSUMER_ROOT/.github/pull_request_template.md"
-      if [[ -f "$TEMPLATES_DIR/pr-templates/agent.md" ]]; then
-        sync_file "$TEMPLATES_DIR/pr-templates/agent.md" \
-          "$CONSUMER_ROOT/.github/PULL_REQUEST_TEMPLATE/agent.md"
-      fi
       ;;
     on-org-update)
-      # RETIRED with l9-ci-pack: this receiver's only action was running
-      # scripts/sync_ci_from_pack.py, the consumer half of the same copy loop.
+      # RETIRED. This receiver's only action was running
+      # scripts/sync_ci_from_pack.py, the consumer half of the old copy loop.
       echo "❌ ERROR: seed category 'on-org-update' is RETIRED." >&2
       echo "   It existed to run scripts/sync_ci_from_pack.py, which is gone." >&2
-      exit 1
-      ;;
-    l9-ci-pack)
-      # RETIRED. This category physically copied Core callers and a governance
-      # pack into consumer repositories. Quantum-L9/l9-ci-core now declares
-      # "CI distribution from Quantum-L9/.github" prohibited in
-      # .l9/org-runtime-contract.yaml, and both governed repo classes FORBID
-      # every destination it wrote. Canonical CI is
-      # l9-ci-core/.github/workflows/org-ci.yml via an organization
-      # required-workflow ruleset. Fail closed: a silent skip here would read
-      # as "synced, nothing to do".
-      echo "❌ ERROR: seed category 'l9-ci-pack' is RETIRED." >&2
-      echo "   Quantum-L9/.github no longer distributes CI." >&2
-      echo "   Canonical CI: Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml" >&2
-      echo "   enforced by a GitHub organization required-workflow ruleset." >&2
       exit 1
       ;;
     *)

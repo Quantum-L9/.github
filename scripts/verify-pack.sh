@@ -33,8 +33,8 @@ for p in \
  .github/ISSUE_TEMPLATE/config.yml \
  .github/pull_request_template.md \
  .github/workflows/governance-report.yml \
- templates/dependabot.yml \
- templates/governance-caller.yml \
+ .github/dependabot.yml \
+ policies/governance-caller.yml \
  docs/ADVISORY.md docs/BOUNDARIES.md; do
   [[ -f "$p" ]] && ok "present $p" || bad "missing $p"
 done

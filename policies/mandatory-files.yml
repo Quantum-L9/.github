@@ -16,19 +16,19 @@
 #   present  — file must exist; no content check (any content is acceptable)
 files:
   - path: .github/CODEOWNERS
-    source: templates/CODEOWNERS.repo
+    source: policies/CODEOWNERS
     mode: managed
 
   - path: .github/dependabot.yml
-    source: templates/dependabot.yml
+    source: .github/dependabot.yml
     mode: managed
 
   - path: LICENSE
-    source: templates/community-health/LICENSE
+    source: LICENSE
     mode: seeded
 
   - path: .github/workflows/governance.yml
-    source: templates/governance-caller.yml
+    source: policies/governance-caller.yml
     mode: seeded
     # Waived for classes that own their CI invocation upstream; see
     # `mandatory_files_waive` in policies/repo-classes.yml.

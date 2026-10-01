@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
-.PHONY: help activate preflight validate sync-core sync-labels sync-labels-all \
+.PHONY: help activate preflight validate sync-labels sync-labels-all \
         seed-dry seed-apply birth-bootstrap birth-seed \
         apply-rulesets set-properties pin-actions audit-pins enforce-dry enforce-apply \
         dispatch clean
@@ -18,14 +18,9 @@ activate: ## Run full activation (secret scanning, rulesets, labels, seed, prefl
 preflight: ## Run preflight health check (read-only)
 	@bash scripts/preflight.sh
 
-validate: ## Validate starters, pack integrity, and SHA pins
+validate: ## Validate seed payload, birth profiles, and SHA pins
 	@bash ops/validate-starters.sh
 	@bash ops/audit-sha-pins.sh
-
-# ─── Sync from l9-ci-core ────────────────────────────────────────────────────
-sync-core: ## Sync l9-ci-pack from l9-ci-core at pinned SHA
-	@test -n "$(REF)" || (echo "usage: make sync-core REF=<40-char-sha>" >&2; exit 2)
-	@bash ops/sync-v2-starters.sh $(REF)
 
 # ─── Fan-out Operations ──────────────────────────────────────────────────────
 sync-labels: ## Sync org label taxonomy to one repo (REPO=owner/name)
@@ -58,7 +53,7 @@ birth-seed: ## Seed one newly created repo's applicable files (REPO=name [CLASS=
 
 # ─── Rulesets ────────────────────────────────────────────────────────────────
 apply-rulesets: ## Apply org rulesets (evaluate mode only)
-	@bash ops/apply-rulesets.sh
+	@bash scripts/apply-rulesets.sh
 
 # ─── Custom Properties ───────────────────────────────────────────────────────
 set-properties: ## Auto-detect and set custom properties on all repos

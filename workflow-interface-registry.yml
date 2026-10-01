@@ -16,51 +16,28 @@ last_audited: "2026-08-25"
 # Verified at 7148fc7: every kernel's workflow_call interface is a strict
 # superset of the frozen 2b330a5 interface — added inputs are all
 # required: false with defaults, so already-imported v1 wrappers keep
-# resolving and keep their behavior. Gallery starters and this registry
-# now pin the same unified SHA as l9-ci-pack (see v2 below).
+# resolving and keep their behavior. This registry pins the same unified
+# SHA as the v2 record (see v2 below). Organization CI is
+# l9-ci-core/.github/workflows/org-ci.yml, not a workflow copied from here.
 
-# v2 (CURRENT — start here for all new work):
-#   Full instantiation pack:  l9-ci-pack/  (README.md + governance/ + workflows/)
-#   Pinned Core ref:          see l9-ci-pack/README.md "Prerequisites" (full
-#                              commit SHA pre-release; @v2.0.0 / @v2 after cut)
-#   Legacy v1 starters:       workflow-templates/l9-{pr-pipeline,security,
-#                              scorecard,sbom,pre-commit,nightly,release,
-#                              governance,node-ts-monorepo}.yml — same pin,
-#                              kept only for already-imported wrappers.
+# v2 record (frozen — not a distribution pack):
+#   Canonical workflow:  Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml
+#   This file does not tell a seeder to copy CI into a consumer.
 v2:
   schema_version: "1.0"
   kernel_provider: "Quantum-L9/l9-ci-core"
   current_sha: "7148fc73dcbf41367f5c5401432dc997b1f4f869"
   status: "pre-release-candidate"  # flips to "released" once v2.0.0 is tagged
-  pack_path: "l9-ci-pack/"
-  pack_readme: "l9-ci-pack/README.md"
-  reusable_workflows:
-    - name: analyze-semgrep
-      file: "l9-ci-pack/workflows/l9-analysis.yml"
-      calls: "Quantum-L9/l9-ci-core/.github/workflows/analyze-semgrep.yml"
-      classification: KERNEL
-      description: "Central CI orchestrator: SDK-owned semgrep execution, gate evaluation, agent payload + SARIF projection, published check. Replaces the profile-normalize-semgrep + publish-analysis pair at this pin."
-  consumer_owned_templates:
-    - name: l9-lint-test
-      file: "l9-ci-pack/workflows/l9-lint-test.yml"
-      classification: CONSUMER_TEMPLATE
-      description: "Python hygiene (ruff, mypy, pytest+coverage). Not called by Core; copied and owned by the consumer."
-    - name: l9-lint-test-node
-      file: "l9-ci-pack/workflows/l9-lint-test-node.yml"
-      classification: CONSUMER_TEMPLATE
-      description: "Node/TypeScript hygiene (SDK Biome scan, tsc --noEmit, package test script) plus locked biome.json contract. Not called by Core; copied and owned by the consumer."
-  governance_files:
-    - "l9-ci-pack/governance/execution-profiles.yaml"
-    - "l9-ci-pack/governance/provider-requiredness.yaml"
-    - "l9-ci-pack/governance/rule-modes.yaml"
-    - "l9-ci-pack/governance/waivers.yaml"
-    - "l9-ci-pack/governance/promotion-policy.yaml"
-    - "l9-ci-pack/governance/quality-thresholds.yaml"
+  # Organization CI is l9-ci-core/.github/workflows/org-ci.yml via the
+  # required-workflow ruleset. This repository does not copy callers.
+  reusable_workflows: []
+  consumer_owned_templates: []
+  governance_files: []
   excluded_from_pack:
     # Owned solely by this repo's own community-health files; never synced
     # from l9-ci-core docs/templates/.
     - ".github/ISSUE_TEMPLATE/*"
-    - "PULL_REQUEST_TEMPLATE.md"
+    - ".github/pull_request_template.md"
   no_v2_equivalent:
     # SDK does not implement these providers yet — do not re-add as Core
     # reusable workflows without an explicit, authorized scope change.

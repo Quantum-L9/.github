@@ -1,132 +1,134 @@
 # Agents
 
-This document describes the automated agents (workflows) operating in this
-repository and across the Quantum-L9 organization. Each agent has a defined
-scope, schedule, permissions, and interaction model.
+`semantics/` is the Semantic Foundation v3.5.0. `Quantum-L9/.github` owns this
+language. A domain repository owns the meaning of its own capability. Read the
+ledger below for a decision that is already global. Cite its `artifact_id`.
+Do not copy this tree into a product repository.
 
-## Agent Registry
+**ProductTopology** is the product contract
+(`semantics/product_topology.schema.yaml`). **ProductManifest** is the derived
+realization of one topology (`semantics/product_manifest.schema.yaml`). A
+manifest records what was resolved. Schemas check shape. The compiler carries
+out decisions recorded in these ledgers (`semantics/compiler_contract.yaml`).
 
-| Agent | Workflow | Schedule | Scope | Mode |
-| --- | --- | --- | --- | --- |
-| Governance Reporter | `governance-report.yml` | Weekly (Mon 08:00 UTC) | `.github` repo | Read-only issue |
-| Label Syncer | `sync-labels-all.yml` | Weekly (Mon 09:30 UTC) | All repos | Additive (create/update) |
-| Drift Remediator | `continuous-sync.yml` | Weekly (Tue 11:00 UTC) | All repos | PR-based |
-| Policy Enforcer | `enforce-policies.yml` | Weekly (Wed 13:00 UTC) | All repos | Auto-correct settings |
-| Preflight Monitor | `preflight-scheduled.yml` | Monthly (1st, 10:00 UTC) | Org-wide | Issue report |
-| Pin Auditor | `audit-pins-org.yml` | Monthly (15th, 12:00 UTC) | All repos | Issue report |
-| Auto-Seeder | `auto-seed-new-repo.yml` | Hourly (:20) + dispatch / repo creation | All repos | PR-based, repo-class aware |
-| Birth Bootstrap | `repo-birth-bootstrap.yml` | Dispatch from `l9-repo-template` `make new-repo` | One repo | REMOTE APPLY + remote attestation |
-| Template Dispatcher | `dispatch-template-update.yml` | On push to templates/ | Seeded repos | Event dispatch |
-| Governance PR | `governance-pr.yml` | On PR (workflow_call) | Calling repo | Advisory check |
-| Governance Issue | `governance-issue.yml` | On issue (workflow_call) | Calling repo | Label-only |
+v3.5.0 admits two ProductKinds in `semantics/product_kinds.yaml`. A Node is
+remote invocation with an independent runtime. A Dependency is installed and
+composed inside a consumer. SDK is not an admitted kind. Kind follows
+consumption and deployment. Archetypes specialize a kind:
+`semantics/node_archetypes.yaml` and `semantics/dependency_archetypes.yaml`.
 
-## Permissions Model
+Identity dimensions stay distinct in `semantics/identity_model.yaml`.
+Downstream work consumes an assertion that matches
+`semantics/identity_assertion.schema.yaml`. GovernanceProfile selects policy.
+ActorIdentity names who acted.
 
-All agents use a GitHub App token (`GOVERNANCE_APP_ID` / `GOVERNANCE_APP_PRIVATE_KEY`)
-with the following scopes:
+`semantics/canonical_sources.yaml` is the source registry. A registered source
+names its path and whether derivation is allowed. Global contracts live only
+in `semantics/contracts.yaml`. The decisions are ADR-001 through ADR-012 in
+`docs/adr/`. The release record is `docs/semantic-foundation/v3.5.0/`.
 
-| Permission | Level | Used By |
-| --- | --- | --- |
-| `contents: read` | All repos | All agents |
-| `contents: write` | All repos | Seeder, Drift Remediator, Dispatcher |
-| `pull_requests: write` | All repos | Seeder, Drift Remediator |
-| `issues: write` | `.github` only | Preflight, Pin Auditor, Reporter |
-| `administration: write` | All repos | Policy Enforcer (settings correction) |
+Add a ledger here only when it retires a decision that would otherwise be
+remade in every product (ADR-010). Register it in
+`semantics/canonical_sources.yaml`. Leave a material Unknown explicit.
 
-The App token is minted per-run via `actions/create-github-app-token` and expires
-in one hour. No long-lived credentials exist.
+The same repository still runs the organization governance, control, and
+distribution plane. That plane does not own product meaning. Its map is
+`README.md`.
 
-## Interaction Model
+## Language and authority
 
-Agents follow the advisory-first principle:
-
-1. **Observe** — detect drift, missing files, floating refs, or policy violations
-2. **Report** — create/update an issue or job summary with findings
-3. **Remediate** — open a PR or correct a setting (never force-push to main)
-4. **Never block** — all enforcement is in `evaluate` mode until explicitly promoted
-
-## Opt-Out Mechanism
-
-Consumer repos can opt out of specific agents:
-
-| Marker File | Effect |
+| File | What it decides |
 | --- | --- |
-| `.l9/no-sync` | Drift Remediator skips this repo |
-| `.l9/no-policy-enforcement` | Policy Enforcer skips this repo |
+| `semantics/canonical_sources.yaml` | Which ledgers are registered, and whether each may be projected or derived |
+| `semantics/vocabulary.yaml` | Global terms |
+| `semantics/authority_model.yaml` | Who may admit global law, and which classes of artifact can grant authority |
+| `semantics/contracts.yaml` | The single global contract catalog |
+| `semantics/invariants.yaml` | Global invariants |
+| `semantics/artifact_model.yaml` | What kinds of artifact exist and how they relate to authority |
 
-## Agent Contracts
+## Product contract
 
-Each agent guarantees:
-
-- **Idempotency** — running twice produces the same result
-- **Non-destructive** — never deletes files, branches, or data
-- **Additive PRs** — PRs only add or restore content, never remove
-- **Graceful degradation** — if a repo is inaccessible, the agent logs and continues
-- **Summary output** — every run produces a GitHub Actions job summary table
-
-### Seed-branch contract
-
-### Repo classes
-
-Seeding is **capability-scoped, not file-scoped**. Each target resolves its
-class from its own `.l9/org-birth-profile.yaml` against
-`policies/repo-classes.yml`; the class decides INHERIT / MATERIALIZE /
-REMOTE APPLY / FORBID. An absent or unknown marker resolves to `default`, whose
-payload is byte-identical to pre-class seeding (asserted in
-`ops/test-repo-class-profile.js`).
-
-A FORBID hit throws rather than dropping silently: it means the category set
-and the prohibition disagree, and that is a bug to fix, not to hide. See
-`docs/REPO_BIRTH_PROFILES.md`.
-
-The two seeders (`auto-seed-new-repo.yml`, `seed-governance.yml`) build their
-PR as *"the consumer's current default branch + one seed commit"* and then move
-the seed branch onto it. That construction discards anything else already on the
-branch, so both gate every ref move through `ops/seed-branch-safety.js`:
-
-| Consumer state | Seeder behavior |
+| File | What it decides |
 | --- | --- |
-| Seed branch absent | create the branch, open a PR |
-| Seed PR open | **left alone** — the branch may carry review fixes |
-| Branch holds only the seeder's own verified commit, no open PR | rebuilt on the current default branch |
-| Branch holds any other commit | **left alone**, reported in the job summary |
-| Branch state unprovable (comparison failed) | **left alone** — the gate fails closed |
+| `semantics/product_topology.schema.yaml` | Shape of the authoritative product contract |
+| `semantics/product_kinds.yaml` | Admitted kinds and how kind is determined |
+| `semantics/node_archetypes.yaml` | Architecture obligations for a Node |
+| `semantics/dependency_archetypes.yaml` | Architecture obligations for a Dependency |
+| `semantics/identity_model.yaml` | Identity dimensions and resolution |
+| `semantics/identity_assertion.schema.yaml` | Shape of a resolved identity assertion |
+| `semantics/product_manifest.schema.yaml` | Shape of a derived realization |
 
-Seeder authorship is proven, not assumed: the single ahead commit must carry
-the seed subject **and** be committed by the identity the seeder runs as with
-a GitHub-verified signature — an amended or rebased commit that preserves the
-subject line fails the check and the branch is left alone.
+## Resolution
 
-The ref write is a server-side compare-and-swap: GraphQL `updateRefs` pins
-`beforeOid` to the sha the verdict was computed from, so a branch that moves
-between verdict and write is rejected atomically and left untouched.
+| File | What it decides |
+| --- | --- |
+| `semantics/requirement_model.yaml` | How requirements are stated and closed |
+| `semantics/resolution_model.yaml` | How a requirement becomes a resolved decision |
+| `semantics/capabilities.yaml` | Global capability coordinates |
+| `semantics/capability_resolution.yaml` | How a capability resolves to architecture |
+| `semantics/semantic_dependency_model.yaml` | Which semantic artifacts depend on which |
+| `semantics/selector_model.yaml` | Deterministic selectors used when projecting a ledger |
 
-`ops/test-seed-branch-safety.js` covers the gate; `ops/test-seed-workflow-branch-guard.js`
-runs each workflow's real `script:` body against a stubbed API and asserts the
-guarantee holds. Both run in `ops/validate-starters.sh`.
+## Architecture
 
-## Composite Actions (Shared Infrastructure)
+| File | What it decides |
+| --- | --- |
+| `semantics/architecture_rules.yaml` | Architecture law applied after resolution |
+| `semantics/architecture_patterns.yaml` | Reusable architecture patterns |
+| `semantics/port_catalog.yaml` | Ports, in owner vocabulary |
+| `semantics/packet_catalog.yaml` | Bounded packets that carry candidates and do not create authority |
 
-These are not agents but reusable building blocks consumed by consumer repo CI:
+## Compiler
 
-| Action | Path | Purpose |
-| --- | --- | --- |
-| Immutable Checkout | `.github/actions/immutable-checkout/` | SHA-pinned git checkout without marketplace dependency |
+| File | What it decides |
+| --- | --- |
+| `semantics/compiler_contract.yaml` | The generic compiler: inputs, operations, and what it may not invent |
+| `semantics/compiler_passes.yaml` | Ordered compiler passes |
+| `semantics/compiler_receipt.schema.yaml` | Shape of a compiler receipt |
+| `semantics/generic_compiler_manifest.yaml` | Manifest of the generic compiler itself |
+| `semantics/compilation_profiles.yaml` | Compilation profiles the compiler may apply |
+| `semantics/composition_engine_contract.yaml` | Contract for composition |
+| `semantics/composition_profiles.yaml` | Composition profiles |
+| `semantics/derivation_profiles.yaml` | Derivation profiles, including law-to-fixture |
+| `semantics/projection_engine_contract.yaml` | Contract for projection |
+| `semantics/projection_profiles.yaml` | Projection profiles |
+| `semantics/projection_artifact.schema.yaml` | Shape of a projection artifact |
+| `semantics/composed_projection.schema.yaml` | Shape of a composed projection |
+| `semantics/ir_catalog.yaml` | Implementation IR kinds |
+| `semantics/solver_catalog.yaml` | Solvers the compiler may call |
 
-## Copilot Governance
+## Technology
 
-The `.github/copilot-instructions.md` file provides org-wide AI coding instructions.
-Content exclusion policies are documented in `docs/copilot-exclusions.md` and
-configured in Org Settings (not a file).
+| File | What it decides |
+| --- | --- |
+| `semantics/binding_catalog.yaml` | Bindings from a resolved port to a technology |
+| `semantics/technology_capabilities.yaml` | What a technology can supply |
+| `semantics/technology_profiles.yaml` | Technology profiles applied after semantic resolution |
 
-## Custom Properties
+## Evidence
 
-Repos are tagged with structured metadata via GitHub Custom Properties:
+| File | What it decides |
+| --- | --- |
+| `semantics/conformance_model.yaml` | What must be proven for a realization |
+| `semantics/lifecycle.yaml` | Lifecycle coordinates |
+| `semantics/receipt_catalog.yaml` | Receipt kinds |
+| `semantics/error_taxonomy.yaml` | Error classes |
 
-| Property | Type | Values | Purpose |
-| --- | --- | --- | --- |
-| `l9-ci-version` | single_select | v1, v2, none | CI migration tracking |
-| `l9-tier` | single_select | critical, standard, experimental | Ruleset targeting |
-| `l9-language` | multi_select | python, typescript, javascript, rust, go | CI template routing |
-| `l9-seeded` | true_false | true, false | Governance seeding status |
-| `l9-team` | single_select | platform, product, infra, external | Ownership routing |
+<!-- BEGIN L9 FORMATTER OWNERSHIP (generated — do not edit) -->
+
+## Formatter ownership
+
+Workspace class: `biome_default` — Default for every governed workspace: Biome owns JS/TS/JSON, VS Code JSON language features owns JSONC (the Biome extension cannot format jsonc), Ruff owns Python, Prettier owns Markdown (format-on-save off so governance docs do not churn).
+
+Exactly one formatter owns each language. Do not reformat a file with a tool other than its owner, and do not add config for a competing formatter: the result is a diff that churns on every save.
+
+| Languages | Owner | Note |
+|---|---|---|
+| `javascript`, `javascriptreact`, `typescript`, `typescriptreact`, `json` | **biome** | bound by the governed IDE profile |
+| `jsonc` | **vscode-json** | bound by the governed IDE profile |
+| `python` | **ruff** | bound by the governed IDE profile |
+| `markdown` | **prettier** | bound by the governed IDE profile |
+
+Generated from `environment/ide/policy.json` in the governance clone by `ops/scripts/adapters/agentdocs.sh`. Edit the policy, not this block.
+
+<!-- END L9 FORMATTER OWNERSHIP -->

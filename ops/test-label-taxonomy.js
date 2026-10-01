@@ -28,10 +28,6 @@ try {
     assert.strictEqual(typeof l.description, 'string');
   }
 
-  // The distributed copy must parse to the same taxonomy the org applies.
-  const distributed = parseLabels(fs.readFileSync('templates/labels.yml', 'utf8'));
-  assert.ok(distributed.length > 0, 'templates/labels.yml must parse too');
-
   // GitHub's API needs all three fields; a partial line is skipped, not
   // half-applied.
   assert.deepStrictEqual(parseLabels('  - { name: "a", color: "ff0000" }\n'), []);

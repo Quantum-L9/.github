@@ -172,15 +172,11 @@ try {
     'a forbidden dest must throw',
   );
 
-  // `l9-analysis.yml` used to be the other half of that error, arriving through
-  // the `l9-ci-pack` category. That category is now RETIRED, so the historic
-  // default set can no longer produce it under ANY class — which is a stronger
-  // guarantee than throwing on it, and is asserted at its own layer.
-  assert.ok(!parseCategories('all').includes('l9-ci-pack'));
-  assert.throws(
-    () => buildSeedPayload({ fs, profile: ncp, categories: ['l9-ci-pack'], hasPython: true }),
-    /RETIRED/,
-    'the retired CI-distribution category must fail closed under a governed class too',
+  assert.ok(
+    !Object.keys(buildSeedPayload({ fs, categories: 'all', hasPython: true })).some((p) =>
+      p.endsWith('l9-analysis.yml'),
+    ),
+    'the default seed must not write a copied analysis workflow',
   );
 
   // ── INHERIT drops, never errors ────────────────────────────────────────
@@ -264,10 +260,10 @@ try {
   assert.strictEqual(resolveProfile(doc, plain.name).name, 'default');
 
   // ── the consumer LICENSE must never carry the .github-specific notice ──
-  // The birth engine copies templates/community-health/LICENSE into every
-  // newborn as canonical, so a repository-specific footer here is a licence
-  // that lies about which repository it governs, reproduced automatically.
-  const consumerLicense = fs.readFileSync('templates/community-health/LICENSE', 'utf8');
+  // LICENSE at the repo root is the one copy. A footer that names only the
+  // .github repository would be copied, or inherited as the story, for every
+  // other repository.
+  const consumerLicense = fs.readFileSync('LICENSE', 'utf8');
   assert.doesNotMatch(
     consumerLicense,
     /applies only to the Quantum-L9\/\.github repository/,

@@ -1,8 +1,8 @@
 # Advisory posture
 
-Everything in this repo reports. Nothing blocks. This is deliberate: the
-infrastructure is young, and a governance system that blocks before it is trusted
-gets bypassed, and a bypassed control is worse than an absent one because it
+Everything in this repo reports. Nothing blocks a merge or a push until that
+control is promoted. A governance system that blocks before it is trusted gets
+bypassed, and a bypassed control is worse than an absent one because it
 manufactures false confidence.
 
 ## Current state of every control
@@ -18,21 +18,25 @@ manufactures false confidence.
 | Dependabot | opens PRs | No — no auto-merge |
 | Weekly governance report | read-only issue | No |
 
-There is exactly one hard failure anywhere in the pack: `apply-rulesets.sh` refuses
-to run if a ruleset file says anything other than `evaluate`. It fails closed toward
-*advisory*, which is the safe direction.
+Hard failures here fail closed toward advisory, not toward blocking a push:
+
+- `scripts/apply-rulesets.sh` refuses a ruleset whose `enforcement` is not `evaluate`.
+- `ops/build-seed-payload.js` throws if asked for `on-org-update`.
+- An unparseable or unknown `.l9/org-birth-profile.yaml` is an error. It does not
+  fall back to `default`.
 
 ## Promotion ladder
 
 Each rung requires evidence from the rung below. No rung is skipped, and no rung is
 climbed because it feels overdue.
 
-**Rung 0 — observe (now).** Everything advisory. Run the weekly report. Do nothing
-else for at least 4 weeks.
+**Rung 0 — observe.** Blocking controls stay off. The weekly report runs. Seeding,
+label sync, and drift repair may already run; they do not block a merge.
 
-**Rung 1 — promote one gate, one repo.** Pick the single highest-signal finding from
-the report. Set `with: {strict: true}` in *one* repo's caller. Leave it a fortnight.
-If contributors route around it, the gate is wrong, not the contributors.
+**Rung 1 — promote one gate, one repo.** Requires four consecutive weekly reports
+plus one named highest-signal finding from those reports. Set `with: {strict: true}`
+in *one* repo's caller. Leave it a fortnight. If contributors route around it, the
+gate is wrong, not the contributors.
 
 **Rung 2 — promote that gate org-wide.** Only after rung 1 produced zero
 justified complaints.

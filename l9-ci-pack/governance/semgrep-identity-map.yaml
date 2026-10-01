@@ -1,9 +1,0 @@
-{
-  "schema": "l9.identity-map/v1",
-  "metadata": {
-    "provider_id": "semgrep",
-    "version": "1.0.0",
-    "status": "authoritative"
-  },
-  "rules": {}
-}
