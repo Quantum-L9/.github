@@ -390,10 +390,9 @@ def check_sc005(docs: dict[str, dict], report: Report) -> None:
         )
     # Only fields the foundation types as canonical capability references are
     # resolved through capabilities.yaml (``capability_refs``, the ProductTopology
-    # field name). Pattern-level ``required_capabilities`` is not typed as a
-    # capability reference by any registered ledger and is deliberately not
-    # resolved here; resolving it would misread architectural traits as
-    # capability identities.
+    # field name). Pattern-level ``architecture_obligations`` are architectural
+    # traits, not capability identities, and are never resolved here (RC-012
+    # checks their shape).
     pattern_list = patterns.get("patterns")
     if not isinstance(pattern_list, list):
         report.fail(
@@ -836,6 +835,283 @@ def check_rc004(docs: dict[str, dict], report: Report) -> None:
         )
 
 
+IDENTITY_PROFILE_ID = "l9.projection/product-identity-topology@1"
+IDENTITY_TOPOLOGY_SELECTORS = (
+    "$.identity",
+    "$.governance",
+    "$.product.id",
+    "$.product.kind",
+)
+STAGE_CONSUMER_PREFIX = "semantic_build_stage."
+OLD_PATTERN_FIELD = "required_capabilities"
+OBLIGATION_FIELD = "architecture_obligations"
+
+
+def _profile_label(index: int, profile: dict) -> str:
+    return f"projection_profiles[{index}] ({profile.get('id') or 'no id'})"
+
+
+def _profile_catalog(
+    check: str, docs: dict[str, dict], report: Report
+) -> tuple[dict, list] | None:
+    profiles_path = "semantics/projection_profiles.yaml"
+    catalog = docs.get(profiles_path)
+    if catalog is None:
+        report.fail(
+            check,
+            profiles_path,
+            "file",
+            "-",
+            "projection catalog missing or unparsable",
+        )
+        return None
+    profiles = catalog.get("projection_profiles")
+    if not isinstance(profiles, list):
+        report.fail(
+            check,
+            profiles_path,
+            "projection_profiles",
+            profiles,
+            "profile list missing",
+        )
+        return None
+    return catalog, profiles
+
+
+def check_rc003(docs: dict[str, dict], report: Report) -> None:
+    loaded = _profile_catalog("RC-003", docs, report)
+    if loaded is None:
+        return
+    catalog, profiles = loaded
+    profiles_path = "semantics/projection_profiles.yaml"
+    classes = catalog.get("profile_classes")
+    if not isinstance(classes, dict) or not classes:
+        report.fail(
+            "RC-003",
+            profiles_path,
+            "profile_classes",
+            classes,
+            "class registry missing",
+        )
+        return
+    before = len(report.failures)
+    for index, profile in enumerate(profiles):
+        if not isinstance(profile, dict):
+            continue
+        if profile.get("class") not in classes:
+            report.fail(
+                "RC-003",
+                profiles_path,
+                f"{_profile_label(index, profile)}.class",
+                profile.get("class"),
+                "profile class does not resolve to profile_classes",
+            )
+    if len(report.failures) == before:
+        report.ok(
+            "RC-003",
+            f"{len(profiles)} projection profile classes resolve to the {len(classes)} declared profile_classes",
+        )
+
+
+def check_rc005(docs: dict[str, dict], report: Report) -> None:
+    loaded = _profile_catalog("RC-005", docs, report)
+    if loaded is None:
+        return
+    catalog, profiles = loaded
+    profiles_path = "semantics/projection_profiles.yaml"
+    source_classes = catalog.get("source_classes") or {}
+    vocabulary = docs.get("semantics/vocabulary.yaml") or {}
+    stage_ids = {
+        str(stage.get("id"))
+        for stage in vocabulary.get("semantic_build_stages") or []
+        if isinstance(stage, dict)
+    }
+    before = len(report.failures)
+    identity_seen = False
+    stage_count = 0
+    for index, profile in enumerate(profiles):
+        if not isinstance(profile, dict):
+            continue
+        label = _profile_label(index, profile)
+        if profile.get("class") == "stage":
+            stage_count += 1
+            consumer = str(profile.get("consumer") or "")
+            if not consumer.startswith(STAGE_CONSUMER_PREFIX):
+                report.fail(
+                    "RC-005",
+                    profiles_path,
+                    f"{label}.consumer",
+                    profile.get("consumer"),
+                    f"stage profile consumer must start with {STAGE_CONSUMER_PREFIX!r}",
+                )
+            elif consumer.removeprefix(STAGE_CONSUMER_PREFIX) not in stage_ids:
+                report.fail(
+                    "RC-005",
+                    profiles_path,
+                    f"{label}.consumer",
+                    consumer,
+                    "referenced stage is not declared in vocabulary.semantic_build_stages",
+                )
+        if profile.get("id") != IDENTITY_PROFILE_ID:
+            continue
+        identity_seen = True
+        sources = profile.get("sources")
+        if not isinstance(sources, dict):
+            report.fail(
+                "RC-005",
+                profiles_path,
+                f"{label}.sources",
+                sources,
+                "identity projection sources must be a source-local selector mapping",
+            )
+            continue
+        if "selects" in profile:
+            report.fail(
+                "RC-005",
+                profiles_path,
+                f"{label}.selects",
+                profile.get("selects"),
+                "identity projection must not carry a profile-level selects field",
+            )
+        for name in ("product_topology", "identity_model"):
+            block = sources.get(name)
+            if name not in source_classes:
+                report.fail(
+                    "RC-005",
+                    profiles_path,
+                    f"{label}.sources.{name}",
+                    name,
+                    "source does not resolve to source_classes",
+                )
+            selectors = block.get("selectors") if isinstance(block, dict) else None
+            if not isinstance(selectors, list) or not selectors:
+                report.fail(
+                    "RC-005",
+                    profiles_path,
+                    f"{label}.sources.{name}.selectors",
+                    selectors,
+                    "source must own a non-empty selectors list",
+                )
+                continue
+            if name == "product_topology" and set(map(str, selectors)) != set(
+                IDENTITY_TOPOLOGY_SELECTORS
+            ):
+                report.fail(
+                    "RC-005",
+                    profiles_path,
+                    f"{label}.sources.product_topology.selectors",
+                    selectors,
+                    f"ProductTopology selection must be exactly {list(IDENTITY_TOPOLOGY_SELECTORS)}",
+                )
+    if not identity_seen:
+        report.fail(
+            "RC-005",
+            profiles_path,
+            "projection_profiles",
+            IDENTITY_PROFILE_ID,
+            "identity projection profile is missing",
+        )
+    if len(report.failures) == before:
+        report.ok(
+            "RC-005",
+            f"identity projection uses source-local selectors; {stage_count} stage profiles bind "
+            "to declared semantic_build_stages",
+        )
+
+
+def check_rc012(docs: dict[str, dict], report: Report) -> None:
+    patterns_path = "semantics/architecture_patterns.yaml"
+    profiles_path = "semantics/projection_profiles.yaml"
+    patterns = docs.get(patterns_path)
+    loaded = _profile_catalog("RC-012", docs, report)
+    if patterns is None or loaded is None:
+        if patterns is None:
+            report.fail(
+                "RC-012",
+                patterns_path,
+                "file",
+                "-",
+                "pattern catalog missing or unparsable",
+            )
+        return
+    _catalog, profiles = loaded
+    before = len(report.failures)
+    obligation_count = 0
+    for index, pattern in enumerate(patterns.get("patterns") or []):
+        if not isinstance(pattern, dict):
+            continue
+        if OLD_PATTERN_FIELD in pattern:
+            report.fail(
+                "RC-012",
+                patterns_path,
+                f"patterns[{index}].{OLD_PATTERN_FIELD}",
+                pattern.get("id"),
+                f"architecture obligations must be declared as {OBLIGATION_FIELD}",
+            )
+        if OBLIGATION_FIELD in pattern:
+            values = pattern.get(OBLIGATION_FIELD)
+            if not isinstance(values, list) or not all(
+                isinstance(v, str) and v.strip() for v in values
+            ):
+                report.fail(
+                    "RC-012",
+                    patterns_path,
+                    f"patterns[{index}].{OBLIGATION_FIELD}",
+                    values,
+                    "architecture obligations must be a list of non-empty strings",
+                )
+            else:
+                obligation_count += len(values)
+    for name, block in (patterns.get("projection_profiles") or {}).items():
+        includes = block.get("include") if isinstance(block, dict) else None
+        if isinstance(includes, list) and OLD_PATTERN_FIELD in includes:
+            report.fail(
+                "RC-012",
+                patterns_path,
+                f"projection_profiles.{name}.include",
+                OLD_PATTERN_FIELD,
+                f"pattern projection include must name {OBLIGATION_FIELD}",
+            )
+    old_selector = f"$.patterns[*].{OLD_PATTERN_FIELD}"
+    new_selector = f"$.patterns[*].{OBLIGATION_FIELD}"
+    selecting_profiles = 0
+    for index, profile in enumerate(profiles):
+        if not isinstance(profile, dict):
+            continue
+        sources = profile.get("sources")
+        blocks = sources.values() if isinstance(sources, dict) else []
+        selectors = [
+            str(s)
+            for block in blocks
+            if isinstance(block, dict)
+            for s in block.get("selectors") or []
+        ]
+        if old_selector in selectors:
+            report.fail(
+                "RC-012",
+                profiles_path,
+                f"{_profile_label(index, profile)}.sources.architecture_patterns.selectors",
+                old_selector,
+                f"selector must target {new_selector}",
+            )
+        if new_selector in selectors:
+            selecting_profiles += 1
+    if selecting_profiles == 0:
+        report.fail(
+            "RC-012",
+            profiles_path,
+            "projection_profiles",
+            new_selector,
+            "no projection selects architecture-pattern obligations",
+        )
+    if len(report.failures) == before:
+        report.ok(
+            "RC-012",
+            f"{obligation_count} architecture obligations typed as {OBLIGATION_FIELD}; "
+            f"{selecting_profiles} profiles select them; no {OLD_PATTERN_FIELD} field or selector remains",
+        )
+
+
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
@@ -998,9 +1274,12 @@ def main(argv: list[str]) -> int:
     check_derivation_sources(
         "RC-011", "semantics/receipt_catalog.yaml", root, docs, report
     )
+    check_rc003(docs, report)
     check_rc004(docs, report)
+    check_rc005(docs, report)
     check_rc006(docs, report)
     check_rc009(docs, report)
+    check_rc012(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
