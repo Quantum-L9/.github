@@ -30,10 +30,16 @@ try {
   assert.ok(!parseCategories('all').includes('on-org-update'));
   assert.ok(OPT_IN_CATEGORIES.includes('labels'));
   assert.ok(RETIRED_CATEGORIES.includes('on-org-update'));
+  assert.ok(RETIRED_CATEGORIES.includes('l9-ci-pack'));
   assert.throws(
     () => buildSeedPayload({ fs, categories: ['on-org-update'] }),
     /RETIRED/,
     'the receiver for the retired copier must fail closed too',
+  );
+  assert.throws(
+    () => buildSeedPayload({ fs, categories: ['l9-ci-pack'] }),
+    /RETIRED/,
+    'the retired CI pack must fail closed too',
   );
   assert.deepStrictEqual(parseCategories('labels'), ['labels']);
 
@@ -99,6 +105,7 @@ try {
   assert.doesNotMatch(caller, /^\s+secrets:\s*inherit\s*$/m);
 
   assert.ok(!defaultPayload['.github/PULL_REQUEST_TEMPLATE/agent.md']);
+  assert.ok(!defaultPayload['.github/ISSUE_TEMPLATE/EXAMPLE.md']);
   assert.ok(defaultPayload['.github/pull_request_template.md']);
   assert.ok(defaultPayload['.github/ISSUE_TEMPLATE/1-bug.yml']);
   assert.ok(defaultPayload['.github/ISSUE_TEMPLATE/2-feature.yml']);

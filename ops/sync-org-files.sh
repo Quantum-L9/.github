@@ -19,7 +19,8 @@
 #                     (no LICENSE, FUNDING.yml, SUPPORT.md); advisory links
 #                     are rewritten to the consumer's origin remote
 #   issue-templates   numbered chooser + ci-failure +
-#                     gov-violation + config.yml (no bug_report / feature_request)
+#                     gov-violation + config.yml
+#                     (no bug_report / feature_request / EXAMPLE.md)
 #   pr-templates      .github/pull_request_template.md (the file make pr fills)
 #   labels            OPT-IN — org sync-labels-all.yml already fans labels
 #   on-org-update     RETIRED — legacy receiver; fails closed
@@ -36,7 +37,7 @@ usage() {
   echo "Usage: $0 <consumer-repo-path> [--include-all|--include <category>...]" >&2
   echo "Default: codeowners dependabot governance community-health issue-templates pr-templates" >&2
   echo "Opt-in:  labels" >&2
-  echo "Retired: on-org-update (fail closed)" >&2
+  echo "Retired: on-org-update, l9-ci-pack (fail closed)" >&2
   exit 1
 }
 
@@ -55,7 +56,7 @@ fi
 # Parse categories
 DEFAULT_CATEGORIES=(codeowners dependabot governance community-health issue-templates pr-templates)
 ALL_CATEGORIES=("${DEFAULT_CATEGORIES[@]}" labels)
-RETIRED_CATEGORIES=(on-org-update)
+RETIRED_CATEGORIES=(on-org-update l9-ci-pack)
 CATEGORIES=()
 HAS_PYTHON=0
 if [[ -f "$CONSUMER_ROOT/pyproject.toml" || -f "$CONSUMER_ROOT/requirements.txt" ]]; then
@@ -185,7 +186,7 @@ for cat in "${CATEGORIES[@]}"; do
         [[ -f "$f" ]] || continue
         name="$(basename "$f")"
         case "$name" in
-          bug_report.yml|feature_request.yml) continue ;;
+          bug_report.yml|feature_request.yml|EXAMPLE.md) continue ;;
         esac
         sync_file_with_placeholders "$f" "$CONSUMER_ROOT/.github/ISSUE_TEMPLATE/$name"
       done
@@ -200,6 +201,13 @@ for cat in "${CATEGORIES[@]}"; do
       # scripts/sync_ci_from_pack.py, the consumer half of the old copy loop.
       echo "❌ ERROR: seed category 'on-org-update' is RETIRED." >&2
       echo "   It existed to run scripts/sync_ci_from_pack.py, which is gone." >&2
+      exit 1
+      ;;
+    l9-ci-pack)
+      # RETIRED. The pack files are gone. An explicit include must not
+      # report a completed sync that copied nothing.
+      echo "❌ ERROR: seed category 'l9-ci-pack' is RETIRED." >&2
+      echo "   CI is Quantum-L9/l9-ci-core, not a pack copied from this repo." >&2
       exit 1
       ;;
     *)

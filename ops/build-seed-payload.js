@@ -39,9 +39,10 @@ const DEFAULT_CATEGORIES = Object.freeze([
 const OPT_IN_CATEGORIES = Object.freeze(['labels']);
 
 // RETIRED — `on-org-update` only ran `scripts/sync_ci_from_pack.py`, the
-// consumer half of the old copy-first CI loop. The name stays so a request
-// fails closed. Canonical CI is `l9-ci-core/.github/workflows/org-ci.yml`.
-const RETIRED_CATEGORIES = Object.freeze(['on-org-update']);
+// consumer half of the old copy-first CI loop. `l9-ci-pack` was the pack
+// those files came from. The names stay so a request fails closed.
+// Canonical CI is `l9-ci-core/.github/workflows/org-ci.yml`.
+const RETIRED_CATEGORIES = Object.freeze(['on-org-update', 'l9-ci-pack']);
 
 const ALL_CATEGORIES = Object.freeze([...DEFAULT_CATEGORIES, ...OPT_IN_CATEGORIES]);
 
@@ -51,7 +52,11 @@ const COMMUNITY_HEALTH_DEFAULT = Object.freeze([
   'SECURITY.md',
 ]);
 
-const SKIP_ISSUE_TEMPLATES = Object.freeze(['bug_report.yml', 'feature_request.yml']);
+const SKIP_ISSUE_TEMPLATES = Object.freeze([
+  'bug_report.yml',
+  'feature_request.yml',
+  'EXAMPLE.md',
+]);
 
 const PYTHON_LINT_DEST = '.github/workflows/l9-lint-test.yml';
 const STOCK_BIOME_SCHEMA = 'https://biomejs.dev/schemas/2.5.8/schema.json';
