@@ -13,7 +13,6 @@ The release contains **45** canonical semantic YAML files:
 - `semantics/canonical_sources.yaml`
 - `semantics/capabilities.yaml`
 - `semantics/capability_resolution.yaml`
-- `semantics/compilation_artifacts.yaml`
 - `semantics/compilation_profiles.yaml`
 - `semantics/compiler_contract.yaml`
 - `semantics/compiler_passes.yaml`
