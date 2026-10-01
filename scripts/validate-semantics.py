@@ -533,8 +533,12 @@ def check_sc007(docs: dict[str, dict], report: Report) -> None:
 def check_sc008(root: Path, release: str | None, report: Report) -> None:
     base = root / "docs" / "semantic-foundation"
     if release is None:
+        # Numeric version order: v3.10.0 must outrank v3.5.0.
         versions = (
-            sorted(p.name for p in base.iterdir() if p.is_dir())
+            sorted(
+                (p.name for p in base.iterdir() if p.is_dir()),
+                key=lambda name: ([int(n) for n in re.findall(r"\d+", name)], name),
+            )
             if base.is_dir()
             else []
         )
