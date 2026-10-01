@@ -1,6 +1,6 @@
-6a25fed9c295afcd3ba7e30d89f3db92e5bb722b49b7104a68b65e393b99b8f3  ./MANIFEST.md
+cdf88a6a370a2c2ed65c4b03c6b25bb04ed756f26bf1af84b6f8c99a63a2deee  ./MANIFEST.md
 fa8b8b8e78b7c1bf303d9782c586d0574b048544c4d4994dcbb7748e1c69c439  ./README.md
-1c3694bf4ec3c2839d4c507f29692ff6d666d28c1e161e0849424e357fa4aa53  ./RELEASE_VALIDATION.md
+71974b1bcc3cca0958e22eba9e932fd5aa3c0a115ed0af5d1ad2cf08fe048904  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -13,7 +13,7 @@ e6ddf56c1285da2aadf7b9a6663ba35ccb1bb4ccfbcd73aba350f4d0d9a6f875  ./docs/adr/ADR
 ef62249c01489165f1e2513a1d4ebb5bd8a6309362812ad2eb80899bfed54b3a  ./docs/adr/ADR-010-ownership-boundaries-no-recipes.md
 1e2caf4fc468c2f928d81794b1f25c7a2173e3dc741d1580ee5ba345a1a3d337  ./docs/adr/ADR-011-product-kind-node-dependency-taxonomy.md
 0bcccf1323c159f90bdab6cf3ef62f5483cf095c9b7d9832dca2494e7eb6c548  ./docs/adr/ADR-012-identity-topology-first-class-primitive.md
-0076b42e30aafe79798b570a1ac4a21c74598edf850eb1f8739a306df5c82300  ./docs/adr/README.md
+a11d53d532fd8a101d15cc9388537499573fb6c0488a3347219a674d2314ad06  ./docs/adr/README.md
 eb343da9d0021ab79cfe21e783cca8dd54e5c43fd18ac5b3015b3f8b6cd628fe  ./semantics/architecture_patterns.yaml
 1b69ef881f9353a8dfece72240454ec191189f4a03b1864ad64294762257c627  ./semantics/architecture_rules.yaml
 1a44bedede9ea6edb15cf387d10f6c25792b3adde0d6afc7bd9c6cdccb828dfd  ./semantics/artifact_model.yaml
@@ -30,7 +30,7 @@ b5cf608fb33626dd6d8450040957e884c8ea3de49804895c98f2de03059c83f8  ./semantics/co
 3a8166c783cd899bcd24114218aac2cd94796ae5e1535187798b8523e55559c8  ./semantics/composition_engine_contract.yaml
 bd4a547e80604387d4f0c38e53e9132151c1ecb083f94afa8db594a3e34a570c  ./semantics/composition_profiles.yaml
 e777a3cb7b8d94e044934d4778045d697bcdd85ecb2ebe241e95fe60bd7141c5  ./semantics/conformance_model.yaml
-6f3e5432a162ffd8c9b0d6f92c88761d6e70e80f3622c62d5a6c4dea6e92ca3e  ./semantics/contracts.yaml
+f05239b7c06d845b671ae7f988046eb30044dda9f73075ca7a1242b0b4b57573  ./semantics/contracts.yaml
 909db431aa0ccc7668ce3f2dcd46addc26df39c8f3e7303925469b47d6a4617d  ./semantics/dependency_archetypes.yaml
 98c3d74473f099d68d777e0934d4fb8eab9b8daebc69b873a2273aafea0f169b  ./semantics/derivation_profiles.yaml
 6a8439c6560685661f0fb0ea93c9befd867b5d3d09168df90560d6e046598c97  ./semantics/error_taxonomy.yaml
@@ -55,6 +55,6 @@ cf7553196a537e94980e52630892fc4d660b2e78eaca35e62f764da4e20aa449  ./semantics/re
 2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56  ./semantics/selector_model.yaml
 61f83c0494e3c92a59bce54ceaa4ee714634f193de776d8c26f7fbf96e0b9e01  ./semantics/semantic_dependency_model.yaml
 9d1af2e109224e36a43459c73709bc8354650b05a41df1b61dc1ae57914a2202  ./semantics/solver_catalog.yaml
-a23f6c6a93ab5c24f74337a6e52083ba9f73eb33e2382bfbc819600a9359efda  ./semantics/technology_capabilities.yaml
+b8024cf485402c1405d4eefc7ef8692b103425af75638faeba00f960690accb6  ./semantics/technology_capabilities.yaml
 423a6da9cbf80f89d40fb3d524a5ee6c9ae7acff360fc89e25bb997014546246  ./semantics/technology_profiles.yaml
 d4ba7348f8c6d761e5bf16e8f530d3de5d1e0ce299a0bf6929eeb34416735590  ./semantics/vocabulary.yaml

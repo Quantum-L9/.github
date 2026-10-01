@@ -105,6 +105,12 @@ technologies:
     constraints:
       - semantic_decisions_must_be_resolved_before_rendering
       - template_does_not_define_architecture
+  - id: json-schema
+    class: target
+    provides:
+      - json_schema_ir
+    target_roles:
+      - schema_target
 binding_rules:
   provider_compatibility:
     expression: >

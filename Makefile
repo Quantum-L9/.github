@@ -18,9 +18,10 @@ activate: ## Run full activation (secret scanning, rulesets, labels, seed, prefl
 preflight: ## Run preflight health check (read-only)
 	@bash scripts/preflight.sh
 
-validate: ## Validate seed payload, birth profiles, and SHA pins
+validate: ## Validate seed payload, birth profiles, SHA pins, and semantic-foundation closure
 	@bash ops/validate-starters.sh
 	@bash ops/audit-sha-pins.sh
+	@python3 scripts/validate-semantics.py
 
 # ─── Fan-out Operations ──────────────────────────────────────────────────────
 sync-labels: ## Sync org label taxonomy to one repo (REPO=owner/name)

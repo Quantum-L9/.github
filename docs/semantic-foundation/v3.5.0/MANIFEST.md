@@ -4,7 +4,7 @@ Release status: **REPLACEMENT CANDIDATE / RELEASE-READY**
 
 ## Install surface
 
-The release contains **45** canonical semantic YAML files:
+The release contains **44** canonical semantic YAML files:
 - `semantics/architecture_patterns.yaml`
 - `semantics/architecture_rules.yaml`
 - `semantics/artifact_model.yaml`

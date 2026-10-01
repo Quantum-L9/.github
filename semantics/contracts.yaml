@@ -12,8 +12,8 @@ canonical_source:
 derivation:
   source_artifact: invariants.yaml
   source_artifact_id: l9.invariants/global@1
-  source_digest_sha256: 767a57860ea4156c4123a37aede249983f57a50084ab8c7107fe994dc45bd765
-  source_invariant_count: 24
+  source_digest_sha256: c6e4d3559092e63a19ee53f916d82a48f44c5b72c0d557fc7e858dd8c210ff01
+  source_invariant_count: 30
   source_admission: canonical_active
   rule: 'Contracts operationalize admitted global invariants as reusable cross-boundary obligations. They do not
     create new semantic authority or absorb domain-owned behavior.
