@@ -1,0 +1,147 @@
+schema: l9.identity-model/v1
+artifact_id: l9.identity-model/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_identity_semantics
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: identity_model.yaml
+governed_by:
+  contracts:
+  - l9.contract/identity-topology@1
+  - l9.contract/identity-resolution@1
+  - l9.contract/identity-assertion@1
+  - l9.contract/provenance-and-coordinate@1
+  - l9.contract/unknown-and-degradation@1
+purpose: Define distinct L9 identity dimensions, their binding and resolution semantics, and the provenance-bearing
+  assertion consumed by downstream systems without conflating governance profile, provider, adapter, or transport
+  identity with actor authorship.
+global_rules:
+  identity_dimensions_are_semantically_distinct: true
+  equal_strings_do_not_imply_equal_identity_kinds: true
+  identity_resolution_is_evidence_bound: true
+  identity_assertion_is_consumed_not_rederived: true
+  unknown_or_ambiguous_consequential_actor_identity_fails_closed: true
+  governance_profile_is_not_identity: true
+  adapter_identity_is_not_actor_identity: true
+  provider_identity_is_not_actor_identity: true
+  surface_identity_is_not_actor_identity: true
+  runtime_identity_is_not_actor_identity: true
+  memory_authorship_uses_actor_identity: true
+  receipts_bind_applicable_actor_and_runtime_provenance: true
+identity_dimensions:
+  product_identity:
+    question: Which L9 product is this?
+    definition: Stable semantic identity of an L9 product across releases, deployments, runtimes, providers, and
+      surfaces.
+    authority_source: product_semantic_owner
+    dynamic: false
+  release_identity:
+    question: Which exact immutable product release or artifact realization is this?
+    definition: Immutable version/revision/digest-bound realization identity of one product release.
+    authority_source: release_provenance_and_admission
+    dynamic: false
+  runtime_identity:
+    question: Which exact running realization is participating?
+    definition: Identity of a concrete running realization, deployment, process, or consumer-inherited runtime as
+      defined by the applicable ProductKind and topology.
+    authority_source: runtime_identity_contract
+    dynamic: true
+  constellation_identity:
+    question: Which admitted Constellation participant identity is this runtime using?
+    definition: Identity used for admitted Constellation participation where the ProductKind requires independent
+      participation.
+    authority_source: constellation_admission_authority
+    dynamic: true
+  actor_identity:
+    question: Which admitted actor performed or authored this operation?
+    definition: Identity of the actor attributable for an operation, authorship event, memory write, consequential
+      action, or receipt where actor attribution is material.
+    authority_source: actor_registry_and_identity_resolution_contract
+    dynamic: true
+  surface_identity:
+    question: Through which execution or interaction surface is the actor operating?
+    definition: Identity of the concrete user/runtime interaction surface through which an actor is operating, distinct
+      from the actor, adapter, provider, and governance profile.
+    authority_source: surface_registry_and_runtime_evidence
+    dynamic: true
+non_identity_dimensions:
+  adapter_identity:
+    definition: Identity of the integration adapter used to realize a boundary. It is not actor identity.
+  provider_identity:
+    definition: Identity of the underlying provider/tool/runtime mechanism. It is not actor identity.
+  governance_profile:
+    definition: Policy/autonomy profile selected for a runtime/surface. It is not an identity dimension and cannot
+      be used as authorship.
+identity_binding:
+  definition: Declared relation among identity dimensions and non-identity realization coordinates without collapsing
+    their meanings.
+  allowed_fields:
+  - product_ref
+  - release_ref
+  - runtime_ref
+  - constellation_ref
+  - actor_ref
+  - surface_ref
+  - adapter_ref
+  - provider_ref
+  - governance_profile_ref
+  - contract_refs
+  - scope
+  - provenance
+  rules:
+  - binding_does_not_alias_identity_kinds
+  - binding_does_not_transfer_authority
+  - binding_must_preserve_each_dimension_semantics
+identity_resolution:
+  definition: Evidence-bound determination of applicable dynamic identity dimensions for one runtime context.
+  inputs:
+  - runtime_evidence
+  - applicable_product_topology
+  - identity_binding_catalog_or_registry
+  - governing_identity_contracts
+  result_domain:
+  - resolved
+  - unknown
+  - ambiguous
+  - invalid
+  rules:
+  - classify_once_for_same_evidence_and_coordinates
+  - downstream_consumers_do_not_independently_rederive
+  - runtime_markers_are_evidence_not_authority
+  - configured_profile_string_is_not_actor_evidence
+  - unrecognized_runtime_evidence_remains_unknown
+identity_assertion:
+  definition: Typed provenance-bearing evidence artifact recording the resolved identity dimensions for one bounded
+    runtime/operation context.
+  schema_ref: l9.schema/identity-assertion@1
+  required:
+  - subject_ref
+  - product_ref
+  - resolved_dimensions
+  - evidence_refs
+  - resolver_ref
+  - governing_coordinates
+  - result
+  - assertion_digest
+  rules:
+  - assertion_does_not_grant_new_authority
+  - assertion_must_bind_exact_resolution_evidence
+  - material_evidence_change_invalidates_currentness
+  - downstream_may_validate_or_challenge_but_not_silently_rewrite
+consumer_rules:
+  memory:
+  - agent_or_memory_authorship_requires_actor_identity
+  - governance_profile_must_never_be_used_as_memory_author
+  - valid_identity_assertion_is_preferred_over_local_runtime_marker_rederivation
+  bootstrap:
+  - bootstrap_may_use_surface_and_runtime_identity_to_select_adapter_or_projection
+  - bootstrap_must_not_relabel_governance_profile_as_actor_identity
+  governance:
+  - governance_profile_selection_may_consume_surface_runtime_or_actor_coordinates
+  - governance_profile_selection_does_not_change_identity
+  receipts:
+  - consequential_receipts_bind_applicable_actor_identity
+  - receipts_preserve_runtime_and_product_provenance_when_material

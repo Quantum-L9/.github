@@ -1,0 +1,214 @@
+schema: l9.solver-catalog/v1
+artifact_id: l9.solver-catalog/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_solver_catalog
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: solver_catalog.yaml
+solvers:
+- id: predicate-validator/v1
+  class: predicate
+  stage: global_baseline
+  handles:
+  - invariant_ir
+  - global_baseline
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: schema-contract-validator/v1
+  class: schema
+  stage: product_contracts
+  handles:
+  - contract_ir
+  - project_contract_ir
+  - product_contract_ir
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: logic-sat/v1
+  class: satisfiability
+  stage: laws
+  handles:
+  - law_ir
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: fixture-derivation-validator/v1
+  class: fixture_derivation
+  stage: fixtures
+  handles:
+  - fixture_ir
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: reference-conformance/v1
+  class: conformance
+  stage: conformance
+  handles:
+  - conformance_ir
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: graph-constraint-validator/v1
+  class: graph
+  stage: architecture
+  handles:
+  - architecture_ir
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: interface-compatibility/v1
+  class: set_compatibility
+  stage: ports
+  handles:
+  - port_ir
+  - adapter_requirement_ir
+  - product_relationship_ir
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: capability-set-validator/v1
+  class: set_compatibility
+  stage: provider_bindings
+  handles:
+  - provider_binding_ir
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: implementation-contract-validator/v1
+  class: structural
+  stage: implementation
+  handles:
+  - implementation_ir
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: final-conformance/v1
+  class: conformance
+  stage: target_artifacts
+  handles:
+  - target_artifact
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: product-topology-validator/v1
+  class: schema
+  stage: product_topology
+  handles:
+  - product_topology
+  - product_topology_ir
+  - product_kind_resolution
+  - product_archetype_resolution
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+    validates_product_kind_coherence: true
+    validates_archetype_kind_membership: true
+    rejects_unadmitted_product_kind: true
+- id: requirement-closure-validator/v1
+  class: satisfiability
+  stage: requirement_resolution
+  handles:
+  - requirement_ir
+  - requirement_closure
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: semantic-resolution-validator/v1
+  class: graph
+  stage: semantic_resolution
+  handles:
+  - capability_closure_ir
+  - architecture_obligations
+  - port_requirements
+  - adapter_requirements
+  - relationship_requirements
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+- id: product-manifest-validator/v1
+  class: structural
+  stage: product_manifest
+  handles:
+  - product_manifest
+  - product_manifest_ir
+  - resolved_manifest_gate
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+    validates_source_topology_binding: true
+    validates_kind_archetype_preservation: true
+    validates_resolved_manifest_gate: true
+- id: identity-topology-validator/v1
+  class: graph
+  stage: identity_topology_resolution
+  handles:
+  - identity_topology
+  - identity_topology_ir
+  - identity_binding_requirements
+  properties:
+    registered: true
+    versioned: true
+    bounded: true
+    mechanically_checkable: true
+    receipt_capable: true
+    validates_identity_dimension_separation: true
+    validates_governance_profile_separation: true
+    does_not_resolve_live_runtime_identity: true
+compatibility:
+  selection_source: canonical_compilation_profile
+  candidate_may_not_override_solver: true
+  solver_must_handle_candidate_semantic_class: true
+  solver_identity_and_version_must_match_profile: true
+verification_requirements:
+- source_and_candidate_digests_are_bound
+- solver_ref_and_version_are_receipted
+- solver_profile_digest_is_receipted
+- applicable_constraint_refs_are_receipted
+- result_is_in_validation_result_domain
+- unknown_is_not_pass

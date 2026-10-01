@@ -1,0 +1,458 @@
+schema: l9.schema-definition/v1
+artifact_id: l9.schema/product-topology@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_product_topology_schema
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: product_topology.schema.yaml
+governed_by:
+  contracts:
+  - l9.contract/product-topology@1
+  - l9.contract/product-kind@1
+  - l9.contract/authority-boundary@1
+  - l9.contract/hard-constraint@1
+  - l9.contract/provenance-and-coordinate@1
+  - l9.contract/identity-topology@1
+  - l9.contract/identity-resolution@1
+purpose: 'Define one authoritative product contract shape capable of expressing every L9 product through the same
+  topology vocabulary while allowing ProductKind and archetype law to determine kind-specific obligations.
+
+  '
+type: object
+required:
+- schema
+- product
+- identity
+- purpose
+- boundary
+- requirements
+- capabilities
+- consumption
+- deployment
+- contracts
+- architecture
+- relationships
+- admission
+- lifecycle
+- conformance
+- provenance
+- unknowns
+properties:
+  schema:
+    const: l9.product-topology/v1
+  product:
+    type: object
+    required:
+    - id
+    - kind
+    - archetype_ref
+    fields:
+      id: semantic_ref
+      kind: product_kind_or_explicit_unknown
+      archetype_ref: semantic_ref_or_explicit_unknown
+      name: string
+      versioning_family: semantic_ref_or_string
+      status: semantic_ref_or_string
+  identity:
+    type: object
+    required:
+    - semantic_owner
+    - semantic_scope
+    - dimensions
+    - resolution
+    fields:
+      semantic_owner: semantic_ref
+      semantic_scope: semantic_ref_or_string
+      canonical_repository: semantic_ref_or_string
+      dimensions:
+        type: object
+        fields:
+          product:
+            type: identity_dimension_declaration
+          release:
+            type: identity_dimension_declaration
+          runtime:
+            type: identity_dimension_declaration
+          constellation:
+            type: identity_dimension_declaration
+          actor:
+            type: identity_dimension_declaration
+          surface:
+            type: identity_dimension_declaration
+      bindings:
+        type: identity_binding_list
+      resolution:
+        type: object
+        required:
+        - contract_ref
+        - unknown_policy
+        fields:
+          contract_ref: semantic_ref
+          resolver_ref: semantic_ref_or_unknown
+          assertion_schema_ref: semantic_ref
+          unknown_policy: identity_unknown_policy
+          evidence_source_refs: semantic_ref_list
+      identity_contract_refs: semantic_ref_list
+      aliases: semantic_ref_list
+      predecessor_refs: semantic_ref_list
+      successor_refs: semantic_ref_list
+      supersedes: semantic_ref_list
+  purpose:
+    type: object
+    required:
+    - statement
+    - capability_refs
+    fields:
+      statement: string
+      capability_refs: semantic_ref_list
+      primary_responsibility: string
+      objectives: string_list
+      non_goals: string_list
+  boundary:
+    type: object
+    required:
+    - owns
+    - does_not_own
+    fields:
+      owns: semantic_or_string_list
+      does_not_own: semantic_or_string_list
+      authority_boundary_refs: semantic_ref_list
+      semantic_boundary_refs: semantic_ref_list
+      trust_boundary_refs: semantic_ref_list
+      transaction_boundary_refs: semantic_ref_list
+      mutation_boundary_refs: semantic_ref_list
+  requirements:
+    type: object
+    fields:
+      invariant_refs: semantic_ref_list
+      contract_refs: semantic_ref_list
+      hard_constraints: semantic_ref_or_inline_constraint_list
+      soft_objectives: semantic_ref_or_inline_objective_list
+      operational_requirements: semantic_ref_or_inline_constraint_list
+      security_requirements: semantic_ref_or_inline_constraint_list
+      conformance_requirements: semantic_ref_list
+  capabilities:
+    type: object
+    required:
+    - provides
+    - requires
+    fields:
+      provides: capability_binding_list
+      requires: capability_requirement_list
+      optional: capability_requirement_list
+      degraded_without: capability_requirement_list
+      forbidden: semantic_ref_list
+  consumption:
+    type: object
+    required:
+    - model
+    fields:
+      model: consumption_model
+      public_entry_modes: string_list
+      invocation_contract_refs: semantic_ref_list
+      consumer_requirements: semantic_ref_or_inline_constraint_list
+      forbidden_consumption_modes: string_list
+  deployment:
+    type: object
+    required:
+    - model
+    fields:
+      model: deployment_model
+      deployment_unit: string
+      runtime_boundary: string
+      scaling_boundary: string
+      failure_boundary: string
+      upgrade_boundary: string
+      artifact_forms: string_list
+      deployment_constraints: semantic_ref_or_inline_constraint_list
+  architecture:
+    type: object
+    fields:
+      required_pattern_refs: semantic_ref_list
+      optional_pattern_refs: semantic_ref_list
+      forbidden_pattern_refs: semantic_ref_list
+      structural_constraints: semantic_ref_or_inline_constraint_list
+      layer_constraints: semantic_ref_or_inline_constraint_list
+      composition_rules: semantic_ref_list
+  contracts:
+    type: object
+    fields:
+      public: semantic_ref_list
+      consumed: semantic_ref_list
+      produced: semantic_ref_list
+      required: semantic_ref_list
+      compatibility: semantic_ref_list
+      schemas: semantic_ref_list
+      canonicalization: semantic_ref_list
+  interfaces:
+    type: object
+    fields:
+      actions: interface_entry_list
+      public_programmatic_surfaces: interface_entry_list
+      command_surfaces: interface_entry_list
+      event_surfaces: interface_entry_list
+  ports:
+    type: object
+    fields:
+      inbound: port_binding_list
+      outbound: port_binding_list
+      extension: port_binding_list
+      forbidden: semantic_ref_list
+  adapters:
+    type: object
+    fields:
+      inbound: adapter_requirement_list
+      outbound: adapter_requirement_list
+      provider: adapter_requirement_list
+      integration: adapter_requirement_list
+      forbidden: semantic_ref_list
+  relationships:
+    type: object
+    required:
+    - products
+    fields:
+      products: product_relationship_list
+      relationship_constraints: semantic_ref_or_inline_constraint_list
+      forbidden_relationships: product_relationship_list
+  bindings:
+    type: object
+    fields:
+      product_bindings: binding_requirement_list
+      protocol_bindings: binding_requirement_list
+      provider_bindings: binding_requirement_list
+  providers:
+    type: object
+    fields:
+      allowed: provider_requirement_list
+      prohibited: semantic_ref_list
+      substitution_contract_refs: semantic_ref_list
+      provider_independence_required: boolean
+  technology:
+    type: object
+    fields:
+      hard_constraints: semantic_ref_or_inline_constraint_list
+      preferences: semantic_ref_or_inline_objective_list
+      runtime_requirements: semantic_ref_or_inline_constraint_list
+      language_constraints: semantic_ref_or_inline_constraint_list
+      platform_constraints: semantic_ref_or_inline_constraint_list
+  state:
+    type: object
+    fields:
+      owns_authoritative_state: boolean
+      state_semantic_refs: semantic_ref_list
+      persistence_ports: semantic_ref_list
+      consistency_requirement_refs: semantic_ref_list
+      revision_model_ref: semantic_ref
+      transaction_model_ref: semantic_ref
+      retention_contract_refs: semantic_ref_list
+      projection_refs: semantic_ref_list
+      cache_authority: authority_class_or_none
+  runtime:
+    type: object
+    fields:
+      participation_model: semantic_ref_or_string
+      process_model: semantic_ref_or_string
+      concurrency_model: semantic_ref_or_string
+      resource_model: semantic_ref_or_string
+      startup_requirement_refs: semantic_ref_list
+      shutdown_requirement_refs: semantic_ref_list
+      health_contract_refs: semantic_ref_list
+      readiness_contract_refs: semantic_ref_list
+      degradation_contract_refs: semantic_ref_list
+  communication:
+    type: object
+    fields:
+      constellation_boundary_required: boolean
+      transport_contract_refs: semantic_ref_list
+      routing_authority_ref: semantic_ref
+      ingress_contract_refs: semantic_ref_list
+      egress_contract_refs: semantic_ref_list
+      packet_refs: semantic_ref_list
+      forbidden_paths: string_list
+  security:
+    type: object
+    fields:
+      identity_source_refs: semantic_ref_list
+      authentication_contract_refs: semantic_ref_list
+      authorization_contract_refs: semantic_ref_list
+      trust_source_refs: semantic_ref_list
+      secret_contract_refs: semantic_ref_list
+      credential_scope: string_list
+      isolation_requirement_refs: semantic_ref_list
+      data_handling_contract_refs: semantic_ref_list
+  configuration:
+    type: object
+    fields:
+      contract_refs: semantic_ref_list
+      namespaces: string_list
+      precedence_model_ref: semantic_ref
+      required: string_list
+      optional: string_list
+      forbidden: string_list
+  effects:
+    type: object
+    fields:
+      effect_classes: semantic_ref_list
+      consequential_operations: semantic_ref_list
+      idempotency_contract_refs: semantic_ref_list
+      reconciliation_contract_refs: semantic_ref_list
+  receipts:
+    type: object
+    fields:
+      emits: receipt_requirement_list
+      consumes: receipt_requirement_list
+      canonicalization_ref: semantic_ref
+      preservation_requirement_refs: semantic_ref_list
+  failure:
+    type: object
+    fields:
+      taxonomy_refs: semantic_ref_list
+      fail_closed_conditions: semantic_ref_or_string_list
+      degradable_conditions: semantic_ref_or_string_list
+      retry_authority_ref: semantic_ref
+      retry_contract_refs: semantic_ref_list
+      ambiguity_contract_refs: semantic_ref_list
+      reconciliation_contract_refs: semantic_ref_list
+      unknown_outcome_rules: semantic_ref_or_string_list
+  recovery:
+    type: object
+    fields:
+      restart_semantics: semantic_ref_or_string_list
+      replay_semantics: semantic_ref_or_string_list
+      compensation_semantics: semantic_ref_or_string_list
+      restore_contract_refs: semantic_ref_list
+      disaster_recovery_requirement_refs: semantic_ref_list
+  observability:
+    type: object
+    fields:
+      logging_contract_refs: semantic_ref_list
+      capability_metrics: semantic_ref_or_string_list
+      provider_metrics: semantic_ref_or_string_list
+      tracing_requirement_refs: semantic_ref_list
+      correlation_identity_refs: semantic_ref_list
+      audit_requirement_refs: semantic_ref_list
+      slo_refs: semantic_ref_list
+  admission:
+    type: object
+    required:
+    - subject
+    - authority_ref
+    - requirements
+    fields:
+      subject: semantic_ref_or_string
+      authority_ref: semantic_ref
+      admission_profile_ref: semantic_ref
+      requirements: semantic_ref_or_string_list
+      kind_specific_requirements: semantic_ref_or_string_list
+      evidence_requirement_refs: semantic_ref_list
+      decision_ref: semantic_ref_or_null
+  lifecycle:
+    type: object
+    required:
+    - family_ref
+    fields:
+      family_ref: semantic_ref
+      applicable_state_refs: semantic_ref_list
+      transition_contract_refs: semantic_ref_list
+      supersession_contract_ref: semantic_ref
+      retirement_contract_ref: semantic_ref
+  conformance:
+    type: object
+    required:
+    - profile_refs
+    fields:
+      profile_refs: semantic_ref_list
+      required_classes: string_list
+      fixture_profile_refs: semantic_ref_list
+      negative_proof_refs: semantic_ref_list
+      provider_conformance_refs: semantic_ref_list
+      final_conformance_required: boolean
+  compatibility:
+    type: object
+    fields:
+      public_contract_policy_ref: semantic_ref
+      semantic_compatibility_refs: semantic_ref_list
+      runtime_compatibility_refs: semantic_ref_list
+      provider_compatibility_refs: semantic_ref_list
+      consumer_compatibility_refs: semantic_ref_list
+      breaking_change_policy_ref: semantic_ref
+  distribution:
+    type: object
+    fields:
+      artifact_identity_refs: semantic_ref_list
+      artifact_forms: string_list
+      registry_refs: semantic_ref_list
+      release_contract_refs: semantic_ref_list
+      integrity_requirement_refs: semantic_ref_list
+      publication_contract_refs: semantic_ref_list
+  build:
+    type: object
+    fields:
+      compilation_profile_ref: semantic_ref
+      target_binding_refs: semantic_ref_list
+      generated_surfaces: string_list
+      source_owned_surfaces: string_list
+      build_requirement_refs: semantic_ref_list
+      reproducibility_requirement_refs: semantic_ref_list
+  operations:
+    type: object
+    fields:
+      owner_ref: semantic_ref
+      runbook_refs: semantic_ref_list
+      maintenance_contract_refs: semantic_ref_list
+      migration_contract_refs: semantic_ref_list
+      rollback_contract_refs: semantic_ref_list
+  provenance:
+    type: object
+    required:
+    - authority_ref
+    - source_revision
+    fields:
+      authority_ref: semantic_ref
+      source_revision: semantic_ref
+      source_refs: semantic_ref_list
+      predecessor_topology_ref: semantic_ref
+  unknowns:
+    type: object
+    required:
+    - material
+    fields:
+      material: unknown_list
+      non_material: unknown_list
+      resolution_requirement_refs: semantic_ref_list
+  governance:
+    type: object
+    fields:
+      profile_refs: semantic_ref_list
+      profile_selection_contract_refs: semantic_ref_list
+      autonomy_contract_refs: semantic_ref_list
+      selection_inputs: string_list
+      rules: semantic_ref_or_string_list
+semantic_rules:
+- product_topology_is_authoritative_product_contract
+- every_l9_product_uses_one_product_topology_vocabulary
+- product_kind_constrains_topology_without_creating_parallel_vocabulary
+- archetype_must_belong_to_declared_product_kind
+- declared_semantics_override_no_derived_guess
+- compiler_must_not_invent_product_purpose_boundary_or_authority
+- provider_identity_does_not_define_product_kind_or_capability_meaning
+- omitted_derivable_structure_is_not_a_schema_error
+- material_unknown_blocks_resolved_product_manifest
+- unadmitted_or_unresolved_kind_must_remain_explicit_unknown
+- unresolved_kind_or_archetype_blocks_resolved_product_manifest
+- topology_representation_does_not_require_kind_invention
+- identity_is_first_class_product_topology_primitive
+- identity_dimensions_must_not_be_collapsed
+- governance_profile_is_not_identity
+- dynamic_identity_is_resolved_into_identity_assertion_not_authored_as_static_session_fact
+- valid_identity_assertion_is_consumed_not_rederived
+kind_resolution:
+  canonical_source: product_kinds.yaml
+  admitted_kind_rule: Declared kind must resolve to an admitted ProductKind before ProductManifest may pass the
+    resolved-manifest gate.
+  unknown_rule: A product whose ProductKind or archetype is not yet admitted remains representable through explicit
+    material Unknowns; the compiler must not guess or coerce a nearest kind.
+  archetype_rule: Resolved archetype must come from the catalog bound by the resolved ProductKind.

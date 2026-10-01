@@ -1,0 +1,142 @@
+schema: l9.product-kinds/v1
+artifact_id: l9.product-kinds/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_product_kind_semantics
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: product_kinds.yaml
+governed_by:
+  contracts:
+  - l9.contract/product-kind@1
+  - l9.contract/product-topology@1
+  - l9.contract/semantic-ownership@1
+global_rules:
+  product_kind_is_architectural_participation_identity: true
+  product_kind_is_determined_by_canonical_consumption_and_deployment_model: true
+  product_kind_is_not_inferred_from_repository_shape: true
+  product_kind_is_not_inferred_from_package_format: true
+  product_kind_is_not_inferred_from_provider_identity: true
+  product_kind_is_not_inferred_from_semantic_complexity: true
+  product_kind_is_not_inferred_from_process_presence_alone: true
+  product_kind_does_not_create_semantic_ownership: true
+  every_admitted_product_has_exactly_one_primary_kind: true
+  archetype_specializes_kind_without_redefining_kind: true
+  product_kind_constrains_identity_obligations_without_redefining_identity_semantics: true
+  identity_dimension_meaning_is_owned_by_identity_model: true
+kinds:
+  node:
+    definition: 'An independently deployed L9 runtime whose admitted capability is consumed remotely through canonical
+      Constellation communication.
+
+      '
+    consumption_model: remote_invocation
+    deployment_model: independent_runtime
+    archetype_catalog: node_archetypes.yaml
+    requires:
+    - independent_runtime_identity
+    - independent_health_and_readiness
+    - canonical_constellation_communication
+    - gate_routed_inter_product_work
+    - runtime_admission
+    - actor_identity_when_consequential_authorship_exists
+    - surface_identity_when_multiple_execution_surfaces_exist
+    required_patterns:
+    - l9.pattern/runnable-node@1
+    - l9.pattern/semantic-core-gate-adapter@1
+    forbidden:
+    - peer_import_of_server_implementation_as_canonical_consumption
+    - direct_peer_routing_when_gate_is_required
+    - provider_identity_as_product_identity
+    identity_dimensions:
+    - product_identity
+    - release_identity
+    - runtime_identity
+    - constellation_identity
+    admission_model:
+      product_release_admission:
+      - candidate
+      - identified
+      - contract_bound
+      - validated
+      - compatibility_proven
+      - admitted
+      - current
+      - superseded
+      - retired
+      runtime_admission:
+      - deployed
+      - identity_bound
+      - health_ready
+      - gate_admitted
+      - routable
+      - degraded_or_current
+      - withdrawn
+      rule: Product release admission and runtime participation admission are distinct; successful deployment does
+        not self-admit a Node.
+    identity_contract_ref: l9.contract/identity-topology@1
+  dependency:
+    definition: 'An installable L9 product whose admitted capability or subsystem is consumed by local composition
+      inside another product''s runtime boundary.
+
+      '
+    consumption_model: local_composition
+    deployment_model: consumer_bound_artifact
+    archetype_catalog: dependency_archetypes.yaml
+    requires:
+    - installable_artifact
+    - public_programmatic_contract
+    - consumer_owned_process_lifecycle
+    - no_independent_constellation_runtime_identity
+    - actor_identity_when_local_authorship_is_material
+    - surface_identity_when_local_surface_affects_governance_or_projection
+    required_patterns:
+    - l9.pattern/dependency-package@1
+    forbidden:
+    - implicit_gate_registration
+    - independent_constellation_identity_as_dependency
+    - remote_invocation_as_canonical_consumption
+    - provider_identity_as_product_identity
+    identity_dimensions:
+    - product_identity
+    - release_identity
+    admission_model:
+      product_release_admission:
+      - candidate
+      - identified
+      - contract_bound
+      - validated
+      - compatibility_proven
+      - admitted
+      - current
+      - superseded
+      - retired
+      consumer_binding:
+      - select_admitted_release
+      - verify_consumer_compatibility
+      - resolve_dependency_graph
+      - install_exact_artifact
+      - bind_configuration_and_extensions
+      - run_consumer_conformance
+      - record_binding
+      rule: Dependency admission proves an exact release is an admissible L9 Dependency; consumer binding separately
+        proves that release is admissible for one consumer.
+    runtime_identity_rule: RuntimeIdentity(dependency_instance) = RuntimeIdentity(consumer)
+    consumer_binding_required: true
+    identity_contract_ref: l9.contract/identity-topology@1
+unresolved_kind_candidates:
+  sdk:
+    status: unresolved
+    admission: none
+    rule: 'SDK is intentionally not admitted as a ProductKind in this release. Gate_SDK and l9-ci-sdk require a
+      separate comparative architecture pass before global SDK semantics are established.
+
+      '
+catalog_status:
+  admitted_kinds:
+  - node
+  - dependency
+  unresolved_kinds:
+  - sdk

@@ -1,0 +1,45 @@
+schema: l9.technology-profiles/v1
+artifact_id: l9.technology-profiles/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_technology_profile_semantics
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: technology_profiles.yaml
+governed_by:
+  contracts:
+    - l9.contract/technology-binding@1
+    - l9.contract/semantic-identity-and-compatibility@1
+    - l9.contract/unknown-and-degradation@1
+global_rules:
+  profile_declares_intent_and_constraints_not_provider_semantics: true
+  provider_facts_come_from_technology_capabilities: true
+  binding_facts_come_from_binding_catalog: true
+  unknown_provider_capability_fails_closed: true
+  technology_profile_does_not_create_semantic_ownership: true
+profile_shape:
+  required:
+    - id
+    - language
+    - transport
+  optional:
+    - runtime
+    - persistence
+    - cache
+    - testing
+    - packaging
+    - deployment
+    - constraints
+    - preferences
+profiles: []
+resolution:
+  inputs:
+    - technology_profile
+    - technology_capabilities
+    - binding_catalog
+    - required_port_capabilities
+    - operational_requirements
+  compatibility_rule: RequiredCapabilities subset_of ProvidedCapabilities
+  optimization_rule: Preferences may rank only already compatible realizations.

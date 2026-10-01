@@ -1,0 +1,84 @@
+schema: l9.packet-catalog/v1
+artifact_id: l9.packet-catalog/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_packet_catalog
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: packet_catalog.yaml
+global_rules:
+  packet_is_bounded_transferable_unit: true
+  packet_does_not_create_authority: true
+  transport_envelope_is_not_preferred_l9_vocabulary: true
+packets:
+  fixture_candidate:
+    canonical_name: FixtureCandidatePacket
+    purpose: Packet carrying a candidate fixture, source semantics, derivation provenance, proposed classification,
+      and candidate digest for admission.
+    required_semantics:
+    - candidate_fixture
+    - source_semantics
+    - derivation_provenance
+    - proposed_classification
+    - candidate_digest
+  fixture_admission:
+    canonical_name: FixtureAdmissionPacket
+    purpose: Packet carrying fixture admission inputs or decisions bound to exact candidate identity and
+      authority evidence.
+    required_semantics:
+    - candidate_identity
+    - candidate_digest
+    - admission_inputs_or_decision
+    - authority_evidence
+  fixture_harvest:
+    canonical_name: FixtureHarvestPacket
+    purpose: Packet carrying normalized cross-domain fixture or law evidence and a proposed globalization
+      candidate for upstream authority review.
+    required_semantics:
+    - normalized_cross_domain_evidence
+    - witnesses
+    - proposed_globalization_candidate
+    - authority_status
+  conformance:
+    canonical_name: ConformancePacket
+    purpose: Packet carrying resolved fixture profiles, fixture identities, digests, bindings, and execution
+      requirements for a conformance operation.
+    required_semantics:
+    - resolved_fixture_profiles
+    - fixture_identities
+    - fixture_digests
+    - bindings
+    - execution_requirements
+  conformance_distribution:
+    canonical_name: ConformanceDistributionPacket
+    purpose: Packet carrying a published conformance release, profile coordinates, digests, consumer selectors,
+      rollout mode, and distribution metadata.
+    required_semantics:
+    - published_release
+    - profile_coordinates
+    - digests
+    - consumer_selectors
+    - rollout_mode
+    - distribution_metadata
+  admission_decision:
+    canonical_name: AdmissionDecisionPacket
+    purpose: Carry an immutable admission decision bound to the exact candidate digest and authority evidence.
+    required_semantics:
+    - candidate_ref
+    - candidate_digest
+    - decision
+    - authority_ref
+  state_change:
+    canonical_name: StateChangePacket
+    purpose: Carry an explicit revision-bound authoritative state transition request and its required
+      evidence.
+    required_semantics:
+    - work_item
+    - expected_revision
+    - from_phase
+    - to_phase
+    - evidence
+    - authority
+    - operation_id

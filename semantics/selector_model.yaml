@@ -1,0 +1,31 @@
+schema: l9.selector-model/v1
+artifact_id: l9.selector-model/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_projection_selector_semantics
+  authority_class: canonical
+selector_language:
+  name: l9.selector
+  version: 1
+operations:
+  root:
+    syntax: "$"
+  field:
+    syntax: "$.field"
+  nested_field:
+    syntax: "$.parent.child"
+  all_items:
+    syntax: "$.items[*]"
+  item_field:
+    syntax: "$.items[*].field"
+  equality_filter:
+    syntax: '$.items[?(@.field=="value")]'
+  membership_filter:
+    syntax: '$.items[?(@.field contains "value")]'
+rules:
+  selectors_must_be_deterministic: true
+  selectors_must_not_execute_code: true
+  selectors_must_not_mutate_source: true
+  missing_required_selector_result_is_invalid: true
+  optional_selector_result_may_be_empty: true

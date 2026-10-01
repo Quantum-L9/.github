@@ -1,0 +1,121 @@
+schema: l9.node-archetypes/v1
+artifact_id: l9.node-archetypes/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_node_archetypes
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: node_archetypes.yaml
+governed_by:
+  contracts:
+  - l9.contract/product-kind@1
+  - l9.contract/product-topology@1
+global_rules:
+  catalog_applies_only_to_product_kind_node: true
+  archetype_does_not_define_domain_semantics: true
+  archetype_does_not_create_semantic_ownership: true
+  archetype_specializes_node_kind: true
+  archetypes_compose_architecture_patterns: true
+  archetypes_declare_required_structural_properties: true
+  archetypes_declare_required_conformance_classes: true
+  deployment_topology_does_not_imply_semantic_ownership: true
+archetypes:
+- id: l9.node-archetype/semantic-capability@1
+  purpose: 'Base archetype for an independently deployed, Gate-routed L9 node that exposes one bounded semantic capability or cohesive capability family.
+
+    '
+  properties:
+  - semantic_owner
+  - bounded_capability
+  - independent_runtime_identity
+  - independently_admitted_capabilities
+  - independent_health_and_readiness
+  - gate_routed
+  requires:
+    architecture_patterns:
+    - l9.pattern/semantic-core-gate-adapter@1
+    - l9.pattern/runnable-node@1
+    - l9.pattern/authority-candidate-admission@1
+    semantic_surfaces:
+    - semantic_core
+    - capability_contract
+    - product_topology
+    runtime_surfaces:
+    - gate_integration
+    - health
+    - readiness
+    - receipts
+    conformance_classes:
+    - core
+    - capability
+    - runtime
+  optional_patterns:
+  - l9.pattern/semantic-core-provider-adapter@1
+  - l9.pattern/reference-model-conformance@1
+  - l9.pattern/fixture-backed-conformance@1
+  - l9.pattern/provider-neutral-persistence@1
+  forbidden:
+  - semantic_ownership_inferred_from_transport
+  - direct_peer_routing_when_gate_is_required
+  - provider_becomes_semantic_owner
+- id: l9.node-archetype/worker@1
+  extends:
+  - l9.node-archetype/semantic-capability@1
+  purpose: 'Node whose primary role is execution of bounded capability operations, not ownership of cross-node workflow composition or routing.
+
+    '
+  properties:
+  - bounded_operation_execution
+  - caller_owned_or_external_orchestration
+  forbidden:
+  - implicit_cross_node_workflow_authority
+  - routing_authority
+- id: l9.node-archetype/orchestrator@1
+  extends:
+  - l9.node-archetype/semantic-capability@1
+  purpose: 'Node whose bounded capability is composition of multiple capability invocations while preserving Gate as routing authority and preserving semantic ownership of invoked products.
+
+    '
+  properties:
+  - workflow_composition
+  - gate_mediated_step_invocation
+  - local_workflow_state
+  guarantees:
+  - orchestration_does_not_create_routing_authority
+  - invoked_product_semantics_remain_with_their_owners
+  forbidden:
+  - peer_url_resolution
+  - direct_node_to_node_dispatch
+  - semantic_ownership_transfer_by_composition
+- id: l9.node-archetype/authoritative-state@1
+  extends:
+  - l9.node-archetype/semantic-capability@1
+  purpose: 'Node owning durable authoritative revisioned state and consequential state transitions for multiple Constellation participants.
+
+    '
+  properties:
+  - authoritative_state
+  - revisioned_mutation
+  - durable_history
+  - consequential_operations
+  - shared_authority_boundary
+  requires:
+    architecture_patterns:
+    - l9.pattern/immutable-revisioned-state@1
+    conformance_classes:
+    - core
+    - capability
+    - runtime
+    - adapter
+  optional_patterns:
+  - l9.pattern/atomic-state-receipt-journal-outbox@1
+  - l9.pattern/provider-neutral-persistence@1
+  guarantees:
+  - historical_state_is_not_mutated
+  - corrections_create_new_revisions
+  - authoritative_state_boundary_is_remote_and_shared
+  forbidden:
+  - silent_revision_overwrite
+  - provider_becomes_state_semantic_owner

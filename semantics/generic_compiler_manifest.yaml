@@ -1,0 +1,110 @@
+schema: l9.generic-compiler-manifest/v1
+artifact_id: l9.generic-compiler/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_generic_compiler_definition
+  authority_class: canonical
+requires:
+  canonical_sources:
+  - canonical_sources.yaml
+  semantic_catalogs:
+  - vocabulary.yaml
+  - invariants.yaml
+  - contracts.yaml
+  - capabilities.yaml
+  - compilation_profiles.yaml
+  - projection_profiles.yaml
+  - architecture_patterns.yaml
+  - node_archetypes.yaml
+  - technology_capabilities.yaml
+  - ir_catalog.yaml
+  - solver_catalog.yaml
+  - binding_catalog.yaml
+  - authority_model.yaml
+  - artifact_model.yaml
+  - lifecycle.yaml
+  - packet_catalog.yaml
+  - error_taxonomy.yaml
+  - receipt_catalog.yaml
+  - semantic_dependency_model.yaml
+  - product_topology.schema.yaml
+  - requirement_model.yaml
+  - resolution_model.yaml
+  - capability_resolution.yaml
+  - architecture_rules.yaml
+  - port_catalog.yaml
+  - technology_profiles.yaml
+  - conformance_model.yaml
+  - product_manifest.schema.yaml
+  - product_kinds.yaml
+  - dependency_archetypes.yaml
+  - identity_model.yaml
+  - identity_assertion.schema.yaml
+  compiler_catalogs:
+  - compiler_passes.yaml
+  - derivation_profiles.yaml
+  - composition_profiles.yaml
+  - selector_model.yaml
+  contracts:
+  - compiler_contract.yaml
+  - projection_engine_contract.yaml
+  - composition_engine_contract.yaml
+  artifact_schemas:
+  - projection_artifact.schema.yaml
+  - composed_projection.schema.yaml
+  - compiler_receipt.schema.yaml
+capabilities:
+- canonical_source_resolution
+- profile_resolution
+- deterministic_projection
+- declared_derivation
+- candidate_synthesis
+- binding_selection
+- lowering
+- rendering
+- projection_composition
+- mechanical_validation
+- digest_generation
+- provenance_emission
+- staleness_detection
+- compiler_receipts
+- product_topology_normalization
+- requirement_resolution
+- capability_closure_resolution
+- architecture_obligation_resolution
+- port_resolution
+- technology_profile_resolution
+- conformance_requirement_resolution
+- product_manifest_composition
+- product_kind_resolution
+- product_archetype_resolution
+- product_relationship_resolution
+- adapter_requirement_resolution
+- identity_topology_resolution
+- identity_binding_resolution
+- identity_assertion_contract_resolution
+does_not_own:
+- global_semantic_law
+- domain_semantic_law
+- conformance_authority
+- admission_authority
+- distribution_authority
+architectural_rules:
+- semantics_live_in_canonical_sources
+- compiler_behavior_is_profile_driven
+- compiler_passes_are_declared
+- downstream_artifacts_are_derived
+- composed_projections_are_downstream
+- validation_is_mechanical
+- bindings_are_selected_before_lowering
+- rendering_is_last_mile_materialization
+- implementation_lowering_requires_resolved_product_manifest
+- resolvers_share_canonical_resolution_result_algebra
+- shared_resolution_result_algebra_is_canonical
+- product_build_begins_from_authoritative_product_topology
+- product_kind_and_archetype_obligations_resolve_before_architecture_synthesis
+- sdk_kind_is_unresolved_until_separately_admitted
+- identity_dimensions_are_resolved_before_implementation_lowering
+- governance_profile_is_not_identity
+- compiler_must_not_invent_dynamic_identity_assertions

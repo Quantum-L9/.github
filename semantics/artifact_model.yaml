@@ -1,0 +1,177 @@
+schema: l9.artifact-model/v1
+artifact_id: l9.artifact-model/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_artifact_model
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: artifact_model.yaml
+artifacts:
+  canonical_artifact:
+    authority_class: canonical
+    immutable_by_digest: true
+  projection_artifact:
+    authority_class: derived
+    required:
+    - source_ref
+    - source_digest
+    - projection_profile_ref
+    - projection_profile_digest
+    - payload
+    - artifact_digest
+  derived_artifact:
+    authority_class: derived
+    required:
+    - source_refs
+    - source_digests
+    - derivation_profile_ref
+    - derivation_profile_digest
+    - payload
+    - artifact_digest
+  candidate_artifact:
+    authority_class: candidate
+    required:
+    - source_refs
+    - source_digests
+    - compilation_profile_ref
+    - payload
+    - artifact_digest
+  composed_projection:
+    authority_class: derived
+    required:
+    - component_projection_refs
+    - component_projection_digests
+    - composition_profile_ref
+    - composition_profile_digest
+    - payload
+    - artifact_digest
+  validation_receipt:
+    authority_class: evidence
+    required:
+    - candidate_digest
+    - solver_ref
+    - solver_version
+    - solver_profile_digest
+    - result
+  compiled_artifact:
+    authority_class: derived
+    required:
+    - source_refs
+    - source_digests
+    - compiler_version
+    - compilation_profile_ref
+    - artifact_digest
+  published_profile:
+    authority_class: canonical
+    required:
+    - profile_ref
+    - version
+    - digest
+    - status
+  distribution_packet:
+    authority_class: derived
+    required:
+    - profile_coordinates
+    - digests
+    - consumer_selectors
+    - rollout_mode
+    - distribution_metadata
+  receipt:
+    authority_class: evidence
+    semantics_source: receipt_catalog.yaml
+    required:
+    - receipt_type
+    - exact_subject_ref
+    - claim
+    - governing_coordinates
+    - observation_or_outcome
+    - verification_basis
+    - receipt_digest
+  product_topology:
+    authority_class: candidate
+    schema_ref: l9.schema/product-topology@1
+    required:
+    - product_identity
+    - identity_topology
+    - product_kind
+    - product_archetype
+    - purpose
+    - boundary
+    - capability_refs
+    - consumption_model
+    - deployment_model
+    - contracts
+    - relationships
+    - admission
+    - lifecycle
+    - conformance
+    - source_coordinates
+    - material_unknowns
+    rules:
+    - product_topology_is_authoritative_product_contract_when_admitted
+    - candidate_revision_requires_admission_before_compilation_as_authoritative_input
+    - product_kind_and_archetype_are_explicit
+    - compiler_must_not_overwrite_declared_product_semantics
+  product_manifest:
+    authority_class: derived
+    schema_ref: l9.schema/product-manifest@1
+    required:
+    - source_product_topology_ref
+    - source_product_topology_digest
+    - resolved_product_kind
+    - resolved_product_archetype
+    - resolved_requirement_closure
+    - resolved_capability_closure
+    - architecture
+    - ports
+    - adapters
+    - relationships
+    - provider_bindings
+    - provider_bindings
+    - admission_requirements
+    - conformance_requirements
+    - compiler_profile_ref
+    - provenance
+    - manifest_digest
+    rules:
+    - product_manifest_is_non_owning
+    - implementation_lowering_requires_resolved_manifest_gate
+    - manifest_preserves_exact_source_topology_coordinates
+  identity_assertion:
+    authority_class: evidence
+    schema_ref: l9.schema/identity-assertion@1
+    required:
+    - subject_ref
+    - product_ref
+    - resolved_dimensions
+    - evidence_refs
+    - resolver_ref
+    - governing_coordinates
+    - result
+    - assertion_digest
+    rules:
+    - identity_assertion_does_not_grant_authority
+    - material_resolution_input_change_invalidates_currentness
+    - consumer_must_not_silently_rewrite_asserted_identity
+authority_classes:
+  canonical:
+    authoritative: true
+    implicit_derivation: false
+  derived:
+    authoritative: false
+    authority_expansion_allowed: false
+    implicit_promotion_forbidden: true
+  candidate:
+    authoritative: false
+    requires_validation_and_admission: true
+  evidence:
+    authoritative: false
+    attests_declared_observation_or_outcome: true
+    grants_authority: false
+derivation_rules:
+- artifact_digest_is_deterministic
+- derived_artifact_never_implicitly_becomes_canonical
+- provenance_must_be_complete
+- authority_must_not_expand

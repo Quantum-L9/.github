@@ -1,0 +1,74 @@
+schema: l9.schema-definition/v1
+artifact_id: l9.schema/identity-assertion@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_identity_assertion_schema
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: identity_assertion.schema.yaml
+governed_by:
+  contracts:
+  - l9.contract/identity-resolution@1
+  - l9.contract/identity-assertion@1
+  - l9.contract/provenance-and-coordinate@1
+type: object
+required:
+- schema
+- subject_ref
+- product_ref
+- resolved_dimensions
+- evidence_refs
+- resolver_ref
+- governing_coordinates
+- result
+- assertion_digest
+properties:
+  schema:
+    const: l9.identity-assertion/v1
+  subject_ref:
+    type: semantic_ref
+  product_ref:
+    type: semantic_ref
+  resolved_dimensions:
+    type: object
+    fields:
+      release_identity:
+        type: semantic_ref_or_unknown
+      runtime_identity:
+        type: semantic_ref_or_unknown
+      constellation_identity:
+        type: semantic_ref_or_unknown
+      actor_identity:
+        type: semantic_ref_or_unknown
+      surface_identity:
+        type: semantic_ref_or_unknown
+  bindings:
+    type: array
+  governance_profile_ref:
+    type: semantic_ref_or_unknown
+  evidence_refs:
+    type: semantic_ref_list
+  resolver_ref:
+    type: semantic_ref
+  governing_coordinates:
+    type: object
+  result:
+    enum:
+    - resolved
+    - unknown
+    - ambiguous
+    - invalid
+  unknowns:
+    type: array
+  provenance:
+    type: object
+  assertion_digest:
+    type: semantic_digest
+semantic_rules:
+- identity_assertion_is_evidence_not_authority
+- identity_kinds_remain_distinct
+- governance_profile_is_not_actor_identity
+- downstream_consumer_must_not_rederive_valid_asserted_identity
+- material_actor_unknown_blocks_consequential_authorship

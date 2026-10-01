@@ -1,0 +1,102 @@
+schema: l9.compiler-passes/v1
+artifact_id: l9.compiler-passes/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_compiler_pass_catalog
+  authority_class: canonical
+passes:
+  - id: l9.pass/project@1
+    operation: projection
+    consumes:
+      - canonical_artifact
+      - projection_profile
+    produces:
+      - projection_artifact
+    semantic_rules:
+      - no_new_semantic_consequence
+      - no_authority_expansion
+      - provenance_preserved
+      - source_digest_preserved
+  - id: l9.pass/derive@1
+    operation: derivation
+    consumes:
+      - validated_semantics
+      - derivation_profile
+    produces:
+      - derived_artifact
+    semantic_rules:
+      - consequence_must_be_entailed
+      - no_authority_expansion
+      - derivation_provenance_required
+  - id: l9.pass/resolve@1
+    operation: resolution
+    consumes:
+      - typed_requirements
+      - canonical_resolution_model
+      - applicable_semantics
+    produces:
+      - resolution_record
+      - resolved_closure_or_explicit_nonresolution
+    semantic_rules:
+      - hard_requirements_remain_non_compensable
+      - unknown_does_not_become_resolved
+      - resolution_preserves_provenance
+      - resolution_does_not_create_authority
+      - optimization_occurs_only_after_feasibility
+  - id: l9.pass/synthesize@1
+    operation: synthesis
+    consumes:
+      - validated_constraints
+      - synthesis_profile
+    produces:
+      - candidate_artifact
+    semantic_rules:
+      - candidate_requires_validation
+      - synthesis_does_not_create_authority
+  - id: l9.pass/bind@1
+    operation: binding_selection
+    consumes:
+      - abstract_role
+      - binding_catalog
+      - binding_requirements
+    produces:
+      - selected_binding
+    semantic_rules:
+      - binding_must_be_registered
+      - requirements_must_be_satisfied
+      - provider_does_not_become_semantic_owner
+  - id: l9.pass/lower@1
+    operation: lowering
+    consumes:
+      - source_ir
+      - selected_binding
+    produces:
+      - lower_level_ir
+    semantic_rules:
+      - abstraction_must_not_increase
+      - required_semantics_must_be_preserved
+      - binding_required
+  - id: l9.pass/render@1
+    operation: rendering
+    consumes:
+      - concrete_ir
+      - rendering_profile
+    produces:
+      - final_artifact
+    semantic_rules:
+      - no_new_semantic_decisions
+      - no_authority_expansion
+      - concrete_ir_meaning_preserved
+  - id: l9.pass/validate@1
+    operation: validation
+    consumes:
+      - candidate_artifact
+      - solver_projection
+      - validation_profile
+    produces:
+      - validation_receipt
+    semantic_rules:
+      - mechanical_validation_required
+      - result_must_be_receiptable
+      - solver_identity_must_match_profile

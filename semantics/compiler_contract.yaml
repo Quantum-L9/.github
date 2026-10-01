@@ -1,0 +1,101 @@
+schema: l9.compiler-contract/v1
+artifact_id: l9.compiler/generic@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_generic_semantic_compiler_contract
+  authority_class: canonical
+purpose: 'Define the universal deterministic contract for applying canonical compilation operations to canonical
+  or validated semantic artifacts.
+
+  '
+inputs:
+  canonical_sources:
+    registry: canonical_sources.yaml
+  profiles:
+  - projection_profiles.yaml
+  - derivation_profiles.yaml
+  - composition_profiles.yaml
+  - compilation_profiles.yaml
+  catalogs:
+  - compiler_passes.yaml
+  - selector_model.yaml
+operations: &id001
+- projection
+- derivation
+- resolution
+- synthesis
+- binding_selection
+- lowering
+- rendering
+- composition
+- validation
+universal_rules:
+  deterministic_given_pinned_inputs: true
+  source_digest_verification_required: true
+  profile_digest_verification_required: true
+  provenance_required: true
+  artifact_digest_required: true
+  authority_must_not_expand: true
+  undeclared_transformation_is_invalid: true
+  semantic_conflicts_fail_closed: true
+  historical_artifacts_are_immutable: true
+  stale_inputs_must_not_be_silently_consumed: true
+  implementation_lowering_requires_resolved_product_manifest: true
+projection:
+  definition: 'Select and reshape existing semantics without creating new semantic consequences.
+
+    '
+derivation:
+  definition: 'Make entailed semantic consequences explicit under a declared derivation profile.
+
+    '
+synthesis:
+  definition: 'Construct a candidate satisfying declared constraints. Candidate requires subsequent mechanical validation.
+
+    '
+lowering:
+  definition: 'Transform source IR toward a more concrete IR using an admitted binding.
+
+    '
+rendering:
+  definition: 'Materialize sufficiently concrete IR into a final artifact representation without introducing new
+    semantic decisions.
+
+    '
+composition:
+  definition: 'Combine multiple valid downstream projections under an explicit composition profile without changing
+    component semantics.
+
+    '
+validation:
+  definition: 'Mechanically evaluate a candidate under the exact solver projected from the applicable compilation
+    profile.
+
+    '
+receipts:
+  required_for: *id001
+staleness:
+  source_changed:
+    predicate: current_source_digest != artifact_source_digest
+    result: stale
+  profile_changed:
+    predicate: current_profile_digest != artifact_profile_digest
+    result: stale
+failure_semantics:
+  unresolved_source: invalid
+  unresolved_profile: invalid
+  invalid_selector: invalid
+  source_digest_mismatch: invalid
+  profile_digest_mismatch: invalid
+  semantic_conflict: invalid
+  unsupported_operation: invalid
+  missing_binding: invalid
+  validation_unknown: unknown
+resolution:
+  definition: Establish a bounded semantic closure or explicit unresolved/incompatible/unsat/ambiguous result from
+    pinned authoritative inputs without creating authority.
+binding_selection:
+  definition: 'Select a registered concrete realization for an abstract semantic role.
+
+    '
