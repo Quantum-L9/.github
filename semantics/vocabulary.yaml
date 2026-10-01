@@ -1290,6 +1290,25 @@ semantic_build_stages:
   - product_kind_resolution
   - product_archetype_resolution
 - ordinal: 2
+  id: identity_topology_resolution
+  label: Identity Topology Resolution
+  consumes:
+  - product_topology_ir
+  - identity_model
+  - applicable_identity_contracts
+  - product_kind_resolution
+  - product_archetype_resolution
+  operations:
+  - projection
+  - derivation
+  - resolution
+  validation:
+    required: true
+    solver_source: canonical_compilation_profile
+  produces:
+  - identity_topology_ir
+  - identity_binding_requirements
+- ordinal: 3
   id: global_baseline
   label: Global Baseline
   consumes:
@@ -1306,7 +1325,7 @@ semantic_build_stages:
     solver_source: canonical_compilation_profile
   produces:
   - validated_global_baseline
-- ordinal: 3
+- ordinal: 4
   id: requirement_resolution
   label: Requirement Resolution
   consumes:
@@ -1323,7 +1342,7 @@ semantic_build_stages:
     solver_source: canonical_compilation_profile
   produces:
   - requirement_ir
-- ordinal: 4
+- ordinal: 5
   id: semantic_resolution
   label: Semantic Resolution
   consumes:
@@ -1346,7 +1365,7 @@ semantic_build_stages:
   - port_requirements
   - adapter_requirements
   - relationship_requirements
-- ordinal: 5
+- ordinal: 6
   id: product_contracts
   label: Product Contracts
   consumes:
@@ -1363,7 +1382,7 @@ semantic_build_stages:
     solver_source: canonical_compilation_profile
   produces:
   - product_contract_ir
-- ordinal: 6
+- ordinal: 7
   id: laws
   label: Laws
   consumes:
@@ -1378,7 +1397,7 @@ semantic_build_stages:
     solver_source: canonical_compilation_profile
   produces:
   - semantic_law_ir
-- ordinal: 7
+- ordinal: 8
   id: fixtures
   label: Fixtures
   consumes:
@@ -1393,7 +1412,7 @@ semantic_build_stages:
   produces:
   - fixture_ir
   - fixture_candidate_packets
-- ordinal: 8
+- ordinal: 9
   id: architecture
   label: Architecture
   consumes:
@@ -1415,7 +1434,7 @@ semantic_build_stages:
   produces:
   - architecture_ir
   - selected_pattern_refs
-- ordinal: 9
+- ordinal: 10
   id: ports
   label: Ports and Boundaries
   consumes:
@@ -1435,7 +1454,7 @@ semantic_build_stages:
   - port_ir
   - adapter_requirement_ir
   - product_relationship_ir
-- ordinal: 10
+- ordinal: 11
   id: provider_bindings
   label: Provider Bindings
   consumes:
@@ -1451,7 +1470,7 @@ semantic_build_stages:
     solver_source: canonical_compilation_profile
   produces:
   - provider_binding_ir
-- ordinal: 11
+- ordinal: 12
   id: conformance
   label: Conformance
   consumes:
@@ -1473,7 +1492,7 @@ semantic_build_stages:
   - conformance_requirement_ir
   - conformance_ir
   - executable_conformance_cases
-- ordinal: 12
+- ordinal: 13
   id: product_manifest
   label: Product Manifest
   consumes:
@@ -1498,7 +1517,7 @@ semantic_build_stages:
   produces:
   - product_manifest_ir
   - product_manifest
-- ordinal: 13
+- ordinal: 14
   id: implementation
   label: Implementation IR
   consumes:
@@ -1514,7 +1533,7 @@ semantic_build_stages:
     solver_source: canonical_compilation_profile
   produces:
   - implementation_ir
-- ordinal: 14
+- ordinal: 15
   id: target_artifacts
   label: Target Artifacts
   consumes:

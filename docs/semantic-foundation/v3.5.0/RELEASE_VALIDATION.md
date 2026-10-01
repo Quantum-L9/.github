@@ -84,7 +84,20 @@ Corrections in this pass:
 3. `projection_profiles.yaml`: `l9.projection/product-identity-topology@1` is class `runtime` (identity resolution is evidence-bound to a runtime context and consumed by memory, bootstrap, governance, and receipt components; `stage` is excluded because `vocabulary.semantic_build_stages` declares no identity stage, `consumer` because no existing consumer coordinate names it, and `governance` because governance profile is not identity). Its sources use the catalog's source-local selector mapping; the ProductTopology selectors and the three rules are unchanged; no profile class was added.
 4. `HASHES.sha256` regenerated over the same inventory.
 
-Left unchanged, recorded as successor concerns: `pytest/v1` keeps its coordinate until a binding-ID grammar is declared; `compilation_profiles.yaml` declares the stage `identity_topology_resolution` while `vocabulary.semantic_build_stages` does not list it (outside this pass's lock).
+Left unchanged in this pass: `pytest/v1` keeps its coordinate until a binding-ID grammar is declared; `compilation_profiles.yaml` declared the stage `identity_topology_resolution` while `vocabulary.semantic_build_stages` did not list it (outside this pass's lock; closed in the fourth pass below).
+
+## Final stage-domain closure (fourth pass)
+
+Check added to the same validator, run on the stage-domain-closure candidate:
+
+- RC-013 `vocabulary.semantic_build_stages` equals the stage domain of the single canonical compilation profile `l9.compilation/product-build@1`: same stage ids, same list order, same ordinals, ordinals follow list position in both ledgers, exactly one profile in the `canonical: true` ledger (15 stages): PASS
+
+Correction in this pass:
+
+1. `vocabulary.yaml`: `identity_topology_resolution` added to `semantic_build_stages` at ordinal 2, the position `compilation_profiles.yaml` establishes. Its `consumes` (`product_topology_ir`, `identity_model`, `applicable_identity_contracts`, `product_kind_resolution`, `product_archetype_resolution`), `operations` (`projection`, `derivation`, `resolution`), and `produces` (`identity_topology_ir`, `identity_binding_requirements`) reproduce the profile's stage verbatim; `validation` uses the vocabulary's existing shape (`required: true`, `solver_source: canonical_compilation_profile`, the solver itself stays `identity-topology-validator/v1` in `solver_catalog.yaml`); the label `Identity Topology Resolution` is the stage id rendered in the vocabulary's label convention. The thirteen following stages keep every field and shift ordinal 2–14 → 3–15. No stage was redesigned, renamed, or removed; `compilation_profiles.yaml`, `identity_model.yaml`, `projection_profiles.yaml`, and `solver_catalog.yaml` are unchanged.
+2. `HASHES.sha256` regenerated over the same inventory.
+
+Left unchanged, recorded as successor concerns: `pytest/v1` keeps its coordinate until a binding-ID grammar is declared; for nine of the fourteen pre-existing stages the vocabulary's `consumes` or `operations` lists differ from the canonical profile's (twelve field differences) (for example `product_topology.operations` is `validation, resolution` in the vocabulary and `projection, validation` in the profile), which RC-013 does not judge because the stage-domain contract covers ids, order, and ordinals only; no `stage` projection profile exists for `identity_topology_resolution` (RC-005 binds stage consumers to declared stages, not the reverse, and projection edits were outside this pass's lock).
 
 ## Corrective changes from v3.4
 
