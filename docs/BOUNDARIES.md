@@ -1,6 +1,7 @@
 # Boundaries — what this repo does not do
 
-`Quantum-L9/.github` owns org-level governance metadata and advisory reporting.
+`Quantum-L9/.github` owns org-level governance metadata, advisory reporting,
+and the organization-level Semantic Foundation (`semantics/`, ADR-001).
 It does not execute, lint, test, scan, or remediate code.
 
 ## Ownership map
@@ -22,8 +23,11 @@ It does not execute, lint, test, scan, or remediate code.
 
 If a proposed addition would run a test, parse a build log, or decide whether
 code is correct, it belongs in `l9-ci-core`, `l9-ci-sdk`, or
-`l9-ci-debt-resolver`. This repo only asks whether the governance metadata is
-present and coherent.
+`l9-ci-debt-resolver`. This repo only asks whether the governance metadata and
+its own canonical semantic artifacts are present and coherent. Structural
+semantic-foundation validation (`scripts/validate-semantics.py`, run by
+`make validate`) stays inside that boundary: it checks this repository's
+ledgers, release record, and reference closure, never product code.
 
 ## Explicitly rejected
 

@@ -15,6 +15,9 @@
 # CI API contract — machine-readable, downstream consumers depend on it
 /workflow-interface-registry.yml  @Quantum-L9/platform @cryptoxdog
 
+# Semantic Foundation — organization-level canonical semantic authority (ADR-001)
+/semantics/                    @Quantum-L9/platform @cryptoxdog
+
 # Issue templates
 /.github/ISSUE_TEMPLATE/       @Quantum-L9/platform @cryptoxdog
 

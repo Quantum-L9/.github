@@ -18,9 +18,18 @@ activate: ## Run full activation (secret scanning, rulesets, labels, seed, prefl
 preflight: ## Run preflight health check (read-only)
 	@bash scripts/preflight.sh
 
-validate: ## Validate seed payload, birth profiles, and SHA pins
-	@bash ops/validate-starters.sh
-	@bash ops/audit-sha-pins.sh
+validate: ## Validate seed payload, birth profiles, SHA pins, and semantic-foundation closure
+	@set -euo pipefail; \
+	bash ops/validate-starters.sh; \
+	bash ops/audit-sha-pins.sh; \
+	if python3 -c 'import yaml' >/dev/null 2>&1; then \
+	  PY=python3; \
+	else \
+	  python3 -m venv .venv; \
+	  .venv/bin/pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2"; \
+	  PY=.venv/bin/python; \
+	fi; \
+	"$$PY" scripts/validate-semantics.py
 
 # ─── Fan-out Operations ──────────────────────────────────────────────────────
 sync-labels: ## Sync org label taxonomy to one repo (REPO=owner/name)

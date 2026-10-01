@@ -111,6 +111,8 @@ source_classes:
     canonical_artifact: conformance_model.yaml
   product_manifest:
     canonical_artifact: product_manifest.schema.yaml
+  identity_model:
+    canonical_artifact: identity_model.yaml
 projection_profiles:
 - id: l9.projection/gar-architecture-observer@1
   class: consumer

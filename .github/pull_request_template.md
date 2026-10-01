@@ -87,6 +87,19 @@ $ ruff check . && pyright
 - [ ] Public interface change is documented and versioned
 - [ ] Observability exists for the new path (metric, log, trace, or alert)
 
+## Semantic change
+
+<!-- Applies when the diff touches semantics/ or docs/semantic-foundation/. Otherwise tick N/A. -->
+
+- [ ] N/A — no canonical semantic artifact or release record changed
+- Foundation / release candidate affected:
+- Prior exact coordinate or source identity (artifact_id, digest, contract/binding id):
+- New exact coordinate (when applicable):
+- [ ] Transitive semantic dependents revalidated (`semantics/semantic_dependency_model.yaml`)
+- [ ] `scripts/validate-semantics.py` result pasted under Evidence
+- [ ] `docs/semantic-foundation/<version>/` manifest, `HASHES.sha256`, and `RELEASE_VALIDATION.md` updated when canonical bytes changed
+- [ ] Admission / successor requirement checked (`L9-REVISION-001`: an admitted revision is immutable; material change needs a successor)
+
 ## Reviewer focus
 
 <!-- Where to look hardest. Trade-offs accepted. Deferred follow-ups, with issue links. -->

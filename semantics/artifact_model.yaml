@@ -129,7 +129,6 @@ artifacts:
     - adapters
     - relationships
     - provider_bindings
-    - provider_bindings
     - admission_requirements
     - conformance_requirements
     - compiler_profile_ref
