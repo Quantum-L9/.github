@@ -51,9 +51,9 @@ Additional checks in the same validator, run on the residual-closure candidate:
 
 - RC-001 `capabilities.yaml` derivation matches the bytes and record counts of `invariants.yaml` (30) and `contracts.yaml` (25): PASS
 - RC-002 `lifecycle.yaml` derivation matches the bytes of `invariants.yaml`, `contracts.yaml`, and `capabilities.yaml`: PASS
-- RC-003 every projection profile class resolves to `profile_classes`: NOT ENFORCED (`l9.projection/product-identity-topology@1` declares the undeclared class `semantic_projection`; the correct class is an authority decision, see below)
+- RC-003 every projection profile class resolves to `profile_classes`: not enforced in this pass (enforced in the third pass below)
 - RC-004 every projection source resolves to `source_classes` (140 references, 22 profiles): PASS
-- RC-005 profile shape compatible with its declared class: NOT ENFORCED (same dependency as RC-003)
+- RC-005 profile shape compatible with its declared class: not enforced in this pass (enforced in the third pass below)
 - RC-006 `canonical_sources.yaml` equals the `semantic_catalogs` class of `generic_compiler_manifest.yaml` (32 = 32) and every other ledger is classified exactly once: PASS
 - RC-007 every registered path resolves to a ledger declaring `canonical: true`: PASS
 - RC-008 registered ids and paths unique (SC-002): PASS
@@ -69,7 +69,22 @@ Corrections in this pass:
 5. `HASHES.sha256` regenerated over the same inventory.
 6. `receipt_catalog.yaml` derivation: invariants → c6e4d355…, contracts → f05239b7…, capabilities → 959acf1e…. RC-011 checks that ledger on every `make validate`.
 
-Left unchanged, recorded as successor concerns: the product identity projection keeps class `semantic_projection` and its instance-level selectors until its profile class is decided (evidence points to the `stage` class for `identity_topology_resolution`, the only compilation stage without a stage projection); architecture-pattern `required_capabilities` is still untyped pending a coordinated rename with the `projection_profiles.yaml` selectors; `pytest/v1` keeps its coordinate until a binding-ID grammar is declared.
+## Final semantic reference closure (third pass)
+
+Checks added to the same validator, run on the reference-closure candidate:
+
+- RC-003 every projection profile class resolves to `profile_classes` (22 profiles, 6 classes, no allowlist): PASS
+- RC-005 `l9.projection/product-identity-topology@1` uses source-local selectors (`product_topology` exactly `$.identity`, `$.governance`, `$.product.id`, `$.product.kind`; `identity_model` explicitly `$`), carries no profile-level `selects`, and every `stage` profile binds `semantic_build_stage.<stage>` to a stage declared in `vocabulary.semantic_build_stages` (14 profiles): PASS
+- RC-012 `architecture_patterns.yaml` patterns declare obligations as `architecture_obligations` (7 values, lists of non-empty strings), no `required_capabilities` field or include remains, and no projection selector targets `$.patterns[*].required_capabilities` (4 profiles select `$.patterns[*].architecture_obligations`): PASS
+
+Corrections in this pass:
+
+1. `architecture_patterns.yaml`: pattern field `required_capabilities` renamed to the existing semantic concept `architecture_obligations` on `l9.pattern/semantic-core-provider-adapter@1` and `l9.pattern/runnable-node@1`; the seven obligation values are unchanged and are not resolved as capability identities. The same-file projection include lists follow the rename.
+2. `projection_profiles.yaml`: the four selectors `$.patterns[*].required_capabilities` (semantic-compiler-core, stage-architecture, stage-ports, stage-provider-bindings) now select `$.patterns[*].architecture_obligations`.
+3. `projection_profiles.yaml`: `l9.projection/product-identity-topology@1` is class `runtime` (identity resolution is evidence-bound to a runtime context and consumed by memory, bootstrap, governance, and receipt components; `stage` is excluded because `vocabulary.semantic_build_stages` declares no identity stage, `consumer` because no existing consumer coordinate names it, and `governance` because governance profile is not identity). Its sources use the catalog's source-local selector mapping; the ProductTopology selectors and the three rules are unchanged; no profile class was added.
+4. `HASHES.sha256` regenerated over the same inventory.
+
+Left unchanged, recorded as successor concerns: `pytest/v1` keeps its coordinate until a binding-ID grammar is declared; `compilation_profiles.yaml` declares the stage `identity_topology_resolution` while `vocabulary.semantic_build_stages` does not list it (outside this pass's lock).
 
 ## Corrective changes from v3.4
 

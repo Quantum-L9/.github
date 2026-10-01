@@ -82,7 +82,7 @@ patterns:
   - provider_is_replaceable_without_semantic_owner_change
   - provider_specific_details_do_not_define_public_semantics
   - conformance_can_be_applied_independently_of_provider
-  required_capabilities:
+  architecture_obligations:
   - contract_versioning
   - provider_binding
   - provider_conformance
@@ -196,7 +196,7 @@ patterns:
   - explicit_gate_admission
   - canonical_consumption_is_remote_invocation
   - canonical_deployment_is_independent_runtime
-  required_capabilities:
+  architecture_obligations:
   - gate_transport
   - health_readiness
   - capability_manifest
@@ -717,7 +717,7 @@ projection_profiles:
     - structure
     - preconditions
     - guarantees
-    - required_capabilities
+    - architecture_obligations
     - forbidden
     - compatible_with
     - composition_rules
@@ -727,7 +727,7 @@ projection_profiles:
     - structure
     - preconditions
     - guarantees
-    - required_capabilities
+    - architecture_obligations
     - forbidden
     - compatible_with
     - composition_rules
@@ -759,7 +759,7 @@ projection_profiles:
     - preconditions
     - guarantees
     - forbidden
-    - required_capabilities
+    - architecture_obligations
   impact_analysis:
     include:
     - pattern_id

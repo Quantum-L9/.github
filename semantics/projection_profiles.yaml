@@ -231,7 +231,7 @@ projection_profiles:
       - $.patterns[*].structure
       - $.patterns[*].preconditions
       - $.patterns[*].guarantees
-      - $.patterns[*].required_capabilities
+      - $.patterns[*].architecture_obligations
       - $.patterns[*].forbidden
       - $.patterns[*].compatible_with
       - $.composition_rules
@@ -717,7 +717,7 @@ projection_profiles:
       - $.patterns[*].structure
       - $.patterns[*].preconditions
       - $.patterns[*].guarantees
-      - $.patterns[*].required_capabilities
+      - $.patterns[*].architecture_obligations
       - $.patterns[*].forbidden
       - $.patterns[*].compatible_with
       - $.composition_rules
@@ -766,7 +766,7 @@ projection_profiles:
       selectors:
       - $.patterns[*].id
       - $.patterns[*].structure
-      - $.patterns[*].required_capabilities
+      - $.patterns[*].architecture_obligations
       - $.patterns[*].guarantees
       - $.patterns[*].forbidden
     contracts:
@@ -813,7 +813,7 @@ projection_profiles:
     architecture_patterns:
       selectors:
       - $.patterns[*].id
-      - $.patterns[*].required_capabilities
+      - $.patterns[*].architecture_obligations
       - $.patterns[*].forbidden
     ir_catalog:
       selectors:
@@ -1059,17 +1059,19 @@ projection_profiles:
   output:
     schema: l9.projection.stage.product-manifest/v1
 - id: l9.projection/product-identity-topology@1
-  class: semantic_projection
+  class: runtime
   purpose: Project only the identity dimensions, bindings, resolver/assertion contracts, and governance-profile
     separation required by an identity consumer without exposing unrelated ProductTopology semantics.
   sources:
-  - product_topology
-  - identity_model
-  selects:
-  - $.identity
-  - $.governance
-  - $.product.id
-  - $.product.kind
+    product_topology:
+      selectors:
+      - $.identity
+      - $.governance
+      - $.product.id
+      - $.product.kind
+    identity_model:
+      selectors:
+      - $
   rules:
   - preserve_identity_dimension_distinction
   - preserve_identity_resolution_coordinates
