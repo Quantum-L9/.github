@@ -172,10 +172,24 @@ def check_sc002(root: Path, docs: dict[str, dict], report: Report) -> None:
                 source_path,
                 "registered path does not exist",
             )
+            continue
+        target = docs.get(source_path)
+        if target is None or target.get("canonical") is not True:
+            report.fail(
+                "RC-007",
+                registry_path,
+                f"sources[{index}].path",
+                source_path,
+                "registered path is not a parsed ledger declaring canonical: true",
+            )
     if len(report.failures) == before:
         report.ok(
             "SC-002",
             f"{len(sources)} registered canonical sources resolve to existing files with unique ids and paths",
+        )
+        report.ok(
+            "RC-007",
+            "every registered path resolves to a canonical ledger (RC-008 uniqueness is SC-002)",
         )
 
 
@@ -670,6 +684,280 @@ def check_sc008(root: Path, release: str | None, report: Report) -> None:
         )
 
 
+DERIVATION_ITEM_KEYS = {
+    "invariants.yaml": "invariants",
+    "contracts.yaml": "contracts",
+    "capabilities.yaml": "capabilities",
+}
+
+
+def check_derivation_sources(
+    check: str, ledger_path: str, root: Path, docs: dict[str, dict], report: Report
+) -> None:
+    ledger = docs.get(ledger_path)
+    if ledger is None:
+        report.fail(check, ledger_path, "file", "-", "ledger missing or unparsable")
+        return
+    sources = (ledger.get("derivation") or {}).get("source_artifacts")
+    if not isinstance(sources, list) or not sources:
+        report.fail(
+            check,
+            ledger_path,
+            "derivation.source_artifacts",
+            sources,
+            "derivation source list missing",
+        )
+        return
+    before = len(report.failures)
+    for index, source in enumerate(sources):
+        field = f"derivation.source_artifacts[{index}]"
+        if not isinstance(source, dict):
+            report.fail(check, ledger_path, field, source, "entry is not a mapping")
+            continue
+        artifact = source.get("artifact")
+        source_path = f"semantics/{artifact}" if artifact else None
+        source_doc = docs.get(source_path) if source_path else None
+        if source_doc is None:
+            report.fail(
+                check,
+                ledger_path,
+                f"{field}.artifact",
+                artifact,
+                "derivation source is not a parsed canonical semantic source",
+            )
+            continue
+        if source.get("artifact_id") != source_doc.get("artifact_id"):
+            report.fail(
+                check,
+                ledger_path,
+                f"{field}.artifact_id",
+                source.get("artifact_id"),
+                f"source artifact declares artifact_id {source_doc.get('artifact_id')!r}",
+            )
+        actual_digest = sha256_file(root / source_path)
+        if source.get("sha256") != actual_digest:
+            report.fail(
+                check,
+                ledger_path,
+                f"{field}.sha256",
+                source.get("sha256"),
+                f"sha256 of {source_path} is {actual_digest}",
+            )
+        if "item_count" in source:
+            item_key = DERIVATION_ITEM_KEYS.get(artifact)
+            items = source_doc.get(item_key) if item_key else None
+            if not isinstance(items, list):
+                report.fail(
+                    check,
+                    ledger_path,
+                    f"{field}.item_count",
+                    source.get("item_count"),
+                    f"no countable record list is known for {artifact}",
+                )
+            elif source.get("item_count") != len(items):
+                report.fail(
+                    check,
+                    ledger_path,
+                    f"{field}.item_count",
+                    source.get("item_count"),
+                    f"{source_path} contains {len(items)} {item_key} records",
+                )
+    if len(report.failures) == before:
+        report.ok(
+            check,
+            f"{ledger_path} derivation matches the bytes of its {len(sources)} declared sources",
+        )
+
+
+def check_rc004(docs: dict[str, dict], report: Report) -> None:
+    profiles_path = "semantics/projection_profiles.yaml"
+    catalog = docs.get(profiles_path)
+    if catalog is None:
+        report.fail(
+            "RC-004",
+            profiles_path,
+            "file",
+            "-",
+            "projection catalog missing or unparsable",
+        )
+        return
+    source_classes = catalog.get("source_classes")
+    profiles = catalog.get("projection_profiles")
+    if not isinstance(source_classes, dict) or not isinstance(profiles, list):
+        report.fail(
+            "RC-004",
+            profiles_path,
+            "source_classes/projection_profiles",
+            None,
+            "catalog shape missing",
+        )
+        return
+    before = len(report.failures)
+    resolved = 0
+    for index, profile in enumerate(profiles):
+        if not isinstance(profile, dict):
+            continue
+        sources = profile.get("sources")
+        names = (
+            list(sources.keys())
+            if isinstance(sources, dict)
+            else list(sources)
+            if isinstance(sources, list)
+            else None
+        )
+        if names is None:
+            report.fail(
+                "RC-004",
+                profiles_path,
+                f"projection_profiles[{index}].sources",
+                sources,
+                "profile declares no source mapping or list",
+            )
+            continue
+        for name in names:
+            if name in source_classes:
+                resolved += 1
+            else:
+                report.fail(
+                    "RC-004",
+                    profiles_path,
+                    f"projection_profiles[{index}].sources",
+                    name,
+                    "projection source does not resolve to source_classes",
+                )
+    if len(report.failures) == before:
+        report.ok(
+            "RC-004",
+            f"{resolved} projection source references across {len(profiles)} profiles resolve to source_classes",
+        )
+
+
+def check_rc006(docs: dict[str, dict], report: Report) -> None:
+    registry_path = "semantics/canonical_sources.yaml"
+    manifest_path = "semantics/generic_compiler_manifest.yaml"
+    registry = docs.get(registry_path)
+    manifest = docs.get(manifest_path)
+    if registry is None or manifest is None:
+        report.fail(
+            "RC-006",
+            registry_path if registry is None else manifest_path,
+            "file",
+            "-",
+            "required ledger missing or unparsable",
+        )
+        return
+    requires = manifest.get("requires")
+    if not isinstance(requires, dict) or not isinstance(
+        requires.get("semantic_catalogs"), list
+    ):
+        report.fail(
+            "RC-006",
+            manifest_path,
+            "requires.semantic_catalogs",
+            None,
+            "generic compiler manifest declares no semantic catalog class",
+        )
+        return
+    before = len(report.failures)
+    registered = [
+        str(s.get("path", "")).removeprefix("semantics/")
+        for s in registry.get("sources") or []
+        if isinstance(s, dict)
+    ]
+    expected = set(requires["semantic_catalogs"])
+    for name in sorted(expected - set(registered)):
+        report.fail(
+            "RC-006",
+            registry_path,
+            "sources",
+            f"semantics/{name}",
+            "semantic catalog declared by the generic compiler manifest is not registered",
+        )
+    for name in sorted(set(registered) - expected):
+        report.fail(
+            "RC-006",
+            registry_path,
+            "sources",
+            f"semantics/{name}",
+            "registered source is not a semantic catalog of the generic compiler manifest",
+        )
+    classified: dict[str, list[str]] = {}
+    for cls, names in requires.items():
+        for name in names if isinstance(names, list) else []:
+            classified.setdefault(str(name), []).append(str(cls))
+    ledgers = {p.removeprefix("semantics/") for p in docs}
+    # The manifest cannot require itself; it is the one self-reference exemption.
+    manifest_name = manifest_path.removeprefix("semantics/")
+    for name in sorted(ledgers - set(classified) - {manifest_name}):
+        report.fail(
+            "RC-006",
+            manifest_path,
+            "requires",
+            f"semantics/{name}",
+            "canonical ledger is not classified by the generic compiler manifest",
+        )
+    for name, classes in sorted(classified.items()):
+        if len(classes) > 1:
+            report.fail(
+                "RC-006",
+                manifest_path,
+                "requires",
+                f"semantics/{name}",
+                f"ledger is classified more than once: {classes}",
+            )
+        elif name not in ledgers:
+            report.fail(
+                "RC-006",
+                manifest_path,
+                f"requires.{classes[0]}",
+                f"semantics/{name}",
+                "classified ledger does not exist",
+            )
+    if len(report.failures) == before:
+        report.ok(
+            "RC-006",
+            f"registry equals the {len(expected)} semantic catalogs of the generic compiler "
+            f"manifest; the other {len(ledgers) - 1} ledgers are classified exactly once "
+            "(the manifest itself is exempt)",
+        )
+
+
+def check_rc009(docs: dict[str, dict], report: Report) -> None:
+    model_path = "semantics/artifact_model.yaml"
+    model = docs.get(model_path)
+    if model is None:
+        report.fail(
+            "RC-009", model_path, "file", "-", "artifact model missing or unparsable"
+        )
+        return
+    required = ((model.get("artifacts") or {}).get("product_manifest") or {}).get(
+        "required"
+    )
+    if not isinstance(required, list):
+        report.fail(
+            "RC-009",
+            model_path,
+            "artifacts.product_manifest.required",
+            required,
+            "required-field list missing",
+        )
+        return
+    duplicates = sorted({f for f in required if required.count(f) > 1})
+    for field in duplicates:
+        report.fail(
+            "RC-009",
+            model_path,
+            "artifacts.product_manifest.required",
+            field,
+            "required field is declared more than once",
+        )
+    if not duplicates:
+        report.ok(
+            "RC-009",
+            f"ProductManifest declares {len(required)} required fields with no duplicates",
+        )
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -699,6 +987,13 @@ def main(argv: list[str]) -> int:
     check_sc006(docs, report)
     check_sc007(docs, report)
     check_sc008(root, args.release, report)
+    check_derivation_sources(
+        "RC-001", "semantics/capabilities.yaml", root, docs, report
+    )
+    check_derivation_sources("RC-002", "semantics/lifecycle.yaml", root, docs, report)
+    check_rc004(docs, report)
+    check_rc006(docs, report)
+    check_rc009(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:

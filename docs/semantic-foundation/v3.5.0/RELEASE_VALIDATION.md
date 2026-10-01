@@ -45,7 +45,30 @@ surgical-alignment candidate (post-#148):
 3. `MANIFEST.md` install-surface count corrected from 45 to the 44 files it lists.
 4. `HASHES.sha256` regenerated from delivered bytes over the same inventory.
 
-Left unchanged, recorded as successor concerns: derivation digests in `capabilities.yaml`, `lifecycle.yaml`, and `receipt_catalog.yaml` still record the pre-#147 invariant/contract digests; architecture-pattern `required_capabilities` is still untyped pending a coordinated rename with the `projection_profiles.yaml` selectors; `pytest/v1` keeps its coordinate until a binding-ID grammar is declared.
+## Residual semantic closure (second pass)
+
+Additional checks in the same validator, run on the residual-closure candidate:
+
+- RC-001 `capabilities.yaml` derivation matches the bytes and record counts of `invariants.yaml` (30) and `contracts.yaml` (25): PASS
+- RC-002 `lifecycle.yaml` derivation matches the bytes of `invariants.yaml`, `contracts.yaml`, and `capabilities.yaml`: PASS
+- RC-003 every projection profile class resolves to `profile_classes`: NOT ENFORCED (`l9.projection/product-identity-topology@1` declares the undeclared class `semantic_projection`; the correct class is an authority decision, see below)
+- RC-004 every projection source resolves to `source_classes` (140 references, 22 profiles): PASS
+- RC-005 profile shape compatible with its declared class: NOT ENFORCED (same dependency as RC-003)
+- RC-006 `canonical_sources.yaml` equals the `semantic_catalogs` class of `generic_compiler_manifest.yaml` (32 = 32) and every other ledger is classified exactly once: PASS
+- RC-007 every registered path resolves to a ledger declaring `canonical: true`: PASS
+- RC-008 registered ids and paths unique (SC-002): PASS
+- RC-009 `artifact_model.yaml` ProductManifest required fields contain no duplicate (16 fields): PASS
+- RC-010 manifest install-surface count equals enumerated entries (SC-008): PASS
+
+Corrections in this pass:
+
+1. `capabilities.yaml` derivation: invariants sha256 767a5786… → c6e4d355… (count 24 → 30); contracts sha256 9a79b1ba… → f05239b7… (count 21 → 25).
+2. `lifecycle.yaml` derivation: invariants → c6e4d355…, contracts → f05239b7…, capabilities 97759b02… → 959acf1e….
+3. `projection_profiles.yaml`: `identity_model` registered as a source class (`identity_model.yaml`) so the product identity projection's sources resolve.
+4. `artifact_model.yaml`: duplicate `provider_bindings` removed from `artifacts.product_manifest.required` (structural; semantic effect none).
+5. `HASHES.sha256` regenerated over the same inventory.
+
+Left unchanged, recorded as successor concerns: `receipt_catalog.yaml` still records the pre-#147 invariant/contract/capability digests (outside both repair contracts); the product identity projection keeps class `semantic_projection` and its instance-level selectors until its profile class is decided (evidence points to the `stage` class for `identity_topology_resolution`, the only compilation stage without a stage projection); architecture-pattern `required_capabilities` is still untyped pending a coordinated rename with the `projection_profiles.yaml` selectors; `pytest/v1` keeps its coordinate until a binding-ID grammar is declared.
 
 ## Corrective changes from v3.4
 
