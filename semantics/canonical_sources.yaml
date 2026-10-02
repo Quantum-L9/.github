@@ -198,6 +198,18 @@ sources:
   canonical: true
   projection_allowed: true
   derivation_allowed: false
+- id: l9.source/actor-registry@1
+  path: semantics/actor_registry.yaml
+  format: yaml
+  canonical: true
+  projection_allowed: true
+  derivation_allowed: false
+- id: l9.source/surface-registry@1
+  path: semantics/surface_registry.yaml
+  format: yaml
+  canonical: true
+  projection_allowed: true
+  derivation_allowed: false
 rules:
   canonical_sources_must_be_registered: true
   source_ids_are_immutable: true

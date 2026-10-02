@@ -1,0 +1,106 @@
+schema: l9.actor-registry/v1
+artifact_id: l9.actor-registry/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_actor_identity_registry
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: actor_registry.yaml
+governed_by:
+  contracts:
+  - l9.contract/identity-topology@1
+  - l9.contract/identity-resolution@1
+  - l9.contract/identity-assertion@1
+purpose: Name the canonical organization-level ActorIdentity coordinates and their typed historical aliases so
+  that every downstream operating plane validates an actor against one upstream registry instead of remaking the
+  actor-name decision locally. This ledger is the actor_registry half of the identity_model.yaml authority source
+  actor_registry_and_identity_resolution_contract. It names identity; it does not resolve runtime evidence, bind
+  credentials, assign surfaces, select governance policy, or grant execution authority.
+identity_dimension: actor_identity
+detailed_model: identity_model.yaml
+global_rules:
+  registry_names_identity_only: true
+  registry_does_not_interpret_runtime_evidence: true
+  registry_grants_no_credential_role_or_execution_authority: true
+  registry_does_not_assign_surfaces: true
+  registry_does_not_select_governance_profile: true
+  aliases_are_scoped_to_actor_identity: true
+  equal_strings_in_other_identity_dimensions_are_unrelated: true
+  unknown_or_ambiguous_consequential_actor_identity_fails_closed: true
+  actor_admission_is_a_separate_digest_bound_decision: true
+does_not_own:
+- roles
+- permissions
+- grants
+- credentials
+- signing_keys
+- tokens
+- governance_profiles
+- surface_assignment
+- provider_selection
+- adapter_selection
+- runtime_marker_interpretation
+- memory_policy
+- execution_authority
+actor_kinds:
+  agent: An automated actor that performs or authors operations through one or more admitted surfaces.
+  human: A person who performs or authors operations directly.
+actor_statuses:
+  current: Canonical actor coordinate in current use (lifecycle.yaml state_semantics current).
+  superseded: Replaced by a newer canonical actor coordinate without rewriting history (lifecycle.yaml superseded).
+  retired: Ended for future use while preserving history (lifecycle.yaml retired).
+actors:
+- id: cursor
+  kind: agent
+  status: current
+  description: The Cursor agent actor.
+- id: claude-code
+  kind: agent
+  status: current
+  description: The one logical Claude Code actor. Desktop, CLI, IDE, web, and mobile are SurfaceIdentity
+    distinctions recorded in surface_registry.yaml, never separate actors.
+- id: codex
+  kind: agent
+  status: current
+  description: The Codex agent actor.
+- id: gemini
+  kind: agent
+  status: current
+  description: The Gemini agent actor.
+- id: manus
+  kind: agent
+  status: current
+  description: The Manus agent actor.
+- id: human
+  kind: human
+  status: current
+  description: A human actor acting directly rather than through an automated agent.
+aliases:
+- alias: claude-code-desktop
+  canonical: claude-code
+  alias_kind: historical_actor_alias
+  note: Historical actor value emitted by operating-plane identity derivation. When interpreted as an ActorIdentity
+    value it canonicalizes to claude-code. The same string is a canonical SurfaceIdentity in surface_registry.yaml;
+    equal strings do not imply equal identity kinds.
+- alias: claude-code-mobile
+  canonical: claude-code
+  alias_kind: historical_actor_alias
+  note: Historical actor value emitted by operating-plane identity derivation. When interpreted as an ActorIdentity
+    value it canonicalizes to claude-code. The same string is a canonical SurfaceIdentity in surface_registry.yaml;
+    equal strings do not imply equal identity kinds.
+alias_rules:
+  alias_kinds:
+    historical_actor_alias: A former canonical or emitted ActorIdentity value that now canonicalizes to one current
+      actor when read as an actor value.
+  alias_resolves_to_exactly_one_canonical_actor: true
+  alias_never_targets_another_alias: true
+  alias_never_shadows_a_canonical_actor: true
+  alias_meaning_is_bounded_to_actor_identity: true
+  alias_does_not_authorize_new_consequential_authorship_after_downstream_migration: true
+downstream_obligations:
+  resolve_actor_from_runtime_evidence_under: l9.contract/identity-resolution@1
+  emit_assertion_matching: l9.identity-assertion/v1
+  validate_asserted_actor_against_this_registry: true
+  concrete_runtime_evidence_interpretation_remains_downstream: true

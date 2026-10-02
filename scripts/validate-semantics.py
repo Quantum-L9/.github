@@ -852,6 +852,48 @@ VOCABULARY_PATH = "semantics/vocabulary.yaml"
 # vocabulary-owned and intentionally not compared.
 STAGE_PARITY_FIELDS = ("consumes", "operations", "produces")
 
+# RC-014 identity registry closure. The two registries name identity
+# coordinates only (identity_model.yaml authority sources
+# actor_registry_and_identity_resolution_contract and
+# surface_registry_and_runtime_evidence). Equal strings across the two
+# dimensions are legal; ownership fields of another dimension and any
+# runtime-resolution structure are not.
+ACTOR_REGISTRY_PATH = "semantics/actor_registry.yaml"
+SURFACE_REGISTRY_PATH = "semantics/surface_registry.yaml"
+IDENTITY_ID_PATTERN = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+CROSS_DIMENSION_FIELDS = (
+    "governance_profile_ref",
+    "provider_ref",
+    "adapter_ref",
+    "credential_ref",
+    "signing_key_ref",
+    "grants",
+    "permissions",
+    "roles",
+    "token",
+    "tokens",
+)
+ACTOR_FORBIDDEN_ENTRY_FIELDS = ("surface_ref",) + CROSS_DIMENSION_FIELDS
+SURFACE_FORBIDDEN_ENTRY_FIELDS = ("actor_ref",) + CROSS_DIMENSION_FIELDS
+RESOLVER_LEAKAGE_KEYS = (
+    "environment_variables",
+    "environment_variable",
+    "env_vars",
+    "env",
+    "environment_markers",
+    "runtime_markers",
+    "marker_precedence",
+    "marker_interpretation",
+    "host_detection",
+    "detection_rules",
+    "resolution_rules",
+    "resolver",
+    "memory_write",
+    "memory_write_behavior",
+    "credential_provisioning",
+    "governance_profile_inference",
+)
+
 
 def _profile_label(index: int, profile: dict) -> str:
     return f"projection_profiles[{index}] ({profile.get('id') or 'no id'})"
@@ -1321,6 +1363,260 @@ def _compare_stage_fields(
                 )
 
 
+def _walk_keys(node: object, trail: str, found: list[tuple[str, str]]) -> None:
+    if isinstance(node, dict):
+        for key, value in node.items():
+            path = f"{trail}.{key}" if trail else str(key)
+            if str(key) in RESOLVER_LEAKAGE_KEYS:
+                found.append((path, str(key)))
+            _walk_keys(value, path, found)
+    elif isinstance(node, list):
+        for index, item in enumerate(node):
+            _walk_keys(item, f"{trail}[{index}]", found)
+
+
+def _check_identity_registry(
+    check: str,
+    path: str,
+    docs: dict[str, dict],
+    report: Report,
+    entries_key: str,
+    status_vocab_key: str,
+    kind_vocab_key: str | None,
+    forbidden_entry_fields: tuple[str, ...],
+) -> tuple[set[str], set[str]] | None:
+    """IR-001/IR-003 shape, IR-002/IR-004 aliases, IR-005 dimension
+    separation, IR-008 resolver leakage for one registry. Returns
+    (canonical ids, alias keys) or None after failing closed."""
+    ledger = docs.get(path)
+    if ledger is None:
+        report.fail(check, path, "file", "-", "registry missing or unparsable")
+        return None
+    before = len(report.failures)
+    artifact_id = ledger.get("artifact_id")
+    if not isinstance(artifact_id, str) or not artifact_id:
+        report.fail(check, path, "artifact_id", artifact_id, "artifact_id missing")
+    else:
+        holders = [p for p, d in docs.items() if d.get("artifact_id") == artifact_id]
+        if len(holders) != 1:
+            report.fail(
+                check,
+                path,
+                "artifact_id",
+                artifact_id,
+                f"artifact_id is declared by {len(holders)} ledgers: {sorted(holders)}",
+            )
+    if ledger.get("canonical") is not True:
+        report.fail(
+            check, path, "canonical", ledger.get("canonical"), "must be canonical: true"
+        )
+    statuses = ledger.get(status_vocab_key)
+    if not isinstance(statuses, dict) or not statuses:
+        report.fail(
+            check, path, status_vocab_key, statuses, "bounded status vocabulary missing"
+        )
+        statuses = {}
+    kinds: dict = {}
+    if kind_vocab_key is not None:
+        kinds = ledger.get(kind_vocab_key)
+        if not isinstance(kinds, dict) or not kinds:
+            report.fail(
+                check, path, kind_vocab_key, kinds, "bounded kind vocabulary missing"
+            )
+            kinds = {}
+    entries = ledger.get(entries_key)
+    if not isinstance(entries, list) or not entries:
+        report.fail(check, path, entries_key, entries, "registry entries missing")
+        return None
+    ids: list[str] = []
+    for index, entry in enumerate(entries):
+        label = f"{entries_key}[{index}]"
+        if not isinstance(entry, dict):
+            report.fail(check, path, label, entry, "entry is not a mapping")
+            continue
+        entry_id = entry.get("id")
+        if not isinstance(entry_id, str) or not IDENTITY_ID_PATTERN.match(entry_id):
+            report.fail(
+                check,
+                path,
+                f"{label}.id",
+                entry_id,
+                "identity id must be non-empty normalized kebab-case",
+            )
+        else:
+            ids.append(entry_id)
+        if entry.get("status") not in statuses:
+            report.fail(
+                check,
+                path,
+                f"{label}.status",
+                entry.get("status"),
+                f"status must be one of {sorted(statuses)}",
+            )
+        if kind_vocab_key is not None and entry.get("kind") not in kinds:
+            report.fail(
+                check,
+                path,
+                f"{label}.kind",
+                entry.get("kind"),
+                f"kind must be one of {sorted(kinds)}",
+            )
+        for field in forbidden_entry_fields:
+            if field in entry:
+                report.fail(
+                    check,
+                    path,
+                    f"{label}.{field}",
+                    entry.get(field),
+                    "cross-dimension ownership field is not allowed in an identity registry",
+                )
+    for entry_id in sorted(set(ids)):
+        if ids.count(entry_id) > 1:
+            report.fail(check, path, entries_key, entry_id, "duplicate identity id")
+    canonical_ids = set(ids)
+    aliases = ledger.get("aliases")
+    alias_keys: list[str] = []
+    if aliases is None:
+        aliases = []
+    if not isinstance(aliases, list):
+        report.fail(check, path, "aliases", aliases, "aliases must be a list")
+        aliases = []
+    for index, alias in enumerate(aliases):
+        label = f"aliases[{index}]"
+        if not isinstance(alias, dict):
+            report.fail(check, path, label, alias, "alias entry is not a mapping")
+            continue
+        key = alias.get("alias")
+        target = alias.get("canonical")
+        if not isinstance(key, str) or not IDENTITY_ID_PATTERN.match(key):
+            report.fail(
+                check,
+                path,
+                f"{label}.alias",
+                key,
+                "alias must be non-empty normalized kebab-case",
+            )
+            continue
+        alias_keys.append(key)
+        if key in canonical_ids:
+            report.fail(
+                check,
+                path,
+                f"{label}.alias",
+                key,
+                "alias shadows a canonical identity id in the same dimension",
+            )
+        if target not in canonical_ids:
+            report.fail(
+                check,
+                path,
+                f"{label}.canonical",
+                target,
+                "alias target does not resolve to a canonical identity id in this registry",
+            )
+    for key in sorted(set(alias_keys)):
+        if alias_keys.count(key) > 1:
+            report.fail(check, path, "aliases", key, "duplicate alias key")
+    for index, alias in enumerate(aliases):
+        if isinstance(alias, dict) and alias.get("canonical") in alias_keys:
+            report.fail(
+                check,
+                path,
+                f"aliases[{index}].canonical",
+                alias.get("canonical"),
+                "alias targets another alias",
+            )
+    leaks: list[tuple[str, str]] = []
+    _walk_keys(ledger, "", leaks)
+    for trail, key in leaks:
+        report.fail(
+            check,
+            path,
+            trail,
+            key,
+            "runtime-resolution structure is downstream operating-plane responsibility",
+        )
+    if len(report.failures) != before:
+        return None
+    return canonical_ids, set(alias_keys)
+
+
+def check_rc014(docs: dict[str, dict], report: Report) -> None:
+    """Identity registry closure (IR-001..IR-008)."""
+    before = len(report.failures)
+    actor = _check_identity_registry(
+        "RC-014",
+        ACTOR_REGISTRY_PATH,
+        docs,
+        report,
+        "actors",
+        "actor_statuses",
+        "actor_kinds",
+        ACTOR_FORBIDDEN_ENTRY_FIELDS,
+    )
+    surface = _check_identity_registry(
+        "RC-014",
+        SURFACE_REGISTRY_PATH,
+        docs,
+        report,
+        "surfaces",
+        "surface_statuses",
+        None,
+        SURFACE_FORBIDDEN_ENTRY_FIELDS,
+    )
+    # IR-007 registration closure: once in canonical_sources, once in the
+    # compiler manifest's semantic_catalogs. SC-008 covers release inventory.
+    registry = docs.get("semantics/canonical_sources.yaml") or {}
+    registered = [
+        s.get("path") for s in registry.get("sources") or [] if isinstance(s, dict)
+    ]
+    manifest = docs.get("semantics/generic_compiler_manifest.yaml") or {}
+    requires = manifest.get("requires") or {}
+    catalogs = requires.get("semantic_catalogs") if isinstance(requires, dict) else []
+    for path in (ACTOR_REGISTRY_PATH, SURFACE_REGISTRY_PATH):
+        name = path.removeprefix("semantics/")
+        if registered.count(path) != 1:
+            report.fail(
+                "RC-014",
+                "semantics/canonical_sources.yaml",
+                "sources",
+                path,
+                f"registry must be registered exactly once (found {registered.count(path)})",
+            )
+        classified = sum(
+            1
+            for entries in (requires.values() if isinstance(requires, dict) else [])
+            if isinstance(entries, list)
+            for entry in entries
+            if entry == name
+        )
+        if (
+            not isinstance(catalogs, list)
+            or catalogs.count(name) != 1
+            or classified != 1
+        ):
+            report.fail(
+                "RC-014",
+                "semantics/generic_compiler_manifest.yaml",
+                "requires.semantic_catalogs",
+                name,
+                "registry must be classified exactly once, under semantic_catalogs",
+            )
+    if len(report.failures) != before or actor is None or surface is None:
+        return
+    actor_ids, actor_aliases = actor
+    surface_ids, surface_aliases = surface
+    # IR-006: cross-dimension string equality is legal and is only reported.
+    overlap = sorted((actor_ids | actor_aliases) & (surface_ids | surface_aliases))
+    report.ok(
+        "RC-014",
+        f"identity registries closed: {len(actor_ids)} actors with {len(actor_aliases)} "
+        f"typed aliases, {len(surface_ids)} surfaces with {len(surface_aliases)} typed "
+        f"aliases; no cross-dimension ownership field, no runtime-resolution structure; "
+        f"{len(overlap)} strings legally shared across dimensions {overlap}",
+    )
+
+
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
@@ -1490,6 +1786,7 @@ def main(argv: list[str]) -> int:
     check_rc009(docs, report)
     check_rc012(docs, report)
     check_rc013(docs, report)
+    check_rc014(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
