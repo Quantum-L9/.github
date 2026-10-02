@@ -982,3 +982,145 @@ contracts:
     non_current: material_evidence_or_coordinates_changed
     unknown: required_identity_remains_unknown
     invalid: assertion_shape_or_provenance_is_invalid
+- id: l9.contract/product-release@1
+  purpose: 'Govern progression of an exact L9 product release candidate through validation, compatibility proof,
+    admission, publication, distribution, currentness, supersession, and retirement by composing the applicable
+    canonical product, identity, validation, compatibility, admission, lifecycle, provenance, conformance, and
+    distribution semantics without redefining or absorbing the semantics owned by those contracts.
+    '
+  scope: global
+  owner: Quantum-L9/.github
+  source_invariants:
+  - L9-AUTH-001
+  - L9-AUTH-002
+  - L9-OWNER-001
+  - L9-PROMOTION-001
+  - L9-EVIDENCE-001
+  - L9-ASSURANCE-001
+  - L9-UNKNOWN-001
+  - L9-PROV-001
+  - L9-COORD-001
+  - L9-IDENTITY-001
+  - L9-IDENTITY-002
+  - L9-COMPAT-001
+  - L9-REVISION-001
+  - L9-ADMISSION-001
+  - L9-VALIDATION-001
+  - L9-CORRECTNESS-001
+  - L9-CAPABILITY-001
+  applies_to:
+  - l9_product_releases
+  - product_release_candidates
+  - product_release_artifacts
+  - release_validation
+  - release_conformance
+  - release_compatibility
+  - release_admission
+  - release_publication
+  - release_distribution
+  - release_reconciliation
+  - release_currentness
+  - release_supersession
+  requires:
+  - product_identity_is_resolved
+  - product_kind_is_resolved_to_an_admitted_product_kind
+  - authoritative_product_topology_coordinates_are_resolved
+  - current_resolved_product_manifest_coordinates_are_resolved
+  - release_identity_is_explicit_and_distinct_from_product_runtime_provider_adapter_actor_and_surface_identity
+  - release_candidate_subject_set_is_explicit
+  - release_candidate_source_revision_is_immutable_and_exact
+  - every_release_artifact_in_the_candidate_subject_set_has_exact_identity_and_digest
+  - all_material_build_toolchain_profile_and_dependency_coordinates_are_bound_when_they_affect_release_validity
+  - applicable_product_kind_requirements_are_resolved
+  - applicable_product_topology_requirements_are_resolved
+  - applicable_product_manifest_requirements_are_resolved
+  - applicable_conformance_requirements_are_resolved
+  - applicable_compatibility_requirements_are_resolved
+  - applicable_publication_requirements_are_resolved
+  - applicable_distribution_requirements_are_resolved_when_distribution_is_required
+  - applicable_migration_and_rollback_requirements_are_resolved_when_state_or_compatibility_can_be affected
+  - preparation_operations_are_declared_separately_from_validation_operations
+  - release_candidate_is_frozen_before_observational_validation_receipts_are relied upon
+  - validation_and_conformance_use_governing_criteria_independent_of_the_candidate_and_its_production_path
+  - validation_receipts_bind_exact_candidate_subjects_and_governing_coordinates
+  - conformance_receipts_bind_exact_implementation_or_artifact_coordinates_when_conformance_is_required
+  - compatibility_is_proven_by_applicable_declared_compatibility_contracts
+  - admission_decision_is_bound_to_the_exact_release_candidate_subject_set
+  - admission_authority_is_resolved_from_the_applicable_product_contract_and_lifecycle
+  - publication_uses_only_artifacts_admitted_as_part_of_the_exact_release_candidate_subject_set
+  - publication_artifact_digests_equal_the_admitted_and_validated_artifact_digests
+  - distribution_uses_exact_published_identity_and_digest
+  - required_consumer_reconciliation_or_binding_evidence_is explicit when consumer acceptance is part of release completion
+  - material_unknowns_required_for_release_progression_are_resolved_before_progression
+  guarantees:
+  - this_contract_orchestrates_existing_semantics_without_redefining_their_ownership
+  - product_kind_specific_release_obligations_are_derived_from_product_kind_law_not_redeclared_here
+  - product_specific_release_obligations_are_derived_from_the_authoritative_product_topology_and_current_resolved_product_manifest
+  - provider_language_package_registry_ci_platform_and_deployment_mechanism_are_not_global_release_semantics
+  - preparation_may_transform_a_candidate_only_before_the_candidate_subject_set_is_frozen
+  - validation_and_conformance_are_observational_and_do_not_mutate_or_repair_the_frozen_candidate
+  - validation_evidence_does_not_admit_a_release
+  - conformance_evidence_does_not_admit_a_release
+  - successful_build_or_execution_does_not_admit_a_release
+  - admission_is_an_explicit_authority_decision_bound_to_the_exact_candidate_subject_set
+  - admission_does_not_imply_publication
+  - publication_does_not_imply_consumer_binding_or_reconciliation
+  - publication_does_not_imply_runtime_availability_authorization_invocability_or_runtime_admission
+  - publication_does_not_replace_product_release_admission
+  - release_currentness_is_distinct_from_validation_admission_publication_distribution_and_runtime_state
+  - release_identity_is_bound_to_exact_version_revision_and_digest_coordinates_and_is_not_established_by_version_string_alone
+  - published_artifacts_are_byte_identical_to_the_artifacts_admitted_and_validated_for_publication
+  - publication_must_not_rebuild_to_materially_different_artifact_bytes_under_the_same_release_admission
+  - rebuilt_artifacts_with_different_digests_are_new_release_candidate_subjects_and_require_new_applicable_validation_and_admission
+  - every_validation_conformance_admission_publication_distribution_and_reconciliation_claim_remains_bound_to_its_exact_subject_and_material_coordinates
+  - receipts_remain_evidence_and_do_not_grant_semantic_execution_admission_or publication authority
+  - missing_stale_failed_or_unverifiable_required_evidence_cannot_be_coerced_to_release_success
+  - material_candidate_change_invalidates_affected_validation_conformance_compatibility_and_admission_evidence_unless_an_applicable_compatibility_contract_explicitly_preserves_it
+  - material_upstream_product_topology_product_manifest_semantic_or_build_coordinate_change_makes_affected_release_evidence_non_current_until_recomputed_or_compatibility_is_proven
+  - admitted_or_published_release_history_is_not_rewritten_in_place
+  - correction_or_material_change_after_admission_requires_a_successor_release_identity_or_explicit_supersession
+  - prior_release_identity_artifact_digests_decisions_and_receipts_remain_addressable
+  - release_distribution_preserves_exact_published_identity_and_digest_without_reinterpreting_product_semantics
+  - downstream_consumer_binding_reconciliation_or_installation_does_not_change_release_identity_or_product_semantics
+  - product_specific_release_bindings_may_narrow_or_strengthen_required_evidence_but_may_not_weaken_bypass_or_reinterpret_this_contract_or_other_applicable_global_law
+  - one_global_release_contract_can_govern_all_admitted_product_kinds_while_product_kind_and_product_topology_supply_kind_and_product_specific_obligations
+  forbidden:
+  - product_specific_provider_runtime_language_framework_registry_or_ci_semantics_embedded_in_the_global_release_contract
+  - parallel_product_kind_specific_release_languages
+  - validation_that_mutates_repairs_canonicalizes_or_regenerates_the_frozen_candidate
+  - hidden_preparation_inside_validation
+  - candidate_defined_correctness
+  - production_path_defined_correctness
+  - validator_defined_admission
+  - validator_defined_publication_authority
+  - self_admission
+  - self_publication_when_publication_authority_is_owned_elsewhere
+  - validation_receipt_as_admission
+  - conformance_receipt_as_admission
+  - distribution_receipt_as_admission
+  - publication_as_implicit_admission
+  - publication_as_implicit_runtime_admission
+  - successful_execution_as_compatibility_proof
+  - successful_execution_as_release_admission
+  - version_string_as_sufficient_release_identity
+  - provider_identity_as_release_identity
+  - runtime_identity_as_release_identity
+  - adapter_identity_as_release_identity
+  - surface_or_actor_identity_as_release_identity
+  - publication_of_artifacts_not_bound_to_the_admitted_candidate_subject_set
+  - publication_of_artifact_bytes_with_digests_different_from_the_validated_and_admitted_artifact_digests
+  - rebuilding_different_artifact_bytes_after_admission_without_new_candidate_validation_and_admission
+  - evidence_reuse_across_material_candidate_change_without_explicit_compatibility
+  - admission_decision_reuse_across_material_candidate_change_without_explicit_compatibility
+  - unknown_to_pass_coercion
+  - missing_evidence_treated_as_success
+  - stale_evidence_treated_as_current
+  - consumer_binding_as_release_identity_redefinition
+  - distribution_as_payload_semantic_mutation
+  - in_place_rewrite_of_an_admitted_or_published_release
+  - silent_rebinding_of_prior_receipts_or_decisions_to_a_successor_release
+  outcomes:
+    satisfied: exact_release_progression_satisfies_all_applicable_global_kind_product_validation_conformance_compatibility_admission_publication_distribution_and_currentness_obligations
+    blocked: one_or_more_required_release_obligations_are_failed_missing_stale_or_unsatisfied
+    new_candidate_required: release_candidate_or_material_governing_coordinates_changed_and_prior_evidence_or_admission_is_not_preserved_by_explicit_compatibility
+    unresolved: required_release_authority_identity_evidence_compatibility_or_governing_coordinates_cannot_be_resolved
