@@ -1,0 +1,266 @@
+schema: l9.product-topology/v1
+product:
+  id: null
+  kind: null
+  archetype_ref: null
+  name: null
+  versioning_family: null
+  status: null
+identity:
+  semantic_owner: null
+  semantic_scope: null
+  canonical_repository: null
+  dimensions:
+    product: {}
+    release: {}
+    runtime: {}
+    constellation: {}
+    actor: {}
+    surface: {}
+  bindings: []
+  resolution:
+    contract_ref: l9.contract/identity-resolution@1
+    resolver_ref: null
+    assertion_schema_ref: l9.schema/identity-assertion@1
+    unknown_policy: null
+    evidence_source_refs: []
+  identity_contract_refs:
+    - l9.contract/identity-topology@1
+    - l9.contract/identity-resolution@1
+  aliases: []
+  predecessor_refs: []
+  successor_refs: []
+  supersedes: []
+purpose:
+  statement: null
+  capability_refs: []
+  primary_responsibility: null
+  objectives: []
+  non_goals: []
+boundary:
+  owns: []
+  does_not_own: []
+  authority_boundary_refs: []
+  semantic_boundary_refs: []
+  trust_boundary_refs: []
+  transaction_boundary_refs: []
+  mutation_boundary_refs: []
+requirements:
+  invariant_refs: []
+  contract_refs: []
+  hard_constraints: []
+  soft_objectives: []
+  operational_requirements: []
+  security_requirements: []
+  conformance_requirements: []
+capabilities:
+  provides: []
+  requires: []
+  optional: []
+  degraded_without: []
+  forbidden: []
+consumption:
+  model: null
+  public_entry_modes: []
+  invocation_contract_refs: []
+  consumer_requirements: []
+  forbidden_consumption_modes: []
+deployment:
+  model: null
+  deployment_unit: null
+  runtime_boundary: null
+  scaling_boundary: null
+  failure_boundary: null
+  upgrade_boundary: null
+  artifact_forms: []
+  deployment_constraints: []
+architecture:
+  required_pattern_refs: []
+  optional_pattern_refs: []
+  forbidden_pattern_refs: []
+  structural_constraints: []
+  layer_constraints: []
+  composition_rules: []
+contracts:
+  public: []
+  consumed: []
+  produced: []
+  required: []
+  compatibility: []
+  schemas: []
+  canonicalization: []
+interfaces:
+  actions: []
+  public_programmatic_surfaces: []
+  command_surfaces: []
+  event_surfaces: []
+ports:
+  inbound: []
+  outbound: []
+  extension: []
+  forbidden: []
+adapters:
+  inbound: []
+  outbound: []
+  provider: []
+  integration: []
+  forbidden: []
+relationships:
+  products: []
+  relationship_constraints: []
+  forbidden_relationships: []
+bindings:
+  product_bindings: []
+  protocol_bindings: []
+  provider_bindings: []
+providers:
+  allowed: []
+  prohibited: []
+  substitution_contract_refs: []
+  provider_independence_required: null
+technology:
+  hard_constraints: []
+  preferences: []
+  runtime_requirements: []
+  language_constraints: []
+  platform_constraints: []
+state:
+  owns_authoritative_state: null
+  state_semantic_refs: []
+  persistence_ports: []
+  consistency_requirement_refs: []
+  revision_model_ref: null
+  transaction_model_ref: null
+  retention_contract_refs: []
+  projection_refs: []
+  cache_authority: null
+runtime:
+  participation_model: null
+  process_model: null
+  concurrency_model: null
+  resource_model: null
+  startup_requirement_refs: []
+  shutdown_requirement_refs: []
+  health_contract_refs: []
+  readiness_contract_refs: []
+  degradation_contract_refs: []
+communication:
+  constellation_boundary_required: null
+  transport_contract_refs: []
+  routing_authority_ref: null
+  ingress_contract_refs: []
+  egress_contract_refs: []
+  packet_refs: []
+  forbidden_paths: []
+security:
+  identity_source_refs: []
+  authentication_contract_refs: []
+  authorization_contract_refs: []
+  trust_source_refs: []
+  secret_contract_refs: []
+  credential_scope: []
+  isolation_requirement_refs: []
+  data_handling_contract_refs: []
+configuration:
+  contract_refs: []
+  namespaces: []
+  precedence_model_ref: null
+  required: []
+  optional: []
+  forbidden: []
+effects:
+  effect_classes: []
+  consequential_operations: []
+  idempotency_contract_refs: []
+  reconciliation_contract_refs: []
+receipts:
+  emits: []
+  consumes: []
+  canonicalization_ref: null
+  preservation_requirement_refs: []
+failure:
+  taxonomy_refs: []
+  fail_closed_conditions: []
+  degradable_conditions: []
+  retry_authority_ref: null
+  retry_contract_refs: []
+  ambiguity_contract_refs: []
+  reconciliation_contract_refs: []
+  unknown_outcome_rules: []
+recovery:
+  restart_semantics: []
+  replay_semantics: []
+  compensation_semantics: []
+  restore_contract_refs: []
+  disaster_recovery_requirement_refs: []
+observability:
+  logging_contract_refs: []
+  capability_metrics: []
+  provider_metrics: []
+  tracing_requirement_refs: []
+  correlation_identity_refs: []
+  audit_requirement_refs: []
+  slo_refs: []
+governance:
+  profile_refs: []
+  profile_selection_contract_refs: []
+  autonomy_contract_refs: []
+  selection_inputs: []
+  rules: []
+admission:
+  subject: null
+  authority_ref: null
+  admission_profile_ref: null
+  requirements: []
+  kind_specific_requirements: []
+  evidence_requirement_refs: []
+  decision_ref: null
+lifecycle:
+  family_ref: null
+  applicable_state_refs: []
+  transition_contract_refs: []
+  supersession_contract_ref: null
+  retirement_contract_ref: null
+conformance:
+  profile_refs: []
+  required_classes: []
+  fixture_profile_refs: []
+  negative_proof_refs: []
+  provider_conformance_refs: []
+  final_conformance_required: null
+compatibility:
+  public_contract_policy_ref: null
+  semantic_compatibility_refs: []
+  runtime_compatibility_refs: []
+  provider_compatibility_refs: []
+  consumer_compatibility_refs: []
+  breaking_change_policy_ref: null
+distribution:
+  artifact_identity_refs: []
+  artifact_forms: []
+  registry_refs: []
+  release_contract_refs: []
+  integrity_requirement_refs: []
+  publication_contract_refs: []
+build:
+  compilation_profile_ref: null
+  target_binding_refs: []
+  generated_surfaces: []
+  source_owned_surfaces: []
+  build_requirement_refs: []
+  reproducibility_requirement_refs: []
+operations:
+  owner_ref: null
+  runbook_refs: []
+  maintenance_contract_refs: []
+  migration_contract_refs: []
+  rollback_contract_refs: []
+provenance:
+  authority_ref: null
+  source_revision: null
+  source_refs: []
+  predecessor_topology_ref: null
+unknowns:
+  material: []
+  non_material: []
+  resolution_requirement_refs: []
