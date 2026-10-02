@@ -1,0 +1,92 @@
+# Candidate authoring scaffold.
+# No admitted global RepositorySpec schema coordinate is assumed here.
+schema: null
+repository:
+  id: null
+  name: null
+  canonical_repository: null
+  status: null
+identity:
+  repo: null
+  class: null
+  semantic_owner: null
+product_binding:
+  product_ref: null
+  topology:
+    schema_ref: l9.schema/product-topology@1
+    source_path: null
+    revision_ref: null
+    digest: null
+  exact_binding_required: null
+  stale_topology_binding_policy: null
+  inherit: []
+  rules: []
+mission:
+  summary: null
+  repository_responsibility: null
+ownership:
+  owns: []
+  does_not_own: []
+authority_order: []
+authority_rules: {}
+source_surfaces:
+  authoritative:
+    product: []
+    domain: []
+    repository: []
+  derived: []
+  rules: []
+repository_structure:
+  semantic_roots: []
+  implementation_roots: []
+  validation_roots: []
+  fixture_roots: []
+  documentation_roots: []
+  generated_roots: []
+  rules: []
+capabilities:
+  source: null
+  independently_declared_here: null
+  expected_product_capability_refs: []
+  rules: []
+invariants: []
+forbidden: []
+commands:
+  validate: null
+  rules: []
+projection_compilation:
+  calculus_ref: null
+  semantic_inputs:
+    required: []
+    optional: []
+    exact_revision_binding_required: null
+    exact_digest_binding_required: null
+  outputs: []
+  target_bindings: []
+  metadata_required_on_every_output: []
+  staleness:
+    rule: null
+    policy: null
+  incremental_compilation:
+    enabled: null
+    prior_receipt_may_accelerate: null
+    prior_receipt_is_authority: false
+    requirements: []
+validation:
+  repository_projection:
+    required: null
+    acceptance: []
+provenance:
+  semantic_owner: null
+  repository: null
+  source_refs: []
+  product_topology_revision: null
+  product_topology_digest: null
+  repository_spec_revision: null
+  repository_spec_digest: null
+unknowns:
+  material: []
+  non_material: []
+  policy:
+    material_unknowns_block_admission: null
+    unknowns_must_not_be_inferred: null

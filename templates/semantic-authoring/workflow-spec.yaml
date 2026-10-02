@@ -1,0 +1,81 @@
+# Candidate authoring scaffold.
+# No admitted global WorkflowSpec schema coordinate is assumed here.
+schema: null
+workflow:
+  id: null
+  name: null
+  version: null
+  status: null
+  semantic_owner: null
+  product_ref: null
+  repository_ref: null
+  calculus_ref: null
+purpose:
+  statement: null
+  primary_responsibility: null
+principles: []
+authority:
+  roles: {}
+inputs:
+  required: {}
+  conditional: {}
+  optional: {}
+preconditions: []
+context:
+  required: []
+  derived: []
+  forbidden: []
+capabilities:
+  required: []
+  workflow_internal: []
+  forbidden: []
+state_machine:
+  initial_state: null
+  terminal_states:
+    success: []
+    non_success: []
+  states: {}
+passes: []
+transitions:
+  global: []
+failure_semantics:
+  fail_closed: null
+  block_on: []
+  never_coerce: {}
+  rules: []
+recovery:
+  resumable: null
+  resume_requirements: []
+  rules: []
+security:
+  requirements: []
+outputs:
+  success:
+    required: []
+    conditional: []
+  failure:
+    required: []
+    optional: []
+  blocked:
+    required: []
+    optional: []
+receipts:
+  workflow_receipt:
+    ref: null
+    subject: null
+    required_bindings: []
+    grants_authority: false
+validation:
+  required: null
+  acceptance: []
+provenance:
+  semantic_owner: null
+  source_refs: []
+  source_revision: null
+  source_digest: null
+unknowns:
+  material: []
+  non_material: []
+  policy:
+    material_unknowns_block_admission: null
+    unknowns_must_not_be_inferred: null
