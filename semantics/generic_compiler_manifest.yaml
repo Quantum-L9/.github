@@ -41,6 +41,8 @@ requires:
   - dependency_archetypes.yaml
   - identity_model.yaml
   - identity_assertion.schema.yaml
+  - actor_registry.yaml
+  - surface_registry.yaml
   compiler_catalogs:
   - compiler_passes.yaml
   - derivation_profiles.yaml

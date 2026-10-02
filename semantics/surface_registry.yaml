@@ -1,0 +1,112 @@
+schema: l9.surface-registry/v1
+artifact_id: l9.surface-registry/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_surface_identity_registry
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: surface_registry.yaml
+governed_by:
+  contracts:
+  - l9.contract/identity-topology@1
+  - l9.contract/identity-resolution@1
+  - l9.contract/identity-assertion@1
+purpose: Name the canonical organization-level SurfaceIdentity coordinates and their typed historical aliases so
+  that every downstream operating plane validates an execution or interaction surface against one upstream
+  registry. This ledger is the surface_registry half of the identity_model.yaml authority source
+  surface_registry_and_runtime_evidence. A surface is an identity dimension. It does not intrinsically own an
+  actor, select a governance profile, bind a provider or adapter, or interpret runtime evidence.
+identity_dimension: surface_identity
+detailed_model: identity_model.yaml
+global_rules:
+  registry_names_identity_only: true
+  registry_does_not_interpret_runtime_evidence: true
+  registry_grants_no_credential_role_or_execution_authority: true
+  surface_does_not_intrinsically_own_an_actor: true
+  surface_does_not_intrinsically_select_governance_profile: true
+  surface_does_not_bind_provider_or_adapter: true
+  aliases_are_scoped_to_surface_identity: true
+  equal_strings_in_other_identity_dimensions_are_unrelated: true
+  one_actor_may_operate_through_many_surfaces: true
+does_not_own:
+- actor_assignment
+- governance_profile_selection
+- provider_binding
+- adapter_binding
+- credentials
+- signing_keys
+- authorization_grants
+- runtime_marker_precedence
+- environment_variable_rules
+surface_statuses:
+  current: Canonical surface coordinate in current use (lifecycle.yaml state_semantics current).
+  superseded: Replaced by a newer canonical surface coordinate without rewriting history (lifecycle.yaml superseded).
+  retired: Ended for future use while preserving history (lifecycle.yaml retired).
+surfaces:
+- id: cursor-ide
+  status: current
+  description: The Cursor IDE interaction surface.
+- id: claude-code-desktop
+  status: current
+  description: The Claude Code desktop application surface. The same string is a historical ActorIdentity alias in
+    actor_registry.yaml; equal strings do not imply equal identity kinds.
+- id: claude-code-cli
+  status: current
+  description: The Claude Code terminal command-line surface.
+- id: claude-code-ide
+  status: current
+  description: The Claude Code IDE-extension surface.
+- id: claude-code-web
+  status: current
+  description: The Claude Code hosted web surface.
+- id: claude-code-mobile
+  status: current
+  description: The Claude Code mobile surface. The same string is a historical ActorIdentity alias in
+    actor_registry.yaml; equal strings do not imply equal identity kinds.
+- id: codex-cloud
+  status: current
+  description: The Codex hosted cloud surface.
+- id: codex-cli
+  status: current
+  description: The Codex command-line surface.
+- id: gemini-cli
+  status: current
+  description: The Gemini command-line surface.
+- id: manus-cloud
+  status: current
+  description: The Manus hosted cloud surface.
+- id: operator-shell
+  status: current
+  description: A human operator's direct shell surface.
+aliases:
+- alias: claude-desktop
+  canonical: claude-code-desktop
+  alias_kind: historical_surface_alias
+- alias: claude-cli
+  canonical: claude-code-cli
+  alias_kind: historical_surface_alias
+- alias: claude-ide
+  canonical: claude-code-ide
+  alias_kind: historical_surface_alias
+- alias: claude-web
+  canonical: claude-code-web
+  alias_kind: historical_surface_alias
+- alias: claude-mobile
+  canonical: claude-code-mobile
+  alias_kind: historical_surface_alias
+alias_rules:
+  alias_kinds:
+    historical_surface_alias: A former or abbreviated SurfaceIdentity value that canonicalizes to one current surface
+      when read as a surface value.
+  alias_resolves_to_exactly_one_canonical_surface: true
+  alias_never_targets_another_alias: true
+  alias_never_shadows_a_canonical_surface: true
+  alias_meaning_is_bounded_to_surface_identity: true
+  surface_alias_never_implies_actor_alias: true
+downstream_obligations:
+  resolve_surface_from_runtime_evidence_under: l9.contract/identity-resolution@1
+  emit_assertion_matching: l9.identity-assertion/v1
+  validate_asserted_surface_against_this_registry: true
+  concrete_runtime_evidence_interpretation_remains_downstream: true

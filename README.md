@@ -1,12 +1,12 @@
 # Quantum-L9/.github
 
-`semantics/` is the Semantic Foundation v3.5.0. This repository owns that
-language for the organization. A domain repository owns the meaning of its own
-capability. Do not copy this tree into a product repository. Cite the ledger's
-`artifact_id`.
+`semantics/` is the Semantic Foundation v3.6.0 candidate. This repository owns
+that language for the organization. A domain repository owns the meaning of its
+own capability. Do not copy this tree into a product repository. Cite the
+ledger's `artifact_id`.
 
-The release record is [`docs/semantic-foundation/v3.5.0/`](docs/semantic-foundation/v3.5.0/README.md).
-The decisions are ADR-001 through ADR-012 in [`docs/adr/`](docs/adr/README.md).
+The release record is [`docs/semantic-foundation/v3.6.0/`](docs/semantic-foundation/v3.6.0/README.md).
+The decisions are ADR-001 through ADR-013 in [`docs/adr/`](docs/adr/README.md).
 Agent instructions for the language are [`AGENTS.md`](AGENTS.md).
 
 **ProductTopology** is the product contract
@@ -34,7 +34,10 @@ it: `semantics/node_archetypes.yaml` and
 Identity dimensions stay distinct in `semantics/identity_model.yaml`.
 GovernanceProfile selects policy. ActorIdentity names who acted. Downstream
 work consumes an assertion that matches
-`semantics/identity_assertion.schema.yaml`.
+`semantics/identity_assertion.schema.yaml`. The canonical ActorIdentity and
+SurfaceIdentity coordinates are `semantics/actor_registry.yaml` and
+`semantics/surface_registry.yaml`; they name identity and leave runtime
+evidence resolution to the downstream operating plane.
 
 Architecture patterns in `semantics/architecture_patterns.yaml` are composable
 obligations. A pattern is not a complete architecture, and it does not create
@@ -104,9 +107,9 @@ class receives. An absent marker resolves to `default`. A FORBID hit throws.
 ## Layout
 
 ```text
-semantics/          Semantic Foundation v3.5.0 — the language this repo owns
-docs/adr/           ADR-001 … ADR-012
-docs/semantic-foundation/v3.5.0/   release record
+semantics/          Semantic Foundation v3.6.0 candidate — the language this repo owns
+docs/adr/           ADR-001 … ADR-013
+docs/semantic-foundation/v3.6.0/   release record (v3.5.0/ is the predecessor record)
 policies/           repo classes, settings, mandatory files, consumer CODEOWNERS, governance caller
 rulesets/           org rulesets, evaluate only
 ops/                activation, seed payload, birth, pin audit

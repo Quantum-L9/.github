@@ -1,7 +1,7 @@
 # Agents
 
-`semantics/` is the Semantic Foundation v3.5.0. `Quantum-L9/.github` owns this
-language. A domain repository owns the meaning of its own capability. Read the
+`semantics/` is the Semantic Foundation v3.6.0 candidate. `Quantum-L9/.github`
+owns this language. A domain repository owns the meaning of its own capability. Read the
 ledger below for a decision that is already global. Cite its `artifact_id`.
 Do not copy this tree into a product repository.
 
@@ -20,12 +20,17 @@ consumption and deployment. Archetypes specialize a kind:
 Identity dimensions stay distinct in `semantics/identity_model.yaml`.
 Downstream work consumes an assertion that matches
 `semantics/identity_assertion.schema.yaml`. GovernanceProfile selects policy.
-ActorIdentity names who acted.
+ActorIdentity names who acted. The canonical ActorIdentity IDs and their typed
+historical aliases are `semantics/actor_registry.yaml`; the canonical
+SurfaceIdentity IDs and their typed historical aliases are
+`semantics/surface_registry.yaml`. The registries name identity only: runtime
+evidence resolution remains downstream, the registries do not bind
+ActorIdentity to SurfaceIdentity, and they do not select GovernanceProfile.
 
 `semantics/canonical_sources.yaml` is the source registry. A registered source
 names its path and whether derivation is allowed. Global contracts live only
-in `semantics/contracts.yaml`. The decisions are ADR-001 through ADR-012 in
-`docs/adr/`. The release record is `docs/semantic-foundation/v3.5.0/`.
+in `semantics/contracts.yaml`. The decisions are ADR-001 through ADR-013 in
+`docs/adr/`. The release record is `docs/semantic-foundation/v3.6.0/`.
 
 Add a ledger here only when it retires a decision that would otherwise be
 remade in every product (ADR-010). Register it in
@@ -56,6 +61,8 @@ distribution plane. That plane does not own product meaning. Its map is
 | `semantics/dependency_archetypes.yaml` | Architecture obligations for a Dependency |
 | `semantics/identity_model.yaml` | Identity dimensions and resolution |
 | `semantics/identity_assertion.schema.yaml` | Shape of a resolved identity assertion |
+| `semantics/actor_registry.yaml` | Canonical ActorIdentity IDs and typed historical aliases |
+| `semantics/surface_registry.yaml` | Canonical SurfaceIdentity IDs and typed historical aliases |
 | `semantics/product_manifest.schema.yaml` | Shape of a derived realization |
 
 ## Resolution
