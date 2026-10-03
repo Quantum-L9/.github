@@ -113,6 +113,14 @@ source_classes:
     canonical_artifact: product_manifest.schema.yaml
   identity_model:
     canonical_artifact: identity_model.yaml
+  actor_registry:
+    canonical_artifact: actor_registry.yaml
+  surface_registry:
+    canonical_artifact: surface_registry.yaml
+  repository_registry:
+    canonical_artifact: repository_registry.yaml
+  repository_classes:
+    canonical_artifact: repository_classes.yaml
 projection_profiles:
 - id: l9.projection/gar-architecture-observer@1
   class: consumer
