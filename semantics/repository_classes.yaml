@@ -1,0 +1,13 @@
+schema: l9.repository-classes/v1
+artifact_id: l9.repository-classes/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_repository_classes
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: repository_classes.yaml
+purpose: Name the canonical upstream coordinate for the organization repository class catalog so that projection
+  source class repository_classes resolves to one registered ledger. No repository class is admitted by this
+  ledger; class content remains an explicit Unknown until separately admitted.

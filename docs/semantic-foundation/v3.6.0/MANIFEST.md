@@ -4,7 +4,7 @@ Release status: **ADDITIVE SUCCESSOR CANDIDATE**
 
 ## Install surface
 
-The release contains **46** canonical semantic YAML files:
+The release contains **48** canonical semantic YAML files:
 - `semantics/actor_registry.yaml`
 - `semantics/architecture_patterns.yaml`
 - `semantics/architecture_rules.yaml`
@@ -42,6 +42,8 @@ The release contains **46** canonical semantic YAML files:
 - `semantics/projection_engine_contract.yaml`
 - `semantics/projection_profiles.yaml`
 - `semantics/receipt_catalog.yaml`
+- `semantics/repository_classes.yaml`
+- `semantics/repository_registry.yaml`
 - `semantics/requirement_model.yaml`
 - `semantics/resolution_model.yaml`
 - `semantics/selector_model.yaml`

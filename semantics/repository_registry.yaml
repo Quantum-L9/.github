@@ -1,0 +1,13 @@
+schema: l9.repository-registry/v1
+artifact_id: l9.repository-registry/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_repository_registry
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: repository_registry.yaml
+purpose: Name the canonical upstream coordinate for the organization repository registry so that projection
+  source class repository_registry resolves to one registered ledger. No repository entry is admitted by this
+  ledger; entry content remains an explicit Unknown until separately admitted.
