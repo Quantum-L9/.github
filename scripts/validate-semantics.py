@@ -16,6 +16,7 @@ validator itself cannot run (missing dependency, unreadable tree).
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import re
 import sys
@@ -1617,6 +1618,194 @@ def check_rc014(docs: dict[str, dict], report: Report) -> None:
     )
 
 
+REPO_OPS_IR_ID = "l9.repository-operations-ir/v1"
+REPO_OPS_CLASS = "repository_operations_ir"
+REPO_OPS_PYPROJECT_BINDING = "l9.binding/repository-operations-pyproject@1"
+REPO_OPS_MAKEFILE_BINDING = "l9.binding/repository-operations-makefile@1"
+REPO_OPS_PROFILE = "l9.projection/repository-operations-compiler@1"
+REPO_OPS_FORBIDDEN = {
+    "repository_specific_semantic_invention",
+    "dependency_constraint_invention",
+    "build_backend_invention",
+    "target_artifact_as_semantic_authority",
+    "node_or_package_json_semantics_in_first_version",
+}
+
+
+def _unique_entry(entries: object, key: str, value: str) -> tuple[dict | None, int]:
+    if not isinstance(entries, list):
+        return None, 0
+    matches = [entry for entry in entries if isinstance(entry, dict) and entry.get(key) == value]
+    return (matches[0] if len(matches) == 1 else None, len(matches))
+
+
+def _evaluate_rc015(docs: dict[str, dict], report: Report) -> None:
+    ir_path = "semantics/ir_catalog.yaml"
+    bindings_path = "semantics/binding_catalog.yaml"
+    technologies_path = "semantics/technology_capabilities.yaml"
+    profiles_path = "semantics/projection_profiles.yaml"
+    capabilities_path = "semantics/capabilities.yaml"
+    technology_profiles_path = "semantics/technology_profiles.yaml"
+
+    ir_catalog = docs.get(ir_path) or {}
+    ir, ir_count = _unique_entry(ir_catalog.get("irs"), "id", REPO_OPS_IR_ID)
+    if ir_count != 1:
+        report.fail("RC-015", ir_path, "irs", REPO_OPS_IR_ID, f"IR must exist exactly once (found {ir_count})")
+    elif ir.get("semantic_class") != REPO_OPS_CLASS:
+        report.fail("RC-015", ir_path, f"irs[{REPO_OPS_IR_ID}].semantic_class", ir.get("semantic_class"), f"must be {REPO_OPS_CLASS!r}")
+
+    transitions = [
+        item for item in ir_catalog.get("allowed_transitions") or []
+        if isinstance(item, dict)
+        and item.get("from") == REPO_OPS_IR_ID
+        and item.get("to") == "l9.target-ir/v1"
+    ]
+    if len(transitions) != 1:
+        report.fail("RC-015", ir_path, "allowed_transitions", REPO_OPS_IR_ID, f"IR -> target transition must exist exactly once (found {len(transitions)})")
+    else:
+        ops = set(transitions[0].get("operations") or [])
+        for required in ("binding_selection", "lowering"):
+            if required not in ops:
+                report.fail("RC-015", ir_path, "allowed_transitions.operations", required, "required repository-operations lowering operation missing")
+
+    technologies = (docs.get(technologies_path) or {}).get("technologies") or []
+    for technology in ("python", "toml", "makefile"):
+        _entry, count = _unique_entry(technologies, "id", technology)
+        if count != 1:
+            report.fail("RC-015", technologies_path, "technologies", technology, f"technology must exist exactly once (found {count})")
+
+    binding_list = (docs.get(bindings_path) or {}).get("bindings") or []
+    pyproject, py_count = _unique_entry(binding_list, "id", REPO_OPS_PYPROJECT_BINDING)
+    makefile, make_count = _unique_entry(binding_list, "id", REPO_OPS_MAKEFILE_BINDING)
+    for binding, count, binding_id, technology, artifact in (
+        (pyproject, py_count, REPO_OPS_PYPROJECT_BINDING, "toml", "pyproject.toml"),
+        (makefile, make_count, REPO_OPS_MAKEFILE_BINDING, "makefile", "Makefile"),
+    ):
+        if count != 1 or binding is None:
+            report.fail("RC-015", bindings_path, "bindings", binding_id, f"binding must exist exactly once (found {count})")
+            continue
+        if binding.get("source_ir") != REPO_OPS_CLASS:
+            report.fail("RC-015", bindings_path, f"{binding_id}.source_ir", binding.get("source_ir"), f"must consume {REPO_OPS_CLASS}")
+        if binding.get("target_ir") != "target_ir":
+            report.fail("RC-015", bindings_path, f"{binding_id}.target_ir", binding.get("target_ir"), "must produce target_ir")
+        target = binding.get("target") or {}
+        if target.get("technology") != technology:
+            report.fail("RC-015", bindings_path, f"{binding_id}.target.technology", target.get("technology"), f"must target {technology}")
+        if target.get("artifact") != artifact:
+            report.fail("RC-015", bindings_path, f"{binding_id}.target.artifact", target.get("artifact"), f"must target {artifact}")
+
+    if makefile is not None:
+        maps = makefile.get("maps")
+        expected_maps = {"build": "build", "test": "test", "validate": "validate"}
+        if maps != expected_maps:
+            report.fail("RC-015", bindings_path, f"{REPO_OPS_MAKEFILE_BINDING}.maps", maps, f"Makefile v1 map must be exactly {expected_maps}")
+
+    profile_list = (docs.get(profiles_path) or {}).get("projection_profiles") or []
+    profile, profile_count = _unique_entry(profile_list, "id", REPO_OPS_PROFILE)
+    if profile_count != 1 or profile is None:
+        report.fail("RC-015", profiles_path, "projection_profiles", REPO_OPS_PROFILE, f"profile must exist exactly once (found {profile_count})")
+    else:
+        if profile.get("class") != "consumer":
+            report.fail("RC-015", profiles_path, f"{REPO_OPS_PROFILE}.class", profile.get("class"), "must be consumer")
+        sources = profile.get("sources") or {}
+        required_selectors = {
+            "ir_catalog": {
+                '$.irs[?(@.id=="l9.repository-operations-ir/v1")]',
+                '$.irs[?(@.id=="l9.target-ir/v1")]',
+                '$.allowed_transitions[?(@.from=="l9.repository-operations-ir/v1")]',
+            },
+            "binding_catalog": {
+                '$.bindings[?(@.id=="l9.binding/repository-operations-pyproject@1")]',
+                '$.bindings[?(@.id=="l9.binding/repository-operations-makefile@1")]',
+            },
+            "technology_capabilities": {
+                '$.technologies[?(@.id=="python")]',
+                '$.technologies[?(@.id=="toml")]',
+                '$.technologies[?(@.id=="makefile")]',
+            },
+        }
+        all_selectors: list[str] = []
+        for source_name, required in required_selectors.items():
+            block = sources.get(source_name)
+            selectors = block.get("selectors") if isinstance(block, dict) else None
+            selector_set = set(map(str, selectors or []))
+            all_selectors.extend(map(str, selectors or []))
+            for selector in required:
+                if selector not in selector_set:
+                    report.fail("RC-015", profiles_path, f"{REPO_OPS_PROFILE}.sources.{source_name}.selectors", selector, "required selector missing")
+        if any('id=="node"' in selector or "package.json" in selector for selector in all_selectors):
+            report.fail("RC-015", profiles_path, f"{REPO_OPS_PROFILE}.sources", all_selectors, "Node/package.json semantics are outside repository-operations profile v1")
+        forbidden = set(profile.get("forbidden") or [])
+        missing_forbidden = sorted(REPO_OPS_FORBIDDEN - forbidden)
+        if missing_forbidden:
+            report.fail("RC-015", profiles_path, f"{REPO_OPS_PROFILE}.forbidden", missing_forbidden, "required forbidden semantics missing")
+
+    capabilities = (docs.get(capabilities_path) or {}).get("capabilities")
+    if capabilities != []:
+        report.fail("RC-015", capabilities_path, "capabilities", capabilities, "this slice must not globalize repository-operation capabilities")
+
+    technology_profiles = (docs.get(technology_profiles_path) or {}).get("profiles")
+    if technology_profiles != []:
+        report.fail("RC-015", technology_profiles_path, "profiles", technology_profiles, "this slice must not add a technology profile for repository build metadata")
+
+
+def _check_rc015_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    cases = []
+
+    case = copy.deepcopy(docs)
+    binding, _ = _unique_entry(case["semantics/binding_catalog.yaml"]["bindings"], "id", REPO_OPS_PYPROJECT_BINDING)
+    binding["target"]["technology"] = "unregistered-toml"
+    cases.append(("unregistered pyproject technology", case))
+
+    case = copy.deepcopy(docs)
+    binding, _ = _unique_entry(case["semantics/binding_catalog.yaml"]["bindings"], "id", REPO_OPS_MAKEFILE_BINDING)
+    binding["source_ir"] = "missing_repository_operations_ir"
+    cases.append(("Makefile binding missing IR", case))
+
+    case = copy.deepcopy(docs)
+    binding, _ = _unique_entry(case["semantics/binding_catalog.yaml"]["bindings"], "id", REPO_OPS_MAKEFILE_BINDING)
+    binding["maps"]["publish"] = "publish"
+    cases.append(("Makefile v1 adds publish", case))
+
+    case = copy.deepcopy(docs)
+    profile, _ = _unique_entry(case["semantics/projection_profiles.yaml"]["projection_profiles"], "id", REPO_OPS_PROFILE)
+    profile["sources"]["ir_catalog"]["selectors"] = [
+        selector for selector in profile["sources"]["ir_catalog"]["selectors"]
+        if REPO_OPS_IR_ID not in str(selector)
+    ]
+    cases.append(("profile omits repository operations IR", case))
+
+    case = copy.deepcopy(docs)
+    profile, _ = _unique_entry(case["semantics/projection_profiles.yaml"]["projection_profiles"], "id", REPO_OPS_PROFILE)
+    profile["sources"]["technology_capabilities"]["selectors"].append('$.technologies[?(@.id=="node")]')
+    cases.append(("profile adds Node/package.json concern", case))
+
+    case = copy.deepcopy(docs)
+    case["semantics/capabilities.yaml"]["capabilities"].append({"id": "l9.capability/repository-build"})
+    cases.append(("slice globalizes repository operation capability", case))
+
+    case = copy.deepcopy(docs)
+    case["semantics/technology_profiles.yaml"]["profiles"].append({"id": "repo-build", "language": "python", "transport": "none"})
+    cases.append(("slice adds transport-bearing repository technology profile", case))
+
+    for label, candidate in cases:
+        candidate_report = Report()
+        _evaluate_rc015(candidate, candidate_report)
+        if not candidate_report.failures:
+            report.fail("RC-015", "scripts/validate-semantics.py", "negative_case", label, "negative case did not fail closed")
+    if not any(f.startswith("FAIL RC-015 scripts/validate-semantics.py negative_case") for f in report.failures):
+        report.ok("RC-015-NEG", f"{len(cases)} repository-operations negative cases fail closed")
+
+
+def check_rc015(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc015(docs, report)
+    if len(report.failures) == before:
+        report.ok("RC-015", "repository operations IR, Python pyproject binding, Makefile v1 binding, target technologies, and consumer projection are structurally closed")
+        _check_rc015_negative_cases(docs, report)
+
+
+def check_rc006(
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
@@ -1787,6 +1976,7 @@ def main(argv: list[str]) -> int:
     check_rc012(docs, report)
     check_rc013(docs, report)
     check_rc014(docs, report)
+    check_rc015(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
