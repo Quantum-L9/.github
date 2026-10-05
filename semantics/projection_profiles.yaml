@@ -1084,6 +1084,58 @@ projection_profiles:
   - preserve_identity_dimension_distinction
   - preserve_identity_resolution_coordinates
   - do_not_project_governance_profile_as_identity
+- id: l9.projection/repository-operations-compiler@1
+  class: consumer
+  consumer: repository-operations-compiler
+  purpose: >-
+    Supply a repository operations compiler with the minimum canonical IR identity,
+    target bindings, target technology facts, authority boundaries, artifact classes,
+    and failure semantics required to lower an authority-resolved repository operations
+    IR into Python pyproject.toml and thin Makefile projections without exposing or
+    globalizing unrelated repository semantics.
+  sources:
+    ir_catalog:
+      selectors:
+      - '$.irs[?(@.id=="l9.repository-operations-ir/v1")]'
+      - '$.irs[?(@.id=="l9.target-ir/v1")]'
+      - '$.allowed_transitions[?(@.from=="l9.repository-operations-ir/v1")]'
+      - $.abstraction_rules
+    binding_catalog:
+      selectors:
+      - '$.bindings[?(@.id=="l9.binding/repository-operations-pyproject@1")]'
+      - '$.bindings[?(@.id=="l9.binding/repository-operations-makefile@1")]'
+      - $.compatibility
+    technology_capabilities:
+      selectors:
+      - '$.technologies[?(@.id=="python")]'
+      - '$.technologies[?(@.id=="toml")]'
+      - '$.technologies[?(@.id=="makefile")]'
+      - $.binding_rules
+    authority_model:
+      selectors:
+      - $.authority_classes
+      - $.compiler_authority
+      - $.escalation_rules
+    artifact_model:
+      selectors:
+      - $.artifacts.compiled_artifact
+      - $.artifacts.receipt
+      - $.authority_classes
+      - $.derivation_rules
+    error_taxonomy:
+      selectors:
+      - $.errors.semantic
+      - $.errors.compiler
+      - $.errors.binding
+  output:
+    schema: l9.projection.repository-operations-compiler/v1
+  forbidden:
+  - repository_specific_semantic_invention
+  - dependency_constraint_invention
+  - build_backend_invention
+  - target_artifact_as_semantic_authority
+  - node_or_package_json_semantics_in_first_version
+
 projection_engine_contract_ref:
   artifact: projection_engine_contract.yaml
   artifact_id: l9.compiler/projection-engine@1

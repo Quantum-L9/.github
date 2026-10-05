@@ -66,6 +66,58 @@ bindings:
   rules:
   - binding_declares_mapping
   - binding_does_not_perform_lowering
+- id: l9.binding/repository-operations-pyproject@1
+  class: target
+  source_ir: repository_operations_ir
+  target_ir: target_ir
+  target:
+    technology: toml
+    artifact: pyproject.toml
+    semantic_profile: python_project_metadata
+  maps:
+    package_identity: project_identity
+    version_declaration: project_version_or_dynamic_version
+    description: project_description
+    python_runtime_constraint: project_requires_python
+    dependency_intent: project_dependencies
+    optional_dependency_groups: project_optional_dependencies
+    cli_entrypoints: project_scripts
+    build_system: build_system
+    package_layout: package_discovery_configuration
+  rules:
+  - applies_only_when_python_ecosystem_is_resolved
+  - package_identity_must_resolve_from_authoritative_repository_or_product_input
+  - version_declaration_must_resolve_from_authoritative_versioning_intent
+  - build_backend_and_build_requirements_must_be_authoritatively_resolved
+  - dependency_ranges_and_groups_must_be_authoritatively_resolved
+  - observed_imports_must_not_invent_dependency_constraints
+  - projected_cli_entrypoint_must_be_authorized_and_observed_or_declared_build_output
+  - unresolved_required_project_metadata_fails_closed
+  - existing_pyproject_bytes_have_no_authority_or_preservation_privilege
+  - rendering_is_deterministic_and_semantically_noncreative
+- id: l9.binding/repository-operations-makefile@1
+  class: target
+  source_ir: repository_operations_ir
+  target_ir: target_ir
+  target:
+    technology: makefile
+    artifact: Makefile
+    semantic_profile: repository_operator_facade
+  maps:
+    build: build
+    test: test
+    validate: validate
+  rules:
+  - first_binding_version_renders_only_build_test_validate
+  - operation_must_be_resolved_and_applicable_before_target_is_emitted
+  - recipe_must_come_from_resolved_repository_operation_realization
+  - makefile_must_not_contain_unique_business_or_product_logic
+  - make_target_name_does_not_create_operation_semantics
+  - missing_unknown_blocked_or_not_applicable_operation_omits_target
+  - dummy_success_targets_are_forbidden
+  - existing_makefile_bytes_have_no_authority_or_preservation_privilege
+  - additional_operator_targets_require_a_successor_binding_version
+
 validation_binding_families:
 - LocalSATBinding
 - GraphConstraintBinding

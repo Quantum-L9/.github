@@ -91,6 +91,18 @@ irs:
   abstraction_level: 94
   purpose: Resolved static identity topology, applicable identity dimensions, binding obligations, dynamic IdentityResolution
     contract coordinates, and IdentityAssertion schema requirements compiled from ProductTopology and identity_model.yaml.
+- id: l9.repository-operations-ir/v1
+  semantic_class: repository_operations_ir
+  abstraction_level: 35
+  purpose: >-
+    Derived, authority-resolved repository operations representation that combines
+    repository-scoped operational intent with evidence-bound realization facts for
+    deterministic lowering into repository operational artifacts and sibling
+    documentation projections. Upstream authority coordinates remain controlling;
+    downstream disagreement is drift, same-level unresolved authority disagreement
+    remains conflict, unknown required values fail closed, and lowering does not
+    invent repository intent.
+
 allowed_transitions:
 - from: l9.contract-ir/v1
   to: l9.structural-requirements-ir/v1
@@ -200,6 +212,14 @@ allowed_transitions:
   - projection
   - synthesis
   - lowering
+- from: l9.repository-operations-ir/v1
+  to: l9.target-ir/v1
+  operations:
+  - binding_selection
+  - lowering
+  requires_additional_inputs:
+  - target_binding
+
 abstraction_rules:
 - ir_must_have_defined_semantics
 - ir_must_have_version
