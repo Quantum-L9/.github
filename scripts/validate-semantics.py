@@ -1805,7 +1805,6 @@ def check_rc015(docs: dict[str, dict], report: Report) -> None:
         _check_rc015_negative_cases(docs, report)
 
 
-def check_rc006(
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
