@@ -1188,18 +1188,18 @@ terms:
     detailed_model: strategic_plan_model.yaml
   strategic_target:
     semantic_class: strategic_direction
-    definition: A more concrete desired condition whose realization provides bounded strategic resolution toward one
-      or more Strategic Goals. It does not redefine objective.
+    definition: A more concrete desired condition, threshold, milestone, or recognizable state whose realization
+      provides bounded strategic resolution toward one or more Strategic Goals. It does not redefine objective.
     detailed_model: strategic_plan_model.yaml
   strategic_hypothesis:
     semantic_class: strategic_belief
-    definition: A Plan-owned epistemic causal claim about how conditions, capabilities, constraints, or actions are
-      believed to influence strategic realization. It is not authoritative external truth.
+    definition: A Plan-owned epistemic causal claim about how conditions, capabilities, constraints, actions, or
+      combinations thereof are believed to influence strategic realization. It is not authoritative external truth.
     detailed_model: strategic_plan_model.yaml
   strategic_commitment:
     semantic_class: strategic_direction
-    definition: A strategic path L9 has actually chosen to pursue under applicable strategic authority, as distinct
-      from a candidate path considered during reasoning.
+    definition: A strategic path, approach, or course of action L9 has actually chosen to pursue under applicable
+      strategic authority, as distinct from a candidate path considered during reasoning.
     detailed_model: strategic_plan_model.yaml
   affected_strategic_closure:
     semantic_class: strategic_reasoning_concept
