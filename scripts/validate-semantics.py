@@ -4063,6 +4063,276 @@ def check_rc018(docs: dict[str, dict], report: Report) -> None:
         _check_rc018_negative_cases(docs, report)
 
 
+# RC-019 Cursor-Governance identity projection closure. One consumer profile,
+# l9.projection/cursor-governance-identity@1, must project the canonical
+# ActorIdentity and SurfaceIdentity entries and their typed aliases from the
+# two canonical registries so the downstream deterministic projector can
+# resolve local actor_ref / surface_ref coordinates. The check governs this
+# exact profile coordinate only: it does not define an "identity" profile
+# family by name and does not cap how many Cursor-Governance profiles exist
+# (GAR-F-161001). It adds no actor, surface, alias, or identity dimension.
+CG_IDENTITY_PROFILE_ID = "l9.projection/cursor-governance-identity@1"
+CG_IDENTITY_OUTPUT_SCHEMA = "l9.projection.cursor-governance-identity/v1"
+ACTOR_REGISTRY_ARTIFACT_ID = "l9.actor-registry/global@1"
+SURFACE_REGISTRY_ARTIFACT_ID = "l9.surface-registry/global@1"
+# source name -> (canonical ledger path, artifact_id, required selectors)
+CG_IDENTITY_SOURCES = {
+    "actor_registry": (
+        ACTOR_REGISTRY_PATH,
+        ACTOR_REGISTRY_ARTIFACT_ID,
+        ("$.actors", "$.aliases"),
+    ),
+    "surface_registry": (
+        SURFACE_REGISTRY_PATH,
+        SURFACE_REGISTRY_ARTIFACT_ID,
+        ("$.surfaces", "$.aliases"),
+    ),
+}
+# The projection carries identity only. These boundaries stay downstream or
+# are owned by other ledgers, and the profile must say so.
+CG_IDENTITY_FORBIDDEN = {
+    "identity_ownership_transfer",
+    "credential_token_or_signing_key_semantics",
+    "role_permission_or_grant_semantics",
+    "actor_to_surface_assignment",
+    "adapter_provider_or_governance_profile_selection",
+    "runtime_marker_or_runtime_evidence_interpretation",
+    "execution_authority",
+}
+SIMPLE_SELECTOR = re.compile(
+    r"^\$\.([A-Za-z_][A-Za-z0-9_]*)(\.[A-Za-z_][A-Za-z0-9_]*|\[\*\])*$"
+)
+
+
+def _rc019_selector_root(selector: str) -> str | None:
+    """Top-level key a plain field / wildcard selector reads, or None when the
+    selector is not in the plain subset this check can resolve statically."""
+    match = SIMPLE_SELECTOR.match(selector)
+    return match.group(1) if match else None
+
+
+def _evaluate_rc019(docs: dict[str, dict], report: Report) -> None:
+    catalog = docs.get(PROFILES_PATH) or {}
+    profiles = catalog.get("projection_profiles")
+    profile, count = _unique_entry(profiles, "id", CG_IDENTITY_PROFILE_ID)
+    if count != 1 or profile is None:
+        report.fail(
+            "RC-019",
+            PROFILES_PATH,
+            "projection_profiles",
+            CG_IDENTITY_PROFILE_ID,
+            f"Cursor-Governance identity projection profile must exist exactly once (found {count})",
+        )
+        return
+    label = f"projection_profiles[{CG_IDENTITY_PROFILE_ID}]"
+    if profile.get("class") != "consumer":
+        report.fail(
+            "RC-019",
+            PROFILES_PATH,
+            f"{label}.class",
+            profile.get("class"),
+            "identity projection must be a consumer profile",
+        )
+    if profile.get("consumer") != CG_CONSUMER:
+        report.fail(
+            "RC-019",
+            PROFILES_PATH,
+            f"{label}.consumer",
+            profile.get("consumer"),
+            f"identity projection consumer must be exactly {CG_CONSUMER!r}",
+        )
+    output_schema = (profile.get("output") or {}).get("schema")
+    if output_schema != CG_IDENTITY_OUTPUT_SCHEMA:
+        report.fail(
+            "RC-019",
+            PROFILES_PATH,
+            f"{label}.output.schema",
+            output_schema,
+            f"output schema must be exactly {CG_IDENTITY_OUTPUT_SCHEMA!r}; it is the downstream consumer contract",
+        )
+    sources = profile.get("sources")
+    if not isinstance(sources, dict):
+        report.fail(
+            "RC-019",
+            PROFILES_PATH,
+            f"{label}.sources",
+            sources,
+            "profile sources must be a source-local selector mapping",
+        )
+        return
+    if set(sources) != set(CG_IDENTITY_SOURCES):
+        report.fail(
+            "RC-019",
+            PROFILES_PATH,
+            f"{label}.sources",
+            sorted(map(str, sources)),
+            f"identity projection sources must be exactly {sorted(CG_IDENTITY_SOURCES)}; "
+            "no other ledger may be substituted for or added beside the canonical registries",
+        )
+    source_classes = catalog.get("source_classes") or {}
+    for name, (ledger_path, artifact_id, required) in CG_IDENTITY_SOURCES.items():
+        if name not in sources:
+            continue
+        declared = (source_classes.get(name) or {}).get("canonical_artifact")
+        ledger = docs.get(ledger_path) or {}
+        if (
+            declared != ledger_path.removeprefix("semantics/")
+            or ledger.get("artifact_id") != artifact_id
+            or ledger.get("canonical") is not True
+        ):
+            report.fail(
+                "RC-019",
+                PROFILES_PATH,
+                f"source_classes.{name}.canonical_artifact",
+                declared,
+                f"source {name} must resolve to the canonical ledger {ledger_path} ({artifact_id})",
+            )
+            continue
+        block = sources.get(name)
+        selectors = block.get("selectors") if isinstance(block, dict) else None
+        if not isinstance(selectors, list) or not selectors:
+            report.fail(
+                "RC-019",
+                PROFILES_PATH,
+                f"{label}.sources.{name}.selectors",
+                selectors,
+                "source must own a non-empty selectors list",
+            )
+            continue
+        selector_set = set(map(str, selectors))
+        missing = sorted(set(required) - selector_set)
+        if missing:
+            report.fail(
+                "RC-019",
+                PROFILES_PATH,
+                f"{label}.sources.{name}.selectors",
+                missing,
+                f"identity projection must carry the canonical {name} entries and typed aliases",
+            )
+        for selector in sorted(selector_set):
+            root = _rc019_selector_root(selector)
+            if root is None or root not in ledger:
+                report.fail(
+                    "RC-019",
+                    PROFILES_PATH,
+                    f"{label}.sources.{name}.selectors",
+                    selector,
+                    f"selector does not resolve to a top-level section of {ledger_path}",
+                )
+    missing_forbidden = sorted(
+        CG_IDENTITY_FORBIDDEN - set(profile.get("forbidden") or [])
+    )
+    if missing_forbidden:
+        report.fail(
+            "RC-019",
+            PROFILES_PATH,
+            f"{label}.forbidden",
+            missing_forbidden,
+            "identity projection must declare the ownership boundaries it does not carry",
+        )
+
+
+def _check_rc019_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    field = f"projection_profiles[{CG_IDENTITY_PROFILE_ID}]"
+    cases = []
+
+    def mutated() -> tuple[dict, list, dict]:
+        case = copy.deepcopy(docs)
+        profiles = case[PROFILES_PATH]["projection_profiles"]
+        profile, _ = _unique_entry(profiles, "id", CG_IDENTITY_PROFILE_ID)
+        return case, profiles, profile
+
+    case, profiles, profile = mutated()
+    profiles.remove(profile)
+    cases.append(("target profile missing", case, "projection_profiles"))
+    case, profiles, profile = mutated()
+    profiles.append(copy.deepcopy(profile))
+    cases.append(("target profile duplicated", case, "projection_profiles"))
+    case, _, profile = mutated()
+    profile["consumer"] = "Quantum-L9/.github"
+    cases.append(("wrong consumer", case, f"{field}.consumer"))
+    case, _, profile = mutated()
+    profile["class"] = "governance"
+    cases.append(("wrong profile class", case, f"{field}.class"))
+    case, _, profile = mutated()
+    del profile["sources"]["actor_registry"]
+    cases.append(("actor_registry source missing", case, f"{field}.sources"))
+    case, _, profile = mutated()
+    del profile["sources"]["surface_registry"]
+    cases.append(("surface_registry source missing", case, f"{field}.sources"))
+    case, _, profile = mutated()
+    profile["sources"]["identity_model"] = profile["sources"].pop("actor_registry")
+    cases.append(
+        ("identity_model substituted for actor_registry", case, f"{field}.sources")
+    )
+    case, _, profile = mutated()
+    profile["sources"]["actor_registry"]["selectors"].remove("$.aliases")
+    cases.append(
+        (
+            "incomplete actor projection (aliases dropped)",
+            case,
+            f"{field}.sources.actor_registry.selectors",
+        )
+    )
+    case, _, profile = mutated()
+    profile["sources"]["surface_registry"]["selectors"].remove("$.surfaces")
+    cases.append(
+        (
+            "incomplete surface projection (entries dropped)",
+            case,
+            f"{field}.sources.surface_registry.selectors",
+        )
+    )
+    case, _, profile = mutated()
+    profile["sources"]["actor_registry"]["selectors"].append("$.credentials")
+    cases.append(
+        (
+            "selector names a section the actor registry does not have",
+            case,
+            f"{field}.sources.actor_registry.selectors",
+        )
+    )
+    case, _, profile = mutated()
+    profile["output"]["schema"] = "l9.projection.cursor-governance-identity/v2"
+    cases.append(("wrong output schema", case, f"{field}.output.schema"))
+    case, _, profile = mutated()
+    profile["forbidden"].remove("identity_ownership_transfer")
+    cases.append(("ownership boundary dropped", case, f"{field}.forbidden"))
+    for label, candidate, field_name in cases:
+        candidate_report = Report()
+        _evaluate_rc019(candidate, candidate_report)
+        prefix = f"FAIL RC-019 {PROFILES_PATH} {field_name}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-019",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {PROFILES_PATH} {field_name}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-019 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-019-NEG",
+            f"{len(cases)} identity projection negative cases fail closed for their intended reason",
+        )
+
+
+def check_rc019(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc019(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-019",
+            f"{CG_IDENTITY_PROFILE_ID} exists once as a Cursor-Governance consumer profile, projects the "
+            "canonical actor and surface entries and typed aliases from the two canonical registries only, "
+            f"emits {CG_IDENTITY_OUTPUT_SCHEMA}, and declares its ownership boundaries",
+        )
+        _check_rc019_negative_cases(docs, report)
+
+
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
@@ -4237,6 +4507,7 @@ def main(argv: list[str]) -> int:
     check_rc016(docs, report)
     check_rc017(docs, report)
     check_rc018(docs, report)
+    check_rc019(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
