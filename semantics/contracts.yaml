@@ -494,7 +494,8 @@ contracts:
     unresolved: source_or_projection_contract_cannot_be_resolved
 - id: l9.contract/validation-and-correctness@1
   purpose: 'Keep validation and conformance observational, bind them to correctness criteria independent of the
-    candidate and its production path, and prevent validators from changing candidates or governing criteria.
+    candidate and its production path, prevent validators from changing candidates or governing criteria, and
+    make success depend on complete, evidence-bound evaluation of every applicable required criterion.
 
     '
   scope: global
@@ -504,6 +505,7 @@ contracts:
   - L9-CORRECTNESS-001
   - L9-EVIDENCE-001
   - L9-UNKNOWN-001
+  - L9-ASSURANCE-001
   applies_to:
   - validators
   - conformance_systems
@@ -520,6 +522,9 @@ contracts:
   - candidate_or_its_production_path_is_not_the_sole_correctness_authority
   - validation_does_not_alter_relax_substitute_or_reinterpret_governing_criteria
   - unresolved_validation_semantics_remain_unresolved
+  - validation_success_requires_every_applicable_required_criterion_to_be_evaluated_and_satisfied
+  - unavailable_unreadable_unexecuted_or_unresolved_required_criteria_preclude_success
+  - validation_coverage_is_explicit_and_evidence_bound
   forbidden:
   - repair_during_validation
   - constraint_relaxation_during_validation
@@ -527,10 +532,13 @@ contracts:
   - reinterpretation_to_obtain_success
   - candidate_or_production_path_defined_correctness_as_the_only_criterion
   - unknown_to_success_coercion
+  - silent_skip_of_applicable_required_validation
+  - default_success_on_missing_unreadable_unexecuted_or_unresolved_required_validation
+  - partial_validation_coverage_reported_as_complete
   outcomes:
-    satisfied: evidence_supports_the_candidate_against_declared_criteria
+    satisfied: every_applicable_required_criterion_was_evaluated_and_evidence_supports_the_candidate_against_each
     rejected: evidence_refutes_the_candidate_against_declared_criteria
-    unresolved: validation_cannot_resolve_the_candidate_against_declared_criteria
+    unresolved: validation_cannot_resolve_the_candidate_against_every_applicable_required_criterion
 - id: l9.contract/capability-state@1
   purpose: 'Preserve the distinction among capability declaration, admission, availability, authorization, and invocability.
 

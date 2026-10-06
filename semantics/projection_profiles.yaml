@@ -443,11 +443,18 @@ projection_profiles:
     lifecycle:
       selectors:
       - $.lifecycles
+    invariants:
+      selectors:
+      - $.invariants[?(@.scope=="global")]
     contracts:
       selectors:
       - $.contracts[*].id
       - $.contracts[*].purpose
       - $.contracts[*].scope
+      - $.contracts[*].source_invariants
+      - $.contracts[*].requires
+      - $.contracts[*].guarantees
+      - $.contracts[*].forbidden
       - $.contracts[*].outcomes
     error_taxonomy:
       selectors:

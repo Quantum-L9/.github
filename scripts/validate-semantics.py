@@ -3238,7 +3238,9 @@ def _check_rc017_negative_cases(docs: dict[str, dict], report: Report) -> None:
     )
 
     case, contract = mutated_contract()
-    contract["outcomes"]["partially_satisfied"] = "some_required_criteria_were_evaluated"
+    contract["outcomes"]["partially_satisfied"] = (
+        "some_required_criteria_were_evaluated"
+    )
     cases.append(
         (
             "new result taxonomy key added to outcomes",

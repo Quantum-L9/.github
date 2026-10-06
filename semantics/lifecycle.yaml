@@ -17,11 +17,11 @@ derivation:
     admission: canonical_active
   - artifact: contracts.yaml
     artifact_id: l9.contracts/global@1
-    sha256: f19481596e2ec75c46495158fa7a36f2a9f7b8eac4b0357cfb7a08ceb10e6034
+    sha256: 1f6fbe4582d612b89e48a0e9f286bc307cc65e24d23dd8906f7d673284266bac
     admission: canonical_active
   - artifact: capabilities.yaml
     artifact_id: l9.capabilities/global@1
-    sha256: 64eeb55516e90d167990e20e16e5aeb455fc3548ef828c9b6aa94a74f8a03efd
+    sha256: 9d0e0f0b5802f3ba6cf51b52fdf7e125a42afcdad29000d6175e2fedadbe0aa0
     admission: canonical_active
   rule: 'Define typed lifecycle families already evidenced by the L9 semantic corpus. No universal state machine
     is imposed, and capability-state dimensions are not converted into lifecycle stages.
