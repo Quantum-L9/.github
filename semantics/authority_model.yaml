@@ -187,7 +187,7 @@ strategic_cognition_authority:
   detailed_model: strategic_cognition_model.yaml
   invariant_ref: L9-STRATEGY-001
   strategic_plan_owner: plan_keeper
-  strategic_plan_authority_source: explicitly_granted_strategic_scope
+  strategic_plan_authority_source: explicitly_granted_strategic_authority
   strategic_plan_reasoning_analysis_owner: strategic_plan_metacognitive_reasoner
   metacognition_denied:
   - strategic_plan_mutation

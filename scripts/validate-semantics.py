@@ -1825,7 +1825,15 @@ STRATEGY_TERMS = (
     METACOGNITIVE_REASONER,
     "current_meta_view",
 )
+STRATEGY_AUTHORITY_SOURCE = "explicitly_granted_strategic_authority"
+STRATEGY_RESOLUTION_REF = "authority_model.yaml#strategic_cognition_authority"
+STRATEGY_COMPILER_BOUNDARY_REF = "vocabulary.yaml#stage_rules.reasoning_plane_rule"
 METACOGNITION_DENIED = {"strategic_plan_mutation", "strategic_plan_supersession", "strategic_authority"}
+PLAN_KEEPER_MAY_NOT = {
+    "acquire_truth_source_ownership_by_consuming_projections",
+    "derive_authority_from_reasoning_capability",
+    "become_execution_or_implementation_authority_by_implication",
+}
 METACOGNITION_MAY_NOT = {
     "modify_strategic_plan",
     "supersede_plan_keeper",
@@ -1920,8 +1928,11 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
         report.fail("RC-016", model_path, f"roles.{PLAN_KEEPER}.owns", keeper.get("owns"), "Plan Keeper owns the Strategic Plan and nothing else; consuming projections transfers no truth-source ownership")
     if "underlying_truth_sources" not in (keeper.get("does_not_own") or []):
         report.fail("RC-016", model_path, f"roles.{PLAN_KEEPER}.does_not_own", keeper.get("does_not_own"), "Plan Keeper must not own underlying truth sources")
-    if keeper.get("authority_source") != "explicitly_granted_strategic_authority":
+    if keeper.get("authority_source") != STRATEGY_AUTHORITY_SOURCE:
         report.fail("RC-016", model_path, f"roles.{PLAN_KEEPER}.authority_source", keeper.get("authority_source"), "Plan Keeper authority must come only from explicitly granted strategic authority")
+    missing_keeper_denials = sorted(PLAN_KEEPER_MAY_NOT - set(keeper.get("may_not") or []))
+    if missing_keeper_denials:
+        report.fail("RC-016", model_path, f"roles.{PLAN_KEEPER}.may_not", missing_keeper_denials, "required Plan Keeper prohibitions missing")
 
     if reasoner.get("owns") != ["strategic_plan_reasoning_analysis"]:
         report.fail("RC-016", model_path, f"roles.{METACOGNITIVE_REASONER}.owns", reasoner.get("owns"), "Reasoner owns only analysis of Strategic Plan reasoning")
@@ -1949,6 +1960,7 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
     relation = separation.get("teaching_relation") or {}
     if (
         separation.get("invariant_ref") != STRATEGY_INVARIANT_ID
+        or separation.get("resolution_ref") != STRATEGY_RESOLUTION_REF
         or separation.get("strategic_plan_owner") != PLAN_KEEPER
         or separation.get("strategic_plan_reasoning_analysis_owner") != METACOGNITIVE_REASONER
         or relation.get("from") != METACOGNITIVE_REASONER
@@ -1959,6 +1971,12 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
     resolution = (docs.get(authority_path) or {}).get("strategic_cognition_authority") or {}
     if resolution.get("strategic_plan_owner") != PLAN_KEEPER or resolution.get("global_semantics_owner") != STRATEGY_OWNER:
         report.fail("RC-016", authority_path, "strategic_cognition_authority.strategic_plan_owner", resolution.get("strategic_plan_owner"), "authority model must resolve the Strategic Plan to the Plan Keeper")
+    if (
+        resolution.get("detailed_model") != model_path.removeprefix("semantics/")
+        or resolution.get("invariant_ref") != STRATEGY_INVARIANT_ID
+        or resolution.get("strategic_plan_authority_source") != keeper.get("authority_source")
+    ):
+        report.fail("RC-016", authority_path, "strategic_cognition_authority.detailed_model", resolution.get("detailed_model"), "authority resolution must reference the model and invariant and agree with the Plan Keeper authority source")
     if resolution.get("strategic_plan_reasoning_analysis_owner") != METACOGNITIVE_REASONER:
         report.fail("RC-016", authority_path, "strategic_cognition_authority.strategic_plan_reasoning_analysis_owner", resolution.get("strategic_plan_reasoning_analysis_owner"), "authority model must resolve Strategic Plan reasoning analysis to the Reasoner")
     missing_denied = sorted(METACOGNITION_DENIED - set(resolution.get("metacognition_denied") or []))
@@ -1989,7 +2007,12 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
         report.fail("RC-016", artifacts_path, "artifacts", "current_meta_view", "Current Meta View must not be a new artifact class")
 
     plane = model.get("plane") or {}
-    if plane.get("conceptual_plane") != "reasoning_plane" or plane.get("semantic_compiler_owner") is not False or plane.get("runtime_owned_here") is not False:
+    if (
+        plane.get("conceptual_plane") != "reasoning_plane"
+        or plane.get("semantic_compiler_owner") is not False
+        or plane.get("runtime_owned_here") is not False
+        or plane.get("compiler_boundary_ref") != STRATEGY_COMPILER_BOUNDARY_REF
+    ):
         report.fail("RC-016", model_path, "plane", plane, "Strategic Cognition belongs to the Reasoning Plane, is not compiler-owned, and owns no runtime")
     vocabulary = docs.get(vocabulary_path) or {}
     reasoning_rule = (vocabulary.get("stage_rules") or {}).get("reasoning_plane_rule") or {}
