@@ -691,6 +691,8 @@ def check_sc008(root: Path, release: str | None, report: Report) -> None:
 # The validator's own path, used as the receipt location for negative-case
 # batches that prove a closure check fails closed.
 VALIDATOR_PATH = "scripts/validate-semantics.py"
+# Field label for a ledger's canonical owner, reported by RC-016 and RC-018.
+AUTHORITY_OWNER_FIELD = "authority.owner"
 
 DERIVATION_ITEM_KEYS = {
     "invariants.yaml": "invariants",
@@ -2072,7 +2074,7 @@ def _rc016_ledger(docs: dict[str, dict], report: Report) -> dict:
         report.fail(
             "RC-016",
             model_path,
-            "authority.owner",
+            AUTHORITY_OWNER_FIELD,
             authority.get("owner"),
             f"Strategic Cognition semantics are owned by {STRATEGY_OWNER}",
         )
@@ -2715,7 +2717,7 @@ def _check_rc016_negative_cases(docs: dict[str, dict], report: Report) -> None:
             "Strategic Cognition owned by Semantic Compiler",
             case,
             model,
-            "authority.owner",
+            AUTHORITY_OWNER_FIELD,
         )
     )
 
@@ -3343,6 +3345,724 @@ def check_rc017(docs: dict[str, dict], report: Report) -> None:
         _check_rc017_negative_cases(docs, report)
 
 
+# RC-018 Strategic Plan semantic closure. The Strategic Plan model owns exactly
+# four primitives, five relation meanings, and Affected Strategic Closure. It
+# reuses the Strategic Plan concept, Plan Keeper ownership, objective, Strategic
+# Intent, and lifecycle supersession by reference instead of redefining them,
+# and it carries no representation. Every criterion is evaluated on every run:
+# an absent section is a failure, never a skip
+# (l9.contract/validation-and-correctness@1).
+PLAN_MODEL_PATH = "semantics/strategic_plan_model.yaml"
+PLAN_MODEL_ID = "l9.strategic-plan-model/global@1"
+PLAN_SOURCE_ID = "l9.source/strategic-plan-model@1"
+PLAN_SCOPE = "l9_global_strategic_plan_semantics"
+PLAN_MODEL_NAME = PLAN_MODEL_PATH.removeprefix("semantics/")
+PLAN_CONCEPT_FIELD = "concepts.strategic_plan"
+LIFECYCLE_PATH = "semantics/lifecycle.yaml"
+# Model sections admitted by v3.10.0, exactly. A missing section is a coverage
+# failure; an extra one is out of scope.
+PLAN_MODEL_KEYS = {
+    "schema",
+    "artifact_id",
+    "canonical",
+    "authority",
+    "canonical_source",
+    "governed_by",
+    "purpose",
+    "subject",
+    "global_rules",
+    "primitives",
+    "reused_concepts",
+    "relations",
+    "relation_rules",
+    "reasoning_concepts",
+}
+PLAN_SUBJECT = {
+    "concept_ref": "strategic_cognition_model.yaml#concepts.strategic_plan",
+    "resolution_ref": STRATEGY_RESOLUTION_REF,
+}
+PLAN_PRIMITIVES = {
+    "strategic_goal",
+    "strategic_target",
+    "strategic_hypothesis",
+    "strategic_commitment",
+}
+PLAN_PRIMITIVE_KEYS = {"definition", "question"}
+PLAN_MEANING_RELATIONS = {"advances", "enables", "depends_on", "conflicts_with"}
+PLAN_SUPERSEDES = {"semantics_ref": "lifecycle.yaml#lifecycle_relations.supersedes"}
+PLAN_RELATIONS = PLAN_MEANING_RELATIONS | {"supersedes"}
+PLAN_RELATION_RULES = {
+    "relations_do_not_transfer_ownership_or_authority",
+    "material_causal_enables_claims_remain_attributable_to_a_strategic_hypothesis",
+}
+PLAN_GLOBAL_RULES = {
+    "strategic_plan_owns_strategy_not_reality",
+    "strategic_hypothesis_is_plan_owned_belief_not_authoritative_truth",
+    "reality_change_may_require_reconsideration_but_never_directly_modifies_or_invalidates_strategic_plan",
+    "reasoning_workspace_content_is_not_strategic_plan_content_without_authorized_decision",
+    "planning_horizon_does_not_create_primitive_types",
+    "compound_causal_claims_are_expressible_by_one_strategic_hypothesis",
+    "outcome_of_one_primitive_does_not_establish_correctness_of_another",
+}
+PLAN_REUSED_CONCEPTS = {
+    "objective": "vocabulary.yaml#terms.objective",
+    "strategic_intent": "strategic_cognition_model.yaml#concepts.strategic_intent",
+}
+PLAN_CLOSURE = "affected_strategic_closure"
+PLAN_CLOSURE_KEYS = {"definition", "purpose", "may_not"}
+PLAN_CLOSURE_MAY_NOT = {
+    "decide_strategy",
+    "modify_strategic_plan",
+    "invalidate_strategic_plan",
+    "mark_dependent_strategy_stale_automatically",
+}
+PLAN_TERMS = (*sorted(PLAN_PRIMITIVES), PLAN_CLOSURE)
+# Representation the model leaves to a later campaign. None of these keys may
+# appear at any depth of the ledger.
+PLAN_REPRESENTATION_KEYS = {
+    "fields",
+    "properties",
+    "required",
+    "schema_ref",
+    "identifier",
+    "id_format",
+    "confidence",
+    "probability",
+    "horizon",
+    "duration",
+    "date",
+    "endpoints",
+    "endpoint_types",
+    "source_types",
+    "target_types",
+}
+
+
+def _mapping(value: object) -> dict:
+    """``value`` when it is a mapping, else an empty one.
+
+    A malformed nested block must surface as a located failure on the fields
+    its consumer requires, never as an AttributeError that aborts validation.
+    """
+    return value if isinstance(value, dict) else {}
+
+
+def _list(value: object) -> list:
+    """``value`` when it is a list, else an empty one (see ``_mapping``)."""
+    return value if isinstance(value, list) else []
+
+
+def _resolve_ref(docs: dict[str, dict], ref: str) -> object:
+    """Resolve ``<ledger>.yaml#a.b.c`` against parsed ledgers; None if absent."""
+    name, _, anchor = ref.partition("#")
+    node: object = docs.get(f"semantics/{name}")
+    for part in anchor.split(".") if anchor else []:
+        node = node.get(part) if isinstance(node, dict) else None
+    return node
+
+
+def _rc018_ledger(docs: dict[str, dict], report: Report) -> dict:
+    holders = [
+        path for path, doc in docs.items() if doc.get("artifact_id") == PLAN_MODEL_ID
+    ]
+    if holders != [PLAN_MODEL_PATH]:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "artifact_id",
+            holders,
+            f"{PLAN_MODEL_ID} must be declared exactly once, by {PLAN_MODEL_PATH}",
+        )
+    model = docs.get(PLAN_MODEL_PATH) or {}
+    authority = _mapping(model.get("authority"))
+    if model.get("canonical") is not True:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "canonical",
+            model.get("canonical"),
+            "Strategic Plan ledger must be canonical",
+        )
+    if authority.get("owner") != STRATEGY_OWNER:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            AUTHORITY_OWNER_FIELD,
+            authority.get("owner"),
+            f"Strategic Plan semantics are owned by {STRATEGY_OWNER}",
+        )
+    if authority.get("scope") != PLAN_SCOPE:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "authority.scope",
+            authority.get("scope"),
+            f"must be {PLAN_SCOPE!r}",
+        )
+    if authority.get("authority_class") != "canonical":
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "authority.authority_class",
+            authority.get("authority_class"),
+            "must be canonical",
+        )
+    if set(model) != PLAN_MODEL_KEYS:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "keys",
+            {
+                "missing": sorted(PLAN_MODEL_KEYS - set(model)),
+                "extra": sorted(set(model) - PLAN_MODEL_KEYS),
+            },
+            "model must declare exactly the admitted Strategic Plan sections",
+        )
+    return model
+
+
+def _rc018_registration(docs: dict[str, dict], report: Report) -> None:
+    registry_path = "semantics/canonical_sources.yaml"
+    manifest_path = "semantics/generic_compiler_manifest.yaml"
+    sources = _list(_mapping(docs.get(registry_path)).get("sources"))
+    registered = [
+        s for s in sources if isinstance(s, dict) and s.get("path") == PLAN_MODEL_PATH
+    ]
+    expected = {
+        "id": PLAN_SOURCE_ID,
+        "canonical": True,
+        "projection_allowed": True,
+        "derivation_allowed": False,
+    }
+    if len(registered) != 1 or any(
+        registered[0].get(key) != value for key, value in expected.items()
+    ):
+        report.fail(
+            "RC-018",
+            registry_path,
+            "sources",
+            registered,
+            f"ledger must be registered exactly once as {expected}",
+        )
+    requires = _mapping(_mapping(docs.get(manifest_path)).get("requires"))
+    classes = [
+        cls
+        for cls, names in requires.items()
+        if isinstance(names, list) and PLAN_MODEL_NAME in names
+    ]
+    if classes != ["semantic_catalogs"]:
+        report.fail(
+            "RC-018",
+            manifest_path,
+            "requires",
+            classes,
+            "ledger must be classified exactly once, as a semantic catalog",
+        )
+
+
+def _string_list(value: object) -> list[str] | None:
+    """Return ``value`` when it is a list of strings, else None (malformed)."""
+    if isinstance(value, list) and all(isinstance(item, str) for item in value):
+        return value
+    return None
+
+
+def _rc018_governance(model: dict, docs: dict[str, dict], report: Report) -> None:
+    governed = _mapping(model.get("governed_by"))
+    invariant_ids = {
+        i.get("id")
+        for i in _list(_mapping(docs.get(INVARIANTS_PATH)).get("invariants"))
+        if isinstance(i, dict)
+    }
+    cited = _string_list(governed.get("invariants"))
+    if (
+        cited is None
+        or STRATEGY_INVARIANT_ID not in cited
+        or not set(cited) <= invariant_ids
+    ):
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "governed_by.invariants",
+            governed.get("invariants"),
+            f"must cite {STRATEGY_INVARIANT_ID} and only existing invariants",
+        )
+    contract_ids = {
+        c.get("id")
+        for c in _list(_mapping(docs.get(CONTRACTS_PATH)).get("contracts"))
+        if isinstance(c, dict)
+    }
+    contracts = _string_list(governed.get("contracts"))
+    if not contracts or not set(contracts) <= contract_ids:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "governed_by.contracts",
+            governed.get("contracts"),
+            "must cite existing contracts only",
+        )
+
+
+def _rc018_subject(model: dict, docs: dict[str, dict], report: Report) -> None:
+    if model.get("subject") != PLAN_SUBJECT:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "subject",
+            model.get("subject"),
+            f"Strategic Plan content must anchor to the existing concept and authority resolution {PLAN_SUBJECT}",
+        )
+    plan = _resolve_ref(docs, PLAN_SUBJECT["concept_ref"])
+    plan = plan if isinstance(plan, dict) else {}
+    if (
+        plan.get("owner_role") != PLAN_KEEPER
+        or plan.get("content_defined_here") is not False
+        or plan.get("structure_defined_here") is not False
+    ):
+        report.fail(
+            "RC-018",
+            STRATEGY_MODEL_PATH,
+            PLAN_CONCEPT_FIELD,
+            plan,
+            "Strategic Plan stays owned by the Plan Keeper and its content and structure stay undefined there",
+        )
+    resolution = _resolve_ref(docs, PLAN_SUBJECT["resolution_ref"])
+    resolution = resolution if isinstance(resolution, dict) else {}
+    if resolution.get("strategic_plan_owner") != PLAN_KEEPER:
+        report.fail(
+            "RC-018",
+            STRATEGY_AUTHORITY_PATH,
+            "strategic_cognition_authority.strategic_plan_owner",
+            resolution.get("strategic_plan_owner"),
+            "Strategic Plan ownership must resolve to the Plan Keeper",
+        )
+
+
+def _rc018_rule_set(
+    rules: object, admitted: set[str], field: str, report: Report
+) -> None:
+    rules = rules if isinstance(rules, dict) else {}
+    if set(rules) != admitted or any(value is not True for value in rules.values()):
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            field,
+            rules,
+            f"must declare exactly the admitted rules, each true: {sorted(admitted)}",
+        )
+
+
+def _rc018_primitives(model: dict, report: Report) -> None:
+    primitives = model.get("primitives")
+    primitives = primitives if isinstance(primitives, dict) else {}
+    if set(primitives) != PLAN_PRIMITIVES:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "primitives",
+            sorted(primitives),
+            f"exactly four Plan-owned primitives are admitted: {sorted(PLAN_PRIMITIVES)}",
+        )
+    for name in sorted(PLAN_PRIMITIVES & set(primitives)):
+        entry = primitives[name]
+        if (
+            not isinstance(entry, dict)
+            or set(entry) != PLAN_PRIMITIVE_KEYS
+            or not all(isinstance(v, str) and v.strip() for v in entry.values())
+        ):
+            report.fail(
+                "RC-018",
+                PLAN_MODEL_PATH,
+                f"primitives.{name}",
+                entry,
+                "primitive declares exactly a definition and a characteristic question",
+            )
+
+
+def _rc018_reused_concepts(model: dict, docs: dict[str, dict], report: Report) -> None:
+    reused = model.get("reused_concepts")
+    reused = reused if isinstance(reused, dict) else {}
+    if set(reused) != set(PLAN_REUSED_CONCEPTS):
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "reused_concepts",
+            sorted(reused),
+            f"exactly {sorted(PLAN_REUSED_CONCEPTS)} are reused, and none is owned here",
+        )
+    for name, ref in sorted(PLAN_REUSED_CONCEPTS.items()):
+        if reused.get(name) != {"concept_ref": ref, "owned_here": False}:
+            report.fail(
+                "RC-018",
+                PLAN_MODEL_PATH,
+                f"reused_concepts.{name}",
+                reused.get(name),
+                f"must reference {ref} with owned_here false",
+            )
+    objective = _resolve_ref(docs, PLAN_REUSED_CONCEPTS["objective"])
+    objective = objective if isinstance(objective, dict) else {}
+    if (
+        objective.get("semantic_class") != "optimization"
+        or objective.get("detailed_model") == PLAN_MODEL_NAME
+    ):
+        report.fail(
+            "RC-018",
+            VOCABULARY_PATH,
+            "terms.objective",
+            objective,
+            "objective remains the existing optimization criterion and is not redefined by the Strategic Plan",
+        )
+    intent = _resolve_ref(docs, PLAN_REUSED_CONCEPTS["strategic_intent"])
+    if not isinstance(intent, dict) or intent.get("owned_here") is not False:
+        report.fail(
+            "RC-018",
+            STRATEGY_MODEL_PATH,
+            "concepts.strategic_intent",
+            intent,
+            "Strategic Intent remains upstream of the Strategic Plan",
+        )
+
+
+def _rc018_relations(model: dict, docs: dict[str, dict], report: Report) -> None:
+    relations = model.get("relations")
+    relations = relations if isinstance(relations, dict) else {}
+    if set(relations) != PLAN_RELATIONS:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "relations",
+            sorted(relations),
+            f"exactly five strategic relations are admitted: {sorted(PLAN_RELATIONS)}",
+        )
+    for name in sorted(PLAN_MEANING_RELATIONS & set(relations)):
+        entry = relations[name]
+        meaning = entry.get("meaning") if isinstance(entry, dict) else None
+        if set(entry or {}) != {"meaning"} or not (
+            isinstance(meaning, str) and meaning.strip()
+        ):
+            report.fail(
+                "RC-018",
+                PLAN_MODEL_PATH,
+                f"relations.{name}",
+                entry,
+                "relation declares its admitted meaning only; endpoint typing is not admitted",
+            )
+    if "supersedes" in relations and relations["supersedes"] != PLAN_SUPERSEDES:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "relations.supersedes",
+            relations["supersedes"],
+            f"supersedes reuses lifecycle supersession: {PLAN_SUPERSEDES}",
+        )
+    lifecycle_supersedes = _resolve_ref(docs, PLAN_SUPERSEDES["semantics_ref"])
+    if not isinstance(lifecycle_supersedes, dict) or not lifecycle_supersedes.get(
+        "semantics"
+    ):
+        report.fail(
+            "RC-018",
+            LIFECYCLE_PATH,
+            "lifecycle_relations.supersedes",
+            lifecycle_supersedes,
+            "reused supersession semantics must exist",
+        )
+    _rc018_rule_set(
+        model.get("relation_rules"), PLAN_RELATION_RULES, "relation_rules", report
+    )
+
+
+def _rc018_closure(model: dict, report: Report) -> None:
+    concepts = model.get("reasoning_concepts")
+    concepts = concepts if isinstance(concepts, dict) else {}
+    if set(concepts) != {PLAN_CLOSURE}:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "reasoning_concepts",
+            sorted(concepts),
+            f"{PLAN_CLOSURE} is the single admitted strategic reasoning concept",
+        )
+    closure = concepts.get(PLAN_CLOSURE)
+    closure = closure if isinstance(closure, dict) else {}
+    field = f"reasoning_concepts.{PLAN_CLOSURE}"
+    if set(closure) != PLAN_CLOSURE_KEYS or not all(
+        isinstance(closure.get(key), str) and closure[key].strip()
+        for key in ("definition", "purpose")
+    ):
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            field,
+            closure,
+            "closure declares exactly a definition, a purpose, and its prohibitions",
+        )
+    may_not = _string_list(closure.get("may_not"))
+    if (
+        may_not is None
+        or len(may_not) != len(set(may_not))
+        or set(may_not) != PLAN_CLOSURE_MAY_NOT
+    ):
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            f"{field}.may_not",
+            closure.get("may_not"),
+            f"closure identifies reconsideration and may not {sorted(PLAN_CLOSURE_MAY_NOT)}",
+        )
+
+
+def _key_paths(node: object, trail: str = ""):
+    """Yield ``(dotted_path, key)`` for every mapping key at any depth."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            path = f"{trail}.{key}" if trail else str(key)
+            yield path, str(key)
+            yield from _key_paths(value, path)
+    elif isinstance(node, list):
+        for index, item in enumerate(node):
+            yield from _key_paths(item, f"{trail}[{index}]")
+
+
+def _rc018_representation(model: dict, report: Report) -> None:
+    found = [path for path, key in _key_paths(model) if key in PLAN_REPRESENTATION_KEYS]
+    if found:
+        report.fail(
+            "RC-018",
+            PLAN_MODEL_PATH,
+            "representation_keys",
+            found,
+            "Strategic Plan representation is not admitted by the semantic model",
+        )
+
+
+def _rc018_terms(docs: dict[str, dict], report: Report) -> None:
+    terms = _mapping(_mapping(docs.get(VOCABULARY_PATH)).get("terms"))
+    for term in PLAN_TERMS:
+        if _mapping(terms.get(term)).get("detailed_model") != PLAN_MODEL_NAME:
+            report.fail(
+                "RC-018",
+                VOCABULARY_PATH,
+                f"terms.{term}",
+                terms.get(term),
+                "Strategic Plan term must exist and defer to the Strategic Plan model",
+            )
+
+
+def _evaluate_rc018(docs: dict[str, dict], report: Report) -> None:
+    model = _rc018_ledger(docs, report)
+    _rc018_registration(docs, report)
+    _rc018_governance(model, docs, report)
+    _rc018_subject(model, docs, report)
+    _rc018_rule_set(
+        model.get("global_rules"), PLAN_GLOBAL_RULES, "global_rules", report
+    )
+    _rc018_primitives(model, report)
+    _rc018_reused_concepts(model, docs, report)
+    _rc018_relations(model, docs, report)
+    _rc018_closure(model, report)
+    _rc018_representation(model, report)
+    _rc018_terms(docs, report)
+
+
+def _check_rc018_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    model = PLAN_MODEL_PATH
+    closure = f"reasoning_concepts.{PLAN_CLOSURE}"
+    cases = []
+
+    def mutated() -> tuple[dict, dict]:
+        case = copy.deepcopy(docs)
+        return case, case[model]
+
+    case, ledger = mutated()
+    ledger["primitives"]["strategic_milestone"] = {"definition": "x", "question": "y"}
+    cases.append(("fifth Plan-owned primitive", case, model, "primitives"))
+
+    case, ledger = mutated()
+    ledger["primitives"]["strategic_objective"] = {"definition": "x", "question": "y"}
+    cases.append(
+        ("strategic_objective duplicates objective", case, model, "primitives")
+    )
+
+    case, ledger = mutated()
+    ledger["reused_concepts"]["capability"] = {
+        "concept_ref": "capabilities.yaml#capabilities",
+        "owned_here": True,
+    }
+    cases.append(("Strategic Plan absorbs Capability", case, model, "reused_concepts"))
+
+    case, ledger = mutated()
+    ledger["reused_concepts"]["objective"]["owned_here"] = True
+    cases.append(
+        ("objective redefined as Plan-owned", case, model, "reused_concepts.objective")
+    )
+
+    case, ledger = mutated()
+    ledger["relations"]["blocks"] = {"meaning": "x"}
+    cases.append(("sixth strategic relation", case, model, "relations"))
+
+    case, ledger = mutated()
+    ledger["relations"]["supersedes"] = {"meaning": "x"}
+    cases.append(("supersedes redefined locally", case, model, "relations.supersedes"))
+
+    case, ledger = mutated()
+    ledger["relations"]["enables"]["endpoint_types"] = {"source": ["strategic_target"]}
+    cases.append(("relation endpoint type matrix", case, model, "relations.enables"))
+
+    case, ledger = mutated()
+    del ledger["relation_rules"][
+        "material_causal_enables_claims_remain_attributable_to_a_strategic_hypothesis"
+    ]
+    cases.append(
+        ("causal enables detached from hypothesis", case, model, "relation_rules")
+    )
+
+    case, ledger = mutated()
+    ledger["relation_rules"]["relations_do_not_transfer_ownership_or_authority"] = False
+    cases.append(("relations transfer ownership", case, model, "relation_rules"))
+
+    case, ledger = mutated()
+    ledger["global_rules"][
+        "reality_change_may_require_reconsideration_but_never_directly_modifies_or_invalidates_strategic_plan"
+    ] = False
+    cases.append(
+        ("reality directly modifies the Strategic Plan", case, model, "global_rules")
+    )
+
+    case, ledger = mutated()
+    ledger["reasoning_concepts"][PLAN_CLOSURE]["may_not"].remove(
+        "modify_strategic_plan"
+    )
+    cases.append(
+        ("closure may modify the Strategic Plan", case, model, f"{closure}.may_not")
+    )
+
+    case, ledger = mutated()
+    ledger["primitives"]["strategic_hypothesis"]["confidence"] = 0.8
+    cases.append(
+        ("confidence representation admitted", case, model, "representation_keys")
+    )
+
+    case, ledger = mutated()
+    ledger["authority"]["owner"] = "graphiti"
+    cases.append(
+        (
+            "Strategic Plan semantics owned by a store",
+            case,
+            model,
+            AUTHORITY_OWNER_FIELD,
+        )
+    )
+
+    case, ledger = mutated()
+    ledger["subject"]["concept_ref"] = "strategic_plan_model.yaml#primitives"
+    cases.append(
+        (
+            "Strategic Plan re-anchored away from Strategic Cognition",
+            case,
+            model,
+            "subject",
+        )
+    )
+
+    case, ledger = mutated()
+    ledger["reasoning_concepts"][PLAN_CLOSURE]["may_not"].append({"x": 1})
+    cases.append(
+        (
+            "malformed closure prohibition fails closed without crashing",
+            case,
+            model,
+            f"{closure}.may_not",
+        )
+    )
+
+    case, ledger = mutated()
+    ledger["authority"] = ["x"]
+    cases.append(
+        (
+            "non-mapping authority fails closed without crashing",
+            case,
+            model,
+            AUTHORITY_OWNER_FIELD,
+        )
+    )
+
+    case, ledger = mutated()
+    ledger["governed_by"] = "x"
+    cases.append(
+        (
+            "non-mapping governed_by fails closed without crashing",
+            case,
+            model,
+            "governed_by.invariants",
+        )
+    )
+
+    case, ledger = mutated()
+    del ledger["relations"]
+    cases.append(("relations section absent is not skipped", case, model, "relations"))
+
+    case = copy.deepcopy(docs)
+    case[STRATEGY_MODEL_PATH]["concepts"]["strategic_plan"]["owner_role"] = (
+        METACOGNITIVE_REASONER
+    )
+    cases.append(
+        (
+            "Reasoner becomes Strategic Plan owner",
+            case,
+            STRATEGY_MODEL_PATH,
+            PLAN_CONCEPT_FIELD,
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    case[STRATEGY_MODEL_PATH]["concepts"]["strategic_plan"]["content_defined_here"] = (
+        True
+    )
+    cases.append(
+        (
+            "Strategic Cognition absorbs Plan content",
+            case,
+            STRATEGY_MODEL_PATH,
+            PLAN_CONCEPT_FIELD,
+        )
+    )
+
+    for label, candidate, path, field in cases:
+        candidate_report = Report()
+        _evaluate_rc018(candidate, candidate_report)
+        prefix = f"FAIL RC-018 {path} {field}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-018",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {path} {field}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-018 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-018-NEG",
+            f"{len(cases)} Strategic Plan negative cases fail closed for their intended reason",
+        )
+
+
+def check_rc018(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc018(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-018",
+            "Strategic Plan ledger declares exactly four Plan-owned primitives, five strategic relations with "
+            "supersession reused from lifecycle, and Affected Strategic Closure; it anchors to the existing "
+            "Strategic Plan concept and Plan Keeper authority, reuses objective and Strategic Intent without "
+            "owning them, and carries no representation",
+        )
+        _check_rc018_negative_cases(docs, report)
+
+
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
@@ -3516,6 +4236,7 @@ def main(argv: list[str]) -> int:
     check_rc015(docs, report)
     check_rc016(docs, report)
     check_rc017(docs, report)
+    check_rc018(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
