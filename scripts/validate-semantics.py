@@ -3438,6 +3438,20 @@ PLAN_REPRESENTATION_KEYS = {
 }
 
 
+def _mapping(value: object) -> dict:
+    """``value`` when it is a mapping, else an empty one.
+
+    A malformed nested block must surface as a located failure on the fields
+    its consumer requires, never as an AttributeError that aborts validation.
+    """
+    return value if isinstance(value, dict) else {}
+
+
+def _list(value: object) -> list:
+    """``value`` when it is a list, else an empty one (see ``_mapping``)."""
+    return value if isinstance(value, list) else []
+
+
 def _resolve_ref(docs: dict[str, dict], ref: str) -> object:
     """Resolve ``<ledger>.yaml#a.b.c`` against parsed ledgers; None if absent."""
     name, _, anchor = ref.partition("#")
@@ -3460,7 +3474,7 @@ def _rc018_ledger(docs: dict[str, dict], report: Report) -> dict:
             f"{PLAN_MODEL_ID} must be declared exactly once, by {PLAN_MODEL_PATH}",
         )
     model = docs.get(PLAN_MODEL_PATH) or {}
-    authority = model.get("authority") or {}
+    authority = _mapping(model.get("authority"))
     if model.get("canonical") is not True:
         report.fail(
             "RC-018",
@@ -3510,7 +3524,7 @@ def _rc018_ledger(docs: dict[str, dict], report: Report) -> dict:
 def _rc018_registration(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
-    sources = (docs.get(registry_path) or {}).get("sources") or []
+    sources = _list(_mapping(docs.get(registry_path)).get("sources"))
     registered = [
         s for s in sources if isinstance(s, dict) and s.get("path") == PLAN_MODEL_PATH
     ]
@@ -3530,7 +3544,7 @@ def _rc018_registration(docs: dict[str, dict], report: Report) -> None:
             registered,
             f"ledger must be registered exactly once as {expected}",
         )
-    requires = (docs.get(manifest_path) or {}).get("requires") or {}
+    requires = _mapping(_mapping(docs.get(manifest_path)).get("requires"))
     classes = [
         cls
         for cls, names in requires.items()
@@ -3554,10 +3568,10 @@ def _string_list(value: object) -> list[str] | None:
 
 
 def _rc018_governance(model: dict, docs: dict[str, dict], report: Report) -> None:
-    governed = model.get("governed_by") or {}
+    governed = _mapping(model.get("governed_by"))
     invariant_ids = {
         i.get("id")
-        for i in (docs.get(INVARIANTS_PATH) or {}).get("invariants") or []
+        for i in _list(_mapping(docs.get(INVARIANTS_PATH)).get("invariants"))
         if isinstance(i, dict)
     }
     cited = _string_list(governed.get("invariants"))
@@ -3575,7 +3589,7 @@ def _rc018_governance(model: dict, docs: dict[str, dict], report: Report) -> Non
         )
     contract_ids = {
         c.get("id")
-        for c in (docs.get(CONTRACTS_PATH) or {}).get("contracts") or []
+        for c in _list(_mapping(docs.get(CONTRACTS_PATH)).get("contracts"))
         if isinstance(c, dict)
     }
     contracts = _string_list(governed.get("contracts"))
@@ -3822,9 +3836,9 @@ def _rc018_representation(model: dict, report: Report) -> None:
 
 
 def _rc018_terms(docs: dict[str, dict], report: Report) -> None:
-    terms = (docs.get(VOCABULARY_PATH) or {}).get("terms") or {}
+    terms = _mapping(_mapping(docs.get(VOCABULARY_PATH)).get("terms"))
     for term in PLAN_TERMS:
-        if (terms.get(term) or {}).get("detailed_model") != PLAN_MODEL_NAME:
+        if _mapping(terms.get(term)).get("detailed_model") != PLAN_MODEL_NAME:
             report.fail(
                 "RC-018",
                 VOCABULARY_PATH,
@@ -3958,6 +3972,28 @@ def _check_rc018_negative_cases(docs: dict[str, dict], report: Report) -> None:
             case,
             model,
             f"{closure}.may_not",
+        )
+    )
+
+    case, ledger = mutated()
+    ledger["authority"] = ["x"]
+    cases.append(
+        (
+            "non-mapping authority fails closed without crashing",
+            case,
+            model,
+            AUTHORITY_OWNER_FIELD,
+        )
+    )
+
+    case, ledger = mutated()
+    ledger["governed_by"] = "x"
+    cases.append(
+        (
+            "non-mapping governed_by fails closed without crashing",
+            case,
+            model,
+            "governed_by.invariants",
         )
     )
 
