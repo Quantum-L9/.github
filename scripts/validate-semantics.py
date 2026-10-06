@@ -691,6 +691,8 @@ def check_sc008(root: Path, release: str | None, report: Report) -> None:
 # The validator's own path, used as the receipt location for negative-case
 # batches that prove a closure check fails closed.
 VALIDATOR_PATH = "scripts/validate-semantics.py"
+# Field label for a ledger's canonical owner, reported by RC-016 and RC-018.
+AUTHORITY_OWNER_FIELD = "authority.owner"
 
 DERIVATION_ITEM_KEYS = {
     "invariants.yaml": "invariants",
@@ -2072,7 +2074,7 @@ def _rc016_ledger(docs: dict[str, dict], report: Report) -> dict:
         report.fail(
             "RC-016",
             model_path,
-            "authority.owner",
+            AUTHORITY_OWNER_FIELD,
             authority.get("owner"),
             f"Strategic Cognition semantics are owned by {STRATEGY_OWNER}",
         )
@@ -2715,7 +2717,7 @@ def _check_rc016_negative_cases(docs: dict[str, dict], report: Report) -> None:
             "Strategic Cognition owned by Semantic Compiler",
             case,
             model,
-            "authority.owner",
+            AUTHORITY_OWNER_FIELD,
         )
     )
 
@@ -3355,6 +3357,7 @@ PLAN_MODEL_ID = "l9.strategic-plan-model/global@1"
 PLAN_SOURCE_ID = "l9.source/strategic-plan-model@1"
 PLAN_SCOPE = "l9_global_strategic_plan_semantics"
 PLAN_MODEL_NAME = PLAN_MODEL_PATH.removeprefix("semantics/")
+PLAN_CONCEPT_FIELD = "concepts.strategic_plan"
 LIFECYCLE_PATH = "semantics/lifecycle.yaml"
 # Model sections admitted by v3.10.0, exactly. A missing section is a coverage
 # failure; an extra one is out of scope.
@@ -3470,7 +3473,7 @@ def _rc018_ledger(docs: dict[str, dict], report: Report) -> dict:
         report.fail(
             "RC-018",
             PLAN_MODEL_PATH,
-            "authority.owner",
+            AUTHORITY_OWNER_FIELD,
             authority.get("owner"),
             f"Strategic Plan semantics are owned by {STRATEGY_OWNER}",
         )
@@ -3554,7 +3557,7 @@ def _rc018_governance(model: dict, docs: dict[str, dict], report: Report) -> Non
     governed = model.get("governed_by") or {}
     invariant_ids = {
         i.get("id")
-        for i in (docs.get("semantics/invariants.yaml") or {}).get("invariants") or []
+        for i in (docs.get(INVARIANTS_PATH) or {}).get("invariants") or []
         if isinstance(i, dict)
     }
     cited = _string_list(governed.get("invariants"))
@@ -3605,7 +3608,7 @@ def _rc018_subject(model: dict, docs: dict[str, dict], report: Report) -> None:
         report.fail(
             "RC-018",
             STRATEGY_MODEL_PATH,
-            "concepts.strategic_plan",
+            PLAN_CONCEPT_FIELD,
             plan,
             "Strategic Plan stays owned by the Plan Keeper and its content and structure stay undefined there",
         )
@@ -3794,21 +3797,20 @@ def _rc018_closure(model: dict, report: Report) -> None:
         )
 
 
+def _key_paths(node: object, trail: str = ""):
+    """Yield ``(dotted_path, key)`` for every mapping key at any depth."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            path = f"{trail}.{key}" if trail else str(key)
+            yield path, str(key)
+            yield from _key_paths(value, path)
+    elif isinstance(node, list):
+        for index, item in enumerate(node):
+            yield from _key_paths(item, f"{trail}[{index}]")
+
+
 def _rc018_representation(model: dict, report: Report) -> None:
-    found: list[str] = []
-
-    def walk(node: object, trail: str) -> None:
-        if isinstance(node, dict):
-            for key, value in node.items():
-                path = f"{trail}.{key}" if trail else str(key)
-                if str(key) in PLAN_REPRESENTATION_KEYS:
-                    found.append(path)
-                walk(value, path)
-        elif isinstance(node, list):
-            for index, item in enumerate(node):
-                walk(item, f"{trail}[{index}]")
-
-    walk(model, "")
+    found = [path for path, key in _key_paths(model) if key in PLAN_REPRESENTATION_KEYS]
     if found:
         report.fail(
             "RC-018",
@@ -3929,7 +3931,12 @@ def _check_rc018_negative_cases(docs: dict[str, dict], report: Report) -> None:
     case, ledger = mutated()
     ledger["authority"]["owner"] = "graphiti"
     cases.append(
-        ("Strategic Plan semantics owned by a store", case, model, "authority.owner")
+        (
+            "Strategic Plan semantics owned by a store",
+            case,
+            model,
+            AUTHORITY_OWNER_FIELD,
+        )
     )
 
     case, ledger = mutated()
@@ -3967,7 +3974,7 @@ def _check_rc018_negative_cases(docs: dict[str, dict], report: Report) -> None:
             "Reasoner becomes Strategic Plan owner",
             case,
             STRATEGY_MODEL_PATH,
-            "concepts.strategic_plan",
+            PLAN_CONCEPT_FIELD,
         )
     )
 
@@ -3980,7 +3987,7 @@ def _check_rc018_negative_cases(docs: dict[str, dict], report: Report) -> None:
             "Strategic Cognition absorbs Plan content",
             case,
             STRATEGY_MODEL_PATH,
-            "concepts.strategic_plan",
+            PLAN_CONCEPT_FIELD,
         )
     )
 
