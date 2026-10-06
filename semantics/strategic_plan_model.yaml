@@ -1,0 +1,91 @@
+schema: l9.strategic-plan-model/v1
+artifact_id: l9.strategic-plan-model/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_strategic_plan_semantics
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: strategic_plan_model.yaml
+governed_by:
+  invariants:
+  - L9-STRATEGY-001
+  - L9-AUTH-001
+  - L9-OWNER-001
+  - L9-SEM-001
+  - L9-PROMOTION-001
+  - L9-PROJECTION-001
+  - L9-UNKNOWN-001
+  contracts:
+  - l9.contract/authority-boundary@1
+  - l9.contract/semantic-ownership@1
+purpose: Define the global meaning of Strategic Plan content - the four Plan-owned primitives, the five strategic
+  relations, and Affected Strategic Closure - together with the boundary that separates a change in authoritative
+  reality from a revision of strategy. The Strategic Plan, its owner, and its authority are those of Strategic
+  Cognition and are not redefined here. This ledger defines semantics only; it does not define a schema, fields,
+  identifiers, versions, relation endpoint typing, graph or other representation, temporal or horizon structure,
+  confidence or probability, a closure algorithm, runtime cognition, prompts, model or provider selection, or actor
+  bindings.
+subject:
+  concept_ref: strategic_cognition_model.yaml#concepts.strategic_plan
+  resolution_ref: authority_model.yaml#strategic_cognition_authority
+global_rules:
+  strategic_plan_owns_strategy_not_reality: true
+  strategic_hypothesis_is_plan_owned_belief_not_authoritative_truth: true
+  reality_change_may_require_reconsideration_but_never_directly_modifies_or_invalidates_strategic_plan: true
+  reasoning_workspace_content_is_not_strategic_plan_content_without_authorized_decision: true
+  planning_horizon_does_not_create_primitive_types: true
+  compound_causal_claims_are_expressible_by_one_strategic_hypothesis: true
+  outcome_of_one_primitive_does_not_establish_correctness_of_another: true
+primitives:
+  strategic_goal:
+    definition: A broad desired future condition L9 intentionally seeks because its realization advances applicable
+      Strategic Intent.
+    question: What future condition do we seek?
+  strategic_target:
+    definition: A more concrete desired condition, threshold, milestone, or recognizable state whose realization
+      provides bounded strategic resolution toward one or more Strategic Goals.
+    question: What more concrete condition would demonstrate progress toward the Goal?
+  strategic_hypothesis:
+    definition: A Plan-owned epistemic causal claim about how relevant conditions, capabilities, constraints, actions,
+      or combinations thereof are believed to influence strategic realization.
+    question: Why do we believe this path or condition should produce the expected strategic consequence?
+  strategic_commitment:
+    definition: A strategic path, approach, or course of action that L9 has actually chosen to pursue under applicable
+      strategic authority.
+    question: Which path have we chosen?
+reused_concepts:
+  objective:
+    concept_ref: vocabulary.yaml#terms.objective
+    owned_here: false
+  strategic_intent:
+    concept_ref: strategic_cognition_model.yaml#concepts.strategic_intent
+    owned_here: false
+relations:
+  advances:
+    meaning: Realization of the source contributes toward realization of the target; following it upward answers
+      why a strategic object exists.
+  enables:
+    meaning: Under the Strategic Plan's current theory, the source makes the target possible or materially more
+      achievable.
+  depends_on:
+    meaning: The source's current strategic viability requires the target.
+  conflicts_with:
+    meaning: Pursuing, realizing, or maintaining the source is materially incompatible with the target under the
+      current strategic theory.
+  supersedes:
+    semantics_ref: lifecycle.yaml#lifecycle_relations.supersedes
+relation_rules:
+  relations_do_not_transfer_ownership_or_authority: true
+  material_causal_enables_claims_remain_attributable_to_a_strategic_hypothesis: true
+reasoning_concepts:
+  affected_strategic_closure:
+    definition: The smallest reachable set of strategic claims whose current reasoning may materially depend on a
+      changed belief, reference, condition, or authoritative input.
+    purpose: selective_strategic_reconsideration
+    may_not:
+    - decide_strategy
+    - modify_strategic_plan
+    - invalidate_strategic_plan
+    - mark_dependent_strategy_stale_automatically

@@ -1181,6 +1181,32 @@ terms:
     definition: The bounded, derived, disposable, non-authoritative, provenance-preserving composed projection used
       for strategic reasoning; it is invalidated when its source truth changes.
     detailed_model: strategic_cognition_model.yaml
+  strategic_goal:
+    semantic_class: strategic_direction
+    definition: A broad desired future condition L9 intentionally seeks because its realization advances applicable
+      Strategic Intent. Planning horizon does not create a separate Goal type.
+    detailed_model: strategic_plan_model.yaml
+  strategic_target:
+    semantic_class: strategic_direction
+    definition: A more concrete desired condition whose realization provides bounded strategic resolution toward one
+      or more Strategic Goals. It does not redefine objective.
+    detailed_model: strategic_plan_model.yaml
+  strategic_hypothesis:
+    semantic_class: strategic_belief
+    definition: A Plan-owned epistemic causal claim about how conditions, capabilities, constraints, or actions are
+      believed to influence strategic realization. It is not authoritative external truth.
+    detailed_model: strategic_plan_model.yaml
+  strategic_commitment:
+    semantic_class: strategic_direction
+    definition: A strategic path L9 has actually chosen to pursue under applicable strategic authority, as distinct
+      from a candidate path considered during reasoning.
+    detailed_model: strategic_plan_model.yaml
+  affected_strategic_closure:
+    semantic_class: strategic_reasoning_concept
+    definition: The smallest reachable set of strategic claims whose current reasoning may materially depend on a
+      changed belief, reference, condition, or authoritative input. It identifies what requires reconsideration
+      and neither decides strategy nor modifies the Strategic Plan.
+    detailed_model: strategic_plan_model.yaml
 relationships:
   authority_flow:
     sequence:
