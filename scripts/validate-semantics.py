@@ -2021,16 +2021,11 @@ STRATEGY_MODEL_KEYS = {
 }
 
 
-def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
-    model_path = STRATEGY_MODEL_PATH
-    registry_path = "semantics/canonical_sources.yaml"
-    manifest_path = "semantics/generic_compiler_manifest.yaml"
-    invariants_path = "semantics/invariants.yaml"
-    authority_path = "semantics/authority_model.yaml"
-    artifacts_path = "semantics/artifact_model.yaml"
-    vocabulary_path = VOCABULARY_PATH
-    actors_path = ACTOR_REGISTRY_PATH
+STRATEGY_AUTHORITY_PATH = "semantics/authority_model.yaml"
 
+
+def _rc016_ledger(docs: dict[str, dict], report: Report) -> dict:
+    model_path = STRATEGY_MODEL_PATH
     holders = [
         path
         for path, doc in docs.items()
@@ -2045,7 +2040,6 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
             f"{STRATEGY_MODEL_ID} must be declared exactly once, by {model_path}",
         )
     model = docs.get(model_path) or {}
-
     authority = model.get("authority") or {}
     if model.get("canonical") is not True:
         report.fail(
@@ -2088,7 +2082,13 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
             extra_keys,
             "model declares sections outside the admitted Strategic Cognition semantics",
         )
+    return model
 
+
+def _rc016_registration(docs: dict[str, dict], report: Report) -> None:
+    model_path = STRATEGY_MODEL_PATH
+    registry_path = "semantics/canonical_sources.yaml"
+    manifest_path = "semantics/generic_compiler_manifest.yaml"
     sources = (docs.get(registry_path) or {}).get("sources") or []
     registered = [
         s for s in sources if isinstance(s, dict) and s.get("path") == model_path
@@ -2115,10 +2115,11 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
 
     manifest = docs.get(manifest_path) or {}
     requires = manifest.get("requires") or {}
+    catalog_name = model_path.removeprefix("semantics/")
     classes = [
         cls
         for cls, names in requires.items()
-        if isinstance(names, list) and model_path.removeprefix("semantics/") in names
+        if isinstance(names, list) and catalog_name in names
     ]
     if classes != ["semantic_catalogs"]:
         report.fail(
@@ -2145,6 +2146,9 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
             "Semantic Compiler must not gain a strategic capability",
         )
 
+
+def _rc016_invariant(docs: dict[str, dict], report: Report) -> None:
+    invariants_path = "semantics/invariants.yaml"
     invariants = (docs.get(invariants_path) or {}).get("invariants") or []
     invariant, count = _unique_entry(invariants, "id", STRATEGY_INVARIANT_ID)
     family = [
@@ -2197,10 +2201,11 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
             "Strategic Cognition law must be exactly one constitutional invariant",
         )
 
+
+def _rc016_plan_keeper(model: dict, report: Report) -> dict:
+    model_path = STRATEGY_MODEL_PATH
     concepts = model.get("concepts") or {}
-    roles = model.get("roles") or {}
-    keeper = roles.get(PLAN_KEEPER) or {}
-    reasoner = roles.get(METACOGNITIVE_REASONER) or {}
+    keeper = (model.get("roles") or {}).get(PLAN_KEEPER) or {}
     if (concepts.get("strategic_plan") or {}).get("owner_role") != PLAN_KEEPER:
         report.fail(
             "RC-016",
@@ -2244,7 +2249,12 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
             missing_keeper_denials,
             "required Plan Keeper prohibitions missing",
         )
+    return keeper
 
+
+def _rc016_reasoner(model: dict, report: Report) -> None:
+    model_path = STRATEGY_MODEL_PATH
+    reasoner = (model.get("roles") or {}).get(METACOGNITIVE_REASONER) or {}
     if reasoner.get("owns") != ["strategic_plan_reasoning_analysis"]:
         report.fail(
             "RC-016",
@@ -2274,10 +2284,10 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
             missing_denials,
             "required metacognition prohibitions missing",
         )
-    leaked = sorted(METACOGNITION_MAY_NOT & set(reasoner.get("may") or []))
+    granted = [str(item) for item in reasoner.get("may") or []]
+    leaked = METACOGNITION_MAY_NOT.intersection(granted)
     if leaked or any(
-        "strategic_direction" in str(item) or "strategic_plan" == str(item)
-        for item in reasoner.get("may") or []
+        "strategic_direction" in item or item == "strategic_plan" for item in granted
     ):
         report.fail(
             "RC-016",
@@ -2305,23 +2315,25 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
             reasoner.get("output_authority"),
             "Reasoner output is advisory to the Plan Keeper",
         )
-    for role_id, role in ((PLAN_KEEPER, keeper), (METACOGNITIVE_REASONER, reasoner)):
+
+
+def _rc016_roles_not_actors(model: dict, docs: dict[str, dict], report: Report) -> None:
+    roles = model.get("roles") or {}
+    for role_id in (PLAN_KEEPER, METACOGNITIVE_REASONER):
+        role = roles.get(role_id) or {}
         if (
             role.get("role_kind") != "semantic_role"
             or role.get("actor_identity_binding") != "none"
         ):
             report.fail(
                 "RC-016",
-                model_path,
+                STRATEGY_MODEL_PATH,
                 f"roles.{role_id}.actor_identity_binding",
                 role.get("actor_identity_binding"),
                 "strategic roles are semantic roles, not ActorIdentities",
             )
-    actor_ids = {
-        str(a.get("id"))
-        for a in (docs.get(actors_path) or {}).get("actors") or []
-        if isinstance(a, dict)
-    }
+    actors = (docs.get(ACTOR_REGISTRY_PATH) or {}).get("actors") or []
+    actor_ids = {str(a.get("id")) for a in actors if isinstance(a, dict)}
     bound = sorted(
         actor_ids
         & {
@@ -2334,31 +2346,42 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
     if bound:
         report.fail(
             "RC-016",
-            actors_path,
+            ACTOR_REGISTRY_PATH,
             "actors",
             bound,
             "strategic roles must not be registered as actors",
         )
 
+
+def _rc016_model_separation(model: dict, report: Report) -> None:
     separation = model.get("authority_separation") or {}
     relation = separation.get("teaching_relation") or {}
-    if (
-        separation.get("invariant_ref") != STRATEGY_INVARIANT_ID
-        or separation.get("resolution_ref") != STRATEGY_RESOLUTION_REF
-        or separation.get("strategic_plan_owner") != PLAN_KEEPER
-        or separation.get("strategic_plan_reasoning_analysis_owner")
-        != METACOGNITIVE_REASONER
-        or relation.get("from") != METACOGNITIVE_REASONER
-        or relation.get("to") != PLAN_KEEPER
-        or relation.get("authority_effect") != "none"
-    ):
+    expected = (
+        (separation.get("invariant_ref"), STRATEGY_INVARIANT_ID),
+        (separation.get("resolution_ref"), STRATEGY_RESOLUTION_REF),
+        (separation.get("strategic_plan_owner"), PLAN_KEEPER),
+        (
+            separation.get("strategic_plan_reasoning_analysis_owner"),
+            METACOGNITIVE_REASONER,
+        ),
+        (relation.get("from"), METACOGNITIVE_REASONER),
+        (relation.get("to"), PLAN_KEEPER),
+        (relation.get("authority_effect"), "none"),
+    )
+    if any(actual != wanted for actual, wanted in expected):
         report.fail(
             "RC-016",
-            model_path,
+            STRATEGY_MODEL_PATH,
             "authority_separation",
             separation,
             "Plan Keeper / metacognition separation must be declared with an authority-free teaching relation",
         )
+
+
+def _rc016_authority_resolution(
+    docs: dict[str, dict], keeper: dict, report: Report
+) -> None:
+    authority_path = STRATEGY_AUTHORITY_PATH
     resolution = (docs.get(authority_path) or {}).get(
         "strategic_cognition_authority"
     ) or {}
@@ -2373,12 +2396,14 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
             resolution.get("strategic_plan_owner"),
             "authority model must resolve the Strategic Plan to the Plan Keeper",
         )
-    if (
-        resolution.get("detailed_model") != model_path.removeprefix("semantics/")
-        or resolution.get("invariant_ref") != STRATEGY_INVARIANT_ID
-        or resolution.get("strategic_plan_authority_source")
-        != keeper.get("authority_source")
-    ):
+    linked = (
+        resolution.get("detailed_model")
+        == STRATEGY_MODEL_PATH.removeprefix("semantics/")
+        and resolution.get("invariant_ref") == STRATEGY_INVARIANT_ID
+        and resolution.get("strategic_plan_authority_source")
+        == keeper.get("authority_source")
+    )
+    if not linked:
         report.fail(
             "RC-016",
             authority_path,
@@ -2427,7 +2452,10 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
             "Semantic Compiler exclusion rule missing",
         )
 
-    view = concepts.get("current_meta_view") or {}
+
+def _rc016_meta_view_authority(model: dict, report: Report) -> None:
+    model_path = STRATEGY_MODEL_PATH
+    view = (model.get("concepts") or {}).get("current_meta_view") or {}
     properties = view.get("properties") or {}
     if (
         view.get("authority_class") != "derived"
@@ -2466,16 +2494,23 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
                 properties.get(flag),
                 "required Current Meta View property missing",
             )
+
+
+def _rc016_meta_view_reuse(model: dict, docs: dict[str, dict], report: Report) -> None:
+    model_path = STRATEGY_MODEL_PATH
+    artifacts_path = "semantics/artifact_model.yaml"
+    view = (model.get("concepts") or {}).get("current_meta_view") or {}
     artifact_classes = (docs.get(artifacts_path) or {}).get("artifacts") or {}
     for field, class_name in (
         ("artifact_class_ref", "composed_projection"),
         ("component_artifact_class_ref", "projection_artifact"),
     ):
-        if (
-            view.get(field) != class_name
-            or (artifact_classes.get(class_name) or {}).get("authority_class")
-            != "derived"
-        ):
+        reused = (
+            view.get(field) == class_name
+            and (artifact_classes.get(class_name) or {}).get("authority_class")
+            == "derived"
+        )
+        if not reused:
             report.fail(
                 "RC-016",
                 model_path,
@@ -2504,21 +2539,24 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
             "Current Meta View must not be a new artifact class",
         )
 
+
+def _rc016_plane_and_terms(model: dict, docs: dict[str, dict], report: Report) -> None:
     plane = model.get("plane") or {}
-    if (
-        plane.get("conceptual_plane") != "reasoning_plane"
-        or plane.get("semantic_compiler_owner") is not False
-        or plane.get("runtime_owned_here") is not False
-        or plane.get("compiler_boundary_ref") != STRATEGY_COMPILER_BOUNDARY_REF
-    ):
+    expected_plane = (
+        plane.get("conceptual_plane") == "reasoning_plane"
+        and plane.get("semantic_compiler_owner") is False
+        and plane.get("runtime_owned_here") is False
+        and plane.get("compiler_boundary_ref") == STRATEGY_COMPILER_BOUNDARY_REF
+    )
+    if not expected_plane:
         report.fail(
             "RC-016",
-            model_path,
+            STRATEGY_MODEL_PATH,
             "plane",
             plane,
             "Strategic Cognition belongs to the Reasoning Plane, is not compiler-owned, and owns no runtime",
         )
-    vocabulary = docs.get(vocabulary_path) or {}
+    vocabulary = docs.get(VOCABULARY_PATH) or {}
     reasoning_rule = (vocabulary.get("stage_rules") or {}).get(
         "reasoning_plane_rule"
     ) or {}
@@ -2529,23 +2567,36 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
     ):
         report.fail(
             "RC-016",
-            vocabulary_path,
+            VOCABULARY_PATH,
             "stage_rules.reasoning_plane_rule",
             reasoning_rule,
             "Semantic Compiler must remain independent of the Reasoning Plane",
         )
     terms = vocabulary.get("terms") or {}
+    model_name = STRATEGY_MODEL_PATH.removeprefix("semantics/")
     for term in STRATEGY_TERMS:
-        if (terms.get(term) or {}).get("detailed_model") != model_path.removeprefix(
-            "semantics/"
-        ):
+        if (terms.get(term) or {}).get("detailed_model") != model_name:
             report.fail(
                 "RC-016",
-                vocabulary_path,
+                VOCABULARY_PATH,
                 f"terms.{term}",
                 terms.get(term),
                 "Strategic Cognition term must exist and defer to the Strategic Cognition model",
             )
+
+
+def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
+    model = _rc016_ledger(docs, report)
+    _rc016_registration(docs, report)
+    _rc016_invariant(docs, report)
+    keeper = _rc016_plan_keeper(model, report)
+    _rc016_reasoner(model, report)
+    _rc016_roles_not_actors(model, docs, report)
+    _rc016_model_separation(model, report)
+    _rc016_authority_resolution(docs, keeper, report)
+    _rc016_meta_view_authority(model, report)
+    _rc016_meta_view_reuse(model, docs, report)
+    _rc016_plane_and_terms(model, docs, report)
 
 
 def _check_rc016_negative_cases(docs: dict[str, dict], report: Report) -> None:
