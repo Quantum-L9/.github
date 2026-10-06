@@ -49,7 +49,7 @@ RC-018 proves:
 
 Every criterion is evaluated on every run. An absent section is reported as a failure, never skipped, so RC-018 cannot report partial coverage as complete (`l9.contract/validation-and-correctness@1`).
 
-The negative-case batch proves fail-closed behavior, each at its intended file and field, for: a fifth primitive; a `strategic_objective` primitive; the Plan absorbing Capability; `objective` redefined as Plan-owned; a sixth relation; `supersedes` redefined locally; a relation endpoint type matrix; the causal `enables` attribution removed; relations transferring ownership; reality directly modifying the Strategic Plan; Affected Strategic Closure permitted to modify the Plan; a confidence field; the ledger owned by a store; the Plan re-anchored away from Strategic Cognition; the relations section absent; the Reasoner becoming the Strategic Plan owner; and Strategic Cognition absorbing Plan content.
+The negative-case batch proves fail-closed behavior, each at its intended file and field, for: a fifth primitive; a `strategic_objective` primitive; the Plan absorbing Capability; `objective` redefined as Plan-owned; a sixth relation; `supersedes` redefined locally; a relation endpoint type matrix; the causal `enables` attribution removed; relations transferring ownership; reality directly modifying the Strategic Plan; Affected Strategic Closure permitted to modify the Plan; a malformed closure prohibition, which must fail at its field rather than crash the validator; a confidence field; the ledger owned by a store; the Plan re-anchored away from Strategic Cognition; the relations section absent; the Reasoner becoming the Strategic Plan owner; and Strategic Cognition absorbing Plan content.
 
 ## Existing closure
 

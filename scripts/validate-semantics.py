@@ -3543,6 +3543,13 @@ def _rc018_registration(docs: dict[str, dict], report: Report) -> None:
         )
 
 
+def _string_list(value: object) -> list[str] | None:
+    """Return ``value`` when it is a list of strings, else None (malformed)."""
+    if isinstance(value, list) and all(isinstance(item, str) for item in value):
+        return value
+    return None
+
+
 def _rc018_governance(model: dict, docs: dict[str, dict], report: Report) -> None:
     governed = model.get("governed_by") or {}
     invariant_ids = {
@@ -3550,13 +3557,17 @@ def _rc018_governance(model: dict, docs: dict[str, dict], report: Report) -> Non
         for i in (docs.get("semantics/invariants.yaml") or {}).get("invariants") or []
         if isinstance(i, dict)
     }
-    cited = governed.get("invariants") or []
-    if STRATEGY_INVARIANT_ID not in cited or not set(cited) <= invariant_ids:
+    cited = _string_list(governed.get("invariants"))
+    if (
+        cited is None
+        or STRATEGY_INVARIANT_ID not in cited
+        or not set(cited) <= invariant_ids
+    ):
         report.fail(
             "RC-018",
             PLAN_MODEL_PATH,
             "governed_by.invariants",
-            cited,
+            governed.get("invariants"),
             f"must cite {STRATEGY_INVARIANT_ID} and only existing invariants",
         )
     contract_ids = {
@@ -3564,13 +3575,13 @@ def _rc018_governance(model: dict, docs: dict[str, dict], report: Report) -> Non
         for c in (docs.get(CONTRACTS_PATH) or {}).get("contracts") or []
         if isinstance(c, dict)
     }
-    contracts = governed.get("contracts") or []
+    contracts = _string_list(governed.get("contracts"))
     if not contracts or not set(contracts) <= contract_ids:
         report.fail(
             "RC-018",
             PLAN_MODEL_PATH,
             "governed_by.contracts",
-            contracts,
+            governed.get("contracts"),
             "must cite existing contracts only",
         )
 
@@ -3768,9 +3779,9 @@ def _rc018_closure(model: dict, report: Report) -> None:
             closure,
             "closure declares exactly a definition, a purpose, and its prohibitions",
         )
-    may_not = closure.get("may_not")
+    may_not = _string_list(closure.get("may_not"))
     if (
-        not isinstance(may_not, list)
+        may_not is None
         or len(may_not) != len(set(may_not))
         or set(may_not) != PLAN_CLOSURE_MAY_NOT
     ):
@@ -3778,7 +3789,7 @@ def _rc018_closure(model: dict, report: Report) -> None:
             "RC-018",
             PLAN_MODEL_PATH,
             f"{field}.may_not",
-            may_not,
+            closure.get("may_not"),
             f"closure identifies reconsideration and may not {sorted(PLAN_CLOSURE_MAY_NOT)}",
         )
 
@@ -3929,6 +3940,17 @@ def _check_rc018_negative_cases(docs: dict[str, dict], report: Report) -> None:
             case,
             model,
             "subject",
+        )
+    )
+
+    case, ledger = mutated()
+    ledger["reasoning_concepts"][PLAN_CLOSURE]["may_not"].append({"x": 1})
+    cases.append(
+        (
+            "malformed closure prohibition fails closed without crashing",
+            case,
+            model,
+            f"{closure}.may_not",
         )
     )
 
