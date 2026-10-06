@@ -18,8 +18,8 @@ Explicitly unchanged: the capability-class set, all nine prior technology regist
 
 The classification uses only the provider realization that `Quantum-L9/l9-graphiti-memory` actually consumes, read at PR #80 head `dd03303e5d78534a2cbdab5b0e999f34f802a160`:
 
-- Graphiti MCP: `src/l9_graphite_memory/transport.py` calls the Graphiti server's episode-ingest tools (`add_memory`, or the legacy `add_episode`), its search tools (`search_memory_facts` / `search_facts`, `search_nodes`), and `delete_episode`. `adapters/graphiti_projection.py` stores the returned episode locator and withdraws a projection by deleting that episode.
-- Zep: `src/l9_graphite_memory/zep_transport.py` calls the `zep-cloud>=3,<4` SDK graph API (`graph.add`, `graph.search`, `graph.episode.delete`) and keeps the episode uuid as the locator.
+- Graphiti MCP: `src/l9_graphite_memory/transport.py` calls the Graphiti server's episode-ingest tools (`add_memory`, or the legacy `add_episode`), and its search tools (`search_memory_facts` / `search_facts`, `search_nodes`). `adapters/graphiti_projection.py` stores the returned episode locator and withdraws a projection by calling `delete_episode` with that locator through the transport.
+- Zep: `src/l9_graphite_memory/zep_transport.py` calls the `zep-cloud>=3.0,<4` SDK graph API (`graph.add`, `graph.search`, `graph.episode.delete`) and keeps the episode uuid as the locator.
 - `release-work/repository-review/provider-capability-matrix.md` records the same facts for both providers: graph write, search, a persisted stable locator, and verified erasure by locator.
 
 Both technologies persist, index, and query graph episodes, so `datastore` is the faithful existing class: it covers "persistence, transaction, indexing, consistency, and query capabilities exposed by a storage technology". Neither is classed as `transport`. MCP and HTTP are only how the product reaches the store, not the capability it consumes. `datastore` is a technology class, not a claim of canonical status. In the product both stores hold derived projections that can be rebuilt, and canonical memory truth stays in the product's own record store.
@@ -51,7 +51,7 @@ RC-020 defines no graph-provider or memory-provider family by name, applies no r
 
 The negative-case batch fails closed at its intended field for each of these cases: Graphiti registration missing; Zep registration missing; duplicate exact technology id; class missing; non-admitted class; a technology class introduced together with the admission; empty `provides`; `target_roles` missing; a parallel target role introduced; semantic ownership implied; semantic ownership undeclared; and an ownership claim outside the registration grammar.
 
-Test-first evidence: before the registration, RC-020 failed on base `14a93a94a3adaa15b506ee88c12e8b82a121c140`, and the only failures were the two intended absences (`technologies='graphiti-mcp'` and `technologies='zep'`, each found 0). After the registration, RC-020 and RC-020-NEG pass.
+Test-first evidence: before the registration, at commit `2ddb616` (the semantic bytes of base `14a93a94a3adaa15b506ee88c12e8b82a121c140` plus RC-020), RC-020 failed, and the only failures were the two intended absences (`technologies='graphiti-mcp'` and `technologies='zep'`, each found 0). After the registration, RC-020 and RC-020-NEG pass.
 
 ## Existing closure
 
