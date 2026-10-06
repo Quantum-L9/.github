@@ -10,7 +10,7 @@ This successor admits the global semantics of L9 Strategic Cognition: a canonica
 - Adds one constitutional invariant, `L9-STRATEGY-001`: Plan Keeper owns the Strategic Plan; the Strategic Plan Metacognitive Reasoner owns analysis of the reasoning that produces it, may teach the Plan Keeper, and may never modify, supersede, or become strategic authority.
 - Makes that separation machine-resolvable in `authority_model.yaml` `strategic_cognition_authority`.
 - Models the Current Meta View through existing projection and composition law (`composed_projection`, `l9.schema/composed-projection@1`): derived, disposable, non-authoritative, provenance-preserving, invalidatable.
-- Adds ADR-014 and RC-016 Strategic Cognition closure with seven fail-closed negative cases.
+- Adds ADR-014 and RC-016 Strategic Cognition closure with nine fail-closed negative cases.
 
 ## Non-goals
 

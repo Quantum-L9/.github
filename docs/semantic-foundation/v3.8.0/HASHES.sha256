@@ -1,6 +1,6 @@
 800bbd7565563f2caab2abe337058911fe59a05e71be2e1ebfab4fd364396a54  ./MANIFEST.md
-e6a2001dbea6b006b80edaae3cf51c44e38d36fa1772cf7a9884ff003fff8270  ./README.md
-237b9ae2891963023d357e1cde72425e388f80225ab317e4346ca29a7af1626e  ./RELEASE_VALIDATION.md
+c897f0769f7ce93ee2f0856ff825ac8aac9be08956eac1efd88ebc1eaf8e9d62  ./README.md
+023f0d9e1585d984ac8914d3af1ea49e40d4fd13d3167ecd5eb0ba6d142d5bd9  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md

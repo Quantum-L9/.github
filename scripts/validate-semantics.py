@@ -1991,10 +1991,17 @@ METACOGNITION_DENIED = {
     "strategic_plan_supersession",
     "strategic_authority",
 }
+# The Plan Keeper's admitted permissions, exactly. An allowlist, not a
+# blocklist: any other grant is authority self-expansion and fails closed.
+PLAN_KEEPER_MAY = {
+    "revise_strategic_direction_within_explicitly_granted_strategic_authority",
+    "consume_planning_cognition_lessons",
+}
 PLAN_KEEPER_MAY_NOT = {
     "acquire_truth_source_ownership_by_consuming_projections",
     "derive_authority_from_reasoning_capability",
     "become_execution_or_implementation_authority_by_implication",
+    "revise_strategic_direction_beyond_granted_strategic_authority",
 }
 METACOGNITION_MAY_NOT = {
     "modify_strategic_plan",
@@ -2245,6 +2252,15 @@ def _rc016_plan_keeper(model: dict, report: Report) -> dict:
             f"roles.{PLAN_KEEPER}.authority_source",
             keeper.get("authority_source"),
             "Plan Keeper authority must come only from explicitly granted strategic authority",
+        )
+    granted = [str(item) for item in keeper.get("may") or []]
+    if sorted(granted) != sorted(PLAN_KEEPER_MAY):
+        report.fail(
+            "RC-016",
+            model_path,
+            f"roles.{PLAN_KEEPER}.may",
+            keeper.get("may"),
+            "Plan Keeper may hold exactly its admitted permissions; any other grant is authority self-expansion and fails closed",
         )
     missing_keeper_denials = sorted(
         PLAN_KEEPER_MAY_NOT - set(keeper.get("may_not") or [])
@@ -2659,6 +2675,32 @@ def _check_rc016_negative_cases(docs: dict[str, dict], report: Report) -> None:
             case,
             model,
             f"roles.{PLAN_KEEPER}.owns",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    case[model]["roles"][PLAN_KEEPER]["may"].append(
+        "revise_strategic_direction_without_authority"
+    )
+    cases.append(
+        (
+            "Plan Keeper gains an unadmitted permission",
+            case,
+            model,
+            f"roles.{PLAN_KEEPER}.may",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    case[model]["roles"][PLAN_KEEPER]["may_not"].remove(
+        "revise_strategic_direction_beyond_granted_strategic_authority"
+    )
+    cases.append(
+        (
+            "Plan Keeper beyond-scope prohibition removed",
+            case,
+            model,
+            f"roles.{PLAN_KEEPER}.may_not",
         )
     )
 

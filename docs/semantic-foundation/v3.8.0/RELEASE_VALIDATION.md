@@ -35,7 +35,7 @@ Explicitly unchanged: `semantics/artifact_model.yaml`, `semantics/semantic_depen
 
 ## Validator delta
 
-- `scripts/validate-semantics.py`: RC-016 Strategic Cognition closure plus seven isolated negative cases, each required to fail at its intended field.
+- `scripts/validate-semantics.py`: RC-016 Strategic Cognition closure plus nine isolated negative cases, each required to fail at its intended field.
 
 ## RC-016 Strategic Cognition closure
 
@@ -44,15 +44,15 @@ RC-016 proves:
 - the Strategic Cognition ledger is declared exactly once, is canonical, is owned by `Quantum-L9/.github` within `l9_global_strategic_cognition_semantics`, and declares no section outside the admitted semantics;
 - the ledger is registered exactly once in `canonical_sources.yaml` and classified exactly once, as a semantic catalog, by the generic compiler manifest;
 - `L9-STRATEGY-001` exists exactly once with the admitted statement, and it is the only Strategic Cognition invariant;
-- the Plan Keeper owns the Strategic Plan and nothing else, owns no underlying truth source, and draws authority only from explicitly granted strategic authority;
-- the Strategic Plan Metacognitive Reasoner owns only Strategic Plan reasoning analysis, is not universal metacognitive authority, is denied Strategic Plan mutation, supersession, and strategic authority, and emits advisory output to the Plan Keeper;
+- the Plan Keeper owns the Strategic Plan and nothing else, owns no underlying truth source, draws authority only from explicitly granted strategic authority, holds exactly its two admitted permissions (an allowlist: any other grant fails closed), and carries all four admitted prohibitions, including revising strategic direction beyond granted strategic authority;
+- the Strategic Plan Metacognitive Reasoner owns only Strategic Plan reasoning analysis, is not universal metacognitive authority, holds exactly its four admitted analysis permissions (an allowlist: any other grant fails closed), is denied Strategic Plan mutation, supersession, and strategic authority, and emits advisory output to the Plan Keeper;
 - both roles are semantic roles, not ActorIdentities, and neither is registered as an actor;
 - the Current Meta View is derived and non-authoritative, may not reinterpret source truth or create authority, and reuses the existing `composed_projection` and `projection_artifact` classes and the composed-projection schema; no artifact class is added;
 - the Semantic Compiler does not own Strategic Cognition and gains no strategic capability;
 - the Reasoning Plane separation in `vocabulary.yaml` `stage_rules.reasoning_plane_rule` is intact;
 - the five vocabulary terms exist and defer to the model.
 
-The negative-case batch proves fail-closed behavior, each at its intended field, for: the Reasoner gaining Strategic Plan mutation; the Reasoner becoming strategic authority; the Current Meta View promoted to canonical authority; the Current Meta View reinterpreting source truth; the Plan Keeper owning truth sources by consuming projections; Strategic Cognition owned by the Semantic Compiler; and removal of the Plan Keeper / metacognition separation.
+The negative-case batch proves fail-closed behavior, each at its intended field, for: the Reasoner gaining Strategic Plan mutation; the Reasoner becoming strategic authority; the Current Meta View promoted to canonical authority; the Current Meta View reinterpreting source truth; the Plan Keeper owning truth sources by consuming projections; the Plan Keeper gaining an unadmitted permission; removal of the Plan Keeper beyond-scope prohibition; Strategic Cognition owned by the Semantic Compiler; and removal of the Plan Keeper / metacognition separation.
 
 ## Existing closure
 
