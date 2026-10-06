@@ -688,6 +688,10 @@ def check_sc008(root: Path, release: str | None, report: Report) -> None:
         )
 
 
+# The validator's own path, used as the receipt location for negative-case
+# batches that prove a closure check fails closed.
+VALIDATOR_PATH = "scripts/validate-semantics.py"
+
 DERIVATION_ITEM_KEYS = {
     "invariants.yaml": "invariants",
     "contracts.yaml": "contracts",
@@ -1937,7 +1941,7 @@ def _check_rc015_negative_cases(docs: dict[str, dict], report: Report) -> None:
         if not candidate_report.failures:
             report.fail(
                 "RC-015",
-                "scripts/validate-semantics.py",
+                VALIDATOR_PATH,
                 "negative_case",
                 label,
                 "negative case did not fail closed",
@@ -2733,7 +2737,7 @@ def _check_rc016_negative_cases(docs: dict[str, dict], report: Report) -> None:
         if not any(f.startswith(prefix) for f in candidate_report.failures):
             report.fail(
                 "RC-016",
-                "scripts/validate-semantics.py",
+                VALIDATOR_PATH,
                 "negative_case",
                 label,
                 f"negative case did not fail closed at {path} {field}",
@@ -2757,6 +2761,586 @@ def check_rc016(docs: dict[str, dict], report: Report) -> None:
             "Strategic Cognition ledger, invariant, Plan Keeper / Strategic Plan Metacognitive Reasoner authority separation, Current Meta View projection reuse, and Reasoning Plane boundary are structurally closed",
         )
         _check_rc016_negative_cases(docs, report)
+
+
+# RC-017 validation-completeness closure. The validation contract must make
+# incomplete applicable validation coverage incapable of resolving to
+# ``satisfied``, and the Cursor-Governance operating-plane projection must
+# carry the operative contract semantics (not only headings and outcomes)
+# together with the global invariants those semantics cite. No new contract,
+# invariant, profile, or result taxonomy is admitted here; existing law
+# (L9-ASSURANCE-001, L9-UNKNOWN-001, L9-VALIDATION-001, L9-CORRECTNESS-001,
+# L9-EVIDENCE-001) is operationalized through the existing contract.
+CONTRACTS_PATH = "semantics/contracts.yaml"
+PROFILES_PATH = "semantics/projection_profiles.yaml"
+INVARIANTS_PATH = "semantics/invariants.yaml"
+VALIDATION_CONTRACT_ID = "l9.contract/validation-and-correctness@1"
+VALIDATION_CONTRACT_OWNER = "Quantum-L9/.github"
+# The uniform contract shape of contracts.yaml. A field outside it on the
+# validation contract is a result taxonomy or sub-contract smuggled in.
+CONTRACT_SHAPE = {
+    "id",
+    "purpose",
+    "scope",
+    "owner",
+    "source_invariants",
+    "applies_to",
+    "requires",
+    "guarantees",
+    "forbidden",
+    "outcomes",
+}
+VALIDATION_SOURCE_INVARIANTS = {
+    "L9-VALIDATION-001",
+    "L9-CORRECTNESS-001",
+    "L9-EVIDENCE-001",
+    "L9-UNKNOWN-001",
+    "L9-ASSURANCE-001",
+}
+VALIDATION_REQUIRED_GUARANTEES = {
+    # completeness (this change)
+    "validation_success_requires_every_applicable_required_criterion_to_be_evaluated_and_satisfied",
+    "unavailable_unreadable_unexecuted_or_unresolved_required_criteria_preclude_success",
+    "validation_coverage_is_explicit_and_evidence_bound",
+    # existing unresolved-stays-unresolved law the completeness obligations rest on
+    "unresolved_validation_semantics_remain_unresolved",
+}
+VALIDATION_REQUIRED_FORBIDDEN = {
+    # completeness (this change)
+    "silent_skip_of_applicable_required_validation",
+    "default_success_on_missing_unreadable_unexecuted_or_unresolved_required_validation",
+    "partial_validation_coverage_reported_as_complete",
+    # existing coercion prohibition the completeness obligations rest on
+    "unknown_to_success_coercion",
+}
+# The outcome algebra, exactly. Keys are the existing three; ``satisfied`` is
+# bound to complete evaluation of every applicable required criterion, and
+# incomplete coverage lands in ``unresolved``. Any other mapping fails closed.
+VALIDATION_OUTCOMES = {
+    "satisfied": "every_applicable_required_criterion_was_evaluated_and_evidence_supports_the_candidate_against_each",
+    "rejected": "evidence_refutes_the_candidate_against_declared_criteria",
+    "unresolved": "validation_cannot_resolve_the_candidate_against_every_applicable_required_criterion",
+}
+VALIDATION_SUCCESS_OUTCOME = "satisfied"
+CG_PROFILE_ID = "l9.projection/cursor-governance-operating-plane@1"
+CG_CONSUMER = "Cursor-Governance"
+CG_CONTRACT_SELECTORS = {
+    "$.contracts[*].id",
+    "$.contracts[*].purpose",
+    "$.contracts[*].scope",
+    "$.contracts[*].source_invariants",
+    "$.contracts[*].requires",
+    "$.contracts[*].guarantees",
+    "$.contracts[*].forbidden",
+    "$.contracts[*].outcomes",
+}
+GLOBAL_INVARIANTS_SELECTOR = '$.invariants[?(@.scope=="global")]'
+
+
+def _rc017_contract(docs: dict[str, dict], report: Report) -> dict | None:
+    catalog = docs.get(CONTRACTS_PATH) or {}
+    contracts = catalog.get("contracts")
+    contract, count = _unique_entry(contracts, "id", VALIDATION_CONTRACT_ID)
+    if count != 1 or contract is None:
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            "contracts",
+            VALIDATION_CONTRACT_ID,
+            f"validation contract must exist exactly once (found {count})",
+        )
+        return None
+    label = f"contracts[{VALIDATION_CONTRACT_ID}]"
+    if contract.get("owner") != VALIDATION_CONTRACT_OWNER:
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            f"{label}.owner",
+            contract.get("owner"),
+            f"validation law is owned by {VALIDATION_CONTRACT_OWNER}",
+        )
+    if contract.get("scope") != "global":
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            f"{label}.scope",
+            contract.get("scope"),
+            "validation contract must be global",
+        )
+    extra_keys = sorted(set(contract) - CONTRACT_SHAPE)
+    if extra_keys:
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            f"{label}.keys",
+            extra_keys,
+            "validation contract declares fields outside the uniform contract shape; "
+            "no result taxonomy or sub-contract is admitted here",
+        )
+    # No result taxonomy is defined by the contract catalog.
+    outcome_semantics = catalog.get("outcome_semantics") or {}
+    if (
+        outcome_semantics.get("scope") != "contract_local"
+        or outcome_semantics.get("global_error_taxonomy_defined_here") is not False
+    ):
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            "outcome_semantics",
+            outcome_semantics,
+            "contract outcomes stay contract-local; the catalog must not define a result taxonomy",
+        )
+    return contract
+
+
+def _rc017_source_invariants(
+    contract: dict, docs: dict[str, dict], report: Report
+) -> None:
+    label = f"contracts[{VALIDATION_CONTRACT_ID}]"
+    declared = [str(item) for item in contract.get("source_invariants") or []]
+    missing = sorted(VALIDATION_SOURCE_INVARIANTS - set(declared))
+    if missing:
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            f"{label}.source_invariants",
+            missing,
+            "validation contract must rest on the existing validation and assurance invariants",
+        )
+    duplicates = sorted({item for item in declared if declared.count(item) > 1})
+    if duplicates:
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            f"{label}.source_invariants",
+            duplicates,
+            "source invariant declared more than once",
+        )
+    invariants = (docs.get(INVARIANTS_PATH) or {}).get("invariants") or []
+    for invariant_id in sorted(VALIDATION_SOURCE_INVARIANTS):
+        invariant, count = _unique_entry(invariants, "id", invariant_id)
+        if count != 1 or invariant is None:
+            report.fail(
+                "RC-017",
+                INVARIANTS_PATH,
+                "invariants",
+                invariant_id,
+                f"source invariant must exist exactly once (found {count})",
+            )
+        elif (
+            invariant.get("scope") != "global"
+            or invariant.get("owner") != VALIDATION_CONTRACT_OWNER
+        ):
+            report.fail(
+                "RC-017",
+                INVARIANTS_PATH,
+                f"invariants[{invariant_id}].scope",
+                invariant.get("scope"),
+                "source invariant must be a global invariant owned by the global authority",
+            )
+
+
+def _rc017_obligations(contract: dict, report: Report) -> None:
+    label = f"contracts[{VALIDATION_CONTRACT_ID}]"
+    for field, required in (
+        ("guarantees", VALIDATION_REQUIRED_GUARANTEES),
+        ("forbidden", VALIDATION_REQUIRED_FORBIDDEN),
+    ):
+        values = contract.get(field)
+        if not isinstance(values, list) or not all(
+            isinstance(v, str) and v.strip() for v in values
+        ):
+            report.fail(
+                "RC-017",
+                CONTRACTS_PATH,
+                f"{label}.{field}",
+                values,
+                "must be a list of non-empty strings",
+            )
+            continue
+        missing = sorted(required - set(values))
+        if missing:
+            report.fail(
+                "RC-017",
+                CONTRACTS_PATH,
+                f"{label}.{field}",
+                missing,
+                f"required validation-completeness {field} missing",
+            )
+    requires = contract.get("requires")
+    if not isinstance(requires, list) or not requires:
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            f"{label}.requires",
+            requires,
+            "validation contract must declare its requires",
+        )
+
+
+def _rc017_outcomes(contract: dict, report: Report) -> None:
+    label = f"contracts[{VALIDATION_CONTRACT_ID}]"
+    outcomes = contract.get("outcomes")
+    if not isinstance(outcomes, dict):
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            f"{label}.outcomes",
+            outcomes,
+            "outcome algebra missing",
+        )
+        return
+    if set(outcomes) != set(VALIDATION_OUTCOMES):
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            f"{label}.outcomes",
+            sorted(map(str, outcomes)),
+            f"outcome keys must be exactly {sorted(VALIDATION_OUTCOMES)}; no new result taxonomy",
+        )
+        return
+    values = [str(v) for v in outcomes.values()]
+    if len(set(values)) != len(values):
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            f"{label}.outcomes",
+            outcomes,
+            "satisfied, rejected, and unresolved must remain distinct outcomes",
+        )
+        return
+    success = outcomes.get(VALIDATION_SUCCESS_OUTCOME)
+    for key in ("rejected", "unresolved"):
+        if outcomes.get(key) == success:
+            report.fail(
+                "RC-017",
+                CONTRACTS_PATH,
+                f"{label}.outcomes",
+                outcomes,
+                f"{key} must not resolve to the success outcome",
+            )
+    if outcomes != VALIDATION_OUTCOMES:
+        report.fail(
+            "RC-017",
+            CONTRACTS_PATH,
+            f"{label}.outcomes",
+            outcomes,
+            "outcome algebra must bind satisfied to complete evaluation of every applicable "
+            f"required criterion and route incomplete coverage to unresolved: {VALIDATION_OUTCOMES}",
+        )
+
+
+def _rc017_projection(docs: dict[str, dict], report: Report) -> None:
+    catalog = docs.get(PROFILES_PATH) or {}
+    profiles = catalog.get("projection_profiles")
+    profile, count = _unique_entry(profiles, "id", CG_PROFILE_ID)
+    if count != 1 or profile is None:
+        report.fail(
+            "RC-017",
+            PROFILES_PATH,
+            "projection_profiles",
+            CG_PROFILE_ID,
+            f"Cursor-Governance operating-plane profile must exist exactly once (found {count})",
+        )
+        return
+    _rc017_profile_identity(profile, report)
+    label = f"projection_profiles[{CG_PROFILE_ID}]"
+    sources = profile.get("sources")
+    if not isinstance(sources, dict):
+        report.fail(
+            "RC-017",
+            PROFILES_PATH,
+            f"{label}.sources",
+            sources,
+            "profile sources must be a source-local selector mapping",
+        )
+        return
+    source_classes = catalog.get("source_classes") or {}
+    for name in ("contracts", "invariants"):
+        if name not in source_classes:
+            report.fail(
+                "RC-017",
+                PROFILES_PATH,
+                f"{label}.sources.{name}",
+                name,
+                "source does not resolve to source_classes",
+            )
+    _rc017_projection_selectors(label, sources, report)
+
+
+def _rc017_profile_identity(profile: dict, report: Report) -> None:
+    label = f"projection_profiles[{CG_PROFILE_ID}]"
+    if profile.get("class") != "consumer" or profile.get("consumer") != CG_CONSUMER:
+        report.fail(
+            "RC-017",
+            PROFILES_PATH,
+            f"{label}.consumer",
+            profile.get("consumer"),
+            f"must be a consumer profile for {CG_CONSUMER}",
+        )
+
+
+def _rc017_projection_selectors(label: str, sources: dict, report: Report) -> None:
+    contracts_block = sources.get("contracts")
+    contract_selectors = (
+        contracts_block.get("selectors") if isinstance(contracts_block, dict) else None
+    )
+    if not isinstance(contract_selectors, list):
+        report.fail(
+            "RC-017",
+            PROFILES_PATH,
+            f"{label}.sources.contracts.selectors",
+            contract_selectors,
+            "contract projection must own a selectors list",
+        )
+    else:
+        missing = sorted(CG_CONTRACT_SELECTORS - set(map(str, contract_selectors)))
+        if missing:
+            report.fail(
+                "RC-017",
+                PROFILES_PATH,
+                f"{label}.sources.contracts.selectors",
+                missing,
+                "operating-plane contract projection must carry the operative contract "
+                "semantics, not only headings and outcomes",
+            )
+    invariants_block = sources.get("invariants")
+    invariant_selectors = (
+        invariants_block.get("selectors")
+        if isinstance(invariants_block, dict)
+        else None
+    )
+    if not isinstance(
+        invariant_selectors, list
+    ) or GLOBAL_INVARIANTS_SELECTOR not in set(map(str, invariant_selectors)):
+        report.fail(
+            "RC-017",
+            PROFILES_PATH,
+            f"{label}.sources.invariants.selectors",
+            invariant_selectors,
+            f"operating-plane projection must carry the global invariants its contracts cite "
+            f"via {GLOBAL_INVARIANTS_SELECTOR}",
+        )
+
+
+def _evaluate_rc017(docs: dict[str, dict], report: Report) -> None:
+    contract = _rc017_contract(docs, report)
+    if contract is not None:
+        _rc017_source_invariants(contract, docs, report)
+        _rc017_obligations(contract, report)
+        _rc017_outcomes(contract, report)
+    _rc017_projection(docs, report)
+
+
+def _check_rc017_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    contract_field = f"contracts[{VALIDATION_CONTRACT_ID}]"
+    profile_field = f"projection_profiles[{CG_PROFILE_ID}]"
+    cases = []
+
+    def mutated_contract() -> tuple[dict, dict]:
+        case = copy.deepcopy(docs)
+        contract, _ = _unique_entry(
+            case[CONTRACTS_PATH]["contracts"], "id", VALIDATION_CONTRACT_ID
+        )
+        return case, contract
+
+    def mutated_profile() -> tuple[dict, dict]:
+        case = copy.deepcopy(docs)
+        profile, _ = _unique_entry(
+            case[PROFILES_PATH]["projection_profiles"], "id", CG_PROFILE_ID
+        )
+        return case, profile
+
+    for guarantee in (
+        "validation_success_requires_every_applicable_required_criterion_to_be_evaluated_and_satisfied",
+        "unavailable_unreadable_unexecuted_or_unresolved_required_criteria_preclude_success",
+        "validation_coverage_is_explicit_and_evidence_bound",
+        "unresolved_validation_semantics_remain_unresolved",
+    ):
+        case, contract = mutated_contract()
+        contract["guarantees"].remove(guarantee)
+        cases.append(
+            (
+                f"guarantee removed: {guarantee}",
+                case,
+                CONTRACTS_PATH,
+                f"{contract_field}.guarantees",
+            )
+        )
+
+    for prohibition in (
+        "silent_skip_of_applicable_required_validation",
+        "default_success_on_missing_unreadable_unexecuted_or_unresolved_required_validation",
+        "partial_validation_coverage_reported_as_complete",
+        "unknown_to_success_coercion",
+    ):
+        case, contract = mutated_contract()
+        contract["forbidden"].remove(prohibition)
+        cases.append(
+            (
+                f"prohibition removed: {prohibition}",
+                case,
+                CONTRACTS_PATH,
+                f"{contract_field}.forbidden",
+            )
+        )
+
+    case, contract = mutated_contract()
+    contract["source_invariants"].remove("L9-ASSURANCE-001")
+    cases.append(
+        (
+            "assurance basis removed from source_invariants",
+            case,
+            CONTRACTS_PATH,
+            f"{contract_field}.source_invariants",
+        )
+    )
+
+    case, contract = mutated_contract()
+    contract["outcomes"]["unresolved"] = contract["outcomes"]["satisfied"]
+    cases.append(
+        (
+            "unresolved validation resolves as satisfied",
+            case,
+            CONTRACTS_PATH,
+            f"{contract_field}.outcomes",
+        )
+    )
+
+    case, contract = mutated_contract()
+    contract["outcomes"]["satisfied"] = (
+        "evidence_supports_the_candidate_against_declared_criteria"
+    )
+    cases.append(
+        (
+            "satisfied no longer requires every applicable required criterion",
+            case,
+            CONTRACTS_PATH,
+            f"{contract_field}.outcomes",
+        )
+    )
+
+    case, contract = mutated_contract()
+    contract["outcomes"]["partially_satisfied"] = (
+        "some_required_criteria_were_evaluated"
+    )
+    cases.append(
+        (
+            "new result taxonomy key added to outcomes",
+            case,
+            CONTRACTS_PATH,
+            f"{contract_field}.outcomes",
+        )
+    )
+
+    case, contract = mutated_contract()
+    contract["result_taxonomy"] = {"pass": "any_evaluated_criterion_passed"}
+    cases.append(
+        (
+            "parallel result taxonomy field added to the contract",
+            case,
+            CONTRACTS_PATH,
+            f"{contract_field}.keys",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    case[CONTRACTS_PATH]["outcome_semantics"]["global_error_taxonomy_defined_here"] = (
+        True
+    )
+    cases.append(
+        (
+            "contract catalog defines a result taxonomy",
+            case,
+            CONTRACTS_PATH,
+            "outcome_semantics",
+        )
+    )
+
+    case, contract = mutated_contract()
+    contract["owner"] = CG_CONSUMER
+    cases.append(
+        (
+            "validation law owned by the consumer",
+            case,
+            CONTRACTS_PATH,
+            f"{contract_field}.owner",
+        )
+    )
+
+    for selector in (
+        "$.contracts[*].source_invariants",
+        "$.contracts[*].requires",
+        "$.contracts[*].guarantees",
+        "$.contracts[*].forbidden",
+    ):
+        case, profile = mutated_profile()
+        profile["sources"]["contracts"]["selectors"].remove(selector)
+        cases.append(
+            (
+                f"projection selector removed: {selector}",
+                case,
+                PROFILES_PATH,
+                f"{profile_field}.sources.contracts.selectors",
+            )
+        )
+
+    case, profile = mutated_profile()
+    del profile["sources"]["invariants"]
+    cases.append(
+        (
+            "governing invariants projection removed",
+            case,
+            PROFILES_PATH,
+            f"{profile_field}.sources.invariants.selectors",
+        )
+    )
+
+    case, profile = mutated_profile()
+    profile["sources"]["invariants"]["selectors"] = ["$.invariants[*].id"]
+    cases.append(
+        (
+            "invariants projected as headings without their statements",
+            case,
+            PROFILES_PATH,
+            f"{profile_field}.sources.invariants.selectors",
+        )
+    )
+
+    for label, candidate, path, field in cases:
+        candidate_report = Report()
+        _evaluate_rc017(candidate, candidate_report)
+        prefix = f"FAIL RC-017 {path} {field}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-017",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {path} {field}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-017 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-017-NEG",
+            f"{len(cases)} validation-completeness negative cases fail closed for their intended reason",
+        )
+
+
+def check_rc017(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc017(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-017",
+            "validation-and-correctness contract binds satisfied to complete evaluation of every applicable "
+            "required criterion, routes unavailable, unreadable, unexecuted, or unresolved required criteria to "
+            "unresolved, forbids silent skip, default success, and partial coverage reported as complete, and the "
+            "Cursor-Governance operating-plane projection carries operative contract semantics with the global invariants",
+        )
+        _check_rc017_negative_cases(docs, report)
 
 
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
@@ -2931,6 +3515,7 @@ def main(argv: list[str]) -> int:
     check_rc014(docs, report)
     check_rc015(docs, report)
     check_rc016(docs, report)
+    check_rc017(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
