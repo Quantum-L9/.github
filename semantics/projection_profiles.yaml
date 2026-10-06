@@ -473,6 +473,42 @@ projection_profiles:
   - solver_implementation_details
   - rendering_internals
   - unrelated_ir_catalog_entries
+- id: l9.projection/cursor-governance-identity@1
+  class: consumer
+  consumer: Cursor-Governance
+  purpose: 'Project the canonical ActorIdentity and SurfaceIdentity entries, their bounded kind and status
+    vocabularies, and their typed historical aliases so the Cursor-Governance operating plane can resolve its
+    local actor_ref and surface_ref coordinates against one upstream registry without redefining organization
+    identity. The projection is derived, non-canonical, provenance-bearing, and invalidated by any material
+    change to either registry.
+
+    '
+  sources:
+    actor_registry:
+      selectors:
+      - $.schema
+      - $.artifact_id
+      - $.actor_kinds
+      - $.actor_statuses
+      - $.actors
+      - $.aliases
+    surface_registry:
+      selectors:
+      - $.schema
+      - $.artifact_id
+      - $.surface_statuses
+      - $.surfaces
+      - $.aliases
+  output:
+    schema: l9.projection.cursor-governance-identity/v1
+  forbidden:
+  - identity_ownership_transfer
+  - credential_token_or_signing_key_semantics
+  - role_permission_or_grant_semantics
+  - actor_to_surface_assignment
+  - adapter_provider_or_governance_profile_selection
+  - runtime_marker_or_runtime_evidence_interpretation
+  - execution_authority
 - id: l9.projection/global-distribution-plane@1
   class: governance
   consumer: Quantum-L9/.github
