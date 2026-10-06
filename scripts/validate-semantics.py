@@ -4073,6 +4073,8 @@ def check_rc018(docs: dict[str, dict], report: Report) -> None:
 # (GAR-F-161001). It adds no actor, surface, alias, or identity dimension.
 CG_IDENTITY_PROFILE_ID = "l9.projection/cursor-governance-identity@1"
 CG_IDENTITY_OUTPUT_SCHEMA = "l9.projection.cursor-governance-identity/v1"
+# Both registries keep their typed historical aliases under the same key.
+ALIASES_SELECTOR = "$.aliases"
 ACTOR_REGISTRY_ARTIFACT_ID = "l9.actor-registry/global@1"
 SURFACE_REGISTRY_ARTIFACT_ID = "l9.surface-registry/global@1"
 # source name -> (canonical ledger path, artifact_id, required selectors)
@@ -4080,12 +4082,12 @@ CG_IDENTITY_SOURCES = {
     "actor_registry": (
         ACTOR_REGISTRY_PATH,
         ACTOR_REGISTRY_ARTIFACT_ID,
-        ("$.actors", "$.aliases"),
+        ("$.actors", ALIASES_SELECTOR),
     ),
     "surface_registry": (
         SURFACE_REGISTRY_PATH,
         SURFACE_REGISTRY_ARTIFACT_ID,
-        ("$.surfaces", "$.aliases"),
+        ("$.surfaces", ALIASES_SELECTOR),
     ),
 }
 # The projection carries identity only. These boundaries stay downstream or
@@ -4099,9 +4101,8 @@ CG_IDENTITY_FORBIDDEN = {
     "runtime_marker_or_runtime_evidence_interpretation",
     "execution_authority",
 }
-SIMPLE_SELECTOR = re.compile(
-    r"^\$\.([A-Za-z_][A-Za-z0-9_]*)(\.[A-Za-z_][A-Za-z0-9_]*|\[\*\])*$"
-)
+SIMPLE_SELECTOR = re.compile(r"^\$\.([A-Za-z_]\w*)(\.[A-Za-z_]\w*|\[\*\])*$")
+CG_IDENTITY_LABEL = f"projection_profiles[{CG_IDENTITY_PROFILE_ID}]"
 
 
 def _rc019_selector_root(selector: str) -> str | None:
@@ -4111,125 +4112,144 @@ def _rc019_selector_root(selector: str) -> str | None:
     return match.group(1) if match else None
 
 
+def _rc019_fail(field: str, value: object, message: str, report: Report) -> None:
+    report.fail("RC-019", PROFILES_PATH, field, value, message)
+
+
+def _rc019_profile_shape(profile: dict, report: Report) -> None:
+    label = CG_IDENTITY_LABEL
+    if profile.get("class") != "consumer":
+        _rc019_fail(
+            f"{label}.class",
+            profile.get("class"),
+            "identity projection must be a consumer profile",
+            report,
+        )
+    if profile.get("consumer") != CG_CONSUMER:
+        _rc019_fail(
+            f"{label}.consumer",
+            profile.get("consumer"),
+            f"identity projection consumer must be exactly {CG_CONSUMER!r}",
+            report,
+        )
+    output_schema = (profile.get("output") or {}).get("schema")
+    if output_schema != CG_IDENTITY_OUTPUT_SCHEMA:
+        _rc019_fail(
+            f"{label}.output.schema",
+            output_schema,
+            f"output schema must be exactly {CG_IDENTITY_OUTPUT_SCHEMA!r}; it is the downstream consumer contract",
+            report,
+        )
+    missing_forbidden = sorted(
+        CG_IDENTITY_FORBIDDEN - set(profile.get("forbidden") or [])
+    )
+    if missing_forbidden:
+        _rc019_fail(
+            f"{label}.forbidden",
+            missing_forbidden,
+            "identity projection must declare the ownership boundaries it does not carry",
+            report,
+        )
+
+
+def _rc019_source_resolves(
+    name: str, catalog: dict, docs: dict[str, dict], report: Report
+) -> dict | None:
+    """The canonical ledger a profile source names, or None after failing closed
+    when source_classes points anywhere but the canonical registry."""
+    ledger_path, artifact_id, _required = CG_IDENTITY_SOURCES[name]
+    declared = ((catalog.get("source_classes") or {}).get(name) or {}).get(
+        "canonical_artifact"
+    )
+    ledger = docs.get(ledger_path) or {}
+    if (
+        declared != ledger_path.removeprefix("semantics/")
+        or ledger.get("artifact_id") != artifact_id
+        or ledger.get("canonical") is not True
+    ):
+        _rc019_fail(
+            f"source_classes.{name}.canonical_artifact",
+            declared,
+            f"source {name} must resolve to the canonical ledger {ledger_path} ({artifact_id})",
+            report,
+        )
+        return None
+    return ledger
+
+
+def _rc019_source_selectors(
+    name: str, block: object, ledger: dict, report: Report
+) -> None:
+    ledger_path, _artifact_id, required = CG_IDENTITY_SOURCES[name]
+    field = f"{CG_IDENTITY_LABEL}.sources.{name}.selectors"
+    selectors = block.get("selectors") if isinstance(block, dict) else None
+    if not isinstance(selectors, list) or not selectors:
+        _rc019_fail(
+            field, selectors, "source must own a non-empty selectors list", report
+        )
+        return
+    selector_set = set(map(str, selectors))
+    missing = sorted(set(required) - selector_set)
+    if missing:
+        _rc019_fail(
+            field,
+            missing,
+            f"identity projection must carry the canonical {name} entries and typed aliases",
+            report,
+        )
+    for selector in sorted(selector_set):
+        root = _rc019_selector_root(selector)
+        if root is None or root not in ledger:
+            _rc019_fail(
+                field,
+                selector,
+                f"selector does not resolve to a top-level section of {ledger_path}",
+                report,
+            )
+
+
+def _rc019_sources(
+    profile: dict, catalog: dict, docs: dict[str, dict], report: Report
+) -> None:
+    sources = profile.get("sources")
+    if not isinstance(sources, dict):
+        _rc019_fail(
+            f"{CG_IDENTITY_LABEL}.sources",
+            sources,
+            "profile sources must be a source-local selector mapping",
+            report,
+        )
+        return
+    if set(sources) != set(CG_IDENTITY_SOURCES):
+        _rc019_fail(
+            f"{CG_IDENTITY_LABEL}.sources",
+            sorted(map(str, sources)),
+            f"identity projection sources must be exactly {sorted(CG_IDENTITY_SOURCES)}; "
+            "no other ledger may be substituted for or added beside the canonical registries",
+            report,
+        )
+    for name in CG_IDENTITY_SOURCES:
+        if name not in sources:
+            continue
+        ledger = _rc019_source_resolves(name, catalog, docs, report)
+        if ledger is not None:
+            _rc019_source_selectors(name, sources.get(name), ledger, report)
+
+
 def _evaluate_rc019(docs: dict[str, dict], report: Report) -> None:
     catalog = docs.get(PROFILES_PATH) or {}
     profiles = catalog.get("projection_profiles")
     profile, count = _unique_entry(profiles, "id", CG_IDENTITY_PROFILE_ID)
     if count != 1 or profile is None:
-        report.fail(
-            "RC-019",
-            PROFILES_PATH,
+        _rc019_fail(
             "projection_profiles",
             CG_IDENTITY_PROFILE_ID,
             f"Cursor-Governance identity projection profile must exist exactly once (found {count})",
+            report,
         )
         return
-    label = f"projection_profiles[{CG_IDENTITY_PROFILE_ID}]"
-    if profile.get("class") != "consumer":
-        report.fail(
-            "RC-019",
-            PROFILES_PATH,
-            f"{label}.class",
-            profile.get("class"),
-            "identity projection must be a consumer profile",
-        )
-    if profile.get("consumer") != CG_CONSUMER:
-        report.fail(
-            "RC-019",
-            PROFILES_PATH,
-            f"{label}.consumer",
-            profile.get("consumer"),
-            f"identity projection consumer must be exactly {CG_CONSUMER!r}",
-        )
-    output_schema = (profile.get("output") or {}).get("schema")
-    if output_schema != CG_IDENTITY_OUTPUT_SCHEMA:
-        report.fail(
-            "RC-019",
-            PROFILES_PATH,
-            f"{label}.output.schema",
-            output_schema,
-            f"output schema must be exactly {CG_IDENTITY_OUTPUT_SCHEMA!r}; it is the downstream consumer contract",
-        )
-    sources = profile.get("sources")
-    if not isinstance(sources, dict):
-        report.fail(
-            "RC-019",
-            PROFILES_PATH,
-            f"{label}.sources",
-            sources,
-            "profile sources must be a source-local selector mapping",
-        )
-        return
-    if set(sources) != set(CG_IDENTITY_SOURCES):
-        report.fail(
-            "RC-019",
-            PROFILES_PATH,
-            f"{label}.sources",
-            sorted(map(str, sources)),
-            f"identity projection sources must be exactly {sorted(CG_IDENTITY_SOURCES)}; "
-            "no other ledger may be substituted for or added beside the canonical registries",
-        )
-    source_classes = catalog.get("source_classes") or {}
-    for name, (ledger_path, artifact_id, required) in CG_IDENTITY_SOURCES.items():
-        if name not in sources:
-            continue
-        declared = (source_classes.get(name) or {}).get("canonical_artifact")
-        ledger = docs.get(ledger_path) or {}
-        if (
-            declared != ledger_path.removeprefix("semantics/")
-            or ledger.get("artifact_id") != artifact_id
-            or ledger.get("canonical") is not True
-        ):
-            report.fail(
-                "RC-019",
-                PROFILES_PATH,
-                f"source_classes.{name}.canonical_artifact",
-                declared,
-                f"source {name} must resolve to the canonical ledger {ledger_path} ({artifact_id})",
-            )
-            continue
-        block = sources.get(name)
-        selectors = block.get("selectors") if isinstance(block, dict) else None
-        if not isinstance(selectors, list) or not selectors:
-            report.fail(
-                "RC-019",
-                PROFILES_PATH,
-                f"{label}.sources.{name}.selectors",
-                selectors,
-                "source must own a non-empty selectors list",
-            )
-            continue
-        selector_set = set(map(str, selectors))
-        missing = sorted(set(required) - selector_set)
-        if missing:
-            report.fail(
-                "RC-019",
-                PROFILES_PATH,
-                f"{label}.sources.{name}.selectors",
-                missing,
-                f"identity projection must carry the canonical {name} entries and typed aliases",
-            )
-        for selector in sorted(selector_set):
-            root = _rc019_selector_root(selector)
-            if root is None or root not in ledger:
-                report.fail(
-                    "RC-019",
-                    PROFILES_PATH,
-                    f"{label}.sources.{name}.selectors",
-                    selector,
-                    f"selector does not resolve to a top-level section of {ledger_path}",
-                )
-    missing_forbidden = sorted(
-        CG_IDENTITY_FORBIDDEN - set(profile.get("forbidden") or [])
-    )
-    if missing_forbidden:
-        report.fail(
-            "RC-019",
-            PROFILES_PATH,
-            f"{label}.forbidden",
-            missing_forbidden,
-            "identity projection must declare the ownership boundaries it does not carry",
-        )
+    _rc019_profile_shape(profile, report)
+    _rc019_sources(profile, catalog, docs, report)
 
 
 def _check_rc019_negative_cases(docs: dict[str, dict], report: Report) -> None:
@@ -4249,7 +4269,7 @@ def _check_rc019_negative_cases(docs: dict[str, dict], report: Report) -> None:
     profiles.append(copy.deepcopy(profile))
     cases.append(("target profile duplicated", case, "projection_profiles"))
     case, _, profile = mutated()
-    profile["consumer"] = "Quantum-L9/.github"
+    profile["consumer"] = VALIDATION_CONTRACT_OWNER
     cases.append(("wrong consumer", case, f"{field}.consumer"))
     case, _, profile = mutated()
     profile["class"] = "governance"
@@ -4266,7 +4286,7 @@ def _check_rc019_negative_cases(docs: dict[str, dict], report: Report) -> None:
         ("identity_model substituted for actor_registry", case, f"{field}.sources")
     )
     case, _, profile = mutated()
-    profile["sources"]["actor_registry"]["selectors"].remove("$.aliases")
+    profile["sources"]["actor_registry"]["selectors"].remove(ALIASES_SELECTOR)
     cases.append(
         (
             "incomplete actor projection (aliases dropped)",
