@@ -2003,6 +2003,14 @@ METACOGNITION_MAY_NOT = {
     "grant_itself_strategic_authority",
     "convert_metacognitive_conclusions_into_strategic_decisions",
 }
+# The Reasoner's admitted permissions, exactly. An allowlist, not a blocklist:
+# any other grant (edit, approve, grant, ...) fails closed.
+METACOGNITION_MAY = {
+    "analyze_plan_keeper_reasoning_episodes",
+    "compare_planning_reasoning_expectations_outcomes_and_revisions",
+    "identify_recurring_planning_reasoning_strengths_and_failure_patterns",
+    "emit_planning_cognition_lessons_for_plan_keeper",
+}
 # Model sections admitted by v3.8.0. Anything else (plan graph, runtime,
 # prompts, actor bindings, capabilities, artifact classes) is out of scope.
 STRATEGY_MODEL_KEYS = {
@@ -2285,16 +2293,13 @@ def _rc016_reasoner(model: dict, report: Report) -> None:
             "required metacognition prohibitions missing",
         )
     granted = [str(item) for item in reasoner.get("may") or []]
-    leaked = METACOGNITION_MAY_NOT.intersection(granted)
-    if leaked or any(
-        "strategic_direction" in item or item == "strategic_plan" for item in granted
-    ):
+    if sorted(granted) != sorted(METACOGNITION_MAY):
         report.fail(
             "RC-016",
             model_path,
             f"roles.{METACOGNITIVE_REASONER}.may",
             reasoner.get("may"),
-            "Reasoner must not hold Strategic Plan mutation or strategic authority",
+            "Reasoner may hold exactly its admitted analysis permissions; any other grant, including Strategic Plan mutation or strategic authority, fails closed",
         )
     if reasoner.get("strategic_authority") is not False:
         report.fail(
@@ -2606,7 +2611,7 @@ def _check_rc016_negative_cases(docs: dict[str, dict], report: Report) -> None:
     cases = []
 
     case = copy.deepcopy(docs)
-    case[model]["roles"][METACOGNITIVE_REASONER]["may"].append("modify_strategic_plan")
+    case[model]["roles"][METACOGNITIVE_REASONER]["may"].append("edit_strategic_plan")
     cases.append(
         ("Reasoner gains Strategic Plan mutation", case, model, f"{reasoner}.may")
     )
