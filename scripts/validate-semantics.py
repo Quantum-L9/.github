@@ -2770,6 +2770,7 @@ def check_rc016(docs: dict[str, dict], report: Report) -> None:
 CONTRACTS_PATH = "semantics/contracts.yaml"
 PROFILES_PATH = "semantics/projection_profiles.yaml"
 INVARIANTS_PATH = "semantics/invariants.yaml"
+VALIDATOR_PATH = "scripts/validate-semantics.py"
 VALIDATION_CONTRACT_ID = "l9.contract/validation-and-correctness@1"
 VALIDATION_CONTRACT_OWNER = "Quantum-L9/.github"
 VALIDATION_CONTRACT_ID_PATTERN = re.compile(r"validation", re.IGNORECASE)
@@ -3056,6 +3057,32 @@ def _rc017_projection(docs: dict[str, dict], report: Report) -> None:
             f"Cursor-Governance operating-plane profile must exist exactly once (found {count})",
         )
         return
+    _rc017_profile_identity(profiles, profile, report)
+    label = f"projection_profiles[{CG_PROFILE_ID}]"
+    sources = profile.get("sources")
+    if not isinstance(sources, dict):
+        report.fail(
+            "RC-017",
+            PROFILES_PATH,
+            f"{label}.sources",
+            sources,
+            "profile sources must be a source-local selector mapping",
+        )
+        return
+    source_classes = catalog.get("source_classes") or {}
+    for name in ("contracts", "invariants"):
+        if name not in source_classes:
+            report.fail(
+                "RC-017",
+                PROFILES_PATH,
+                f"{label}.sources.{name}",
+                name,
+                "source does not resolve to source_classes",
+            )
+    _rc017_projection_selectors(label, sources, report)
+
+
+def _rc017_profile_identity(profiles: list, profile: dict, report: Report) -> None:
     consumers = [
         str(entry.get("id"))
         for entry in profiles
@@ -3078,26 +3105,9 @@ def _rc017_projection(docs: dict[str, dict], report: Report) -> None:
             profile.get("consumer"),
             f"must be a consumer profile for {CG_CONSUMER}",
         )
-    sources = profile.get("sources")
-    if not isinstance(sources, dict):
-        report.fail(
-            "RC-017",
-            PROFILES_PATH,
-            f"{label}.sources",
-            sources,
-            "profile sources must be a source-local selector mapping",
-        )
-        return
-    source_classes = catalog.get("source_classes") or {}
-    for name in ("contracts", "invariants"):
-        if name not in source_classes:
-            report.fail(
-                "RC-017",
-                PROFILES_PATH,
-                f"{label}.sources.{name}",
-                name,
-                "source does not resolve to source_classes",
-            )
+
+
+def _rc017_projection_selectors(label: str, sources: dict, report: Report) -> None:
     contracts_block = sources.get("contracts")
     contract_selectors = (
         contracts_block.get("selectors") if isinstance(contracts_block, dict) else None
@@ -3362,13 +3372,13 @@ def _check_rc017_negative_cases(docs: dict[str, dict], report: Report) -> None:
         if not any(f.startswith(prefix) for f in candidate_report.failures):
             report.fail(
                 "RC-017",
-                "scripts/validate-semantics.py",
+                VALIDATOR_PATH,
                 "negative_case",
                 label,
                 f"negative case did not fail closed at {path} {field}",
             )
     if not any(
-        f.startswith("FAIL RC-017 scripts/validate-semantics.py negative_case")
+        f.startswith(f"FAIL RC-017 {VALIDATOR_PATH} negative_case")
         for f in report.failures
     ):
         report.ok(
