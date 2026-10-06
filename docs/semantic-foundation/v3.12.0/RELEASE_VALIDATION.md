@@ -34,24 +34,44 @@ None. `technology_capabilities.yaml` is not a hashed derivation source of any ot
 
 ## Validator delta
 
-- `scripts/validate-semantics.py` gains RC-020, the Graphiti/Zep technology admission closure, plus an isolated negative-case batch in which each case must fail at its intended field. RC-019 and every earlier check are unchanged.
+- `scripts/validate-semantics.py` gains RC-020, the Graphiti/Zep technology admission closure, plus an isolated negative-case batch. Each case must fail at its intended field and for its intended reason. RC-019 and every earlier check are unchanged.
 
 ## RC-020 Graphiti/Zep technology admission closure
 
 RC-020 governs the exact coordinates `graphiti-mcp` and `zep` and proves that:
 
 - each is registered exactly once;
-- each carries every field in `registration_requirements.required` (`id`, `class`, `provides`, `target_roles`), and every field it carries is a declared registration field, so a claim outside the registration grammar fails closed;
-- each class is an admitted `capability_classes` entry and is already held by a registration outside these two coordinates, so the admission cannot introduce a class;
+- each carries the pinned required fields `id`, `class`, `provides`, and `target_roles`, and the catalog's `registration_requirements` is well formed and still requires them, so relaxing the grammar cannot excuse a missing field;
+- every field each entry carries is a declared registration field, so a claim outside the registration grammar fails closed;
+- each class is a string, is a `capability_classes` entry, and belongs to the class set admitted before this registration (`language`, `framework`, `datastore`, `transport`, `target`), so the admission cannot introduce a class, even beside a decoy registration that uses it;
 - `provides` is a non-empty list of distinct explicit terms;
-- `target_roles` is a non-empty list of distinct explicit roles, each already held by a registration outside these two coordinates, so the admission cannot introduce a parallel role system;
-- `semantic_ownership` is exactly `{implied: false}`.
+- `target_roles` is a non-empty list of distinct explicit roles drawn from the role set admitted before this registration, so the admission cannot introduce a parallel role system;
+- any optional `constraints`, `compatible_with`, or `incompatible_with` is a non-empty list of distinct terms, and each referenced technology is registered;
+- `semantic_ownership` is exactly `{implied: false}`. A falsy non-boolean such as `0` is rejected;
+- a malformed catalog shape (technologies, capability classes, or registration grammar) produces a structured FAIL and never an uncaught exception.
 
-RC-020 defines no graph-provider or memory-provider family by name, applies no rule to any other technology, and sets no cardinality on the catalog (`L9-VALIDATION-001`).
+The pinned class and role sets apply only to these two coordinates. They bound what this admission may reuse and place no limit on future admissions by canonical authority. RC-020 defines no graph-provider or memory-provider family by name, applies no rule to any other technology, and sets no cardinality on the catalog (`L9-VALIDATION-001`).
 
-The negative-case batch fails closed at its intended field for each of these cases: Graphiti registration missing; Zep registration missing; duplicate exact technology id; class missing; non-admitted class; a technology class introduced together with the admission; empty `provides`; `target_roles` missing; a parallel target role introduced; semantic ownership implied; semantic ownership undeclared; and an ownership claim outside the registration grammar.
+The negative-case batch has 16 cases. Each must fail at its intended field with its intended reason. The cases are:
 
-Test-first evidence: before the registration, at commit `2ddb616` (the semantic bytes of base `14a93a94a3adaa15b506ee88c12e8b82a121c140` plus RC-020), RC-020 failed, and the only failures were the two intended absences (`technologies='graphiti-mcp'` and `technologies='zep'`, each found 0). After the registration, RC-020 and RC-020-NEG pass.
+- Graphiti registration missing;
+- Zep registration missing;
+- duplicate exact technology id;
+- class missing;
+- a non-admitted class, also held by another registration;
+- a class introduced together with the admission behind a decoy;
+- a class that is not a scalar;
+- empty `provides`;
+- `target_roles` missing;
+- a target role introduced behind a decoy;
+- semantic ownership implied;
+- semantic ownership falsy but not `false`;
+- semantic ownership undeclared;
+- an ownership claim outside the registration grammar;
+- the registration grammar relaxed to excuse a missing field;
+- capability classes that are not a mapping.
+
+Test-first evidence: before the registration, at commit `2ddb616` (the semantic bytes of base `14a93a94a3adaa15b506ee88c12e8b82a121c140` plus RC-020), RC-020 failed, and the only failures were the two intended absences (`technologies='graphiti-mcp'` and `technologies='zep'`, each found 0). After the registration, RC-020 and RC-020-NEG pass. The independent Validate & Repair audit found bypasses and uncaught exceptions in the first form of RC-020: a decoy registration, a falsy non-boolean ownership value, a non-scalar class, a malformed grammar, and a self-relaxed required list. These were repaired before publication. Each audit reproduction now fails closed, and the pre-registration RED is unchanged.
 
 ## Existing closure
 
