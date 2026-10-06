@@ -1635,7 +1635,11 @@ REPO_OPS_FORBIDDEN = {
 def _unique_entry(entries: object, key: str, value: str) -> tuple[dict | None, int]:
     if not isinstance(entries, list):
         return None, 0
-    matches = [entry for entry in entries if isinstance(entry, dict) and entry.get(key) == value]
+    matches = [
+        entry
+        for entry in entries
+        if isinstance(entry, dict) and entry.get(key) == value
+    ]
     return (matches[0] if len(matches) == 1 else None, len(matches))
 
 
@@ -1650,29 +1654,60 @@ def _evaluate_rc015(docs: dict[str, dict], report: Report) -> None:
     ir_catalog = docs.get(ir_path) or {}
     ir, ir_count = _unique_entry(ir_catalog.get("irs"), "id", REPO_OPS_IR_ID)
     if ir_count != 1:
-        report.fail("RC-015", ir_path, "irs", REPO_OPS_IR_ID, f"IR must exist exactly once (found {ir_count})")
+        report.fail(
+            "RC-015",
+            ir_path,
+            "irs",
+            REPO_OPS_IR_ID,
+            f"IR must exist exactly once (found {ir_count})",
+        )
     elif ir.get("semantic_class") != REPO_OPS_CLASS:
-        report.fail("RC-015", ir_path, f"irs[{REPO_OPS_IR_ID}].semantic_class", ir.get("semantic_class"), f"must be {REPO_OPS_CLASS!r}")
+        report.fail(
+            "RC-015",
+            ir_path,
+            f"irs[{REPO_OPS_IR_ID}].semantic_class",
+            ir.get("semantic_class"),
+            f"must be {REPO_OPS_CLASS!r}",
+        )
 
     transitions = [
-        item for item in ir_catalog.get("allowed_transitions") or []
+        item
+        for item in ir_catalog.get("allowed_transitions") or []
         if isinstance(item, dict)
         and item.get("from") == REPO_OPS_IR_ID
         and item.get("to") == "l9.target-ir/v1"
     ]
     if len(transitions) != 1:
-        report.fail("RC-015", ir_path, "allowed_transitions", REPO_OPS_IR_ID, f"IR -> target transition must exist exactly once (found {len(transitions)})")
+        report.fail(
+            "RC-015",
+            ir_path,
+            "allowed_transitions",
+            REPO_OPS_IR_ID,
+            f"IR -> target transition must exist exactly once (found {len(transitions)})",
+        )
     else:
         ops = set(transitions[0].get("operations") or [])
         for required in ("binding_selection", "lowering"):
             if required not in ops:
-                report.fail("RC-015", ir_path, "allowed_transitions.operations", required, "required repository-operations lowering operation missing")
+                report.fail(
+                    "RC-015",
+                    ir_path,
+                    "allowed_transitions.operations",
+                    required,
+                    "required repository-operations lowering operation missing",
+                )
 
     technologies = (docs.get(technologies_path) or {}).get("technologies") or []
     for technology in ("python", "toml", "makefile"):
         _entry, count = _unique_entry(technologies, "id", technology)
         if count != 1:
-            report.fail("RC-015", technologies_path, "technologies", technology, f"technology must exist exactly once (found {count})")
+            report.fail(
+                "RC-015",
+                technologies_path,
+                "technologies",
+                technology,
+                f"technology must exist exactly once (found {count})",
+            )
 
     binding_list = (docs.get(bindings_path) or {}).get("bindings") or []
     pyproject, py_count = _unique_entry(binding_list, "id", REPO_OPS_PYPROJECT_BINDING)
@@ -1682,31 +1717,79 @@ def _evaluate_rc015(docs: dict[str, dict], report: Report) -> None:
         (makefile, make_count, REPO_OPS_MAKEFILE_BINDING, "makefile", "Makefile"),
     ):
         if count != 1 or binding is None:
-            report.fail("RC-015", bindings_path, "bindings", binding_id, f"binding must exist exactly once (found {count})")
+            report.fail(
+                "RC-015",
+                bindings_path,
+                "bindings",
+                binding_id,
+                f"binding must exist exactly once (found {count})",
+            )
             continue
         if binding.get("source_ir") != REPO_OPS_CLASS:
-            report.fail("RC-015", bindings_path, f"{binding_id}.source_ir", binding.get("source_ir"), f"must consume {REPO_OPS_CLASS}")
+            report.fail(
+                "RC-015",
+                bindings_path,
+                f"{binding_id}.source_ir",
+                binding.get("source_ir"),
+                f"must consume {REPO_OPS_CLASS}",
+            )
         if binding.get("target_ir") != "target_ir":
-            report.fail("RC-015", bindings_path, f"{binding_id}.target_ir", binding.get("target_ir"), "must produce target_ir")
+            report.fail(
+                "RC-015",
+                bindings_path,
+                f"{binding_id}.target_ir",
+                binding.get("target_ir"),
+                "must produce target_ir",
+            )
         target = binding.get("target") or {}
         if target.get("technology") != technology:
-            report.fail("RC-015", bindings_path, f"{binding_id}.target.technology", target.get("technology"), f"must target {technology}")
+            report.fail(
+                "RC-015",
+                bindings_path,
+                f"{binding_id}.target.technology",
+                target.get("technology"),
+                f"must target {technology}",
+            )
         if target.get("artifact") != artifact:
-            report.fail("RC-015", bindings_path, f"{binding_id}.target.artifact", target.get("artifact"), f"must target {artifact}")
+            report.fail(
+                "RC-015",
+                bindings_path,
+                f"{binding_id}.target.artifact",
+                target.get("artifact"),
+                f"must target {artifact}",
+            )
 
     if makefile is not None:
         maps = makefile.get("maps")
         expected_maps = {"build": "build", "test": "test", "validate": "validate"}
         if maps != expected_maps:
-            report.fail("RC-015", bindings_path, f"{REPO_OPS_MAKEFILE_BINDING}.maps", maps, f"Makefile v1 map must be exactly {expected_maps}")
+            report.fail(
+                "RC-015",
+                bindings_path,
+                f"{REPO_OPS_MAKEFILE_BINDING}.maps",
+                maps,
+                f"Makefile v1 map must be exactly {expected_maps}",
+            )
 
     profile_list = (docs.get(profiles_path) or {}).get("projection_profiles") or []
     profile, profile_count = _unique_entry(profile_list, "id", REPO_OPS_PROFILE)
     if profile_count != 1 or profile is None:
-        report.fail("RC-015", profiles_path, "projection_profiles", REPO_OPS_PROFILE, f"profile must exist exactly once (found {profile_count})")
+        report.fail(
+            "RC-015",
+            profiles_path,
+            "projection_profiles",
+            REPO_OPS_PROFILE,
+            f"profile must exist exactly once (found {profile_count})",
+        )
     else:
         if profile.get("class") != "consumer":
-            report.fail("RC-015", profiles_path, f"{REPO_OPS_PROFILE}.class", profile.get("class"), "must be consumer")
+            report.fail(
+                "RC-015",
+                profiles_path,
+                f"{REPO_OPS_PROFILE}.class",
+                profile.get("class"),
+                "must be consumer",
+            )
         sources = profile.get("sources") or {}
         required_selectors = {
             "ir_catalog": {
@@ -1732,76 +1815,151 @@ def _evaluate_rc015(docs: dict[str, dict], report: Report) -> None:
             all_selectors.extend(map(str, selectors or []))
             for selector in required:
                 if selector not in selector_set:
-                    report.fail("RC-015", profiles_path, f"{REPO_OPS_PROFILE}.sources.{source_name}.selectors", selector, "required selector missing")
-        if any('id=="node"' in selector or "package.json" in selector for selector in all_selectors):
-            report.fail("RC-015", profiles_path, f"{REPO_OPS_PROFILE}.sources", all_selectors, "Node/package.json semantics are outside repository-operations profile v1")
+                    report.fail(
+                        "RC-015",
+                        profiles_path,
+                        f"{REPO_OPS_PROFILE}.sources.{source_name}.selectors",
+                        selector,
+                        "required selector missing",
+                    )
+        if any(
+            'id=="node"' in selector or "package.json" in selector
+            for selector in all_selectors
+        ):
+            report.fail(
+                "RC-015",
+                profiles_path,
+                f"{REPO_OPS_PROFILE}.sources",
+                all_selectors,
+                "Node/package.json semantics are outside repository-operations profile v1",
+            )
         forbidden = set(profile.get("forbidden") or [])
         missing_forbidden = sorted(REPO_OPS_FORBIDDEN - forbidden)
         if missing_forbidden:
-            report.fail("RC-015", profiles_path, f"{REPO_OPS_PROFILE}.forbidden", missing_forbidden, "required forbidden semantics missing")
+            report.fail(
+                "RC-015",
+                profiles_path,
+                f"{REPO_OPS_PROFILE}.forbidden",
+                missing_forbidden,
+                "required forbidden semantics missing",
+            )
 
     capabilities = (docs.get(capabilities_path) or {}).get("capabilities")
     if capabilities != []:
-        report.fail("RC-015", capabilities_path, "capabilities", capabilities, "this slice must not globalize repository-operation capabilities")
+        report.fail(
+            "RC-015",
+            capabilities_path,
+            "capabilities",
+            capabilities,
+            "this slice must not globalize repository-operation capabilities",
+        )
 
     technology_profiles = (docs.get(technology_profiles_path) or {}).get("profiles")
     if technology_profiles != []:
-        report.fail("RC-015", technology_profiles_path, "profiles", technology_profiles, "this slice must not add a technology profile for repository build metadata")
+        report.fail(
+            "RC-015",
+            technology_profiles_path,
+            "profiles",
+            technology_profiles,
+            "this slice must not add a technology profile for repository build metadata",
+        )
 
 
 def _check_rc015_negative_cases(docs: dict[str, dict], report: Report) -> None:
     cases = []
 
     case = copy.deepcopy(docs)
-    binding, _ = _unique_entry(case["semantics/binding_catalog.yaml"]["bindings"], "id", REPO_OPS_PYPROJECT_BINDING)
+    binding, _ = _unique_entry(
+        case["semantics/binding_catalog.yaml"]["bindings"],
+        "id",
+        REPO_OPS_PYPROJECT_BINDING,
+    )
     binding["target"]["technology"] = "unregistered-toml"
     cases.append(("unregistered pyproject technology", case))
 
     case = copy.deepcopy(docs)
-    binding, _ = _unique_entry(case["semantics/binding_catalog.yaml"]["bindings"], "id", REPO_OPS_MAKEFILE_BINDING)
+    binding, _ = _unique_entry(
+        case["semantics/binding_catalog.yaml"]["bindings"],
+        "id",
+        REPO_OPS_MAKEFILE_BINDING,
+    )
     binding["source_ir"] = "missing_repository_operations_ir"
     cases.append(("Makefile binding missing IR", case))
 
     case = copy.deepcopy(docs)
-    binding, _ = _unique_entry(case["semantics/binding_catalog.yaml"]["bindings"], "id", REPO_OPS_MAKEFILE_BINDING)
+    binding, _ = _unique_entry(
+        case["semantics/binding_catalog.yaml"]["bindings"],
+        "id",
+        REPO_OPS_MAKEFILE_BINDING,
+    )
     binding["maps"]["publish"] = "publish"
     cases.append(("Makefile v1 adds publish", case))
 
     case = copy.deepcopy(docs)
-    profile, _ = _unique_entry(case["semantics/projection_profiles.yaml"]["projection_profiles"], "id", REPO_OPS_PROFILE)
+    profile, _ = _unique_entry(
+        case["semantics/projection_profiles.yaml"]["projection_profiles"],
+        "id",
+        REPO_OPS_PROFILE,
+    )
     profile["sources"]["ir_catalog"]["selectors"] = [
-        selector for selector in profile["sources"]["ir_catalog"]["selectors"]
+        selector
+        for selector in profile["sources"]["ir_catalog"]["selectors"]
         if REPO_OPS_IR_ID not in str(selector)
     ]
     cases.append(("profile omits repository operations IR", case))
 
     case = copy.deepcopy(docs)
-    profile, _ = _unique_entry(case["semantics/projection_profiles.yaml"]["projection_profiles"], "id", REPO_OPS_PROFILE)
-    profile["sources"]["technology_capabilities"]["selectors"].append('$.technologies[?(@.id=="node")]')
+    profile, _ = _unique_entry(
+        case["semantics/projection_profiles.yaml"]["projection_profiles"],
+        "id",
+        REPO_OPS_PROFILE,
+    )
+    profile["sources"]["technology_capabilities"]["selectors"].append(
+        '$.technologies[?(@.id=="node")]'
+    )
     cases.append(("profile adds Node/package.json concern", case))
 
     case = copy.deepcopy(docs)
-    case["semantics/capabilities.yaml"]["capabilities"].append({"id": "l9.capability/repository-build"})
+    case["semantics/capabilities.yaml"]["capabilities"].append(
+        {"id": "l9.capability/repository-build"}
+    )
     cases.append(("slice globalizes repository operation capability", case))
 
     case = copy.deepcopy(docs)
-    case["semantics/technology_profiles.yaml"]["profiles"].append({"id": "repo-build", "language": "python", "transport": "none"})
+    case["semantics/technology_profiles.yaml"]["profiles"].append(
+        {"id": "repo-build", "language": "python", "transport": "none"}
+    )
     cases.append(("slice adds transport-bearing repository technology profile", case))
 
     for label, candidate in cases:
         candidate_report = Report()
         _evaluate_rc015(candidate, candidate_report)
         if not candidate_report.failures:
-            report.fail("RC-015", "scripts/validate-semantics.py", "negative_case", label, "negative case did not fail closed")
-    if not any(f.startswith("FAIL RC-015 scripts/validate-semantics.py negative_case") for f in report.failures):
-        report.ok("RC-015-NEG", f"{len(cases)} repository-operations negative cases fail closed")
+            report.fail(
+                "RC-015",
+                "scripts/validate-semantics.py",
+                "negative_case",
+                label,
+                "negative case did not fail closed",
+            )
+    if not any(
+        f.startswith("FAIL RC-015 scripts/validate-semantics.py negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-015-NEG",
+            f"{len(cases)} repository-operations negative cases fail closed",
+        )
 
 
 def check_rc015(docs: dict[str, dict], report: Report) -> None:
     before = len(report.failures)
     _evaluate_rc015(docs, report)
     if len(report.failures) == before:
-        report.ok("RC-015", "repository operations IR, Python pyproject binding, Makefile v1 binding, target technologies, and consumer projection are structurally closed")
+        report.ok(
+            "RC-015",
+            "repository operations IR, Python pyproject binding, Makefile v1 binding, target technologies, and consumer projection are structurally closed",
+        )
         _check_rc015_negative_cases(docs, report)
 
 
@@ -1828,7 +1986,11 @@ STRATEGY_TERMS = (
 STRATEGY_AUTHORITY_SOURCE = "explicitly_granted_strategic_authority"
 STRATEGY_RESOLUTION_REF = "authority_model.yaml#strategic_cognition_authority"
 STRATEGY_COMPILER_BOUNDARY_REF = "vocabulary.yaml#stage_rules.reasoning_plane_rule"
-METACOGNITION_DENIED = {"strategic_plan_mutation", "strategic_plan_supersession", "strategic_authority"}
+METACOGNITION_DENIED = {
+    "strategic_plan_mutation",
+    "strategic_plan_supersession",
+    "strategic_authority",
+}
 PLAN_KEEPER_MAY_NOT = {
     "acquire_truth_source_ownership_by_consuming_projections",
     "derive_authority_from_reasoning_capability",
@@ -1869,92 +2031,314 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
     vocabulary_path = VOCABULARY_PATH
     actors_path = ACTOR_REGISTRY_PATH
 
-    holders = [path for path, doc in docs.items() if doc.get("artifact_id") == STRATEGY_MODEL_ID]
+    holders = [
+        path
+        for path, doc in docs.items()
+        if doc.get("artifact_id") == STRATEGY_MODEL_ID
+    ]
     if holders != [model_path]:
-        report.fail("RC-016", model_path, "artifact_id", holders, f"{STRATEGY_MODEL_ID} must be declared exactly once, by {model_path}")
+        report.fail(
+            "RC-016",
+            model_path,
+            "artifact_id",
+            holders,
+            f"{STRATEGY_MODEL_ID} must be declared exactly once, by {model_path}",
+        )
     model = docs.get(model_path) or {}
 
     authority = model.get("authority") or {}
     if model.get("canonical") is not True:
-        report.fail("RC-016", model_path, "canonical", model.get("canonical"), "Strategic Cognition ledger must be canonical")
+        report.fail(
+            "RC-016",
+            model_path,
+            "canonical",
+            model.get("canonical"),
+            "Strategic Cognition ledger must be canonical",
+        )
     if authority.get("owner") != STRATEGY_OWNER:
-        report.fail("RC-016", model_path, "authority.owner", authority.get("owner"), f"Strategic Cognition semantics are owned by {STRATEGY_OWNER}")
+        report.fail(
+            "RC-016",
+            model_path,
+            "authority.owner",
+            authority.get("owner"),
+            f"Strategic Cognition semantics are owned by {STRATEGY_OWNER}",
+        )
     if authority.get("scope") != STRATEGY_SCOPE:
-        report.fail("RC-016", model_path, "authority.scope", authority.get("scope"), f"must be {STRATEGY_SCOPE!r}")
+        report.fail(
+            "RC-016",
+            model_path,
+            "authority.scope",
+            authority.get("scope"),
+            f"must be {STRATEGY_SCOPE!r}",
+        )
     if authority.get("authority_class") != "canonical":
-        report.fail("RC-016", model_path, "authority.authority_class", authority.get("authority_class"), "must be canonical")
+        report.fail(
+            "RC-016",
+            model_path,
+            "authority.authority_class",
+            authority.get("authority_class"),
+            "must be canonical",
+        )
     extra_keys = sorted(set(model) - STRATEGY_MODEL_KEYS)
     if extra_keys:
-        report.fail("RC-016", model_path, "keys", extra_keys, "model declares sections outside the admitted Strategic Cognition semantics")
+        report.fail(
+            "RC-016",
+            model_path,
+            "keys",
+            extra_keys,
+            "model declares sections outside the admitted Strategic Cognition semantics",
+        )
 
     sources = (docs.get(registry_path) or {}).get("sources") or []
-    registered = [s for s in sources if isinstance(s, dict) and s.get("path") == model_path]
+    registered = [
+        s for s in sources if isinstance(s, dict) and s.get("path") == model_path
+    ]
     if len(registered) != 1:
-        report.fail("RC-016", registry_path, "sources", model_path, f"ledger must be registered exactly once (found {len(registered)})")
-    elif registered[0].get("id") != STRATEGY_SOURCE_ID or registered[0].get("canonical") is not True:
-        report.fail("RC-016", registry_path, "sources.id", registered[0].get("id"), f"registration must be canonical {STRATEGY_SOURCE_ID}")
+        report.fail(
+            "RC-016",
+            registry_path,
+            "sources",
+            model_path,
+            f"ledger must be registered exactly once (found {len(registered)})",
+        )
+    elif (
+        registered[0].get("id") != STRATEGY_SOURCE_ID
+        or registered[0].get("canonical") is not True
+    ):
+        report.fail(
+            "RC-016",
+            registry_path,
+            "sources.id",
+            registered[0].get("id"),
+            f"registration must be canonical {STRATEGY_SOURCE_ID}",
+        )
 
     manifest = docs.get(manifest_path) or {}
     requires = manifest.get("requires") or {}
-    classes = [cls for cls, names in requires.items() if isinstance(names, list) and model_path.removeprefix("semantics/") in names]
+    classes = [
+        cls
+        for cls, names in requires.items()
+        if isinstance(names, list) and model_path.removeprefix("semantics/") in names
+    ]
     if classes != ["semantic_catalogs"]:
-        report.fail("RC-016", manifest_path, "requires", classes, "ledger must be classified exactly once, as a semantic catalog")
+        report.fail(
+            "RC-016",
+            manifest_path,
+            "requires",
+            classes,
+            "ledger must be classified exactly once, as a semantic catalog",
+        )
     if "strategic_cognition" not in (manifest.get("does_not_own") or []):
-        report.fail("RC-016", manifest_path, "does_not_own", manifest.get("does_not_own"), "Semantic Compiler must not own Strategic Cognition")
+        report.fail(
+            "RC-016",
+            manifest_path,
+            "does_not_own",
+            manifest.get("does_not_own"),
+            "Semantic Compiler must not own Strategic Cognition",
+        )
     if any("strateg" in str(cap) for cap in manifest.get("capabilities") or []):
-        report.fail("RC-016", manifest_path, "capabilities", manifest.get("capabilities"), "Semantic Compiler must not gain a strategic capability")
+        report.fail(
+            "RC-016",
+            manifest_path,
+            "capabilities",
+            manifest.get("capabilities"),
+            "Semantic Compiler must not gain a strategic capability",
+        )
 
     invariants = (docs.get(invariants_path) or {}).get("invariants") or []
     invariant, count = _unique_entry(invariants, "id", STRATEGY_INVARIANT_ID)
-    family = [i.get("id") for i in invariants if isinstance(i, dict) and str(i.get("id", "")).startswith("L9-STRATEGY-")]
-    mentions = [i.get("id") for i in invariants if isinstance(i, dict) and "Plan Keeper" in str(i.get("statement", ""))]
+    family = [
+        i.get("id")
+        for i in invariants
+        if isinstance(i, dict) and str(i.get("id", "")).startswith("L9-STRATEGY-")
+    ]
+    mentions = [
+        i.get("id")
+        for i in invariants
+        if isinstance(i, dict) and "Plan Keeper" in str(i.get("statement", ""))
+    ]
     if count != 1 or invariant is None:
-        report.fail("RC-016", invariants_path, "invariants", STRATEGY_INVARIANT_ID, f"Strategic Cognition invariant must exist exactly once (found {count})")
+        report.fail(
+            "RC-016",
+            invariants_path,
+            "invariants",
+            STRATEGY_INVARIANT_ID,
+            f"Strategic Cognition invariant must exist exactly once (found {count})",
+        )
     else:
-        if " ".join(str(invariant.get("statement", "")).split()) != STRATEGY_INVARIANT_STATEMENT:
-            report.fail("RC-016", invariants_path, f"{STRATEGY_INVARIANT_ID}.statement", invariant.get("statement"), "statement must preserve the admitted authority separation exactly")
-        if invariant.get("scope") != "global" or invariant.get("owner") != STRATEGY_OWNER:
-            report.fail("RC-016", invariants_path, f"{STRATEGY_INVARIANT_ID}.scope", invariant.get("scope"), "must be a global invariant owned by the global authority")
+        if (
+            " ".join(str(invariant.get("statement", "")).split())
+            != STRATEGY_INVARIANT_STATEMENT
+        ):
+            report.fail(
+                "RC-016",
+                invariants_path,
+                f"{STRATEGY_INVARIANT_ID}.statement",
+                invariant.get("statement"),
+                "statement must preserve the admitted authority separation exactly",
+            )
+        if (
+            invariant.get("scope") != "global"
+            or invariant.get("owner") != STRATEGY_OWNER
+        ):
+            report.fail(
+                "RC-016",
+                invariants_path,
+                f"{STRATEGY_INVARIANT_ID}.scope",
+                invariant.get("scope"),
+                "must be a global invariant owned by the global authority",
+            )
     if family != [STRATEGY_INVARIANT_ID] or mentions != [STRATEGY_INVARIANT_ID]:
-        report.fail("RC-016", invariants_path, "invariants", sorted(set(family + mentions)), "Strategic Cognition law must be exactly one constitutional invariant")
+        report.fail(
+            "RC-016",
+            invariants_path,
+            "invariants",
+            sorted(set(family + mentions)),
+            "Strategic Cognition law must be exactly one constitutional invariant",
+        )
 
     concepts = model.get("concepts") or {}
     roles = model.get("roles") or {}
     keeper = roles.get(PLAN_KEEPER) or {}
     reasoner = roles.get(METACOGNITIVE_REASONER) or {}
     if (concepts.get("strategic_plan") or {}).get("owner_role") != PLAN_KEEPER:
-        report.fail("RC-016", model_path, "concepts.strategic_plan.owner_role", (concepts.get("strategic_plan") or {}).get("owner_role"), "Plan Keeper must own the Strategic Plan")
+        report.fail(
+            "RC-016",
+            model_path,
+            "concepts.strategic_plan.owner_role",
+            (concepts.get("strategic_plan") or {}).get("owner_role"),
+            "Plan Keeper must own the Strategic Plan",
+        )
     if keeper.get("owns") != ["strategic_plan"]:
-        report.fail("RC-016", model_path, f"roles.{PLAN_KEEPER}.owns", keeper.get("owns"), "Plan Keeper owns the Strategic Plan and nothing else; consuming projections transfers no truth-source ownership")
+        report.fail(
+            "RC-016",
+            model_path,
+            f"roles.{PLAN_KEEPER}.owns",
+            keeper.get("owns"),
+            "Plan Keeper owns the Strategic Plan and nothing else; consuming projections transfers no truth-source ownership",
+        )
     if "underlying_truth_sources" not in (keeper.get("does_not_own") or []):
-        report.fail("RC-016", model_path, f"roles.{PLAN_KEEPER}.does_not_own", keeper.get("does_not_own"), "Plan Keeper must not own underlying truth sources")
+        report.fail(
+            "RC-016",
+            model_path,
+            f"roles.{PLAN_KEEPER}.does_not_own",
+            keeper.get("does_not_own"),
+            "Plan Keeper must not own underlying truth sources",
+        )
     if keeper.get("authority_source") != STRATEGY_AUTHORITY_SOURCE:
-        report.fail("RC-016", model_path, f"roles.{PLAN_KEEPER}.authority_source", keeper.get("authority_source"), "Plan Keeper authority must come only from explicitly granted strategic authority")
-    missing_keeper_denials = sorted(PLAN_KEEPER_MAY_NOT - set(keeper.get("may_not") or []))
+        report.fail(
+            "RC-016",
+            model_path,
+            f"roles.{PLAN_KEEPER}.authority_source",
+            keeper.get("authority_source"),
+            "Plan Keeper authority must come only from explicitly granted strategic authority",
+        )
+    missing_keeper_denials = sorted(
+        PLAN_KEEPER_MAY_NOT - set(keeper.get("may_not") or [])
+    )
     if missing_keeper_denials:
-        report.fail("RC-016", model_path, f"roles.{PLAN_KEEPER}.may_not", missing_keeper_denials, "required Plan Keeper prohibitions missing")
+        report.fail(
+            "RC-016",
+            model_path,
+            f"roles.{PLAN_KEEPER}.may_not",
+            missing_keeper_denials,
+            "required Plan Keeper prohibitions missing",
+        )
 
     if reasoner.get("owns") != ["strategic_plan_reasoning_analysis"]:
-        report.fail("RC-016", model_path, f"roles.{METACOGNITIVE_REASONER}.owns", reasoner.get("owns"), "Reasoner owns only analysis of Strategic Plan reasoning")
-    if reasoner.get("subject") != "reasoning_processes_that_produce_and_revise_the_strategic_plan" or reasoner.get("universal_metacognitive_authority") is not False:
-        report.fail("RC-016", model_path, f"roles.{METACOGNITIVE_REASONER}.subject", reasoner.get("subject"), "Reasoner subject is Strategic Plan reasoning only, never universal metacognition")
+        report.fail(
+            "RC-016",
+            model_path,
+            f"roles.{METACOGNITIVE_REASONER}.owns",
+            reasoner.get("owns"),
+            "Reasoner owns only analysis of Strategic Plan reasoning",
+        )
+    if (
+        reasoner.get("subject")
+        != "reasoning_processes_that_produce_and_revise_the_strategic_plan"
+        or reasoner.get("universal_metacognitive_authority") is not False
+    ):
+        report.fail(
+            "RC-016",
+            model_path,
+            f"roles.{METACOGNITIVE_REASONER}.subject",
+            reasoner.get("subject"),
+            "Reasoner subject is Strategic Plan reasoning only, never universal metacognition",
+        )
     missing_denials = sorted(METACOGNITION_MAY_NOT - set(reasoner.get("may_not") or []))
     if missing_denials:
-        report.fail("RC-016", model_path, f"roles.{METACOGNITIVE_REASONER}.may_not", missing_denials, "required metacognition prohibitions missing")
+        report.fail(
+            "RC-016",
+            model_path,
+            f"roles.{METACOGNITIVE_REASONER}.may_not",
+            missing_denials,
+            "required metacognition prohibitions missing",
+        )
     leaked = sorted(METACOGNITION_MAY_NOT & set(reasoner.get("may") or []))
-    if leaked or any("strategic_direction" in str(item) or "strategic_plan" == str(item) for item in reasoner.get("may") or []):
-        report.fail("RC-016", model_path, f"roles.{METACOGNITIVE_REASONER}.may", reasoner.get("may"), "Reasoner must not hold Strategic Plan mutation or strategic authority")
+    if leaked or any(
+        "strategic_direction" in str(item) or "strategic_plan" == str(item)
+        for item in reasoner.get("may") or []
+    ):
+        report.fail(
+            "RC-016",
+            model_path,
+            f"roles.{METACOGNITIVE_REASONER}.may",
+            reasoner.get("may"),
+            "Reasoner must not hold Strategic Plan mutation or strategic authority",
+        )
     if reasoner.get("strategic_authority") is not False:
-        report.fail("RC-016", model_path, f"roles.{METACOGNITIVE_REASONER}.strategic_authority", reasoner.get("strategic_authority"), "Reasoner must never be strategic authority")
-    if reasoner.get("output_authority") != "advisory" or reasoner.get("output_consumer") != PLAN_KEEPER:
-        report.fail("RC-016", model_path, f"roles.{METACOGNITIVE_REASONER}.output_authority", reasoner.get("output_authority"), "Reasoner output is advisory to the Plan Keeper")
+        report.fail(
+            "RC-016",
+            model_path,
+            f"roles.{METACOGNITIVE_REASONER}.strategic_authority",
+            reasoner.get("strategic_authority"),
+            "Reasoner must never be strategic authority",
+        )
+    if (
+        reasoner.get("output_authority") != "advisory"
+        or reasoner.get("output_consumer") != PLAN_KEEPER
+    ):
+        report.fail(
+            "RC-016",
+            model_path,
+            f"roles.{METACOGNITIVE_REASONER}.output_authority",
+            reasoner.get("output_authority"),
+            "Reasoner output is advisory to the Plan Keeper",
+        )
     for role_id, role in ((PLAN_KEEPER, keeper), (METACOGNITIVE_REASONER, reasoner)):
-        if role.get("role_kind") != "semantic_role" or role.get("actor_identity_binding") != "none":
-            report.fail("RC-016", model_path, f"roles.{role_id}.actor_identity_binding", role.get("actor_identity_binding"), "strategic roles are semantic roles, not ActorIdentities")
-    actor_ids = {str(a.get("id")) for a in (docs.get(actors_path) or {}).get("actors") or [] if isinstance(a, dict)}
-    bound = sorted(actor_ids & {PLAN_KEEPER, METACOGNITIVE_REASONER, "plan-keeper", "strategic-plan-metacognitive-reasoner"})
+        if (
+            role.get("role_kind") != "semantic_role"
+            or role.get("actor_identity_binding") != "none"
+        ):
+            report.fail(
+                "RC-016",
+                model_path,
+                f"roles.{role_id}.actor_identity_binding",
+                role.get("actor_identity_binding"),
+                "strategic roles are semantic roles, not ActorIdentities",
+            )
+    actor_ids = {
+        str(a.get("id"))
+        for a in (docs.get(actors_path) or {}).get("actors") or []
+        if isinstance(a, dict)
+    }
+    bound = sorted(
+        actor_ids
+        & {
+            PLAN_KEEPER,
+            METACOGNITIVE_REASONER,
+            "plan-keeper",
+            "strategic-plan-metacognitive-reasoner",
+        }
+    )
     if bound:
-        report.fail("RC-016", actors_path, "actors", bound, "strategic roles must not be registered as actors")
+        report.fail(
+            "RC-016",
+            actors_path,
+            "actors",
+            bound,
+            "strategic roles must not be registered as actors",
+        )
 
     separation = model.get("authority_separation") or {}
     relation = separation.get("teaching_relation") or {}
@@ -1962,49 +2346,163 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
         separation.get("invariant_ref") != STRATEGY_INVARIANT_ID
         or separation.get("resolution_ref") != STRATEGY_RESOLUTION_REF
         or separation.get("strategic_plan_owner") != PLAN_KEEPER
-        or separation.get("strategic_plan_reasoning_analysis_owner") != METACOGNITIVE_REASONER
+        or separation.get("strategic_plan_reasoning_analysis_owner")
+        != METACOGNITIVE_REASONER
         or relation.get("from") != METACOGNITIVE_REASONER
         or relation.get("to") != PLAN_KEEPER
         or relation.get("authority_effect") != "none"
     ):
-        report.fail("RC-016", model_path, "authority_separation", separation, "Plan Keeper / metacognition separation must be declared with an authority-free teaching relation")
-    resolution = (docs.get(authority_path) or {}).get("strategic_cognition_authority") or {}
-    if resolution.get("strategic_plan_owner") != PLAN_KEEPER or resolution.get("global_semantics_owner") != STRATEGY_OWNER:
-        report.fail("RC-016", authority_path, "strategic_cognition_authority.strategic_plan_owner", resolution.get("strategic_plan_owner"), "authority model must resolve the Strategic Plan to the Plan Keeper")
+        report.fail(
+            "RC-016",
+            model_path,
+            "authority_separation",
+            separation,
+            "Plan Keeper / metacognition separation must be declared with an authority-free teaching relation",
+        )
+    resolution = (docs.get(authority_path) or {}).get(
+        "strategic_cognition_authority"
+    ) or {}
+    if (
+        resolution.get("strategic_plan_owner") != PLAN_KEEPER
+        or resolution.get("global_semantics_owner") != STRATEGY_OWNER
+    ):
+        report.fail(
+            "RC-016",
+            authority_path,
+            "strategic_cognition_authority.strategic_plan_owner",
+            resolution.get("strategic_plan_owner"),
+            "authority model must resolve the Strategic Plan to the Plan Keeper",
+        )
     if (
         resolution.get("detailed_model") != model_path.removeprefix("semantics/")
         or resolution.get("invariant_ref") != STRATEGY_INVARIANT_ID
-        or resolution.get("strategic_plan_authority_source") != keeper.get("authority_source")
+        or resolution.get("strategic_plan_authority_source")
+        != keeper.get("authority_source")
     ):
-        report.fail("RC-016", authority_path, "strategic_cognition_authority.detailed_model", resolution.get("detailed_model"), "authority resolution must reference the model and invariant and agree with the Plan Keeper authority source")
-    if resolution.get("strategic_plan_reasoning_analysis_owner") != METACOGNITIVE_REASONER:
-        report.fail("RC-016", authority_path, "strategic_cognition_authority.strategic_plan_reasoning_analysis_owner", resolution.get("strategic_plan_reasoning_analysis_owner"), "authority model must resolve Strategic Plan reasoning analysis to the Reasoner")
-    missing_denied = sorted(METACOGNITION_DENIED - set(resolution.get("metacognition_denied") or []))
+        report.fail(
+            "RC-016",
+            authority_path,
+            "strategic_cognition_authority.detailed_model",
+            resolution.get("detailed_model"),
+            "authority resolution must reference the model and invariant and agree with the Plan Keeper authority source",
+        )
+    if (
+        resolution.get("strategic_plan_reasoning_analysis_owner")
+        != METACOGNITIVE_REASONER
+    ):
+        report.fail(
+            "RC-016",
+            authority_path,
+            "strategic_cognition_authority.strategic_plan_reasoning_analysis_owner",
+            resolution.get("strategic_plan_reasoning_analysis_owner"),
+            "authority model must resolve Strategic Plan reasoning analysis to the Reasoner",
+        )
+    missing_denied = sorted(
+        METACOGNITION_DENIED - set(resolution.get("metacognition_denied") or [])
+    )
     if missing_denied:
-        report.fail("RC-016", authority_path, "strategic_cognition_authority.metacognition_denied", missing_denied, "metacognition must be denied Strategic Plan mutation, supersession, and strategic authority")
+        report.fail(
+            "RC-016",
+            authority_path,
+            "strategic_cognition_authority.metacognition_denied",
+            missing_denied,
+            "metacognition must be denied Strategic Plan mutation, supersession, and strategic authority",
+        )
     if resolution.get("roles_are_actor_identities") is not False:
-        report.fail("RC-016", authority_path, "strategic_cognition_authority.roles_are_actor_identities", resolution.get("roles_are_actor_identities"), "strategic roles must not be ActorIdentities")
-    if "semantic_compiler_does_not_own_strategic_cognition" not in (resolution.get("rules") or []):
-        report.fail("RC-016", authority_path, "strategic_cognition_authority.rules", resolution.get("rules"), "Semantic Compiler exclusion rule missing")
+        report.fail(
+            "RC-016",
+            authority_path,
+            "strategic_cognition_authority.roles_are_actor_identities",
+            resolution.get("roles_are_actor_identities"),
+            "strategic roles must not be ActorIdentities",
+        )
+    if "semantic_compiler_does_not_own_strategic_cognition" not in (
+        resolution.get("rules") or []
+    ):
+        report.fail(
+            "RC-016",
+            authority_path,
+            "strategic_cognition_authority.rules",
+            resolution.get("rules"),
+            "Semantic Compiler exclusion rule missing",
+        )
 
     view = concepts.get("current_meta_view") or {}
     properties = view.get("properties") or {}
-    if view.get("authority_class") != "derived" or view.get("authoritative") is not False or view.get("canonical_source") is not False:
-        report.fail("RC-016", model_path, "concepts.current_meta_view.authority_class", view.get("authority_class"), "Current Meta View is derived and never canonical authority")
-    if properties.get("may_reinterpret_source_truth") is not False or properties.get("may_create_authority") is not False:
-        report.fail("RC-016", model_path, "concepts.current_meta_view.properties", properties, "Current Meta View must not reinterpret source truth or create authority")
-    for flag in ("derived", "disposable", "provenance_preserving", "invalidated_when_source_truth_changes"):
+    if (
+        view.get("authority_class") != "derived"
+        or view.get("authoritative") is not False
+        or view.get("canonical_source") is not False
+    ):
+        report.fail(
+            "RC-016",
+            model_path,
+            "concepts.current_meta_view.authority_class",
+            view.get("authority_class"),
+            "Current Meta View is derived and never canonical authority",
+        )
+    if (
+        properties.get("may_reinterpret_source_truth") is not False
+        or properties.get("may_create_authority") is not False
+    ):
+        report.fail(
+            "RC-016",
+            model_path,
+            "concepts.current_meta_view.properties",
+            properties,
+            "Current Meta View must not reinterpret source truth or create authority",
+        )
+    for flag in (
+        "derived",
+        "disposable",
+        "provenance_preserving",
+        "invalidated_when_source_truth_changes",
+    ):
         if properties.get(flag) is not True:
-            report.fail("RC-016", model_path, f"concepts.current_meta_view.properties.{flag}", properties.get(flag), "required Current Meta View property missing")
+            report.fail(
+                "RC-016",
+                model_path,
+                f"concepts.current_meta_view.properties.{flag}",
+                properties.get(flag),
+                "required Current Meta View property missing",
+            )
     artifact_classes = (docs.get(artifacts_path) or {}).get("artifacts") or {}
-    for field, class_name in (("artifact_class_ref", "composed_projection"), ("component_artifact_class_ref", "projection_artifact")):
-        if view.get(field) != class_name or (artifact_classes.get(class_name) or {}).get("authority_class") != "derived":
-            report.fail("RC-016", model_path, f"concepts.current_meta_view.{field}", view.get(field), f"Current Meta View must reuse the existing derived {class_name} class")
+    for field, class_name in (
+        ("artifact_class_ref", "composed_projection"),
+        ("component_artifact_class_ref", "projection_artifact"),
+    ):
+        if (
+            view.get(field) != class_name
+            or (artifact_classes.get(class_name) or {}).get("authority_class")
+            != "derived"
+        ):
+            report.fail(
+                "RC-016",
+                model_path,
+                f"concepts.current_meta_view.{field}",
+                view.get(field),
+                f"Current Meta View must reuse the existing derived {class_name} class",
+            )
     schema_ids = {doc.get("artifact_id") for doc in docs.values()}
-    if view.get("schema_ref") != "l9.schema/composed-projection@1" or view.get("schema_ref") not in schema_ids:
-        report.fail("RC-016", model_path, "concepts.current_meta_view.schema_ref", view.get("schema_ref"), "Current Meta View must reuse the composed-projection schema")
+    if (
+        view.get("schema_ref") != "l9.schema/composed-projection@1"
+        or view.get("schema_ref") not in schema_ids
+    ):
+        report.fail(
+            "RC-016",
+            model_path,
+            "concepts.current_meta_view.schema_ref",
+            view.get("schema_ref"),
+            "Current Meta View must reuse the composed-projection schema",
+        )
     if "current_meta_view" in artifact_classes:
-        report.fail("RC-016", artifacts_path, "artifacts", "current_meta_view", "Current Meta View must not be a new artifact class")
+        report.fail(
+            "RC-016",
+            artifacts_path,
+            "artifacts",
+            "current_meta_view",
+            "Current Meta View must not be a new artifact class",
+        )
 
     plane = model.get("plane") or {}
     if (
@@ -2013,15 +2511,41 @@ def _evaluate_rc016(docs: dict[str, dict], report: Report) -> None:
         or plane.get("runtime_owned_here") is not False
         or plane.get("compiler_boundary_ref") != STRATEGY_COMPILER_BOUNDARY_REF
     ):
-        report.fail("RC-016", model_path, "plane", plane, "Strategic Cognition belongs to the Reasoning Plane, is not compiler-owned, and owns no runtime")
+        report.fail(
+            "RC-016",
+            model_path,
+            "plane",
+            plane,
+            "Strategic Cognition belongs to the Reasoning Plane, is not compiler-owned, and owns no runtime",
+        )
     vocabulary = docs.get(vocabulary_path) or {}
-    reasoning_rule = (vocabulary.get("stage_rules") or {}).get("reasoning_plane_rule") or {}
-    if reasoning_rule.get("current_dependency_allowed") is not False or "MUST remain independent" not in str(reasoning_rule.get("rule", "")):
-        report.fail("RC-016", vocabulary_path, "stage_rules.reasoning_plane_rule", reasoning_rule, "Semantic Compiler must remain independent of the Reasoning Plane")
+    reasoning_rule = (vocabulary.get("stage_rules") or {}).get(
+        "reasoning_plane_rule"
+    ) or {}
+    if reasoning_rule.get(
+        "current_dependency_allowed"
+    ) is not False or "MUST remain independent" not in str(
+        reasoning_rule.get("rule", "")
+    ):
+        report.fail(
+            "RC-016",
+            vocabulary_path,
+            "stage_rules.reasoning_plane_rule",
+            reasoning_rule,
+            "Semantic Compiler must remain independent of the Reasoning Plane",
+        )
     terms = vocabulary.get("terms") or {}
     for term in STRATEGY_TERMS:
-        if (terms.get(term) or {}).get("detailed_model") != model_path.removeprefix("semantics/"):
-            report.fail("RC-016", vocabulary_path, f"terms.{term}", terms.get(term), "Strategic Cognition term must exist and defer to the Strategic Cognition model")
+        if (terms.get(term) or {}).get("detailed_model") != model_path.removeprefix(
+            "semantics/"
+        ):
+            report.fail(
+                "RC-016",
+                vocabulary_path,
+                f"terms.{term}",
+                terms.get(term),
+                "Strategic Cognition term must exist and defer to the Strategic Cognition model",
+            )
 
 
 def _check_rc016_negative_cases(docs: dict[str, dict], report: Report) -> None:
@@ -2032,47 +2556,108 @@ def _check_rc016_negative_cases(docs: dict[str, dict], report: Report) -> None:
 
     case = copy.deepcopy(docs)
     case[model]["roles"][METACOGNITIVE_REASONER]["may"].append("modify_strategic_plan")
-    cases.append(("Reasoner gains Strategic Plan mutation", case, model, f"{reasoner}.may"))
+    cases.append(
+        ("Reasoner gains Strategic Plan mutation", case, model, f"{reasoner}.may")
+    )
 
     case = copy.deepcopy(docs)
     case[model]["roles"][METACOGNITIVE_REASONER]["strategic_authority"] = True
-    cases.append(("Reasoner becomes strategic authority", case, model, f"{reasoner}.strategic_authority"))
+    cases.append(
+        (
+            "Reasoner becomes strategic authority",
+            case,
+            model,
+            f"{reasoner}.strategic_authority",
+        )
+    )
 
     case = copy.deepcopy(docs)
     case[model]["concepts"]["current_meta_view"]["authority_class"] = "canonical"
-    cases.append(("Current Meta View promoted to canonical authority", case, model, "concepts.current_meta_view.authority_class"))
+    cases.append(
+        (
+            "Current Meta View promoted to canonical authority",
+            case,
+            model,
+            "concepts.current_meta_view.authority_class",
+        )
+    )
 
     case = copy.deepcopy(docs)
-    case[model]["concepts"]["current_meta_view"]["properties"]["may_reinterpret_source_truth"] = True
-    cases.append(("Current Meta View may reinterpret source truth", case, model, "concepts.current_meta_view.properties"))
+    case[model]["concepts"]["current_meta_view"]["properties"][
+        "may_reinterpret_source_truth"
+    ] = True
+    cases.append(
+        (
+            "Current Meta View may reinterpret source truth",
+            case,
+            model,
+            "concepts.current_meta_view.properties",
+        )
+    )
 
     case = copy.deepcopy(docs)
     case[model]["roles"][PLAN_KEEPER]["owns"].append("underlying_truth_sources")
-    cases.append(("Plan Keeper owns truth sources by consuming projections", case, model, f"roles.{PLAN_KEEPER}.owns"))
+    cases.append(
+        (
+            "Plan Keeper owns truth sources by consuming projections",
+            case,
+            model,
+            f"roles.{PLAN_KEEPER}.owns",
+        )
+    )
 
     case = copy.deepcopy(docs)
     case[model]["authority"]["owner"] = "l9-semantic-compiler"
-    cases.append(("Strategic Cognition owned by Semantic Compiler", case, model, "authority.owner"))
+    cases.append(
+        (
+            "Strategic Cognition owned by Semantic Compiler",
+            case,
+            model,
+            "authority.owner",
+        )
+    )
 
     case = copy.deepcopy(docs)
     del case[authority]["strategic_cognition_authority"]["metacognition_denied"]
-    cases.append(("Plan Keeper / metacognition separation removed", case, authority, "strategic_cognition_authority.metacognition_denied"))
+    cases.append(
+        (
+            "Plan Keeper / metacognition separation removed",
+            case,
+            authority,
+            "strategic_cognition_authority.metacognition_denied",
+        )
+    )
 
     for label, candidate, path, field in cases:
         candidate_report = Report()
         _evaluate_rc016(candidate, candidate_report)
         prefix = f"FAIL RC-016 {path} {field}="
         if not any(f.startswith(prefix) for f in candidate_report.failures):
-            report.fail("RC-016", "scripts/validate-semantics.py", "negative_case", label, f"negative case did not fail closed at {path} {field}")
-    if not any(f.startswith("FAIL RC-016 scripts/validate-semantics.py negative_case") for f in report.failures):
-        report.ok("RC-016-NEG", f"{len(cases)} Strategic Cognition negative cases fail closed for their intended reason")
+            report.fail(
+                "RC-016",
+                "scripts/validate-semantics.py",
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {path} {field}",
+            )
+    if not any(
+        f.startswith("FAIL RC-016 scripts/validate-semantics.py negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-016-NEG",
+            f"{len(cases)} Strategic Cognition negative cases fail closed for their intended reason",
+        )
 
 
 def check_rc016(docs: dict[str, dict], report: Report) -> None:
     before = len(report.failures)
     _evaluate_rc016(docs, report)
     if len(report.failures) == before:
-        report.ok("RC-016", "Strategic Cognition ledger, invariant, Plan Keeper / Strategic Plan Metacognitive Reasoner authority separation, Current Meta View projection reuse, and Reasoning Plane boundary are structurally closed")
+        report.ok(
+            "RC-016",
+            "Strategic Cognition ledger, invariant, Plan Keeper / Strategic Plan Metacognitive Reasoner authority separation, Current Meta View projection reuse, and Reasoning Plane boundary are structurally closed",
+        )
         _check_rc016_negative_cases(docs, report)
 
 
