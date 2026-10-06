@@ -182,3 +182,20 @@ identity_authority:
   - identity_assertion_does_not_grant_authorization
   - governance_profile_selection_does_not_rewrite_identity
   - memory_and_receipt_consumers_do_not_own_actor_identity_semantics
+strategic_cognition_authority:
+  global_semantics_owner: Quantum-L9/.github
+  detailed_model: strategic_cognition_model.yaml
+  invariant_ref: L9-STRATEGY-001
+  strategic_plan_owner: plan_keeper
+  strategic_plan_authority_source: explicitly_granted_strategic_scope
+  strategic_plan_reasoning_analysis_owner: strategic_plan_metacognitive_reasoner
+  metacognition_denied:
+  - strategic_plan_mutation
+  - strategic_plan_supersession
+  - strategic_authority
+  roles_are_actor_identities: false
+  rules:
+  - reasoning_capability_does_not_confer_strategic_authority
+  - metacognitive_output_is_advisory_to_plan_keeper
+  - projection_consumption_does_not_transfer_truth_source_ownership
+  - semantic_compiler_does_not_own_strategic_cognition

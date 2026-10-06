@@ -34,8 +34,9 @@ ProductTopology
 - ADR-011: ProductKind from canonical consumption and deployment
 - ADR-012: Identity as a first-class topology primitive
 - ADR-013: Global actor and surface identity registries
+- ADR-014: Strategic Cognition in the Reasoning Plane
 
-ADR-001 through ADR-013 are the global semantic decisions. They live in this
+ADR-001 through ADR-014 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions

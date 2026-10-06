@@ -45,6 +45,7 @@ requires:
   - surface_registry.yaml
   - repository_registry.yaml
   - repository_classes.yaml
+  - strategic_cognition_model.yaml
   compiler_catalogs:
   - compiler_passes.yaml
   - derivation_profiles.yaml
@@ -94,6 +95,7 @@ does_not_own:
 - conformance_authority
 - admission_authority
 - distribution_authority
+- strategic_cognition
 architectural_rules:
 - semantics_live_in_canonical_sources
 - compiler_behavior_is_profile_driven
