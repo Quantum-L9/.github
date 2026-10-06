@@ -1,0 +1,149 @@
+schema: l9.strategic-cognition-model/v1
+artifact_id: l9.strategic-cognition-model/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_strategic_cognition_semantics
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: strategic_cognition_model.yaml
+governed_by:
+  invariants:
+  - L9-STRATEGY-001
+  - L9-AUTH-001
+  - L9-AUTH-002
+  - L9-OWNER-001
+  - L9-PROMOTION-001
+  - L9-PROJECTION-001
+  - L9-DERIVED-001
+  - L9-PROV-001
+  - L9-COORD-001
+  contracts:
+  - l9.contract/authority-boundary@1
+  - l9.contract/semantic-ownership@1
+  - l9.contract/projection@1
+  - l9.contract/derived-artifact@1
+purpose: Define the global meaning of Strategic Cognition, the Current Meta View it reasons over, and the authority
+  boundary between the Plan Keeper, which owns the Strategic Plan, and the Strategic Plan Metacognitive Reasoner,
+  which owns analysis of the reasoning that produces the Strategic Plan. This ledger defines semantics only; it does
+  not define Strategic Plan content or structure, runtime cognition, prompts, model or provider selection, actor
+  bindings, or memory behavior.
+plane:
+  conceptual_plane: reasoning_plane
+  semantic_compiler_owner: false
+  runtime_owned_here: false
+  compiler_boundary_ref: vocabulary.yaml#stage_rules.reasoning_plane_rule
+global_rules:
+  strategic_cognition_does_not_own_underlying_truth_sources: true
+  strategic_cognition_does_not_own_runtime_execution: true
+  reasoning_capability_does_not_confer_strategic_authority: true
+  projection_consumption_does_not_transfer_truth_source_ownership: true
+  strategic_roles_are_semantic_roles_not_actor_identities: true
+  metacognition_is_advisory_to_strategic_authority: true
+  semantic_compiler_remains_independent_of_reasoning_plane: true
+concepts:
+  strategic_cognition:
+    definition: The reasoning concern that converts current authoritative understanding plus strategic intent into
+      maintained strategic direction.
+    consumes:
+    - current_meta_view
+    - strategic_intent
+    - strategic_plan
+    produces:
+    - maintained_strategic_direction
+    does_not_own:
+    - underlying_truth_sources
+    - runtime_execution
+    - architecture_semantics
+    - evidence_semantics
+    - memory_semantics
+    - capability_semantics
+    - authority_semantics
+  strategic_plan:
+    definition: The maintained statement of strategic direction produced by Strategic Cognition and held within an
+      explicitly granted strategic scope.
+    owner_role: plan_keeper
+    content_defined_here: false
+    structure_defined_here: false
+  current_meta_view:
+    definition: The bounded current view used for strategic reasoning, composed from relevant authoritative projections.
+    authority_class: derived
+    authoritative: false
+    canonical_source: false
+    artifact_class_ref: composed_projection
+    component_artifact_class_ref: projection_artifact
+    schema_ref: l9.schema/composed-projection@1
+    properties:
+      derived: true
+      disposable: true
+      provenance_preserving: true
+      invalidated_when_source_truth_changes: true
+      may_reinterpret_source_truth: false
+      may_create_authority: false
+  strategic_intent:
+    definition: The strategic purpose supplied by the applicable strategic authority against which strategic direction
+      is maintained.
+    owned_here: false
+    owner: applicable_strategic_authority
+roles:
+  plan_keeper:
+    role_kind: semantic_role
+    actor_identity_binding: none
+    definition: The strategic reasoning role responsible for maintaining the Strategic Plan.
+    owns:
+    - strategic_plan
+    reasons_over:
+    - current_meta_view
+    - strategic_intent
+    - strategic_plan
+    may:
+    - revise_strategic_direction_within_explicitly_granted_strategic_authority
+    - consume_planning_cognition_lessons
+    authority_source: explicitly_granted_strategic_authority
+    does_not_own:
+    - underlying_truth_sources
+    - capability_semantics
+    - evidence
+    - memory
+    - architecture
+    - execution
+    - environment_truth
+    may_not:
+    - acquire_truth_source_ownership_by_consuming_projections
+    - derive_authority_from_reasoning_capability
+    - become_execution_or_implementation_authority_by_implication
+    - revise_strategic_direction_beyond_granted_strategic_authority
+  strategic_plan_metacognitive_reasoner:
+    role_kind: semantic_role
+    actor_identity_binding: none
+    definition: The reasoning role responsible for analyzing the reasoning processes that produce and revise the
+      Strategic Plan.
+    subject: reasoning_processes_that_produce_and_revise_the_strategic_plan
+    universal_metacognitive_authority: false
+    owns:
+    - strategic_plan_reasoning_analysis
+    may:
+    - analyze_plan_keeper_reasoning_episodes
+    - compare_planning_reasoning_expectations_outcomes_and_revisions
+    - identify_recurring_planning_reasoning_strengths_and_failure_patterns
+    - emit_planning_cognition_lessons_for_plan_keeper
+    may_not:
+    - modify_strategic_plan
+    - supersede_plan_keeper
+    - become_strategic_authority
+    - grant_itself_strategic_authority
+    - convert_metacognitive_conclusions_into_strategic_decisions
+    strategic_authority: false
+    output_authority: advisory
+    output_consumer: plan_keeper
+authority_separation:
+  invariant_ref: L9-STRATEGY-001
+  resolution_ref: authority_model.yaml#strategic_cognition_authority
+  strategic_plan_owner: plan_keeper
+  strategic_plan_reasoning_analysis_owner: strategic_plan_metacognitive_reasoner
+  teaching_relation:
+    from: strategic_plan_metacognitive_reasoner
+    to: plan_keeper
+    carries: planning_cognition_lessons
+    authority_effect: none

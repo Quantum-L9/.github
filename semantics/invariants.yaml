@@ -209,6 +209,12 @@ invariants:
     supporting the resolved identity dimensions; material evidence or coordinate change invalidates currentness.
   scope: global
   owner: Quantum-L9/.github
+- id: L9-STRATEGY-001
+  statement: Plan Keeper owns the Strategic Plan. Strategic Plan Metacognitive Reasoner owns analysis of the reasoning
+    processes that produce the Strategic Plan. The latter may teach the former but may never modify, supersede, or
+    become strategic authority.
+  scope: global
+  owner: Quantum-L9/.github
 - id: INV-VALIDATION-MONOTONICITY
   statement: A successor semantic-foundation release MUST preserve every still-applicable mechanically enforced
     predecessor closure property unless an explicit authoritative supersession retires it.

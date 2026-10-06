@@ -1154,6 +1154,33 @@ terms:
     rules:
     - governance_profile_is_not_actor_identity
     - governance_profile_selection_does_not_change_identity
+  strategic_cognition:
+    semantic_class: reasoning_concern
+    definition: The reasoning concern that converts current authoritative understanding plus strategic intent into
+      maintained strategic direction. It owns neither the underlying truth sources nor runtime execution.
+    question: How is current understanding turned into maintained strategic direction?
+    detailed_model: strategic_cognition_model.yaml
+  strategic_plan:
+    semantic_class: authoritative_record
+    definition: The maintained statement of strategic direction produced by Strategic Cognition and owned by the
+      Plan Keeper within an explicitly granted strategic scope.
+    detailed_model: strategic_cognition_model.yaml
+  plan_keeper:
+    semantic_class: semantic_role
+    definition: The strategic reasoning role that maintains the Strategic Plan within explicitly granted strategic
+      authority. It is a semantic role, not an ActorIdentity.
+    detailed_model: strategic_cognition_model.yaml
+  strategic_plan_metacognitive_reasoner:
+    semantic_class: semantic_role
+    definition: The reasoning role that analyzes the reasoning processes that produce and revise the Strategic Plan
+      and teaches the Plan Keeper without modifying, superseding, or becoming strategic authority. It is a semantic
+      role, not an ActorIdentity.
+    detailed_model: strategic_cognition_model.yaml
+  current_meta_view:
+    semantic_class: derived_artifact
+    definition: The bounded, derived, disposable, non-authoritative, provenance-preserving composed projection used
+      for strategic reasoning; it is invalidated when its source truth changes.
+    detailed_model: strategic_cognition_model.yaml
 relationships:
   authority_flow:
     sequence:
