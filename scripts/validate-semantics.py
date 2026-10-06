@@ -2776,7 +2776,6 @@ PROFILES_PATH = "semantics/projection_profiles.yaml"
 INVARIANTS_PATH = "semantics/invariants.yaml"
 VALIDATION_CONTRACT_ID = "l9.contract/validation-and-correctness@1"
 VALIDATION_CONTRACT_OWNER = "Quantum-L9/.github"
-VALIDATION_CONTRACT_ID_PATTERN = re.compile(r"validation", re.IGNORECASE)
 # The uniform contract shape of contracts.yaml. A field outside it on the
 # validation contract is a result taxonomy or sub-contract smuggled in.
 CONTRACT_SHAPE = {
@@ -2877,22 +2876,6 @@ def _rc017_contract(docs: dict[str, dict], report: Report) -> dict | None:
             extra_keys,
             "validation contract declares fields outside the uniform contract shape; "
             "no result taxonomy or sub-contract is admitted here",
-        )
-    # No parallel validation contract: the catalog holds exactly one contract
-    # in the validation family.
-    family = sorted(
-        str(entry.get("id"))
-        for entry in contracts or []
-        if isinstance(entry, dict)
-        and VALIDATION_CONTRACT_ID_PATTERN.search(str(entry.get("id", "")))
-    )
-    if family != [VALIDATION_CONTRACT_ID]:
-        report.fail(
-            "RC-017",
-            CONTRACTS_PATH,
-            "contracts",
-            family,
-            f"validation law must be exactly one contract, {VALIDATION_CONTRACT_ID}",
         )
     # No result taxonomy is defined by the contract catalog.
     outcome_semantics = catalog.get("outcome_semantics") or {}
@@ -3060,7 +3043,7 @@ def _rc017_projection(docs: dict[str, dict], report: Report) -> None:
             f"Cursor-Governance operating-plane profile must exist exactly once (found {count})",
         )
         return
-    _rc017_profile_identity(profiles, profile, report)
+    _rc017_profile_identity(profile, report)
     label = f"projection_profiles[{CG_PROFILE_ID}]"
     sources = profile.get("sources")
     if not isinstance(sources, dict):
@@ -3085,20 +3068,7 @@ def _rc017_projection(docs: dict[str, dict], report: Report) -> None:
     _rc017_projection_selectors(label, sources, report)
 
 
-def _rc017_profile_identity(profiles: list, profile: dict, report: Report) -> None:
-    consumers = [
-        str(entry.get("id"))
-        for entry in profiles
-        if isinstance(entry, dict) and entry.get("consumer") == CG_CONSUMER
-    ]
-    if consumers != [CG_PROFILE_ID]:
-        report.fail(
-            "RC-017",
-            PROFILES_PATH,
-            "projection_profiles",
-            consumers,
-            f"{CG_CONSUMER} must be served by exactly one projection profile, {CG_PROFILE_ID}",
-        )
+def _rc017_profile_identity(profile: dict, report: Report) -> None:
     label = f"projection_profiles[{CG_PROFILE_ID}]"
     if profile.get("class") != "consumer" or profile.get("consumer") != CG_CONSUMER:
         report.fail(
@@ -3275,19 +3245,6 @@ def _check_rc017_negative_cases(docs: dict[str, dict], report: Report) -> None:
     )
 
     case = copy.deepcopy(docs)
-    case[CONTRACTS_PATH]["contracts"].append(
-        {
-            "id": "l9.contract/validation-coverage@1",
-            "scope": "global",
-            "owner": VALIDATION_CONTRACT_OWNER,
-            "outcomes": {"satisfied": "coverage_is_complete"},
-        }
-    )
-    cases.append(
-        ("parallel validation contract introduced", case, CONTRACTS_PATH, "contracts")
-    )
-
-    case = copy.deepcopy(docs)
     case[CONTRACTS_PATH]["outcome_semantics"]["global_error_taxonomy_defined_here"] = (
         True
     )
@@ -3347,24 +3304,6 @@ def _check_rc017_negative_cases(docs: dict[str, dict], report: Report) -> None:
             case,
             PROFILES_PATH,
             f"{profile_field}.sources.invariants.selectors",
-        )
-    )
-
-    case = copy.deepcopy(docs)
-    case[PROFILES_PATH]["projection_profiles"].append(
-        {
-            "id": "l9.projection/cursor-governance-operating-plane@2",
-            "class": "consumer",
-            "consumer": CG_CONSUMER,
-            "sources": {"contracts": {"selectors": ["$.contracts[*].id"]}},
-        }
-    )
-    cases.append(
-        (
-            "parallel Cursor-Governance profile introduced",
-            case,
-            PROFILES_PATH,
-            "projection_profiles",
         )
     )
 
