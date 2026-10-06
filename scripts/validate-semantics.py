@@ -688,6 +688,10 @@ def check_sc008(root: Path, release: str | None, report: Report) -> None:
         )
 
 
+# The validator's own path, used as the receipt location for negative-case
+# batches that prove a closure check fails closed.
+VALIDATOR_PATH = "scripts/validate-semantics.py"
+
 DERIVATION_ITEM_KEYS = {
     "invariants.yaml": "invariants",
     "contracts.yaml": "contracts",
@@ -1937,7 +1941,7 @@ def _check_rc015_negative_cases(docs: dict[str, dict], report: Report) -> None:
         if not candidate_report.failures:
             report.fail(
                 "RC-015",
-                "scripts/validate-semantics.py",
+                VALIDATOR_PATH,
                 "negative_case",
                 label,
                 "negative case did not fail closed",
@@ -2733,7 +2737,7 @@ def _check_rc016_negative_cases(docs: dict[str, dict], report: Report) -> None:
         if not any(f.startswith(prefix) for f in candidate_report.failures):
             report.fail(
                 "RC-016",
-                "scripts/validate-semantics.py",
+                VALIDATOR_PATH,
                 "negative_case",
                 label,
                 f"negative case did not fail closed at {path} {field}",
@@ -2770,7 +2774,6 @@ def check_rc016(docs: dict[str, dict], report: Report) -> None:
 CONTRACTS_PATH = "semantics/contracts.yaml"
 PROFILES_PATH = "semantics/projection_profiles.yaml"
 INVARIANTS_PATH = "semantics/invariants.yaml"
-VALIDATOR_PATH = "scripts/validate-semantics.py"
 VALIDATION_CONTRACT_ID = "l9.contract/validation-and-correctness@1"
 VALIDATION_CONTRACT_OWNER = "Quantum-L9/.github"
 VALIDATION_CONTRACT_ID_PATTERN = re.compile(r"validation", re.IGNORECASE)
