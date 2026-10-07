@@ -2,7 +2,7 @@
 
 Candidate status: **additive successor candidate**.
 
-This release keeps the v3.12.0 semantic-foundation inventory. It adds one authority declaration and three projection selectors. It adds no ledger, schema, invariant, contract, receipt family, vocabulary term, authority class, or ADR.
+This release keeps the v3.12.0 semantic-foundation inventory. It adds one authority declaration, three projection selectors, and one dependency edge. It adds no ledger, schema, invariant, contract, receipt family, vocabulary term, authority class, or ADR.
 
 ## Semantic changes
 
@@ -21,11 +21,12 @@ Modified canonical ledgers:
   - `implies` set to `false` for each of: `publication`, `runtime_admission`, `runtime_availability`, `capability_invocation_authorization`, `implementation_conformance`, `consumer_compatibility`
   - five `rules`
 - `semantics/projection_profiles.yaml`: the `authority_model` source of `l9.projection/stage-product-topology@1` gains `$.product_admission_authority`, `$.admission_rules`, and `$.escalation_rules`.
+- `semantics/semantic_dependency_model.yaml`: `dependency_rules.product_topology.depends_on` gains `authority_model`, so a change to the declaration marks ProductTopology results stale.
 
 Explicitly unchanged:
 
 - Every other section of `semantics/authority_model.yaml`, including `admission_rules`, `global_admission_rules`, `escalation_rules`, `product_topology_authority`, `product_manifest_authority`, and `compiler_authority`.
-- Every other projection profile.
+- Every other projection profile, and every other dependency rule.
 - These ledgers: `semantics/product_topology.schema.yaml`, `semantics/product_kinds.yaml`, `semantics/identity_model.yaml`, `semantics/lifecycle.yaml`, `semantics/node_archetypes.yaml`, `semantics/vocabulary.yaml`, `semantics/contracts.yaml`, `semantics/receipt_catalog.yaml`, `semantics/canonical_sources.yaml`, and `semantics/invariants.yaml`.
 - All prior release records.
 
@@ -42,7 +43,7 @@ The declaration reuses existing law and introduces no new law:
 
 ## Mechanical derivation refreshes
 
-None. Neither modified ledger is a hashed derivation source of any other ledger. After the change, the validator reported no stale coordinate. Before this release record existed, the only failures were SC-008 against the v3.12.0 hash inventory, which this record supersedes.
+None. No modified ledger is a hashed derivation source of any other ledger. After the change, the validator reported no stale coordinate. Before this release record existed, the only failures were SC-008 against the v3.12.0 hash inventory, which this record supersedes.
 
 ## Validator delta
 
@@ -56,14 +57,14 @@ RC-021 governs the exact coordinate `l9.authority/product-admission` and proves 
 - **Declared exactly once.** The coordinate is declared at `authority_model.yaml#product_admission_authority.id`. Any other occurrence in any ledger fails closed unless it is an exact reference under a `*_ref` or `*_refs` field. That includes a key containing the coordinate, a version-suffixed or whitespace-padded value, or a value under a non-reference field.
 - **Declaration pinned whole.** The declaration equals its pinned bytes key by key. An extra key, an extra `implies` consequence, a removed rule, a changed meaning, or a second decision authority each fails closed.
 - **Inherited law pinned.** `admission_rules` (the six global requirements and three flags) and `escalation_rules` (four entries) equal their pinned values, so the inherited law cannot be weakened underneath the declaration.
-- **Vocabulary term pinned.** The vocabulary term `product_admission` keeps its semantic class, its subtype `admission`, and its three non-implication rules.
+- **Vocabulary term pinned.** The vocabulary term `product_admission` keeps its semantic class, its subtype `admission`, and its three rules: one exact-subject binding rule and two non-implication rules.
 - **Receipt owner pinned.** The admission receipt owner stays `applicable_target_class_authority`.
 - **Reaches ProductTopology intake.** `l9.projection/stage-product-topology@1` exists exactly once and projects `$.product_admission_authority`, `$.admission_rules`, and `$.escalation_rules` from the authority model.
-- **No crash on malformed shapes.** Comparisons are by value only, so a malformed shape produces a located failure, never an uncaught exception.
+- **No crash on malformed shapes.** Comparisons are by value only and selectors are filtered to strings, so a malformed shape produces a located failure, never an uncaught exception.
 
 RC-021 applies no rule to any other authority, defines no authority family, and sets no cardinality on authority declarations (`L9-VALIDATION-001`).
 
-The negative-case batch has 48 cases. Each must fail at its intended field, and a case that raises instead of failing is itself a failure. The cases cover:
+The negative-case batch has 49 cases. Each must fail at its intended field, and a case that raises instead of failing is itself a failure. The cases cover:
 
 - **The coordinate itself:** missing; declared twice; shadowed under another id key, with a version suffix, or as a mapping key; an inexact reference.
 - **Decision authority:** moved to the global owner, to the compiler, or to a non-scalar.
@@ -74,7 +75,7 @@ The negative-case batch has 48 cases. Each must fail at its intended field, and 
 - **Implied consequences:** each of the six set `true`; the publication consequence omitted; an extra consequence set `true`.
 - **Inherited law:** the inherited self-admission ban lifted; an inherited requirement dropped; `unknown` defaulting to pass; missing authority allowed; the escalation law removed.
 - **Vocabulary term:** its rules rewritten; its subtype moved.
-- **ProductTopology projection:** each of the three selectors dropped; the stage profile removed.
+- **ProductTopology projection:** each of the three selectors dropped; a non-string selector; the stage profile removed.
 - **Admission receipt:** its owner moved.
 
 Test-first evidence:
@@ -93,6 +94,7 @@ Audit history:
   - duplicate subjects;
   - `TypeError` crashes on a list operation or a mapping subject.
 - **Codex review (PR #166)** found that ProductTopology intake did not receive the declaration. The projection selectors and their RC-021 coverage close that.
+- **Independent review of the successor commit** found a `TypeError` crash on a non-string stage selector, and that `semantic_dependency_model.yaml` did not make ProductTopology depend on the authority model. Both are repaired, and the crash has its own negative case.
 - **Review under `L9-REVISION-001`** found that the authority change had been hashed into the published v3.12.0 record in place. That record is restored byte-identical, and this successor carries the change instead.
 
 ## Existing closure

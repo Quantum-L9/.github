@@ -10,6 +10,7 @@ The coordinate names an authority role. It does not change the meaning of produc
 
 - Adds one declaration to `semantics/authority_model.yaml`: `product_admission_authority` (`id: l9.authority/product-admission`), between `product_topology_authority` and `product_manifest_authority`. It is decided by `applicable_target_class_authority`, and its subjects are an exact ProductTopology or an exact product release. It inherits the existing global admission requirements and the existing `admission_rules` and `escalation_rules`, and it forbids self-admission. It implies none of the following: publication, runtime admission, runtime availability, capability invocation authorization, implementation conformance or consumer compatibility.
 - Adds `$.product_admission_authority`, `$.admission_rules` and `$.escalation_rules` to the `authority_model` source of `l9.projection/stage-product-topology@1`, so ProductTopology intake receives the declaration and the law it inherits.
+- Adds `authority_model` to `dependency_rules.product_topology.depends_on` in `semantics/semantic_dependency_model.yaml`, so a change to the declaration invalidates ProductTopology results.
 - Adds RC-021 to `scripts/validate-semantics.py`. RC-021 is a closure check for this exact coordinate, with a negative-case batch that fails closed.
 
 ## Non-goals

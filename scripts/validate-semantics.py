@@ -5031,8 +5031,11 @@ def _rc021_projection(docs: dict[str, dict], report: Report) -> None:
     selectors = _mapping(_mapping(profile.get("sources")).get("authority_model")).get(
         "selectors"
     )
-    present = set(selectors) if isinstance(selectors, list) else set()
-    present = {s for s in present if isinstance(s, str)}
+    present = (
+        {s for s in selectors if isinstance(s, str)}
+        if isinstance(selectors, list)
+        else set()
+    )
     for selector in RC021_TOPOLOGY_STAGE_SELECTORS:
         if selector not in present:
             _rc021_fail(
@@ -5217,6 +5220,22 @@ def _check_rc021_negative_cases(docs: dict[str, dict], report: Report) -> None:
             f"{stage_field}.sources.authority_model.selectors",
         )
     case, _ = mutated()
+    stage, _ = _unique_entry(
+        case[PROFILES_PATH]["projection_profiles"],
+        "id",
+        RC021_TOPOLOGY_STAGE_PROFILE,
+    )
+    stage["sources"]["authority_model"]["selectors"] = [
+        {"a": 1},
+        *RC021_TOPOLOGY_STAGE_SELECTORS[1:],
+    ]
+    add(
+        "topology stage selector is not a string",
+        case,
+        PROFILES_PATH,
+        f"{stage_field}.sources.authority_model.selectors",
+    )
+    case, _ = mutated()
     stages = case[PROFILES_PATH]["projection_profiles"]
     stage, _ = _unique_entry(stages, "id", RC021_TOPOLOGY_STAGE_PROFILE)
     stages.remove(stage)
@@ -5275,7 +5294,8 @@ def check_rc021(docs: dict[str, dict], report: Report) -> None:
             f"term, and the admission receipt owner match their pinned bytes: decided by "
             f"{RC021_DECISION_AUTHORITY}, no self-admission, and no implied publication, runtime "
             "admission, runtime availability, capability invocation, implementation "
-            "conformance, or consumer compatibility",
+            f"conformance, or consumer compatibility; {RC021_TOPOLOGY_STAGE_PROFILE} "
+            "projects the declaration and the law it inherits",
         )
         _check_rc021_negative_cases(docs, report)
 

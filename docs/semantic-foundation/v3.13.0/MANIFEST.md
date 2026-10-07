@@ -66,12 +66,13 @@ v3.13.0 adds no ADR. The existing authority law in `semantics/authority_model.ya
 
 ## Product admission authority identity
 
-v3.13.0 makes a semantic change to two canonical ledgers:
+v3.13.0 makes a semantic change to three canonical ledgers:
 
 - `semantics/authority_model.yaml`: one declaration, `product_admission_authority` (`id: l9.authority/product-admission`), between `product_topology_authority` and `product_manifest_authority`. Its decision authority is `applicable_target_class_authority`, the owner of `l9.receipt/admission@1`. It inherits `admission_rules.global_requirements` by anchor and references `admission_rules` and `escalation_rules`, and it forbids self-admission. It declares the following consequences `false`: publication, runtime admission, runtime availability, capability invocation authorization, implementation conformance and consumer compatibility. Every other section of the ledger is unchanged.
 - `semantics/projection_profiles.yaml`: the `authority_model` source of `l9.projection/stage-product-topology@1` gains the selectors `$.product_admission_authority`, `$.admission_rules` and `$.escalation_rules`, so ProductTopology intake receives the declaration it validates `admission.authority_ref` against, and the law that declaration inherits. No other profile changes.
+- `semantics/semantic_dependency_model.yaml`: `dependency_rules.product_topology.depends_on` gains `authority_model`. ProductTopology intake already consumed the authority model through its stage projection, and now validates `admission.authority_ref` against it, so a change to the declaration must mark ProductTopology results stale (`invalidation_rules.source_digest_change`). No other dependency rule changes.
 
-No derivation coordinate in any other ledger depends on the bytes of either file, so no mechanical refresh was required.
+No derivation coordinate in any other ledger depends on the bytes of these files, so no mechanical refresh was required.
 
 The release also adds RC-021 to `scripts/validate-semantics.py`, together with its negative-case batch, which fails closed.
 

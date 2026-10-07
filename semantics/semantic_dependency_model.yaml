@@ -54,6 +54,7 @@ dependency_rules:
     - vocabulary
     - invariants
     - contracts
+    - authority_model
     - capability_semantics
     - product_kinds
     - node_archetypes
