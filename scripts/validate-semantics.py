@@ -4353,6 +4353,523 @@ def check_rc019(docs: dict[str, dict], report: Report) -> None:
         _check_rc019_negative_cases(docs, report)
 
 
+# RC-020 Graphiti/Zep technology admission closure (v3.12.0). Two concrete
+# provider technologies are admitted to the canonical technology catalog so a
+# product may name them in a provider binding. The check governs these exact
+# coordinates only: it defines no graph-provider or memory-provider family,
+# imposes no rule on any other technology, and does not cap how many
+# technologies exist. Registration states technology facts; it grants no
+# semantic ownership and authorizes no use.
+#
+# The admission must reuse what the catalog already admitted. The class and
+# role sets are therefore pinned to the v3.11.0 catalog rather than read from
+# the live file, so a class or role introduced alongside the admission (or
+# beside a decoy registration that uses it) cannot pass as pre-existing. The
+# required registration fields are pinned the same way, so relaxing the
+# catalog's own grammar cannot excuse a missing field.
+TECHNOLOGIES_PATH = "semantics/technology_capabilities.yaml"
+RC020_TECHNOLOGY_IDS = ("graphiti-mcp", "zep")
+RC020_REQUIRED_FIELDS = ("id", "class", "provides", "target_roles")
+# The semantic facts this admission registered, from the provider realization
+# l9-graphiti-memory consumes: the class, the minimum provider capability facts,
+# and the minimum target role. A successor may add facts or roles; it may not
+# substitute or drop these, or the closure would pass on a gutted admission.
+RC020_ADMITTED_CLASS = "datastore"
+RC020_ADMITTED_PROVIDES = frozenset(
+    {"graph_episode_storage", "graph_search", "episode_deletion_by_locator"}
+)
+RC020_ADMITTED_TARGET_ROLES = frozenset({"persistence_provider"})
+RC020_OWNERSHIP_REASON = "does not transfer semantic ownership"
+RC020_ADMITTED_CLASSES = frozenset(
+    {"language", "framework", "datastore", "transport", "target"}
+)
+RC020_ADMITTED_ROLES = frozenset(
+    {
+        "implementation_language",
+        "conformance_target",
+        "persistence_provider",
+        "constellation_transport_binding",
+        "late_stage_renderer",
+        "schema_target",
+        "repository_metadata_target",
+        "repository_operator_facade_target",
+    }
+)
+
+
+def _rc020_fail(field: str, value: object, message: str, report: Report) -> None:
+    report.fail("RC-020", TECHNOLOGIES_PATH, field, value, message)
+
+
+def _rc020_terms(value: object) -> list[str] | None:
+    """A non-empty list of distinct non-empty strings, else None."""
+    if not isinstance(value, list) or not value:
+        return None
+    if not all(isinstance(term, str) and term.strip() for term in value):
+        return None
+    return value if len(set(value)) == len(value) else None
+
+
+def _rc020_grammar(catalog: dict, report: Report) -> set[str] | None:
+    """Registration fields the catalog declares, or None after failing closed
+    when its grammar is malformed or no longer requires the pinned fields."""
+    requirements = catalog.get("registration_requirements")
+    required = optional = None
+    if isinstance(requirements, dict):
+        required = _string_list(requirements.get("required"))
+        optional = _string_list(requirements.get("optional"))
+    if required is None or optional is None:
+        _rc020_fail(
+            "registration_requirements",
+            requirements,
+            "registration grammar must declare required and optional field lists",
+            report,
+        )
+        return None
+    missing = sorted(set(RC020_REQUIRED_FIELDS) - set(required))
+    if missing:
+        _rc020_fail(
+            "registration_requirements.required",
+            missing,
+            "registration grammar no longer requires the pinned registration fields",
+            report,
+        )
+        return None
+    return set(required) | set(optional)
+
+
+def _rc020_class(label: str, cls: object, classes: dict, report: Report) -> None:
+    if not isinstance(cls, str) or cls not in classes:
+        _rc020_fail(
+            f"{label}.class",
+            cls,
+            "class is not an admitted capability class of the technology catalog",
+            report,
+        )
+    elif cls not in RC020_ADMITTED_CLASSES:
+        _rc020_fail(
+            f"{label}.class",
+            cls,
+            "class was not admitted before this registration; the admission must "
+            "not introduce a technology class",
+            report,
+        )
+    if cls != RC020_ADMITTED_CLASS:
+        _rc020_fail(
+            f"{label}.class",
+            cls,
+            f"admitted class must remain {RC020_ADMITTED_CLASS!r}",
+            report,
+        )
+
+
+def _rc020_roles(label: str, value: object, report: Report) -> None:
+    roles = _rc020_terms(value)
+    if roles is None:
+        _rc020_fail(
+            f"{label}.target_roles",
+            value,
+            "target roles must be a non-empty list of distinct explicit roles",
+            report,
+        )
+        return
+    for role in roles:
+        if role not in RC020_ADMITTED_ROLES:
+            _rc020_fail(
+                f"{label}.target_roles",
+                role,
+                "role was not admitted before this registration; the admission "
+                "must reuse an existing target role",
+                report,
+            )
+    dropped = sorted(RC020_ADMITTED_TARGET_ROLES - set(roles))
+    if dropped:
+        _rc020_fail(
+            f"{label}.target_roles",
+            dropped,
+            "admitted target role was dropped; a provider binding relies on it",
+            report,
+        )
+
+
+def _rc020_optional(label: str, entry: dict, registered: set, report: Report) -> None:
+    for field in ("constraints", "compatible_with", "incompatible_with"):
+        if field in entry and _rc020_terms(entry.get(field)) is None:
+            _rc020_fail(
+                f"{label}.{field}",
+                entry.get(field),
+                "optional registration field must be a non-empty list of distinct terms",
+                report,
+            )
+    for field in ("compatible_with", "incompatible_with"):
+        for ref in _rc020_terms(entry.get(field)) or []:
+            if ref not in registered:
+                _rc020_fail(
+                    f"{label}.{field}",
+                    ref,
+                    "referenced technology is not registered",
+                    report,
+                )
+
+
+def _rc020_ownership(label: str, ownership: object, report: Report) -> None:
+    if not (
+        isinstance(ownership, dict)
+        and set(ownership) == {"implied"}
+        and ownership["implied"] is False
+    ):
+        _rc020_fail(
+            f"{label}.semantic_ownership",
+            ownership,
+            "provider technology must declare exactly {'implied': False}; "
+            f"registration {RC020_OWNERSHIP_REASON}",
+            report,
+        )
+
+
+def _rc020_registration(
+    entry: dict,
+    allowed: set[str],
+    classes: dict,
+    registered: set,
+    report: Report,
+) -> None:
+    label = f"technologies[{entry.get('id')}]"
+    for field in RC020_REQUIRED_FIELDS:
+        if field not in entry:
+            _rc020_fail(
+                f"{label}.{field}",
+                None,
+                "required registration field missing",
+                report,
+            )
+    for field in sorted(set(map(str, entry)) - allowed):
+        _rc020_fail(
+            f"{label}.{field}",
+            entry.get(field),
+            "field is not a registration field of the technology catalog",
+            report,
+        )
+    _rc020_class(label, entry.get("class"), classes, report)
+    provides = _rc020_terms(entry.get("provides"))
+    if provides is None:
+        _rc020_fail(
+            f"{label}.provides",
+            entry.get("provides"),
+            "capability claims must be a non-empty list of distinct explicit terms",
+            report,
+        )
+    else:
+        dropped = sorted(RC020_ADMITTED_PROVIDES - set(provides))
+        if dropped:
+            _rc020_fail(
+                f"{label}.provides",
+                dropped,
+                "admitted capability facts were dropped; a provider binding "
+                "relies on them",
+                report,
+            )
+    _rc020_roles(label, entry.get("target_roles"), report)
+    _rc020_optional(label, entry, registered, report)
+    _rc020_ownership(label, entry.get("semantic_ownership"), report)
+
+
+def _evaluate_rc020(docs: dict[str, dict], report: Report) -> None:
+    catalog = docs.get(TECHNOLOGIES_PATH)
+    if not isinstance(catalog, dict):
+        _rc020_fail("file", "-", "technology catalog missing or unparsable", report)
+        return
+    technologies = catalog.get("technologies")
+    if not isinstance(technologies, list):
+        _rc020_fail(
+            "technologies",
+            type(technologies).__name__,
+            "technology list missing",
+            report,
+        )
+        return
+    classes = catalog.get("capability_classes")
+    if not isinstance(classes, dict):
+        _rc020_fail(
+            "capability_classes",
+            classes,
+            "capability classes must be a mapping",
+            report,
+        )
+        return
+    allowed = _rc020_grammar(catalog, report)
+    if allowed is None:
+        return
+    registered = {
+        entry.get("id")
+        for entry in technologies
+        if isinstance(entry, dict) and isinstance(entry.get("id"), str)
+    }
+    for technology_id in RC020_TECHNOLOGY_IDS:
+        entry, count = _unique_entry(technologies, "id", technology_id)
+        if count != 1 or entry is None:
+            _rc020_fail(
+                "technologies",
+                technology_id,
+                f"technology must be registered exactly once (found {count})",
+                report,
+            )
+            continue
+        _rc020_registration(entry, allowed, classes, registered, report)
+
+
+def _check_rc020_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    graphiti, zep = RC020_TECHNOLOGY_IDS
+    cases = []
+
+    def mutated(technology_id: str) -> tuple[dict, dict, list, dict]:
+        case = copy.deepcopy(docs)
+        catalog = case[TECHNOLOGIES_PATH]
+        technologies = catalog["technologies"]
+        entry, _ = _unique_entry(technologies, "id", technology_id)
+        return case, catalog, technologies, entry
+
+    def field(technology_id: str, name: str) -> str:
+        return f"technologies[{technology_id}].{name}"
+
+    case, _, technologies, entry = mutated(graphiti)
+    technologies.remove(entry)
+    cases.append(("Graphiti registration missing", case, "technologies", "found 0"))
+    case, _, technologies, entry = mutated(zep)
+    technologies.remove(entry)
+    cases.append(("Zep registration missing", case, "technologies", "found 0"))
+    case, _, technologies, entry = mutated(zep)
+    technologies.append(copy.deepcopy(entry))
+    cases.append(("duplicate exact technology id", case, "technologies", "found 2"))
+    case, _, _, entry = mutated(graphiti)
+    del entry["class"]
+    cases.append(("class missing", case, field(graphiti, "class"), "field missing"))
+    case, catalog, technologies, entry = mutated(zep)
+    entry["class"] = "memory_provider"
+    other, _ = _unique_entry(technologies, "id", "mongodb")
+    other["class"] = "memory_provider"
+    cases.append(
+        (
+            "non-admitted class (also held by another registration)",
+            case,
+            field(zep, "class"),
+            "not an admitted capability class",
+        )
+    )
+    case, catalog, technologies, entry = mutated(zep)
+    catalog["capability_classes"]["memory_store"] = {
+        "definition": "introduced alongside the admission"
+    }
+    technologies.append(
+        {
+            "id": "decoy",
+            "class": "memory_store",
+            "provides": ["decoy_fact"],
+            "target_roles": ["persistence_provider"],
+        }
+    )
+    entry["class"] = "memory_store"
+    cases.append(
+        (
+            "class introduced alongside the admission behind a decoy",
+            case,
+            field(zep, "class"),
+            "must not introduce a technology class",
+        )
+    )
+    case, _, _, entry = mutated(zep)
+    entry["class"] = ["datastore"]
+    cases.append(
+        (
+            "class not a scalar",
+            case,
+            field(zep, "class"),
+            "not an admitted capability class",
+        )
+    )
+    case, _, _, entry = mutated(graphiti)
+    entry["provides"] = []
+    cases.append(
+        (
+            "empty provides",
+            case,
+            field(graphiti, "provides"),
+            "capability claims must be",
+        )
+    )
+    case, _, _, entry = mutated(zep)
+    entry["provides"] = ["unrelated_fact"]
+    cases.append(
+        (
+            "admitted capability facts replaced",
+            case,
+            field(zep, "provides"),
+            "admitted capability facts were dropped",
+        )
+    )
+    case, _, _, entry = mutated(graphiti)
+    entry["provides"].remove("graph_search")
+    cases.append(
+        (
+            "one admitted capability fact removed",
+            case,
+            field(graphiti, "provides"),
+            "admitted capability facts were dropped",
+        )
+    )
+    case, _, _, entry = mutated(graphiti)
+    entry["class"] = "language"
+    cases.append(
+        (
+            "another already-admitted class substituted",
+            case,
+            field(graphiti, "class"),
+            "admitted class must remain",
+        )
+    )
+    case, _, _, entry = mutated(zep)
+    entry["target_roles"] = ["implementation_language"]
+    cases.append(
+        (
+            "another already-admitted target role substituted",
+            case,
+            field(zep, "target_roles"),
+            "admitted target role was dropped",
+        )
+    )
+    case, _, _, entry = mutated(zep)
+    del entry["target_roles"]
+    cases.append(
+        (
+            "target_roles missing",
+            case,
+            field(zep, "target_roles"),
+            "field missing",
+        )
+    )
+    case, _, technologies, entry = mutated(graphiti)
+    technologies.append(
+        {
+            "id": "decoy",
+            "class": "datastore",
+            "provides": ["decoy_fact"],
+            "target_roles": ["memory_role"],
+        }
+    )
+    entry["target_roles"] = ["memory_role"]
+    cases.append(
+        (
+            "target role introduced behind a decoy",
+            case,
+            field(graphiti, "target_roles"),
+            "must reuse an existing target role",
+        )
+    )
+    case, _, _, entry = mutated(graphiti)
+    entry["semantic_ownership"]["implied"] = True
+    cases.append(
+        (
+            "semantic ownership implied",
+            case,
+            field(graphiti, "semantic_ownership"),
+            RC020_OWNERSHIP_REASON,
+        )
+    )
+    case, _, _, entry = mutated(zep)
+    entry["semantic_ownership"]["implied"] = 0
+    cases.append(
+        (
+            "semantic ownership falsy but not false",
+            case,
+            field(zep, "semantic_ownership"),
+            RC020_OWNERSHIP_REASON,
+        )
+    )
+    case, _, _, entry = mutated(zep)
+    del entry["semantic_ownership"]
+    cases.append(
+        (
+            "semantic ownership undeclared",
+            case,
+            field(zep, "semantic_ownership"),
+            RC020_OWNERSHIP_REASON,
+        )
+    )
+    case, _, _, entry = mutated(zep)
+    entry["owns"] = ["memory_admission"]
+    cases.append(
+        (
+            "ownership claim outside the registration grammar",
+            case,
+            field(zep, "owns"),
+            "not a registration field",
+        )
+    )
+    case, catalog, _, entry = mutated(zep)
+    requirements = catalog["registration_requirements"]
+    requirements["optional"].extend(requirements["required"])
+    requirements["required"] = ["id"]
+    del entry["provides"]
+    cases.append(
+        (
+            "registration grammar relaxed to excuse a missing field",
+            case,
+            "registration_requirements.required",
+            "no longer requires the pinned registration fields",
+        )
+    )
+    case, catalog, _, _ = mutated(zep)
+    catalog["capability_classes"] = ["datastore"]
+    cases.append(
+        (
+            "capability classes not a mapping",
+            case,
+            "capability_classes",
+            "must be a mapping",
+        )
+    )
+    for label, candidate, field_name, reason in cases:
+        candidate_report = Report()
+        _evaluate_rc020(candidate, candidate_report)
+        prefix = f"FAIL RC-020 {TECHNOLOGIES_PATH} {field_name}="
+        if not any(
+            f.startswith(prefix) and reason in f for f in candidate_report.failures
+        ):
+            report.fail(
+                "RC-020",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {TECHNOLOGIES_PATH} "
+                f"{field_name} for its intended reason ({reason!r})",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-020 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-020-NEG",
+            f"{len(cases)} Graphiti/Zep technology admission negative cases fail "
+            "closed at their intended field with their intended reason",
+        )
+
+
+def check_rc020(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc020(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-020",
+            f"{' and '.join(RC020_TECHNOLOGY_IDS)} are each registered exactly once "
+            "with every pinned registration field, a class and target roles "
+            "admitted before this registration, the admitted class datastore, "
+            "capability claims and target roles that retain the admitted facts, "
+            "and "
+            "semantic_ownership exactly {implied: false}",
+        )
+        _check_rc020_negative_cases(docs, report)
+
+
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
@@ -4528,6 +5045,7 @@ def main(argv: list[str]) -> int:
     check_rc017(docs, report)
     check_rc018(docs, report)
     check_rc019(docs, report)
+    check_rc020(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:

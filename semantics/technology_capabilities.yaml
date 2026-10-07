@@ -137,6 +137,26 @@ technologies:
       - missing_or_blocked_operation_omits_the_target
       - dummy_success_targets_are_forbidden
       - makefile_target_does_not_create_operation_semantics
+  - id: graphiti-mcp
+    class: datastore
+    provides:
+      - graph_episode_storage
+      - graph_search
+      - episode_deletion_by_locator
+    target_roles:
+      - persistence_provider
+    semantic_ownership:
+      implied: false
+  - id: zep
+    class: datastore
+    provides:
+      - graph_episode_storage
+      - graph_search
+      - episode_deletion_by_locator
+    target_roles:
+      - persistence_provider
+    semantic_ownership:
+      implied: false
 
 binding_rules:
   provider_compatibility:
