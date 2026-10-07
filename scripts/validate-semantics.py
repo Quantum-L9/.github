@@ -5300,6 +5300,378 @@ def check_rc021(docs: dict[str, dict], report: Report) -> None:
         _check_rc021_negative_cases(docs, report)
 
 
+# RC-022 Admission contract / authority-model requirement closure. The
+# authority model owns the universal admission prerequisites
+# (`admission_rules.global_requirements`); `l9.authority/product-admission`
+# inherits that list by anchor and RC-021 pins it. The contract catalog
+# operationalizes the same prerequisites as the base `requires` of
+# l9.contract/admission-and-promotion@1. v3.13.0 shipped with that consumer
+# drifted from its authority: one requirement carried a stale spelling, and a
+# conditional cross-domain evidence obligation sat in the unconditional base
+# list. RC-022 proves the contract's base `requires` equals the live
+# authority-model sequence exactly, and that the conditional recurrence law
+# the base list no longer carries still lives where the contract states it
+# (guarantees, prohibitions, and the globalization invariant), so removing
+# the witness from `requires` cannot become a weakening. It reads the
+# authority list live rather than re-pinning it: pinning is RC-021's job,
+# and a second pin would be duplicated doctrine. It governs this one
+# contract only (L9-VALIDATION-001).
+RC022_CONTRACT_ID = "l9.contract/admission-and-promotion@1"
+RC022_STALE_SPELLING = (
+    "explicit_compatibility_contract_when_reusing_a_prior_decision_after_material_change"
+)
+RC022_CONDITIONAL_WITNESS = (
+    "independent_domain_witnesses_when_cross_domain_recurrence_is_asserted_as_admission_evidence"
+)
+# The recurrence / globalization law that keeps cross-domain evidence a
+# conditional obligation rather than a base prerequisite (L9-GLOBALIZATION-001).
+RC022_RECURRENCE_GUARANTEES = (
+    "recurrence_or_validation_creates_no_implicit_promotion",
+    "cross_domain_recurrence_claims_are_evidence_bound_when_used_to_support_higher_scope_admission",
+)
+RC022_RECURRENCE_FORBIDDEN = (
+    "treating_recurrence_as_global_admission",
+    "treating_hypothetical_reuse_repeated_assertion_or_single_domain_repetition_as_cross_domain_recurrence",
+)
+RC022_GLOBALIZATION_INVARIANT = "L9-GLOBALIZATION-001"
+
+
+def _rc022_fail(
+    path: str, field: str, value: object, message: str, report: Report
+) -> None:
+    report.fail("RC-022", path, field, value, message)
+
+
+def _rc022_string_list(
+    path: str, field: str, value: object, report: Report
+) -> list[str] | None:
+    """``value`` as a list of strings, else a located failure and ``None``."""
+    if not isinstance(value, list) or not value:
+        _rc022_fail(path, field, value, "must be a non-empty list", report)
+        return None
+    if not all(isinstance(item, str) for item in value):
+        _rc022_fail(path, field, value, "every entry must be a string", report)
+        return None
+    return value
+
+
+def _evaluate_rc022(docs: dict[str, dict], report: Report) -> None:
+    authority_field = "admission_rules.global_requirements"
+    requirements = _rc022_string_list(
+        RC021_AUTHORITY_PATH,
+        authority_field,
+        _mapping(_mapping(docs.get(RC021_AUTHORITY_PATH)).get("admission_rules")).get(
+            "global_requirements"
+        ),
+        report,
+    )
+    if requirements is None:
+        return
+    if len(set(requirements)) != len(requirements):
+        _rc022_fail(
+            RC021_AUTHORITY_PATH,
+            authority_field,
+            requirements,
+            "global admission requirements must be unique",
+            report,
+        )
+        return
+    contract, count = _unique_entry(
+        _mapping(docs.get(CONTRACTS_PATH)).get("contracts"), "id", RC022_CONTRACT_ID
+    )
+    field = f"contracts[{RC022_CONTRACT_ID}]"
+    if count != 1 or contract is None:
+        _rc022_fail(
+            CONTRACTS_PATH,
+            field,
+            count,
+            "admission-and-promotion contract must exist exactly once",
+            report,
+        )
+        return
+    requires = _rc022_string_list(
+        CONTRACTS_PATH, f"{field}.requires", contract.get("requires"), report
+    )
+    if requires is not None:
+        for requirement in requirements:
+            if requirement not in requires:
+                hint = (
+                    f" (the contract carries the stale spelling {RC022_STALE_SPELLING!r})"
+                    if RC022_STALE_SPELLING in requires
+                    and requirement
+                    != RC022_STALE_SPELLING
+                    and requirement.startswith("explicit_compatibility_contract")
+                    else ""
+                )
+                _rc022_fail(
+                    CONTRACTS_PATH,
+                    f"{field}.requires",
+                    requirement,
+                    "authority-model global admission requirement is absent from the "
+                    f"contract's base requires{hint}",
+                    report,
+                )
+        for requirement in requires:
+            if requirement in requirements:
+                continue
+            if requirement == RC022_CONDITIONAL_WITNESS:
+                reason = (
+                    "cross-domain witness evidence is a conditional obligation when "
+                    "recurrence is actually asserted (L9-GLOBALIZATION-001), not an "
+                    "unconditional base admission requirement"
+                )
+            elif requirement == RC022_STALE_SPELLING:
+                reason = (
+                    "stale spelling; the canonical requirement identifier is the one "
+                    f"in {RC021_AUTHORITY_PATH}#{authority_field}"
+                )
+            else:
+                reason = (
+                    "requirement is not in the authority model's global admission "
+                    "requirements; a base admission requirement is admitted there first"
+                )
+            _rc022_fail(CONTRACTS_PATH, f"{field}.requires", requirement, reason, report)
+        if set(requires) == set(requirements) and requires != requirements:
+            _rc022_fail(
+                CONTRACTS_PATH,
+                f"{field}.requires",
+                requires,
+                f"must equal {RC021_AUTHORITY_PATH}#{authority_field} as an exact "
+                "sequence (same order, no duplicates)",
+                report,
+            )
+    guarantees = _rc022_string_list(
+        CONTRACTS_PATH, f"{field}.guarantees", contract.get("guarantees"), report
+    )
+    for guarantee in RC022_RECURRENCE_GUARANTEES:
+        if guarantees is not None and guarantee not in guarantees:
+            _rc022_fail(
+                CONTRACTS_PATH,
+                f"{field}.guarantees",
+                guarantee,
+                "recurrence guarantee must stay declared; it is where the conditional "
+                "cross-domain evidence obligation lives",
+                report,
+            )
+    forbidden = _rc022_string_list(
+        CONTRACTS_PATH, f"{field}.forbidden", contract.get("forbidden"), report
+    )
+    for prohibition in RC022_RECURRENCE_FORBIDDEN:
+        if forbidden is not None and prohibition not in forbidden:
+            _rc022_fail(
+                CONTRACTS_PATH,
+                f"{field}.forbidden",
+                prohibition,
+                "recurrence prohibition must stay declared (L9-GLOBALIZATION-001)",
+                report,
+            )
+    invariants = _rc022_string_list(
+        CONTRACTS_PATH,
+        f"{field}.source_invariants",
+        contract.get("source_invariants"),
+        report,
+    )
+    if invariants is not None and RC022_GLOBALIZATION_INVARIANT not in invariants:
+        _rc022_fail(
+            CONTRACTS_PATH,
+            f"{field}.source_invariants",
+            RC022_GLOBALIZATION_INVARIANT,
+            "the contract must keep citing the globalization invariant",
+            report,
+        )
+
+
+def _check_rc022_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    field = f"contracts[{RC022_CONTRACT_ID}]"
+    authority_field = "admission_rules.global_requirements"
+    cases = []
+
+    def mutated() -> tuple[dict, dict]:
+        case = copy.deepcopy(docs)
+        contract, _ = _unique_entry(
+            case[CONTRACTS_PATH]["contracts"], "id", RC022_CONTRACT_ID
+        )
+        return case, contract
+
+    def add(label: str, case: dict, case_path: str, field_name: str) -> None:
+        cases.append((label, case, case_path, field_name))
+
+    case, _ = mutated()
+    del case[CONTRACTS_PATH]
+    add("contracts ledger missing", case, CONTRACTS_PATH, field)
+    case, contract = mutated()
+    case[CONTRACTS_PATH]["contracts"].remove(contract)
+    add("contract missing", case, CONTRACTS_PATH, field)
+    case, contract = mutated()
+    case[CONTRACTS_PATH]["contracts"].append(copy.deepcopy(contract))
+    add("contract duplicated", case, CONTRACTS_PATH, field)
+    case, _ = mutated()
+    case[CONTRACTS_PATH]["contracts"] = {"id": RC022_CONTRACT_ID}
+    add("contract catalog not a list", case, CONTRACTS_PATH, field)
+    for label, value in (
+        ("requires is a string", "exact_subject_identity"),
+        ("requires is empty", []),
+        ("requires holds a mapping", [{"id": "exact_subject_identity"}]),
+        ("requires removed", None),
+    ):
+        case, contract = mutated()
+        if value is None:
+            del contract["requires"]
+        else:
+            contract["requires"] = value
+        add(label, case, CONTRACTS_PATH, f"{field}.requires")
+    case, _ = mutated()
+    del case[RC021_AUTHORITY_PATH]["admission_rules"]["global_requirements"]
+    add(
+        "authority-model admission requirements missing",
+        case,
+        RC021_AUTHORITY_PATH,
+        authority_field,
+    )
+    case, _ = mutated()
+    case[RC021_AUTHORITY_PATH]["admission_rules"] = "exact_subject_identity"
+    add(
+        "authority-model admission rules not a mapping",
+        case,
+        RC021_AUTHORITY_PATH,
+        authority_field,
+    )
+    case, _ = mutated()
+    case[RC021_AUTHORITY_PATH]["admission_rules"]["global_requirements"] = [
+        {"id": "exact_subject_identity"}
+    ]
+    add(
+        "authority-model requirement not a string",
+        case,
+        RC021_AUTHORITY_PATH,
+        authority_field,
+    )
+    case, _ = mutated()
+    case[RC021_AUTHORITY_PATH]["admission_rules"]["global_requirements"].append(
+        "exact_subject_identity"
+    )
+    add(
+        "authority-model requirement duplicated",
+        case,
+        RC021_AUTHORITY_PATH,
+        authority_field,
+    )
+    case, contract = mutated()
+    contract["requires"] = contract["requires"][:-1]
+    add("requirement missing", case, CONTRACTS_PATH, f"{field}.requires")
+    case, contract = mutated()
+    contract["requires"] = [*contract["requires"], "producer_attestation"]
+    add("extra requirement", case, CONTRACTS_PATH, f"{field}.requires")
+    case, contract = mutated()
+    contract["requires"] = [
+        "subject_identity" if r == "exact_subject_identity" else r
+        for r in contract["requires"]
+    ]
+    add("requirement renamed", case, CONTRACTS_PATH, f"{field}.requires")
+    case, contract = mutated()
+    contract["requires"] = [
+        RC022_STALE_SPELLING if r.startswith("explicit_compatibility_contract") else r
+        for r in contract["requires"]
+    ]
+    add(
+        "stale reusing_a_prior_decision spelling",
+        case,
+        CONTRACTS_PATH,
+        f"{field}.requires",
+    )
+    case, contract = mutated()
+    contract["requires"] = [*contract["requires"], RC022_CONDITIONAL_WITNESS]
+    add(
+        "cross-domain witness reintroduced as unconditional",
+        case,
+        CONTRACTS_PATH,
+        f"{field}.requires",
+    )
+    case, contract = mutated()
+    contract["requires"] = list(reversed(contract["requires"]))
+    add("requirement order changed", case, CONTRACTS_PATH, f"{field}.requires")
+    case, contract = mutated()
+    contract["requires"] = [*contract["requires"], contract["requires"][0]]
+    add("requirement duplicated", case, CONTRACTS_PATH, f"{field}.requires")
+    case, _ = mutated()
+    case[RC021_AUTHORITY_PATH]["admission_rules"]["global_requirements"][0] = (
+        "subject_identity"
+    )
+    add(
+        "authority-model requirement renamed under the contract",
+        case,
+        CONTRACTS_PATH,
+        f"{field}.requires",
+    )
+    for guarantee in RC022_RECURRENCE_GUARANTEES:
+        case, contract = mutated()
+        contract["guarantees"].remove(guarantee)
+        add(f"{guarantee} removed", case, CONTRACTS_PATH, f"{field}.guarantees")
+    case, contract = mutated()
+    contract["guarantees"] = "recurrence_or_validation_creates_no_implicit_promotion"
+    add("guarantees not a list", case, CONTRACTS_PATH, f"{field}.guarantees")
+    for prohibition in RC022_RECURRENCE_FORBIDDEN:
+        case, contract = mutated()
+        contract["forbidden"].remove(prohibition)
+        add(f"{prohibition} removed", case, CONTRACTS_PATH, f"{field}.forbidden")
+    case, contract = mutated()
+    contract["source_invariants"].remove(RC022_GLOBALIZATION_INVARIANT)
+    add(
+        "globalization invariant no longer cited",
+        case,
+        CONTRACTS_PATH,
+        f"{field}.source_invariants",
+    )
+    for label, candidate, case_path, field_name in cases:
+        candidate_report = Report()
+        try:
+            _evaluate_rc022(candidate, candidate_report)
+        except (AttributeError, KeyError, TypeError, ValueError) as error:
+            # A malformed shape must be a located failure, never a crash.
+            report.fail(
+                "RC-022",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case raised {type(error).__name__} instead of failing closed",
+            )
+            continue
+        prefix = f"FAIL RC-022 {case_path} {field_name}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-022",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {case_path} {field_name}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-022 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-022-NEG",
+            f"{len(cases)} admission contract requirement-closure negative cases fail "
+            "closed at their intended field",
+        )
+
+
+def check_rc022(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc022(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-022",
+            f"{RC022_CONTRACT_ID} exists exactly once and its base requires equals "
+            f"{RC021_AUTHORITY_PATH}#admission_rules.global_requirements as an exact "
+            "sequence; the stale reusing_a_prior_decision spelling and the unconditional "
+            "cross-domain witness are absent; the recurrence guarantees, recurrence "
+            f"prohibitions, and {RC022_GLOBALIZATION_INVARIANT} citation that keep "
+            "cross-domain evidence conditional stay declared",
+        )
+        _check_rc022_negative_cases(docs, report)
+
+
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
@@ -5477,6 +5849,7 @@ def main(argv: list[str]) -> int:
     check_rc019(docs, report)
     check_rc020(docs, report)
     check_rc021(docs, report)
+    check_rc022(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:

@@ -159,8 +159,7 @@ contracts:
   - target_semantic_or_authority_class
   - target_class_authority
   - explicit_decision_record
-  - explicit_compatibility_contract_when_reusing_a_prior_decision_after_material_change
-  - independent_domain_witnesses_when_cross_domain_recurrence_is_asserted_as_admission_evidence
+  - explicit_compatibility_contract_when_reusing_prior_decision_after_material_change
   guarantees:
   - decisions_bind_only_the_exact_subject_evaluated
   - promotion_is_performed_only_by_target_class_authority
