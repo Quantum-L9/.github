@@ -5317,12 +5317,8 @@ def check_rc021(docs: dict[str, dict], report: Report) -> None:
 # and a second pin would be duplicated doctrine. It governs this one
 # contract only (L9-VALIDATION-001).
 RC022_CONTRACT_ID = "l9.contract/admission-and-promotion@1"
-RC022_STALE_SPELLING = (
-    "explicit_compatibility_contract_when_reusing_a_prior_decision_after_material_change"
-)
-RC022_CONDITIONAL_WITNESS = (
-    "independent_domain_witnesses_when_cross_domain_recurrence_is_asserted_as_admission_evidence"
-)
+RC022_STALE_SPELLING = "explicit_compatibility_contract_when_reusing_a_prior_decision_after_material_change"
+RC022_CONDITIONAL_WITNESS = "independent_domain_witnesses_when_cross_domain_recurrence_is_asserted_as_admission_evidence"
 # The recurrence / globalization law that keeps cross-domain evidence a
 # conditional obligation rather than a base prerequisite (L9-GLOBALIZATION-001).
 RC022_RECURRENCE_GUARANTEES = (
@@ -5398,8 +5394,7 @@ def _evaluate_rc022(docs: dict[str, dict], report: Report) -> None:
                 hint = (
                     f" (the contract carries the stale spelling {RC022_STALE_SPELLING!r})"
                     if RC022_STALE_SPELLING in requires
-                    and requirement
-                    != RC022_STALE_SPELLING
+                    and requirement != RC022_STALE_SPELLING
                     and requirement.startswith("explicit_compatibility_contract")
                     else ""
                 )
@@ -5430,7 +5425,9 @@ def _evaluate_rc022(docs: dict[str, dict], report: Report) -> None:
                     "requirement is not in the authority model's global admission "
                     "requirements; a base admission requirement is admitted there first"
                 )
-            _rc022_fail(CONTRACTS_PATH, f"{field}.requires", requirement, reason, report)
+            _rc022_fail(
+                CONTRACTS_PATH, f"{field}.requires", requirement, reason, report
+            )
         if set(requires) == set(requirements) and requires != requirements:
             _rc022_fail(
                 CONTRACTS_PATH,
