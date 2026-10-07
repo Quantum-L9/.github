@@ -168,7 +168,7 @@ product_admission_authority:
   id: l9.authority/product-admission
   meaning: Semantic authority role under which an exact ProductTopology or exact product release may be admitted
     by the applicable target-class authority.
-  role_semantics_owner: Quantum-L9/.github
+  global_semantics_owner: Quantum-L9/.github
   decision_authority: applicable_target_class_authority
   operation: product_admission
   subjects:
@@ -185,11 +185,13 @@ product_admission_authority:
     runtime_admission: false
     runtime_availability: false
     capability_invocation_authorization: false
+    implementation_conformance: false
+    consumer_compatibility: false
   rules:
   - product_admission_binds_exact_subject
   - compilation_or_validation_is_not_product_admission
   - candidate_does_not_self_admit_because_validation_passes
-  - role_semantics_owner_does_not_admit_products
+  - global_semantics_owner_does_not_admit_products
   - product_release_admission_is_not_runtime_admission
 product_manifest_authority:
   artifact_class: derived
