@@ -4870,6 +4870,272 @@ def check_rc020(docs: dict[str, dict], report: Report) -> None:
         _check_rc020_negative_cases(docs, report)
 
 
+# RC-021 Product admission authority identity. ProductTopology.admission
+# requires `authority_ref: semantic_ref`, and product topologies name
+# l9.authority/product-admission there, so that coordinate must resolve to
+# exactly one canonical declaration in the authority model. The check governs
+# this coordinate only. It pins the declaration to the existing admission law
+# rather than reading it from the live file, so redefining product admission
+# (dropping a global requirement, moving the decision away from the
+# target-class authority, or letting admission imply publication, runtime
+# admission, availability, or invocation) cannot pass as resolution.
+RC021_AUTHORITY_ID = "l9.authority/product-admission"
+RC021_AUTHORITY_PATH = "semantics/authority_model.yaml"
+RC021_DECLARATION_KEY = "product_admission_authority"
+RC021_RECEIPTS_PATH = "semantics/receipt_catalog.yaml"
+RC021_DECISION_AUTHORITY = "applicable_target_class_authority"
+RC021_OPERATION = "product_admission"
+RC021_SUBJECTS = frozenset({"exact_product_topology", "exact_product_release"})
+RC021_GLOBAL_REQUIREMENTS = (
+    "exact_subject_identity",
+    "exact_subject_revision_or_digest_when_revisioned",
+    "target_semantic_or_authority_class",
+    "target_class_authority",
+    "explicit_decision_record",
+    "explicit_compatibility_contract_when_reusing_prior_decision_after_material_change",
+)
+RC021_TRUE_FLAGS = (
+    "candidate_generation_is_not_admission",
+    "self_admission_without_target_class_authority_forbidden",
+)
+RC021_NOT_IMPLIED = (
+    "publication",
+    "runtime_admission",
+    "runtime_availability",
+    "capability_invocation_authorization",
+)
+
+
+def _rc021_fail(
+    path: str, field: str, value: object, message: str, report: Report
+) -> None:
+    report.fail("RC-021", path, field, value, message)
+
+
+def _rc021_declarations(node: object, trail: str, found: list[str]) -> None:
+    if isinstance(node, dict):
+        if node.get("id") == RC021_AUTHORITY_ID:
+            found.append(trail)
+        for key, child in node.items():
+            _rc021_declarations(child, f"{trail}.{key}" if trail else str(key), found)
+    elif isinstance(node, list):
+        for index, child in enumerate(node):
+            _rc021_declarations(child, f"{trail}[{index}]", found)
+
+
+def _evaluate_rc021(docs: dict[str, dict], report: Report) -> None:
+    path = RC021_AUTHORITY_PATH
+    found: list[str] = []
+    for doc_path in sorted(docs):
+        trails: list[str] = []
+        _rc021_declarations(docs[doc_path], "", trails)
+        found.extend(f"{doc_path}#{trail}" for trail in trails)
+    expected = f"{path}#{RC021_DECLARATION_KEY}"
+    if found != [expected]:
+        _rc021_fail(
+            path,
+            RC021_DECLARATION_KEY,
+            RC021_AUTHORITY_ID,
+            f"authority coordinate must be declared exactly once, at {expected} (found {found})",
+            report,
+        )
+        return
+    model = docs[path]
+    decl = model[RC021_DECLARATION_KEY]
+    field = RC021_DECLARATION_KEY
+    if decl.get("decision_authority") != RC021_DECISION_AUTHORITY:
+        _rc021_fail(
+            path,
+            f"{field}.decision_authority",
+            decl.get("decision_authority"),
+            f"product admission is decided only by {RC021_DECISION_AUTHORITY}",
+            report,
+        )
+    receipt_owner = _mapping(
+        _mapping(_mapping(docs.get(RC021_RECEIPTS_PATH)).get("receipts")).get(
+            "admission"
+        )
+    ).get("semantic_owner")
+    if receipt_owner != RC021_DECISION_AUTHORITY:
+        _rc021_fail(
+            RC021_RECEIPTS_PATH,
+            "receipts.admission.semantic_owner",
+            receipt_owner,
+            f"admission receipts must stay owned by {RC021_DECISION_AUTHORITY}",
+            report,
+        )
+    operation = decl.get("operation")
+    term = _mapping(_mapping(docs.get(VOCABULARY_PATH)).get("terms")).get(operation)
+    if operation != RC021_OPERATION or _mapping(term).get("subtype_of") != "admission":
+        _rc021_fail(
+            path,
+            f"{field}.operation",
+            operation,
+            f"must name the canonical admission subtype {RC021_OPERATION}",
+            report,
+        )
+    subjects = decl.get("subjects")
+    if not isinstance(subjects, list) or frozenset(subjects) != RC021_SUBJECTS:
+        _rc021_fail(
+            path,
+            f"{field}.subjects",
+            subjects,
+            f"subjects must be exactly {sorted(RC021_SUBJECTS)}",
+            report,
+        )
+    global_requirements = _mapping(model.get("admission_rules")).get(
+        "global_requirements"
+    )
+    if global_requirements != list(RC021_GLOBAL_REQUIREMENTS):
+        _rc021_fail(
+            path,
+            "admission_rules.global_requirements",
+            global_requirements,
+            "existing global admission requirements must be unchanged",
+            report,
+        )
+    if decl.get("inherits_global_requirements") != list(RC021_GLOBAL_REQUIREMENTS):
+        _rc021_fail(
+            path,
+            f"{field}.inherits_global_requirements",
+            decl.get("inherits_global_requirements"),
+            "must inherit the global admission requirements unchanged",
+            report,
+        )
+    for flag in RC021_TRUE_FLAGS:
+        if decl.get(flag) is not True:
+            _rc021_fail(
+                path, f"{field}.{flag}", decl.get(flag), "must be exactly true", report
+            )
+    implies = _mapping(decl.get("implies"))
+    for consequence in RC021_NOT_IMPLIED:
+        if implies.get(consequence) is not False:
+            _rc021_fail(
+                path,
+                f"{field}.implies.{consequence}",
+                implies.get(consequence),
+                "product admission must declare this consequence exactly false",
+                report,
+            )
+
+
+def _check_rc021_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    path = RC021_AUTHORITY_PATH
+    field = RC021_DECLARATION_KEY
+    cases = []
+
+    def mutated() -> tuple[dict, dict]:
+        case = copy.deepcopy(docs)
+        return case, case[path][field]
+
+    case, _ = mutated()
+    del case[path][field]
+    cases.append(("coordinate missing", case, path, field))
+    case, decl = mutated()
+    case[RC021_RECEIPTS_PATH]["shadow_authority"] = {"id": decl["id"]}
+    cases.append(("coordinate declared twice", case, path, field))
+    case, decl = mutated()
+    decl["decision_authority"] = "Quantum-L9/.github"
+    cases.append(
+        ("global owner as admitter", case, path, f"{field}.decision_authority")
+    )
+    case, decl = mutated()
+    decl["decision_authority"] = "l9-semantic-compiler"
+    cases.append(("compiler as admitter", case, path, f"{field}.decision_authority"))
+    case, _ = mutated()
+    case[RC021_RECEIPTS_PATH]["receipts"]["admission"]["semantic_owner"] = "producer"
+    cases.append(
+        (
+            "admission receipt owner moved",
+            case,
+            RC021_RECEIPTS_PATH,
+            "receipts.admission.semantic_owner",
+        )
+    )
+    case, decl = mutated()
+    decl["operation"] = "runtime_admission"
+    cases.append(("operation not product admission", case, path, f"{field}.operation"))
+    case, decl = mutated()
+    decl["subjects"] = ["exact_product_topology", "deployed_node"]
+    cases.append(("subject widened", case, path, f"{field}.subjects"))
+    case, decl = mutated()
+    decl["inherits_global_requirements"] = list(RC021_GLOBAL_REQUIREMENTS[:-2])
+    cases.append(
+        (
+            "requirement dropped",
+            case,
+            path,
+            f"{field}.inherits_global_requirements",
+        )
+    )
+    case, decl = mutated()
+    decl["self_admission_without_target_class_authority_forbidden"] = False
+    cases.append(
+        (
+            "self-admission allowed",
+            case,
+            path,
+            f"{field}.self_admission_without_target_class_authority_forbidden",
+        )
+    )
+    for consequence in RC021_NOT_IMPLIED:
+        case, decl = mutated()
+        decl["implies"][consequence] = True
+        cases.append(
+            (
+                f"admission implies {consequence}",
+                case,
+                path,
+                f"{field}.implies.{consequence}",
+            )
+        )
+    case, decl = mutated()
+    del decl["implies"]["publication"]
+    cases.append(
+        (
+            "publication non-implication omitted",
+            case,
+            path,
+            f"{field}.implies.publication",
+        )
+    )
+    for label, candidate, case_path, field_name in cases:
+        candidate_report = Report()
+        _evaluate_rc021(candidate, candidate_report)
+        prefix = f"FAIL RC-021 {case_path} {field_name}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-021",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {case_path} {field_name}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-021 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-021-NEG",
+            f"{len(cases)} product admission authority negative cases fail closed for their intended reason",
+        )
+
+
+def check_rc021(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc021(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-021",
+            f"{RC021_AUTHORITY_ID} resolves exactly once to {RC021_AUTHORITY_PATH}#"
+            f"{RC021_DECLARATION_KEY}, decided by {RC021_DECISION_AUTHORITY} for "
+            f"{RC021_OPERATION} over an exact ProductTopology or product release, inherits the "
+            "unchanged global admission requirements, forbids self-admission, and implies no "
+            "publication, runtime admission, runtime availability, or capability invocation",
+        )
+        _check_rc021_negative_cases(docs, report)
+
+
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
@@ -5046,6 +5312,7 @@ def main(argv: list[str]) -> int:
     check_rc018(docs, report)
     check_rc019(docs, report)
     check_rc020(docs, report)
+    check_rc021(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
