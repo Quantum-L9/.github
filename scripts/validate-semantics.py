@@ -4370,13 +4370,15 @@ def check_rc019(docs: dict[str, dict], report: Report) -> None:
 TECHNOLOGIES_PATH = "semantics/technology_capabilities.yaml"
 RC020_TECHNOLOGY_IDS = ("graphiti-mcp", "zep")
 RC020_REQUIRED_FIELDS = ("id", "class", "provides", "target_roles")
-# The technology facts this admission registered, from the provider
-# realization l9-graphiti-memory consumes. A successor may add facts; it may not
-# silently drop these, or a provider binding loses its required coverage while
-# the closure still passes.
+# The semantic facts this admission registered, from the provider realization
+# l9-graphiti-memory consumes: the class, the minimum provider capability facts,
+# and the minimum target role. A successor may add facts or roles; it may not
+# substitute or drop these, or the closure would pass on a gutted admission.
+RC020_ADMITTED_CLASS = "datastore"
 RC020_ADMITTED_PROVIDES = frozenset(
     {"graph_episode_storage", "graph_search", "episode_deletion_by_locator"}
 )
+RC020_ADMITTED_TARGET_ROLES = frozenset({"persistence_provider"})
 RC020_OWNERSHIP_REASON = "does not transfer semantic ownership"
 RC020_ADMITTED_CLASSES = frozenset(
     {"language", "framework", "datastore", "transport", "target"}
@@ -4452,6 +4454,13 @@ def _rc020_class(label: str, cls: object, classes: dict, report: Report) -> None
             "not introduce a technology class",
             report,
         )
+    if cls != RC020_ADMITTED_CLASS:
+        _rc020_fail(
+            f"{label}.class",
+            cls,
+            f"admitted class must remain {RC020_ADMITTED_CLASS!r}",
+            report,
+        )
 
 
 def _rc020_roles(label: str, value: object, report: Report) -> None:
@@ -4473,6 +4482,14 @@ def _rc020_roles(label: str, value: object, report: Report) -> None:
                 "must reuse an existing target role",
                 report,
             )
+    dropped = sorted(RC020_ADMITTED_TARGET_ROLES - set(roles))
+    if dropped:
+        _rc020_fail(
+            f"{label}.target_roles",
+            dropped,
+            "admitted target role was dropped; a provider binding relies on it",
+            report,
+        )
 
 
 def _rc020_optional(label: str, entry: dict, registered: set, report: Report) -> None:
@@ -4690,6 +4707,36 @@ def _check_rc020_negative_cases(docs: dict[str, dict], report: Report) -> None:
             "admitted capability facts were dropped",
         )
     )
+    case, _, _, entry = mutated(graphiti)
+    entry["provides"].remove("graph_search")
+    cases.append(
+        (
+            "one admitted capability fact removed",
+            case,
+            field(graphiti, "provides"),
+            "admitted capability facts were dropped",
+        )
+    )
+    case, _, _, entry = mutated(graphiti)
+    entry["class"] = "language"
+    cases.append(
+        (
+            "another already-admitted class substituted",
+            case,
+            field(graphiti, "class"),
+            "admitted class must remain",
+        )
+    )
+    case, _, _, entry = mutated(zep)
+    entry["target_roles"] = ["implementation_language"]
+    cases.append(
+        (
+            "another already-admitted target role substituted",
+            case,
+            field(zep, "target_roles"),
+            "admitted target role was dropped",
+        )
+    )
     case, _, _, entry = mutated(zep)
     del entry["target_roles"]
     cases.append(
@@ -4815,8 +4862,9 @@ def check_rc020(docs: dict[str, dict], report: Report) -> None:
             "RC-020",
             f"{' and '.join(RC020_TECHNOLOGY_IDS)} are each registered exactly once "
             "with every pinned registration field, a class and target roles "
-            "admitted before this registration, explicit capability claims that "
-            "retain the admitted facts, and "
+            "admitted before this registration, the admitted class datastore, "
+            "capability claims and target roles that retain the admitted facts, "
+            "and "
             "semantic_ownership exactly {implied: false}",
         )
         _check_rc020_negative_cases(docs, report)

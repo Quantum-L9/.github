@@ -43,16 +43,16 @@ RC-020 governs the exact coordinates `graphiti-mcp` and `zep` and proves that:
 - each is registered exactly once;
 - each carries the pinned required fields `id`, `class`, `provides`, and `target_roles`, and the catalog's `registration_requirements` is well formed and still requires them, so relaxing the grammar cannot excuse a missing field;
 - every field each entry carries is a declared registration field, so a claim outside the registration grammar fails closed;
-- each class is a string, is a `capability_classes` entry, and belongs to the class set admitted before this registration (`language`, `framework`, `datastore`, `transport`, `target`), so the admission cannot introduce a class, even beside a decoy registration that uses it;
+- each class is a string, is a `capability_classes` entry, and belongs to the class set admitted before this registration (`language`, `framework`, `datastore`, `transport`, `target`), so the admission cannot introduce a class, even beside a decoy registration that uses it; and the class remains exactly the admitted `datastore`, so another already-admitted class cannot be substituted;
 - `provides` is a non-empty list of distinct explicit terms that still contains the admitted facts `graph_episode_storage`, `graph_search`, and `episode_deletion_by_locator`; a successor may add facts but cannot silently drop the coverage a provider binding relies on;
-- `target_roles` is a non-empty list of distinct explicit roles drawn from the role set admitted before this registration, so the admission cannot introduce a parallel role system;
+- `target_roles` is a non-empty list of distinct explicit roles drawn from the role set admitted before this registration, so the admission cannot introduce a parallel role system, and the list still contains the admitted role `persistence_provider`; a successor may add a role but cannot substitute or drop it;
 - any optional `constraints`, `compatible_with`, or `incompatible_with` is a non-empty list of distinct terms, and each referenced technology is registered;
 - `semantic_ownership` is exactly `{implied: false}`. A falsy non-boolean such as `0` is rejected;
 - a malformed catalog shape (technologies, capability classes, or registration grammar) produces a structured FAIL and never an uncaught exception.
 
 The pinned class and role sets apply only to these two coordinates. They bound what this admission may reuse and place no limit on future admissions by canonical authority. RC-020 defines no graph-provider or memory-provider family by name, applies no rule to any other technology, and sets no cardinality on the catalog (`L9-VALIDATION-001`).
 
-The negative-case batch has 17 cases. Each must fail at its intended field with its intended reason. The cases are:
+The negative-case batch has 20 cases. Each must fail at its intended field with its intended reason. The cases are:
 
 - Graphiti registration missing;
 - Zep registration missing;
@@ -63,6 +63,9 @@ The negative-case batch has 17 cases. Each must fail at its intended field with 
 - a class that is not a scalar;
 - empty `provides`;
 - the admitted capability facts replaced by unrelated terms;
+- one admitted capability fact removed;
+- another already-admitted class substituted;
+- another already-admitted target role substituted;
 - `target_roles` missing;
 - a target role introduced behind a decoy;
 - semantic ownership implied;
@@ -72,7 +75,7 @@ The negative-case batch has 17 cases. Each must fail at its intended field with 
 - the registration grammar relaxed to excuse a missing field;
 - capability classes that are not a mapping.
 
-Test-first evidence: before the registration, at commit `2ddb616` (the semantic bytes of base `14a93a94a3adaa15b506ee88c12e8b82a121c140` plus RC-020), RC-020 failed, and the only failures were the two intended absences (`technologies='graphiti-mcp'` and `technologies='zep'`, each found 0). After the registration, RC-020 and RC-020-NEG pass. The independent Validate & Repair audit found bypasses and uncaught exceptions in the first form of RC-020: a decoy registration, a falsy non-boolean ownership value, a non-scalar class, a malformed grammar, and a self-relaxed required list. These were repaired before publication. Each audit reproduction now fails closed, and the pre-registration RED is unchanged.
+Test-first evidence: before the registration, at commit `2ddb616` (the semantic bytes of base `14a93a94a3adaa15b506ee88c12e8b82a121c140` plus RC-020), RC-020 failed, and the only failures were the two intended absences (`technologies='graphiti-mcp'` and `technologies='zep'`, each found 0). After the registration, RC-020 and RC-020-NEG pass. The independent Validate & Repair audit found bypasses and uncaught exceptions in the first form of RC-020: a decoy registration, a falsy non-boolean ownership value, a non-scalar class, a malformed grammar, and a self-relaxed required list. These were repaired before publication. Review then found that the admitted semantic facts themselves were not pinned: Codex flagged `provides`, and GAR-F-165-001 extended the finding to the class and the target role. RC-020 now requires class `datastore`, the three admitted capability facts, and the admitted role `persistence_provider` on both coordinates; additions remain allowed. Each audit and review reproduction now fails closed, and the pre-registration RED is unchanged.
 
 ## Existing closure
 
