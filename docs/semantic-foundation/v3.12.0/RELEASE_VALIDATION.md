@@ -44,7 +44,7 @@ RC-020 governs the exact coordinates `graphiti-mcp` and `zep` and proves that:
 - each carries the pinned required fields `id`, `class`, `provides`, and `target_roles`, and the catalog's `registration_requirements` is well formed and still requires them, so relaxing the grammar cannot excuse a missing field;
 - every field each entry carries is a declared registration field, so a claim outside the registration grammar fails closed;
 - each class is a string, is a `capability_classes` entry, and belongs to the class set admitted before this registration (`language`, `framework`, `datastore`, `transport`, `target`), so the admission cannot introduce a class, even beside a decoy registration that uses it;
-- `provides` is a non-empty list of distinct explicit terms;
+- `provides` is a non-empty list of distinct explicit terms that still contains the admitted facts `graph_episode_storage`, `graph_search`, and `episode_deletion_by_locator`; a successor may add facts but cannot silently drop the coverage a provider binding relies on;
 - `target_roles` is a non-empty list of distinct explicit roles drawn from the role set admitted before this registration, so the admission cannot introduce a parallel role system;
 - any optional `constraints`, `compatible_with`, or `incompatible_with` is a non-empty list of distinct terms, and each referenced technology is registered;
 - `semantic_ownership` is exactly `{implied: false}`. A falsy non-boolean such as `0` is rejected;
@@ -52,7 +52,7 @@ RC-020 governs the exact coordinates `graphiti-mcp` and `zep` and proves that:
 
 The pinned class and role sets apply only to these two coordinates. They bound what this admission may reuse and place no limit on future admissions by canonical authority. RC-020 defines no graph-provider or memory-provider family by name, applies no rule to any other technology, and sets no cardinality on the catalog (`L9-VALIDATION-001`).
 
-The negative-case batch has 16 cases. Each must fail at its intended field with its intended reason. The cases are:
+The negative-case batch has 17 cases. Each must fail at its intended field with its intended reason. The cases are:
 
 - Graphiti registration missing;
 - Zep registration missing;
@@ -62,6 +62,7 @@ The negative-case batch has 16 cases. Each must fail at its intended field with 
 - a class introduced together with the admission behind a decoy;
 - a class that is not a scalar;
 - empty `provides`;
+- the admitted capability facts replaced by unrelated terms;
 - `target_roles` missing;
 - a target role introduced behind a decoy;
 - semantic ownership implied;

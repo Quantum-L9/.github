@@ -4370,6 +4370,14 @@ def check_rc019(docs: dict[str, dict], report: Report) -> None:
 TECHNOLOGIES_PATH = "semantics/technology_capabilities.yaml"
 RC020_TECHNOLOGY_IDS = ("graphiti-mcp", "zep")
 RC020_REQUIRED_FIELDS = ("id", "class", "provides", "target_roles")
+# The technology facts this admission registered, from the provider
+# realization l9-graphiti-memory consumes. A successor may add facts; it may not
+# silently drop these, or a provider binding loses its required coverage while
+# the closure still passes.
+RC020_ADMITTED_PROVIDES = frozenset(
+    {"graph_episode_storage", "graph_search", "episode_deletion_by_locator"}
+)
+RC020_OWNERSHIP_REASON = "does not transfer semantic ownership"
 RC020_ADMITTED_CLASSES = frozenset(
     {"language", "framework", "datastore", "transport", "target"}
 )
@@ -4497,7 +4505,7 @@ def _rc020_ownership(label: str, ownership: object, report: Report) -> None:
             f"{label}.semantic_ownership",
             ownership,
             "provider technology must declare exactly {'implied': False}; "
-            "registration does not transfer semantic ownership",
+            f"registration {RC020_OWNERSHIP_REASON}",
             report,
         )
 
@@ -4526,13 +4534,24 @@ def _rc020_registration(
             report,
         )
     _rc020_class(label, entry.get("class"), classes, report)
-    if _rc020_terms(entry.get("provides")) is None:
+    provides = _rc020_terms(entry.get("provides"))
+    if provides is None:
         _rc020_fail(
             f"{label}.provides",
             entry.get("provides"),
             "capability claims must be a non-empty list of distinct explicit terms",
             report,
         )
+    else:
+        dropped = sorted(RC020_ADMITTED_PROVIDES - set(provides))
+        if dropped:
+            _rc020_fail(
+                f"{label}.provides",
+                dropped,
+                "admitted capability facts were dropped; a provider binding "
+                "relies on them",
+                report,
+            )
     _rc020_roles(label, entry.get("target_roles"), report)
     _rc020_optional(label, entry, registered, report)
     _rc020_ownership(label, entry.get("semantic_ownership"), report)
@@ -4662,6 +4681,16 @@ def _check_rc020_negative_cases(docs: dict[str, dict], report: Report) -> None:
         )
     )
     case, _, _, entry = mutated(zep)
+    entry["provides"] = ["unrelated_fact"]
+    cases.append(
+        (
+            "admitted capability facts replaced",
+            case,
+            field(zep, "provides"),
+            "admitted capability facts were dropped",
+        )
+    )
+    case, _, _, entry = mutated(zep)
     del entry["target_roles"]
     cases.append(
         (
@@ -4696,7 +4725,7 @@ def _check_rc020_negative_cases(docs: dict[str, dict], report: Report) -> None:
             "semantic ownership implied",
             case,
             field(graphiti, "semantic_ownership"),
-            "does not transfer semantic ownership",
+            RC020_OWNERSHIP_REASON,
         )
     )
     case, _, _, entry = mutated(zep)
@@ -4706,7 +4735,7 @@ def _check_rc020_negative_cases(docs: dict[str, dict], report: Report) -> None:
             "semantic ownership falsy but not false",
             case,
             field(zep, "semantic_ownership"),
-            "does not transfer semantic ownership",
+            RC020_OWNERSHIP_REASON,
         )
     )
     case, _, _, entry = mutated(zep)
@@ -4716,7 +4745,7 @@ def _check_rc020_negative_cases(docs: dict[str, dict], report: Report) -> None:
             "semantic ownership undeclared",
             case,
             field(zep, "semantic_ownership"),
-            "does not transfer semantic ownership",
+            RC020_OWNERSHIP_REASON,
         )
     )
     case, _, _, entry = mutated(zep)
@@ -4786,7 +4815,8 @@ def check_rc020(docs: dict[str, dict], report: Report) -> None:
             "RC-020",
             f"{' and '.join(RC020_TECHNOLOGY_IDS)} are each registered exactly once "
             "with every pinned registration field, a class and target roles "
-            "admitted before this registration, explicit capability claims, and "
+            "admitted before this registration, explicit capability claims that "
+            "retain the admitted facts, and "
             "semantic_ownership exactly {implied: false}",
         )
         _check_rc020_negative_cases(docs, report)
