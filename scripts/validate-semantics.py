@@ -4887,6 +4887,14 @@ RC021_AUTHORITY_ID = "l9.authority/product-admission"
 RC021_AUTHORITY_PATH = "semantics/authority_model.yaml"
 RC021_DECLARATION_KEY = "product_admission_authority"
 RC021_RECEIPTS_PATH = "semantics/receipt_catalog.yaml"
+# ProductTopology.admission.authority_ref is validated at ProductTopology intake,
+# so that stage must receive the declaration and the law it inherits.
+RC021_TOPOLOGY_STAGE_PROFILE = "l9.projection/stage-product-topology@1"
+RC021_TOPOLOGY_STAGE_SELECTORS = (
+    "$.product_admission_authority",
+    "$.admission_rules",
+    "$.escalation_rules",
+)
 RC021_DECISION_AUTHORITY = "applicable_target_class_authority"
 RC021_OPERATION = "product_admission"
 RC021_GLOBAL_REQUIREMENTS = [
@@ -5006,6 +5014,37 @@ def _rc021_pinned(
             )
 
 
+def _rc021_projection(docs: dict[str, dict], report: Report) -> None:
+    """ProductTopology intake must receive the declaration and the law it inherits."""
+    profiles = _mapping(docs.get(PROFILES_PATH)).get("projection_profiles")
+    profile, count = _unique_entry(profiles, "id", RC021_TOPOLOGY_STAGE_PROFILE)
+    field = f"projection_profiles[{RC021_TOPOLOGY_STAGE_PROFILE}]"
+    if count != 1 or profile is None:
+        _rc021_fail(
+            PROFILES_PATH,
+            field,
+            count,
+            "ProductTopology stage profile must exist exactly once",
+            report,
+        )
+        return
+    selectors = _mapping(_mapping(profile.get("sources")).get("authority_model")).get(
+        "selectors"
+    )
+    present = set(selectors) if isinstance(selectors, list) else set()
+    present = {s for s in present if isinstance(s, str)}
+    for selector in RC021_TOPOLOGY_STAGE_SELECTORS:
+        if selector not in present:
+            _rc021_fail(
+                PROFILES_PATH,
+                f"{field}.sources.authority_model.selectors",
+                selector,
+                "ProductTopology intake must project the product admission authority "
+                "and every section it inherits",
+                report,
+            )
+
+
 def _evaluate_rc021(docs: dict[str, dict], report: Report) -> None:
     path = RC021_AUTHORITY_PATH
     field = RC021_DECLARATION_KEY
@@ -5029,6 +5068,7 @@ def _evaluate_rc021(docs: dict[str, dict], report: Report) -> None:
     _rc021_pinned(path, field, model.get(field), RC021_DECLARATION, report)
     for name, law in RC021_INHERITED.items():
         _rc021_pinned(path, name, model.get(name), law, report)
+    _rc021_projection(docs, report)
     term = _mapping(_mapping(docs.get(VOCABULARY_PATH)).get("terms")).get(
         RC021_OPERATION
     )
@@ -5161,6 +5201,26 @@ def _check_rc021_negative_cases(docs: dict[str, dict], report: Report) -> None:
     case, _ = mutated()
     case[VOCABULARY_PATH]["terms"][RC021_OPERATION]["subtype_of"] = "promotion"
     add("vocabulary subtype moved", case, VOCABULARY_PATH, f"{vocab_field}.subtype_of")
+    stage_field = f"projection_profiles[{RC021_TOPOLOGY_STAGE_PROFILE}]"
+    for selector in RC021_TOPOLOGY_STAGE_SELECTORS:
+        case, _ = mutated()
+        stage, _ = _unique_entry(
+            case[PROFILES_PATH]["projection_profiles"],
+            "id",
+            RC021_TOPOLOGY_STAGE_PROFILE,
+        )
+        stage["sources"]["authority_model"]["selectors"].remove(selector)
+        add(
+            f"topology stage does not project {selector}",
+            case,
+            PROFILES_PATH,
+            f"{stage_field}.sources.authority_model.selectors",
+        )
+    case, _ = mutated()
+    stages = case[PROFILES_PATH]["projection_profiles"]
+    stage, _ = _unique_entry(stages, "id", RC021_TOPOLOGY_STAGE_PROFILE)
+    stages.remove(stage)
+    add("topology stage profile missing", case, PROFILES_PATH, stage_field)
     case, _ = mutated()
     case[RC021_RECEIPTS_PATH]["receipts"]["admission"]["semantic_owner"] = "producer"
     add(

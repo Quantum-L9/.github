@@ -989,6 +989,9 @@ projection_profiles:
       selectors:
       - $.authority_classes
       - $.project_contract_admission
+      - $.product_admission_authority
+      - $.admission_rules
+      - $.escalation_rules
     node_archetypes:
       selectors:
       - $.archetypes
