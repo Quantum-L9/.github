@@ -4870,6 +4870,436 @@ def check_rc020(docs: dict[str, dict], report: Report) -> None:
         _check_rc020_negative_cases(docs, report)
 
 
+# RC-021 Product admission authority identity. ProductTopology.admission
+# requires `authority_ref: semantic_ref`, and product topologies name
+# l9.authority/product-admission there, so that coordinate must resolve to
+# exactly one canonical declaration in the authority model. The check governs
+# this coordinate only. It pins the whole declaration, the admission and
+# escalation law it inherits, the vocabulary term it names, and the admission
+# receipt owner to their admitted bytes rather than reading them from the live
+# file. Redefining product admission (dropping a requirement or rule, moving
+# the decision off the target-class authority, adding an admitter, letting
+# admission imply publication, runtime admission, availability, or invocation)
+# therefore cannot pass as resolution. Any other occurrence of the coordinate
+# in a ledger must be an exact reference under a `*_ref` / `*_refs` field;
+# anything else is a shadow declaration.
+RC021_AUTHORITY_ID = "l9.authority/product-admission"
+RC021_AUTHORITY_PATH = "semantics/authority_model.yaml"
+RC021_DECLARATION_KEY = "product_admission_authority"
+RC021_RECEIPTS_PATH = "semantics/receipt_catalog.yaml"
+# ProductTopology.admission.authority_ref is validated at ProductTopology intake,
+# so that stage must receive the declaration and the law it inherits.
+RC021_TOPOLOGY_STAGE_PROFILE = "l9.projection/stage-product-topology@1"
+RC021_TOPOLOGY_STAGE_SELECTORS = (
+    "$.product_admission_authority",
+    "$.admission_rules",
+    "$.escalation_rules",
+)
+RC021_DECISION_AUTHORITY = "applicable_target_class_authority"
+RC021_OPERATION = "product_admission"
+RC021_GLOBAL_REQUIREMENTS = [
+    "exact_subject_identity",
+    "exact_subject_revision_or_digest_when_revisioned",
+    "target_semantic_or_authority_class",
+    "target_class_authority",
+    "explicit_decision_record",
+    "explicit_compatibility_contract_when_reusing_prior_decision_after_material_change",
+]
+RC021_NOT_IMPLIED = (
+    "publication",
+    "runtime_admission",
+    "runtime_availability",
+    "capability_invocation_authorization",
+    "implementation_conformance",
+    "consumer_compatibility",
+)
+RC021_DECLARATION = {
+    "id": RC021_AUTHORITY_ID,
+    "meaning": "Semantic authority role under which an exact ProductTopology or exact "
+    "product release may be admitted by the applicable target-class authority.",
+    "global_semantics_owner": "Quantum-L9/.github",
+    "decision_authority": RC021_DECISION_AUTHORITY,
+    "operation": RC021_OPERATION,
+    "subjects": ["exact_product_topology", "exact_product_release"],
+    "inherits_global_requirements": RC021_GLOBAL_REQUIREMENTS,
+    "inherits_rules": ["admission_rules", "escalation_rules"],
+    "candidate_generation_is_not_admission": True,
+    "self_admission_without_target_class_authority_forbidden": True,
+    "implies": {consequence: False for consequence in RC021_NOT_IMPLIED},
+    "rules": [
+        "product_admission_binds_exact_subject",
+        "compilation_or_validation_is_not_product_admission",
+        "candidate_does_not_self_admit_because_validation_passes",
+        "global_semantics_owner_does_not_admit_products",
+        "product_release_admission_is_not_runtime_admission",
+    ],
+}
+# The inherited law, pinned to the v3.12.0 authority model.
+RC021_INHERITED = {
+    "admission_rules": {
+        "global_requirements": RC021_GLOBAL_REQUIREMENTS,
+        "candidate_generation_is_not_admission": True,
+        "self_admission_without_target_class_authority_forbidden": True,
+        "changed_material_subject_requires_new_decision_unless_compatibility_preserves_it": True,
+    },
+    "escalation_rules": {
+        "authority_missing": "block",
+        "semantic_conflict": "block",
+        "unknown": "remain_unknown",
+        "changed_candidate_after_decision": "require_new_decision",
+    },
+}
+RC021_TERM = {
+    "semantic_class": "governance_operation",
+    "subtype_of": "admission",
+    "rules": [
+        "admission_binds_exact_subject",
+        "admission_does_not_imply_runtime_availability",
+        "admission_does_not_authorize_capability_invocation",
+    ],
+}
+
+
+def _rc021_fail(
+    path: str, field: str, value: object, message: str, report: Report
+) -> None:
+    report.fail("RC-021", path, field, value, message)
+
+
+def _rc021_occurrences(
+    node: object, trail: str, parent_key: str, found: list[str]
+) -> None:
+    """Every place a ledger names the coordinate other than an exact reference."""
+    if isinstance(node, dict):
+        for key, child in node.items():
+            key_text = str(key)
+            child_trail = f"{trail}.{key_text}" if trail else key_text
+            if RC021_AUTHORITY_ID in key_text:
+                found.append(child_trail)
+            _rc021_occurrences(child, child_trail, key_text, found)
+    elif isinstance(node, list):
+        for index, child in enumerate(node):
+            _rc021_occurrences(child, f"{trail}[{index}]", parent_key, found)
+    elif isinstance(node, str) and RC021_AUTHORITY_ID in node:
+        is_ref = parent_key.endswith(("_ref", "_refs"))
+        if not (is_ref and node == RC021_AUTHORITY_ID):
+            found.append(trail)
+
+
+def _rc021_pinned(
+    path: str, field: str, actual: object, expected: dict, report: Report
+) -> None:
+    """Fail at each key whose value differs from the pinned mapping."""
+    if not isinstance(actual, dict):
+        _rc021_fail(path, field, actual, "must be the pinned mapping", report)
+        return
+    for key in sorted(set(expected) | set(actual), key=str):
+        if key not in expected:
+            _rc021_fail(
+                path, f"{field}.{key}", actual[key], "key is not admitted here", report
+            )
+        elif isinstance(expected[key], dict):
+            _rc021_pinned(
+                path, f"{field}.{key}", actual.get(key), expected[key], report
+            )
+        elif actual.get(key) != expected[key] or (
+            isinstance(expected[key], bool) and actual.get(key) is not expected[key]
+        ):
+            _rc021_fail(
+                path,
+                f"{field}.{key}",
+                actual.get(key),
+                f"must be exactly {expected[key]!r}",
+                report,
+            )
+
+
+def _rc021_projection(docs: dict[str, dict], report: Report) -> None:
+    """ProductTopology intake must receive the declaration and the law it inherits."""
+    profiles = _mapping(docs.get(PROFILES_PATH)).get("projection_profiles")
+    profile, count = _unique_entry(profiles, "id", RC021_TOPOLOGY_STAGE_PROFILE)
+    field = f"projection_profiles[{RC021_TOPOLOGY_STAGE_PROFILE}]"
+    if count != 1 or profile is None:
+        _rc021_fail(
+            PROFILES_PATH,
+            field,
+            count,
+            "ProductTopology stage profile must exist exactly once",
+            report,
+        )
+        return
+    selectors = _mapping(_mapping(profile.get("sources")).get("authority_model")).get(
+        "selectors"
+    )
+    present = (
+        {s for s in selectors if isinstance(s, str)}
+        if isinstance(selectors, list)
+        else set()
+    )
+    for selector in RC021_TOPOLOGY_STAGE_SELECTORS:
+        if selector not in present:
+            _rc021_fail(
+                PROFILES_PATH,
+                f"{field}.sources.authority_model.selectors",
+                selector,
+                "ProductTopology intake must project the product admission authority "
+                "and every section it inherits",
+                report,
+            )
+
+
+def _evaluate_rc021(docs: dict[str, dict], report: Report) -> None:
+    path = RC021_AUTHORITY_PATH
+    field = RC021_DECLARATION_KEY
+    expected = f"{path}#{field}.id"
+    found: list[str] = []
+    for doc_path in sorted(docs):
+        trails: list[str] = []
+        _rc021_occurrences(docs[doc_path], "", "", trails)
+        found.extend(f"{doc_path}#{trail}" for trail in trails)
+    if found != [expected]:
+        _rc021_fail(
+            path,
+            field,
+            RC021_AUTHORITY_ID,
+            f"authority coordinate must be declared exactly once, at {expected}, and "
+            f"otherwise only referenced exactly under *_ref fields (found {found})",
+            report,
+        )
+        return
+    model = docs[path]
+    _rc021_pinned(path, field, model.get(field), RC021_DECLARATION, report)
+    for name, law in RC021_INHERITED.items():
+        _rc021_pinned(path, name, model.get(name), law, report)
+    _rc021_projection(docs, report)
+    term = _mapping(_mapping(docs.get(VOCABULARY_PATH)).get("terms")).get(
+        RC021_OPERATION
+    )
+    term_view = {key: _mapping(term).get(key) for key in RC021_TERM}
+    _rc021_pinned(
+        VOCABULARY_PATH, f"terms.{RC021_OPERATION}", term_view, RC021_TERM, report
+    )
+    receipt_owner = _mapping(
+        _mapping(_mapping(docs.get(RC021_RECEIPTS_PATH)).get("receipts")).get(
+            "admission"
+        )
+    ).get("semantic_owner")
+    if receipt_owner != RC021_DECISION_AUTHORITY:
+        _rc021_fail(
+            RC021_RECEIPTS_PATH,
+            "receipts.admission.semantic_owner",
+            receipt_owner,
+            f"admission receipts must stay owned by {RC021_DECISION_AUTHORITY}",
+            report,
+        )
+
+
+def _check_rc021_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    path = RC021_AUTHORITY_PATH
+    field = RC021_DECLARATION_KEY
+    vocab_field = f"terms.{RC021_OPERATION}"
+    cases = []
+
+    def mutated() -> tuple[dict, dict]:
+        case = copy.deepcopy(docs)
+        return case, case[path][field]
+
+    def add(label: str, case: dict, case_path: str, field_name: str) -> None:
+        cases.append((label, case, case_path, field_name))
+
+    case, _ = mutated()
+    del case[path][field]
+    add("coordinate missing", case, path, field)
+    case, decl = mutated()
+    case[RC021_RECEIPTS_PATH]["shadow_authority"] = {"id": decl["id"]}
+    add("coordinate declared twice", case, path, field)
+    case, _ = mutated()
+    case[RC021_RECEIPTS_PATH]["shadow"] = {"authority_id": RC021_AUTHORITY_ID}
+    add("shadow under another id key", case, path, field)
+    case, _ = mutated()
+    case[path]["shadow"] = {"id": f"{RC021_AUTHORITY_ID}@1"}
+    add("shadow with version suffix", case, path, field)
+    case, _ = mutated()
+    case[path][RC021_AUTHORITY_ID] = {"decision_authority": "producer"}
+    add("shadow as mapping key", case, path, field)
+    case, _ = mutated()
+    case[path]["shadow"] = {"authority_ref": f"{RC021_AUTHORITY_ID} "}
+    add("inexact reference", case, path, field)
+    for key, value in (
+        ("decision_authority", "Quantum-L9/.github"),
+        ("decision_authority", "l9-semantic-compiler"),
+        ("decision_authority", ["applicable_target_class_authority"]),
+        ("operation", "runtime_admission"),
+        ("operation", ["product_admission"]),
+        ("subjects", ["exact_product_topology", "deployed_node"]),
+        ("subjects", [{"a": 1}, "exact_product_release"]),
+        ("subjects", ["exact_product_topology", "exact_product_topology"]),
+        ("inherits_global_requirements", RC021_GLOBAL_REQUIREMENTS[:-2]),
+        ("inherits_rules", []),
+        ("inherits_rules", ["promotion_rules"]),
+        ("self_admission_without_target_class_authority_forbidden", False),
+        ("candidate_generation_is_not_admission", 1),
+        ("global_semantics_owner", "l9-semantic-compiler"),
+        ("meaning", "Performed by the semantic compiler; implies publication."),
+        ("rules", ["candidate_self_admits_when_validation_passes"]),
+        ("alternate_decision_authorities", ["l9-semantic-compiler"]),
+        ("may_self_admit", True),
+        ("implies", []),
+    ):
+        case, decl = mutated()
+        decl[key] = value
+        add(f"{key}={value!r}", case, path, f"{field}.{key}")
+    for key in ("rules", "inherits_rules", "global_semantics_owner"):
+        case, decl = mutated()
+        del decl[key]
+        add(f"{key} removed", case, path, f"{field}.{key}")
+    for consequence in RC021_NOT_IMPLIED:
+        case, decl = mutated()
+        decl["implies"][consequence] = True
+        add(f"implies {consequence}", case, path, f"{field}.implies.{consequence}")
+    case, decl = mutated()
+    del decl["implies"]["publication"]
+    add(
+        "publication non-implication omitted",
+        case,
+        path,
+        f"{field}.implies.publication",
+    )
+    case, decl = mutated()
+    decl["implies"]["deployment"] = True
+    add("extra implied consequence", case, path, f"{field}.implies.deployment")
+    case, _ = mutated()
+    case[path]["admission_rules"] = copy.deepcopy(case[path]["admission_rules"])
+    case[path]["admission_rules"][
+        "self_admission_without_target_class_authority_forbidden"
+    ] = False
+    add(
+        "inherited self-admission ban lifted",
+        case,
+        path,
+        "admission_rules.self_admission_without_target_class_authority_forbidden",
+    )
+    case, _ = mutated()
+    case[path]["admission_rules"]["global_requirements"].pop()
+    add(
+        "inherited requirement dropped",
+        case,
+        path,
+        "admission_rules.global_requirements",
+    )
+    case, _ = mutated()
+    case[path]["escalation_rules"]["unknown"] = "default_pass"
+    add("unknown defaults to pass", case, path, "escalation_rules.unknown")
+    case, _ = mutated()
+    case[path]["escalation_rules"]["authority_missing"] = "allow"
+    add("missing authority allowed", case, path, "escalation_rules.authority_missing")
+    case, _ = mutated()
+    del case[path]["escalation_rules"]
+    add("escalation law removed", case, path, "escalation_rules")
+    case, _ = mutated()
+    case[VOCABULARY_PATH]["terms"][RC021_OPERATION]["rules"] = [
+        "admission_implies_runtime_availability"
+    ]
+    add("vocabulary rules rewritten", case, VOCABULARY_PATH, f"{vocab_field}.rules")
+    case, _ = mutated()
+    case[VOCABULARY_PATH]["terms"][RC021_OPERATION]["subtype_of"] = "promotion"
+    add("vocabulary subtype moved", case, VOCABULARY_PATH, f"{vocab_field}.subtype_of")
+    stage_field = f"projection_profiles[{RC021_TOPOLOGY_STAGE_PROFILE}]"
+    for selector in RC021_TOPOLOGY_STAGE_SELECTORS:
+        case, _ = mutated()
+        stage, _ = _unique_entry(
+            case[PROFILES_PATH]["projection_profiles"],
+            "id",
+            RC021_TOPOLOGY_STAGE_PROFILE,
+        )
+        stage["sources"]["authority_model"]["selectors"].remove(selector)
+        add(
+            f"topology stage does not project {selector}",
+            case,
+            PROFILES_PATH,
+            f"{stage_field}.sources.authority_model.selectors",
+        )
+    case, _ = mutated()
+    stage, _ = _unique_entry(
+        case[PROFILES_PATH]["projection_profiles"],
+        "id",
+        RC021_TOPOLOGY_STAGE_PROFILE,
+    )
+    stage["sources"]["authority_model"]["selectors"] = [
+        {"a": 1},
+        *RC021_TOPOLOGY_STAGE_SELECTORS[1:],
+    ]
+    add(
+        "topology stage selector is not a string",
+        case,
+        PROFILES_PATH,
+        f"{stage_field}.sources.authority_model.selectors",
+    )
+    case, _ = mutated()
+    stages = case[PROFILES_PATH]["projection_profiles"]
+    stage, _ = _unique_entry(stages, "id", RC021_TOPOLOGY_STAGE_PROFILE)
+    stages.remove(stage)
+    add("topology stage profile missing", case, PROFILES_PATH, stage_field)
+    case, _ = mutated()
+    case[RC021_RECEIPTS_PATH]["receipts"]["admission"]["semantic_owner"] = "producer"
+    add(
+        "admission receipt owner moved",
+        case,
+        RC021_RECEIPTS_PATH,
+        "receipts.admission.semantic_owner",
+    )
+    for label, candidate, case_path, field_name in cases:
+        candidate_report = Report()
+        try:
+            _evaluate_rc021(candidate, candidate_report)
+        except (AttributeError, KeyError, TypeError, ValueError) as error:
+            # A malformed shape must be a located failure, never a crash.
+            report.fail(
+                "RC-021",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case raised {type(error).__name__} instead of failing closed",
+            )
+            continue
+        prefix = f"FAIL RC-021 {case_path} {field_name}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-021",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {case_path} {field_name}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-021 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-021-NEG",
+            f"{len(cases)} product admission authority negative cases fail closed at "
+            "their intended field",
+        )
+
+
+def check_rc021(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc021(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-021",
+            f"{RC021_AUTHORITY_ID} resolves exactly once to {RC021_AUTHORITY_PATH}#"
+            f"{RC021_DECLARATION_KEY} and is otherwise only referenced exactly; the "
+            f"declaration, the admission and escalation law it inherits, the {RC021_OPERATION} "
+            f"term, and the admission receipt owner match their pinned bytes: decided by "
+            f"{RC021_DECISION_AUTHORITY}, no self-admission, and no implied publication, runtime "
+            "admission, runtime availability, capability invocation, implementation "
+            f"conformance, or consumer compatibility; {RC021_TOPOLOGY_STAGE_PROFILE} "
+            "projects the declaration and the law it inherits",
+        )
+        _check_rc021_negative_cases(docs, report)
+
+
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
@@ -5046,6 +5476,7 @@ def main(argv: list[str]) -> int:
     check_rc018(docs, report)
     check_rc019(docs, report)
     check_rc020(docs, report)
+    check_rc021(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
