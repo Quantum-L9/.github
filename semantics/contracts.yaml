@@ -165,6 +165,7 @@ contracts:
   - promotion_is_performed_only_by_target_class_authority
   - recurrence_or_validation_creates_no_implicit_promotion
   - cross_domain_recurrence_claims_are_evidence_bound_when_used_to_support_higher_scope_admission
+  - independent_domain_witnesses_when_cross_domain_recurrence_is_asserted_as_admission_evidence
   - materially_changed_subjects_require_new_decisions_unless_compatibility_preserves_the_prior_decision
   forbidden:
   - self_admission

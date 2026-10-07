@@ -5324,6 +5324,9 @@ RC022_CONDITIONAL_WITNESS = "independent_domain_witnesses_when_cross_domain_recu
 RC022_RECURRENCE_GUARANTEES = (
     "recurrence_or_validation_creates_no_implicit_promotion",
     "cross_domain_recurrence_claims_are_evidence_bound_when_used_to_support_higher_scope_admission",
+    # The witness obligation relocated verbatim out of the unconditional base
+    # list: it must stay here (conditional) and must never re-enter requires.
+    RC022_CONDITIONAL_WITNESS,
 )
 RC022_RECURRENCE_FORBIDDEN = (
     "treating_recurrence_as_global_admission",
