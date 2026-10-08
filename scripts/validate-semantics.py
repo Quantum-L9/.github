@@ -6516,7 +6516,7 @@ def check_rc023(docs: dict[str, dict], report: Report) -> None:
             f"{RC023_CLASS_ID} is the single admitted repository class and its whole "
             "declaration matches the pinned bytes (current, memory namespace "
             f"{RC023_NAMESPACE}, membership required from the resolved class, projection "
-            "obligation naming no profile or compiler receipt); {RC023_VIEW_ID} selects it over current/superseded/retired and "
+            f"obligation naming no profile or compiler receipt); {RC023_VIEW_ID} selects it over current/superseded/retired and "
             f"derives namespace {RC023_NAMESPACE} preserving id, coordinate, lifecycle, "
             f"class_ref with no consumer membership expansion or removal; the registry "
             f"holds exactly the {RC023_REPOSITORY_COUNT} admitted repositories with "

@@ -59,7 +59,7 @@ RC-023 governs `semantics/repository_classes.yaml` and `semantics/repository_reg
 
 RC-023 applies no rule to any other ledger and does not re-validate registration, classification or projection-source naming, which SC-002, RC-006 and the projection checks already own (`L9-VALIDATION-001`).
 
-The negative-case batch has 58 cases. Each must fail at its intended file and field. The cases cover:
+The negative-case batch has 57 cases. Each must fail at its intended file and field. The cases cover:
 
 - **Class catalog identity:** catalog missing; wrong schema; wrong artifact_id; not canonical; `classes` not a mapping.
 - **The l9 class:** missing; duplicated under a second key; an unadmitted class defined beside it; status not `current`; organization membership wrong; each of `namespace`, `membership`, `membership_source` and `consumer_may_not_independently_add_or_remove_members` in the memory obligation wrong; memory obligation not a mapping; `projection_profile_required`, `projection_profile_digest_required` and `compiler_receipt_required` each reintroduced into the projection obligation; `source_digest_required` flipped to false; `provenance_required` removed; an `identity_materialization` obligation reintroduced; a prohibition dropped; the class definition rewritten; an unadmitted class listed in `admitted_classes`.
