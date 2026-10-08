@@ -154,9 +154,11 @@ try {
       assert.strictEqual(profiled[dest], legacy[dest], `default class must not rewrite ${dest}`);
     }
   }
-  // Every passive surface GitHub serves from this repository exists here, so
-  // inheritance is real and not a name for "nobody ships it".
-  for (const inherited of ['CODE_OF_CONDUCT.md', 'CONTRIBUTING.md', 'SUPPORT.md', '.github/VULNERABILITY_REPORT.yml']) {
+  // Every passive surface GitHub serves from this repository exists here, at
+  // the path GitHub reads an org default from (FUNDING.yml and
+  // VULNERABILITY_REPORT.yml only count inside .github/), so inheritance is
+  // real and not a name for "nobody ships it".
+  for (const inherited of def.inherit) {
     assert.ok(fs.existsSync(inherited), `${inherited} must exist in the org .github repo to be inherited`);
   }
 
