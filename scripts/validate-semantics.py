@@ -5813,6 +5813,15 @@ def _evaluate_rc023_classes(docs: dict[str, dict], report: Report) -> None:
             report,
         )
         return
+    if set(classes) != {RC023_CLASS_KEY}:
+        _rc023_fail(
+            path,
+            "classes",
+            sorted(str(key) for key in classes),
+            f"only the admitted class key {RC023_CLASS_KEY!r} may be defined; any "
+            "other class is a new admission decision",
+            report,
+        )
     cls = _mapping(classes.get(RC023_CLASS_KEY))
     field = f"classes.{RC023_CLASS_KEY}"
     _rc023_expect(path, f"{field}.id", cls.get("id"), RC023_CLASS_ID, report)
@@ -5851,6 +5860,15 @@ def _evaluate_rc023_classes(docs: dict[str, dict], report: Report) -> None:
             report,
         )
         return
+    if set(views) != {RC023_VIEW_KEY}:
+        _rc023_fail(
+            path,
+            "derived_views",
+            sorted(str(key) for key in views),
+            f"only the admitted view key {RC023_VIEW_KEY!r} may be defined; any "
+            "other derived view is a new admission decision",
+            report,
+        )
     view = _mapping(views.get(RC023_VIEW_KEY))
     vfield = f"derived_views.{RC023_VIEW_KEY}"
     _rc023_expect(path, f"{vfield}.id", view.get("id"), RC023_VIEW_ID, report)
@@ -6101,6 +6119,13 @@ def _check_rc023_negative_cases(docs: dict[str, dict], report: Report) -> None:
     catalog["classes"]["l9_again"] = copy.deepcopy(catalog["classes"][RC023_CLASS_KEY])
     add("l9 class duplicated", case, cp, f"classes[{RC023_CLASS_ID}]")
     case, catalog, _ = mutated()
+    catalog["classes"]["org_auxiliary"] = {
+        "id": "l9.repository-class/org-auxiliary@1",
+        "status": "current",
+        "organization_membership": "auxiliary",
+    }
+    add("unadmitted class defined beside l9", case, cp, "classes")
+    case, catalog, _ = mutated()
     catalog["classes"][RC023_CLASS_KEY]["status"] = "retired"
     add("l9 class not current", case, cp, f"{cls_field}.status")
     case, catalog, _ = mutated()
@@ -6145,6 +6170,13 @@ def _check_rc023_negative_cases(docs: dict[str, dict], report: Report) -> None:
         catalog["derived_views"][RC023_VIEW_KEY]
     )
     add("memory-namespace view duplicated", case, cp, f"derived_views[{RC023_VIEW_ID}]")
+    case, catalog, _ = mutated()
+    catalog["derived_views"]["l9_everything"] = {
+        "id": "l9.repository-view/everything@1",
+        "selector": {"class_ref": RC023_CLASS_ID},
+        "output": {"namespace": "main", "authority_class": "derived"},
+    }
+    add("unrelated extra derived view", case, cp, "derived_views")
     case, catalog, _ = mutated()
     catalog["derived_views"][RC023_VIEW_KEY]["selector"]["class_ref"] = (
         "l9.repository-class/org-auxiliary@1"
