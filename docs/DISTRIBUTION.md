@@ -12,16 +12,26 @@ The mode names are `docs/REPO_BIRTH_PROFILES.md`.
 
 | Mechanism | What moves | Credential | How an edit propagates |
 | --- | --- | --- | --- |
-| **Inheritance** | A community-health file the consumer does not already have (`SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SUPPORT.md`, `FUNDING.yml`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`) | None | Live from `main`. One local copy blocks inheritance for that file. There is no merge. |
+| **Inheritance** | The passive community-health surfaces: `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml`. For `self_governed` repositories, `SECURITY.md` and the templates as well. | None | Live from `main`. These are never in the seed payload. One local copy blocks inheritance for that file. There is no merge. |
 | **Reference** | `governance-pr.yml` and `governance-issue.yml`, called from the consumer's `.github/workflows/governance.yml` | None for the callee | The caller pins a full commit SHA (`policies/governance-caller.yml`). Moving a tag does not retarget a caller that already pins a SHA. Missing-only seed does not overwrite an existing caller. |
-| **Physical copy** | Default categories: `codeowners`, `dependabot`, `governance`, `community-health`, `issue-templates`, `pr-templates`. `labels` is opt-in. | Org secret `GH_TOKEN` | Missing-only pull request. An existing file is left as-is. |
+| **Physical copy** | `.github/CODEOWNERS`, `.github/dependabot.yml`, the governance caller where the class allows it, `SECURITY.md`, `.github/ISSUE_TEMPLATE/*`, `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md`. Default categories: `codeowners`, `dependabot`, `governance`, `community-health`, `issue-templates`, `pr-templates`. `labels` is opt-in. | Org secret `GH_TOKEN` | Missing-only pull request. An existing file is left as-is. |
+| **Remote apply** | Labels and repository settings | Org secret / governance App | API state, not a file. `sync-labels-all.yml`, `enforce-policies.yml`, `repo-birth-bootstrap.yml`. |
 
 Seed sources that are also this repository's own files are read from those
 files. Consumer-only files live in `policies/`:
 
 - `policies/CODEOWNERS` → `.github/CODEOWNERS` (skipped when the consumer already has a root `CODEOWNERS`)
 - `policies/governance-caller.yml` → `.github/workflows/governance.yml`
-- `.github/dependabot.yml`, `.github/labels.yml` (opt-in), root community-health files, `.github/ISSUE_TEMPLATE/*`, `.github/pull_request_template.md`
+- `.github/dependabot.yml`, `.github/labels.yml` (opt-in)
+- `SECURITY.md` (`community-health`; advisory URLs rewritten to the consumer)
+- `.github/ISSUE_TEMPLATE/*` (`config.yml` advisory URL rewritten to the consumer)
+- `.github/pull_request_template.md` and `.github/PULL_REQUEST_TEMPLATE/release.md` (`pr-templates`, named files, never a directory copy)
+
+`community-health` copies `SECURITY.md` only. It is the one community-health
+file whose bytes differ per consumer. `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`,
+`SUPPORT.md`, `FUNDING.yml` and `VULNERABILITY_REPORT.yml` are inherited and a
+seeded copy would create a second owner. CI is never in the payload; the
+`on-org-update` and `l9-ci-pack` categories throw.
 
 `continuous-sync.yml` is the exception to missing-only. It restores
 `.github/CODEOWNERS` and `.github/dependabot.yml` when they drift, unless the
@@ -46,8 +56,9 @@ Those workflows, and `repo-birth-bootstrap.yml`, run in the
 
 | Change | What to do |
 | --- | --- |
-| Security policy, contributing guide, code of conduct | Edit the root file and merge. Repos with no local copy inherit it. Repos that were seeded a copy keep the old file; seed will not overwrite it. |
-| PR or issue template | Same. The seed source for the human PR template is `.github/pull_request_template.md`. |
+| Contributing guide, code of conduct, support, funding, vulnerability report form | Edit the file and merge. Every repo with no local copy inherits it live. Nothing to seed. |
+| Security policy | Edit `SECURITY.md` and merge. `self_governed` repos inherit it. Repos that were seeded a copy keep the old file; seed will not overwrite it. |
+| PR or issue template | Edit and merge. The seed sources are `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md`, and `.github/ISSUE_TEMPLATE/*`. Seeded copies are not overwritten. |
 | Governance gate rule | Edit `governance-pr.yml` or `governance-issue.yml`, then re-pin the SHA in `policies/governance-caller.yml` and update consumers that already have a caller. |
 | CODEOWNERS or dependabot | Edit `policies/CODEOWNERS` or `.github/dependabot.yml`. `continuous-sync.yml` opens a restore PR where those files drifted. |
 | New repository | `auto-seed-new-repo.yml`, or `workflow_dispatch` on `seed-governance.yml`. `l9-repo-template` `make new-repo` dispatches `repo-birth-bootstrap.yml` for one repo. |

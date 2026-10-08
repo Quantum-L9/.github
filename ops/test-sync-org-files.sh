@@ -14,7 +14,7 @@ ORG_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
-CATEGORIES=(--include codeowners community-health issue-templates)
+CATEGORIES=(--include codeowners community-health issue-templates pr-templates)
 
 make_consumer() {
   local dir="$1"
@@ -50,6 +50,24 @@ if grep -q 'https://github.com/Quantum-L9/.github/security/advisories/new' \
 fi
 echo "✅ SECURITY.md advisory link rewritten to the consumer"
 
+# community-health copies SECURITY.md alone. The passive surfaces are INHERIT
+# (GitHub serves them org-wide) and a copy would create a second owner.
+for f in CODE_OF_CONDUCT.md CONTRIBUTING.md SUPPORT.md LICENSE .github/FUNDING.yml .github/VULNERABILITY_REPORT.yml; do
+  if [[ -e "$WITH_ROOT/$f" ]]; then
+    fail "community-health copied INHERIT surface $f"
+  fi
+done
+echo "✅ community-health copies only SECURITY.md (CoC/CONTRIBUTING/SUPPORT inherited)"
+
+[[ -f "$WITH_ROOT/.github/pull_request_template.md" ]] || \
+  fail "pr-templates did not copy .github/pull_request_template.md"
+[[ -f "$WITH_ROOT/.github/PULL_REQUEST_TEMPLATE/release.md" ]] || \
+  fail "pr-templates did not copy .github/PULL_REQUEST_TEMPLATE/release.md"
+if [[ -e "$WITH_ROOT/.github/PULL_REQUEST_TEMPLATE/infra.md" ]]; then
+  fail "pr-templates copied the deleted infra.md"
+fi
+echo "✅ pr-templates copies the default + release templates and never infra.md"
+
 CFG="$WITH_ROOT/.github/ISSUE_TEMPLATE/config.yml"
 [[ -f "$CFG" ]] || fail "issue-template config.yml not synced"
 grep -q 'https://github.com/Quantum-L9/example/security/advisories/new' "$CFG" || \
@@ -76,4 +94,4 @@ mkdir -p "$NO_REMOTE"
 [[ -f "$NO_REMOTE/SECURITY.md" ]] || fail "SECURITY.md not synced without a remote"
 echo "✅ no-remote consumer still syncs (verbatim, no invented repository)"
 
-echo "ok: shell seeder preserves root CODEOWNERS and rewrites advisory links"
+echo "ok: shell seeder preserves root CODEOWNERS, rewrites advisory links, copies SECURITY.md + both PR templates only"

@@ -10,7 +10,9 @@
 /SECURITY.md                   @Quantum-L9/platform @cryptoxdog
 /CODE_OF_CONDUCT.md            @Quantum-L9/platform @cryptoxdog
 /SUPPORT.md                    @Quantum-L9/platform @cryptoxdog
+/.github/VULNERABILITY_REPORT.yml @Quantum-L9/platform @cryptoxdog
 /.github/pull_request_template.md @Quantum-L9/platform @cryptoxdog
+/.github/PULL_REQUEST_TEMPLATE/ @Quantum-L9/platform @cryptoxdog
 
 # CI API contract — machine-readable, downstream consumers depend on it
 /workflow-interface-registry.yml  @Quantum-L9/platform @cryptoxdog

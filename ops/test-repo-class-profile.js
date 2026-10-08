@@ -107,26 +107,59 @@ try {
   assert.ok(ncp.remote_apply.labels, 'labels are REMOTE APPLY for this class');
   assert.ok(ncp.remote_apply.repo_settings, 'repo settings are REMOTE APPLY for this class');
 
-  // ── the default class is a behavioral no-op ────────────────────────────
-  // Every org sweep that ran before profiles existed must keep its payload.
+  // ── the default class is the frozen four-mode model ────────────────────
+  // MATERIALIZE the repository-local surfaces; INHERIT the passive
+  // community-health surfaces GitHub serves org-wide; FORBID nothing.
   assert.deepStrictEqual(
     [...def.seed_categories].sort(byName),
     [...DEFAULT_CATEGORIES].sort(byName),
     'default class must reproduce DEFAULT_CATEGORIES exactly',
   );
-  assert.deepStrictEqual(def.inherit, []);
+  const PASSIVE_COMMUNITY_HEALTH = [
+    '.github/FUNDING.yml',
+    '.github/VULNERABILITY_REPORT.yml',
+    'CODE_OF_CONDUCT.md',
+    'CONTRIBUTING.md',
+    'SUPPORT.md',
+  ];
+  assert.deepStrictEqual(
+    [...def.inherit].sort(byName),
+    PASSIVE_COMMUNITY_HEALTH,
+    'default inherits exactly the passive community-health surfaces',
+  );
+  assert.ok(!def.inherit.includes('SECURITY.md'), 'SECURITY.md is MATERIALIZE, never inherited by default');
   assert.deepStrictEqual(def.forbid, []);
   for (const hasPython of [true, false]) {
-    const legacy = buildSeedPayload({ fs, hasPython, repository: 'Quantum-L9/x' });
     const profiled = buildSeedPayload({ fs, profile: def, hasPython, repository: 'Quantum-L9/x' });
-    assert.deepStrictEqual(
-      Object.keys(profiled).sort(byName),
-      Object.keys(legacy).sort(byName),
-      `default class must not change the payload (hasPython=${hasPython})`,
-    );
+    assert.deepStrictEqual(Object.keys(profiled).sort(byName), [
+      '.github/CODEOWNERS',
+      '.github/ISSUE_TEMPLATE/1-bug.yml',
+      '.github/ISSUE_TEMPLATE/2-feature.yml',
+      '.github/ISSUE_TEMPLATE/3-task.yml',
+      '.github/ISSUE_TEMPLATE/4-incident.yml',
+      '.github/ISSUE_TEMPLATE/ci-failure.yml',
+      '.github/ISSUE_TEMPLATE/config.yml',
+      '.github/ISSUE_TEMPLATE/gov-violation.yml',
+      '.github/PULL_REQUEST_TEMPLATE/release.md',
+      '.github/dependabot.yml',
+      '.github/pull_request_template.md',
+      '.github/workflows/governance.yml',
+      'SECURITY.md',
+    ], `default class materializes exactly the repository-local surfaces (hasPython=${hasPython})`);
+    // The inherit list names surfaces the categories never produce, so the
+    // profile drops nothing: the unprofiled payload and the profiled one agree.
+    const legacy = buildSeedPayload({ fs, hasPython, repository: 'Quantum-L9/x' });
+    assert.deepStrictEqual(Object.keys(profiled).sort(byName), Object.keys(legacy).sort(byName));
     for (const dest of Object.keys(legacy)) {
       assert.strictEqual(profiled[dest], legacy[dest], `default class must not rewrite ${dest}`);
     }
+  }
+  // Every passive surface GitHub serves from this repository exists here, at
+  // the path GitHub reads an org default from (FUNDING.yml and
+  // VULNERABILITY_REPORT.yml only count inside .github/), so inheritance is
+  // real and not a name for "nobody ships it".
+  for (const inherited of def.inherit) {
+    assert.ok(fs.existsSync(inherited), `${inherited} must exist in the org .github repo to be inherited`);
   }
 
   // ── the non-Constellation Python class ─────────────────────────────────
@@ -141,7 +174,26 @@ try {
     '.github/CODEOWNERS',
     '.github/dependabot.yml',
     '.github/labels.yml',
+    'SECURITY.md',
   ], 'class seeds exactly the non-inheritable, repo-local surfaces');
+  // SECURITY.md is materialized BECAUSE it carries consumer-specific routing.
+  assert.match(
+    born['SECURITY.md'],
+    /https:\/\/github\.com\/Quantum-L9\/l9-observability-core\/security\/advisories\/new/,
+  );
+  // The passive community-health surfaces and both template sets are INHERIT
+  // for this class: asked for explicitly, they drop out of the payload and
+  // only SECURITY.md remains.
+  const ncpInheritProbe = buildSeedPayload({
+    fs,
+    profile: ncp,
+    categories: ['community-health', 'issue-templates', 'pr-templates'],
+    repository: 'Quantum-L9/l9-observability-core',
+  });
+  assert.deepStrictEqual(Object.keys(ncpInheritProbe), ['SECURITY.md']);
+  for (const passive of ['CODE_OF_CONDUCT.md', 'CONTRIBUTING.md', 'SUPPORT.md', '.github/FUNDING.yml', '.github/VULNERABILITY_REPORT.yml']) {
+    assert.ok(matchPattern(ncp.inherit, passive), `non_constellation_python inherits ${passive}`);
+  }
 
   // The claim this whole contract exists to make.
   for (const denied of TEMPLATE_DENY_CI_DISTRIBUTION) {
@@ -259,18 +311,24 @@ try {
   assert.strictEqual(plain.error, null);
   assert.strictEqual(resolveProfile(doc, plain.name).name, 'default');
 
-  // ── the consumer LICENSE must never carry the .github-specific notice ──
-  // LICENSE at the repo root is the one copy. A footer that names only the
-  // .github repository would be copied, or inherited as the story, for every
-  // other repository.
-  const consumerLicense = fs.readFileSync('LICENSE', 'utf8');
-  assert.doesNotMatch(
-    consumerLicense,
-    /applies only to the Quantum-L9\/\.github repository/,
-    'the consumer LICENSE template must not claim to govern only the .github repo',
+  // ── LICENSE is outside universal distribution ──────────────────────────
+  // GitHub does not propagate it as a community-health default and no class
+  // seeds it, so no class may list it as mandatory-seeded either.
+  // Line-wise, whitespace-normalized match; no regex so there is nothing to
+  // backtrack on.
+  const mandatoryEntries = fs.readFileSync('policies/mandatory-files.yml', 'utf8')
+    .split('\n')
+    .map((line) => line.trim().split(/\s+/).join(' '));
+  assert.ok(
+    !mandatoryEntries.includes('- path: LICENSE'),
+    'LICENSE is not a mandatory consumer file',
   );
-  assert.match(consumerLicense, /QUANTUM AI PARTNERS/, 'still the L9 proprietary licence');
-  assert.match(consumerLicense, /GOVERNING LAW/, 'licence body intact');
+  for (const name of Object.keys(doc.classes)) {
+    const payloadKeys = Object.keys(buildSeedPayload({
+      fs, profile: resolveProfile(doc, name), repository: 'Quantum-L9/x',
+    }));
+    assert.ok(!payloadKeys.includes('LICENSE'), `${name} must not seed LICENSE`);
+  }
 
   // An override naming an undefined class is a policy bug, caught at load.
   assert.throws(
@@ -299,6 +357,20 @@ try {
   }
   assert.ok(selfGoverned.remote_apply.labels, 'labels still apply remotely');
   assert.ok(selfGoverned.remote_apply.repo_settings, 'settings still apply remotely');
+  // Every community-health surface, SECURITY.md included, is INHERIT here.
+  for (const inherited of [
+    'CODE_OF_CONDUCT.md',
+    'CONTRIBUTING.md',
+    'SECURITY.md',
+    'SUPPORT.md',
+    '.github/FUNDING.yml',
+    '.github/VULNERABILITY_REPORT.yml',
+    '.github/ISSUE_TEMPLATE/config.yml',
+    '.github/pull_request_template.md',
+    '.github/PULL_REQUEST_TEMPLATE/release.md',
+  ]) {
+    assert.ok(matchPattern(selfGoverned.inherit, inherited), `self_governed inherits ${inherited}`);
+  }
   // The paths that actually broke these repos must be forbidden outright.
   for (const denied of [
     '.github/workflows/governance.yml',
@@ -317,11 +389,11 @@ try {
   console.log('ok: repo-classes policy is JSON-in-YAML and PyYAML-readable');
   console.log('ok: org overrides classify undeclared repos; a marker still outranks them');
   console.log('ok: a malformed or unknown EXPLICIT class fails closed, never widens to default');
-  console.log('ok: consumer LICENSE template is generic, not .github-specific');
-  console.log('ok: self_governed seeds zero files and still applies labels + settings remotely');
+  console.log('ok: LICENSE is neither mandatory nor seeded by any class');
+  console.log('ok: self_governed seeds zero files, inherits every community-health surface, applies labels + settings remotely');
   console.log('ok: resolveProfile is strict at birth and defensive on a null (absent) class');
-  console.log('ok: default class reproduces pre-profile seeding byte-for-byte');
-  console.log('ok: non_constellation_python seeds no template-denied CI distribution path');
+  console.log('ok: default class materializes SECURITY.md + templates and inherits the passive community-health surfaces');
+  console.log('ok: non_constellation_python materializes SECURITY.md and no template-denied CI distribution path');
   console.log('ok: labels.yml is MATERIALIZE per class while staying out of the global default');
   console.log('ok: a forbidden dest throws; an inherited dest drops');
 } finally {

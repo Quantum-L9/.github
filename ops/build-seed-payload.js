@@ -13,6 +13,12 @@ const { applyProfile } = require('./repo-class-profile.js');
  * file is left untouched. CI workflows are not in the payload. Canonical CI
  * is Quantum-L9/l9-ci-core `.github/workflows/org-ci.yml`.
  *
+ * The payload MATERIALIZES only what needs repository-local bytes.
+ * `community-health` is SECURITY.md alone (consumer-specific advisory
+ * routing). CODE_OF_CONDUCT.md, CONTRIBUTING.md, SUPPORT.md, FUNDING.yml and
+ * VULNERABILITY_REPORT.yml are INHERIT: GitHub serves them org-wide, so they
+ * are never in the payload. Modes: docs/REPO_BIRTH_PROFILES.md.
+ *
  * @param {object} opts
  * @param {typeof import('fs')} opts.fs
  * @param {string[]} [opts.categories]  subset of ALL_CATEGORIES; default DEFAULT
@@ -46,10 +52,17 @@ const RETIRED_CATEGORIES = Object.freeze(['on-org-update', 'l9-ci-pack']);
 
 const ALL_CATEGORIES = Object.freeze([...DEFAULT_CATEGORIES, ...OPT_IN_CATEGORIES]);
 
-const COMMUNITY_HEALTH_DEFAULT = Object.freeze([
-  'CODE_OF_CONDUCT.md',
-  'CONTRIBUTING.md',
-  'SECURITY.md',
+// The one community-health file with consumer-specific content: its advisory
+// URLs are rewritten per consumer. Every other community-health file is
+// INHERIT and must not be listed here.
+const COMMUNITY_HEALTH_MATERIALIZED = Object.freeze(['SECURITY.md']);
+
+// Both PR templates a consumer carries locally. `.github/PULL_REQUEST_TEMPLATE/`
+// is read by name, never by directory listing, so a template added to this
+// repository is not distributed until it is named here.
+const PR_TEMPLATES_MATERIALIZED = Object.freeze([
+  '.github/pull_request_template.md',
+  '.github/PULL_REQUEST_TEMPLATE/release.md',
 ]);
 
 const SKIP_ISSUE_TEMPLATES = Object.freeze([
@@ -177,7 +190,7 @@ function buildSeedPayload({
         break;
       }
       case 'community-health': {
-        for (const f of COMMUNITY_HEALTH_DEFAULT) {
+        for (const f of COMMUNITY_HEALTH_MATERIALIZED) {
           const body = readIfFile(fs, f);
           if (body != null) payload[f] = applyRepoPlaceholders(body, repository);
         }
@@ -196,8 +209,10 @@ function buildSeedPayload({
         break;
       }
       case 'pr-templates': {
-        const human = readIfFile(fs, '.github/pull_request_template.md');
-        if (human != null) payload['.github/pull_request_template.md'] = human;
+        for (const f of PR_TEMPLATES_MATERIALIZED) {
+          const body = readIfFile(fs, f);
+          if (body != null) payload[f] = body;
+        }
         break;
       }
       default:
@@ -221,7 +236,8 @@ module.exports = {
   DEFAULT_CATEGORIES,
   OPT_IN_CATEGORIES,
   RETIRED_CATEGORIES,
-  COMMUNITY_HEALTH_DEFAULT,
+  COMMUNITY_HEALTH_MATERIALIZED,
+  PR_TEMPLATES_MATERIALIZED,
   SKIP_ISSUE_TEMPLATES,
   PYTHON_LINT_DEST,
   STOCK_BIOME_SCHEMA,
