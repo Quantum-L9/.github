@@ -20,6 +20,10 @@ const {
   RETIRED_CATEGORIES,
 } = require('./build-seed-payload.js');
 
+// Explicit comparator: a default `.sort()` compares by string conversion,
+// which is an implicit ordering rule one refactor away from being wrong.
+const byName = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+
 const root = path.resolve(__dirname, '..');
 const origCwd = process.cwd();
 process.chdir(root);
@@ -91,7 +95,7 @@ try {
   // by name. The deleted infra template must never reappear via a directory
   // copy.
   const prTemplates = buildSeedPayload({ fs, categories: ['pr-templates'] });
-  assert.deepStrictEqual(Object.keys(prTemplates).sort(), [
+  assert.deepStrictEqual(Object.keys(prTemplates).sort(byName), [
     '.github/PULL_REQUEST_TEMPLATE/release.md',
     '.github/pull_request_template.md',
   ]);

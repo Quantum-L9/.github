@@ -312,8 +312,15 @@ try {
   // ── LICENSE is outside universal distribution ──────────────────────────
   // GitHub does not propagate it as a community-health default and no class
   // seeds it, so no class may list it as mandatory-seeded either.
-  const mandatoryDoc = fs.readFileSync('policies/mandatory-files.yml', 'utf8');
-  assert.doesNotMatch(mandatoryDoc, /^\s*-\s*path:\s*LICENSE\s*$/m, 'LICENSE is not a mandatory consumer file');
+  // Line-wise, whitespace-normalized match; no regex so there is nothing to
+  // backtrack on.
+  const mandatoryEntries = fs.readFileSync('policies/mandatory-files.yml', 'utf8')
+    .split('\n')
+    .map((line) => line.trim().split(/\s+/).join(' '));
+  assert.ok(
+    !mandatoryEntries.includes('- path: LICENSE'),
+    'LICENSE is not a mandatory consumer file',
+  );
   for (const name of Object.keys(doc.classes)) {
     const payloadKeys = Object.keys(buildSeedPayload({
       fs, profile: resolveProfile(doc, name), repository: 'Quantum-L9/x',
