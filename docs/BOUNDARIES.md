@@ -12,8 +12,12 @@ It does not execute, lint, test, scan, or remediate code.
 | CI failure diagnosis | `l9-ci-debt-resolver` | none |
 | CI debt measurement | `l9-ci-debt-intelligence` | consume as a link, never recompute |
 | PR and issue description quality | **this repo** | advisory gates |
-| Community health files | **this repo** | inherited when the consumer has no local copy; otherwise seeded missing-only |
-| CODEOWNERS, dependabot, governance caller | **this repo** | `policies/CODEOWNERS`, `.github/dependabot.yml`, `policies/governance-caller.yml` |
+| Passive community-health files (`CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `FUNDING.yml`, `VULNERABILITY_REPORT.yml`) | **this repo** | INHERIT: GitHub serves them live; never seeded |
+| `SECURITY.md` | **this repo** | MATERIALIZE: seeded missing-only because it carries consumer-specific advisory routing |
+| Issue templates, default PR template, release PR template | **this repo** | MATERIALIZE: seeded missing-only; `ISSUE_TEMPLATE/config.yml` carries consumer-specific routing |
+| CODEOWNERS, dependabot, governance caller | **this repo** | MATERIALIZE: `policies/CODEOWNERS`, `.github/dependabot.yml`, `policies/governance-caller.yml` |
+| Labels, repository settings | **this repo** | REMOTE APPLY: API state, never a seeded file |
+| Semantic Foundation (`semantics/`) | **this repo** | owned here, never in the seed payload |
 | Which capabilities a class receives | **this repo** | `policies/repo-classes.yml` |
 | How a repository is born | `l9-repo-template` | `make new-repo` declares the class; this repo applies it |
 | Org rulesets, secret scanning posture | **this repo** | advisory / evaluate |
@@ -36,6 +40,10 @@ ledgers, release record, and reference closure, never product code.
   organization required-workflow ruleset. No copied workflow, no
   consumer-selected Core pin.
 - Seeding `on-org-update`. That category throws.
+- Seeding the passive community-health files. A local copy of an inherited
+  file is a second owner that drifts from the org default.
+- Seeding Semantic Foundation files, `AGENTS.md`, `Makefile`, `pyproject.toml`,
+  or IDE/tooling config. None is in any seed category.
 - A second code scanner. `l9-ci-core` already runs analysis.
 - CI-failure triage or auto-fix. `l9-ci-debt-resolver` owns bounded recovery.
 

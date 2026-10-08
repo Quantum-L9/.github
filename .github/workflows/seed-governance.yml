@@ -1,8 +1,10 @@
 name: Seed org templates into consumers
 
-# Physically seeds health and ownership files. CI is never seeded.
-# Default `all` omits labels.yml (org sync-labels-all),
-# LICENSE, FUNDING.yml, SUPPORT.md, and duplicate issue templates.
+# Physically seeds ownership files, SECURITY.md, and templates. CI is never
+# seeded. Default `all` omits labels.yml (org sync-labels-all), LICENSE, the
+# inherited community-health files (CODE_OF_CONDUCT.md, CONTRIBUTING.md,
+# SUPPORT.md, FUNDING.yml, VULNERABILITY_REPORT.yml), and duplicate issue
+# templates.
 #
 # Matches ops/sync-org-files.sh. CI is not distributed from here — see
 # docs/BOUNDARIES.md.

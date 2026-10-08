@@ -23,9 +23,9 @@ files:
     source: .github/dependabot.yml
     mode: managed
 
-  - path: LICENSE
-    source: LICENSE
-    mode: seeded
+  # LICENSE is not part of universal governance distribution. GitHub does not
+  # propagate it as a community-health default and this organization does not
+  # seed it; each repository carries its own.
 
   - path: .github/workflows/governance.yml
     source: policies/governance-caller.yml

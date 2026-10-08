@@ -15,13 +15,16 @@
 #   codeowners        .github/CODEOWNERS (path-scoped; skip if root CODEOWNERS)
 #   dependabot        .github/dependabot.yml (github-actions only)
 #   governance        .github/workflows/governance.yml
-#   community-health  CODE_OF_CONDUCT.md, CONTRIBUTING.md, SECURITY.md
-#                     (no LICENSE, FUNDING.yml, SUPPORT.md); advisory links
-#                     are rewritten to the consumer's origin remote
+#   community-health  SECURITY.md only; advisory links are rewritten to the
+#                     consumer's origin remote. CODE_OF_CONDUCT.md,
+#                     CONTRIBUTING.md, SUPPORT.md, FUNDING.yml and
+#                     VULNERABILITY_REPORT.yml are INHERIT (GitHub serves
+#                     them org-wide) and are never copied. No LICENSE.
 #   issue-templates   numbered chooser + ci-failure +
 #                     gov-violation + config.yml
 #                     (no bug_report / feature_request / EXAMPLE.md)
 #   pr-templates      .github/pull_request_template.md (the file make pr fills)
+#                     + .github/PULL_REQUEST_TEMPLATE/release.md
 #   labels            OPT-IN — org sync-labels-all.yml already fans labels
 #   on-org-update     RETIRED — legacy receiver; fails closed
 #
@@ -172,12 +175,13 @@ for cat in "${CATEGORIES[@]}"; do
       sync_file ".github/labels.yml" "$CONSUMER_ROOT/.github/labels.yml"
       ;;
     community-health)
+      # SECURITY.md is the one community-health file with consumer-specific
+      # content. CODE_OF_CONDUCT.md / CONTRIBUTING.md / SUPPORT.md are INHERIT
+      # and must not be copied. Mirrors COMMUNITY_HEALTH_MATERIALIZED.
       echo "── community health ──"
-      for f in CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md; do
-        if [[ -f "$f" ]]; then
-          sync_file_with_placeholders "$f" "$CONSUMER_ROOT/$f"
-        fi
-      done
+      if [[ -f SECURITY.md ]]; then
+        sync_file_with_placeholders SECURITY.md "$CONSUMER_ROOT/SECURITY.md"
+      fi
       ;;
     issue-templates)
       echo "── issue templates ──"
@@ -192,9 +196,13 @@ for cat in "${CATEGORIES[@]}"; do
       done
       ;;
     pr-templates)
-      echo "── PR template ──"
-      sync_file ".github/pull_request_template.md" \
-        "$CONSUMER_ROOT/.github/pull_request_template.md"
+      # Named, never a directory copy: a template added under
+      # .github/PULL_REQUEST_TEMPLATE/ is not distributed until it is listed
+      # here. Mirrors PR_TEMPLATES_MATERIALIZED.
+      echo "── PR templates ──"
+      for f in .github/pull_request_template.md .github/PULL_REQUEST_TEMPLATE/release.md; do
+        sync_file "$f" "$CONSUMER_ROOT/$f"
+      done
       ;;
     on-org-update)
       # RETIRED. This receiver's only action was running
