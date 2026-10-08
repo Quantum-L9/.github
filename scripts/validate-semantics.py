@@ -5672,6 +5672,860 @@ def check_rc022(docs: dict[str, dict], report: Report) -> None:
         _check_rc022_negative_cases(docs, report)
 
 
+# RC-023 Repository class / repository registry closure. Until v3.15.0 the
+# repository class catalog and the repository registry were registered
+# ledgers whose content was an explicit Unknown. v3.15.0 admits exactly one
+# RepositoryClass (l9.repository-class/l9@1), one derived memory-namespace
+# view over it, and an explicit census of 32 repositories, every one
+# assigned that class by decision. RC-023 pins that admission: the class
+# identity and its memory obligation, the derived view's selector and output,
+# and the exact repository ids and case-sensitive GitHub coordinates. It
+# therefore fails on an extra repository, a missing repository, a renamed
+# coordinate, a duplicate, a wrong class, an unrecognized lifecycle, and on
+# any consumer-side membership expansion or removal. Membership is explicit:
+# nothing here infers a class from a repository name, prefix, hosting
+# organization, shape, ProductKind or birth profile, and a future repository
+# needs a new explicit admission (and a new pin) before it is a member. The
+# check governs these two ledgers only (L9-VALIDATION-001).
+RC023_CLASSES_PATH = "semantics/repository_classes.yaml"
+RC023_REGISTRY_PATH = "semantics/repository_registry.yaml"
+RC023_CLASSES_SCHEMA = "l9.repository-classes/v1"
+RC023_CLASSES_ARTIFACT_ID = "l9.repository-classes/global@1"
+RC023_REGISTRY_SCHEMA = "l9.repository-registry/v1"
+RC023_REGISTRY_ARTIFACT_ID = "l9.repository-registry/global@1"
+RC023_CLASS_KEY = "l9"
+RC023_CLASS_ID = "l9.repository-class/l9@1"
+RC023_NAMESPACE = "l9"
+RC023_VIEW_KEY = "l9_memory_namespace"
+RC023_VIEW_ID = "l9.repository-view/memory-namespace-l9@1"
+RC023_VIEW_LIFECYCLES = ["current", "superseded", "retired"]
+RC023_VIEW_PRESERVE_FIELDS = ["id", "coordinate", "lifecycle", "class_ref"]
+RC023_LIFECYCLES = ("current", "superseded", "retired")
+RC023_PROVIDER = "github"
+RC023_ORGANIZATION = "Quantum-L9"
+# The admitted class declaration, pinned to its admitted bytes (the RC-021
+# style). Every key under classes.l9 is law: a key that drifts, disappears, or
+# appears beside these fails as a new admission decision. The projection
+# obligation deliberately names no projection profile and no compiler
+# receipt: whether a derived view is realized through a canonical profile or
+# a declared selector contract is owned by l9.contract/projection@1
+# (`declared_projection_profile_or_selector_contract`), and the admitted
+# memory-namespace view is realized by a selector contract plus a
+# deterministic downstream projector with a projection receipt.
+RC023_CLASS_DEFINITION = (
+    "A repository admitted as part of the governed L9 organization corpus. Its "
+    "repository identity and organization participation are governed by Quantum-L9 "
+    "organization law. Where organization-level canonical semantic authority exists, "
+    "the repository consumes that authority by reference or admitted projection instead "
+    "of maintaining a competing local definition.\n"
+)
+RC023_PROJECTION_OBLIGATION = {
+    "generated_materialization_authority_class": "derived",
+    "manual_edit_of_generated_projection": "forbidden",
+    "source_coordinate_required": True,
+    "source_digest_required": True,
+    "provenance_required": True,
+    "stale_projection_must_not_be_silently_consumed": True,
+    "authority_expansion": "forbidden",
+}
+RC023_MEMORY_OBLIGATION = {
+    "namespace": RC023_NAMESPACE,
+    "membership": "required",
+    "membership_source": "resolved_repository_class",
+    "content_selection_owned_by_memory_plane": True,
+    "content_authority_remains_with_source_repository": True,
+    "memory_representation_authority_class": "derived",
+    "consumer_may_not_independently_add_or_remove_members": True,
+    "lifecycle_semantics": {
+        "current": "current_source",
+        "superseded": "historical_source",
+        "retired": "historical_source",
+    },
+}
+RC023_CLASS_DECLARATION = {
+    "id": RC023_CLASS_ID,
+    "status": "current",
+    "definition": RC023_CLASS_DEFINITION,
+    "organization_membership": RC023_NAMESPACE,
+    "obligations": {
+        "canonical_authority_consumption": {
+            "when_global_canonical_authority_exists": "reference_or_admitted_projection",
+            "local_competing_canonical_copy": "forbidden",
+            "local_domain_semantics_within_repository_authority": "allowed",
+        },
+        "projection": RC023_PROJECTION_OBLIGATION,
+        "memory": RC023_MEMORY_OBLIGATION,
+    },
+    "prohibitions": [
+        "redefine_existing_global_canonical_semantics_locally",
+        "treat_generated_projection_as_canonical_authority",
+        "treat_memory_representation_as_source_repository_authority",
+        "infer_repository_membership_from_repository_name",
+        "infer_repository_membership_from_repository_prefix",
+        "infer_repository_membership_from_organization_hosting",
+        "infer_product_kind_from_repository_class",
+        "infer_birth_profile_from_repository_class",
+        "expand_authority_through_projection",
+    ],
+}
+# The explicit census admitted by v3.15.0: registry id -> case-sensitive
+# GitHub repository coordinate under Quantum-L9. Thirty-two entries, every
+# one lifecycle `current` and class l9.repository-class/l9@1. This is a pin,
+# not a rule: a repository is listed because it was admitted, and admitting
+# another one is a new semantic decision that extends this mapping.
+RC023_REPOSITORIES = {
+    "dot-github": ".github",
+    "cursor-governance": "Cursor-Governance",
+    "igorbot": "igorbot",
+    "seo-bot": "SEO-Bot",
+    "website-bot": "Website-Bot",
+    "l9-original-repo": "L9_Original_Repo",
+    "l9-assurance": "l9-assurance",
+    "l9-ci-core": "l9-ci-core",
+    "l9-ci-debt-intelligence": "l9-ci-debt-intelligence",
+    "l9-ci-debt-lsp": "l9-ci-debt-lsp",
+    "l9-ci-debt-resolver": "l9-ci-debt-resolver",
+    "l9-ci-sdk": "l9-ci-sdk",
+    "l9-codegen": "l9-codegen",
+    "l9-cognitive-runtime": "l9-cognitive-runtime",
+    "l9-constellation-ingest": "l9-constellation-ingest",
+    "l9-constellation-topology": "l9-constellation-topology",
+    "l9-dependency-template": "l9-dependency-template",
+    "l9-deploy": "l9-deploy",
+    "l9-devpack-compiler": "l9-devpack-compiler",
+    "l9-goose": "l9-goose",
+    "l9-graphiti-memory": "l9-graphiti-memory",
+    "l9-harness": "l9-harness",
+    "l9-meta-injector": "l9-meta-injector",
+    "l9-node-chain-of-search": "l9-node-chain-of-search",
+    "l9-node-template": "l9-node-template",
+    "l9-observability-core": "l9-observability-core",
+    "l9-ops-mcp": "L9-Ops-MCP",
+    "l9-pr-repair": "l9-pr-repair",
+    "l9-prompt-generator": "L9-Prompt-Generator",
+    "l9-repo-template": "l9-repo-template",
+    "l9-semantic-compiler-engine": "l9-semantic-compiler-engine",
+    "l9-wip": "l9-wip",
+}
+RC023_REPOSITORY_COUNT = 32
+
+
+def _rc023_fail(
+    path: str, field: str, value: object, message: str, report: Report
+) -> None:
+    report.fail("RC-023", path, field, value, message)
+
+
+def _rc023_expect(
+    path: str, field: str, actual: object, expected: object, report: Report
+) -> bool:
+    """Fail at ``field`` unless ``actual`` equals the pinned ``expected``."""
+    if actual != expected:
+        _rc023_fail(path, field, actual, f"must equal {expected!r}", report)
+        return False
+    return True
+
+
+def _rc023_pinned(
+    path: str, field: str, actual: object, expected: dict, report: Report
+) -> None:
+    """Fail at each pinned key whose value differs; extra keys are admitted."""
+    if not isinstance(actual, dict):
+        _rc023_fail(path, field, actual, "must be a mapping", report)
+        return
+    for key, value in expected.items():
+        _rc023_expect(path, f"{field}.{key}", actual.get(key), value, report)
+
+
+def _rc023_exact(
+    path: str, field: str, actual: object, expected: dict, report: Report
+) -> None:
+    """Fail at each key whose value differs from the pinned mapping, recursively.
+
+    A key missing from ``actual`` fails at that key; a key ``expected`` does
+    not admit fails at that key as well, so an obligation cannot be added or
+    dropped without a new admission decision.
+    """
+    if not isinstance(actual, dict):
+        _rc023_fail(path, field, actual, "must be a mapping", report)
+        return
+    for key in sorted(set(expected) | set(actual), key=str):
+        if key not in expected:
+            _rc023_fail(
+                path,
+                f"{field}.{key}",
+                actual[key],
+                "key is not admitted here; adding an obligation is a new admission decision",
+                report,
+            )
+        elif isinstance(expected[key], dict):
+            _rc023_exact(path, f"{field}.{key}", actual.get(key), expected[key], report)
+        else:
+            _rc023_expect(
+                path, f"{field}.{key}", actual.get(key), expected[key], report
+            )
+
+
+def _evaluate_rc023_classes(docs: dict[str, dict], report: Report) -> None:
+    path = RC023_CLASSES_PATH
+    catalog = docs.get(path)
+    if not isinstance(catalog, dict):
+        _rc023_fail(path, "file", "-", "repository class catalog missing", report)
+        return
+    _rc023_expect(path, "schema", catalog.get("schema"), RC023_CLASSES_SCHEMA, report)
+    _rc023_expect(
+        path,
+        "artifact_id",
+        catalog.get("artifact_id"),
+        RC023_CLASSES_ARTIFACT_ID,
+        report,
+    )
+    _rc023_expect(path, "canonical", catalog.get("canonical"), True, report)
+    classes = catalog.get("classes")
+    if not isinstance(classes, dict):
+        _rc023_fail(path, "classes", classes, "must be a mapping of classes", report)
+        return
+    with_id = [
+        key for key, cls in classes.items() if _mapping(cls).get("id") == RC023_CLASS_ID
+    ]
+    if len(with_id) != 1 or RC023_CLASS_KEY not in classes:
+        _rc023_fail(
+            path,
+            f"classes[{RC023_CLASS_ID}]",
+            len(with_id),
+            f"the l9 class must exist exactly once under classes.{RC023_CLASS_KEY}",
+            report,
+        )
+        return
+    if set(classes) != {RC023_CLASS_KEY}:
+        _rc023_fail(
+            path,
+            "classes",
+            sorted(str(key) for key in classes),
+            f"only the admitted class key {RC023_CLASS_KEY!r} may be defined; any "
+            "other class is a new admission decision",
+            report,
+        )
+    field = f"classes.{RC023_CLASS_KEY}"
+    _rc023_exact(
+        path, field, classes.get(RC023_CLASS_KEY), RC023_CLASS_DECLARATION, report
+    )
+    admitted = _mapping(catalog.get("catalog_status")).get("admitted_classes")
+    _rc023_expect(
+        path, "catalog_status.admitted_classes", admitted, [RC023_CLASS_ID], report
+    )
+    views = catalog.get("derived_views")
+    if not isinstance(views, dict):
+        _rc023_fail(path, "derived_views", views, "must be a mapping of views", report)
+        return
+    with_view_id = [
+        key for key, view in views.items() if _mapping(view).get("id") == RC023_VIEW_ID
+    ]
+    if len(with_view_id) != 1 or RC023_VIEW_KEY not in views:
+        _rc023_fail(
+            path,
+            f"derived_views[{RC023_VIEW_ID}]",
+            len(with_view_id),
+            f"the memory-namespace view must exist exactly once under derived_views.{RC023_VIEW_KEY}",
+            report,
+        )
+        return
+    if set(views) != {RC023_VIEW_KEY}:
+        _rc023_fail(
+            path,
+            "derived_views",
+            sorted(str(key) for key in views),
+            f"only the admitted view key {RC023_VIEW_KEY!r} may be defined; any "
+            "other derived view is a new admission decision",
+            report,
+        )
+    view = _mapping(views.get(RC023_VIEW_KEY))
+    vfield = f"derived_views.{RC023_VIEW_KEY}"
+    _rc023_expect(path, f"{vfield}.id", view.get("id"), RC023_VIEW_ID, report)
+    selector = _mapping(view.get("selector"))
+    _rc023_expect(
+        path,
+        f"{vfield}.selector.class_ref",
+        selector.get("class_ref"),
+        RC023_CLASS_ID,
+        report,
+    )
+    _rc023_expect(
+        path,
+        f"{vfield}.selector.lifecycle_in",
+        selector.get("lifecycle_in"),
+        RC023_VIEW_LIFECYCLES,
+        report,
+    )
+    _rc023_pinned(
+        path,
+        f"{vfield}.output",
+        view.get("output"),
+        {
+            "namespace": RC023_NAMESPACE,
+            "authority_class": "derived",
+            "preserve_fields": RC023_VIEW_PRESERVE_FIELDS,
+            "consumer_may_not_add_unregistered_members": True,
+            "consumer_may_not_remove_required_members": True,
+        },
+        report,
+    )
+
+
+def _evaluate_rc023_registry(docs: dict[str, dict], report: Report) -> None:
+    path = RC023_REGISTRY_PATH
+    registry = docs.get(path)
+    if not isinstance(registry, dict):
+        _rc023_fail(path, "file", "-", "repository registry missing", report)
+        return
+    _rc023_expect(path, "schema", registry.get("schema"), RC023_REGISTRY_SCHEMA, report)
+    _rc023_expect(
+        path,
+        "artifact_id",
+        registry.get("artifact_id"),
+        RC023_REGISTRY_ARTIFACT_ID,
+        report,
+    )
+    _rc023_expect(path, "canonical", registry.get("canonical"), True, report)
+    _rc023_expect(
+        path,
+        "class_catalog_ref",
+        registry.get("class_catalog_ref"),
+        RC023_CLASSES_ARTIFACT_ID,
+        report,
+    )
+    repositories = registry.get("repositories")
+    if not isinstance(repositories, list):
+        _rc023_fail(
+            path,
+            "repositories",
+            repositories,
+            "must be a list of repository entries",
+            report,
+        )
+        return
+    if len(repositories) != RC023_REPOSITORY_COUNT:
+        _rc023_fail(
+            path,
+            "repositories",
+            len(repositories),
+            f"exactly {RC023_REPOSITORY_COUNT} repositories are admitted",
+            report,
+        )
+    seen_ids: dict[str, int] = {}
+    seen_coordinates: dict[tuple[str, str, str], int] = {}
+    for index, entry in enumerate(repositories):
+        field = f"repositories[{index}]"
+        if not isinstance(entry, dict):
+            _rc023_fail(
+                path, field, entry, "repository entry must be a mapping", report
+            )
+            continue
+        rid = entry.get("id")
+        if not isinstance(rid, str) or not rid:
+            _rc023_fail(
+                path, f"{field}.id", rid, "repository id must be a string", report
+            )
+            continue
+        field = f"repositories[{rid}]"
+        seen_ids[rid] = seen_ids.get(rid, 0) + 1
+        coordinate = entry.get("coordinate")
+        if not isinstance(coordinate, dict):
+            _rc023_fail(
+                path,
+                f"{field}.coordinate",
+                coordinate,
+                "coordinate must be a mapping",
+                report,
+            )
+        else:
+            _rc023_expect(
+                path,
+                f"{field}.coordinate.provider",
+                coordinate.get("provider"),
+                RC023_PROVIDER,
+                report,
+            )
+            _rc023_expect(
+                path,
+                f"{field}.coordinate.organization",
+                coordinate.get("organization"),
+                RC023_ORGANIZATION,
+                report,
+            )
+            key = (
+                str(coordinate.get("provider")),
+                str(coordinate.get("organization")),
+                str(coordinate.get("repository")),
+            )
+            seen_coordinates[key] = seen_coordinates.get(key, 0) + 1
+            if rid in RC023_REPOSITORIES:
+                _rc023_expect(
+                    path,
+                    f"{field}.coordinate.repository",
+                    coordinate.get("repository"),
+                    RC023_REPOSITORIES[rid],
+                    report,
+                )
+        lifecycle = entry.get("lifecycle")
+        if lifecycle not in RC023_LIFECYCLES:
+            _rc023_fail(
+                path,
+                f"{field}.lifecycle",
+                lifecycle,
+                f"lifecycle must be one of {list(RC023_LIFECYCLES)}",
+                report,
+            )
+        elif lifecycle != "current":
+            _rc023_fail(
+                path,
+                f"{field}.lifecycle",
+                lifecycle,
+                "every admitted repository is lifecycle current in this release",
+                report,
+            )
+        _rc023_expect(
+            path, f"{field}.class_ref", entry.get("class_ref"), RC023_CLASS_ID, report
+        )
+    for rid, count in sorted(seen_ids.items()):
+        if count > 1:
+            _rc023_fail(
+                path,
+                f"repositories[{rid}].id",
+                count,
+                "repository id is registered more than once",
+                report,
+            )
+        if rid not in RC023_REPOSITORIES:
+            _rc023_fail(
+                path,
+                f"repositories[{rid}].id",
+                rid,
+                "repository is not admitted by this release; admission is an explicit "
+                "semantic decision, never inferred from a name, prefix, or hosting",
+                report,
+            )
+    for rid in sorted(set(RC023_REPOSITORIES) - set(seen_ids)):
+        _rc023_fail(
+            path,
+            f"repositories[{rid}].id",
+            None,
+            "admitted repository is missing from the registry",
+            report,
+        )
+    for key, count in sorted(seen_coordinates.items()):
+        if count > 1:
+            _rc023_fail(
+                path,
+                "repositories[].coordinate",
+                "/".join(key),
+                "provider coordinate is registered more than once",
+                report,
+            )
+    expected_coordinates = {
+        (RC023_PROVIDER, RC023_ORGANIZATION, repo)
+        for repo in RC023_REPOSITORIES.values()
+    }
+    for key in sorted(expected_coordinates - set(seen_coordinates)):
+        _rc023_fail(
+            path,
+            "repositories[].coordinate",
+            "/".join(key),
+            "admitted coordinate is missing from the registry",
+            report,
+        )
+
+
+def _evaluate_rc023(docs: dict[str, dict], report: Report) -> None:
+    _evaluate_rc023_classes(docs, report)
+    _evaluate_rc023_registry(docs, report)
+
+
+def _check_rc023_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    cases = []
+
+    def mutated() -> tuple[dict, dict, dict]:
+        case = copy.deepcopy(docs)
+        return (
+            case,
+            case[RC023_CLASSES_PATH],
+            case[RC023_REGISTRY_PATH],
+        )
+
+    def add(label: str, case: dict, case_path: str, field_name: str) -> None:
+        cases.append((label, case, case_path, field_name))
+
+    def entry(registry: dict, rid: str) -> dict:
+        found, _ = _unique_entry(registry["repositories"], "id", rid)
+        assert found is not None
+        return found
+
+    cp, rp = RC023_CLASSES_PATH, RC023_REGISTRY_PATH
+    cls_field = f"classes.{RC023_CLASS_KEY}"
+    view_field = f"derived_views.{RC023_VIEW_KEY}"
+    # Class catalog identity.
+    case, catalog, _ = mutated()
+    del case[cp]
+    add("class catalog missing", case, cp, "file")
+    for label, key, value in (
+        ("class catalog schema wrong", "schema", "l9.repository-classes/v2"),
+        (
+            "class catalog artifact_id wrong",
+            "artifact_id",
+            "l9.repository-classes/global@2",
+        ),
+        ("class catalog not canonical", "canonical", False),
+    ):
+        case, catalog, _ = mutated()
+        catalog[key] = value
+        add(label, case, cp, key)
+    case, catalog, _ = mutated()
+    catalog["classes"] = []
+    add("classes not a mapping", case, cp, "classes")
+    case, catalog, _ = mutated()
+    del catalog["classes"][RC023_CLASS_KEY]
+    add("l9 class missing", case, cp, f"classes[{RC023_CLASS_ID}]")
+    case, catalog, _ = mutated()
+    catalog["classes"]["l9_again"] = copy.deepcopy(catalog["classes"][RC023_CLASS_KEY])
+    add("l9 class duplicated", case, cp, f"classes[{RC023_CLASS_ID}]")
+    case, catalog, _ = mutated()
+    catalog["classes"]["org_auxiliary"] = {
+        "id": "l9.repository-class/org-auxiliary@1",
+        "status": "current",
+        "organization_membership": "auxiliary",
+    }
+    add("unadmitted class defined beside l9", case, cp, "classes")
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["status"] = "retired"
+    add("l9 class not current", case, cp, f"{cls_field}.status")
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["organization_membership"] = "auxiliary"
+    add("l9 class membership wrong", case, cp, f"{cls_field}.organization_membership")
+    for key, value in (
+        ("namespace", "main"),
+        ("membership", "optional"),
+        ("membership_source", "repository_name"),
+        ("consumer_may_not_independently_add_or_remove_members", False),
+    ):
+        case, catalog, _ = mutated()
+        catalog["classes"][RC023_CLASS_KEY]["obligations"]["memory"][key] = value
+        add(
+            f"memory obligation {key} wrong",
+            case,
+            cp,
+            f"{cls_field}.obligations.memory.{key}",
+        )
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["obligations"]["memory"] = "l9"
+    add("memory obligation not a mapping", case, cp, f"{cls_field}.obligations.memory")
+    for key in ("projection_profile_required", "projection_profile_digest_required"):
+        case, catalog, _ = mutated()
+        catalog["classes"][RC023_CLASS_KEY]["obligations"]["projection"][key] = True
+        add(
+            f"projection obligation reintroduces {key}",
+            case,
+            cp,
+            f"{cls_field}.obligations.projection.{key}",
+        )
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["obligations"]["projection"][
+        "compiler_receipt_required"
+    ] = True
+    add(
+        "projection obligation reintroduces compiler_receipt_required",
+        case,
+        cp,
+        f"{cls_field}.obligations.projection.compiler_receipt_required",
+    )
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["obligations"]["projection"][
+        "source_digest_required"
+    ] = False
+    add(
+        "projection obligation drops source digest",
+        case,
+        cp,
+        f"{cls_field}.obligations.projection.source_digest_required",
+    )
+    case, catalog, _ = mutated()
+    del catalog["classes"][RC023_CLASS_KEY]["obligations"]["projection"][
+        "provenance_required"
+    ]
+    add(
+        "projection obligation missing provenance_required",
+        case,
+        cp,
+        f"{cls_field}.obligations.projection.provenance_required",
+    )
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["obligations"]["identity_materialization"] = {
+        "actor_registry_ref": "l9.actor-registry/global@1"
+    }
+    add(
+        "unadmitted obligation reintroduced",
+        case,
+        cp,
+        f"{cls_field}.obligations.identity_materialization",
+    )
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["prohibitions"].remove(
+        "infer_repository_membership_from_repository_name"
+    )
+    add("prohibition dropped", case, cp, f"{cls_field}.prohibitions")
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["definition"] = (
+        "Any repository hosted under Quantum-L9."
+    )
+    add("class definition rewritten", case, cp, f"{cls_field}.definition")
+    case, catalog, _ = mutated()
+    catalog["catalog_status"]["admitted_classes"].append(
+        "l9.repository-class/org-auxiliary@1"
+    )
+    add(
+        "unadmitted class listed as admitted",
+        case,
+        cp,
+        "catalog_status.admitted_classes",
+    )
+    # Derived memory-namespace view.
+    case, catalog, _ = mutated()
+    catalog["derived_views"] = "l9_memory_namespace"
+    add("derived views not a mapping", case, cp, "derived_views")
+    case, catalog, _ = mutated()
+    del catalog["derived_views"][RC023_VIEW_KEY]
+    add("memory-namespace view missing", case, cp, f"derived_views[{RC023_VIEW_ID}]")
+    case, catalog, _ = mutated()
+    catalog["derived_views"]["again"] = copy.deepcopy(
+        catalog["derived_views"][RC023_VIEW_KEY]
+    )
+    add("memory-namespace view duplicated", case, cp, f"derived_views[{RC023_VIEW_ID}]")
+    case, catalog, _ = mutated()
+    catalog["derived_views"]["l9_everything"] = {
+        "id": "l9.repository-view/everything@1",
+        "selector": {"class_ref": RC023_CLASS_ID},
+        "output": {"namespace": "main", "authority_class": "derived"},
+    }
+    add("unrelated extra derived view", case, cp, "derived_views")
+    case, catalog, _ = mutated()
+    catalog["derived_views"][RC023_VIEW_KEY]["selector"]["class_ref"] = (
+        "l9.repository-class/org-auxiliary@1"
+    )
+    add("view selects a different class", case, cp, f"{view_field}.selector.class_ref")
+    case, catalog, _ = mutated()
+    catalog["derived_views"][RC023_VIEW_KEY]["selector"]["lifecycle_in"] = ["current"]
+    add(
+        "view lifecycle selector narrowed",
+        case,
+        cp,
+        f"{view_field}.selector.lifecycle_in",
+    )
+    case, catalog, _ = mutated()
+    catalog["derived_views"][RC023_VIEW_KEY]["output"]["namespace"] = "default"
+    add("view namespace wrong", case, cp, f"{view_field}.output.namespace")
+    case, catalog, _ = mutated()
+    catalog["derived_views"][RC023_VIEW_KEY]["output"]["authority_class"] = "canonical"
+    add(
+        "view claims canonical authority",
+        case,
+        cp,
+        f"{view_field}.output.authority_class",
+    )
+    case, catalog, _ = mutated()
+    catalog["derived_views"][RC023_VIEW_KEY]["output"]["preserve_fields"] = [
+        "id",
+        "coordinate",
+    ]
+    add("view drops preserved fields", case, cp, f"{view_field}.output.preserve_fields")
+    case, catalog, _ = mutated()
+    catalog["derived_views"][RC023_VIEW_KEY]["output"][
+        "consumer_may_not_add_unregistered_members"
+    ] = False
+    add(
+        "view allows consumer membership expansion",
+        case,
+        cp,
+        f"{view_field}.output.consumer_may_not_add_unregistered_members",
+    )
+    case, catalog, _ = mutated()
+    catalog["derived_views"][RC023_VIEW_KEY]["output"][
+        "consumer_may_not_remove_required_members"
+    ] = False
+    add(
+        "view allows consumer membership removal",
+        case,
+        cp,
+        f"{view_field}.output.consumer_may_not_remove_required_members",
+    )
+    # Registry identity.
+    case, _, registry = mutated()
+    del case[rp]
+    add("registry missing", case, rp, "file")
+    for label, key, value in (
+        ("registry schema wrong", "schema", "l9.repository-registry/v2"),
+        (
+            "registry artifact_id wrong",
+            "artifact_id",
+            "l9.repository-registry/global@2",
+        ),
+        ("registry not canonical", "canonical", False),
+        (
+            "registry class catalog ref wrong",
+            "class_catalog_ref",
+            "l9.repository-classes/global@2",
+        ),
+    ):
+        case, _, registry = mutated()
+        registry[key] = value
+        add(label, case, rp, key)
+    case, _, registry = mutated()
+    registry["repositories"] = {"id": "dot-github"}
+    add("repositories not a list", case, rp, "repositories")
+    # Census pins.
+    case, _, registry = mutated()
+    registry["repositories"].append(
+        {
+            "id": "gate-sdk",
+            "coordinate": {
+                "provider": "github",
+                "organization": "Quantum-L9",
+                "repository": "Gate_SDK",
+            },
+            "lifecycle": "current",
+            "class_ref": RC023_CLASS_ID,
+        }
+    )
+    add("extra repository admitted", case, rp, "repositories[gate-sdk].id")
+    case, _, registry = mutated()
+    registry["repositories"].append(
+        {
+            "id": "l9-anything",
+            "coordinate": {
+                "provider": "github",
+                "organization": "Quantum-L9",
+                "repository": "l9-anything",
+            },
+            "lifecycle": "current",
+            "class_ref": RC023_CLASS_ID,
+        }
+    )
+    add(
+        "l9-prefixed repository not admitted by name",
+        case,
+        rp,
+        "repositories[l9-anything].id",
+    )
+    case, _, registry = mutated()
+    registry["repositories"].remove(entry(registry, "l9-goose"))
+    add("admitted repository missing", case, rp, "repositories[l9-goose].id")
+    case, _, registry = mutated()
+    entry(registry, "l9-ops-mcp")["coordinate"]["repository"] = "l9-ops-mcp"
+    add(
+        "coordinate case changed",
+        case,
+        rp,
+        "repositories[l9-ops-mcp].coordinate.repository",
+    )
+    case, _, registry = mutated()
+    entry(registry, "cursor-governance")["coordinate"]["repository"] = "Cursor-Gov"
+    add(
+        "coordinate renamed",
+        case,
+        rp,
+        "repositories[cursor-governance].coordinate.repository",
+    )
+    case, _, registry = mutated()
+    entry(registry, "l9-harness")["coordinate"]["organization"] = "quantum-l9"
+    add(
+        "organization case changed",
+        case,
+        rp,
+        "repositories[l9-harness].coordinate.organization",
+    )
+    case, _, registry = mutated()
+    entry(registry, "l9-harness")["coordinate"]["provider"] = "gitlab"
+    add("provider changed", case, rp, "repositories[l9-harness].coordinate.provider")
+    case, _, registry = mutated()
+    entry(registry, "l9-harness")["coordinate"] = "Quantum-L9/l9-harness"
+    add("coordinate not a mapping", case, rp, "repositories[l9-harness].coordinate")
+    case, _, registry = mutated()
+    registry["repositories"].append(copy.deepcopy(entry(registry, "l9-deploy")))
+    add("repository id duplicated", case, rp, "repositories[l9-deploy].id")
+    case, _, registry = mutated()
+    duplicate = copy.deepcopy(entry(registry, "l9-deploy"))
+    duplicate["id"] = "l9-deploy-again"
+    registry["repositories"].append(duplicate)
+    add("provider coordinate duplicated", case, rp, "repositories[].coordinate")
+    case, _, registry = mutated()
+    entry(registry, "l9-goose")["class_ref"] = "l9.repository-class/external-fork@1"
+    add("wrong class", case, rp, "repositories[l9-goose].class_ref")
+    case, _, registry = mutated()
+    del entry(registry, "l9-wip")["class_ref"]
+    add("class_ref missing", case, rp, "repositories[l9-wip].class_ref")
+    case, _, registry = mutated()
+    entry(registry, "l9-wip")["lifecycle"] = "archived"
+    add("unrecognized lifecycle", case, rp, "repositories[l9-wip].lifecycle")
+    case, _, registry = mutated()
+    entry(registry, "l9-wip")["lifecycle"] = "retired"
+    add("admitted repository not current", case, rp, "repositories[l9-wip].lifecycle")
+    case, _, registry = mutated()
+    registry["repositories"][0] = "dot-github"
+    add("repository entry not a mapping", case, rp, "repositories[0]")
+    case, _, registry = mutated()
+    del registry["repositories"][0]["id"]
+    add("repository id missing", case, rp, "repositories[0].id")
+    for label, candidate, case_path, field_name in cases:
+        candidate_report = Report()
+        try:
+            _evaluate_rc023(candidate, candidate_report)
+        except (AttributeError, KeyError, TypeError, ValueError) as error:
+            # A malformed shape must be a located failure, never a crash.
+            report.fail(
+                "RC-023",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case raised {type(error).__name__} instead of failing closed",
+            )
+            continue
+        prefix = f"FAIL RC-023 {case_path} {field_name}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-023",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {case_path} {field_name}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-023 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-023-NEG",
+            f"{len(cases)} repository class / registry closure negative cases fail "
+            "closed at their intended field",
+        )
+
+
+def check_rc023(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc023(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-023",
+            f"{RC023_CLASS_ID} is the single admitted repository class and its whole "
+            "declaration matches the pinned bytes (current, memory namespace "
+            f"{RC023_NAMESPACE}, membership required from the resolved class, projection "
+            f"obligation naming no profile or compiler receipt); {RC023_VIEW_ID} selects it over current/superseded/retired and "
+            f"derives namespace {RC023_NAMESPACE} preserving id, coordinate, lifecycle, "
+            f"class_ref with no consumer membership expansion or removal; the registry "
+            f"holds exactly the {RC023_REPOSITORY_COUNT} admitted repositories with "
+            "unique ids and unique case-sensitive github/Quantum-L9 coordinates, every "
+            "one current and assigned that class",
+        )
+        _check_rc023_negative_cases(docs, report)
+
+
 def check_rc006(docs: dict[str, dict], report: Report) -> None:
     registry_path = "semantics/canonical_sources.yaml"
     manifest_path = "semantics/generic_compiler_manifest.yaml"
@@ -5850,6 +6704,7 @@ def main(argv: list[str]) -> int:
     check_rc020(docs, report)
     check_rc021(docs, report)
     check_rc022(docs, report)
+    check_rc023(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:

@@ -8,6 +8,146 @@ authority:
 canonical_source:
   format: yaml
   artifact: repository_classes.yaml
-purpose: Name the canonical upstream coordinate for the organization repository class catalog so that projection
-  source class repository_classes resolves to one registered ledger. No repository class is admitted by this
-  ledger; class content remains an explicit Unknown until separately admitted.
+purpose: >
+  Define the canonical organization-level RepositoryClass coordinates and the
+  organization obligations that follow from those classes. RepositoryClass is
+  an organization-governance classification. It does not replace ProductKind,
+  repository birth profile, domain semantic ownership, runtime admission, or
+  implementation-specific configuration. This catalog admits exactly the
+  classes listed under catalog_status.admitted_classes; every other class is an
+  explicit Unknown until separately admitted.
+global_rules:
+  repository_class_is_explicit: true
+  repository_class_is_not_inferred_from_repository_name: true
+  repository_class_is_not_inferred_from_repository_prefix: true
+  repository_class_is_not_inferred_from_organization_hosting: true
+  repository_class_is_not_inferred_from_repository_shape: true
+  repository_class_is_not_inferred_from_language: true
+  repository_class_is_not_inferred_from_product_kind: true
+  repository_class_is_not_inferred_from_birth_profile: true
+  every_registered_repository_has_exactly_one_primary_class: true
+  class_assignment_must_resolve_through_repository_registry: true
+  unknown_or_unresolved_class_fails_closed: true
+  repository_class_does_not_transfer_domain_semantic_ownership: true
+  repository_class_does_not_grant_execution_authority: true
+  repository_class_does_not_define_runtime_state: true
+  product_kind_is_orthogonal_to_repository_class: true
+  birth_profile_is_orthogonal_to_repository_class: true
+  multiple_birth_profiles_may_exist_within_one_repository_class: true
+  multiple_product_kinds_may_exist_within_one_repository_class: true
+  organization_level_canonical_semantics_must_be_consumed_by_reference_or_admitted_projection: true
+  generated_projection_is_non_authoritative: true
+  generated_projection_must_preserve_provenance: true
+  generated_projection_must_not_expand_authority: true
+  repository_memory_membership_is_derived_from_repository_class: true
+  repository_content_authority_remains_with_source_repository: true
+  memory_representation_does_not_become_repository_authority: true
+does_not_own:
+  - repository_domain_semantics
+  - product_kind
+  - product_release_admission
+  - repository_birth_profile
+  - repository_seed_materialization
+  - executable_ci_implementation
+  - runtime_health
+  - runtime_readiness
+  - credentials
+  - tokens
+  - signing_keys
+  - deployment_state
+  - ingestion_progress
+  - memory_records
+  - memory_runtime_state
+class_statuses:
+  current: >
+    Admitted RepositoryClass available for current repository registration.
+  superseded: >
+    RepositoryClass retained for historical resolution but replaced for new
+    registrations.
+  retired: >
+    RepositoryClass retained only for historical interpretation.
+classes:
+  l9:
+    id: l9.repository-class/l9@1
+    status: current
+    definition: >
+      A repository admitted as part of the governed L9 organization corpus.
+      Its repository identity and organization participation are governed by
+      Quantum-L9 organization law. Where organization-level canonical semantic
+      authority exists, the repository consumes that authority by reference or
+      admitted projection instead of maintaining a competing local definition.
+    organization_membership: l9
+    obligations:
+      canonical_authority_consumption:
+        when_global_canonical_authority_exists: reference_or_admitted_projection
+        local_competing_canonical_copy: forbidden
+        local_domain_semantics_within_repository_authority: allowed
+      projection:
+        generated_materialization_authority_class: derived
+        manual_edit_of_generated_projection: forbidden
+        source_coordinate_required: true
+        source_digest_required: true
+        provenance_required: true
+        stale_projection_must_not_be_silently_consumed: true
+        authority_expansion: forbidden
+      memory:
+        namespace: l9
+        membership: required
+        membership_source: resolved_repository_class
+        content_selection_owned_by_memory_plane: true
+        content_authority_remains_with_source_repository: true
+        memory_representation_authority_class: derived
+        consumer_may_not_independently_add_or_remove_members: true
+        lifecycle_semantics:
+          current: current_source
+          superseded: historical_source
+          retired: historical_source
+    prohibitions:
+      - redefine_existing_global_canonical_semantics_locally
+      - treat_generated_projection_as_canonical_authority
+      - treat_memory_representation_as_source_repository_authority
+      - infer_repository_membership_from_repository_name
+      - infer_repository_membership_from_repository_prefix
+      - infer_repository_membership_from_organization_hosting
+      - infer_product_kind_from_repository_class
+      - infer_birth_profile_from_repository_class
+      - expand_authority_through_projection
+resolution:
+  repository_registry_ref: l9.repository-registry/global@1
+  class_ref_field: class_ref
+  exactly_one_class_required: true
+  unresolved_class_behavior: fail_closed
+  unadmitted_class_behavior: fail_closed
+derived_views:
+  l9_memory_namespace:
+    id: l9.repository-view/memory-namespace-l9@1
+    operation: resolution
+    inputs:
+      repository_registry_ref: l9.repository-registry/global@1
+      repository_classes_ref: l9.repository-classes/global@1
+    selector:
+      class_ref: l9.repository-class/l9@1
+      lifecycle_in:
+        - current
+        - superseded
+        - retired
+    output:
+      namespace: l9
+      authority_class: derived
+      preserve_fields:
+        - id
+        - coordinate
+        - lifecycle
+        - class_ref
+      lifecycle_semantics:
+        current: current_source
+        superseded: historical_source
+        retired: historical_source
+      membership_is_exhaustive_for_matching_registry_entries: true
+      consumer_may_not_add_unregistered_members: true
+      consumer_may_not_remove_required_members: true
+      repository_content_is_not_copied_into_this_authority_artifact: true
+catalog_status:
+  admitted_classes:
+    - l9.repository-class/l9@1
+  unadmitted_class_assignment_behavior: fail_closed
