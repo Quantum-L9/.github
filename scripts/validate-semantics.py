@@ -5703,7 +5703,31 @@ RC023_VIEW_PRESERVE_FIELDS = ["id", "coordinate", "lifecycle", "class_ref"]
 RC023_LIFECYCLES = ("current", "superseded", "retired")
 RC023_PROVIDER = "github"
 RC023_ORGANIZATION = "Quantum-L9"
-# The memory obligation of the admitted class, pinned to its admitted bytes.
+# The admitted class declaration, pinned to its admitted bytes (the RC-021
+# style). Every key under classes.l9 is law: a key that drifts, disappears, or
+# appears beside these fails as a new admission decision. The projection
+# obligation deliberately names no projection profile and no compiler
+# receipt: whether a derived view is realized through a canonical profile or
+# a declared selector contract is owned by l9.contract/projection@1
+# (`declared_projection_profile_or_selector_contract`), and the admitted
+# memory-namespace view is realized by a selector contract plus a
+# deterministic downstream projector with a projection receipt.
+RC023_CLASS_DEFINITION = (
+    "A repository admitted as part of the governed L9 organization corpus. Its "
+    "repository identity and organization participation are governed by Quantum-L9 "
+    "organization law. Where organization-level canonical semantic authority exists, "
+    "the repository consumes that authority by reference or admitted projection instead "
+    "of maintaining a competing local definition.\n"
+)
+RC023_PROJECTION_OBLIGATION = {
+    "generated_materialization_authority_class": "derived",
+    "manual_edit_of_generated_projection": "forbidden",
+    "source_coordinate_required": True,
+    "source_digest_required": True,
+    "provenance_required": True,
+    "stale_projection_must_not_be_silently_consumed": True,
+    "authority_expansion": "forbidden",
+}
 RC023_MEMORY_OBLIGATION = {
     "namespace": RC023_NAMESPACE,
     "membership": "required",
@@ -5712,6 +5736,37 @@ RC023_MEMORY_OBLIGATION = {
     "content_authority_remains_with_source_repository": True,
     "memory_representation_authority_class": "derived",
     "consumer_may_not_independently_add_or_remove_members": True,
+    "lifecycle_semantics": {
+        "current": "current_source",
+        "superseded": "historical_source",
+        "retired": "historical_source",
+    },
+}
+RC023_CLASS_DECLARATION = {
+    "id": RC023_CLASS_ID,
+    "status": "current",
+    "definition": RC023_CLASS_DEFINITION,
+    "organization_membership": RC023_NAMESPACE,
+    "obligations": {
+        "canonical_authority_consumption": {
+            "when_global_canonical_authority_exists": "reference_or_admitted_projection",
+            "local_competing_canonical_copy": "forbidden",
+            "local_domain_semantics_within_repository_authority": "allowed",
+        },
+        "projection": RC023_PROJECTION_OBLIGATION,
+        "memory": RC023_MEMORY_OBLIGATION,
+    },
+    "prohibitions": [
+        "redefine_existing_global_canonical_semantics_locally",
+        "treat_generated_projection_as_canonical_authority",
+        "treat_memory_representation_as_source_repository_authority",
+        "infer_repository_membership_from_repository_name",
+        "infer_repository_membership_from_repository_prefix",
+        "infer_repository_membership_from_organization_hosting",
+        "infer_product_kind_from_repository_class",
+        "infer_birth_profile_from_repository_class",
+        "expand_authority_through_projection",
+    ],
 }
 # The explicit census admitted by v3.15.0: registry id -> case-sensitive
 # GitHub repository coordinate under Quantum-L9. Thirty-two entries, every
@@ -5782,6 +5837,35 @@ def _rc023_pinned(
         _rc023_expect(path, f"{field}.{key}", actual.get(key), value, report)
 
 
+def _rc023_exact(
+    path: str, field: str, actual: object, expected: dict, report: Report
+) -> None:
+    """Fail at each key whose value differs from the pinned mapping, recursively.
+
+    A key missing from ``actual`` fails at that key; a key ``expected`` does
+    not admit fails at that key as well, so an obligation cannot be added or
+    dropped without a new admission decision.
+    """
+    if not isinstance(actual, dict):
+        _rc023_fail(path, field, actual, "must be a mapping", report)
+        return
+    for key in sorted(set(expected) | set(actual), key=str):
+        if key not in expected:
+            _rc023_fail(
+                path,
+                f"{field}.{key}",
+                actual[key],
+                "key is not admitted here; adding an obligation is a new admission decision",
+                report,
+            )
+        elif isinstance(expected[key], dict):
+            _rc023_exact(path, f"{field}.{key}", actual.get(key), expected[key], report)
+        else:
+            _rc023_expect(
+                path, f"{field}.{key}", actual.get(key), expected[key], report
+            )
+
+
 def _evaluate_rc023_classes(docs: dict[str, dict], report: Report) -> None:
     path = RC023_CLASSES_PATH
     catalog = docs.get(path)
@@ -5822,23 +5906,9 @@ def _evaluate_rc023_classes(docs: dict[str, dict], report: Report) -> None:
             "other class is a new admission decision",
             report,
         )
-    cls = _mapping(classes.get(RC023_CLASS_KEY))
     field = f"classes.{RC023_CLASS_KEY}"
-    _rc023_expect(path, f"{field}.id", cls.get("id"), RC023_CLASS_ID, report)
-    _rc023_expect(path, f"{field}.status", cls.get("status"), "current", report)
-    _rc023_expect(
-        path,
-        f"{field}.organization_membership",
-        cls.get("organization_membership"),
-        RC023_NAMESPACE,
-        report,
-    )
-    _rc023_pinned(
-        path,
-        f"{field}.obligations.memory",
-        _mapping(cls.get("obligations")).get("memory"),
-        RC023_MEMORY_OBLIGATION,
-        report,
+    _rc023_exact(
+        path, field, classes.get(RC023_CLASS_KEY), RC023_CLASS_DECLARATION, report
     )
     admitted = _mapping(catalog.get("catalog_status")).get("admitted_classes")
     _rc023_expect(
@@ -6148,6 +6218,65 @@ def _check_rc023_negative_cases(docs: dict[str, dict], report: Report) -> None:
     case, catalog, _ = mutated()
     catalog["classes"][RC023_CLASS_KEY]["obligations"]["memory"] = "l9"
     add("memory obligation not a mapping", case, cp, f"{cls_field}.obligations.memory")
+    for key in ("projection_profile_required", "projection_profile_digest_required"):
+        case, catalog, _ = mutated()
+        catalog["classes"][RC023_CLASS_KEY]["obligations"]["projection"][key] = True
+        add(
+            f"projection obligation reintroduces {key}",
+            case,
+            cp,
+            f"{cls_field}.obligations.projection.{key}",
+        )
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["obligations"]["projection"][
+        "compiler_receipt_required"
+    ] = True
+    add(
+        "projection obligation reintroduces compiler_receipt_required",
+        case,
+        cp,
+        f"{cls_field}.obligations.projection.compiler_receipt_required",
+    )
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["obligations"]["projection"][
+        "source_digest_required"
+    ] = False
+    add(
+        "projection obligation drops source digest",
+        case,
+        cp,
+        f"{cls_field}.obligations.projection.source_digest_required",
+    )
+    case, catalog, _ = mutated()
+    del catalog["classes"][RC023_CLASS_KEY]["obligations"]["projection"][
+        "provenance_required"
+    ]
+    add(
+        "projection obligation missing provenance_required",
+        case,
+        cp,
+        f"{cls_field}.obligations.projection.provenance_required",
+    )
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["obligations"]["identity_materialization"] = {
+        "actor_registry_ref": "l9.actor-registry/global@1"
+    }
+    add(
+        "unadmitted obligation reintroduced",
+        case,
+        cp,
+        f"{cls_field}.obligations.identity_materialization",
+    )
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["prohibitions"].remove(
+        "infer_repository_membership_from_repository_name"
+    )
+    add("prohibition dropped", case, cp, f"{cls_field}.prohibitions")
+    case, catalog, _ = mutated()
+    catalog["classes"][RC023_CLASS_KEY]["definition"] = (
+        "Any repository hosted under Quantum-L9."
+    )
+    add("class definition rewritten", case, cp, f"{cls_field}.definition")
     case, catalog, _ = mutated()
     catalog["catalog_status"]["admitted_classes"].append(
         "l9.repository-class/org-auxiliary@1"
@@ -6384,9 +6513,10 @@ def check_rc023(docs: dict[str, dict], report: Report) -> None:
     if len(report.failures) == before:
         report.ok(
             "RC-023",
-            f"{RC023_CLASS_ID} is the single admitted repository class (current, "
-            f"memory namespace {RC023_NAMESPACE}, membership required from the resolved "
-            f"class); {RC023_VIEW_ID} selects it over current/superseded/retired and "
+            f"{RC023_CLASS_ID} is the single admitted repository class and its whole "
+            "declaration matches the pinned bytes (current, memory namespace "
+            f"{RC023_NAMESPACE}, membership required from the resolved class, projection "
+            "obligation naming no profile or compiler receipt); {RC023_VIEW_ID} selects it over current/superseded/retired and "
             f"derives namespace {RC023_NAMESPACE} preserving id, coordinate, lifecycle, "
             f"class_ref with no consumer membership expansion or removal; the registry "
             f"holds exactly the {RC023_REPOSITORY_COUNT} admitted repositories with "

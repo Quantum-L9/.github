@@ -87,19 +87,9 @@ classes:
         manual_edit_of_generated_projection: forbidden
         source_coordinate_required: true
         source_digest_required: true
-        projection_profile_required: true
-        projection_profile_digest_required: true
         provenance_required: true
-        compiler_receipt_required: true
         stale_projection_must_not_be_silently_consumed: true
         authority_expansion: forbidden
-      identity_materialization:
-        actor_registry_ref: l9.actor-registry/global@1
-        surface_registry_ref: l9.surface-registry/global@1
-        actor_materialization_mode: canonical_reference_or_projection
-        surface_materialization_mode: canonical_reference_or_projection
-        local_actor_redefinition: forbidden
-        local_surface_redefinition: forbidden
       memory:
         namespace: l9
         membership: required
@@ -112,11 +102,6 @@ classes:
           current: current_source
           superseded: historical_source
           retired: historical_source
-      governance:
-        organization_governance_applies: true
-        birth_profile_source: policies/repo-classes.yml
-        birth_profile_relation: orthogonal
-        domain_authority_remains_with_repository_owner: true
     prohibitions:
       - redefine_existing_global_canonical_semantics_locally
       - treat_generated_projection_as_canonical_authority
