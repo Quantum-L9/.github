@@ -2001,9 +2001,13 @@ METACOGNITION_DENIED = {
 }
 # The Plan Keeper's admitted permissions, exactly. An allowlist, not a
 # blocklist: any other grant is authority self-expansion and fails closed.
+# v3.19.0 (ADR-018) admits emission of the planning episode and the revision
+# candidate; RC-026 requires both and keeps them zero-authority.
 PLAN_KEEPER_MAY = {
     "revise_strategic_plan_within_granted_strategic_authority",
     "consume_planning_cognition_lessons",
+    "emit_strategic_planning_episode",
+    "emit_strategic_plan_revision_candidate",
 }
 PLAN_KEEPER_MAY_NOT = {
     "acquire_truth_source_ownership_by_consuming_projections",
@@ -2020,14 +2024,17 @@ METACOGNITION_MAY_NOT = {
 }
 # The Reasoner's admitted permissions, exactly. An allowlist, not a blocklist:
 # any other grant (edit, approve, grant, ...) fails closed.
+# v3.19.0 (ADR-018) admits emission of the advisory metacognitive analysis.
 METACOGNITION_MAY = {
     "analyze_plan_keeper_reasoning_episodes",
     "compare_planning_reasoning_expectations_outcomes_and_revisions",
     "identify_recurring_planning_reasoning_strengths_and_failure_patterns",
     "emit_planning_cognition_lessons_for_plan_keeper",
+    "emit_strategic_plan_metacognitive_analysis",
 }
-# Model sections admitted by v3.8.0. Anything else (plan graph, runtime,
-# prompts, actor bindings, capabilities, artifact classes) is out of scope.
+# Model sections admitted by v3.8.0, plus the reasoning_artifacts anchors
+# admitted by v3.19.0 (ADR-018). Anything else (plan graph, runtime, prompts,
+# actor bindings, capabilities, artifact classes) is out of scope.
 STRATEGY_MODEL_KEYS = {
     "schema",
     "artifact_id",
@@ -2039,6 +2046,7 @@ STRATEGY_MODEL_KEYS = {
     "plane",
     "global_rules",
     "concepts",
+    "reasoning_artifacts",
     "roles",
     "authority_separation",
 }
@@ -3412,7 +3420,17 @@ PLAN_REUSED_CONCEPTS = {
     "strategic_intent": "strategic_cognition_model.yaml#concepts.strategic_intent",
 }
 PLAN_CLOSURE = "affected_strategic_closure"
-PLAN_CLOSURE_KEYS = {"definition", "purpose", "may_not"}
+# v3.19.0 (ADR-018) binds the closure to its derived representation schema
+# while keeping the closure algorithm undefined here; RC-026 pins the values.
+PLAN_CLOSURE_KEYS = {
+    "definition",
+    "purpose",
+    "may_not",
+    "representation_schema_ref",
+    "authority_class",
+    "authoritative",
+    "representation_does_not_define_closure_algorithm",
+}
 PLAN_CLOSURE_MAY_NOT = {
     "decide_strategy",
     "modify_strategic_plan",
