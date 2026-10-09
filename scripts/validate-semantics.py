@@ -8352,36 +8352,43 @@ RC027_PROBE_CONTRACT_LEDGER = "semantics/product_kinds.yaml"
 RC027_PROBE_INVARIANT_LEDGER = "semantics/strategic_plan_model.yaml"
 
 
-def _rc027_declared_ids(docs: dict[str, dict], path: str, collection: str) -> set[str]:
-    entries = _list(_mapping(docs.get(path)).get(collection))
-    return {
-        str(_mapping(entry).get("id"))
-        for entry in entries
-        if isinstance(_mapping(entry).get("id"), str)
-    }
+def _rc027_declared_ids(
+    docs: dict[str, dict], path: str, collection: str, report: Report
+) -> set[str]:
+    """Ids declared exactly once in ``path`` ``collection``.
+
+    A missing or duplicate id is reported here: a reference can only resolve
+    to exactly one canonical entry, so an ambiguous coordinate is a closure
+    failure, not a resolved one.
+    """
+    declared: set[str] = set()
+    for index, entry in enumerate(_list(_mapping(docs.get(path)).get(collection))):
+        entry_id = _mapping(entry).get("id")
+        label = f"{collection}[{index}].id"
+        if not isinstance(entry_id, str) or not entry_id:
+            report.fail(
+                "RC-027",
+                path,
+                label,
+                entry_id,
+                "catalog entry declares no string id; no reference can resolve to it",
+            )
+        elif entry_id in declared:
+            report.fail(
+                "RC-027",
+                path,
+                label,
+                entry_id,
+                "duplicate catalog id; a reference to it would be ambiguous",
+            )
+        else:
+            declared.add(entry_id)
+    return declared
 
 
-def _evaluate_rc027(docs: dict[str, dict], report: Report) -> int:
-    invariant_ids = _rc027_declared_ids(docs, INVARIANTS_PATH, "invariants")
-    contract_ids = _rc027_declared_ids(docs, CONTRACTS_PATH, "contracts")
-    if not invariant_ids:
-        report.fail(
-            "RC-027",
-            INVARIANTS_PATH,
-            "invariants",
-            None,
-            "invariant catalog declares no ids; references cannot be resolved",
-        )
-    if not contract_ids:
-        report.fail(
-            "RC-027",
-            CONTRACTS_PATH,
-            "contracts",
-            None,
-            "contract catalog declares no ids; references cannot be resolved",
-        )
-    if not invariant_ids or not contract_ids:
-        return 0
+def _rc027_contract_citations(
+    docs: dict[str, dict], invariant_ids: set[str], report: Report
+) -> int:
     resolved = 0
     for index, entry in enumerate(
         _list(_mapping(docs.get(CONTRACTS_PATH)).get("contracts"))
@@ -8409,39 +8416,89 @@ def _evaluate_rc027(docs: dict[str, dict], report: Report) -> int:
                     ref,
                     "contract cites an invariant that invariants.yaml does not declare",
                 )
-    catalogs = (
-        ("contracts", contract_ids, "contract"),
-        ("invariants", invariant_ids, "invariant"),
-    )
-    for path, doc in sorted(docs.items()):
-        governed = _mapping(doc).get(GOVERNED_BY_FIELD)
-        if not isinstance(governed, dict):
+    return resolved
+
+
+def _rc027_governed_by(
+    path: str,
+    doc: dict,
+    catalogs: tuple[tuple[str, set[str], str], ...],
+    report: Report,
+) -> int:
+    """Resolve one ledger's ``governed_by`` reference lists; absent is legal."""
+    if GOVERNED_BY_FIELD not in doc:
+        return 0
+    governed = doc.get(GOVERNED_BY_FIELD)
+    if not isinstance(governed, dict):
+        report.fail(
+            "RC-027",
+            path,
+            GOVERNED_BY_FIELD,
+            governed,
+            f"{GOVERNED_BY_FIELD} must be a mapping; a present non-mapping value "
+            "drops every governing reference",
+        )
+        return 0
+    resolved = 0
+    for field, declared, kind in catalogs:
+        if field not in governed:
             continue
-        for field, declared, kind in catalogs:
-            if field not in governed:
-                continue
-            refs = governed.get(field)
-            label = f"{GOVERNED_BY_FIELD}.{field}"
-            if not isinstance(refs, list):
+        refs = governed.get(field)
+        label = f"{GOVERNED_BY_FIELD}.{field}"
+        if not isinstance(refs, list):
+            report.fail(
+                "RC-027",
+                path,
+                label,
+                refs,
+                f"{label} must be a list of declared {kind} ids",
+            )
+            continue
+        for ref in refs:
+            if isinstance(ref, str) and ref in declared:
+                resolved += 1
+            else:
                 report.fail(
                     "RC-027",
                     path,
                     label,
-                    refs,
-                    f"{label} must be a list of declared {kind} ids",
+                    ref,
+                    f"ledger is governed by a {kind} that the canonical catalog does not declare",
                 )
-                continue
-            for ref in refs:
-                if isinstance(ref, str) and ref in declared:
-                    resolved += 1
-                else:
-                    report.fail(
-                        "RC-027",
-                        path,
-                        label,
-                        ref,
-                        f"ledger is governed by a {kind} that the canonical catalog does not declare",
-                    )
+    return resolved
+
+
+def _evaluate_rc027(docs: dict[str, dict], report: Report) -> int:
+    before = len(report.failures)
+    invariant_ids = _rc027_declared_ids(docs, INVARIANTS_PATH, "invariants", report)
+    contract_ids = _rc027_declared_ids(docs, CONTRACTS_PATH, "contracts", report)
+    if not invariant_ids:
+        report.fail(
+            "RC-027",
+            INVARIANTS_PATH,
+            "invariants",
+            None,
+            "invariant catalog declares no ids; references cannot be resolved",
+        )
+    if not contract_ids:
+        report.fail(
+            "RC-027",
+            CONTRACTS_PATH,
+            "contracts",
+            None,
+            "contract catalog declares no ids; references cannot be resolved",
+        )
+    if len(report.failures) != before:
+        # An empty, duplicated, or id-less catalog cannot resolve anything
+        # unambiguously; do not count references against it.
+        return 0
+    catalogs = (
+        ("contracts", contract_ids, "contract"),
+        ("invariants", invariant_ids, "invariant"),
+    )
+    resolved = _rc027_contract_citations(docs, invariant_ids, report)
+    for path, doc in sorted(docs.items()):
+        resolved += _rc027_governed_by(path, _mapping(doc), catalogs, report)
     return resolved
 
 
@@ -8496,6 +8553,41 @@ def _check_rc027_negative_cases(docs: dict[str, dict], report: Report) -> None:
             case,
             RC027_PROBE_CONTRACT_LEDGER,
             f"{GOVERNED_BY_FIELD}.contracts",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    case[RC027_PROBE_CONTRACT_LEDGER][GOVERNED_BY_FIELD] = "invalid"
+    cases.append(
+        (
+            "governed_by replaced by a scalar",
+            case,
+            RC027_PROBE_CONTRACT_LEDGER,
+            GOVERNED_BY_FIELD,
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    contracts = case[CONTRACTS_PATH]["contracts"]
+    contracts.append(copy.deepcopy(contracts[0]))
+    cases.append(
+        (
+            "duplicate contract id admitted",
+            case,
+            CONTRACTS_PATH,
+            f"contracts[{len(contracts) - 1}].id",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    invariants = case[INVARIANTS_PATH]["invariants"]
+    invariants.append(copy.deepcopy(invariants[0]))
+    cases.append(
+        (
+            "duplicate invariant id admitted",
+            case,
+            INVARIANTS_PATH,
+            f"invariants[{len(invariants) - 1}].id",
         )
     )
 
