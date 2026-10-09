@@ -234,6 +234,12 @@ sources:
   canonical: true
   projection_allowed: true
   derivation_allowed: false
+- id: l9.source/strategic-plan-graph-schema@1
+  path: semantics/strategic_plan_graph.schema.yaml
+  format: yaml
+  canonical: true
+  projection_allowed: true
+  derivation_allowed: false
 rules:
   canonical_sources_must_be_registered: true
   source_ids_are_immutable: true
