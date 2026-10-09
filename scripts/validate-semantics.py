@@ -6915,6 +6915,198 @@ def check_rc024(docs: dict[str, dict], report: Report) -> None:
         )
         _check_rc024_negative_cases(docs, report)
 
+
+# RC-025 Federated authority graphs + Strategic Plan Graph representation closure.
+PLAN_GRAPH_SCHEMA_PATH = "semantics/strategic_plan_graph.schema.yaml"
+PLAN_GRAPH_SCHEMA_ID = "l9.schema/strategic-plan-graph@1"
+PLAN_GRAPH_SOURCE_ID = "l9.source/strategic-plan-graph-schema@1"
+PLAN_GRAPH_SCOPE = "l9_global_strategic_plan_graph_schema"
+FEDERATED_GRAPH_PATTERN_ID = "l9.pattern/federated-authority-graphs@1"
+PLAN_GRAPH_REQUIRED = {
+    "schema", "plan_ref", "revision_ref", "strategic_authority_ref", "scope",
+    "strategic_intent_refs", "objective_refs", "nodes", "relations", "provenance", "graph_digest",
+}
+PLAN_GRAPH_NODE_KINDS = {
+    "strategic_goal", "strategic_target", "strategic_hypothesis", "strategic_commitment",
+}
+PLAN_GRAPH_RELATION_KINDS = {"advances", "enables", "depends_on", "conflicts_with", "supersedes"}
+PLAN_GRAPH_FORBIDDEN_KEYS = {
+    "confidence", "probability", "horizon", "duration", "date", "start_date", "end_date",
+    "deadline", "budget", "priority", "resource_allocation", "owner_actor_id", "executor",
+    "task", "campaign", "status", "progress", "progress_percentage", "affected_strategic_closure",
+    "graphiti_id", "neo4j_id", "database_id",
+}
+
+
+def _rc025_pattern(docs: dict[str, dict], report: Report) -> None:
+    patterns_doc = _mapping(docs.get("semantics/architecture_patterns.yaml"))
+    matches = [
+        item for item in _list(patterns_doc.get("patterns"))
+        if _mapping(item).get("id") == FEDERATED_GRAPH_PATTERN_ID
+    ]
+    if len(matches) != 1:
+        report.fail("RC-025", "semantics/architecture_patterns.yaml", "patterns", len(matches),
+                    "federated authority graph pattern must exist exactly once")
+        return
+    pattern = _mapping(matches[0])
+    if pattern.get("class") != "projection":
+        report.fail("RC-025", "semantics/architecture_patterns.yaml", "pattern.class", pattern.get("class"),
+                    "federated authority graphs are a projection/composition pattern")
+    refs = _mapping(pattern.get("reference_model"))
+    if refs.get("authoritative_direction") != "downstream_to_upstream" or refs.get("reverse_traversal") != "derived_reverse_adjacency":
+        report.fail("RC-025", "semantics/architecture_patterns.yaml", "pattern.reference_model", refs,
+                    "reference direction must be downstream-to-upstream with derived reverse adjacency")
+    comp = _mapping(pattern.get("composition"))
+    if comp.get("profile_ref") != "l9.compose/consumer-view@1" or comp.get("output_authority_class") != "derived":
+        report.fail("RC-025", "semantics/architecture_patterns.yaml", "pattern.composition", comp,
+                    "cross-graph composition must reuse consumer-view and remain derived")
+    required_forbidden = {
+        "mega_graph_becomes_canonical_authority",
+        "cross_domain_reference_transfers_ownership",
+        "upstream_authority_tracks_downstream_consumer_inventory",
+        "composed_view_mutates_authoritative_sources",
+        "graph_database_or_index_provider_becomes_semantic_owner",
+        "unresolved_reference_is_silently_treated_as_resolved",
+    }
+    if not required_forbidden <= set(_list(pattern.get("forbidden"))):
+        report.fail("RC-025", "semantics/architecture_patterns.yaml", "pattern.forbidden", pattern.get("forbidden"),
+                    "federation anti-authority and fail-closed rules must remain explicit")
+
+
+def _rc025_schema(docs: dict[str, dict], report: Report) -> None:
+    graph = _mapping(docs.get(PLAN_GRAPH_SCHEMA_PATH))
+    if graph.get("schema") != "l9.schema-definition/v1" or graph.get("artifact_id") != PLAN_GRAPH_SCHEMA_ID:
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "identity", graph.get("artifact_id"),
+                    "Strategic Plan Graph schema identity must be canonical v1")
+    authority = _mapping(graph.get("authority"))
+    if graph.get("canonical") is not True or authority.get("owner") != STRATEGY_OWNER or authority.get("scope") != PLAN_GRAPH_SCOPE:
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "authority", authority,
+                    "Strategic Plan Graph schema must be canonical and globally owned by .github")
+    if set(_list(graph.get("required"))) != PLAN_GRAPH_REQUIRED:
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "required", graph.get("required"),
+                    "Strategic Plan Graph top-level required fields must remain minimal and exact")
+    props = _mapping(graph.get("properties"))
+    node = _mapping(_mapping(_mapping(props.get("nodes")).get("items")).get("fields"))
+    kinds = set(_list(_mapping(node.get("kind")).get("enum")))
+    if kinds != PLAN_GRAPH_NODE_KINDS:
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "properties.nodes.items.fields.kind.enum", sorted(kinds),
+                    "exactly the four admitted Plan-owned primitive kinds may be local nodes")
+    relation = _mapping(_mapping(_mapping(props.get("relations")).get("items")).get("fields"))
+    relation_kinds = set(_list(_mapping(relation.get("relation")).get("enum")))
+    if relation_kinds != PLAN_GRAPH_RELATION_KINDS:
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "properties.relations.items.fields.relation.enum", sorted(relation_kinds),
+                    "exactly the five admitted strategic relation kinds are representable")
+    if "strategy" in kinds:
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "properties.nodes.items.fields.kind.enum", "strategy",
+                    "Strategy is the integrated meaning of the graph, never a fifth node kind")
+    found = [path for path, key in _key_paths(graph) if key in PLAN_GRAPH_FORBIDDEN_KEYS]
+    if found:
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "forbidden_representation_keys", found,
+                    "v3.18 Plan Graph must not absorb deferred planning, execution, storage, or closure fields")
+    refs = _mapping(graph.get("reference_rules"))
+    if refs.get("external_references_remain_externally_owned") is not True or refs.get("reverse_adjacency_is_derived") is not True:
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "reference_rules", refs,
+                    "external reference ownership and derived reverse adjacency must remain explicit")
+    if refs.get("unresolved_external_reference_result") != "unknown":
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "reference_rules.unresolved_external_reference_result", refs.get("unresolved_external_reference_result"),
+                    "unresolved external references must preserve Unknown")
+    constraints = _mapping(graph.get("relation_constraints"))
+    all_rules = _mapping(constraints.get("all"))
+    enables = _mapping(constraints.get("enables"))
+    supersedes = _mapping(constraints.get("supersedes"))
+    if all_rules.get("at_least_one_endpoint_must_resolve_to_local_plan_node") is not True:
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "relation_constraints.all", all_rules,
+                    "every strategic relation must touch at least one local Plan node")
+    if enables.get("hypothesis_ref_required") is not True or enables.get("hypothesis_ref_must_resolve_to_local_kind") != "strategic_hypothesis":
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "relation_constraints.enables", enables,
+                    "enables must remain attributable to one local Strategic Hypothesis")
+    if supersedes.get("source_must_resolve_to_local_plan_node") is not True or supersedes.get("target_must_resolve_to_same_primitive_kind") is not True or supersedes.get("target_may_resolve_to_prior_revision_same_plan_lineage") is not True:
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "relation_constraints.supersedes", supersedes,
+                    "supersedes must preserve same-kind Plan lineage across immutable revisions")
+    revisions = _mapping(graph.get("revision_rules"))
+    required_revision_rules = {
+        "graph_represents_exactly_one_plan_revision",
+        "content_change_requires_new_revision_ref",
+        "predecessor_when_present_must_reference_prior_revision_same_plan_lineage",
+        "prior_revisions_remain_addressable",
+        "historical_revision_content_is_immutable",
+        "graph_digest_binds_exact_revision_content",
+    }
+    if not all(revisions.get(rule) is True for rule in required_revision_rules):
+        report.fail("RC-025", PLAN_GRAPH_SCHEMA_PATH, "revision_rules", revisions,
+                    "Plan revision identity, immutability, lineage, and digest binding must remain closed")
+
+
+def _rc025_registration(docs: dict[str, dict], report: Report) -> None:
+    registry = _mapping(docs.get("semantics/canonical_sources.yaml"))
+    entries = [item for item in _list(registry.get("sources")) if _mapping(item).get("id") == PLAN_GRAPH_SOURCE_ID]
+    if len(entries) != 1 or _mapping(entries[0]).get("path") != PLAN_GRAPH_SCHEMA_PATH:
+        report.fail("RC-025", "semantics/canonical_sources.yaml", "sources", entries,
+                    "Strategic Plan Graph schema must be registered exactly once as a canonical source")
+    manifest = _mapping(docs.get("semantics/generic_compiler_manifest.yaml"))
+    requires = _mapping(manifest.get("requires"))
+    semantic_catalogs = _list(requires.get("semantic_catalogs"))
+    artifact_schemas = _list(requires.get("artifact_schemas"))
+    filename = PLAN_GRAPH_SCHEMA_PATH.removeprefix("semantics/")
+    if semantic_catalogs.count(filename) != 1:
+        report.fail("RC-025", "semantics/generic_compiler_manifest.yaml", "requires.semantic_catalogs", semantic_catalogs,
+                    "authoritative Strategic Plan Graph schema must be a semantic catalog exactly once")
+    if filename in artifact_schemas:
+        report.fail("RC-025", "semantics/generic_compiler_manifest.yaml", "requires.artifact_schemas", artifact_schemas,
+                    "authoritative Strategic Plan Graph schema must not be misclassified as compiler-output artifact schema")
+
+
+def _evaluate_rc025(docs: dict[str, dict], report: Report) -> None:
+    _rc025_pattern(docs, report)
+    _rc025_schema(docs, report)
+    _rc025_registration(docs, report)
+
+
+def _check_rc025_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    cases = []
+    model = PLAN_GRAPH_SCHEMA_PATH
+    pattern_path = "semantics/architecture_patterns.yaml"
+    registry_path = "semantics/canonical_sources.yaml"
+    manifest_path = "semantics/generic_compiler_manifest.yaml"
+
+    def pattern(case):
+        return next(item for item in case[pattern_path]["patterns"] if item.get("id") == FEDERATED_GRAPH_PATTERN_ID)
+
+    case = copy.deepcopy(docs); case[model]["properties"]["nodes"]["items"]["fields"]["kind"]["enum"].append("capability"); cases.append(("fifth local primitive", case, model, "properties.nodes.items.fields.kind.enum"))
+    case = copy.deepcopy(docs); case[model]["properties"]["relations"]["items"]["fields"]["relation"]["enum"].append("causes"); cases.append(("sixth strategic relation", case, model, "properties.relations.items.fields.relation.enum"))
+    case = copy.deepcopy(docs); case[model]["properties"]["nodes"]["items"]["fields"]["kind"]["enum"].append("strategy"); cases.append(("Strategy becomes local node", case, model, "properties.nodes.items.fields.kind.enum"))
+    case = copy.deepcopy(docs); case[model]["required"].remove("strategic_authority_ref"); cases.append(("authority ref becomes optional", case, model, "required"))
+    case = copy.deepcopy(docs); case[model]["properties"]["confidence"]={"type":"number"}; cases.append(("confidence leaks into Plan Graph", case, model, "forbidden_representation_keys"))
+    case = copy.deepcopy(docs); case[model]["properties"]["affected_strategic_closure"]={"type":"array"}; cases.append(("Affected Closure serialized", case, model, "forbidden_representation_keys"))
+    case = copy.deepcopy(docs); case[model]["relation_constraints"]["all"]["at_least_one_endpoint_must_resolve_to_local_plan_node"]=False; cases.append(("world graph relation permitted", case, model, "relation_constraints.all"))
+    case = copy.deepcopy(docs); case[model]["relation_constraints"]["enables"]["hypothesis_ref_required"]=False; cases.append(("enables loses hypothesis attribution", case, model, "relation_constraints.enables"))
+    case = copy.deepcopy(docs); case[model]["relation_constraints"]["enables"]["hypothesis_ref_must_resolve_to_local_kind"]="strategic_commitment"; cases.append(("enables attributed to wrong primitive", case, model, "relation_constraints.enables"))
+    case = copy.deepcopy(docs); case[model]["relation_constraints"]["supersedes"]["target_must_resolve_to_same_primitive_kind"]=False; cases.append(("cross-kind supersession allowed", case, model, "relation_constraints.supersedes"))
+    case = copy.deepcopy(docs); case[model]["reference_rules"]["external_references_remain_externally_owned"]=False; cases.append(("external ownership absorbed", case, model, "reference_rules"))
+    case = copy.deepcopy(docs); case[model]["reference_rules"]["unresolved_external_reference_result"]="resolved"; cases.append(("Unknown coerced to resolved", case, model, "reference_rules.unresolved_external_reference_result"))
+    case = copy.deepcopy(docs); pattern(case)["composition"]["output_authority_class"]="canonical"; cases.append(("management view becomes authority", case, pattern_path, "pattern.composition"))
+    case = copy.deepcopy(docs); pattern(case)["reference_model"]["authoritative_direction"]="upstream_to_downstream"; cases.append(("upstream tracks downstream", case, pattern_path, "pattern.reference_model"))
+    case = copy.deepcopy(docs); case[manifest_path]["requires"]["semantic_catalogs"].remove("strategic_plan_graph.schema.yaml"); case[manifest_path]["requires"]["artifact_schemas"].append("strategic_plan_graph.schema.yaml"); cases.append(("schema misclassified as compiler output", case, manifest_path, "requires.semantic_catalogs"))
+    case = copy.deepcopy(docs); case[registry_path]["sources"]=[x for x in case[registry_path]["sources"] if x.get("id") != PLAN_GRAPH_SOURCE_ID]; cases.append(("schema registration removed", case, registry_path, "sources"))
+
+    for label, candidate, path, field in cases:
+        candidate_report = Report()
+        _evaluate_rc025(candidate, candidate_report)
+        prefix = f"FAIL RC-025 {path} {field}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail("RC-025", VALIDATOR_PATH, "negative_case", label,
+                        f"negative case did not fail closed at {path} {field}")
+    if not any(f.startswith(f"FAIL RC-025 {VALIDATOR_PATH} negative_case") for f in report.failures):
+        report.ok("RC-025-NEG", f"{len(cases)} federation / Strategic Plan Graph negative cases fail closed for their intended reason")
+
+
+def check_rc025(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc025(docs, report)
+    if len(report.failures) == before:
+        report.ok("RC-025", "federated authority graphs preserve independent ownership and Strategic Plan Graph v1 admits only the minimal 4-node / 5-relation representation with authority, reference, causal-attribution, revision, and compiler-registration closure")
+        _check_rc025_negative_cases(docs, report)
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -6969,6 +7161,7 @@ def main(argv: list[str]) -> int:
     check_rc022(docs, report)
     check_rc023(docs, report)
     check_rc024(docs, report)
+    check_rc025(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:

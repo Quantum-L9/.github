@@ -455,6 +455,71 @@ patterns:
   examples:
   - Graphiti_world_model
   - Redis_projection_cache
+- id: l9.pattern/federated-authority-graphs@1
+  class: projection
+  purpose: 'Compose independently owned graph-shaped semantic domains into provenance-preserving cross-domain views without centralizing semantic ownership, governing authority, or source truth.
+
+    '
+  structure:
+    nodes:
+    - authoritative_domain_graph
+    - typed_semantic_reference
+    - projection_artifact
+    - composed_consumer_view
+    edges:
+    - from: authoritative_domain_graph
+      relation: projects
+      to: projection_artifact
+    - from: projection_artifact
+      relation: composes_into
+      to: composed_consumer_view
+  reference_model:
+    authoritative_direction: downstream_to_upstream
+    reverse_traversal: derived_reverse_adjacency
+    rules:
+    - downstream_objects_reference_governing_upstream_objects_they_realize
+    - upstream_objects_do_not_embed_downstream_consumer_inventories
+    - reverse_traversal_is_derived_from_composed_references
+    - cross_domain_reference_does_not_transfer_semantic_ownership
+    - relation_semantics_remain_owned_by_the_domain_that_declares_them
+  composition:
+    profile_ref: l9.compose/consumer-view@1
+    output_authority_class: derived
+    source_projection_provenance_required: true
+    conflict_result: invalid
+  preconditions:
+  - every_participating_graph_has_an_explicit_semantic_owner
+  - every_cross_domain_reference_uses_a_resolvable_typed_semantic_coordinate_or_remains_explicitly_unknown
+  - participating_sources_expose_projection_artifacts_under_admitted_projection_semantics
+  - the_composition_profile_is_resolved
+  guarantees:
+  - independently_evolvable_domain_authorities
+  - rebuildable_cross_domain_views
+  - why_traversal_without_truth_centralization
+  - how_traversal_without_upstream_backpatching
+  - selective_invalidation_of_derived_views
+  - provider_neutral_graph_materialization
+  architecture_obligations:
+  - preserve_source_projection_identity_and_digest
+  - preserve_cross_domain_reference_coordinates
+  - derive_reverse_adjacency_in_the_read_model_only
+  - fail_closed_on_material_reference_or_composition_conflict
+  - keep_authoritative_mutation_at_the_source_owner
+  forbidden:
+  - mega_graph_becomes_canonical_authority
+  - cross_domain_reference_transfers_ownership
+  - upstream_authority_tracks_downstream_consumer_inventory
+  - composed_view_mutates_authoritative_sources
+  - graph_database_or_index_provider_becomes_semantic_owner
+  - unresolved_reference_is_silently_treated_as_resolved
+  common_examples:
+  - strategic_plan_to_delegation_to_workstate_to_execution_to_evidence
+  - derived_management_why_and_how_view
+  compatible_with:
+  - l9.pattern/canonical-source-derived-projections@1
+  - l9.pattern/read-model-non-authority@1
+  - l9.pattern/facts-plus-lineage-compiled-views@1
+  - l9.pattern/session-projection-cache@1
 - id: l9.pattern/facts-plus-lineage-compiled-views@1
   class: projection
   purpose: 'Store canonical facts and their provenance once and generate multiple views rather than maintaining duplicated representations manually.
