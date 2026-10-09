@@ -87,6 +87,10 @@ reasoning_concepts:
     definition: The smallest reachable set of Plan-owned claims whose current justification may materially depend on a
       changed belief, reference, condition, or authoritative input.
     purpose: selective_plan_reconsideration
+    representation_schema_ref: l9.schema/affected-strategic-closure@1
+    authority_class: derived
+    authoritative: false
+    representation_does_not_define_closure_algorithm: true
     may_not:
     - decide_strategy
     - modify_strategic_plan
