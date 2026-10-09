@@ -7107,6 +7107,383 @@ def check_rc025(docs: dict[str, dict], report: Report) -> None:
         report.ok("RC-025", "federated authority graphs preserve independent ownership and Strategic Plan Graph v1 admits only the minimal 4-node / 5-relation representation with authority, reference, causal-attribution, revision, and compiler-registration closure")
         _check_rc025_negative_cases(docs, report)
 
+# RC-026 Strategic planning cognition representation closure. These schemas
+# freeze the Planner / Meta-Planner handoff without admitting runtime algorithms
+# or allowing reasoning artifacts to acquire Strategic Authority.
+AFFECTED_CLOSURE_SCHEMA_PATH = "semantics/affected_strategic_closure.schema.yaml"
+PLANNING_EPISODE_SCHEMA_PATH = "semantics/strategic_planning_episode.schema.yaml"
+PLAN_REVISION_CANDIDATE_SCHEMA_PATH = "semantics/strategic_plan_revision_candidate.schema.yaml"
+METACOG_ANALYSIS_SCHEMA_PATH = "semantics/strategic_plan_metacognitive_analysis.schema.yaml"
+STRATEGIC_COGNITION_MODEL_PATH = "semantics/strategic_cognition_model.yaml"
+STRATEGIC_PLAN_MODEL_PATH = "semantics/strategic_plan_model.yaml"
+
+RC026_SCHEMA_IDS = {
+    AFFECTED_CLOSURE_SCHEMA_PATH: "l9.schema/affected-strategic-closure@1",
+    PLANNING_EPISODE_SCHEMA_PATH: "l9.schema/strategic-planning-episode@1",
+    PLAN_REVISION_CANDIDATE_SCHEMA_PATH: "l9.schema/strategic-plan-revision-candidate@1",
+    METACOG_ANALYSIS_SCHEMA_PATH: "l9.schema/strategic-plan-metacognitive-analysis@1",
+}
+RC026_SOURCE_IDS = {
+    AFFECTED_CLOSURE_SCHEMA_PATH: "l9.source/affected-strategic-closure-schema@1",
+    PLANNING_EPISODE_SCHEMA_PATH: "l9.source/strategic-planning-episode-schema@1",
+    PLAN_REVISION_CANDIDATE_SCHEMA_PATH: "l9.source/strategic-plan-revision-candidate-schema@1",
+    METACOG_ANALYSIS_SCHEMA_PATH: "l9.source/strategic-plan-metacognitive-analysis-schema@1",
+}
+RC026_FILENAMES = [path.removeprefix("semantics/") for path in RC026_SCHEMA_IDS]
+
+
+def _rc026_fields(node: object) -> dict:
+    return _mapping(_mapping(node).get("fields"))
+
+
+def _rc026_required(schema: dict) -> set[str]:
+    return {item for item in _list(schema.get("required")) if isinstance(item, str)}
+
+
+def _rc026_schema_identity(path: str, schema: dict, report: Report) -> None:
+    expected_id = RC026_SCHEMA_IDS[path]
+    if schema.get("schema") != "l9.schema-definition/v1":
+        report.fail("RC-026", path, "schema", schema.get("schema"), "schema-definition identity drift")
+    if schema.get("artifact_id") != expected_id:
+        report.fail("RC-026", path, "artifact_id", schema.get("artifact_id"), f"expected {expected_id}")
+    if schema.get("canonical") is not True:
+        report.fail("RC-026", path, "canonical", schema.get("canonical"), "planning cognition schema must remain canonical")
+    authority = _mapping(schema.get("authority"))
+    if authority.get("owner") != "Quantum-L9/.github" or authority.get("authority_class") != "canonical":
+        report.fail("RC-026", path, "authority", authority, "schema authority must remain canonical .github law")
+
+
+def _rc026_closure(docs: dict[str, dict], report: Report) -> None:
+    path = AFFECTED_CLOSURE_SCHEMA_PATH
+    schema = _mapping(docs.get(path))
+    _rc026_schema_identity(path, schema, report)
+    inst = _mapping(schema.get("instance_semantics"))
+    if inst.get("authority_class") != "derived" or inst.get("authoritative") is not False or inst.get("authority_effect") != "none":
+        report.fail("RC-026", path, "instance_semantics", inst, "Affected Closure must remain derived, non-authoritative, and effect-free")
+    required = _rc026_required(schema)
+    expected = {"schema", "closure_ref", "plan_ref", "plan_revision_ref", "plan_graph_digest", "trigger_sources", "affected_plan_refs", "provenance", "closure_digest"}
+    if required != expected:
+        report.fail("RC-026", path, "required", sorted(required), "Affected Closure required field set drifted")
+    rules = _mapping(schema.get("closure_rules"))
+    required_rules = {
+        "affected_refs_must_resolve_to_plan_owned_claims_in_bound_revision",
+        "empty_closure_is_valid_when_no_plan_owned_claim_materially_depends_on_trigger",
+        "unresolved_dependency_is_preserved_as_unknown",
+        "closure_algorithm_is_not_defined_by_this_schema",
+        "closure_result_is_invalidated_by_bound_plan_revision_or_trigger_digest_change",
+    }
+    if not all(rules.get(key) is True for key in required_rules):
+        report.fail("RC-026", path, "closure_rules", rules, "closure must remain bounded, Unknown-preserving, digest-bound, and algorithm-neutral")
+    semantic = set(_list(schema.get("semantic_rules")))
+    needed = {
+        "closure_does_not_decide_strategy",
+        "closure_does_not_modify_or_invalidate_strategic_plan",
+        "closure_does_not_mark_plan_claims_false_or_stale_automatically",
+        "closure_does_not_transfer_truth_source_ownership",
+    }
+    if not needed <= semantic:
+        report.fail("RC-026", path, "semantic_rules", sorted(semantic), "Affected Closure anti-authority rules missing")
+
+
+def _rc026_episode(docs: dict[str, dict], report: Report) -> None:
+    path = PLANNING_EPISODE_SCHEMA_PATH
+    schema = _mapping(docs.get(path))
+    _rc026_schema_identity(path, schema, report)
+    inst = _mapping(schema.get("instance_semantics"))
+    if inst.get("authority_class") != "derived" or inst.get("authoritative") is not False or inst.get("authority_effect") != "none" or inst.get("producer_role") != "plan_keeper":
+        report.fail("RC-026", path, "instance_semantics", inst, "Planning Episode must remain Plan-Keeper-produced derived reasoning with zero authority effect")
+    required = _rc026_required(schema)
+    expected = {"schema", "episode_ref", "plan_ref", "plan_revision_ref", "plan_graph_digest", "strategic_authority_ref", "strategic_intent_refs", "objective_refs", "current_meta_view", "trigger_refs", "workspace", "recommendation", "provenance", "episode_digest"}
+    if required != expected:
+        report.fail("RC-026", path, "required", sorted(required), "Planning Episode required field set drifted")
+    props = _mapping(schema.get("properties"))
+    workspace = _mapping(props.get("workspace"))
+    workspace_required = set(_list(workspace.get("required")))
+    expected_workspace = {"decision_question", "observations", "assumptions", "candidate_paths", "evaluations", "material_unknowns"}
+    if workspace_required != expected_workspace:
+        report.fail("RC-026", path, "properties.workspace.required", sorted(workspace_required), "reasoning workspace partitions or material Unknown closure drifted")
+    wf = _rc026_fields(workspace)
+    candidate_paths = _mapping(wf.get("candidate_paths"))
+    cp_fields = _rc026_fields(_mapping(candidate_paths.get("items")))
+    disposition = set(_list(_mapping(cp_fields.get("disposition")).get("enum")))
+    if disposition != {"considered", "rejected", "recommended_for_candidate"}:
+        report.fail("RC-026", path, "properties.workspace.fields.candidate_paths.items.fields.disposition.enum", sorted(disposition), "candidate path disposition must never imply commitment")
+    evaluations = _mapping(wf.get("evaluations"))
+    ev_fields = _rc026_fields(_mapping(evaluations.get("items")))
+    ev_results = set(_list(_mapping(ev_fields.get("result")).get("enum")))
+    if ev_results != {"favorable", "unfavorable", "mixed", "unknown"}:
+        report.fail("RC-026", path, "properties.workspace.fields.evaluations.items.fields.result.enum", sorted(ev_results), "evaluation result algebra drifted")
+    rec = _mapping(props.get("recommendation"))
+    rf = _rc026_fields(rec)
+    outcomes = set(_list(_mapping(rf.get("outcome")).get("enum")))
+    if outcomes != {"retain_current_plan", "propose_revision", "unresolved"}:
+        report.fail("RC-026", path, "properties.recommendation.fields.outcome.enum", sorted(outcomes), "Planning Episode recommendation outcomes drifted")
+    authority_effect = _mapping(rf.get("authority_effect")).get("const")
+    if authority_effect != "none":
+        report.fail("RC-026", path, "properties.recommendation.fields.authority_effect", authority_effect, "recommendation may not create strategic authority")
+    rules = _mapping(schema.get("workspace_rules"))
+    required_rules = {
+        "observations_reference_sources_but_do_not_take_truth_ownership",
+        "assumptions_are_provisional_reasoning_objects_not_plan_owned_beliefs",
+        "candidate_paths_are_not_strategic_commitments",
+        "evaluations_do_not_create_objective_or_evidence_authority",
+        "recommendation_is_not_a_strategic_decision",
+        "propose_revision_outcome_requires_separate_revision_candidate_artifact",
+        "changed_bound_input_digest_invalidates_episode_currentness",
+    }
+    if not all(rules.get(key) is True for key in required_rules):
+        report.fail("RC-026", path, "workspace_rules", rules, "Planning Episode workspace / Strategy boundary drifted")
+
+
+def _rc026_candidate(docs: dict[str, dict], report: Report) -> None:
+    path = PLAN_REVISION_CANDIDATE_SCHEMA_PATH
+    schema = _mapping(docs.get(path))
+    _rc026_schema_identity(path, schema, report)
+    inst = _mapping(schema.get("instance_semantics"))
+    if inst.get("authority_class") != "candidate" or inst.get("authoritative") is not False or inst.get("authority_effect") != "none_until_admitted" or inst.get("producer_role") != "plan_keeper":
+        report.fail("RC-026", path, "instance_semantics", inst, "Revision Candidate must remain non-authoritative candidate output from Plan Keeper")
+    required = _rc026_required(schema)
+    expected = {"schema", "candidate_ref", "plan_ref", "predecessor", "proposed_graph", "reasoning_episode", "strategic_authority_ref", "rationale_refs", "provenance", "candidate_digest"}
+    if required != expected:
+        report.fail("RC-026", path, "required", sorted(required), "Revision Candidate required field set drifted")
+    props = _mapping(schema.get("properties"))
+    pg = _mapping(props.get("proposed_graph"))
+    pg_fields = _rc026_fields(pg)
+    schema_ref = _mapping(pg_fields.get("schema_ref")).get("const")
+    if schema_ref != "l9.schema/strategic-plan-graph@1":
+        report.fail("RC-026", path, "properties.proposed_graph.fields.schema_ref", schema_ref, "proposed graph must bind canonical Strategic Plan Graph schema")
+    if set(_list(pg.get("required"))) != {"ref", "schema_ref", "digest"}:
+        report.fail("RC-026", path, "properties.proposed_graph.required", pg.get("required"), "proposed graph exact ref/schema/digest binding required")
+    rules = _mapping(schema.get("candidate_rules"))
+    required_rules = {
+        "proposed_graph_must_conform_to_strategic_plan_graph_schema",
+        "proposed_graph_plan_ref_must_equal_candidate_plan_ref",
+        "proposed_graph_predecessor_must_bind_exact_predecessor",
+        "predecessor_must_be_current_at_admission_or_admission_fails_closed",
+        "admission_must_bind_candidate_digest_and_proposed_graph_digest",
+        "candidate_change_requires_new_authority_decision",
+        "proposed_graph_change_requires_new_authority_decision",
+        "candidate_may_be_rejected_without_mutating_current_plan",
+    }
+    if not all(rules.get(key) is True for key in required_rules):
+        report.fail("RC-026", path, "candidate_rules", rules, "candidate digest/admission/predecessor closure drifted")
+    semantic = set(_list(schema.get("semantic_rules")))
+    needed = {
+        "revision_candidate_is_candidate_not_strategy",
+        "revision_candidate_does_not_self_admit",
+        "revision_candidate_does_not_modify_strategic_plan",
+        "admission_is_external_to_candidate_artifact",
+        "authorization_must_bind_exact_candidate_and_proposed_graph_digests",
+    }
+    if not needed <= semantic:
+        report.fail("RC-026", path, "semantic_rules", sorted(semantic), "candidate anti-self-admission / anti-mutation rules missing")
+
+
+def _rc026_meta(docs: dict[str, dict], report: Report) -> None:
+    path = METACOG_ANALYSIS_SCHEMA_PATH
+    schema = _mapping(docs.get(path))
+    _rc026_schema_identity(path, schema, report)
+    inst = _mapping(schema.get("instance_semantics"))
+    if inst.get("authority_class") != "derived" or inst.get("authoritative") is not False or inst.get("output_authority") != "advisory" or inst.get("authority_effect") != "none" or inst.get("producer_role") != "strategic_plan_metacognitive_reasoner":
+        report.fail("RC-026", path, "instance_semantics", inst, "Metacognitive Analysis must remain derived, advisory, and non-authoritative")
+    required = _rc026_required(schema)
+    expected = {"schema", "analysis_ref", "plan_ref", "subject_episodes", "plan_revision_refs", "outcome_evidence_refs", "findings", "patterns", "lessons", "provenance", "analysis_digest"}
+    if required != expected:
+        report.fail("RC-026", path, "required", sorted(required), "Metacognitive Analysis required field set drifted")
+    props = _mapping(schema.get("properties"))
+    findings = _mapping(props.get("findings"))
+    f_fields = _rc026_fields(_mapping(findings.get("items")))
+    finding_kinds = set(_list(_mapping(f_fields.get("kind")).get("enum")))
+    expected_findings = {"reasoning_strength", "reasoning_failure", "expectation_outcome_mismatch", "revision_pattern", "unknown"}
+    if finding_kinds != expected_findings:
+        report.fail("RC-026", path, "properties.findings.items.fields.kind.enum", sorted(finding_kinds), "metacognitive findings must remain reasoning-focused")
+    patterns = _mapping(props.get("patterns"))
+    p_fields = _rc026_fields(_mapping(patterns.get("items")))
+    pattern_kinds = set(_list(_mapping(p_fields.get("kind")).get("enum")))
+    expected_patterns = {"recurring_reasoning_strength", "recurring_reasoning_failure", "recurring_expectation_outcome_pattern", "unknown"}
+    if pattern_kinds != expected_patterns:
+        report.fail("RC-026", path, "properties.patterns.items.fields.kind.enum", sorted(pattern_kinds), "metacognitive patterns must remain reasoning-focused")
+    lessons = _mapping(props.get("lessons"))
+    l_fields = _rc026_fields(_mapping(lessons.get("items")))
+    lesson_effect = _mapping(l_fields.get("authority_effect")).get("const")
+    if lesson_effect != "none":
+        report.fail("RC-026", path, "properties.lessons.items.fields.authority_effect", lesson_effect, "planning cognition lesson must remain advisory")
+    rules = _mapping(schema.get("analysis_rules"))
+    required_rules = {
+        "findings_must_trace_to_exact_episode_revision_or_evidence_refs",
+        "recurring_pattern_requires_multiple_occurrence_refs",
+        "lessons_must_trace_to_findings_patterns_or_exact_source_refs",
+        "lesson_is_advisory_input_to_plan_keeper_only",
+        "metacognitive_analysis_cannot_modify_or_supersede_strategic_plan",
+        "metacognitive_analysis_cannot_grant_strategic_authority",
+        "metacognitive_analysis_cannot_reinterpret_external_evidence_as_owned_truth",
+        "metacognitive_analysis_is_not_universal_metacognitive_authority",
+    }
+    if not all(rules.get(key) is True for key in required_rules):
+        report.fail("RC-026", path, "analysis_rules", rules, "Meta-Planner advisory / ownership boundary drifted")
+
+
+def _rc026_semantic_anchors(docs: dict[str, dict], report: Report) -> None:
+    cognition = _mapping(docs.get(STRATEGIC_COGNITION_MODEL_PATH))
+    artifacts = _mapping(cognition.get("reasoning_artifacts"))
+    expected = {
+        "strategic_planning_episode": "l9.schema/strategic-planning-episode@1",
+        "strategic_plan_revision_candidate": "l9.schema/strategic-plan-revision-candidate@1",
+        "strategic_plan_metacognitive_analysis": "l9.schema/strategic-plan-metacognitive-analysis@1",
+    }
+    for name, schema_ref in expected.items():
+        item = _mapping(artifacts.get(name))
+        if item.get("schema_ref") != schema_ref:
+            report.fail("RC-026", STRATEGIC_COGNITION_MODEL_PATH, f"reasoning_artifacts.{name}.schema_ref", item.get("schema_ref"), f"expected {schema_ref}")
+    plan_keeper = _mapping(_mapping(cognition.get("roles")).get("plan_keeper"))
+    may = set(_list(plan_keeper.get("may")))
+    if not {"emit_strategic_planning_episode", "emit_strategic_plan_revision_candidate"} <= may:
+        report.fail("RC-026", STRATEGIC_COGNITION_MODEL_PATH, "roles.plan_keeper.may", sorted(may), "Plan Keeper must own emission of planning episode and revision candidate")
+    meta = _mapping(_mapping(cognition.get("roles")).get("strategic_plan_metacognitive_reasoner"))
+    meta_may = set(_list(meta.get("may")))
+    if "emit_strategic_plan_metacognitive_analysis" not in meta_may:
+        report.fail("RC-026", STRATEGIC_COGNITION_MODEL_PATH, "roles.strategic_plan_metacognitive_reasoner.may", sorted(meta_may), "Meta-Planner must own its analysis output")
+    plan = _mapping(docs.get(STRATEGIC_PLAN_MODEL_PATH))
+    closure = _mapping(_mapping(plan.get("reasoning_concepts")).get("affected_strategic_closure"))
+    if closure.get("representation_schema_ref") != "l9.schema/affected-strategic-closure@1" or closure.get("authority_class") != "derived" or closure.get("authoritative") is not False or closure.get("representation_does_not_define_closure_algorithm") is not True:
+        report.fail("RC-026", STRATEGIC_PLAN_MODEL_PATH, "reasoning_concepts.affected_strategic_closure", closure, "Affected Strategic Closure semantic owner must bind derived schema while deferring algorithm")
+
+
+def _rc026_registration(docs: dict[str, dict], report: Report) -> None:
+    registry_path = "semantics/canonical_sources.yaml"
+    registry = _mapping(docs.get(registry_path))
+    sources = _list(registry.get("sources"))
+    for path, source_id in RC026_SOURCE_IDS.items():
+        entries = [item for item in sources if _mapping(item).get("id") == source_id]
+        if len(entries) != 1 or _mapping(entries[0]).get("path") != path:
+            report.fail("RC-026", registry_path, "sources", entries, f"{source_id} must register {path} exactly once")
+    manifest_path = "semantics/generic_compiler_manifest.yaml"
+    manifest = _mapping(docs.get(manifest_path))
+    requires = _mapping(manifest.get("requires"))
+    semantic_catalogs = _list(requires.get("semantic_catalogs"))
+    artifact_schemas = _list(requires.get("artifact_schemas"))
+    for filename in RC026_FILENAMES:
+        if semantic_catalogs.count(filename) != 1:
+            report.fail("RC-026", manifest_path, "requires.semantic_catalogs", semantic_catalogs, f"{filename} must be consumed exactly once as a semantic catalog")
+        if filename in artifact_schemas:
+            report.fail("RC-026", manifest_path, "requires.artifact_schemas", artifact_schemas, f"{filename} must not be misclassified as compiler-output artifact schema")
+
+
+def _evaluate_rc026(docs: dict[str, dict], report: Report) -> None:
+    _rc026_closure(docs, report)
+    _rc026_episode(docs, report)
+    _rc026_candidate(docs, report)
+    _rc026_meta(docs, report)
+    _rc026_semantic_anchors(docs, report)
+    _rc026_registration(docs, report)
+
+
+def _check_rc026_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    cases = []
+
+    case = copy.deepcopy(docs)
+    case[AFFECTED_CLOSURE_SCHEMA_PATH]["instance_semantics"]["authority_class"] = "canonical"
+    cases.append(("closure authority inflation", case, AFFECTED_CLOSURE_SCHEMA_PATH, "instance_semantics"))
+
+    case = copy.deepcopy(docs)
+    case[AFFECTED_CLOSURE_SCHEMA_PATH]["closure_rules"]["closure_algorithm_is_not_defined_by_this_schema"] = False
+    cases.append(("closure algorithm capture", case, AFFECTED_CLOSURE_SCHEMA_PATH, "closure_rules"))
+
+    case = copy.deepcopy(docs)
+    case[AFFECTED_CLOSURE_SCHEMA_PATH]["semantic_rules"].remove("closure_does_not_modify_or_invalidate_strategic_plan")
+    cases.append(("closure Plan mutation permission", case, AFFECTED_CLOSURE_SCHEMA_PATH, "semantic_rules"))
+
+    case = copy.deepcopy(docs)
+    case[PLANNING_EPISODE_SCHEMA_PATH]["instance_semantics"]["authority_class"] = "canonical"
+    cases.append(("Planning Episode authority inflation", case, PLANNING_EPISODE_SCHEMA_PATH, "instance_semantics"))
+
+    case = copy.deepcopy(docs)
+    case[PLANNING_EPISODE_SCHEMA_PATH]["properties"]["recommendation"]["fields"]["authority_effect"]["const"] = "strategic"
+    cases.append(("Planning Episode recommendation authority inflation", case, PLANNING_EPISODE_SCHEMA_PATH, "properties.recommendation.fields.authority_effect"))
+
+    case = copy.deepcopy(docs)
+    case[PLANNING_EPISODE_SCHEMA_PATH]["properties"]["workspace"]["fields"]["candidate_paths"]["items"]["fields"]["disposition"]["enum"].append("committed")
+    cases.append(("candidate path silently becomes commitment", case, PLANNING_EPISODE_SCHEMA_PATH, "properties.workspace.fields.candidate_paths.items.fields.disposition.enum"))
+
+    case = copy.deepcopy(docs)
+    case[PLANNING_EPISODE_SCHEMA_PATH]["properties"]["workspace"]["required"].remove("material_unknowns")
+    cases.append(("material Unknown becomes optional", case, PLANNING_EPISODE_SCHEMA_PATH, "properties.workspace.required"))
+
+    case = copy.deepcopy(docs)
+    case[STRATEGIC_COGNITION_MODEL_PATH]["reasoning_artifacts"]["strategic_planning_episode"]["schema_ref"] = "l9.schema/other@1"
+    cases.append(("Planning Episode semantic-owner schema drift", case, STRATEGIC_COGNITION_MODEL_PATH, "reasoning_artifacts.strategic_planning_episode.schema_ref"))
+
+    case = copy.deepcopy(docs)
+    case[PLAN_REVISION_CANDIDATE_SCHEMA_PATH]["instance_semantics"]["authority_class"] = "canonical"
+    cases.append(("Revision Candidate authority inflation", case, PLAN_REVISION_CANDIDATE_SCHEMA_PATH, "instance_semantics"))
+
+    case = copy.deepcopy(docs)
+    case[PLAN_REVISION_CANDIDATE_SCHEMA_PATH]["properties"]["proposed_graph"]["fields"]["schema_ref"]["const"] = "l9.schema/other@1"
+    cases.append(("proposed graph schema drift", case, PLAN_REVISION_CANDIDATE_SCHEMA_PATH, "properties.proposed_graph.fields.schema_ref"))
+
+    case = copy.deepcopy(docs)
+    case[PLAN_REVISION_CANDIDATE_SCHEMA_PATH]["candidate_rules"]["admission_must_bind_candidate_digest_and_proposed_graph_digest"] = False
+    cases.append(("admission loses proposed graph digest binding", case, PLAN_REVISION_CANDIDATE_SCHEMA_PATH, "candidate_rules"))
+
+    case = copy.deepcopy(docs)
+    case[PLAN_REVISION_CANDIDATE_SCHEMA_PATH]["semantic_rules"].remove("revision_candidate_does_not_self_admit")
+    cases.append(("candidate self-admission semantics", case, PLAN_REVISION_CANDIDATE_SCHEMA_PATH, "semantic_rules"))
+
+    case = copy.deepcopy(docs)
+    case[METACOG_ANALYSIS_SCHEMA_PATH]["instance_semantics"]["output_authority"] = "canonical"
+    cases.append(("Meta-Planner output authority inflation", case, METACOG_ANALYSIS_SCHEMA_PATH, "instance_semantics"))
+
+    case = copy.deepcopy(docs)
+    case[METACOG_ANALYSIS_SCHEMA_PATH]["properties"]["lessons"]["items"]["fields"]["authority_effect"]["const"] = "strategic"
+    cases.append(("metacognitive lesson authority inflation", case, METACOG_ANALYSIS_SCHEMA_PATH, "properties.lessons.items.fields.authority_effect"))
+
+    case = copy.deepcopy(docs)
+    case[METACOG_ANALYSIS_SCHEMA_PATH]["properties"]["findings"]["items"]["fields"]["kind"]["enum"].append("strategic_decision")
+    cases.append(("metacognitive strategic-decision category", case, METACOG_ANALYSIS_SCHEMA_PATH, "properties.findings.items.fields.kind.enum"))
+
+    case = copy.deepcopy(docs)
+    case[METACOG_ANALYSIS_SCHEMA_PATH]["analysis_rules"]["metacognitive_analysis_cannot_modify_or_supersede_strategic_plan"] = False
+    cases.append(("metacognitive Plan mutation permission", case, METACOG_ANALYSIS_SCHEMA_PATH, "analysis_rules"))
+
+    case = copy.deepcopy(docs)
+    case[STRATEGIC_PLAN_MODEL_PATH]["reasoning_concepts"]["affected_strategic_closure"]["representation_schema_ref"] = "l9.schema/other@1"
+    cases.append(("Affected Closure semantic-owner schema drift", case, STRATEGIC_PLAN_MODEL_PATH, "reasoning_concepts.affected_strategic_closure"))
+
+    case = copy.deepcopy(docs)
+    source_id = RC026_SOURCE_IDS[AFFECTED_CLOSURE_SCHEMA_PATH]
+    case["semantics/canonical_sources.yaml"]["sources"] = [x for x in case["semantics/canonical_sources.yaml"]["sources"] if x.get("id") != source_id]
+    cases.append(("canonical registration loss", case, "semantics/canonical_sources.yaml", "sources"))
+
+    case = copy.deepcopy(docs)
+    filename = "strategic_planning_episode.schema.yaml"
+    case["semantics/generic_compiler_manifest.yaml"]["requires"]["semantic_catalogs"].remove(filename)
+    case["semantics/generic_compiler_manifest.yaml"]["requires"]["artifact_schemas"].append(filename)
+    cases.append(("compiler schema misclassification", case, "semantics/generic_compiler_manifest.yaml", "requires.semantic_catalogs"))
+
+    case = copy.deepcopy(docs)
+    case[STRATEGIC_COGNITION_MODEL_PATH]["reasoning_artifacts"]["strategic_plan_metacognitive_analysis"]["schema_ref"] = "l9.schema/other@1"
+    cases.append(("Meta-Planner semantic-owner schema drift", case, STRATEGIC_COGNITION_MODEL_PATH, "reasoning_artifacts.strategic_plan_metacognitive_analysis.schema_ref"))
+
+    for label, candidate, path, field in cases:
+        candidate_report = Report()
+        _evaluate_rc026(candidate, candidate_report)
+        prefix = f"FAIL RC-026 {path} {field}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail("RC-026", VALIDATOR_PATH, "negative_case", label, f"negative case did not fail closed at {path} {field}")
+    if not any(f.startswith(f"FAIL RC-026 {VALIDATOR_PATH} negative_case") for f in report.failures):
+        report.ok("RC-026-NEG", f"{len(cases)} Strategic Planning cognition negative cases fail closed for their intended reason")
+
+
+def check_rc026(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc026(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-026",
+            "Planner / Meta-Planner cognitive interfaces preserve exact source coordinates, workspace/Strategy separation, candidate admission binding, Meta-Planner advisory authority, semantic-owner anchors, and compiler/registry closure",
+        )
+        _check_rc026_negative_cases(docs, report)
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -7162,6 +7539,7 @@ def main(argv: list[str]) -> int:
     check_rc023(docs, report)
     check_rc024(docs, report)
     check_rc025(docs, report)
+    check_rc026(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
