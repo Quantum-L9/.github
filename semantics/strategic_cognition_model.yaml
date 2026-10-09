@@ -24,11 +24,11 @@ governed_by:
   - l9.contract/semantic-ownership@1
   - l9.contract/projection@1
   - l9.contract/derived-artifact@1
-purpose: Define the global meaning of Strategic Cognition, the Current Meta View it reasons over, and the authority
-  boundary between the Plan Keeper, which owns the Strategic Plan, and the Strategic Plan Metacognitive Reasoner,
-  which owns analysis of the reasoning that produces the Strategic Plan. This ledger defines semantics only; it does
-  not define Strategic Plan content or structure, runtime cognition, prompts, model or provider selection, actor
-  bindings, or memory behavior.
+purpose: Define the global meaning of Strategy, Strategic Cognition, Strategic Intent, the Current Meta View it reasons
+  over, and the authority boundary between the Plan Keeper, which owns the Strategic Plan, and the Strategic Plan
+  Metacognitive Reasoner, which owns analysis of the reasoning that produces the Strategic Plan. This ledger defines
+  semantics only; it does not define Strategic Plan content or structure, runtime cognition, prompts, model or provider
+  selection, actor bindings, or memory behavior.
 plane:
   conceptual_plane: reasoning_plane
   semantic_compiler_owner: false
@@ -40,18 +40,22 @@ global_rules:
   reasoning_capability_does_not_confer_strategic_authority: true
   projection_consumption_does_not_transfer_truth_source_ownership: true
   strategic_roles_are_semantic_roles_not_actor_identities: true
+  strategic_label_does_not_create_authority_or_ownership: true
   metacognition_is_advisory_to_strategic_authority: true
   semantic_compiler_remains_independent_of_reasoning_plane: true
 concepts:
+  strategy:
+    definition: An integrated theory of intended change that identifies desired future conditions, causal beliefs about
+      how relevant conditions and actions may influence those conditions, and chosen courses of action under uncertainty.
   strategic_cognition:
-    definition: The reasoning concern that converts current authoritative understanding plus strategic intent into
-      maintained strategic direction.
+    definition: The reasoning concern through which the Plan Keeper compares current authoritative understanding and
+      Strategic Intent with the current Strategy to determine whether the Strategic Plan should remain unchanged or be revised.
     consumes:
     - current_meta_view
     - strategic_intent
     - strategic_plan
-    produces:
-    - maintained_strategic_direction
+    maintains:
+    - strategic_plan
     does_not_own:
     - underlying_truth_sources
     - runtime_execution
@@ -61,13 +65,13 @@ concepts:
     - capability_semantics
     - authority_semantics
   strategic_plan:
-    definition: The maintained statement of strategic direction produced by Strategic Cognition and held within an
-      explicitly granted strategic scope.
+    definition: The authoritative maintained record of the current Strategy within a scope for which the Plan Keeper has
+      been granted Strategic Authority.
     owner_role: plan_keeper
     content_defined_here: false
     structure_defined_here: false
   current_meta_view:
-    definition: The bounded current view used for strategic reasoning, composed from relevant authoritative projections.
+    definition: The bounded current view used when reasoning about Strategy, composed from relevant authoritative projections.
     authority_class: derived
     authoritative: false
     canonical_source: false
@@ -82,15 +86,15 @@ concepts:
       may_reinterpret_source_truth: false
       may_create_authority: false
   strategic_intent:
-    definition: The strategic purpose supplied by the applicable strategic authority against which strategic direction
-      is maintained.
+    definition: The purpose supplied by an applicable authority that constrains what the current Strategy is intended to advance.
     owned_here: false
     owner: applicable_strategic_authority
+    authority_ref: authority_model.yaml#strategic_authority
 roles:
   plan_keeper:
     role_kind: semantic_role
     actor_identity_binding: none
-    definition: The strategic reasoning role responsible for maintaining the Strategic Plan.
+    definition: The reasoning role responsible for maintaining the Strategic Plan within granted Strategic Authority.
     owns:
     - strategic_plan
     reasons_over:
@@ -98,9 +102,9 @@ roles:
     - strategic_intent
     - strategic_plan
     may:
-    - revise_strategic_direction_within_explicitly_granted_strategic_authority
+    - revise_strategic_plan_within_granted_strategic_authority
     - consume_planning_cognition_lessons
-    authority_source: explicitly_granted_strategic_authority
+    authority_source: strategic_authority
     does_not_own:
     - underlying_truth_sources
     - capability_semantics
@@ -113,7 +117,7 @@ roles:
     - acquire_truth_source_ownership_by_consuming_projections
     - derive_authority_from_reasoning_capability
     - become_execution_or_implementation_authority_by_implication
-    - revise_strategic_direction_beyond_granted_strategic_authority
+    - revise_strategic_plan_beyond_granted_strategic_authority
   strategic_plan_metacognitive_reasoner:
     role_kind: semantic_role
     actor_identity_binding: none
