@@ -5676,7 +5676,7 @@ def check_rc022(docs: dict[str, dict], report: Report) -> None:
 # repository class catalog and the repository registry were registered
 # ledgers whose content was an explicit Unknown. v3.15.0 admits exactly one
 # RepositoryClass (l9.repository-class/l9@1), one derived memory-namespace
-# view over it, and an explicit census of 32 repositories, every one
+# view over it, and an explicit census of repositories, every one
 # assigned that class by decision. RC-023 pins that admission: the class
 # identity and its memory obligation, the derived view's selector and output,
 # and the exact repository ids and case-sensitive GitHub coordinates. It
@@ -5768,7 +5768,7 @@ RC023_CLASS_DECLARATION = {
         "expand_authority_through_projection",
     ],
 }
-# The explicit census admitted by v3.15.0: registry id -> case-sensitive
+# The explicit census admitted by v3.15.0 and extended by v3.16.0: registry id -> case-sensitive
 # GitHub repository coordinate under Quantum-L9. Thirty-two entries, every
 # one lifecycle `current` and class l9.repository-class/l9@1. This is a pin,
 # not a rule: a repository is listed because it was admitted, and admitting
@@ -5788,6 +5788,7 @@ RC023_REPOSITORIES = {
     "l9-ci-sdk": "l9-ci-sdk",
     "l9-codegen": "l9-codegen",
     "l9-cognitive-runtime": "l9-cognitive-runtime",
+    "l9-conformance": "l9-conformance",
     "l9-constellation-ingest": "l9-constellation-ingest",
     "l9-constellation-topology": "l9-constellation-topology",
     "l9-dependency-template": "l9-dependency-template",
@@ -5807,7 +5808,7 @@ RC023_REPOSITORIES = {
     "l9-semantic-compiler-engine": "l9-semantic-compiler-engine",
     "l9-wip": "l9-wip",
 }
-RC023_REPOSITORY_COUNT = 32
+RC023_REPOSITORY_COUNT = 33
 
 
 def _rc023_fail(

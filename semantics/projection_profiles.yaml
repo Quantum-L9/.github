@@ -93,6 +93,14 @@ source_classes:
     canonical_artifact: semantic_dependency_model.yaml
   conformance_profiles:
     canonical_owner: l9-conformance
+    # Reachable publication coordinate. The profile body is owned by
+    # l9-conformance; this ledger does not admit fixtures or release law.
+    admitted_profiles:
+      - id: l9.fixture-profile/core@1
+        conformance_class: core
+        distribution_repository: Quantum-L9/l9-conformance
+        distribution_path: catalog/fixture-profile-core-1.yaml
+        digest: sha256:3d2cb01a2b872215a3e2298b4e3b3d7ae99ecf867d6486f5730a3f98aba2bb2f
   product_topology:
     canonical_artifact: product_topology.schema.yaml
   requirement_model:

@@ -172,6 +172,13 @@ repositories:
       repository: l9-cognitive-runtime
     lifecycle: current
     class_ref: l9.repository-class/l9@1
+  - id: l9-conformance
+    coordinate:
+      provider: github
+      organization: Quantum-L9
+      repository: l9-conformance
+    lifecycle: current
+    class_ref: l9.repository-class/l9@1
   - id: l9-constellation-ingest
     coordinate:
       provider: github
