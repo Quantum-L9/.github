@@ -1154,21 +1154,35 @@ terms:
     rules:
     - governance_profile_is_not_actor_identity
     - governance_profile_selection_does_not_change_identity
+  strategy:
+    semantic_class: semantic_concept
+    definition: An integrated theory of intended change that identifies desired future conditions, causal beliefs about
+      how relevant conditions and actions may influence those conditions, and chosen courses of action under uncertainty.
+    detailed_model: strategic_cognition_model.yaml
   strategic_cognition:
     semantic_class: reasoning_concern
-    definition: The reasoning concern that converts current authoritative understanding plus strategic intent into
-      maintained strategic direction. It owns neither the underlying truth sources nor runtime execution.
-    question: How is current understanding turned into maintained strategic direction?
+    definition: The reasoning concern through which the Plan Keeper compares current authoritative understanding and
+      Strategic Intent with the current Strategy to determine whether the Strategic Plan should remain unchanged or be revised.
+    question: How should the current Strategy respond to authoritative understanding and Strategic Intent?
     detailed_model: strategic_cognition_model.yaml
   strategic_plan:
     semantic_class: authoritative_record
-    definition: The maintained statement of strategic direction produced by Strategic Cognition and owned by the
-      Plan Keeper within an explicitly granted strategic scope.
+    definition: The authoritative maintained record of the current Strategy within a scope for which the Plan Keeper has
+      been granted Strategic Authority.
     detailed_model: strategic_cognition_model.yaml
+  strategic_intent:
+    semantic_class: semantic_concept
+    definition: The purpose supplied by an applicable authority that constrains what the current Strategy is intended to advance.
+    detailed_model: strategic_cognition_model.yaml
+  strategic_authority:
+    semantic_class: governance
+    definition: Explicitly granted authority to create, revise, or supersede the Strategy represented by the Strategic Plan
+      within a bounded scope.
+    detailed_model: authority_model.yaml
   plan_keeper:
     semantic_class: semantic_role
-    definition: The strategic reasoning role that maintains the Strategic Plan within explicitly granted strategic
-      authority. It is a semantic role, not an ActorIdentity.
+    definition: The reasoning role that maintains the Strategic Plan within granted Strategic Authority.
+      It is a semantic role, not an ActorIdentity.
     detailed_model: strategic_cognition_model.yaml
   strategic_plan_metacognitive_reasoner:
     semantic_class: semantic_role
@@ -1179,33 +1193,33 @@ terms:
   current_meta_view:
     semantic_class: derived_artifact
     definition: The bounded, derived, disposable, non-authoritative, provenance-preserving composed projection used
-      for strategic reasoning; it is invalidated when its source truth changes.
+      when reasoning about Strategy; it is invalidated when its source truth changes.
     detailed_model: strategic_cognition_model.yaml
   strategic_goal:
-    semantic_class: strategic_direction
-    definition: A broad desired future condition L9 intentionally seeks because its realization advances applicable
-      Strategic Intent. Planning horizon does not create a separate Goal type.
+    semantic_class: semantic_concept
+    definition: A broad desired future condition represented in the current Strategy because its realization would
+      advance Strategic Intent. Planning horizon does not create a separate Goal type.
     detailed_model: strategic_plan_model.yaml
   strategic_target:
-    semantic_class: strategic_direction
-    definition: A more concrete desired condition, threshold, milestone, or recognizable state whose realization
-      provides bounded strategic resolution toward one or more Strategic Goals. It does not redefine objective.
+    semantic_class: semantic_concept
+    definition: A more concrete desired condition, threshold, milestone, or recognizable state represented in the
+      current Strategy to give bounded resolution to progress toward one or more Strategic Goals. It does not redefine objective.
     detailed_model: strategic_plan_model.yaml
   strategic_hypothesis:
-    semantic_class: strategic_belief
-    definition: A Plan-owned epistemic causal claim about how conditions, capabilities, constraints, actions, or
-      combinations thereof are believed to influence strategic realization. It is not authoritative external truth.
+    semantic_class: semantic_concept
+    definition: A Plan-owned causal belief represented in the current Strategy about how conditions, capabilities,
+      constraints, actions, or combinations thereof may influence realization of Strategic Goals or Targets. It is not authoritative external truth.
     detailed_model: strategic_plan_model.yaml
   strategic_commitment:
-    semantic_class: strategic_direction
-    definition: A strategic path, approach, or course of action L9 has actually chosen to pursue under applicable
-      strategic authority, as distinct from a candidate path considered during reasoning.
+    semantic_class: semantic_concept
+    definition: A course of action recorded in the current Strategy as chosen for pursuit under Strategic Authority,
+      distinct from a candidate path considered during reasoning.
     detailed_model: strategic_plan_model.yaml
   affected_strategic_closure:
-    semantic_class: strategic_reasoning_concept
-    definition: The smallest reachable set of strategic claims whose current reasoning may materially depend on a
+    semantic_class: reasoning_concern
+    definition: The smallest reachable set of Plan-owned claims whose current justification may materially depend on a
       changed belief, reference, condition, or authoritative input. It identifies what requires reconsideration
-      and neither decides strategy nor modifies the Strategic Plan.
+      and neither decides Strategy nor modifies the Strategic Plan.
     detailed_model: strategic_plan_model.yaml
 relationships:
   authority_flow:
