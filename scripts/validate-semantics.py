@@ -1983,13 +1983,15 @@ STRATEGY_OWNER = "Quantum-L9/.github"
 PLAN_KEEPER = "plan_keeper"
 METACOGNITIVE_REASONER = "strategic_plan_metacognitive_reasoner"
 STRATEGY_TERMS = (
+    "strategy",
     "strategic_cognition",
     "strategic_plan",
+    "strategic_intent",
     PLAN_KEEPER,
     METACOGNITIVE_REASONER,
     "current_meta_view",
 )
-STRATEGY_AUTHORITY_SOURCE = "explicitly_granted_strategic_authority"
+STRATEGY_AUTHORITY_SOURCE = "strategic_authority"
 STRATEGY_RESOLUTION_REF = "authority_model.yaml#strategic_cognition_authority"
 STRATEGY_COMPILER_BOUNDARY_REF = "vocabulary.yaml#stage_rules.reasoning_plane_rule"
 METACOGNITION_DENIED = {
@@ -2000,14 +2002,14 @@ METACOGNITION_DENIED = {
 # The Plan Keeper's admitted permissions, exactly. An allowlist, not a
 # blocklist: any other grant is authority self-expansion and fails closed.
 PLAN_KEEPER_MAY = {
-    "revise_strategic_direction_within_explicitly_granted_strategic_authority",
+    "revise_strategic_plan_within_granted_strategic_authority",
     "consume_planning_cognition_lessons",
 }
 PLAN_KEEPER_MAY_NOT = {
     "acquire_truth_source_ownership_by_consuming_projections",
     "derive_authority_from_reasoning_capability",
     "become_execution_or_implementation_authority_by_implication",
-    "revise_strategic_direction_beyond_granted_strategic_authority",
+    "revise_strategic_plan_beyond_granted_strategic_authority",
 }
 METACOGNITION_MAY_NOT = {
     "modify_strategic_plan",
@@ -2686,7 +2688,7 @@ def _check_rc016_negative_cases(docs: dict[str, dict], report: Report) -> None:
 
     case = copy.deepcopy(docs)
     case[model]["roles"][PLAN_KEEPER]["may"].append(
-        "revise_strategic_direction_without_authority"
+        "revise_strategic_plan_without_authority"
     )
     cases.append(
         (
@@ -2699,7 +2701,7 @@ def _check_rc016_negative_cases(docs: dict[str, dict], report: Report) -> None:
 
     case = copy.deepcopy(docs)
     case[model]["roles"][PLAN_KEEPER]["may_not"].remove(
-        "revise_strategic_direction_beyond_granted_strategic_authority"
+        "revise_strategic_plan_beyond_granted_strategic_authority"
     )
     cases.append(
         (
@@ -3396,7 +3398,7 @@ PLAN_RELATION_RULES = {
     "material_causal_enables_claims_remain_attributable_to_a_strategic_hypothesis",
 }
 PLAN_GLOBAL_RULES = {
-    "strategic_plan_owns_strategy_not_reality",
+    "strategic_plan_represents_strategy_without_absorbing_external_truth_ownership",
     "strategic_hypothesis_is_plan_owned_belief_not_authoritative_truth",
     "reality_change_may_require_reconsideration_but_never_directly_modifies_or_invalidates_strategic_plan",
     "reasoning_workspace_content_is_not_strategic_plan_content_without_authorized_decision",
@@ -3405,6 +3407,7 @@ PLAN_GLOBAL_RULES = {
     "outcome_of_one_primitive_does_not_establish_correctness_of_another",
 }
 PLAN_REUSED_CONCEPTS = {
+    "strategy": "strategic_cognition_model.yaml#concepts.strategy",
     "objective": "vocabulary.yaml#terms.objective",
     "strategic_intent": "strategic_cognition_model.yaml#concepts.strategic_intent",
 }
@@ -6653,6 +6656,265 @@ def check_rc009(docs: dict[str, dict], report: Report) -> None:
         )
 
 
+
+# RC-024 Strategy semantic-root closure. Strategy must be independently defined
+# without using strategy/strategic to define itself, and the current strategic
+# semantic family must resolve through that root.
+RC024_STRATEGY_DEFINITION = (
+    "An integrated theory of intended change that identifies desired future conditions, causal beliefs about "
+    "how relevant conditions and actions may influence those conditions, and chosen courses of action under uncertainty."
+)
+RC024_INTENT_DEFINITION = (
+    "The purpose supplied by an applicable authority that constrains what the current Strategy is intended to advance."
+)
+RC024_PLAN_DEFINITION = (
+    "The authoritative maintained record of the current Strategy within a scope for which the Plan Keeper has "
+    "been granted Strategic Authority."
+)
+RC024_AUTHORITY_DEFINITION = (
+    "Explicitly granted authority to create, revise, or supersede the Strategy represented by the Strategic Plan "
+    "within a bounded scope."
+)
+RC024_GHOSTS = {
+    "maintained_strategic_direction",
+    "revise_strategic_direction_within_explicitly_granted_strategic_authority",
+    "revise_strategic_direction_beyond_granted_strategic_authority",
+    "strategic_plan_owns_strategy_not_reality",
+    "semantic_class: strategic_direction",
+}
+
+
+def _rc024_norm(value: object) -> str:
+    return " ".join(str(value or "").split())
+
+
+def _evaluate_rc024(docs: dict[str, dict], report: Report) -> None:
+    cognition = _mapping(docs.get(STRATEGY_MODEL_PATH))
+    concepts = _mapping(cognition.get("concepts"))
+    strategy = _mapping(concepts.get("strategy"))
+    root = _rc024_norm(strategy.get("definition"))
+    if root != RC024_STRATEGY_DEFINITION:
+        report.fail(
+            "RC-024",
+            STRATEGY_MODEL_PATH,
+            "concepts.strategy.definition",
+            strategy.get("definition"),
+            "Strategy must match the admitted semantic-root definition",
+        )
+    if re.search(r"\bstrateg(?:y|ic)\b", root, flags=re.IGNORECASE):
+        report.fail(
+            "RC-024",
+            STRATEGY_MODEL_PATH,
+            "concepts.strategy.definition",
+            strategy.get("definition"),
+            "Strategy may not define itself using strategy or strategic",
+        )
+
+    intent = _mapping(concepts.get("strategic_intent"))
+    if (
+        _rc024_norm(intent.get("definition")) != RC024_INTENT_DEFINITION
+        or intent.get("authority_ref") != "authority_model.yaml#strategic_authority"
+    ):
+        report.fail(
+            "RC-024",
+            STRATEGY_MODEL_PATH,
+            "concepts.strategic_intent",
+            intent,
+            "Strategic Intent must constrain Strategy and resolve Strategic Authority",
+        )
+
+    plan = _mapping(concepts.get("strategic_plan"))
+    if _rc024_norm(plan.get("definition")) != RC024_PLAN_DEFINITION:
+        report.fail(
+            "RC-024",
+            STRATEGY_MODEL_PATH,
+            "concepts.strategic_plan.definition",
+            plan.get("definition"),
+            "Strategic Plan must be the authoritative maintained record of current Strategy",
+        )
+
+    authority = _mapping(
+        _mapping(docs.get(STRATEGY_AUTHORITY_PATH)).get("strategic_authority")
+    )
+    if (
+        _rc024_norm(authority.get("definition")) != RC024_AUTHORITY_DEFINITION
+        or authority.get("strategy_concept_ref")
+        != "strategic_cognition_model.yaml#concepts.strategy"
+    ):
+        report.fail(
+            "RC-024",
+            STRATEGY_AUTHORITY_PATH,
+            "strategic_authority",
+            authority,
+            "Strategic Authority must be explicit and resolve to the Strategy root",
+        )
+    if authority.get("grant_must_be_explicit") is not True:
+        report.fail(
+            "RC-024",
+            STRATEGY_AUTHORITY_PATH,
+            "strategic_authority.grant_must_be_explicit",
+            authority.get("grant_must_be_explicit"),
+            "Strategic Authority must be explicitly granted",
+        )
+
+    resolution = _mapping(
+        _mapping(docs.get(STRATEGY_AUTHORITY_PATH)).get("strategic_cognition_authority")
+    )
+    if resolution.get("strategic_plan_authority_source") != "strategic_authority":
+        report.fail(
+            "RC-024",
+            STRATEGY_AUTHORITY_PATH,
+            "strategic_cognition_authority.strategic_plan_authority_source",
+            resolution.get("strategic_plan_authority_source"),
+            "Strategic Plan authority must resolve to Strategic Authority",
+        )
+
+    plan_model = _mapping(docs.get(PLAN_MODEL_PATH))
+    reused = _mapping(plan_model.get("reused_concepts"))
+    if reused.get("strategy") != {
+        "concept_ref": "strategic_cognition_model.yaml#concepts.strategy",
+        "owned_here": False,
+    }:
+        report.fail(
+            "RC-024",
+            PLAN_MODEL_PATH,
+            "reused_concepts.strategy",
+            reused.get("strategy"),
+            "Strategic Plan content must reuse Strategy without ownership transfer",
+        )
+
+    vocab = _mapping(_mapping(docs.get(VOCABULARY_PATH)).get("terms"))
+    expected = {
+        "strategy": (RC024_STRATEGY_DEFINITION, "strategic_cognition_model.yaml"),
+        "strategic_intent": (RC024_INTENT_DEFINITION, "strategic_cognition_model.yaml"),
+        "strategic_plan": (RC024_PLAN_DEFINITION, "strategic_cognition_model.yaml"),
+        "strategic_authority": (RC024_AUTHORITY_DEFINITION, "authority_model.yaml"),
+    }
+    for name, (definition, model_name) in expected.items():
+        term = _mapping(vocab.get(name))
+        if (
+            _rc024_norm(term.get("definition")) != definition
+            or term.get("detailed_model") != model_name
+        ):
+            report.fail(
+                "RC-024",
+                VOCABULARY_PATH,
+                f"terms.{name}",
+                term,
+                "strategy-family vocabulary must mirror its canonical semantic owner",
+            )
+
+    serialized = "\n".join(
+        (_rc024_norm(cognition), _rc024_norm(plan_model), _rc024_norm(vocab))
+    )
+    for ghost in sorted(RC024_GHOSTS):
+        if ghost in serialized:
+            report.fail(
+                "RC-024",
+                STRATEGY_MODEL_PATH,
+                "ghost_semantics",
+                ghost,
+                "retired strategic-direction semantics must be absent from current canonical strategy ledgers",
+            )
+
+
+def _check_rc024_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    cases = []
+
+    case = copy.deepcopy(docs)
+    case[STRATEGY_MODEL_PATH]["concepts"]["strategy"]["definition"] = (
+        "The strategic direction maintained by the Strategic Plan."
+    )
+    cases.append(
+        (
+            "circular Strategy definition",
+            case,
+            STRATEGY_MODEL_PATH,
+            "concepts.strategy.definition",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    del case[STRATEGY_AUTHORITY_PATH]["strategic_authority"]
+    cases.append(
+        (
+            "Strategic Authority removed",
+            case,
+            STRATEGY_AUTHORITY_PATH,
+            "strategic_authority",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    case[STRATEGY_MODEL_PATH]["roles"][PLAN_KEEPER]["may"][0] = (
+        "revise_strategic_direction_within_explicitly_granted_strategic_authority"
+    )
+    cases.append(
+        (
+            "ghost Plan Keeper permission restored",
+            case,
+            STRATEGY_MODEL_PATH,
+            "ghost_semantics",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    del case[PLAN_MODEL_PATH]["reused_concepts"]["strategy"]
+    cases.append(
+        (
+            "Strategic Plan detached from Strategy root",
+            case,
+            PLAN_MODEL_PATH,
+            "reused_concepts.strategy",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    case[VOCABULARY_PATH]["terms"]["strategy"]["definition"] = (
+        "A maintained strategic direction."
+    )
+    cases.append(
+        (
+            "vocabulary drifts from Strategy root",
+            case,
+            VOCABULARY_PATH,
+            "terms.strategy",
+        )
+    )
+
+    for label, candidate, path, field in cases:
+        candidate_report = Report()
+        _evaluate_rc024(candidate, candidate_report)
+        prefix = f"FAIL RC-024 {path} {field}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-024",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {path} {field}",
+            )
+
+    if not any(
+        f.startswith(f"FAIL RC-024 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-024-NEG",
+            f"{len(cases)} Strategy semantic-root negative cases fail closed for their intended reason",
+        )
+
+
+def check_rc024(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc024(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-024",
+            "Strategy is a non-circular semantic root and Intent, Plan, Authority, Plan content, and vocabulary resolve through it without strategic-direction ghosts",
+        )
+        _check_rc024_negative_cases(docs, report)
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -6706,6 +6968,7 @@ def main(argv: list[str]) -> int:
     check_rc021(docs, report)
     check_rc022(docs, report)
     check_rc023(docs, report)
+    check_rc024(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:

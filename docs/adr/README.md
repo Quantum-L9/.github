@@ -36,8 +36,9 @@ ProductTopology
 - ADR-013: Global actor and surface identity registries
 - ADR-014: Strategic Cognition in the Reasoning Plane
 - ADR-015: Strategic Plan semantic model
+- ADR-016: Strategy semantic root closure
 
-ADR-001 through ADR-015 are the global semantic decisions. They live in this
+ADR-001 through ADR-016 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions

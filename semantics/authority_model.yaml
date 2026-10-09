@@ -211,12 +211,20 @@ identity_authority:
   - identity_assertion_does_not_grant_authorization
   - governance_profile_selection_does_not_rewrite_identity
   - memory_and_receipt_consumers_do_not_own_actor_identity_semantics
+strategic_authority:
+  definition: Explicitly granted authority to create, revise, or supersede the Strategy represented by the Strategic Plan within a bounded scope.
+  strategy_concept_ref: strategic_cognition_model.yaml#concepts.strategy
+  grant_must_be_explicit: true
+  may_not_be_inferred_from:
+  - reasoning_capability
+  - projection_consumption
+  - metacognitive_output
 strategic_cognition_authority:
   global_semantics_owner: Quantum-L9/.github
   detailed_model: strategic_cognition_model.yaml
   invariant_ref: L9-STRATEGY-001
   strategic_plan_owner: plan_keeper
-  strategic_plan_authority_source: explicitly_granted_strategic_authority
+  strategic_plan_authority_source: strategic_authority
   strategic_plan_reasoning_analysis_owner: strategic_plan_metacognitive_reasoner
   metacognition_denied:
   - strategic_plan_mutation
