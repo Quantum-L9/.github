@@ -87,6 +87,7 @@ properties:
           type: string
         basis_refs:
           type: semantic_ref_list
+          min_items: 1
   patterns:
     type: array
     items:
@@ -109,6 +110,7 @@ properties:
           type: string
         occurrence_refs:
           type: semantic_ref_list
+          min_items: 2
   lessons:
     type: array
     items:
@@ -125,6 +127,7 @@ properties:
           type: string
         basis_refs:
           type: semantic_ref_list
+          min_items: 1
         applicability_scope_refs:
           type: semantic_ref_list
         authority_effect:

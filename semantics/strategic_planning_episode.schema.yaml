@@ -34,7 +34,7 @@ required:
 - strategic_intent_refs
 - objective_refs
 - current_meta_view
-- trigger_refs
+- trigger_sources
 - workspace
 - recommendation
 - provenance
@@ -77,8 +77,20 @@ properties:
         type: semantic_ref
       digest:
         type: semantic_digest
-  trigger_refs:
-    type: semantic_ref_list
+  trigger_sources:
+    type: array
+    items:
+      type: object
+      required:
+      - ref
+      - digest
+      fields:
+        ref:
+          type: semantic_ref
+        digest:
+          type: semantic_digest
+        change_ref:
+          type: semantic_ref
   workspace:
     type: object
     required:
@@ -106,6 +118,7 @@ properties:
               type: string
             source_refs:
               type: semantic_ref_list
+              min_items: 1
       assumptions:
         type: array
         items:

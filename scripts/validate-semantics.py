@@ -7211,7 +7211,7 @@ def _rc026_episode(docs: dict[str, dict], report: Report) -> None:
     if inst.get("authority_class") != "derived" or inst.get("authoritative") is not False or inst.get("authority_effect") != "none" or inst.get("producer_role") != "plan_keeper":
         report.fail("RC-026", path, "instance_semantics", inst, "Planning Episode must remain Plan-Keeper-produced derived reasoning with zero authority effect")
     required = _rc026_required(schema)
-    expected = {"schema", "episode_ref", "plan_ref", "plan_revision_ref", "plan_graph_digest", "strategic_authority_ref", "strategic_intent_refs", "objective_refs", "current_meta_view", "trigger_refs", "workspace", "recommendation", "provenance", "episode_digest"}
+    expected = {"schema", "episode_ref", "plan_ref", "plan_revision_ref", "plan_graph_digest", "strategic_authority_ref", "strategic_intent_refs", "objective_refs", "current_meta_view", "trigger_sources", "workspace", "recommendation", "provenance", "episode_digest"}
     if required != expected:
         report.fail("RC-026", path, "required", sorted(required), "Planning Episode required field set drifted")
     props = _mapping(schema.get("properties"))
