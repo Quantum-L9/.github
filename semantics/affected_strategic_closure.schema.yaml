@@ -1,0 +1,86 @@
+schema: l9.schema-definition/v1
+artifact_id: l9.schema/affected-strategic-closure@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_affected_strategic_closure_schema
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: affected_strategic_closure.schema.yaml
+governed_by:
+  semantic_model_ref: strategic_plan_model.yaml#reasoning_concepts.affected_strategic_closure
+  strategic_plan_graph_schema_ref: l9.schema/strategic-plan-graph@1
+  strategic_cognition_ref: strategic_cognition_model.yaml
+purpose: >
+  Define the minimum provenance-bound representation of Affected Strategic
+  Closure for one exact Strategic Plan revision and one exact set of changed
+  authoritative inputs. This schema represents the output of selective impact
+  reasoning; it does not define the closure algorithm, decide Strategy, mutate
+  or invalidate the Strategic Plan, or convert a changed reality fact directly
+  into a strategic revision.
+instance_semantics:
+  authority_class: derived
+  authoritative: false
+  authority_effect: none
+  disposable: true
+  recomputable: true
+type: object
+required:
+- schema
+- closure_ref
+- plan_ref
+- plan_revision_ref
+- plan_graph_digest
+- trigger_sources
+- affected_plan_refs
+- provenance
+- closure_digest
+properties:
+  schema:
+    const: l9.affected-strategic-closure/v1
+  closure_ref:
+    type: semantic_ref
+  plan_ref:
+    type: semantic_ref
+  plan_revision_ref:
+    type: semantic_ref
+  plan_graph_digest:
+    type: semantic_digest
+  trigger_sources:
+    type: array
+    min_items: 1
+    items:
+      type: object
+      required:
+      - ref
+      - digest
+      fields:
+        ref:
+          type: semantic_ref
+        digest:
+          type: semantic_digest
+        change_ref:
+          type: semantic_ref
+  affected_plan_refs:
+    type: semantic_ref_list
+  unresolved_refs:
+    type: semantic_ref_list
+  provenance:
+    type: object
+  closure_digest:
+    type: semantic_digest
+closure_rules:
+  affected_refs_must_resolve_to_plan_owned_claims_in_bound_revision: true
+  empty_closure_is_valid_when_no_plan_owned_claim_materially_depends_on_trigger: true
+  unresolved_dependency_is_preserved_as_unknown: true
+  closure_algorithm_is_not_defined_by_this_schema: true
+  closure_result_is_invalidated_by_bound_plan_revision_or_trigger_digest_change: true
+semantic_rules:
+- affected_strategic_closure_is_derived_reasoning_not_strategy
+- closure_identifies_reconsideration_frontier_only
+- closure_does_not_decide_strategy
+- closure_does_not_modify_or_invalidate_strategic_plan
+- closure_does_not_mark_plan_claims_false_or_stale_automatically
+- closure_does_not_transfer_truth_source_ownership
+- source_provenance_and_exact_digests_are_required

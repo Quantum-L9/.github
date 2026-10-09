@@ -48,6 +48,10 @@ requires:
   - strategic_cognition_model.yaml
   - strategic_plan_model.yaml
   - strategic_plan_graph.schema.yaml
+  - affected_strategic_closure.schema.yaml
+  - strategic_planning_episode.schema.yaml
+  - strategic_plan_revision_candidate.schema.yaml
+  - strategic_plan_metacognitive_analysis.schema.yaml
   compiler_catalogs:
   - compiler_passes.yaml
   - derivation_profiles.yaml

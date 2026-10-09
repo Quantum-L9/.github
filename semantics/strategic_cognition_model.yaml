@@ -43,6 +43,9 @@ global_rules:
   strategic_label_does_not_create_authority_or_ownership: true
   metacognition_is_advisory_to_strategic_authority: true
   semantic_compiler_remains_independent_of_reasoning_plane: true
+  planning_episode_is_non_authoritative_reasoning_record: true
+  plan_revision_candidate_is_not_strategy_until_admitted_under_strategic_authority: true
+  metacognitive_analysis_is_advisory_and_cannot_mutate_strategy: true
 concepts:
   strategy:
     definition: An integrated theory of intended change that identifies desired future conditions, causal beliefs about
@@ -90,6 +93,43 @@ concepts:
     owned_here: false
     owner: applicable_strategic_authority
     authority_ref: authority_model.yaml#strategic_authority
+reasoning_artifacts:
+  strategic_planning_episode:
+    definition: An immutable, non-authoritative record of one bounded Plan Keeper reasoning episode over exact planning
+      inputs, observations, assumptions, candidate paths, evaluations, material Unknowns, and its recommendation.
+    producer_role: plan_keeper
+    authority_class: derived
+    schema_ref: l9.schema/strategic-planning-episode@1
+    authority_effect: none
+    may_not:
+    - become_strategic_plan_content_by_recording
+    - grant_strategic_authority
+    - mutate_strategic_plan
+  strategic_plan_revision_candidate:
+    definition: A digest-bound candidate binding an exact predecessor Strategic Plan revision, one exact proposed
+      Strategic Plan Graph, and the planning episode that produced it. Candidate status alone does not revise Strategy.
+    producer_role: plan_keeper
+    authority_class: candidate
+    schema_ref: l9.schema/strategic-plan-revision-candidate@1
+    authority_effect: none_until_admitted
+    may_not:
+    - self_admit
+    - mutate_strategic_plan_without_applicable_strategic_authority
+    - float_across_changed_candidate_or_proposed_graph_digests
+  strategic_plan_metacognitive_analysis:
+    definition: An immutable advisory analysis of exact Plan Keeper reasoning episodes, Plan revisions, and outcome
+      evidence that identifies findings, recurring reasoning patterns, and planning cognition lessons without deciding
+      or modifying Strategy.
+    producer_role: strategic_plan_metacognitive_reasoner
+    owner_role: strategic_plan_metacognitive_reasoner
+    authority_class: derived
+    schema_ref: l9.schema/strategic-plan-metacognitive-analysis@1
+    output_authority: advisory
+    authority_effect: none
+    may_not:
+    - modify_strategic_plan
+    - become_strategic_authority
+    - convert_lesson_into_strategic_decision
 roles:
   plan_keeper:
     role_kind: semantic_role
@@ -103,6 +143,8 @@ roles:
     - strategic_plan
     may:
     - revise_strategic_plan_within_granted_strategic_authority
+    - emit_strategic_planning_episode
+    - emit_strategic_plan_revision_candidate
     - consume_planning_cognition_lessons
     authority_source: strategic_authority
     does_not_own:
@@ -117,6 +159,8 @@ roles:
     - acquire_truth_source_ownership_by_consuming_projections
     - derive_authority_from_reasoning_capability
     - become_execution_or_implementation_authority_by_implication
+    - treat_planning_episode_as_strategic_plan_content
+    - treat_revision_candidate_as_authorized_plan_revision_without_admission
     - revise_strategic_plan_beyond_granted_strategic_authority
   strategic_plan_metacognitive_reasoner:
     role_kind: semantic_role
@@ -131,12 +175,14 @@ roles:
     - analyze_plan_keeper_reasoning_episodes
     - compare_planning_reasoning_expectations_outcomes_and_revisions
     - identify_recurring_planning_reasoning_strengths_and_failure_patterns
+    - emit_strategic_plan_metacognitive_analysis
     - emit_planning_cognition_lessons_for_plan_keeper
     may_not:
     - modify_strategic_plan
     - supersede_plan_keeper
     - become_strategic_authority
     - grant_itself_strategic_authority
+    - treat_metacognitive_analysis_as_strategic_decision
     - convert_metacognitive_conclusions_into_strategic_decisions
     strategic_authority: false
     output_authority: advisory

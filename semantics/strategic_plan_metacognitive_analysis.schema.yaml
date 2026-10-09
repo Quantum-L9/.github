@@ -1,0 +1,156 @@
+schema: l9.schema-definition/v1
+artifact_id: l9.schema/strategic-plan-metacognitive-analysis@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_strategic_plan_metacognitive_analysis_schema
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: strategic_plan_metacognitive_analysis.schema.yaml
+governed_by:
+  semantic_model_ref: strategic_cognition_model.yaml#reasoning_artifacts.strategic_plan_metacognitive_analysis
+  role_ref: strategic_cognition_model.yaml#roles.strategic_plan_metacognitive_reasoner
+  authority_ref: authority_model.yaml#strategic_cognition_authority
+purpose: >
+  Define the minimum advisory artifact through which the Strategic Plan
+  Metacognitive Reasoner analyzes exact Plan Keeper reasoning episodes, Plan
+  revisions, and outcome evidence; identifies findings and recurring reasoning
+  patterns; and emits planning cognition lessons for the Plan Keeper. The
+  artifact has no Strategic Authority and cannot become a strategic decision,
+  Plan revision, truth source, or universal metacognitive authority.
+instance_semantics:
+  authority_class: derived
+  authoritative: false
+  output_authority: advisory
+  authority_effect: none
+  producer_role: strategic_plan_metacognitive_reasoner
+type: object
+required:
+- schema
+- analysis_ref
+- plan_ref
+- subject_episodes
+- plan_revision_refs
+- outcome_evidence_refs
+- findings
+- patterns
+- lessons
+- provenance
+- analysis_digest
+properties:
+  schema:
+    const: l9.strategic-plan-metacognitive-analysis/v1
+  analysis_ref:
+    type: semantic_ref
+  plan_ref:
+    type: semantic_ref
+  subject_episodes:
+    type: array
+    min_items: 1
+    items:
+      type: object
+      required:
+      - ref
+      - digest
+      fields:
+        ref:
+          type: semantic_ref
+        digest:
+          type: semantic_digest
+  plan_revision_refs:
+    type: semantic_ref_list
+  outcome_evidence_refs:
+    type: semantic_ref_list
+  prior_analysis_refs:
+    type: semantic_ref_list
+  findings:
+    type: array
+    items:
+      type: object
+      required:
+      - ref
+      - kind
+      - statement
+      - basis_refs
+      fields:
+        ref:
+          type: semantic_ref
+        kind:
+          enum:
+          - reasoning_strength
+          - reasoning_failure
+          - expectation_outcome_mismatch
+          - revision_pattern
+          - unknown
+        statement:
+          type: string
+        basis_refs:
+          type: semantic_ref_list
+          min_items: 1
+  patterns:
+    type: array
+    items:
+      type: object
+      required:
+      - ref
+      - kind
+      - statement
+      - occurrence_refs
+      fields:
+        ref:
+          type: semantic_ref
+        kind:
+          enum:
+          - recurring_reasoning_strength
+          - recurring_reasoning_failure
+          - recurring_expectation_outcome_pattern
+          - unknown
+        statement:
+          type: string
+        occurrence_refs:
+          type: semantic_ref_list
+          min_items: 2
+  lessons:
+    type: array
+    items:
+      type: object
+      required:
+      - ref
+      - statement
+      - basis_refs
+      - authority_effect
+      fields:
+        ref:
+          type: semantic_ref
+        statement:
+          type: string
+        basis_refs:
+          type: semantic_ref_list
+          min_items: 1
+        applicability_scope_refs:
+          type: semantic_ref_list
+        authority_effect:
+          const: none
+  unresolved:
+    type: unknown_list
+  provenance:
+    type: object
+  analysis_digest:
+    type: semantic_digest
+analysis_rules:
+  findings_must_trace_to_exact_episode_revision_or_evidence_refs: true
+  recurring_pattern_requires_multiple_occurrence_refs: true
+  lessons_must_trace_to_findings_patterns_or_exact_source_refs: true
+  lesson_is_advisory_input_to_plan_keeper_only: true
+  metacognitive_analysis_cannot_modify_or_supersede_strategic_plan: true
+  metacognitive_analysis_cannot_grant_strategic_authority: true
+  metacognitive_analysis_cannot_reinterpret_external_evidence_as_owned_truth: true
+  metacognitive_analysis_is_not_universal_metacognitive_authority: true
+semantic_rules:
+- metacognitive_reasoner_learns_about_planning_reasoning_not_world_truth_ownership
+- analysis_is_advisory_and_non_mutating
+- analysis_does_not_convert_findings_patterns_or_lessons_into_strategic_decisions
+- analysis_may_compare_expectations_outcomes_and_revisions
+- analysis_preserves_dissent_unknown_and_unresolved_results
+- analysis_is_provider_model_prompt_memory_and_storage_neutral

@@ -240,6 +240,30 @@ sources:
   canonical: true
   projection_allowed: true
   derivation_allowed: false
+- id: l9.source/affected-strategic-closure-schema@1
+  path: semantics/affected_strategic_closure.schema.yaml
+  format: yaml
+  canonical: true
+  projection_allowed: true
+  derivation_allowed: false
+- id: l9.source/strategic-planning-episode-schema@1
+  path: semantics/strategic_planning_episode.schema.yaml
+  format: yaml
+  canonical: true
+  projection_allowed: true
+  derivation_allowed: false
+- id: l9.source/strategic-plan-revision-candidate-schema@1
+  path: semantics/strategic_plan_revision_candidate.schema.yaml
+  format: yaml
+  canonical: true
+  projection_allowed: true
+  derivation_allowed: false
+- id: l9.source/strategic-plan-metacognitive-analysis-schema@1
+  path: semantics/strategic_plan_metacognitive_analysis.schema.yaml
+  format: yaml
+  canonical: true
+  projection_allowed: true
+  derivation_allowed: false
 rules:
   canonical_sources_must_be_registered: true
   source_ids_are_immutable: true

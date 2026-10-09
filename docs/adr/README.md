@@ -38,8 +38,9 @@ ProductTopology
 - ADR-015: Strategic Plan semantic model
 - ADR-016: Strategy semantic root closure
 - ADR-017: Federated authority graphs and Strategic Plan Graph representation
+- ADR-018: Strategic planning cognition artifact representations
 
-ADR-001 through ADR-017 are the global semantic decisions. They live in this
+ADR-001 through ADR-018 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions
