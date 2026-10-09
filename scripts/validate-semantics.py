@@ -7502,6 +7502,180 @@ def check_rc026(docs: dict[str, dict], report: Report) -> None:
         )
         _check_rc026_negative_cases(docs, report)
 
+# RC-027 cross-ledger reference closure. The byte-digest checks (SC-008,
+# RC-001, RC-002, RC-011) are regenerated at every release, so a dangling
+# contract or invariant reference introduced inside a release PR used to pass:
+# no check resolved the references themselves (RC-017 pins only the validation
+# contract's own invariants). RC-027 resolves the two typed reference lists a
+# ledger may carry: ``contracts[*].source_invariants`` against invariants.yaml,
+# and ``governed_by.contracts`` / ``governed_by.invariants`` against the two
+# canonical catalogs. Anchor-form references (``<ledger>.yaml#path``) stay with
+# the checks that pin them (RC-024 .. RC-026).
+GOVERNED_BY_FIELD = "governed_by"
+RC027_PROBE_CONTRACT_LEDGER = "semantics/product_kinds.yaml"
+RC027_PROBE_INVARIANT_LEDGER = "semantics/strategic_plan_model.yaml"
+
+
+def _rc027_declared_ids(docs: dict[str, dict], path: str, collection: str) -> set[str]:
+    entries = _list(_mapping(docs.get(path)).get(collection))
+    return {
+        str(_mapping(entry).get("id"))
+        for entry in entries
+        if isinstance(_mapping(entry).get("id"), str)
+    }
+
+
+def _evaluate_rc027(docs: dict[str, dict], report: Report) -> int:
+    invariant_ids = _rc027_declared_ids(docs, INVARIANTS_PATH, "invariants")
+    contract_ids = _rc027_declared_ids(docs, CONTRACTS_PATH, "contracts")
+    if not invariant_ids:
+        report.fail(
+            "RC-027", INVARIANTS_PATH, "invariants", None,
+            "invariant catalog declares no ids; references cannot be resolved",
+        )
+    if not contract_ids:
+        report.fail(
+            "RC-027", CONTRACTS_PATH, "contracts", None,
+            "contract catalog declares no ids; references cannot be resolved",
+        )
+    if not invariant_ids or not contract_ids:
+        return 0
+    resolved = 0
+    for index, entry in enumerate(_list(_mapping(docs.get(CONTRACTS_PATH)).get("contracts"))):
+        contract = _mapping(entry)
+        label = f"contracts[{contract.get('id') or index}].source_invariants"
+        cited = contract.get("source_invariants")
+        if not isinstance(cited, list):
+            report.fail(
+                "RC-027", CONTRACTS_PATH, label, cited,
+                "source_invariants must be a list of declared invariant ids",
+            )
+            continue
+        for ref in cited:
+            if isinstance(ref, str) and ref in invariant_ids:
+                resolved += 1
+            else:
+                report.fail(
+                    "RC-027", CONTRACTS_PATH, label, ref,
+                    "contract cites an invariant that invariants.yaml does not declare",
+                )
+    catalogs = (
+        ("contracts", contract_ids, "contract"),
+        ("invariants", invariant_ids, "invariant"),
+    )
+    for path, doc in sorted(docs.items()):
+        governed = _mapping(doc).get(GOVERNED_BY_FIELD)
+        if not isinstance(governed, dict):
+            continue
+        for field, declared, kind in catalogs:
+            if field not in governed:
+                continue
+            refs = governed.get(field)
+            label = f"{GOVERNED_BY_FIELD}.{field}"
+            if not isinstance(refs, list):
+                report.fail(
+                    "RC-027", path, label, refs,
+                    f"{label} must be a list of declared {kind} ids",
+                )
+                continue
+            for ref in refs:
+                if isinstance(ref, str) and ref in declared:
+                    resolved += 1
+                else:
+                    report.fail(
+                        "RC-027", path, label, ref,
+                        f"ledger is governed by a {kind} that the canonical catalog does not declare",
+                    )
+    return resolved
+
+
+def _check_rc027_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    cases: list[tuple[str, dict, str, str]] = []
+
+    case = copy.deepcopy(docs)
+    contract = _mapping(_list(case[CONTRACTS_PATH]["contracts"])[-1])
+    contract["source_invariants"][0] = "L9-NOPE-999"
+    cases.append(
+        (
+            "contract cites an undeclared invariant",
+            case,
+            CONTRACTS_PATH,
+            f"contracts[{contract.get('id')}].source_invariants",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    case[RC027_PROBE_CONTRACT_LEDGER][GOVERNED_BY_FIELD]["contracts"][0] = "l9.contract/nope@1"
+    cases.append(
+        (
+            "ledger governed by an undeclared contract",
+            case,
+            RC027_PROBE_CONTRACT_LEDGER,
+            f"{GOVERNED_BY_FIELD}.contracts",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    case[RC027_PROBE_INVARIANT_LEDGER][GOVERNED_BY_FIELD]["invariants"][0] = "L9-NOPE-999"
+    cases.append(
+        (
+            "ledger governed by an undeclared invariant",
+            case,
+            RC027_PROBE_INVARIANT_LEDGER,
+            f"{GOVERNED_BY_FIELD}.invariants",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    case[RC027_PROBE_CONTRACT_LEDGER][GOVERNED_BY_FIELD]["contracts"] = "l9.contract/product-kind@1"
+    cases.append(
+        (
+            "governed_by.contracts collapsed to a scalar",
+            case,
+            RC027_PROBE_CONTRACT_LEDGER,
+            f"{GOVERNED_BY_FIELD}.contracts",
+        )
+    )
+
+    case = copy.deepcopy(docs)
+    case[CONTRACTS_PATH]["contracts"] = []
+    cases.append(("contract catalog emptied", case, CONTRACTS_PATH, "contracts"))
+
+    for label, candidate, path, field in cases:
+        candidate_report = Report()
+        _evaluate_rc027(candidate, candidate_report)
+        prefix = f"FAIL RC-027 {path} {field}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-027",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {path} {field}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-027 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-027-NEG",
+            f"{len(cases)} cross-ledger reference negative cases fail closed at their intended field",
+        )
+
+
+def check_rc027(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    resolved = _evaluate_rc027(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-027",
+            f"{resolved} typed cross-ledger references resolve: every contracts[*].source_invariants "
+            "entry names a declared invariant and every governed_by.contracts / governed_by.invariants "
+            "entry names a declared contract or invariant",
+        )
+        _check_rc027_negative_cases(docs, report)
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -7558,6 +7732,7 @@ def main(argv: list[str]) -> int:
     check_rc024(docs, report)
     check_rc025(docs, report)
     check_rc026(docs, report)
+    check_rc027(docs, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
