@@ -3125,16 +3125,17 @@ def _rc017_cited_invariants(docs: dict[str, dict], report: Report) -> None:
     # invariants selected by GLOBAL_INVARIANTS_SELECTOR. A citation of a
     # declared invariant outside that selection reaches the consumer as a
     # dangling reference. A citation of an undeclared invariant is RC-027's.
-    invariants = (docs.get(INVARIANTS_PATH) or {}).get("invariants") or []
+    # Malformed collections are RC-027's to report; skipping them here keeps
+    # the validator from raising before RC-027 runs.
     scope_by_id: dict[str, object] = {}
-    for invariant in invariants:
+    for invariant in _list(_mapping(docs.get(INVARIANTS_PATH)).get("invariants")):
         if isinstance(invariant, dict) and "id" in invariant:
             scope_by_id.setdefault(str(invariant["id"]), invariant.get("scope"))
-    for contract in (docs.get(CONTRACTS_PATH) or {}).get("contracts") or []:
+    for contract in _list(_mapping(docs.get(CONTRACTS_PATH)).get("contracts")):
         if not isinstance(contract, dict):
             continue
         field = f"contracts[{contract.get('id')}].source_invariants"
-        for cited in contract.get("source_invariants") or []:
+        for cited in _list(contract.get("source_invariants")):
             if str(cited) in scope_by_id and scope_by_id[str(cited)] != "global":
                 report.fail(
                     "RC-017",
@@ -3398,7 +3399,10 @@ def _check_rc017_negative_cases(docs: dict[str, dict], report: Report) -> None:
             "l9.contract/projection@1 is absent, so the case cannot be constructed",
         )
     else:
-        contract["source_invariants"].append("INV-VALIDATION-MONOTONICITY")
+        contract["source_invariants"] = [
+            *_list(contract.get("source_invariants")),
+            "INV-VALIDATION-MONOTONICITY",
+        ]
         cases.append(
             (
                 "contract cites an invariant outside the projected global selection",
