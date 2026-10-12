@@ -2948,7 +2948,9 @@ def _rc017_source_invariants(
     contract: dict, docs: dict[str, dict], report: Report
 ) -> None:
     label = f"contracts[{VALIDATION_CONTRACT_ID}]"
-    declared = [str(item) for item in contract.get("source_invariants") or []]
+    # A non-list value is RC-027's to report; read it as empty so the run
+    # completes and the required invariants surface here as missing.
+    declared = [str(item) for item in _list(contract.get("source_invariants"))]
     missing = sorted(VALIDATION_SOURCE_INVARIANTS - set(declared))
     if missing:
         report.fail(
@@ -3269,6 +3271,17 @@ def _check_rc017_negative_cases(docs: dict[str, dict], report: Report) -> None:
     cases.append(
         (
             "assurance basis removed from source_invariants",
+            case,
+            CONTRACTS_PATH,
+            f"{contract_field}.source_invariants",
+        )
+    )
+
+    case, contract = mutated_contract()
+    contract["source_invariants"] = 7
+    cases.append(
+        (
+            "source_invariants is a scalar, not a list",
             case,
             CONTRACTS_PATH,
             f"{contract_field}.source_invariants",
