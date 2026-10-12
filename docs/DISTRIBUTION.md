@@ -33,6 +33,15 @@ file whose bytes differ per consumer. `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`,
 seeded copy would create a second owner. CI is never in the payload; the
 `on-org-update` and `l9-ci-pack` categories throw.
 
+Physical copy has three entrypoints and one decision. `auto-seed-new-repo.yml`
+(hourly), `seed-governance.yml` (dispatch) and `ops/sync-org-files.sh`
+(manual, local checkout) all resolve the target's class through
+`ops/repo-class-profile.js` and build the payload through
+`ops/build-seed-payload.js`. `all` means the class's categories. An explicit
+category list is filtered by the class: INHERIT drops, FORBID is refused with
+the class and path named. Every entrypoint is missing-only; the shell path
+reports each existing file as kept and a second run is byte-identical.
+
 `continuous-sync.yml` is the exception to missing-only. It restores
 `.github/CODEOWNERS` and `.github/dependabot.yml` when they drift, unless the
 repo has `.l9/no-sync`. That workflow uses the governance GitHub App

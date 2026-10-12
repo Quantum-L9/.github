@@ -73,13 +73,29 @@ const notFound = (msg) => Object.assign(new Error(msg), { status: 404 });
  */
 function makeCore() {
   const failures = [];
+  const warnings = [];
+  // Summary tables are captured so a suite can read the per-repo verdict rows
+  // a workflow reports, not only the API calls it made.
+  const tables = [];
   const summary = {
     addHeading: () => summary,
     addRaw: () => summary,
-    addTable: () => summary,
+    addTable: (rows) => {
+      tables.push(rows);
+      return summary;
+    },
     write: async () => summary,
   };
-  return { info() {}, error() {}, setFailed: (m) => failures.push(m), failures, summary };
+  return {
+    info() {},
+    error() {},
+    warning: (m) => warnings.push(m),
+    setFailed: (m) => failures.push(m),
+    failures,
+    warnings,
+    tables,
+    summary,
+  };
 }
 
 /**
@@ -112,9 +128,9 @@ function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations })
   const fn = loadScriptModule(file, tmpTag);
   const scopedRequire = makeScopedRequire(root);
 
-  return async function run({ dry = false, mutateGithub, ...stubOpts } = {}) {
+  return async function run({ dry = false, mutateGithub, envExtra = {}, ...stubOpts } = {}) {
     const prevCwd = process.cwd();
-    const env = envFor(dry);
+    const env = { ...envFor(dry), ...envExtra };
     const prevEnv = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
     process.chdir(root);
     Object.assign(process.env, env);
@@ -136,6 +152,9 @@ function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations })
       names,
       state,
       failures: core.failures,
+      warnings: core.warnings,
+      // Verdict rows of the last summary table, header row dropped.
+      rows: core.tables.length ? core.tables[core.tables.length - 1].slice(1) : [],
       mutated: names.some((n) => mutations.has(n)),
     };
   };

@@ -58,6 +58,13 @@ The organization honours what the repository declares. An absent marker
 resolves through `overrides`, then `default_class`. It never resolves to
 something wider than the repository asked for.
 
+Every distribution path makes this one decision through
+`ops/repo-class-profile.js`: the hourly auto-seed, the dispatch seeder, and
+the manual shell sync. None of them has a category list of its own; `all`
+means the class's `seed_categories`, and an explicit category still passes
+through the class, so INHERIT destinations drop and a FORBID destination is a
+refusal with the class and path named.
+
 ## Classes
 
 Path lists live in `policies/repo-classes.yml`. Every class remote-applies
@@ -118,8 +125,10 @@ the override and default path.
 | Surface | Uses |
 | --- | --- |
 | `ops/repo-class-profile.js` | resolver — load, parse marker, resolve, apply, waive |
-| `ops/build-seed-payload.js` | `profile` option: class picks the categories; INHERIT drops, FORBID throws |
+| `ops/build-seed-payload.js` | `profile` option: class picks the categories; INHERIT drops, FORBID throws. `planConsumerSeed` is the manual-seed decision: class, payload, missing-only selection |
 | `.github/workflows/auto-seed-new-repo.yml` | per-repo class resolution; reports the class per row |
+| `.github/workflows/seed-governance.yml` | same per-repo class resolution; `all` means the class's categories; an explicit category a class forbids is a reported skip, never a write |
+| `ops/sync-org-files.sh` | thin shell entrypoint over `planConsumerSeed`; same class decision, missing-only, refuses a FORBID request or a malformed marker |
 | `.github/workflows/repo-birth-bootstrap.yml` | targeted REMOTE APPLY for one repo |
 | `.github/workflows/enforce-policies.yml` | honours `mandatory_files_waive` |
 | `l9-repo-template` `scripts/birth-runner/new_repo.py` | reads the same file to apply the profile locally, before creation |

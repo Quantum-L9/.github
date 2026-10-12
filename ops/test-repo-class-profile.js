@@ -25,10 +25,12 @@ const {
   applyProfile,
   waivesMandatoryFile,
 } = require('./repo-class-profile.js');
+const os = require('node:os');
 const {
   buildSeedPayload,
   DEFAULT_CATEGORIES,
   parseCategories,
+  planConsumerSeed,
 } = require('./build-seed-payload.js');
 
 // `[].sort()` with no comparator sorts by string conversion. These lists are
@@ -386,7 +388,105 @@ try {
   assert.ok(waivesMandatoryFile(selfGoverned, '.github/workflows/governance.yml'));
   assert.ok(waivesMandatoryFile(selfGoverned, '.github/CODEOWNERS'));
 
+  // ── planConsumerSeed: the manual (shell) path binds to the same class law ──
+  // ops/sync-org-files.sh writes nothing itself; this is the whole decision.
+  const work = fs.mkdtempSync(path.join(os.tmpdir(), 'plan-consumer-seed-'));
+  try {
+    const consumer = (name, marker, files = {}) => {
+      const dir = path.join(work, name);
+      fs.mkdirSync(dir, { recursive: true });
+      if (marker != null) {
+        fs.mkdirSync(path.join(dir, '.l9'), { recursive: true });
+        fs.writeFileSync(path.join(dir, doc.marker_path), marker);
+      }
+      for (const [rel, body] of Object.entries(files)) {
+        fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
+        fs.writeFileSync(path.join(dir, rel), body);
+      }
+      return dir;
+    };
+
+    // default class: no marker, no override; the class payload, all missing.
+    const plain = planConsumerSeed({ fs, path, consumerRoot: consumer('plain', null), repository: 'Quantum-L9/plain' });
+    assert.strictEqual(plain.profile.name, 'default');
+    assert.deepStrictEqual(plain.kept, []);
+    assert.deepStrictEqual(plain.inherited, []);
+    assert.ok(plain.writes.includes('.github/workflows/governance.yml'));
+    assert.ok(plain.writes.includes('SECURITY.md'));
+    assert.match(plain.payload['SECURITY.md'], /Quantum-L9\/plain\/security\/advisories\/new/);
+
+    // marker beats override; the class payload and nothing forbidden.
+    const ncpDir = consumer('ncp', 'profile: non_constellation_python\n');
+    const ncpPlan = planConsumerSeed({ fs, path, consumerRoot: ncpDir, repository: 'Quantum-L9/ncp' });
+    assert.strictEqual(ncpPlan.profile.name, 'non_constellation_python');
+    assert.strictEqual(ncpPlan.profile.resolved_from, 'marker');
+    assert.deepStrictEqual(ncpPlan.writes.sort(byName), [
+      '.github/CODEOWNERS', '.github/dependabot.yml', '.github/labels.yml', 'SECURITY.md',
+    ]);
+    for (const denied of TEMPLATE_DENY_CI_DISTRIBUTION) {
+      assert.ok(!ncpPlan.writes.some((w) => w === denied || w.startsWith(`${denied}/`)), `plan must never write ${denied}`);
+    }
+    // explicit FORBID request throws (the shell turns this into exit 2).
+    assert.throws(
+      () => planConsumerSeed({ fs, path, consumerRoot: ncpDir, repository: 'Quantum-L9/ncp', categories: 'governance' }),
+      /violates repo class non_constellation_python.*governance\.yml/,
+    );
+    // explicit INHERIT request drops, reported, never written.
+    const ncpInherit = planConsumerSeed({
+      fs, path, consumerRoot: ncpDir, repository: 'Quantum-L9/ncp', categories: 'community-health,pr-templates',
+    });
+    assert.deepStrictEqual(ncpInherit.writes, ['SECURITY.md']);
+    assert.deepStrictEqual(ncpInherit.inherited.sort(byName), [
+      '.github/PULL_REQUEST_TEMPLATE/release.md', '.github/pull_request_template.md',
+    ]);
+
+    // missing-only: an existing consumer file is kept and the payload is not
+    // what is on disk, so the caller can prove it never overwrote.
+    const seeded = consumer('seeded', null, {
+      'SECURITY.md': '# consumer-owned\n',
+      '.github/pull_request_template.md': 'local template\n',
+      'CODEOWNERS': '* @Quantum-L9/seeded-owners\n',
+    });
+    const seededPlan = planConsumerSeed({ fs, path, consumerRoot: seeded, repository: 'Quantum-L9/seeded' });
+    assert.deepStrictEqual(seededPlan.kept.sort(byName), ['.github/pull_request_template.md', 'SECURITY.md']);
+    assert.ok(!seededPlan.writes.includes('SECURITY.md'));
+    assert.ok(!('.github/CODEOWNERS' in seededPlan.payload), 'root CODEOWNERS suppresses the path-scoped template');
+    assert.ok(seededPlan.writes.includes('.github/PULL_REQUEST_TEMPLATE/release.md'));
+
+    // self_governed: zero writes, everything inherited.
+    const sgPlan = planConsumerSeed({ fs, path, consumerRoot: consumer('sg', 'profile: self_governed\n'), repository: 'Quantum-L9/sg' });
+    assert.deepStrictEqual(sgPlan.writes, []);
+    assert.deepStrictEqual(sgPlan.kept, []);
+    assert.deepStrictEqual(Object.keys(sgPlan.payload), []);
+
+    // org override classifies an unmarked repo by name.
+    const ovrPlan = planConsumerSeed({ fs, path, consumerRoot: consumer('l9-ci-core', null), repository: 'Quantum-L9/l9-ci-core' });
+    assert.strictEqual(ovrPlan.profile.name, 'self_governed');
+    assert.strictEqual(ovrPlan.profile.resolved_from, 'org override');
+    assert.deepStrictEqual(ovrPlan.writes, []);
+
+    // a malformed or unknown explicit marker fails closed, never default.
+    for (const [label, marker] of [
+      ['typo', 'profile: non_constelation_python\n'],
+      ['empty', ''],
+      ['no key', 'schema: x\n'],
+    ]) {
+      assert.throws(
+        () => planConsumerSeed({ fs, path, consumerRoot: consumer(`bad-${label.replace(' ', '-')}`, marker), repository: 'Quantum-L9/bad' }),
+        /refusing to seed/,
+        `${label} marker must refuse`,
+      );
+    }
+    // no remote: no repo name, so overrides cannot apply; marker still rules.
+    const noRemote = planConsumerSeed({ fs, path, consumerRoot: consumer('no-remote', null) });
+    assert.strictEqual(noRemote.profile.name, 'default');
+    assert.match(noRemote.payload['SECURITY.md'], /Quantum-L9\/\.github\/security\/advisories\/new/, 'verbatim without a repository');
+  } finally {
+    fs.rmSync(work, { recursive: true, force: true });
+  }
+
   console.log('ok: repo-classes policy is JSON-in-YAML and PyYAML-readable');
+  console.log('ok: planConsumerSeed (shell path) classifies, refuses FORBID, drops INHERIT, keeps existing files, fails closed on a bad marker');
   console.log('ok: org overrides classify undeclared repos; a marker still outranks them');
   console.log('ok: a malformed or unknown EXPLICIT class fails closed, never widens to default');
   console.log('ok: LICENSE is neither mandatory nor seeded by any class');
