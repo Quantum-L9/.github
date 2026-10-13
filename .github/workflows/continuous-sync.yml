@@ -1,6 +1,13 @@
-# Continuous Sync: detects governance file drift and auto-opens PRs to restore.
-# Runs weekly, on every main push that changes a managed source, and on demand.
+# Manual Update: detects governance file drift and opens PRs to restore it.
+# Manual only (workflow_dispatch). Nothing schedules it and no push starts it.
+#   Preview (dry_run=true, the default): reports drift per repo, writes nothing.
+#   Apply   (dry_run=false):             one reviewable PR per drifted repo.
 # Repos can opt out with a .l9/no-sync marker file.
+#
+# Auth: the l9-governance-seeder App. Its GOVERNANCE_APP_ID variable and
+# GOVERNANCE_APP_PRIVATE_KEY secret live on the governance-distribution
+# environment (CANONICAL_LAW §14), so the job must run in that environment;
+# outside it both resolve empty and token minting fails before any read.
 #
 # Managed (overwrite, not missing-only — docs/DISTRIBUTION.md):
 #   .github/CODEOWNERS, .github/dependabot.yml   every repo, exact bytes
@@ -14,19 +21,9 @@
 # Alternate templates (PULL_REQUEST_TEMPLATE/, root or docs/ copies) are
 # reported per repo for classification, never edited. Writes are one atomic
 # commit per repo, moved by ops/seed-branch-safety.js (provenance + CAS).
-name: Continuous Sync (drift remediation)
+name: Manual Update (governance drift remediation)
 
 on:
-  schedule:
-    - cron: "0 11 * * 2"  # Tuesday 11:00 UTC
-  push:
-    branches: [main]
-    paths:
-      - .github/pull_request_template.md
-      - policies/governance-caller.yml
-      - policies/CODEOWNERS
-      - .github/dependabot.yml
-      - policies/repo-classes.yml
   workflow_dispatch:
     inputs:
       repo_filter:
@@ -34,7 +31,7 @@ on:
         type: string
         default: ""
       dry_run:
-        description: "Dry run (report drift only, no PRs)"
+        description: "Preview: report drift only, no PRs. Uncheck to Apply."
         type: boolean
         default: true
 
@@ -50,6 +47,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment: governance-distribution
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
@@ -62,7 +60,8 @@ jobs:
 
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         env:
-          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          # Only an explicit Apply (dry_run=false) writes; anything else previews.
+          DRY_RUN: ${{ inputs.dry_run }}
           FILTER: ${{ inputs.repo_filter || '' }}
           # The App's commit identity: an installation token cannot call /user,
           # so branch provenance is checked against `<app-slug>[bot]`.
@@ -77,7 +76,7 @@ jobs:
             const {
               SYNC_COMMIT_SUBJECT, assessSeedBranch, moveSeedBranch,
             } = require('./ops/seed-branch-safety.js');
-            const DRY = process.env.DRY_RUN === 'true';
+            const DRY = process.env.DRY_RUN !== 'false';
             const FILTER = process.env.FILTER;
             const BRANCH = 'chore/governance-sync';
             const ORG = 'Quantum-L9';
@@ -287,9 +286,9 @@ jobs:
                         : d.why === 're-pin' ? ` — \`uses:\` pins moved to \`${canonicalPin}\`; the rest of the file is unchanged`
                           : ' — replaced with the org bytes')),
                     '',
-                    'Review and merge. To opt out of automatic sync, create `.l9/no-sync` in your repo.',
+                    'Review and merge. To opt out of governance sync, create `.l9/no-sync` in your repo.',
                     '',
-                    '_Opened by Quantum-L9/.github continuous-sync._',
+                    '_Opened by a manual Apply of Quantum-L9/.github continuous-sync.yml._',
                   ].join('\n'),
                 });
                 row('UPDATE_PR_OPEN', `PR #${pr.data.number} (${summary})`);
@@ -301,9 +300,9 @@ jobs:
 
             const counts = {};
             for (const r of rows) counts[r[2]] = (counts[r[2]] || 0) + 1;
-            const mode = DRY ? 'DRY RUN' : 'APPLIED';
+            const mode = DRY ? 'PREVIEW' : 'APPLY';
             core.summary
-              .addHeading(`Continuous Sync (${mode}) — ${targets.length} repos`, 2)
+              .addHeading(`Manual Update (${mode}) — ${targets.length} repos`, 2)
               .addRaw(Object.entries(counts).map(([k, v]) => `${k}: ${v}`).join(' · ') + '\n\n')
               .addTable([
                 [{data: 'Repo', header: true}, {data: 'Class', header: true},

@@ -42,10 +42,14 @@ category list is filtered by the class: INHERIT drops, FORBID is refused with
 the class and path named. Every entrypoint is missing-only; the shell path
 reports each existing file as kept and a second run is byte-identical.
 
-`continuous-sync.yml` is the exception to missing-only. It restores
-`.github/CODEOWNERS` and `.github/dependabot.yml` when they drift, unless the
-repo has `.l9/no-sync`. That workflow uses the governance GitHub App
-(`GOVERNANCE_APP_ID`), not `GH_TOKEN`.
+`continuous-sync.yml` (Manual Update) is the exception to missing-only. It
+restores `.github/CODEOWNERS` and `.github/dependabot.yml` when they drift,
+unless the repo has `.l9/no-sync`. It runs only when dispatched: nothing
+schedules it and no push starts it. `dry_run=true` (Preview, the default)
+reports drift and writes nothing; `dry_run=false` (Apply) opens one reviewable
+PR per drifted repository. Any value other than an explicit `false` previews.
+That workflow uses the governance GitHub App (`GOVERNANCE_APP_ID`), not
+`GH_TOKEN`.
 
 The `.github` repository must be public. A private one disables inheritance,
 and cross-repo `workflow_call` needs the callee to be readable.
@@ -58,6 +62,18 @@ governance caller. The governance App can request that permission, but an org
 install only gains it after a browser approval, so seed does not depend on
 that click.
 
+`continuous-sync.yml` mints a governance App installation token from
+`GOVERNANCE_APP_ID` (variable) and `GOVERNANCE_APP_PRIVATE_KEY` (secret). Both
+are defined on the `governance-distribution` environment, not the repository
+or organization, so the job must run in that environment. Before it did, every
+run failed at token minting with `Input required and not supplied: app-id`.
+Branch provenance is checked against the App's own `<app-slug>[bot]` identity.
+The App's workflows permission takes effect only after an org-owner browser
+approval. Without it, an Apply cannot move a sync branch whose commit re-pins
+`.github/workflows/governance.yml`: that repository is not updated and the run
+summary reports it blocked (`BLOCKED_PERMISSION` for a new branch,
+`BLOCKED_POLICY` for a rebuilt one).
+
 Those workflows, and `repo-birth-bootstrap.yml`, run in the
 `governance-distribution` environment.
 
@@ -69,7 +85,7 @@ Those workflows, and `repo-birth-bootstrap.yml`, run in the
 | Security policy | Edit `SECURITY.md` and merge. `self_governed` repos inherit it. Repos that were seeded a copy keep the old file; seed will not overwrite it. |
 | PR or issue template | Edit and merge. The seed sources are `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md`, and `.github/ISSUE_TEMPLATE/*`. Seeded copies are not overwritten. |
 | Governance gate rule | Edit `governance-pr.yml` or `governance-issue.yml`, then re-pin the SHA in `policies/governance-caller.yml` and update consumers that already have a caller. |
-| CODEOWNERS or dependabot | Edit `policies/CODEOWNERS` or `.github/dependabot.yml`. `continuous-sync.yml` opens a restore PR where those files drifted. |
+| CODEOWNERS or dependabot | Edit `policies/CODEOWNERS` or `.github/dependabot.yml` and merge. Then dispatch `continuous-sync.yml`: Preview to read the drift, Apply to open a restore PR where those files drifted. |
 | New repository | `auto-seed-new-repo.yml`, or `workflow_dispatch` on `seed-governance.yml`. `l9-repo-template` `make new-repo` dispatches `repo-birth-bootstrap.yml` for one repo. |
 
 ## Appendix A — secrets and called workflows
@@ -143,11 +159,12 @@ anywhere else. `continuous-sync.yml` extends its exception to missing-only
 Alternate templates (a `PULL_REQUEST_TEMPLATE/` directory, root or `docs/`
 copies) are reported per repository and never edited. Each run's summary gives
 every repository one status: `INHERITED`, `CANONICAL_COPY`, `UPDATE_PR_OPEN`,
-`UPDATE_PENDING_MERGE`, `DRIFT` (dry run), `BLOCKED_PERMISSION`,
+`UPDATE_PENDING_MERGE`, `DRIFT` (Preview), `BLOCKED_PERMISSION`,
 `BLOCKED_POLICY`, `OPTED_OUT`, `UNREACHABLE`, or `UNVERIFIED`. Any repository
-left `UNREACHABLE`, `BLOCKED_PERMISSION`, or `UNVERIFIED` fails the run. A push to `main` that changes the template,
-the caller, CODEOWNERS, dependabot, or the class policy starts a run, so
-convergence does not wait for the weekly schedule. Each repository gets one
+left `UNREACHABLE`, `BLOCKED_PERMISSION`, or `UNVERIFIED` fails the run. A
+change to the template, the caller, CODEOWNERS, dependabot, or the class policy
+reaches consumers only when an operator dispatches the workflow. Preview first,
+then Apply. Each repository gets one
 atomic commit, moved onto the sync branch through the seeders' guarded path
 (`ops/seed-branch-safety.js`): only when the branch holds nothing but this
 workflow's own verified commit (subject, `<app-slug>[bot]` committer,
@@ -165,7 +182,8 @@ through `pr-files.yml`.
 
 **Shipping a body or gate change to consumers.** Merge the
 `governance-pr.yml` change, set the merged commit as the pin in
-`policies/governance-caller.yml`, and merge that: the push starts
-`continuous-sync.yml`, which re-pins every eligible consumer caller through a
-reviewable PR. A consumer's run still reflects its previous pin until that PR
-merges; the run summary lists who is pending.
+`policies/governance-caller.yml`, and merge that. Then dispatch
+`continuous-sync.yml`: Preview lists the callers it would re-pin, and Apply
+re-pins every eligible consumer caller through a reviewable PR. A consumer's
+run still reflects its previous pin until that PR merges; the run summary lists
+who is pending.

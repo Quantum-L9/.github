@@ -293,6 +293,80 @@ async function classScenarios() {
   console.log(`ok: ${label} — dry run reports drift only`);
 }
 
+/** The only calls a Preview may make: reads. Everything else writes. */
+const READS = new Set(['repos.getContent', 'pulls.list', 'git.getRef', 'request GET /repos/{owner}/{repo}/compare/{basehead}']);
+const writesOf = (calls) => calls.filter((c) => !READS.has(c.name));
+
+/**
+ * Manual Update modes. Preview writes nothing however much drifted; Apply
+ * opens one reviewable PR against the consumer's default branch and moves no
+ * ref but the sync branch; consumer content outside the managed population,
+ * and opted-out repositories, are never touched in either mode.
+ */
+async function manualModeScenarios() {
+  const label = 'continuous-sync (manual modes)';
+  const old = '3'.repeat(40);
+  const callerAt = (pin) =>
+    `name: Governance\njobs:\n  pr:\n    uses: Quantum-L9/.github/.github/workflows/governance-pr.yml@${pin}\n    with:\n      strict: true\n`;
+  // Every kind of drift at once: managed files missing, template divergent,
+  // caller pin stale, plus consumer-owned files the sync must never write.
+  const consumerOwned = {
+    'README.md': '# consumer\n',
+    '.github/workflows/ci.yml': 'name: ci\n',
+    'SECURITY.md': '# consumer policy\n',
+  };
+  const drifted = { [TEMPLATE]: '## stale\n', [CALLER]: callerAt(old), ...consumerOwned };
+  const stale = { sha: 'stale-sync-branch', commits: [SYNC_COMMIT] };
+
+  // Preview: drift is reported in full; not one non-read call is made.
+  let r = await runClass({ files: drifted, branch: stale, dry: true });
+  assert.strictEqual(r.status, 'DRIFT');
+  for (const p of ['.github/CODEOWNERS', '.github/dependabot.yml', TEMPLATE, CALLER]) {
+    assert.ok(r.detail.includes(p), `preview must report ${p}`);
+  }
+  assert.deepStrictEqual(writesOf(r.calls), [], `${label}: Preview made a write call`);
+  assert.strictEqual(r.state.sha, 'stale-sync-branch');
+  assert.deepStrictEqual(r.failures, []);
+  console.log(`ok: ${label} — Preview reports every drifted path and makes only read calls`);
+
+  // Preview is also the fail-closed state: only DRY_RUN exactly "false" applies.
+  for (const value of ['', 'true', 'False', '0', 'undefined']) {
+    const p = await run({ branch: stale, envExtra: { DRY_RUN: value } });
+    assert.deepStrictEqual(writesOf(p.calls), [], `${label}: DRY_RUN=${JSON.stringify(value)} wrote`);
+  }
+  console.log(`ok: ${label} — any DRY_RUN other than "false" previews`);
+
+  // Apply: one commit carrying only managed paths, one PR from the sync branch
+  // into the default branch, and the only ref moved is the sync branch.
+  r = await runClass({ files: drifted, branch: stale });
+  assert.strictEqual(r.status, 'UPDATE_PR_OPEN');
+  const pr = r.calls.find((c) => c.name === 'pulls.create');
+  assert.ok(pr, `${label}: Apply must open a consumer PR`);
+  assert.strictEqual(pr.args.head, BRANCH);
+  assert.strictEqual(pr.args.base, 'main');
+  assert.strictEqual(r.calls.filter((c) => c.name === 'pulls.create').length, 1);
+  const moves = r.calls.filter((c) => ['git.createRef', 'graphql.updateRefs'].includes(c.name));
+  assert.deepStrictEqual(moves.map((c) => c.args.ref || c.args.name), [`refs/heads/${BRANCH}`],
+    `${label}: Apply may move the sync branch and nothing else`);
+  const touched = r.writes.map((w) => w.args.path).sort();
+  assert.deepStrictEqual(touched, ['.github/CODEOWNERS', '.github/dependabot.yml', CALLER, TEMPLATE].sort());
+  for (const p of Object.keys(consumerOwned)) {
+    assert.ok(!touched.includes(p) && !r.deletes.some((d) => d.args.path === p), `${label}: Apply touched ${p}`);
+  }
+  const caller = Buffer.from(r.writes.find((w) => w.args.path === CALLER).args.content, 'base64').toString();
+  assert.strictEqual(caller, callerAt(canonicalPin), `${label}: caller changed beyond its pin`);
+  console.log(`ok: ${label} — Apply opens one PR into the default branch; only the sync branch and managed paths move`);
+
+  // Opt-out: drift everywhere, still nothing beyond the marker read, either mode.
+  for (const dry of [true, false]) {
+    r = await runClass({ files: { ...drifted, '.l9/no-sync': '' }, branch: stale, dry });
+    assert.strictEqual(r.status, 'OPTED_OUT');
+    assert.deepStrictEqual(r.calls.map((c) => c.name), ['repos.getContent'], `${label}: opted-out repo was probed past its marker`);
+    assert.strictEqual(r.state.sha, 'stale-sync-branch');
+  }
+  console.log(`ok: ${label} — .l9/no-sync repos are left untouched in Preview and Apply`);
+}
+
 (async () => {
   const label = path.basename(WORKFLOW);
 
@@ -372,6 +446,7 @@ async function classScenarios() {
   console.log(`ok: ${label} — dry run performs no writes`);
 
   await classScenarios();
+  await manualModeScenarios();
   console.log('\nall continuous-sync branch-guard scenarios passed');
 })().catch((e) => {
   console.error(e);
