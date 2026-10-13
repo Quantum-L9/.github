@@ -71,6 +71,45 @@ def rel(root: Path, path: Path) -> str:
     return str(path.relative_to(root))
 
 
+# The candidate surface every check reads. SC-009 snapshots it before the
+# checks run and compares afterwards, so "observational" is evaluated, not
+# asserted.
+OBSERVED_TREES = ("semantics", "docs")
+
+
+def candidate_snapshot(root: Path) -> dict[str, str]:
+    snapshot: dict[str, str] = {}
+    for tree in OBSERVED_TREES:
+        base = root / tree
+        if not base.is_dir():
+            continue
+        for path in sorted(base.rglob("*")):
+            if path.is_file() and not path.is_symlink():
+                snapshot[rel(root, path)] = sha256_file(path)
+    return snapshot
+
+
+def check_sc009(before: dict[str, str], root: Path, report: Report) -> None:
+    after = candidate_snapshot(root)
+    changed = sorted(
+        path for path in set(before) | set(after) if before.get(path) != after.get(path)
+    )
+    if changed:
+        report.fail(
+            "SC-009",
+            ",".join(f"{tree}/" for tree in OBSERVED_TREES),
+            "files",
+            changed,
+            "validation changed the candidate it was evaluating",
+        )
+        return
+    report.ok(
+        "SC-009",
+        f"validation was observational: {len(after)} candidate files under "
+        f"{' and '.join(f'{tree}/' for tree in OBSERVED_TREES)} are byte-identical before and after",
+    )
+
+
 def check_sc001(root: Path, report: Report) -> dict[str, dict]:
     docs: dict[str, dict] = {}
     files = sorted((root / "semantics").glob("*.yaml"))
@@ -2909,7 +2948,9 @@ def _rc017_source_invariants(
     contract: dict, docs: dict[str, dict], report: Report
 ) -> None:
     label = f"contracts[{VALIDATION_CONTRACT_ID}]"
-    declared = [str(item) for item in contract.get("source_invariants") or []]
+    # A non-list value is RC-027's to report; read it as empty so the run
+    # completes and the required invariants surface here as missing.
+    declared = [str(item) for item in _list(contract.get("source_invariants"))]
     missing = sorted(VALIDATION_SOURCE_INVARIANTS - set(declared))
     if missing:
         report.fail(
@@ -3078,6 +3119,34 @@ def _rc017_projection(docs: dict[str, dict], report: Report) -> None:
                 "source does not resolve to source_classes",
             )
     _rc017_projection_selectors(label, sources, report)
+    _rc017_cited_invariants(docs, report)
+
+
+def _rc017_cited_invariants(docs: dict[str, dict], report: Report) -> None:
+    # The profile projects every contract's source_invariants and only the
+    # invariants selected by GLOBAL_INVARIANTS_SELECTOR. A citation of a
+    # declared invariant outside that selection reaches the consumer as a
+    # dangling reference. A citation of an undeclared invariant is RC-027's.
+    # Malformed collections are RC-027's to report; skipping them here keeps
+    # the validator from raising before RC-027 runs.
+    scope_by_id: dict[str, object] = {}
+    for invariant in _list(_mapping(docs.get(INVARIANTS_PATH)).get("invariants")):
+        if isinstance(invariant, dict) and "id" in invariant:
+            scope_by_id.setdefault(str(invariant["id"]), invariant.get("scope"))
+    for contract in _list(_mapping(docs.get(CONTRACTS_PATH)).get("contracts")):
+        if not isinstance(contract, dict):
+            continue
+        field = f"contracts[{contract.get('id')}].source_invariants"
+        for cited in _list(contract.get("source_invariants")):
+            if str(cited) in scope_by_id and scope_by_id[str(cited)] != "global":
+                report.fail(
+                    "RC-017",
+                    CONTRACTS_PATH,
+                    field,
+                    cited,
+                    f"cited invariant is not carried by the operating-plane selector "
+                    f"{GLOBAL_INVARIANTS_SELECTOR}",
+                )
 
 
 def _rc017_profile_identity(profile: dict, report: Report) -> None:
@@ -3209,6 +3278,17 @@ def _check_rc017_negative_cases(docs: dict[str, dict], report: Report) -> None:
     )
 
     case, contract = mutated_contract()
+    contract["source_invariants"] = 7
+    cases.append(
+        (
+            "source_invariants is a scalar, not a list",
+            case,
+            CONTRACTS_PATH,
+            f"{contract_field}.source_invariants",
+        )
+    )
+
+    case, contract = mutated_contract()
     contract["outcomes"]["unresolved"] = contract["outcomes"]["satisfied"]
     cases.append(
         (
@@ -3319,6 +3399,32 @@ def _check_rc017_negative_cases(docs: dict[str, dict], report: Report) -> None:
         )
     )
 
+    case = copy.deepcopy(docs)
+    contract, _ = _unique_entry(
+        case[CONTRACTS_PATH]["contracts"], "id", "l9.contract/projection@1"
+    )
+    if contract is None:
+        report.fail(
+            "RC-017",
+            VALIDATOR_PATH,
+            "negative_case",
+            "contract cites an invariant outside the projected global selection",
+            "l9.contract/projection@1 is absent, so the case cannot be constructed",
+        )
+    else:
+        contract["source_invariants"] = [
+            *_list(contract.get("source_invariants")),
+            "INV-VALIDATION-MONOTONICITY",
+        ]
+        cases.append(
+            (
+                "contract cites an invariant outside the projected global selection",
+                case,
+                CONTRACTS_PATH,
+                "contracts[l9.contract/projection@1].source_invariants",
+            )
+        )
+
     for label, candidate, path, field in cases:
         candidate_report = Report()
         _evaluate_rc017(candidate, candidate_report)
@@ -3350,7 +3456,8 @@ def check_rc017(docs: dict[str, dict], report: Report) -> None:
             "validation-and-correctness contract binds satisfied to complete evaluation of every applicable "
             "required criterion, routes unavailable, unreadable, unexecuted, or unresolved required criteria to "
             "unresolved, forbids silent skip, default success, and partial coverage reported as complete, and the "
-            "Cursor-Governance operating-plane projection carries operative contract semantics with the global invariants",
+            "Cursor-Governance operating-plane projection carries operative contract semantics with the global invariants, "
+            "and every declared invariant a contract cites is inside that global selection",
         )
         _check_rc017_negative_cases(docs, report)
 
@@ -8651,6 +8758,7 @@ def main(argv: list[str]) -> int:
         print(f"FAIL SC-000 validator: {root} has no semantics/ directory")
         return 2
     report = Report()
+    observed = candidate_snapshot(root)
     docs = check_sc001(root, report)
     check_sc002(root, docs, report)
     check_sc003(docs, report)
@@ -8687,11 +8795,11 @@ def main(argv: list[str]) -> int:
     check_rc025(docs, report)
     check_rc026(docs, report)
     check_rc027(docs, report)
+    check_sc009(observed, root, report)
     for line in report.passes:
         print(line)
     for line in report.failures:
         print(line)
-    print("PASS SC-009 validation was observational: no file was written")
     if report.failures:
         print(
             f"FAIL semantic-foundation closure: {len(report.failures)} unresolved (SC-010 fail-closed)"
