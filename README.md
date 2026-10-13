@@ -86,7 +86,7 @@ Canonical CI is `Quantum-L9/l9-ci-core` (`org-ci.yml`).
 | Org rulesets | `rulesets/*.json` | `evaluate` |
 | Governance seeding | `auto-seed-new-repo.yml` | PR, class-aware |
 | Label sync | `sync-labels-all.yml` | additive |
-| Drift remediation | `continuous-sync.yml` | PR |
+| Drift remediation (Manual Update) | `continuous-sync.yml` | manual dispatch: Preview, or Apply → PR |
 | Policy enforcement | `enforce-policies.yml` | settings correction |
 | SHA-pin audit | `audit-pins-org.yml` | report |
 | Preflight | `preflight-scheduled.yml` | report |
