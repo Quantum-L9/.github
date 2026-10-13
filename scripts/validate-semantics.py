@@ -75,6 +75,8 @@ def rel(root: Path, path: Path) -> str:
 # checks run and compares afterwards, so "observational" is evaluated, not
 # asserted.
 OBSERVED_TREES = ("semantics", "docs")
+# Snapshot value for a file that could not be read; never a sha256 hex digest.
+UNREADABLE = "unreadable"
 
 
 def candidate_snapshot(root: Path) -> dict[str, str]:
@@ -85,12 +87,30 @@ def candidate_snapshot(root: Path) -> dict[str, str]:
             continue
         for path in sorted(base.rglob("*")):
             if path.is_file() and not path.is_symlink():
-                snapshot[rel(root, path)] = sha256_file(path)
+                try:
+                    snapshot[rel(root, path)] = sha256_file(path)
+                except OSError as exc:
+                    snapshot[rel(root, path)] = f"{UNREADABLE}: {type(exc).__name__}"
     return snapshot
 
 
 def check_sc009(before: dict[str, str], root: Path, report: Report) -> None:
     after = candidate_snapshot(root)
+    unreadable = sorted(
+        path
+        for snapshot in (before, after)
+        for path, value in snapshot.items()
+        if value.startswith(UNREADABLE)
+    )
+    if unreadable:
+        report.fail(
+            "SC-009",
+            ",".join(f"{tree}/" for tree in OBSERVED_TREES),
+            "files",
+            sorted(set(unreadable)),
+            "candidate file could not be read, so the run cannot be shown to be observational",
+        )
+        return
     changed = sorted(
         path for path in set(before) | set(after) if before.get(path) != after.get(path)
     )
