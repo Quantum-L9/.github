@@ -23,12 +23,14 @@ const path = require('node:path');
 /**
  * Extract the `script: |` block from a workflow, without a YAML dependency.
  * Deliberately literal: the test must run the same text the runner does, not
- * a re-serialized round trip through a YAML library.
+ * a re-serialized round trip through a YAML library. `nth` selects among
+ * several blocks (0 = first), for a workflow with more than one job script.
  */
-function extractScript(file) {
+function extractScript(file, nth = 0) {
   const lines = fs.readFileSync(file, 'utf8').split('\n');
-  const start = lines.findIndex((l) => /^\s*script:\s*\|\s*$/.test(l));
-  assert.ok(start !== -1, `no "script: |" block in ${file}`);
+  const starts = lines.flatMap((l, i) => (/^\s*script:\s*\|\s*$/.test(l) ? [i] : []));
+  const start = nth < starts.length ? starts[nth] : -1;
+  assert.ok(start !== -1, `no "script: |" block #${nth} in ${file}`);
   const indent = lines[start].match(/^\s*/)[0].length + 2;
   const body = [];
   for (const line of lines.slice(start + 1)) {
@@ -47,10 +49,11 @@ function extractScript(file) {
  *
  * @param {string} file      absolute path to the workflow YAML
  * @param {string} [tmpTag]  prefix for the temp dir, for readable failures
+ * @param {number} [nth]     which `script: |` block (0 = first)
  * @returns {(github: object, core: object, context: object, require: Function) => Promise<void>}
  */
-function loadScriptModule(file, tmpTag = 'workflow-script-') {
-  const body = extractScript(file);
+function loadScriptModule(file, tmpTag = 'workflow-script-', nth = 0) {
+  const body = extractScript(file, nth);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), tmpTag));
   const mod = path.join(dir, `${path.basename(file, '.yml')}.script.js`);
   fs.writeFileSync(

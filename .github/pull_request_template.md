@@ -15,7 +15,9 @@
 
 <!-- One path per line. Must match the additive_only diff. Composer fills. -->
 
+<!-- PROTECTED-ROOT-PATHS:START -->
 - ` `
+<!-- PROTECTED-ROOT-PATHS:END -->
 
 ### Edit mode (pick one per path)
 
@@ -67,12 +69,16 @@ Rollback:
 
 ## Evidence
 
-<!-- Show the problem is gone. Pasted output or a CI link. Not "tests pass". -->
+<!-- Show the problem is gone. Pasted output or a CI link. Not "tests pass".
+     The EVIDENCE block is machine-owned (make pr receipts, marked STALE when a
+     later push was not measured). Add your own evidence below it. -->
 
+<!-- EVIDENCE:START -->
 ```
 $ pytest -q
 $ ruff check . && pyright
 ```
+<!-- EVIDENCE:END -->
 
 ## Gates
 
@@ -106,8 +112,10 @@ $ ruff check . && pyright
 
 ## Changes by intent
 
-<!-- Composer fills one `path — why` line per name-status row. -->
+<!-- Machine-owned path list: one `path — why` line per diff row, refreshed on
+     every push. Edit the text after a path; it survives refresh. -->
 
+<!-- CHANGES-BY-INTENT:START -->
 **Added**
 - `path/to/new_file.py` — why this file needs to exist
 
@@ -116,10 +124,12 @@ $ ruff check . && pyright
 
 **Deleted**
 - `path/to/dead.py` — why it is safe to remove
+<!-- CHANGES-BY-INTENT:END -->
 
 ## Files touched
 
-<!-- Auto-filled by make pr / .github/workflows/pr-files.yml. Do not edit by hand. -->
+<!-- Machine-owned: make pr and the governance-pr workflow refresh it from the
+     diff on every push. Do not edit by hand. -->
 
 <!-- FILES-TOUCHED:START -->
 _pending — the bot fills this in on push_

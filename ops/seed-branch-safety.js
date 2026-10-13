@@ -19,14 +19,18 @@
 // Message written by auto-seed-new-repo.yml ("auto-seed") and
 // seed-governance.yml ("seed"). Keep in sync with both workflows.
 const SEED_COMMIT_SUBJECT = /^chore\(governance\): (?:auto-)?seed \d+ org template file\(s\)$/;
+// Message written by continuous-sync.yml, which rebuilds its own branch
+// through the same guarded path with this subject in place of the seed one.
+const SYNC_COMMIT_SUBJECT = /^chore\(governance\): sync \d+ org-managed file\(s\)$/;
 
 /**
  * @param {unknown} message  full commit message
- * @returns {boolean} true when the subject line is a seeder-authored subject
+ * @param {RegExp} [subject] the subject the writing workflow uses
+ * @returns {boolean} true when the subject line is that workflow's subject
  */
-function isSeedCommitMessage(message) {
+function isSeedCommitMessage(message, subject = SEED_COMMIT_SUBJECT) {
   if (typeof message !== 'string') return false;
-  return SEED_COMMIT_SUBJECT.test(message.split('\n')[0].trim());
+  return subject.test(message.split('\n')[0].trim());
 }
 
 /**
@@ -46,7 +50,7 @@ function isSeedCommitMessage(message) {
  * @param {string|null} comparison.seederLogin  login the seeder authenticates as
  * @returns {{ safeToReplace: boolean, reason: string }}
  */
-function classifySeedBranch({ aheadBy, commits, seederLogin } = {}) {
+function classifySeedBranch({ aheadBy, commits, seederLogin, subject = SEED_COMMIT_SUBJECT } = {}) {
   if (!Number.isInteger(aheadBy) || aheadBy < 0 || !Array.isArray(commits)) {
     return {
       safeToReplace: false,
@@ -78,7 +82,7 @@ function classifySeedBranch({ aheadBy, commits, seederLogin } = {}) {
       reason: 'comparison carried no commit detail — cannot prove the branch is seeder-authored',
     };
   }
-  if (!isSeedCommitMessage(only.message)) {
+  if (!isSeedCommitMessage(only.message, subject)) {
     return {
       safeToReplace: false,
       reason: 'holds a commit the seeder did not author',
@@ -133,9 +137,15 @@ async function resolveSeederLogin(github) {
  * @param {string} opts.repo
  * @param {string} opts.base    the consumer's default branch
  * @param {string} opts.branch  the seed branch
+ * @param {RegExp} [opts.subject]       commit subject the writing workflow uses
+ * @param {string} [opts.seederLogin]   committer login, when the client cannot
+ *   resolve its own (a GitHub App installation token cannot call /user; pass
+ *   `<app-slug>[bot]`)
  * @returns {Promise<{action: 'skip'|'create'|'rebuild', sha: string|null, reason: string}>}
  */
-async function assessSeedBranch({ github, owner, repo, base, branch }) {
+async function assessSeedBranch({
+  github, owner, repo, base, branch, subject = SEED_COMMIT_SUBJECT, seederLogin,
+}) {
   // An open seed PR is work in flight: the branch may carry review fixes,
   // maintainer commits, or agent remediation. Short-circuit before reading
   // any git state, let alone writing it.
@@ -171,7 +181,8 @@ async function assessSeedBranch({ github, owner, repo, base, branch }) {
       committerLogin: c.committer?.login ?? null,
       verified: c.commit?.verification?.verified === true,
     })),
-    seederLogin: await resolveSeederLogin(github),
+    seederLogin: seederLogin || (await resolveSeederLogin(github)),
+    subject,
   });
   if (!verdict.safeToReplace) {
     return { action: 'skip', sha, reason: `branch ${branch} ${verdict.reason} — left alone` };
@@ -253,6 +264,7 @@ async function moveSeedBranch({ github, owner, repo, branch, expectedSha, commit
 }
 
 module.exports = {
+  SYNC_COMMIT_SUBJECT,
   SEED_COMMIT_SUBJECT,
   isSeedCommitMessage,
   classifySeedBranch,

@@ -2,7 +2,9 @@
 # ops/validate-starters.sh
 # Runs the ops/test-*.js suites: seed payload selection, the repo-class birth
 # profile contract, the shared label taxonomy parser, the seed-branch safety
-# gate, and the branch guard inside both seed workflows.
+# gate, the branch guard inside both seed workflows and continuous-sync
+# (including its class-aware PR-template and caller re-pin management), and
+# the governance-pr.yml PR-body refresh job.
 # Run from the root of the Quantum-L9/.github repo.
 set -euo pipefail
 
@@ -17,7 +19,9 @@ if command -v node &>/dev/null; then
     ops/test-repo-class-profile.js \
     ops/test-label-taxonomy.js \
     ops/test-seed-branch-safety.js \
-    ops/test-seed-workflow-branch-guard.js; do
+    ops/test-seed-workflow-branch-guard.js \
+    ops/test-continuous-sync-branch-guard.js \
+    ops/test-governance-pr-body.js; do
     if node "$t"; then
       echo "✅ $t"
       PASS=$((PASS+1))

@@ -1,11 +1,32 @@
 # Continuous Sync: detects governance file drift and auto-opens PRs to restore.
-# Runs weekly. Checks managed files against templates; if drift detected, opens
-# a remediation PR. Repos can opt out with a .l9/no-sync marker file.
+# Runs weekly, on every main push that changes a managed source, and on demand.
+# Repos can opt out with a .l9/no-sync marker file.
+#
+# Managed (overwrite, not missing-only — docs/DISTRIBUTION.md):
+#   .github/CODEOWNERS, .github/dependabot.yml   every repo, exact bytes
+#   .github/pull_request_template.md             by repo class
+#     (policies/repo-classes.yml): a class that seeds `pr-templates` carries
+#     the canonical bytes; a class that INHERITS it carries no copy, so a
+#     divergent one is removed and GitHub serves this repo's template live
+#   .github/workflows/governance.yml             re-pinned only: the
+#     governance-pr/-issue `uses:` SHAs follow policies/governance-caller.yml;
+#     the rest of a consumer's caller (e.g. `strict: true`) is theirs
+# Alternate templates (PULL_REQUEST_TEMPLATE/, root or docs/ copies) are
+# reported per repo for classification, never edited. Writes are one atomic
+# commit per repo, moved by ops/seed-branch-safety.js (provenance + CAS).
 name: Continuous Sync (drift remediation)
 
 on:
   schedule:
     - cron: "0 11 * * 2"  # Tuesday 11:00 UTC
+  push:
+    branches: [main]
+    paths:
+      - .github/pull_request_template.md
+      - policies/governance-caller.yml
+      - policies/CODEOWNERS
+      - .github/dependabot.yml
+      - policies/repo-classes.yml
   workflow_dispatch:
     inputs:
       repo_filter:
@@ -20,10 +41,15 @@ on:
 permissions:
   contents: read
 
+# One fleet writer at a time: two runs would race on the same sync branches.
+concurrency:
+  group: continuous-sync
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
@@ -38,20 +64,58 @@ jobs:
         env:
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
           FILTER: ${{ inputs.repo_filter || '' }}
+          # The App's commit identity: an installation token cannot call /user,
+          # so branch provenance is checked against `<app-slug>[bot]`.
+          APP_SLUG: ${{ steps.token.outputs.app-slug }}
         with:
           github-token: ${{ steps.token.outputs.token }}
           script: |
             const fs = require('fs');
+            const {
+              loadRepoClasses, classForRepo, resolveProfile, matchPattern,
+            } = require('./ops/repo-class-profile.js');
+            const {
+              SYNC_COMMIT_SUBJECT, assessSeedBranch, moveSeedBranch,
+            } = require('./ops/seed-branch-safety.js');
             const DRY = process.env.DRY_RUN === 'true';
             const FILTER = process.env.FILTER;
             const BRANCH = 'chore/governance-sync';
             const ORG = 'Quantum-L9';
+            const TEMPLATE = '.github/pull_request_template.md';
+            const CALLER = '.github/workflows/governance.yml';
+            const SYNC_LOGIN = process.env.APP_SLUG ? `${process.env.APP_SLUG}[bot]` : '';
+            // Any ref form (full SHA, tag, branch, short SHA): only the
+            // canonical full SHA is in sync.
+            const PIN_RE = /(Quantum-L9\/\.github\/\.github\/workflows\/governance-(?:pr|issue)\.yml@)([^\s#'"]+)/g;
+            const ALT_NAME = /^pull_request_template(\.md)?$/i;
 
-            // Managed files: if these drift from template, auto-restore via PR
+            const classes = loadRepoClasses(fs);
+            const canonicalTemplate = fs.readFileSync(TEMPLATE, 'utf8');
+            const canonicalPin = (fs.readFileSync('policies/governance-caller.yml', 'utf8')
+              .match(/governance-pr\.yml@([0-9a-f]{40})/) || [])[1];
+            if (!canonicalPin) {
+              core.setFailed('policies/governance-caller.yml carries no governance-pr.yml@<sha> pin');
+              return;
+            }
+            // Managed for every repository, exact bytes (unchanged contract).
             const MANAGED = {
               '.github/CODEOWNERS': fs.readFileSync('policies/CODEOWNERS', 'utf8'),
               '.github/dependabot.yml': fs.readFileSync('.github/dependabot.yml', 'utf8'),
             };
+
+            // 404 is an answer ("absent"). Anything else is not, and must not
+            // be read as "in sync" — that used to report unreadable repos as clean.
+            const read = async (o, n, path, ref) => {
+              try {
+                const r = await github.rest.repos.getContent({ owner: o, repo: n, path, ...(ref ? { ref } : {}) });
+                if (Array.isArray(r.data)) return { state: 'dir', entries: r.data };
+                return { state: 'present', sha: r.data.sha, text: Buffer.from(r.data.content || '', 'base64').toString('utf8') };
+              } catch (e) {
+                if (e.status === 404) return { state: 'absent' };
+                throw Object.assign(e, { phase: 'read' });
+              }
+            };
+            const same = (a, b) => a.trim() === b.trim();
 
             const all = await github.paginate(github.rest.repos.listForOrg, {
               org: ORG, type: 'all', per_page: 100
@@ -64,45 +128,85 @@ jobs:
             const rows = [];
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
+              let klass = '-';
+              const notes = [];
+              const row = (status, detail) => rows.push([n, klass, status, [detail, ...notes].filter(Boolean).join('; ')]);
+              try {
+                if ((await read(o, n, '.l9/no-sync')).state === 'present') {
+                  row('OPTED_OUT', '.l9/no-sync');
+                  continue;
+                }
 
-              // Check for opt-out marker
-              const optOut = await github.rest.repos.getContent({
-                owner: o, repo: n, path: '.l9/no-sync'
-              }).then(() => true).catch(() => false);
-
-              if (optOut) {
-                rows.push([n, 'opted out (.l9/no-sync)']);
-                continue;
-              }
-
-              // Check each managed file for drift
-              const drifted = [];
-              for (const [path, expected] of Object.entries(MANAGED)) {
-                try {
-                  const resp = await github.rest.repos.getContent({ owner: o, repo: n, path });
-                  const actual = Buffer.from(resp.data.content, 'base64').toString('utf8');
-                  if (actual.trim() !== expected.trim()) {
-                    drifted.push({ path, sha: resp.data.sha, expected });
-                  }
-                } catch (e) {
-                  if (e.status === 404) {
-                    drifted.push({ path, sha: null, expected });
+                // What this repository should carry: path -> {action, content, sha, why}.
+                const plan = [];
+                for (const [path, expected] of Object.entries(MANAGED)) {
+                  const cur = await read(o, n, path);
+                  if (cur.state !== 'present' || !same(cur.text, expected)) {
+                    plan.push({ path, action: 'write', content: expected, why: 'restore' });
                   }
                 }
-              }
 
-              if (drifted.length === 0) {
-                rows.push([n, 'in sync']);
-                continue;
-              }
+                const marker = await read(o, n, classes.marker_path);
+                const decided = classForRepo(classes, n, marker.state === 'present' ? marker.text : null);
+                let inherited = false;
+                if (decided.error) {
+                  // A declared class we cannot honour: touch nothing class-dependent.
+                  klass = 'unresolved';
+                  notes.push(`class: ${decided.error}`);
+                } else {
+                  const profile = resolveProfile(classes, decided.name);
+                  klass = profile.name;
+                  const seeds = profile.seed_categories || [];
+                  const tpl = await read(o, n, TEMPLATE);
+                  if (matchPattern(profile.inherit || [], TEMPLATE)) {
+                    inherited = true;
+                    // A local copy blocks inheritance and is, by policy, not theirs.
+                    if (tpl.state === 'present') {
+                      plan.push({ path: TEMPLATE, action: 'delete', why: 'remove' });
+                    }
+                  } else if (seeds.includes('pr-templates') && !matchPattern(profile.forbid || [], TEMPLATE)) {
+                    if (tpl.state !== 'present' || !same(tpl.text, canonicalTemplate)) {
+                      plan.push({ path: TEMPLATE, action: 'write', content: canonicalTemplate, why: 'restore' });
+                    }
+                  }
+                  if (seeds.includes('governance') && !matchPattern(profile.forbid || [], CALLER)) {
+                    const caller = await read(o, n, CALLER);
+                    if (caller.state === 'present') {
+                      const repinned = caller.text.replace(PIN_RE, `$1${canonicalPin}`);
+                      if (!PIN_RE.test(caller.text)) {
+                        notes.push('governance caller calls neither governance-pr.yml nor governance-issue.yml (reported, not edited)');
+                      } else if (repinned !== caller.text) {
+                        plan.push({ path: CALLER, action: 'write', content: repinned, why: 're-pin' });
+                      }
+                      PIN_RE.lastIndex = 0;
+                    } else {
+                      notes.push('governance caller absent (seeded missing-only by seed-governance)');
+                    }
+                  }
+                }
 
-              if (DRY) {
-                rows.push([n, `drift: ${drifted.map(d => d.path).join(', ')}`]);
-                continue;
-              }
+                // GitHub also honours root and docs/ templates and a
+                // PULL_REQUEST_TEMPLATE/ directory. Report them; never edit.
+                for (const dir of ['', '.github', 'docs']) {
+                  const listing = await read(o, n, dir);
+                  for (const e of listing.state === 'dir' ? listing.entries : []) {
+                    const p = dir ? `${dir}/${e.name}` : e.name;
+                    if (p !== TEMPLATE && (ALT_NAME.test(e.name) || /^pull_request_template$/i.test(e.name))) {
+                      notes.push(`alternate template ${e.type === 'dir' ? 'dir ' : ''}${p} (reported, not edited)`);
+                    }
+                  }
+                }
 
-              // Open remediation PR
-              try {
+                if (plan.length === 0) {
+                  row(decided.error ? 'BLOCKED_POLICY' : inherited ? 'INHERITED' : 'CANONICAL_COPY', 'in sync');
+                  continue;
+                }
+                const summary = plan.map(d => `${d.why} ${d.path}`).join(', ');
+                if (DRY) {
+                  row('DRIFT', `dry run: ${summary}`);
+                  continue;
+                }
+
                 const base = repo.default_branch;
 
                 // An open PR on the sync branch is work in flight: it may carry
@@ -117,69 +221,99 @@ jobs:
                   owner: o, repo: n, head: `${ORG}:${BRANCH}`, state: 'open'
                 });
                 if (openPR.data.length) {
-                  rows.push([n, `PR #${openPR.data[0].number} already open — branch left alone`]);
+                  row('UPDATE_PENDING_MERGE', `PR #${openPR.data[0].number} already open — branch left alone (${summary})`);
                   continue;
                 }
 
-                const ref = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
-
-                // Create or reset branch. Safe only because no PR is open on it:
-                // see the guard above.
-                try {
-                  await github.rest.git.createRef({
-                    owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: ref.data.object.sha
-                  });
-                } catch (e) {
-                  if (e.status === 422) {
-                    await github.rest.git.updateRef({
-                      owner: o, repo: n, ref: `heads/${BRANCH}`, sha: ref.data.object.sha, force: true
-                    });
-                  } else throw e;
+                // The branch is rebuilt as "default branch + one sync commit"
+                // through the seeders' guarded path: it is replaced only when it
+                // holds nothing but this workflow's own verified commit (subject,
+                // committer identity, signature), and the move is a server-side
+                // compare-and-swap on the sha that verdict was computed from.
+                const gate = await assessSeedBranch({
+                  github, owner: o, repo: n, base, branch: BRANCH,
+                  subject: SYNC_COMMIT_SUBJECT, seederLogin: SYNC_LOGIN,
+                });
+                if (gate.action === 'skip') {
+                  row('BLOCKED_POLICY', `${gate.reason} (${summary})`);
+                  continue;
                 }
 
-                for (const d of drifted) {
-                  const existing = await github.rest.repos.getContent({
-                    owner: o, repo: n, path: d.path, ref: BRANCH
-                  }).catch(() => null);
-
-                  await github.rest.repos.createOrUpdateFileContents({
-                    owner: o, repo: n, path: d.path, branch: BRANCH,
-                    message: `chore(governance): restore ${d.path} to org standard`,
-                    content: Buffer.from(d.expected).toString('base64'),
-                    sha: existing?.data?.sha,
+                const baseSha = (await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` })).data.object.sha;
+                const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
+                const treeItems = [];
+                for (const d of plan) {
+                  if (d.action === 'delete') {
+                    treeItems.push({ path: d.path, mode: '100644', type: 'blob', sha: null });
+                    continue;
+                  }
+                  const blob = await github.rest.git.createBlob({
+                    owner: o, repo: n, content: Buffer.from(d.content).toString('base64'), encoding: 'base64',
                   });
+                  treeItems.push({ path: d.path, mode: '100644', type: 'blob', sha: blob.data.sha });
+                }
+                const tree = await github.rest.git.createTree({
+                  owner: o, repo: n, base_tree: baseCommit.data.tree.sha, tree: treeItems,
+                });
+                const commit = await github.rest.git.createCommit({
+                  owner: o, repo: n,
+                  message: [
+                    `chore(governance): sync ${plan.length} org-managed file(s)`,
+                    '',
+                    ...plan.map(d => `${d.why} ${d.path}`),
+                  ].join('\n'),
+                  tree: tree.data.sha,
+                  parents: [baseSha],
+                });
+                const moved = await moveSeedBranch({
+                  github, owner: o, repo: n, branch: BRANCH,
+                  expectedSha: gate.sha, commitSha: commit.data.sha,
+                });
+                if (!moved.moved) {
+                  row('BLOCKED_POLICY', `${moved.reason} (${summary})`);
+                  continue;
                 }
 
                 // No open-PR branch here: the guard above returned early for
                 // those, so this always opens a fresh PR.
-                {
-                  const pr = await github.rest.pulls.create({
-                    owner: o, repo: n, head: BRANCH, base,
-                    title: 'chore(governance): restore drifted governance files',
-                    body: [
-                      'Governance files have drifted from the org standard.',
-                      '',
-                      '**Restored:**',
-                      ...drifted.map(d => `- \`${d.path}\``),
-                      '',
-                      'This is advisory — merge at your convenience.',
-                      'To opt out of automatic sync, create `.l9/no-sync` in your repo.',
-                      '',
-                      '_Opened by Quantum-L9/.github continuous-sync._',
-                    ].join('\n'),
-                  });
-                  rows.push([n, `PR #${pr.data.number} (${drifted.length} files)`]);
-                }
+                const pr = await github.rest.pulls.create({
+                  owner: o, repo: n, head: BRANCH, base,
+                  title: 'chore(governance): restore drifted governance files',
+                  body: [
+                    `Governance files have drifted from the ${ORG}/.github standard (class \`${klass}\`).`,
+                    '',
+                    ...plan.map(d => `- **${d.why}** \`${d.path}\`` + (
+                      d.action === 'delete' ? ` — this class inherits it live from ${ORG}/.github; a local copy blocks that`
+                        : d.why === 're-pin' ? ` — \`uses:\` pins moved to \`${canonicalPin}\`; the rest of the file is unchanged`
+                          : ' — replaced with the org bytes')),
+                    '',
+                    'Review and merge. To opt out of automatic sync, create `.l9/no-sync` in your repo.',
+                    '',
+                    '_Opened by Quantum-L9/.github continuous-sync._',
+                  ].join('\n'),
+                });
+                row('UPDATE_PR_OPEN', `PR #${pr.data.number} (${summary})`);
               } catch (e) {
-                rows.push([n, `failed: ${(e.message || '').slice(0, 60)}`]);
+                const status = e.status === 403 ? 'BLOCKED_PERMISSION' : e.phase === 'read' ? 'UNREACHABLE' : 'UNVERIFIED';
+                row(status, `${e.status || ''} ${(e.message || '').slice(0, 80)}`.trim());
               }
             }
 
+            const counts = {};
+            for (const r of rows) counts[r[2]] = (counts[r[2]] || 0) + 1;
             const mode = DRY ? 'DRY RUN' : 'APPLIED';
             core.summary
               .addHeading(`Continuous Sync (${mode}) — ${targets.length} repos`, 2)
+              .addRaw(Object.entries(counts).map(([k, v]) => `${k}: ${v}`).join(' · ') + '\n\n')
               .addTable([
-                [{data: 'Repo', header: true}, {data: 'Status', header: true}],
+                [{data: 'Repo', header: true}, {data: 'Class', header: true},
+                 {data: 'Status', header: true}, {data: 'Detail', header: true}],
                 ...rows.map(r => r.map(String))
               ])
               .write();
+            // A repository nobody could read or write is not synchronized, and
+            // the run must not read as if it were.
+            const unresolved = rows.filter(r => ['UNREACHABLE', 'BLOCKED_PERMISSION', 'UNVERIFIED'].includes(r[2]));
+            if (unresolved.length) {
+              core.setFailed(`${unresolved.length} repo(s) not synchronized: ${unresolved.map(r => `${r[0]} (${r[2]})`).join(', ')}`);
+            }

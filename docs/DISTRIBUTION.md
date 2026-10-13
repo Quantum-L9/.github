@@ -106,3 +106,46 @@ gh api -X PUT orgs/Quantum-L9/actions/permissions \
 `scripts/preflight.sh` checks this for every repo before seeding. The weekly
 governance report names repos whose Actions policy would stop the caller, and
 points here.
+
+## Appendix C — PR template, PR body, and caller pins
+
+The PR template is organization-managed: one canonical file,
+`.github/pull_request_template.md` in this repository, and no divergent copy
+anywhere else. `continuous-sync.yml` extends its exception to missing-only
+(above) to two more paths, decided per repository by `policies/repo-classes.yml`:
+
+| Path | Class rule | Sync action |
+| --- | --- | --- |
+| `.github/pull_request_template.md` | class seeds `pr-templates` | carry the canonical bytes; a divergent copy is replaced |
+| `.github/pull_request_template.md` | class INHERITS it | carry no copy; a local one blocks inheritance and is removed |
+| `.github/workflows/governance.yml` | class seeds `governance` | re-pin only: the `governance-pr.yml` / `governance-issue.yml` `uses:` SHAs follow `policies/governance-caller.yml`; everything else in the consumer's caller (e.g. `strict: true`) is kept |
+
+Alternate templates (a `PULL_REQUEST_TEMPLATE/` directory, root or `docs/`
+copies) are reported per repository and never edited. Each run's summary gives
+every repository one status: `INHERITED`, `CANONICAL_COPY`, `UPDATE_PR_OPEN`,
+`UPDATE_PENDING_MERGE`, `DRIFT` (dry run), `BLOCKED_PERMISSION`,
+`BLOCKED_POLICY`, `OPTED_OUT`, `UNREACHABLE`, or `UNVERIFIED`. Any repository
+left `UNREACHABLE`, `BLOCKED_PERMISSION`, or `UNVERIFIED` fails the run. A push to `main` that changes the template,
+the caller, CODEOWNERS, dependabot, or the class policy starts a run, so
+convergence does not wait for the weekly schedule. Each repository gets one
+atomic commit, moved onto the sync branch through the seeders' guarded path
+(`ops/seed-branch-safety.js`): only when the branch holds nothing but this
+workflow's own verified commit (subject, `<app-slug>[bot]` committer,
+signature), and as a server-side compare-and-swap on the inspected sha.
+
+**PR body.** The template's machine-owned regions (`PROTECTED-ROOT-PATHS`,
+`EVIDENCE`, `CHANGES-BY-INTENT`, `FILES-TOUCHED`) are filled by one renderer,
+Cursor-Governance `ops/scripts/compose_pr_body.py`: at publication by `make pr`,
+and on every later PR event by the `body` job in `governance-pr.yml`, which
+runs that composer at the commit pinned in the job (`COMPOSER` and the checkout
+`ref`, moved together). Reviewer text outside the regions is never rewritten;
+an unchanged body is never PATCHed; a head no local gate measured is marked
+`STALE` in Evidence, never claimed. This repository's own PRs get the same job
+through `pr-files.yml`.
+
+**Shipping a body or gate change to consumers.** Merge the
+`governance-pr.yml` change, set the merged commit as the pin in
+`policies/governance-caller.yml`, and merge that: the push starts
+`continuous-sync.yml`, which re-pins every eligible consumer caller through a
+reviewable PR. A consumer's run still reflects its previous pin until that PR
+merges; the run summary lists who is pending.
