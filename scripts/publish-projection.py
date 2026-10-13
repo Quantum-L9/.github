@@ -36,6 +36,7 @@ import hashlib
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 import tempfile
@@ -64,6 +65,8 @@ ARTIFACT_SCHEMA = "l9.projection-artifact/v1"
 RECEIPT_SCHEMA = "l9.compiler-receipt/v1"
 RECEIPT_TYPE = "l9.receipt/compilation@1"
 INDEX_PATH = "index.json"
+PROJECTION_FILE = "projection.json"
+RECEIPT_FILE = "receipt.json"
 INDEX_FORMAT = (
     "quantum-l9-github/projections-index@1"  # transport format, not semantic law
 )
@@ -81,6 +84,8 @@ _ORIGIN = re.compile(
     re.IGNORECASE,
 )
 _SOURCE_CLASS = re.compile(r"[a-z0-9_]+")
+# Values that reach git argv: never option-like, never shell-meaningful.
+_REMOTE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 
 
 class Outcome(Exception):
@@ -117,7 +122,7 @@ def _reject_constant(name: str) -> Any:
 def load_json(data: bytes, what: str) -> dict[str, Any]:
     try:
         doc = json.loads(data.decode("utf-8"), parse_constant=_reject_constant)
-    except (UnicodeDecodeError, ValueError) as exc:
+    except ValueError as exc:  # includes UnicodeDecodeError
         raise Outcome("REJECTED", "MALFORMED_JSON", input=what, error=str(exc)) from exc
     if not isinstance(doc, dict):
         raise Outcome("REJECTED", "MALFORMED_JSON", input=what, error="not an object")
@@ -207,6 +212,48 @@ def is_ancestor(repo: Path, older: str, newer: str) -> bool:
     )
 
 
+# ── argv safety: CLI values that reach git ─────────────────────────────────
+
+
+def require_branch(repo: Path, branch: str) -> str:
+    if (
+        branch.startswith("-")
+        or git(repo, "check-ref-format", "--branch", branch, check=False).returncode
+    ):
+        raise Outcome("REJECTED", "UNSAFE_BRANCH_NAME", branch=branch)
+    return branch
+
+
+def require_remote(repo: Path, remote: str) -> str:
+    """A remote must be a plain, already-configured name; a URL or option is refused."""
+    if (
+        not _REMOTE_NAME.fullmatch(remote)
+        or remote not in git_out(repo, "remote").split()
+    ):
+        raise Outcome("REJECTED", "UNSAFE_OR_UNKNOWN_REMOTE", remote=remote)
+    return remote
+
+
+def require_full_ref(repo: Path, ref: str) -> str:
+    if (
+        not ref.startswith("refs/")
+        or git(repo, "check-ref-format", ref, check=False).returncode
+    ):
+        raise Outcome("REJECTED", "UNSAFE_REF_NAME", ref=ref)
+    return ref
+
+
+def require_commit_sha(commit: str) -> str:
+    if not _SHA1.fullmatch(commit or ""):
+        raise Outcome(
+            "REJECTED",
+            "PUBLICATION_COMMIT_MALFORMED",
+            commit=commit,
+            detail="name the publication commit by its full 40-hex SHA",
+        )
+    return commit
+
+
 # ── authority: independent pin ──────────────────────────────────────────────
 
 
@@ -261,6 +308,33 @@ def bind_authority(root: Path, revision: str | None) -> str:
     return pin
 
 
+def _single_selector(profile: dict[str, Any], source_class: str) -> list[str]:
+    """One selector and no reshape is the only payload shape the producer defines."""
+    spec = (profile.get("sources") or {}).get(source_class)
+    if not isinstance(spec, dict):
+        raise Outcome(
+            "REJECTED",
+            "UNSUPPORTED_SOURCE_CLASS",
+            source_class=source_class,
+            detail="profile declares no such source class",
+        )
+    selectors = spec.get("selectors")
+    if (
+        not isinstance(selectors, list)
+        or len(selectors) != 1
+        or not isinstance(selectors[0], str)
+        or "reshape" in spec
+    ):
+        raise Outcome(
+            "REJECTED",
+            "UNSUPPORTED_SOURCE_CLASS",
+            source_class=source_class,
+            selectors=selectors,
+            detail="multi-selector or reshaped classes have no declared payload shape and are not published",
+        )
+    return selectors
+
+
 def compute_pins(
     root: Path, revision: str, profile_ref: str, source_class: str
 ) -> dict[str, Any]:
@@ -301,29 +375,7 @@ def compute_pins(
             "BLOCKED", "PROFILE_UNRESOLVED", profile=profile_ref, matches=len(profiles)
         )
     profile = profiles[0]
-    spec = (profile.get("sources") or {}).get(source_class)
-    if not isinstance(spec, dict):
-        raise Outcome(
-            "REJECTED",
-            "UNSUPPORTED_SOURCE_CLASS",
-            source_class=source_class,
-            detail="profile declares no such source class",
-        )
-    selectors = spec.get("selectors")
-    # One selector and no reshape is the only payload shape the producer defines.
-    if (
-        not isinstance(selectors, list)
-        or len(selectors) != 1
-        or not isinstance(selectors[0], str)
-        or "reshape" in spec
-    ):
-        raise Outcome(
-            "REJECTED",
-            "UNSUPPORTED_SOURCE_CLASS",
-            source_class=source_class,
-            selectors=selectors,
-            detail="multi-selector or reshaped classes have no declared payload shape and are not published",
-        )
+    selectors = _single_selector(profile, source_class)
     class_artifact = (
         (catalog.get("source_classes") or {}).get(source_class) or {}
     ).get("canonical_artifact")
@@ -489,8 +541,8 @@ def verify_pair(
         "receipt_authority_revision": asserted,
         "compiler_version": producer["version"],
         "files": {
-            "projection.json": digest_bytes(artifact_bytes),
-            "receipt.json": digest_bytes(receipt_bytes),
+            PROJECTION_FILE: digest_bytes(artifact_bytes),
+            RECEIPT_FILE: digest_bytes(receipt_bytes),
         },
         # Unkeyed receipts: role and digests are checked, the producer is not authenticated.
         "producer_authentication": "unauthenticated_unkeyed_receipt",
@@ -498,14 +550,24 @@ def verify_pair(
 
 
 def read_pair_dir(pair_dir: Path) -> tuple[bytes, bytes]:
-    try:
-        return (pair_dir / "projection.json").read_bytes(), (
-            pair_dir / "receipt.json"
-        ).read_bytes()
-    except OSError as exc:
-        raise Outcome(
-            "BLOCKED", "PRODUCER_OUTPUT_ABSENT", pair_dir=str(pair_dir), error=str(exc)
-        ) from exc
+    """The producer's two files, as regular files inside `pair_dir`; symlinks are refused."""
+    base = Path(os.path.realpath(pair_dir))
+    found = []
+    for name in (PROJECTION_FILE, RECEIPT_FILE):
+        try:
+            fd = os.open(base / name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+            with os.fdopen(fd, "rb") as handle:
+                if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+                    raise OSError(f"{name} is not a regular file")
+                found.append(handle.read())
+        except OSError as exc:
+            raise Outcome(
+                "BLOCKED",
+                "PRODUCER_OUTPUT_ABSENT",
+                pair_dir=str(pair_dir),
+                error=str(exc),
+            ) from exc
+    return found[0], found[1]
 
 
 # ── publication store ───────────────────────────────────────────────────────
@@ -517,7 +579,7 @@ def entry_key(pins: dict[str, Any]) -> str:
 
 def pair_paths(source_class: str, receipt_digest: str) -> tuple[str, str]:
     base = f"pairs/{source_class}/{receipt_digest.split(':', 1)[1]}"
-    return f"{base}/projection.json", f"{base}/receipt.json"
+    return f"{base}/{PROJECTION_FILE}", f"{base}/{RECEIPT_FILE}"
 
 
 def load_index(repo: Path, commit: str) -> dict[str, Any]:
@@ -542,8 +604,9 @@ def index_bytes(index: dict[str, Any]) -> bytes:
 
 def resolve_base(repo: Path, branch: str, remote: str | None) -> str:
     """Current tip of the target branch. The publisher never creates it."""
-    ref = f"refs/heads/{branch}"
+    ref = f"refs/heads/{require_branch(repo, branch)}"
     if remote:
+        require_remote(repo, remote)
         listed = git_out(repo, "ls-remote", "--refs", remote, ref)
         if not listed:
             raise Outcome(
@@ -701,7 +764,9 @@ def build_commit(repo: Path, base: str, files: dict[str, bytes], message: str) -
 
 def advance(repo: Path, branch: str, base: str, new: str, remote: str | None) -> None:
     """Fast-forward `branch` from `base` to `new`, or lose cleanly. Never forces."""
-    ref = f"refs/heads/{branch}"
+    ref = f"refs/heads/{require_branch(repo, branch)}"
+    require_commit_sha(base)
+    require_commit_sha(new)
     if remote is None:
         if git(repo, "update-ref", ref, new, base, check=False).returncode:
             raise Outcome(
@@ -738,6 +803,7 @@ def require_canonical_fresh(
     authority_root: Path, pins: dict[str, Any], canonical_ref: str
 ) -> None:
     """Refuse to promote when canonical main has already moved the material inputs."""
+    require_full_ref(authority_root, canonical_ref)
     tip = git(
         authority_root,
         "rev-parse",
@@ -788,7 +854,12 @@ def check_publication(
     source_class: str,
 ) -> dict[str, Any]:
     proc = git(
-        repo, "rev-parse", "--verify", "--quiet", f"{commit}^{{commit}}", check=False
+        repo,
+        "rev-parse",
+        "--verify",
+        "--quiet",
+        f"{require_commit_sha(commit)}^{{commit}}",
+        check=False,
     )
     if proc.returncode:
         raise Outcome("BLOCKED", "PUBLICATION_COMMIT_UNKNOWN", commit=commit)
@@ -801,7 +872,7 @@ def check_publication(
         )
     current = entry["current"]
     pair = []
-    for name in ("projection.json", "receipt.json"):
+    for name in (PROJECTION_FILE, RECEIPT_FILE):
         data = blob_at(repo, fixed, f"{current.get('pair')}/{name}")
         if data is None:
             raise Outcome(

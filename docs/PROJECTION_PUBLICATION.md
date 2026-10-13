@@ -43,6 +43,10 @@ producer-defined payload shape and is refused as `UNSUPPORTED_SOURCE_CLASS`.
   producer role. It does not authenticate the producer. Every index record
   says `producer_authentication: unauthenticated_unkeyed_receipt`.
 - **Compiler revision** is recorded as `caller_asserted`.
+- **Arguments that reach git are validated first.** `--remote` must be an
+  already-configured remote name (no URL, no option), `--branch` and
+  `--canonical-ref` must be valid ref names, and `--commit` a full 40-hex
+  SHA. Producer files are read as regular files only; symlinks are refused.
 
 ## Layout of `projections`
 

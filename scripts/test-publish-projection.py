@@ -498,19 +498,20 @@ class PublishTests(Fixture):
         pins2 = self.pins(rev2)
         pair2 = make_pair(self.tmp / "out", pins2, rev2)
         facts = pp.verify_pair(*pp.read_pair_dir(pair2), pins2, rev2)
+        pair2_bytes, tip = pp.read_pair_dir(pair2), self.tip()
         with self.assertRaises(pp.Outcome) as ctx:
             pp.plan_publication(
                 self.store,
-                self.tip(),
+                tip,
                 self.auth,
                 pins2,
                 facts,
-                pp.read_pair_dir(pair2),
+                pair2_bytes,
                 "c" * 40,
             )
         self.assertEqual(ctx.exception.reason, "ROLLBACK_REFUSED")
 
-    def test_unsupported_class_or_missing_compiler_revision_never_publishes(self):
+    def test_unsafe_or_unsupported_inputs_never_publish_or_reach_git_as_options(self):
         code, out = self.publish(
             self.pair, self.rev1, "--apply", "--source-class", "grouped"
         )
@@ -530,6 +531,32 @@ class PublishTests(Fixture):
             "--apply",
         )
         self.assertEqual((code, out["reason"]), (3, "COMPILER_REVISION_ABSENT"))
+        marker = self.tmp / "INJECTED"
+        injected = f"--upload-pack=touch {marker};false"
+        for extra, reason in (
+            (("--remote", injected), "UNSAFE_OR_UNKNOWN_REMOTE"),
+            (
+                ("--remote", "https://github.com/Quantum-L9/.github"),
+                "UNSAFE_OR_UNKNOWN_REMOTE",
+            ),
+            (("--branch", injected), "UNSAFE_BRANCH_NAME"),
+            (("--canonical-ref", injected), "UNSAFE_REF_NAME"),
+        ):
+            code, out = self.publish(self.pair, self.rev1, "--apply", *extra)
+            self.assertEqual((code, out["reason"]), (1, reason))
+        code, out = self.cli(
+            "check",
+            "--authority-root",
+            str(self.auth),
+            "--revision",
+            self.rev1,
+            "--repo",
+            str(self.store),
+            "--commit",
+            injected,
+        )
+        self.assertEqual((code, out["reason"]), (1, "PUBLICATION_COMMIT_MALFORMED"))
+        self.assertFalse(marker.exists(), "an option-like CLI value reached git")
         self.assertEqual(self.tip(), self.root_commit)
 
 
