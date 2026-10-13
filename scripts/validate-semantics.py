@@ -9183,6 +9183,7 @@ def _evaluate_rc028(docs: dict[str, dict], report: Report) -> None:
 def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
     field = CODING_PROFILE_LABEL
     selectors = f"{field}.sources.{{}}.selectors"
+    invariants_class = "source_classes.invariants.canonical_artifact"
     cases = []
 
     def mutated() -> tuple[dict, list, dict]:
@@ -9276,7 +9277,7 @@ def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
         (
             "source class retargeted",
             case,
-            "source_classes.invariants.canonical_artifact",
+            invariants_class,
         )
     )
     case, _, profile = mutated()
@@ -9312,7 +9313,7 @@ def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
         (
             "source_classes not a mapping",
             case,
-            "source_classes.invariants.canonical_artifact",
+            invariants_class,
         )
     )
     case, _, _ = mutated()
@@ -9321,7 +9322,7 @@ def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
         (
             "source class entry not a mapping",
             case,
-            "source_classes.invariants.canonical_artifact",
+            invariants_class,
         )
     )
     case, _, profile = mutated()
