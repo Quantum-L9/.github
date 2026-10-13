@@ -44,7 +44,7 @@ const events = (block) => block.flatMap((l) => {
 
 /** The indented body of a dispatch input, e.g. `dry_run:` or `mode:`. */
 function input(block, name) {
-  const i = block.findIndex((l) => new RegExp(`^ {6}${name}:\\s*$`).test(l));
+  const i = block.findIndex((l) => new RegExp(String.raw`^ {6}${name}:\s*$`).test(l));
   assert.ok(i !== -1, `no workflow_dispatch input "${name}"`);
   const body = [];
   for (const l of block.slice(i + 1)) {
@@ -64,7 +64,7 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
 
   assert.deepStrictEqual(events(block), ['workflow_dispatch'], `${label}: workflow_dispatch must be the only trigger`);
   for (const forbidden of ['schedule', 'push', 'cron', 'pull_request', 'workflow_run', 'repository_dispatch', 'workflow_call']) {
-    assert.ok(!block.some((l) => new RegExp(`^\\s*-?\\s*${forbidden}:`).test(l)), `${label}: automatic trigger "${forbidden}" present`);
+    assert.ok(!block.some((l) => new RegExp(String.raw`^\s*-?\s*${forbidden}:`).test(l)), `${label}: automatic trigger "${forbidden}" present`);
   }
   console.log(`ok: ${label} — workflow_dispatch is the only trigger (no schedule, no push)`);
 
@@ -73,7 +73,7 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   assert.ok(dry.includes('default: true'), `${label}: dispatch must default to Preview`);
   assert.ok(input(block, 'repo_filter').includes('type: string'));
   // Only an explicit false reaches Apply; no fallback may default to writing.
-  assert.match(text, /^\s+DRY_RUN: \$\{\{ inputs\.dry_run \}\}\s*$/m, `${label}: DRY_RUN must come from the input alone`);
+  assert.ok(text.split('\n').some((l) => l.trim() === 'DRY_RUN: ${{ inputs.dry_run }}'), `${label}: DRY_RUN must come from the input alone`);
   assert.doesNotMatch(text, /DRY_RUN:.*\|\|/, `${label}: DRY_RUN must not carry a fallback`);
   assert.match(text, /const DRY = process\.env\.DRY_RUN !== 'false';/, `${label}: Preview unless DRY_RUN is exactly "false"`);
   console.log(`ok: ${label} — Preview is the default and the fail-closed state; Apply needs dry_run=false`);

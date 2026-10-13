@@ -348,8 +348,9 @@ async function manualModeScenarios() {
   const moves = r.calls.filter((c) => ['git.createRef', 'graphql.updateRefs'].includes(c.name));
   assert.deepStrictEqual(moves.map((c) => c.args.ref || c.args.name), [`refs/heads/${BRANCH}`],
     `${label}: Apply may move the sync branch and nothing else`);
-  const touched = r.writes.map((w) => w.args.path).sort();
-  assert.deepStrictEqual(touched, ['.github/CODEOWNERS', '.github/dependabot.yml', CALLER, TEMPLATE].sort());
+  const byName = (a, b) => a.localeCompare(b);
+  const touched = r.writes.map((w) => w.args.path).sort(byName);
+  assert.deepStrictEqual(touched, ['.github/CODEOWNERS', '.github/dependabot.yml', CALLER, TEMPLATE].sort(byName));
   for (const p of Object.keys(consumerOwned)) {
     assert.ok(!touched.includes(p) && !r.deletes.some((d) => d.args.path === p), `${label}: Apply touched ${p}`);
   }
