@@ -8757,6 +8757,498 @@ def check_rc027(docs: dict[str, dict], report: Report) -> None:
         _check_rc027_negative_cases(docs, report)
 
 
+# RC-028 Coding-agent execution projection closure. One runtime profile,
+# l9.projection/coding-agent-execution@1, selects the admitted global records
+# that govern repository work by any coding agent the Cursor-Governance
+# operating plane binds. It selects by exact id only: no wildcard, scope
+# filter, or field selector, so the payload is a fixed, enumerable set of
+# whole records and adds no meaning (L9-PROJECTION-001). The selected set is
+# pinned exactly, because an admitted @1 profile is immutable
+# (L9-REVISION-001): a different selection is a new version, not an edit. The
+# selected contracts must close over their source_invariants, every source
+# must be a registered canonical ledger that permits projection, and the
+# profile must not name a skill. The check adds no invariant or contract.
+CODING_PROFILE_ID = "l9.projection/coding-agent-execution@1"
+CODING_OUTPUT_SCHEMA = "l9.projection.coding-agent-execution/v1"
+CODING_PROFILE_LABEL = f"projection_profiles[{CODING_PROFILE_ID}]"
+CANONICAL_SOURCES_PATH = "semantics/canonical_sources.yaml"
+AUTHORITY_MODEL_PATH = "semantics/authority_model.yaml"
+CODING_INVARIANT_IDS = (
+    "L9-AUTH-001",
+    "L9-AUTH-002",
+    "L9-OWNER-001",
+    "L9-MONOTONIC-001",
+    "L9-PROMOTION-001",
+    "L9-DERIVED-001",
+    "L9-EVIDENCE-001",
+    "L9-ASSURANCE-001",
+    "L9-UNKNOWN-001",
+    "L9-DEGRADE-001",
+    "L9-PROV-001",
+    "L9-COORD-001",
+    "L9-COMPAT-001",
+    "L9-REVISION-001",
+    "L9-ADMISSION-001",
+    "L9-PROJECTION-001",
+    "L9-VALIDATION-001",
+    "L9-CORRECTNESS-001",
+    "L9-GLOBALIZATION-001",
+)
+CODING_CONTRACT_IDS = (
+    "l9.contract/authority-boundary@1",
+    "l9.contract/monotonic-subordination@1",
+    "l9.contract/admission-and-promotion@1",
+    "l9.contract/derived-artifact@1",
+    "l9.contract/evidence-and-receipt@1",
+    "l9.contract/assurance-and-verification@1",
+    "l9.contract/unknown-and-degradation@1",
+    "l9.contract/provenance-and-coordinate@1",
+    "l9.contract/projection@1",
+    "l9.contract/validation-and-correctness@1",
+)
+CODING_AUTHORITY_SECTIONS = (
+    "agent_authority",
+    "human_authority",
+    "escalation_rules",
+    "admission_rules",
+)
+# source name -> (ledger path, artifact_id, collection, pinned ids or sections)
+CODING_SOURCES = {
+    "invariants": (
+        INVARIANTS_PATH,
+        "l9.invariants/global@1",
+        "invariants",
+        CODING_INVARIANT_IDS,
+    ),
+    "contracts": (
+        CONTRACTS_PATH,
+        "l9.contracts/global@1",
+        "contracts",
+        CODING_CONTRACT_IDS,
+    ),
+    "authority_model": (
+        AUTHORITY_MODEL_PATH,
+        "l9.authority-model/global@1",
+        None,
+        CODING_AUTHORITY_SECTIONS,
+    ),
+}
+CODING_FORBIDDEN = {
+    "obligation_not_admitted_in_a_selected_source",
+    "skill_command_or_routing_semantics",
+    "adapter_host_or_surface_specific_semantics",
+    "repository_local_policy_as_global_law",
+    "execution_publication_or_merge_authority_grant",
+}
+ID_EQUALITY_SELECTOR = re.compile(
+    r'^\$\.(?P<collection>[A-Za-z_]\w*)\[\?\(@\.id=="(?P<id>[^"]+)"\)\]$'
+)
+TOP_LEVEL_SELECTOR = re.compile(r"^\$\.(?P<section>[A-Za-z_]\w*)$")
+SKILL_REFERENCE = re.compile(r"l9-coding-agent|skills/|SKILL\.md", re.IGNORECASE)
+
+
+def _rc028_fail(field: str, value: object, message: str, report: Report) -> None:
+    report.fail("RC-028", PROFILES_PATH, field, value, message)
+
+
+def _rc028_strings(value: object) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        return [s for item in value.values() for s in _rc028_strings(item)]
+    if isinstance(value, list):
+        return [s for item in value for s in _rc028_strings(item)]
+    return []
+
+
+def _rc028_profile_shape(profile: dict, report: Report) -> None:
+    label = CODING_PROFILE_LABEL
+    if profile.get("class") != "runtime":
+        _rc028_fail(
+            f"{label}.class",
+            profile.get("class"),
+            "coding-agent execution projection must be a runtime profile",
+            report,
+        )
+    if profile.get("consumer") != CG_CONSUMER:
+        _rc028_fail(
+            f"{label}.consumer",
+            profile.get("consumer"),
+            f"coding-agent execution projection consumer must be exactly {CG_CONSUMER!r}, "
+            "the operating plane that binds coding-agent surfaces",
+            report,
+        )
+    output_schema = (profile.get("output") or {}).get("schema")
+    if output_schema != CODING_OUTPUT_SCHEMA:
+        _rc028_fail(
+            f"{label}.output.schema",
+            output_schema,
+            f"output schema must be exactly {CODING_OUTPUT_SCHEMA!r}; it is the downstream consumer contract",
+            report,
+        )
+    missing_forbidden = sorted(CODING_FORBIDDEN - set(profile.get("forbidden") or []))
+    if missing_forbidden:
+        _rc028_fail(
+            f"{label}.forbidden",
+            missing_forbidden,
+            "coding-agent execution projection must declare the boundaries it does not carry",
+            report,
+        )
+    skill_refs = sorted(
+        {s for s in _rc028_strings(profile) if SKILL_REFERENCE.search(s)}
+    )
+    if skill_refs:
+        _rc028_fail(
+            label,
+            skill_refs,
+            "coding-agent execution projection must not reference or depend on a skill",
+            report,
+        )
+
+
+def _rc028_source_ledger(
+    name: str, catalog: dict, docs: dict[str, dict], report: Report
+) -> dict | None:
+    """The canonical ledger a source names, or None after failing closed when
+    the source class, its registration, or the ledger identity does not hold."""
+    ledger_path, artifact_id, _collection, _pinned = CODING_SOURCES[name]
+    declared = ((catalog.get("source_classes") or {}).get(name) or {}).get(
+        "canonical_artifact"
+    )
+    ledger = docs.get(ledger_path) or {}
+    if (
+        declared != ledger_path.removeprefix("semantics/")
+        or ledger.get("artifact_id") != artifact_id
+        or ledger.get("canonical") is not True
+    ):
+        _rc028_fail(
+            f"source_classes.{name}.canonical_artifact",
+            declared,
+            f"source {name} must resolve to the canonical ledger {ledger_path} ({artifact_id})",
+            report,
+        )
+        return None
+    registry = (docs.get(CANONICAL_SOURCES_PATH) or {}).get("sources")
+    registration, count = _unique_entry(registry, "path", ledger_path)
+    if (
+        count != 1
+        or registration is None
+        or registration.get("canonical") is not True
+        or registration.get("projection_allowed") is not True
+    ):
+        _rc028_fail(
+            f"source_classes.{name}",
+            ledger_path,
+            f"source {name} must be registered once in {CANONICAL_SOURCES_PATH} as canonical "
+            "with projection_allowed: true",
+            report,
+        )
+        return None
+    return ledger
+
+
+def _rc028_record_selectors(
+    name: str, selectors: list, ledger: dict, report: Report
+) -> set[str]:
+    """Ids selected from one id-keyed collection; fails closed on any selector
+    that is not an exact-id equality filter over a declared global record."""
+    ledger_path, _artifact_id, collection, _pinned = CODING_SOURCES[name]
+    field = f"{CODING_PROFILE_LABEL}.sources.{name}.selectors"
+    records = ledger.get(collection)
+    scopes: dict[str, list] = {}
+    for record in records if isinstance(records, list) else []:
+        if isinstance(record, dict) and isinstance(record.get("id"), str):
+            scopes.setdefault(record["id"], []).append(record.get("scope"))
+    selected: set[str] = set()
+    for selector in selectors:
+        match = ID_EQUALITY_SELECTOR.match(str(selector))
+        if match is None or match.group("collection") != collection:
+            _rc028_fail(
+                field,
+                selector,
+                f'selector must be an exact-id filter $.{collection}[?(@.id=="<id>")]; '
+                "wildcard, scope, field, and membership selectors are not admitted here",
+                report,
+            )
+            continue
+        record_id = match.group("id")
+        if record_id in selected:
+            _rc028_fail(field, selector, "selector is declared more than once", report)
+        selected.add(record_id)
+        found = scopes.get(record_id, [])
+        if len(found) != 1:
+            _rc028_fail(
+                field,
+                selector,
+                f"selector must resolve to exactly one record in {ledger_path} (found {len(found)})",
+                report,
+            )
+        elif found[0] != "global":
+            _rc028_fail(
+                field,
+                selector,
+                f"selected record must have scope global (found {found[0]!r})",
+                report,
+            )
+    return selected
+
+
+def _rc028_section_selectors(
+    name: str, selectors: list, ledger: dict, report: Report
+) -> set[str]:
+    ledger_path = CODING_SOURCES[name][0]
+    field = f"{CODING_PROFILE_LABEL}.sources.{name}.selectors"
+    selected: set[str] = set()
+    for selector in selectors:
+        match = TOP_LEVEL_SELECTOR.match(str(selector))
+        if match is None or match.group("section") not in ledger:
+            _rc028_fail(
+                field,
+                selector,
+                f"selector must name one top-level section of {ledger_path}",
+                report,
+            )
+            continue
+        if match.group("section") in selected:
+            _rc028_fail(field, selector, "selector is declared more than once", report)
+        selected.add(match.group("section"))
+    return selected
+
+
+def _rc028_sources(
+    profile: dict, catalog: dict, docs: dict[str, dict], report: Report
+) -> None:
+    sources = profile.get("sources")
+    label = CODING_PROFILE_LABEL
+    if not isinstance(sources, dict):
+        _rc028_fail(
+            f"{label}.sources",
+            sources,
+            "profile sources must be a source-local selector mapping",
+            report,
+        )
+        return
+    if set(sources) != set(CODING_SOURCES):
+        _rc028_fail(
+            f"{label}.sources",
+            sorted(map(str, sources)),
+            f"coding-agent execution projection sources must be exactly {sorted(CODING_SOURCES)}",
+            report,
+        )
+    selected: dict[str, set[str]] = {}
+    for name, (_path, _artifact, collection, pinned) in CODING_SOURCES.items():
+        if name not in sources:
+            continue
+        ledger = _rc028_source_ledger(name, catalog, docs, report)
+        if ledger is None:
+            continue
+        block = sources.get(name)
+        selectors = block.get("selectors") if isinstance(block, dict) else None
+        field = f"{label}.sources.{name}.selectors"
+        if not isinstance(selectors, list) or not selectors:
+            _rc028_fail(
+                field, selectors, "source must own a non-empty selectors list", report
+            )
+            continue
+        if collection is None:
+            chosen = _rc028_section_selectors(name, selectors, ledger, report)
+        else:
+            chosen = _rc028_record_selectors(name, selectors, ledger, report)
+        selected[name] = chosen
+        if chosen != set(pinned):
+            _rc028_fail(
+                field,
+                {
+                    "missing": sorted(set(pinned) - chosen),
+                    "unexpected": sorted(chosen - set(pinned)),
+                },
+                f"{CODING_PROFILE_ID} is immutable: its {name} selection must be exactly the pinned set; "
+                "a different selection is a new profile version",
+                report,
+            )
+    if "contracts" in selected and "invariants" in selected:
+        contracts = (docs.get(CONTRACTS_PATH) or {}).get("contracts") or []
+        for contract in contracts:
+            if (
+                not isinstance(contract, dict)
+                or contract.get("id") not in selected["contracts"]
+            ):
+                continue
+            cited = contract.get("source_invariants")
+            for invariant in cited if isinstance(cited, list) else []:
+                if invariant not in selected["invariants"]:
+                    _rc028_fail(
+                        f"{label}.sources.invariants.selectors",
+                        invariant,
+                        f"selected contract {contract['id']} cites an invariant the profile does not "
+                        "select; the projection must close over its contracts' source_invariants",
+                        report,
+                    )
+
+
+def _evaluate_rc028(docs: dict[str, dict], report: Report) -> None:
+    catalog = docs.get(PROFILES_PATH) or {}
+    profile, count = _unique_entry(
+        catalog.get("projection_profiles"), "id", CODING_PROFILE_ID
+    )
+    if count != 1 or profile is None:
+        _rc028_fail(
+            "projection_profiles",
+            CODING_PROFILE_ID,
+            f"coding-agent execution projection profile must exist exactly once (found {count})",
+            report,
+        )
+        return
+    _rc028_profile_shape(profile, report)
+    _rc028_sources(profile, catalog, docs, report)
+
+
+def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    field = CODING_PROFILE_LABEL
+    selectors = f"{field}.sources.{{}}.selectors"
+    cases = []
+
+    def mutated() -> tuple[dict, list, dict]:
+        case = copy.deepcopy(docs)
+        profiles = case[PROFILES_PATH]["projection_profiles"]
+        profile, _ = _unique_entry(profiles, "id", CODING_PROFILE_ID)
+        return case, profiles, profile
+
+    def selector_list(profile: dict, name: str) -> list:
+        return profile["sources"][name]["selectors"]
+
+    case, profiles, profile = mutated()
+    profiles.remove(profile)
+    cases.append(("profile deleted", case, "projection_profiles"))
+    case, profiles, profile = mutated()
+    profiles.append(copy.deepcopy(profile))
+    cases.append(("profile duplicated", case, "projection_profiles"))
+    case, _, profile = mutated()
+    profile["consumer"] = "claude-code"
+    cases.append(("consumer not authorized", case, f"{field}.consumer"))
+    case, _, profile = mutated()
+    profile["class"] = "consumer"
+    cases.append(("wrong profile class", case, f"{field}.class"))
+    case, _, profile = mutated()
+    del profile["sources"]["contracts"]
+    cases.append(("contracts source missing", case, f"{field}.sources"))
+    case, _, profile = mutated()
+    profile["sources"]["capabilities"] = {"selectors": ["$.global_rules"]}
+    cases.append(("unpinned source added", case, f"{field}.sources"))
+    case, _, profile = mutated()
+    selector_list(profile, "invariants")[0] = (
+        '$.invariants[?(@.id=="L9-NOT-ADMITTED-001")]'
+    )
+    cases.append(
+        ("selector names an undeclared id", case, selectors.format("invariants"))
+    )
+    case, _, profile = mutated()
+    selector_list(profile, "invariants").append("$.invariants[*]")
+    cases.append(("arbitrary wildcard selector", case, selectors.format("invariants")))
+    case, _, profile = mutated()
+    selector_list(profile, "contracts").append('$.contracts[?(@.scope=="global")]')
+    cases.append(
+        ("arbitrary scope-filter selector", case, selectors.format("contracts"))
+    )
+    case, _, profile = mutated()
+    selector_list(profile, "contracts").append('$.invariants[?(@.id=="L9-AUTH-001")]')
+    cases.append(("selector crosses source", case, selectors.format("contracts")))
+    case, _, profile = mutated()
+    selector_list(profile, "invariants").append(selector_list(profile, "invariants")[0])
+    cases.append(("duplicate selector", case, selectors.format("invariants")))
+    case, _, profile = mutated()
+    selector_list(profile, "invariants").append(
+        '$.invariants[?(@.id=="INV-VALIDATION-MONOTONICITY")]'
+    )
+    cases.append(("non-global record selected", case, selectors.format("invariants")))
+    case, _, profile = mutated()
+    selector_list(profile, "contracts").remove(
+        '$.contracts[?(@.id=="l9.contract/validation-and-correctness@1")]'
+    )
+    cases.append(("obligation stripped", case, selectors.format("contracts")))
+    case, _, profile = mutated()
+    selector_list(profile, "invariants").append('$.invariants[?(@.id=="L9-HARD-001")]')
+    cases.append(
+        ("immutable @1 selection changed", case, selectors.format("invariants"))
+    )
+    case, _, profile = mutated()
+    selector_list(profile, "invariants").remove(
+        '$.invariants[?(@.id=="L9-GLOBALIZATION-001")]'
+    )
+    cases.append(("contract closure broken", case, selectors.format("invariants")))
+    case, _, profile = mutated()
+    selector_list(profile, "authority_model").remove("$.human_authority")
+    cases.append(
+        ("human authority stripped", case, selectors.format("authority_model"))
+    )
+    case, _, profile = mutated()
+    selector_list(profile, "authority_model").append("$.self_merge_authority")
+    cases.append(
+        ("selector names a missing section", case, selectors.format("authority_model"))
+    )
+    case, _, profile = mutated()
+    case[PROFILES_PATH]["source_classes"]["invariants"]["canonical_artifact"] = (
+        "vocabulary.yaml"
+    )
+    cases.append(
+        (
+            "source class retargeted",
+            case,
+            "source_classes.invariants.canonical_artifact",
+        )
+    )
+    case, _, profile = mutated()
+    registration, _ = _unique_entry(
+        case[CANONICAL_SOURCES_PATH]["sources"], "path", AUTHORITY_MODEL_PATH
+    )
+    registration["projection_allowed"] = False
+    cases.append(("source not projectable", case, "source_classes.authority_model"))
+    case, _, profile = mutated()
+    profile["purpose"] += " Bound through skills/l9-coding-agent."
+    cases.append(("skill dependency", case, field))
+    case, _, profile = mutated()
+    profile["output"]["schema"] = "l9.projection.coding-agent-execution/v2"
+    cases.append(("wrong output schema", case, f"{field}.output.schema"))
+    case, _, profile = mutated()
+    profile["forbidden"].remove("execution_publication_or_merge_authority_grant")
+    cases.append(("authority boundary dropped", case, f"{field}.forbidden"))
+    for label, candidate, field_name in cases:
+        candidate_report = Report()
+        _evaluate_rc028(candidate, candidate_report)
+        prefix = f"FAIL RC-028 {PROFILES_PATH} {field_name}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-028",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {PROFILES_PATH} {field_name}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-028 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-028-NEG",
+            f"{len(cases)} coding-agent execution projection negative cases fail closed at their intended field",
+        )
+
+
+def check_rc028(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc028(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-028",
+            f"{CODING_PROFILE_ID} exists once as a Cursor-Governance runtime profile, selects exactly "
+            f"{len(CODING_INVARIANT_IDS)} global invariants, {len(CODING_CONTRACT_IDS)} global contracts "
+            f"closed over their source_invariants, and {len(CODING_AUTHORITY_SECTIONS)} authority_model "
+            f"sections by exact id from registered projectable ledgers, emits {CODING_OUTPUT_SCHEMA}, "
+            "declares its boundaries, and names no skill",
+        )
+        _check_rc028_negative_cases(docs, report)
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -8815,6 +9307,7 @@ def main(argv: list[str]) -> int:
     check_rc025(docs, report)
     check_rc026(docs, report)
     check_rc027(docs, report)
+    check_rc028(docs, report)
     check_sc009(observed, root, report)
     for line in report.passes:
         print(line)
