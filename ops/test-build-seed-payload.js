@@ -241,8 +241,19 @@ try {
     /violates repo class non_constellation_python: \.github\/workflows\/governance\.yml/,
   );
 
-  const pin = fs.readFileSync('ops/governance-v1-pin.txt', 'utf8');
-  assert.match(pin, /7ed3ab8650583f6659a6caf061eae77dbd3ed1be/);
+  // The pin record and both reusable-workflow calls in the caller name one SHA.
+  // A record that drifts from the caller (the old v1-tag line did) fails here.
+  const pin = fs.readFileSync('ops/governance-v1-pin.txt', 'utf8').match(/^caller ([0-9a-f]{40})$/m);
+  assert.ok(pin, 'ops/governance-v1-pin.txt must record `caller <40-hex sha>`');
+  const callerPins = [
+    ...fs.readFileSync('policies/governance-caller.yml', 'utf8')
+      .matchAll(/uses: Quantum-L9\/\.github\/\.github\/workflows\/governance-(pr|issue)\.yml@(\S+)/g),
+  ].map((m) => `${m[1]}@${m[2]}`);
+  assert.deepStrictEqual(
+    callerPins,
+    [`pr@${pin[1]}`, `issue@${pin[1]}`],
+    'both caller uses: lines must pin the recorded SHA',
+  );
 
   console.log('ok: default payload materializes SECURITY.md, ownership, governance caller, issue + PR templates');
   console.log('ok: default payload omits INHERIT surfaces (CoC/CONTRIBUTING/SUPPORT/FUNDING/VULNERABILITY_REPORT), LICENSE, labels, retired CI, infra.md');

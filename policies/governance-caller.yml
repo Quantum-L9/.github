@@ -1,15 +1,15 @@
-# Managed by Quantum-L9/.github. Pinned to a tag so main can move safely.
+# Managed by Quantum-L9/.github. Both reusable-workflow calls below pin one
+# full commit SHA on main, so main can move without retargeting any consumer.
 #
-# This file should never need editing again. Governance logic lives in
-# Quantum-L9/.github/.github/workflows/governance-*.yml; shipping a change means
-# force-moving the v1 tag there, not touching this file.
+# Governance logic lives in Quantum-L9/.github/.github/workflows/governance-*.yml.
+# Shipping a change there: merge it, set both `uses:` SHAs below to that merge
+# commit, and record the same SHA in ops/governance-v1-pin.txt
+# (ops/test-build-seed-payload.js fails when they disagree). Consumers that
+# already carry a caller are re-pinned by a manual continuous-sync dispatch
+# (docs/DISTRIBUTION.md). No tag is involved: moving one retargets nothing.
 #
-# Pin record (ops/governance-v1-pin.txt):
-#   Quantum-L9/.github/.github/workflows/governance-pr.yml@v1
-#   Quantum-L9/.github/.github/workflows/governance-issue.yml@v1
-#   tag SHA 7ed3ab8650583f6659a6caf061eae77dbd3ed1be
-# Preflight: `git ls-remote https://github.com/Quantum-L9/.github.git refs/tags/v1`
-# must match that SHA before re-seeding this caller.
+# Current pin: 02ea092a, the merge of #176 (PR-body refresh `body` job and the
+# `gates` input in governance-pr.yml).
 #
 # SECRETS: a called workflow does NOT inherit caller secrets automatically.
 # Both callees use only GITHUB_TOKEN. Do not add blank `secrets: inherit`.
@@ -35,11 +35,11 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: Quantum-L9/.github/.github/workflows/governance-pr.yml@02ea092a098563b27970d21416fabc47dd005fb0  # v1
+    uses: Quantum-L9/.github/.github/workflows/governance-pr.yml@02ea092a098563b27970d21416fabc47dd005fb0  # merge of #176
 
   issue:
     if: github.event_name == 'issues'
     permissions:
       contents: read
       issues: write
-    uses: Quantum-L9/.github/.github/workflows/governance-issue.yml@02ea092a098563b27970d21416fabc47dd005fb0  # v1
+    uses: Quantum-L9/.github/.github/workflows/governance-issue.yml@02ea092a098563b27970d21416fabc47dd005fb0  # merge of #176
