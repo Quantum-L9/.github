@@ -45,7 +45,15 @@ from typing import Any
 try:
     import yaml
 except ImportError as exc:  # an interpreter without PyYAML is Unknown, not REJECTED
-    print(json.dumps({"status": "BLOCKED", "reason": "INTERPRETER_WITHOUT_PYYAML", "error": repr(exc)}))
+    print(
+        json.dumps(
+            {
+                "status": "BLOCKED",
+                "reason": "INTERPRETER_WITHOUT_PYYAML",
+                "error": repr(exc),
+            }
+        )
+    )
     raise SystemExit(3) from exc
 
 OWNER_REPOSITORY = "Quantum-L9/.github"
@@ -56,7 +64,9 @@ ARTIFACT_SCHEMA = "l9.projection-artifact/v1"
 RECEIPT_SCHEMA = "l9.compiler-receipt/v1"
 RECEIPT_TYPE = "l9.receipt/compilation@1"
 INDEX_PATH = "index.json"
-INDEX_FORMAT = "quantum-l9-github/projections-index@1"  # transport format, not semantic law
+INDEX_FORMAT = (
+    "quantum-l9-github/projections-index@1"  # transport format, not semantic law
+)
 DEFAULT_BRANCH = "projections"
 DEFAULT_PROFILE = "l9.projection/cursor-governance-operating-plane@1"
 DEFAULT_SOURCE_CLASS = "invariants"
@@ -81,13 +91,19 @@ class Outcome(Exception):
 
 # ── digests (the producer's conventions, recomputed independently) ──────────
 
+
 def digest_bytes(data: bytes) -> str:
     return "sha256:" + hashlib.sha256(data).hexdigest()
 
 
 def canonical_json(value: Any) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
-                      allow_nan=False).encode("utf-8")
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
 
 
 def digest(value: Any) -> str:
@@ -112,40 +128,65 @@ class _UniqueKeyLoader(yaml.SafeLoader):
     pass
 
 
-def _unique_mapping(loader: yaml.SafeLoader, node: yaml.MappingNode, deep: bool = False) -> dict:
+def _unique_mapping(
+    loader: yaml.SafeLoader, node: yaml.MappingNode, deep: bool = False
+) -> dict:
     seen = set()
     for key_node, _ in node.value:
         key = loader.construct_object(key_node, deep=deep)
         if key in seen:
-            raise yaml.constructor.ConstructorError(None, None, f"duplicate key {key!r}", key_node.start_mark)
+            raise yaml.constructor.ConstructorError(
+                None, None, f"duplicate key {key!r}", key_node.start_mark
+            )
         seen.add(key)
     return loader.construct_mapping(node, deep=deep)
 
 
-_UniqueKeyLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _unique_mapping)
+_UniqueKeyLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _unique_mapping
+)
 
 
 def load_yaml(data: bytes, what: str) -> dict[str, Any]:
     try:
         doc = yaml.load(data.decode("utf-8"), Loader=_UniqueKeyLoader)
     except (UnicodeDecodeError, yaml.YAMLError) as exc:
-        raise Outcome("BLOCKED", "AUTHORITY_UNREADABLE", path=what, error=str(exc)) from exc
+        raise Outcome(
+            "BLOCKED", "AUTHORITY_UNREADABLE", path=what, error=str(exc)
+        ) from exc
     if not isinstance(doc, dict):
-        raise Outcome("BLOCKED", "AUTHORITY_UNREADABLE", path=what, error="not a mapping")
+        raise Outcome(
+            "BLOCKED", "AUTHORITY_UNREADABLE", path=what, error="not a mapping"
+        )
     return doc
 
 
 # ── git ─────────────────────────────────────────────────────────────────────
 
-def git(repo: Path, *args: str, data: bytes | None = None, check: bool = True,
-        env: dict[str, str] | None = None) -> subprocess.CompletedProcess[bytes]:
+
+def git(
+    repo: Path,
+    *args: str,
+    data: bytes | None = None,
+    check: bool = True,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[bytes]:
     proc = subprocess.run(
-        ["git", "-C", str(repo), *args], input=data, capture_output=True,
-        timeout=GIT_TIMEOUT_S, env={**GIT_ENV, **(env or {})}, check=False,
+        ["git", "-C", str(repo), *args],
+        input=data,
+        capture_output=True,
+        timeout=GIT_TIMEOUT_S,
+        env={**GIT_ENV, **(env or {})},
+        check=False,
     )
     if check and proc.returncode != 0:
-        raise Outcome("BLOCKED", "GIT_FAILED", repo=str(repo), args=list(args),
-                      stderr=proc.stderr.decode("utf-8", "replace").strip()[-400:])
+        raise Outcome(
+            "BLOCKED",
+            "GIT_FAILED",
+            repo=str(repo),
+            args=list(args),
+            stderr=proc.stderr.decode("utf-8", "replace").strip()[-400:],
+        )
     return proc
 
 
@@ -160,36 +201,69 @@ def blob_at(repo: Path, commit: str, path: str) -> bytes | None:
 
 
 def is_ancestor(repo: Path, older: str, newer: str) -> bool:
-    return git(repo, "merge-base", "--is-ancestor", older, newer, check=False).returncode == 0
+    return (
+        git(repo, "merge-base", "--is-ancestor", older, newer, check=False).returncode
+        == 0
+    )
 
 
 # ── authority: independent pin ──────────────────────────────────────────────
 
+
 def require_pin(revision: str | None) -> str:
     if not revision or not _SHA1.fullmatch(revision):
-        raise Outcome("BLOCKED", "REVISION_PIN_ABSENT_OR_MALFORMED", revision=revision,
-                      detail="a 40-hex canonical main revision from an independent record is required")
+        raise Outcome(
+            "BLOCKED",
+            "REVISION_PIN_ABSENT_OR_MALFORMED",
+            revision=revision,
+            detail="a 40-hex canonical main revision from an independent record is required",
+        )
     return revision
 
 
 def bind_authority(root: Path, revision: str | None) -> str:
     """Bind the authority checkout to the pin; fail closed on anything local-only."""
     pin = require_pin(revision)
-    if not (root / ".git").exists() and git(root, "rev-parse", "--git-dir", check=False).returncode:
+    if (
+        not (root / ".git").exists()
+        and git(root, "rev-parse", "--git-dir", check=False).returncode
+    ):
         raise Outcome("BLOCKED", "AUTHORITY_ROOT_NOT_A_GIT_CHECKOUT", root=str(root))
-    origin = git(root, "config", "--get", "remote.origin.url", check=False).stdout.decode().strip()
+    origin = (
+        git(root, "config", "--get", "remote.origin.url", check=False)
+        .stdout.decode()
+        .strip()
+    )
     if not _ORIGIN.fullmatch(origin):
-        raise Outcome("BLOCKED", "AUTHORITY_ORIGIN_UNVERIFIED", origin=origin, expected=OWNER_REPOSITORY)
+        raise Outcome(
+            "BLOCKED",
+            "AUTHORITY_ORIGIN_UNVERIFIED",
+            origin=origin,
+            expected=OWNER_REPOSITORY,
+        )
     if git(root, "cat-file", "-e", f"{pin}^{{commit}}", check=False).returncode:
         raise Outcome("BLOCKED", "REVISION_PIN_UNKNOWN_COMMIT", revision=pin)
-    containing = git_out(root, "for-each-ref", "--contains", pin, "--format=%(refname)", "refs/remotes/origin")
+    containing = git_out(
+        root,
+        "for-each-ref",
+        "--contains",
+        pin,
+        "--format=%(refname)",
+        "refs/remotes/origin",
+    )
     if not containing:
-        raise Outcome("BLOCKED", "REVISION_PIN_NOT_IN_FETCHED_ORIGIN", revision=pin,
-                      detail="the pin must be contained in a fetched origin ref of the canonical owner")
+        raise Outcome(
+            "BLOCKED",
+            "REVISION_PIN_NOT_IN_FETCHED_ORIGIN",
+            revision=pin,
+            detail="the pin must be contained in a fetched origin ref of the canonical owner",
+        )
     return pin
 
 
-def compute_pins(root: Path, revision: str, profile_ref: str, source_class: str) -> dict[str, Any]:
+def compute_pins(
+    root: Path, revision: str, profile_ref: str, source_class: str
+) -> dict[str, Any]:
     """Source and profile digests at `revision`, from commit objects, never the working tree."""
     if not _SOURCE_CLASS.fullmatch(source_class):
         raise Outcome("REJECTED", "UNSUPPORTED_SOURCE_CLASS", source_class=source_class)
@@ -197,7 +271,9 @@ def compute_pins(root: Path, revision: str, profile_ref: str, source_class: str)
     def read(path: str) -> bytes:
         data = blob_at(root, revision, path)
         if data is None:
-            raise Outcome("BLOCKED", "AUTHORITY_PATH_ABSENT", revision=revision, path=path)
+            raise Outcome(
+                "BLOCKED", "AUTHORITY_PATH_ABSENT", revision=revision, path=path
+            )
         return data
 
     registry_bytes = read(REGISTRY_PATH)
@@ -207,28 +283,55 @@ def compute_pins(root: Path, revision: str, profile_ref: str, source_class: str)
     def entry(**match: str) -> dict[str, Any]:
         found = [e for e in entries if all(e.get(k) == v for k, v in match.items())]
         if len(found) != 1:
-            raise Outcome("BLOCKED", "SOURCE_REGISTRY_UNRESOLVED", match=match, matches=len(found))
+            raise Outcome(
+                "BLOCKED", "SOURCE_REGISTRY_UNRESOLVED", match=match, matches=len(found)
+            )
         return found[0]
 
     catalog_path = entry(id=CATALOG_REF).get("path")
     catalog_bytes = read(str(catalog_path))
     catalog = load_yaml(catalog_bytes, str(catalog_path))
-    profiles = [p for p in catalog.get("projection_profiles") or [] if isinstance(p, dict) and p.get("id") == profile_ref]
+    profiles = [
+        p
+        for p in catalog.get("projection_profiles") or []
+        if isinstance(p, dict) and p.get("id") == profile_ref
+    ]
     if len(profiles) != 1:
-        raise Outcome("BLOCKED", "PROFILE_UNRESOLVED", profile=profile_ref, matches=len(profiles))
+        raise Outcome(
+            "BLOCKED", "PROFILE_UNRESOLVED", profile=profile_ref, matches=len(profiles)
+        )
     profile = profiles[0]
     spec = (profile.get("sources") or {}).get(source_class)
     if not isinstance(spec, dict):
-        raise Outcome("REJECTED", "UNSUPPORTED_SOURCE_CLASS", source_class=source_class,
-                      detail="profile declares no such source class")
+        raise Outcome(
+            "REJECTED",
+            "UNSUPPORTED_SOURCE_CLASS",
+            source_class=source_class,
+            detail="profile declares no such source class",
+        )
     selectors = spec.get("selectors")
     # One selector and no reshape is the only payload shape the producer defines.
-    if not isinstance(selectors, list) or len(selectors) != 1 or not isinstance(selectors[0], str) or "reshape" in spec:
-        raise Outcome("REJECTED", "UNSUPPORTED_SOURCE_CLASS", source_class=source_class, selectors=selectors,
-                      detail="multi-selector or reshaped classes have no declared payload shape and are not published")
-    class_artifact = ((catalog.get("source_classes") or {}).get(source_class) or {}).get("canonical_artifact")
+    if (
+        not isinstance(selectors, list)
+        or len(selectors) != 1
+        or not isinstance(selectors[0], str)
+        or "reshape" in spec
+    ):
+        raise Outcome(
+            "REJECTED",
+            "UNSUPPORTED_SOURCE_CLASS",
+            source_class=source_class,
+            selectors=selectors,
+            detail="multi-selector or reshaped classes have no declared payload shape and are not published",
+        )
+    class_artifact = (
+        (catalog.get("source_classes") or {}).get(source_class) or {}
+    ).get("canonical_artifact")
     source = entry(path=f"semantics/{class_artifact}")
-    if source.get("canonical") is not True or source.get("projection_allowed") is not True:
+    if (
+        source.get("canonical") is not True
+        or source.get("projection_allowed") is not True
+    ):
         raise Outcome("REJECTED", "SOURCE_NOT_PROJECTABLE", source=source.get("id"))
     try:
         profile_digest = digest(profile)
@@ -251,13 +354,18 @@ def compute_pins(root: Path, revision: str, profile_ref: str, source_class: str)
 
 # ── producer output pair ────────────────────────────────────────────────────
 
+
 def _expect(cond: bool, reason: str, **detail: Any) -> None:
     if not cond:
         raise Outcome("REJECTED", reason, **detail)
 
 
-def verify_pair(artifact_bytes: bytes, receipt_bytes: bytes, pins: dict[str, Any],
-                expected_revision: str | None) -> dict[str, Any]:
+def verify_pair(
+    artifact_bytes: bytes,
+    receipt_bytes: bytes,
+    pins: dict[str, Any],
+    expected_revision: str | None,
+) -> dict[str, Any]:
     """Recompute every binding of one pair; any mismatch is REJECTED.
 
     `expected_revision` set: the receipt must assert exactly that revision
@@ -266,51 +374,113 @@ def verify_pair(artifact_bytes: bytes, receipt_bytes: bytes, pins: dict[str, Any
     """
     artifact = load_json(artifact_bytes, "projection.json")
     receipt = load_json(receipt_bytes, "receipt.json")
-    _expect(artifact.get("schema") == ARTIFACT_SCHEMA, "ARTIFACT_SCHEMA_MISMATCH", schema=artifact.get("schema"))
-    _expect(receipt.get("schema") == RECEIPT_SCHEMA, "RECEIPT_SCHEMA_MISMATCH", schema=receipt.get("schema"))
+    _expect(
+        artifact.get("schema") == ARTIFACT_SCHEMA,
+        "ARTIFACT_SCHEMA_MISMATCH",
+        schema=artifact.get("schema"),
+    )
+    _expect(
+        receipt.get("schema") == RECEIPT_SCHEMA,
+        "RECEIPT_SCHEMA_MISMATCH",
+        schema=receipt.get("schema"),
+    )
     _expect(receipt.get("receipt_type") == RECEIPT_TYPE, "RECEIPT_TYPE_MISMATCH")
-    _expect(receipt.get("operation") == "projection" and receipt.get("result") == "pass",
-            "RECEIPT_NOT_A_PASSING_PROJECTION", operation=receipt.get("operation"), result=receipt.get("result"))
+    _expect(
+        receipt.get("operation") == "projection" and receipt.get("result") == "pass",
+        "RECEIPT_NOT_A_PASSING_PROJECTION",
+        operation=receipt.get("operation"),
+        result=receipt.get("result"),
+    )
 
     # pins: computed here from the authority, never read from the pair
-    _expect(artifact.get("source_ref") == pins["source_ref"] and artifact.get("source_digest") == pins["source_digest"],
-            "SOURCE_DIGEST_MISMATCH", expected=pins["source_digest"], observed=artifact.get("source_digest"))
-    _expect(artifact.get("projection_profile_ref") == pins["profile_ref"]
-            and artifact.get("projection_profile_digest") == pins["profile_digest"],
-            "PROFILE_DIGEST_MISMATCH", expected=pins["profile_digest"], observed=artifact.get("projection_profile_digest"))
+    _expect(
+        artifact.get("source_ref") == pins["source_ref"]
+        and artifact.get("source_digest") == pins["source_digest"],
+        "SOURCE_DIGEST_MISMATCH",
+        expected=pins["source_digest"],
+        observed=artifact.get("source_digest"),
+    )
+    _expect(
+        artifact.get("projection_profile_ref") == pins["profile_ref"]
+        and artifact.get("projection_profile_digest") == pins["profile_digest"],
+        "PROFILE_DIGEST_MISMATCH",
+        expected=pins["profile_digest"],
+        observed=artifact.get("projection_profile_digest"),
+    )
     try:
         payload_digest = digest(artifact.get("payload"))
     except (TypeError, ValueError) as exc:
         raise Outcome("REJECTED", "PAYLOAD_NOT_PLAIN_JSON", error=str(exc)) from exc
-    _expect("payload" in artifact and artifact.get("projection_digest") == payload_digest,
-            "PROJECTION_DIGEST_MISMATCH", expected=payload_digest, observed=artifact.get("projection_digest"))
+    _expect(
+        "payload" in artifact and artifact.get("projection_digest") == payload_digest,
+        "PROJECTION_DIGEST_MISMATCH",
+        expected=payload_digest,
+        observed=artifact.get("projection_digest"),
+    )
     generated = artifact.get("generated_by") or {}
     producer = receipt.get("producer_identity") or {}
-    _expect(generated.get("compiler") == PRODUCER and producer.get("compiler") == PRODUCER
-            and generated.get("version") == producer.get("version") and isinstance(producer.get("version"), str),
-            "PRODUCER_ROLE_MISMATCH", generated_by=generated, producer_identity=producer)
+    _expect(
+        generated.get("compiler") == PRODUCER
+        and producer.get("compiler") == PRODUCER
+        and generated.get("version") == producer.get("version")
+        and isinstance(producer.get("version"), str),
+        "PRODUCER_ROLE_MISMATCH",
+        generated_by=generated,
+        producer_identity=producer,
+    )
 
     # receipt binds this artifact
-    _expect(receipt.get("exact_subject_ref") == pins["profile_ref"], "RECEIPT_SUBJECT_MISMATCH")
-    _expect(receipt.get("profile") == {"ref": pins["profile_ref"], "digest": pins["profile_digest"]},
-            "RECEIPT_PROFILE_MISMATCH")
-    _expect(receipt.get("output") == {"ref": f"{pins['profile_ref']}#{pins['source_class']}",
-                                      "digest": artifact["projection_digest"]}, "RECEIPT_OUTPUT_UNBOUND")
+    _expect(
+        receipt.get("exact_subject_ref") == pins["profile_ref"],
+        "RECEIPT_SUBJECT_MISMATCH",
+    )
+    _expect(
+        receipt.get("profile")
+        == {"ref": pins["profile_ref"], "digest": pins["profile_digest"]},
+        "RECEIPT_PROFILE_MISMATCH",
+    )
+    _expect(
+        receipt.get("output")
+        == {
+            "ref": f"{pins['profile_ref']}#{pins['source_class']}",
+            "digest": artifact["projection_digest"],
+        },
+        "RECEIPT_OUTPUT_UNBOUND",
+    )
     inputs = receipt.get("inputs") or []
-    _expect({"ref": pins["source_ref"], "digest": pins["source_digest"]} in inputs
-            and {"ref": CATALOG_REF, "digest": pins["catalog_digest"]} in inputs, "RECEIPT_INPUTS_UNBOUND")
+    _expect(
+        {"ref": pins["source_ref"], "digest": pins["source_digest"]} in inputs
+        and {"ref": CATALOG_REF, "digest": pins["catalog_digest"]} in inputs,
+        "RECEIPT_INPUTS_UNBOUND",
+    )
     gov = receipt.get("governing_coordinates") or {}
-    _expect(gov.get("source_class") == pins["source_class"] and gov.get("selectors") == pins["selectors"]
-            and gov.get("canonical_source_registry_digest") == pins["registry_digest"]
-            and gov.get("authority_owner") == OWNER_REPOSITORY, "RECEIPT_GOVERNING_MISMATCH")
+    _expect(
+        gov.get("source_class") == pins["source_class"]
+        and gov.get("selectors") == pins["selectors"]
+        and gov.get("canonical_source_registry_digest") == pins["registry_digest"]
+        and gov.get("authority_owner") == OWNER_REPOSITORY,
+        "RECEIPT_GOVERNING_MISMATCH",
+    )
     asserted = gov.get("authority_revision")
-    _expect(isinstance(asserted, str) and bool(_SHA1.fullmatch(asserted)), "RECEIPT_REVISION_UNASSERTED", observed=asserted)
+    _expect(
+        isinstance(asserted, str) and bool(_SHA1.fullmatch(asserted)),
+        "RECEIPT_REVISION_UNASSERTED",
+        observed=asserted,
+    )
     if expected_revision is not None:
-        _expect(asserted == expected_revision, "RECEIPT_REVISION_MISMATCH", expected=expected_revision, observed=asserted)
+        _expect(
+            asserted == expected_revision,
+            "RECEIPT_REVISION_MISMATCH",
+            expected=expected_revision,
+            observed=asserted,
+        )
 
     body = {k: v for k, v in receipt.items() if k != "receipt_digest"}
     _expect(receipt.get("receipt_digest") == digest(body), "RECEIPT_DIGEST_MISMATCH")
-    identity = "l9.receipt-instance/" + digest({**body, "receipt_identity": "pending"}).split(":", 1)[1]
+    identity = (
+        "l9.receipt-instance/"
+        + digest({**body, "receipt_identity": "pending"}).split(":", 1)[1]
+    )
     _expect(receipt.get("receipt_identity") == identity, "RECEIPT_IDENTITY_MISMATCH")
     return {
         "projection_digest": artifact["projection_digest"],
@@ -318,7 +488,10 @@ def verify_pair(artifact_bytes: bytes, receipt_bytes: bytes, pins: dict[str, Any
         "receipt_identity": receipt["receipt_identity"],
         "receipt_authority_revision": asserted,
         "compiler_version": producer["version"],
-        "files": {"projection.json": digest_bytes(artifact_bytes), "receipt.json": digest_bytes(receipt_bytes)},
+        "files": {
+            "projection.json": digest_bytes(artifact_bytes),
+            "receipt.json": digest_bytes(receipt_bytes),
+        },
         # Unkeyed receipts: role and digests are checked, the producer is not authenticated.
         "producer_authentication": "unauthenticated_unkeyed_receipt",
     }
@@ -326,12 +499,17 @@ def verify_pair(artifact_bytes: bytes, receipt_bytes: bytes, pins: dict[str, Any
 
 def read_pair_dir(pair_dir: Path) -> tuple[bytes, bytes]:
     try:
-        return (pair_dir / "projection.json").read_bytes(), (pair_dir / "receipt.json").read_bytes()
+        return (pair_dir / "projection.json").read_bytes(), (
+            pair_dir / "receipt.json"
+        ).read_bytes()
     except OSError as exc:
-        raise Outcome("BLOCKED", "PRODUCER_OUTPUT_ABSENT", pair_dir=str(pair_dir), error=str(exc)) from exc
+        raise Outcome(
+            "BLOCKED", "PRODUCER_OUTPUT_ABSENT", pair_dir=str(pair_dir), error=str(exc)
+        ) from exc
 
 
 # ── publication store ───────────────────────────────────────────────────────
+
 
 def entry_key(pins: dict[str, Any]) -> str:
     return f"{pins['profile_ref']}#{pins['source_class']}"
@@ -347,13 +525,19 @@ def load_index(repo: Path, commit: str) -> dict[str, Any]:
     if data is None:
         return {"transport_format": INDEX_FORMAT, "entries": {}}
     index = load_json(data, INDEX_PATH)
-    _expect(index.get("transport_format") == INDEX_FORMAT and isinstance(index.get("entries"), dict),
-            "INDEX_FORMAT_UNSUPPORTED", observed=index.get("transport_format"))
+    _expect(
+        index.get("transport_format") == INDEX_FORMAT
+        and isinstance(index.get("entries"), dict),
+        "INDEX_FORMAT_UNSUPPORTED",
+        observed=index.get("transport_format"),
+    )
     return index
 
 
 def index_bytes(index: dict[str, Any]) -> bytes:
-    return (json.dumps(index, indent=2, sort_keys=True, ensure_ascii=False) + "\n").encode("utf-8")
+    return (
+        json.dumps(index, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    ).encode("utf-8")
 
 
 def resolve_base(repo: Path, branch: str, remote: str | None) -> str:
@@ -362,21 +546,42 @@ def resolve_base(repo: Path, branch: str, remote: str | None) -> str:
     if remote:
         listed = git_out(repo, "ls-remote", "--refs", remote, ref)
         if not listed:
-            raise Outcome("BLOCKED", "TARGET_REF_ABSENT", remote=remote, ref=ref,
-                          detail="creating the publication branch is an activation step, not a publisher action")
+            raise Outcome(
+                "BLOCKED",
+                "TARGET_REF_ABSENT",
+                remote=remote,
+                ref=ref,
+                detail="creating the publication branch is an activation step, not a publisher action",
+            )
         tip = listed.split()[0]
         git(repo, "fetch", "--no-tags", "--quiet", remote, ref)
-        _expect(git_out(repo, "rev-parse", "FETCH_HEAD") == tip, "TARGET_REF_MOVED_DURING_FETCH")
+        _expect(
+            git_out(repo, "rev-parse", "FETCH_HEAD") == tip,
+            "TARGET_REF_MOVED_DURING_FETCH",
+        )
         return tip
-    proc = git(repo, "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}", check=False)
+    proc = git(
+        repo, "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}", check=False
+    )
     if proc.returncode:
-        raise Outcome("BLOCKED", "TARGET_REF_ABSENT", ref=ref,
-                      detail="creating the publication branch is an activation step, not a publisher action")
+        raise Outcome(
+            "BLOCKED",
+            "TARGET_REF_ABSENT",
+            ref=ref,
+            detail="creating the publication branch is an activation step, not a publisher action",
+        )
     return proc.stdout.decode().strip()
 
 
-def plan_publication(repo: Path, base: str, authority_root: Path, pins: dict[str, Any],
-                     facts: dict[str, Any], pair: tuple[bytes, bytes], compiler_revision: str) -> dict[str, Any]:
+def plan_publication(
+    repo: Path,
+    base: str,
+    authority_root: Path,
+    pins: dict[str, Any],
+    facts: dict[str, Any],
+    pair: tuple[bytes, bytes],
+    compiler_revision: str,
+) -> dict[str, Any]:
     index = load_index(repo, base)
     key = entry_key(pins)
     prior = index["entries"].get(key)
@@ -384,19 +589,39 @@ def plan_publication(repo: Path, base: str, authority_root: Path, pins: dict[str
         current = prior.get("current") or {}
         if current.get("receipt_digest") == facts["receipt_digest"]:
             return {"status": "NOOP_IDENTICAL", "base": base, "entry": key}
-        if current.get("source_digest") == pins["source_digest"] and current.get("profile_digest") == pins["profile_digest"]:
+        if (
+            current.get("source_digest") == pins["source_digest"]
+            and current.get("profile_digest") == pins["profile_digest"]
+        ):
             # A later unrelated authority revision: semantics unchanged, nothing to republish.
-            return {"status": "NOOP_UNCHANGED_SEMANTICS", "base": base, "entry": key,
-                    "current_authority_revision": current.get("authority_revision")}
+            return {
+                "status": "NOOP_UNCHANGED_SEMANTICS",
+                "base": base,
+                "entry": key,
+                "current_authority_revision": current.get("authority_revision"),
+            }
         older = current.get("authority_revision")
-        if not (isinstance(older, str) and _SHA1.fullmatch(older) and is_ancestor(authority_root, older, pins["authority_revision"])):
-            raise Outcome("REJECTED", "ROLLBACK_REFUSED", current=older, candidate=pins["authority_revision"],
-                          detail="a material change must come from a descendant of the current revision")
+        if not (
+            isinstance(older, str)
+            and _SHA1.fullmatch(older)
+            and is_ancestor(authority_root, older, pins["authority_revision"])
+        ):
+            raise Outcome(
+                "REJECTED",
+                "ROLLBACK_REFUSED",
+                current=older,
+                candidate=pins["authority_revision"],
+                detail="a material change must come from a descendant of the current revision",
+            )
 
-    projection_path, receipt_path = pair_paths(pins["source_class"], facts["receipt_digest"])
+    projection_path, receipt_path = pair_paths(
+        pins["source_class"], facts["receipt_digest"]
+    )
     for path, data in ((projection_path, pair[0]), (receipt_path, pair[1])):
         existing = blob_at(repo, base, path)
-        _expect(existing is None or existing == data, "IMMUTABLE_PATH_COLLISION", path=path)
+        _expect(
+            existing is None or existing == data, "IMMUTABLE_PATH_COLLISION", path=path
+        )
 
     record = {
         "pair": projection_path.rsplit("/", 1)[0],
@@ -411,16 +636,27 @@ def plan_publication(repo: Path, base: str, authority_root: Path, pins: dict[str
         "profile_digest": pins["profile_digest"],
         "authority_revision": pins["authority_revision"],
         "authority_revision_basis": "independent_pin_verified_in_fetched_canonical_origin",
-        "compiler": {"name": PRODUCER, "version": facts["compiler_version"],
-                     "revision": compiler_revision, "revision_basis": "caller_asserted"},
+        "compiler": {
+            "name": PRODUCER,
+            "version": facts["compiler_version"],
+            "revision": compiler_revision,
+            "revision_basis": "caller_asserted",
+        },
     }
     history = ([prior["current"]] + list(prior.get("history") or [])) if prior else []
     index["entries"][key] = {"current": record, "history": history}
     # The publication commit cannot name itself; its parent is recorded instead.
     index["previous_publication"] = base
     return {
-        "status": "PLANNED", "base": base, "entry": key, "record": record,
-        "files": {projection_path: pair[0], receipt_path: pair[1], INDEX_PATH: index_bytes(index)},
+        "status": "PLANNED",
+        "base": base,
+        "entry": key,
+        "record": record,
+        "files": {
+            projection_path: pair[0],
+            receipt_path: pair[1],
+            INDEX_PATH: index_bytes(index),
+        },
     }
 
 
@@ -428,18 +664,39 @@ def build_commit(repo: Path, base: str, files: dict[str, bytes], message: str) -
     """One commit on `base` whose tree holds every staged file; no ref is touched."""
     identity = {
         "GIT_AUTHOR_NAME": os.environ.get("GIT_AUTHOR_NAME", "l9-projection-publisher"),
-        "GIT_AUTHOR_EMAIL": os.environ.get("GIT_AUTHOR_EMAIL", "l9-projection-publisher@users.noreply.github.com"),
-        "GIT_COMMITTER_NAME": os.environ.get("GIT_COMMITTER_NAME", "l9-projection-publisher"),
-        "GIT_COMMITTER_EMAIL": os.environ.get("GIT_COMMITTER_EMAIL", "l9-projection-publisher@users.noreply.github.com"),
+        "GIT_AUTHOR_EMAIL": os.environ.get(
+            "GIT_AUTHOR_EMAIL", "l9-projection-publisher@users.noreply.github.com"
+        ),
+        "GIT_COMMITTER_NAME": os.environ.get(
+            "GIT_COMMITTER_NAME", "l9-projection-publisher"
+        ),
+        "GIT_COMMITTER_EMAIL": os.environ.get(
+            "GIT_COMMITTER_EMAIL", "l9-projection-publisher@users.noreply.github.com"
+        ),
     }
     with tempfile.TemporaryDirectory(prefix="l9-projection-index-") as tmp:
         env = {**identity, "GIT_INDEX_FILE": str(Path(tmp) / "index")}
         git(repo, "read-tree", base, env=env)
         for path, data in sorted(files.items()):
-            blob = git(repo, "hash-object", "-w", "--stdin", data=data).stdout.decode().strip()
-            git(repo, "update-index", "--add", "--cacheinfo", f"100644,{blob},{path}", env=env)
+            blob = (
+                git(repo, "hash-object", "-w", "--stdin", data=data)
+                .stdout.decode()
+                .strip()
+            )
+            git(
+                repo,
+                "update-index",
+                "--add",
+                "--cacheinfo",
+                f"100644,{blob},{path}",
+                env=env,
+            )
         tree = git(repo, "write-tree", env=env).stdout.decode().strip()
-    return git(repo, "commit-tree", tree, "-p", base, "-m", message, env=identity).stdout.decode().strip()
+    return (
+        git(repo, "commit-tree", tree, "-p", base, "-m", message, env=identity)
+        .stdout.decode()
+        .strip()
+    )
 
 
 def advance(repo: Path, branch: str, base: str, new: str, remote: str | None) -> None:
@@ -447,69 +704,153 @@ def advance(repo: Path, branch: str, base: str, new: str, remote: str | None) ->
     ref = f"refs/heads/{branch}"
     if remote is None:
         if git(repo, "update-ref", ref, new, base, check=False).returncode:
-            raise Outcome("CONFLICT", "TARGET_REF_MOVED", ref=ref, expected=base,
-                          detail="another publisher advanced the branch; re-evaluate from the new tip")
+            raise Outcome(
+                "CONFLICT",
+                "TARGET_REF_MOVED",
+                ref=ref,
+                expected=base,
+                detail="another publisher advanced the branch; re-evaluate from the new tip",
+            )
         return
     listed = git_out(repo, "ls-remote", "--refs", remote, ref)
     if not listed or listed.split()[0] != base:
-        raise Outcome("CONFLICT", "TARGET_REF_MOVED", remote=remote, ref=ref, expected=base,
-                      observed=listed.split()[0] if listed else None)
+        raise Outcome(
+            "CONFLICT",
+            "TARGET_REF_MOVED",
+            remote=remote,
+            ref=ref,
+            expected=base,
+            observed=listed.split()[0] if listed else None,
+        )
     # A plain refspec: the server rejects anything that is not a fast-forward.
     push = git(repo, "push", "--porcelain", remote, f"{new}:{ref}", check=False)
     if push.returncode:
-        raise Outcome("CONFLICT", "PUSH_REJECTED_NOT_FAST_FORWARD", remote=remote, ref=ref,
-                      stderr=push.stderr.decode("utf-8", "replace").strip()[-400:])
+        raise Outcome(
+            "CONFLICT",
+            "PUSH_REJECTED_NOT_FAST_FORWARD",
+            remote=remote,
+            ref=ref,
+            stderr=push.stderr.decode("utf-8", "replace").strip()[-400:],
+        )
 
 
-def require_canonical_fresh(authority_root: Path, pins: dict[str, Any], canonical_ref: str) -> None:
+def require_canonical_fresh(
+    authority_root: Path, pins: dict[str, Any], canonical_ref: str
+) -> None:
     """Refuse to promote when canonical main has already moved the material inputs."""
-    tip = git(authority_root, "rev-parse", "--verify", "--quiet", f"{canonical_ref}^{{commit}}", check=False)
+    tip = git(
+        authority_root,
+        "rev-parse",
+        "--verify",
+        "--quiet",
+        f"{canonical_ref}^{{commit}}",
+        check=False,
+    )
     if tip.returncode:
         raise Outcome("BLOCKED", "CANONICAL_REF_UNAVAILABLE", ref=canonical_ref)
     tip_sha = tip.stdout.decode().strip()
     if not is_ancestor(authority_root, pins["authority_revision"], tip_sha):
-        raise Outcome("BLOCKED", "REVISION_PIN_NOT_ON_CANONICAL_LINE", revision=pins["authority_revision"],
-                      canonical_ref=canonical_ref, canonical_tip=tip_sha)
-    now = compute_pins(authority_root, tip_sha, pins["profile_ref"], pins["source_class"])
-    if (now["source_digest"], now["profile_digest"]) != (pins["source_digest"], pins["profile_digest"]):
-        raise Outcome("STALE", "MATERIAL_INPUT_CHANGED_ON_CANONICAL", canonical_tip=tip_sha,
-                      pinned={"source": pins["source_digest"], "profile": pins["profile_digest"]},
-                      canonical={"source": now["source_digest"], "profile": now["profile_digest"]})
+        raise Outcome(
+            "BLOCKED",
+            "REVISION_PIN_NOT_ON_CANONICAL_LINE",
+            revision=pins["authority_revision"],
+            canonical_ref=canonical_ref,
+            canonical_tip=tip_sha,
+        )
+    now = compute_pins(
+        authority_root, tip_sha, pins["profile_ref"], pins["source_class"]
+    )
+    if (now["source_digest"], now["profile_digest"]) != (
+        pins["source_digest"],
+        pins["profile_digest"],
+    ):
+        raise Outcome(
+            "STALE",
+            "MATERIAL_INPUT_CHANGED_ON_CANONICAL",
+            canonical_tip=tip_sha,
+            pinned={"source": pins["source_digest"], "profile": pins["profile_digest"]},
+            canonical={
+                "source": now["source_digest"],
+                "profile": now["profile_digest"],
+            },
+        )
 
 
 # ── fixed-commit currentness ───────────────────────────────────────────────
 
-def check_publication(repo: Path, commit: str, authority_root: Path, revision: str,
-                      profile_ref: str, source_class: str) -> dict[str, Any]:
-    proc = git(repo, "rev-parse", "--verify", "--quiet", f"{commit}^{{commit}}", check=False)
+
+def check_publication(
+    repo: Path,
+    commit: str,
+    authority_root: Path,
+    revision: str,
+    profile_ref: str,
+    source_class: str,
+) -> dict[str, Any]:
+    proc = git(
+        repo, "rev-parse", "--verify", "--quiet", f"{commit}^{{commit}}", check=False
+    )
     if proc.returncode:
         raise Outcome("BLOCKED", "PUBLICATION_COMMIT_UNKNOWN", commit=commit)
     fixed = proc.stdout.decode().strip()  # every read below is from this one commit
     pins = compute_pins(authority_root, revision, profile_ref, source_class)
     entry = load_index(repo, fixed)["entries"].get(entry_key(pins))
     if not entry:
-        raise Outcome("BLOCKED", "NO_PUBLISHED_ENTRY", commit=fixed, entry=entry_key(pins))
+        raise Outcome(
+            "BLOCKED", "NO_PUBLISHED_ENTRY", commit=fixed, entry=entry_key(pins)
+        )
     current = entry["current"]
     pair = []
     for name in ("projection.json", "receipt.json"):
         data = blob_at(repo, fixed, f"{current.get('pair')}/{name}")
         if data is None:
-            raise Outcome("REJECTED", "INDEXED_PAIR_ABSENT", commit=fixed, path=f"{current.get('pair')}/{name}")
-        _expect(digest_bytes(data) == (current.get("files") or {}).get(name), "INDEXED_FILE_HASH_MISMATCH", file=name)
+            raise Outcome(
+                "REJECTED",
+                "INDEXED_PAIR_ABSENT",
+                commit=fixed,
+                path=f"{current.get('pair')}/{name}",
+            )
+        _expect(
+            digest_bytes(data) == (current.get("files") or {}).get(name),
+            "INDEXED_FILE_HASH_MISMATCH",
+            file=name,
+        )
         pair.append(data)
-    if (current.get("source_digest"), current.get("profile_digest")) != (pins["source_digest"], pins["profile_digest"]):
-        raise Outcome("STALE", "MATERIAL_INPUT_CHANGED", commit=fixed, published_revision=current.get("authority_revision"),
-                      pinned_revision=revision)
+    if (current.get("source_digest"), current.get("profile_digest")) != (
+        pins["source_digest"],
+        pins["profile_digest"],
+    ):
+        raise Outcome(
+            "STALE",
+            "MATERIAL_INPUT_CHANGED",
+            commit=fixed,
+            published_revision=current.get("authority_revision"),
+            pinned_revision=revision,
+        )
     facts = verify_pair(pair[0], pair[1], pins, expected_revision=None)
-    _expect(facts["receipt_digest"] == current.get("receipt_digest"), "INDEX_RECEIPT_MISMATCH")
+    _expect(
+        facts["receipt_digest"] == current.get("receipt_digest"),
+        "INDEX_RECEIPT_MISMATCH",
+    )
     if not is_ancestor(authority_root, facts["receipt_authority_revision"], revision):
-        raise Outcome("REJECTED", "PUBLISHED_REVISION_NOT_IN_PINNED_HISTORY",
-                      published=facts["receipt_authority_revision"], pinned=revision)
-    return {"status": "CURRENT", "commit": fixed, "entry": entry_key(pins), "pinned_revision": revision,
-            "published_authority_revision": facts["receipt_authority_revision"], **facts}
+        raise Outcome(
+            "REJECTED",
+            "PUBLISHED_REVISION_NOT_IN_PINNED_HISTORY",
+            published=facts["receipt_authority_revision"],
+            pinned=revision,
+        )
+    return {
+        "status": "CURRENT",
+        "commit": fixed,
+        "entry": entry_key(pins),
+        "pinned_revision": revision,
+        "published_authority_revision": facts["receipt_authority_revision"],
+        **facts,
+    }
 
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
+
 
 def _printable(value: Any) -> Any:
     if isinstance(value, bytes):
@@ -528,27 +869,50 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     if args.command == "pins":
         return {"status": "PINNED", **pins}
     if args.command == "check":
-        return check_publication(Path(args.repo), args.commit, authority, revision, args.profile, args.source_class)
+        return check_publication(
+            Path(args.repo),
+            args.commit,
+            authority,
+            revision,
+            args.profile,
+            args.source_class,
+        )
 
     pair = read_pair_dir(Path(args.pair_dir))
     facts = verify_pair(pair[0], pair[1], pins, expected_revision=revision)
-    _expect(Path(args.pair_dir).name == facts["receipt_digest"].split(":", 1)[1], "PAIR_DIRECTORY_NOT_CONTENT_ADDRESSED",
-            pair_dir=str(args.pair_dir))
+    _expect(
+        Path(args.pair_dir).name == facts["receipt_digest"].split(":", 1)[1],
+        "PAIR_DIRECTORY_NOT_CONTENT_ADDRESSED",
+        pair_dir=str(args.pair_dir),
+    )
     if args.command == "verify":
         return {"status": "VERIFIED", **facts}
 
     if not args.compiler_revision or not _SHA1.fullmatch(args.compiler_revision):
-        raise Outcome("BLOCKED", "COMPILER_REVISION_ABSENT", detail="--compiler-revision must name the producer commit")
+        raise Outcome(
+            "BLOCKED",
+            "COMPILER_REVISION_ABSENT",
+            detail="--compiler-revision must name the producer commit",
+        )
     require_canonical_fresh(authority, pins, args.canonical_ref)
     repo = Path(args.repo)
     base = resolve_base(repo, args.branch, args.remote)
-    plan = plan_publication(repo, base, authority, pins, facts, pair, args.compiler_revision)
+    plan = plan_publication(
+        repo, base, authority, pins, facts, pair, args.compiler_revision
+    )
     if plan["status"] != "PLANNED" or not args.apply:
         return {**plan, "applied": False, "branch": args.branch, "remote": args.remote}
     message = f"publish {plan['entry']} {facts['receipt_digest']}\n\nauthority_revision: {revision}\n"
     new = build_commit(repo, base, plan["files"], message)
     advance(repo, args.branch, base, new, args.remote)
-    return {**plan, "status": "PUBLISHED", "applied": True, "commit": new, "branch": args.branch, "remote": args.remote}
+    return {
+        **plan,
+        "status": "PUBLISHED",
+        "applied": True,
+        "commit": new,
+        "branch": args.branch,
+        "remote": args.remote,
+    }
 
 
 def parser() -> argparse.ArgumentParser:
@@ -556,23 +920,58 @@ def parser() -> argparse.ArgumentParser:
     sub = ap.add_subparsers(dest="command", required=True)
     for name in ("pins", "verify", "publish", "check"):
         p = sub.add_parser(name)
-        p.add_argument("--authority-root", required=True, help="Quantum-L9/.github checkout with fetched origin refs")
-        p.add_argument("--revision", required=True, help="40-hex canonical main pin from an independent record")
+        p.add_argument(
+            "--authority-root",
+            required=True,
+            help="Quantum-L9/.github checkout with fetched origin refs",
+        )
+        p.add_argument(
+            "--revision",
+            required=True,
+            help="40-hex canonical main pin from an independent record",
+        )
         p.add_argument("--profile", default=DEFAULT_PROFILE)
         p.add_argument("--source-class", default=DEFAULT_SOURCE_CLASS)
         if name in ("verify", "publish"):
-            p.add_argument("--pair-dir", required=True, help="producer output <out>/<class>/<receipt hex>")
+            p.add_argument(
+                "--pair-dir",
+                required=True,
+                help="producer output <out>/<class>/<receipt hex>",
+            )
         if name in ("publish", "check"):
-            p.add_argument("--repo", required=True, help="git repository holding the publication branch")
+            p.add_argument(
+                "--repo",
+                required=True,
+                help="git repository holding the publication branch",
+            )
         if name == "publish":
             p.add_argument("--branch", default=DEFAULT_BRANCH)
-            p.add_argument("--remote", default=None, help="push to this remote (non-force); default is a local ref")
-            p.add_argument("--canonical-ref", default="refs/remotes/origin/main",
-                           help="authority-root ref holding fetched canonical main, for pre-advance freshness")
-            p.add_argument("--compiler-revision", default=None, help="40-hex producer commit (recorded, caller-asserted)")
-            p.add_argument("--apply", action="store_true", help="write objects and advance; default only plans")
+            p.add_argument(
+                "--remote",
+                default=None,
+                help="push to this remote (non-force); default is a local ref",
+            )
+            p.add_argument(
+                "--canonical-ref",
+                default="refs/remotes/origin/main",
+                help="authority-root ref holding fetched canonical main, for pre-advance freshness",
+            )
+            p.add_argument(
+                "--compiler-revision",
+                default=None,
+                help="40-hex producer commit (recorded, caller-asserted)",
+            )
+            p.add_argument(
+                "--apply",
+                action="store_true",
+                help="write objects and advance; default only plans",
+            )
         if name == "check":
-            p.add_argument("--commit", required=True, help="the one publication commit every read comes from")
+            p.add_argument(
+                "--commit",
+                required=True,
+                help="the one publication commit every read comes from",
+            )
     return ap
 
 
@@ -581,7 +980,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         result, code = run(args), 0
     except Outcome as out:
-        result, code = {"status": out.status, "reason": out.reason, **out.detail}, EXIT[out.status]
+        result, code = (
+            {"status": out.status, "reason": out.reason, **out.detail},
+            EXIT[out.status],
+        )
     print(json.dumps(_printable(result), indent=2, sort_keys=True))
     return code
 
