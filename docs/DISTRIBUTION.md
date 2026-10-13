@@ -179,8 +179,10 @@ copies) are reported per repository and never edited. Each run's summary gives
 every repository one status: `INHERITED`, `CANONICAL_COPY`, `UPDATE_PR_OPEN`,
 `UPDATE_PENDING_MERGE`, `DRIFT` (Preview), `BLOCKED_PERMISSION`,
 `BLOCKED_POLICY`, `BLOCKED_OWNERSHIP`, `BLOCKED_CONFLICT` (another open PR
-changes a planned path), `BASE_MOVED`, `OPTED_OUT`, `UNREACHABLE`, or
-`UNVERIFIED`. Any repository
+changes a planned path), `BASE_MOVED`, `UNINITIALIZED` (no commits),
+`OPTED_OUT`, `UNREACHABLE`, or `UNVERIFIED`. Every planning read is pinned to
+the default-branch commit read first, and that commit is re-checked before the
+sync branch moves. Any repository
 left `UNREACHABLE`, `BLOCKED_PERMISSION`, or `UNVERIFIED` fails the run. A
 change to the template, the caller, CODEOWNERS, dependabot, or the class policy
 reaches consumers only when an operator dispatches the workflow. Preview first,

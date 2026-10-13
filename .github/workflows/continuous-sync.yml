@@ -142,9 +142,24 @@ jobs:
                   continue;
                 }
 
+                // The whole plan is read at one pinned commit; the base is
+                // re-checked just before the ref move, so nothing planned can
+                // change underneath it unseen.
+                const base = repo.default_branch;
+                let baseSha;
+                try {
+                  baseSha = (await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` })).data.object.sha;
+                } catch (e) {
+                  if (e.status === 409 && /^Git Repository is empty\.?$/i.test(String(e.message || '').trim())) {
+                    row('UNINITIALIZED', 'Git Repository is empty — nothing to sync');
+                    continue;
+                  }
+                  throw Object.assign(e, { phase: 'read' });
+                }
+
                 // Class before plan: a declared class that cannot be honoured
                 // plans nothing at all, managed files included.
-                const marker = await read(o, n, classes.marker_path);
+                const marker = await read(o, n, classes.marker_path, baseSha);
                 if (marker.state === 'dir') throw Object.assign(new Error(`${classes.marker_path} is a directory`), { phase: 'read' });
                 const decided = classForRepo(classes, n, marker.state === 'present' ? marker.text : null);
                 if (decided.error) {
@@ -153,8 +168,9 @@ jobs:
                   continue;
                 }
                 const profile = resolveProfile(classes, decided.name);
+                if (decided.name) profile.resolved_from = decided.source;
                 klass = profile.name;
-                const rootOwners = await read(o, n, 'CODEOWNERS');
+                const rootOwners = await read(o, n, 'CODEOWNERS', baseSha);
                 if (rootOwners.state === 'present') notes.push('root CODEOWNERS present; .github/CODEOWNERS not managed');
                 // What this class materializes, from the one shared builder.
                 const eligible = buildSeedPayload({
@@ -165,7 +181,7 @@ jobs:
                 const plan = [];
                 for (const path of MANAGED) {
                   if (!(path in eligible)) continue;
-                  const cur = await read(o, n, path);
+                  const cur = await read(o, n, path, baseSha);
                   if (cur.state !== 'present' || !same(cur.text, eligible[path])) {
                     plan.push({ path, action: 'write', content: eligible[path], why: 'restore', existed: cur.state === 'present' });
                   }
@@ -173,7 +189,7 @@ jobs:
 
                 let inherited = false;
                 let ownershipBlocked = false;
-                const tpl = await read(o, n, TEMPLATE);
+                const tpl = await read(o, n, TEMPLATE, baseSha);
                 if (matchPattern(profile.inherit || [], TEMPLATE)) {
                   inherited = true;
                   // A local copy blocks inheritance. Only a byte-identical copy
@@ -192,7 +208,7 @@ jobs:
                   }
                 }
                 if (CALLER in eligible) {
-                  const caller = await read(o, n, CALLER);
+                  const caller = await read(o, n, CALLER, baseSha);
                   if (caller.state === 'present') {
                     const repinned = caller.text.replace(PIN_RE, `$1${canonicalPin}`);
                     if (!PIN_RE.test(caller.text)) {
@@ -209,7 +225,7 @@ jobs:
                 // GitHub also honours root and docs/ templates and a
                 // PULL_REQUEST_TEMPLATE/ directory. Report them; never edit.
                 for (const dir of ['', '.github', 'docs']) {
-                  const listing = await read(o, n, dir);
+                  const listing = await read(o, n, dir, baseSha);
                   for (const e of listing.state === 'dir' ? listing.entries : []) {
                     const p = dir ? `${dir}/${e.name}` : e.name;
                     if (p !== TEMPLATE && (ALT_NAME.test(e.name) || /^pull_request_template$/i.test(e.name))) {
@@ -238,8 +254,6 @@ jobs:
                   row('DRIFT', `dry run: ${summary}`);
                   continue;
                 }
-
-                const base = repo.default_branch;
 
                 // An open PR on the sync branch is work in flight: it may carry
                 // review fixes, maintainer commits, or agent remediation. The
@@ -271,7 +285,6 @@ jobs:
                   continue;
                 }
 
-                const baseSha = (await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` })).data.object.sha;
                 const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
                 const treeItems = [];
                 for (const d of plan) {

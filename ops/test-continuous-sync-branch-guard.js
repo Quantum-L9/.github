@@ -72,7 +72,7 @@ const SYNC_COMMIT = {
  * @param {number} [o.listError]  HTTP status listing all open PRs throws
  * @param {string} [o.baseMovesTo] the default branch reads this sha after its first read
  */
-function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {}, errors = {}, otherPRs = [], listError, baseMovesTo } = {}) {
+function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {}, errors = {}, otherPRs = [], listError, baseMovesTo, repoName = 'consumer-repo', baseError } = {}) {
   const calls = [];
   const state = { sha: branch ? branch.sha : null };
   const record = (name, ret = {}) => async (args) => {
@@ -84,6 +84,10 @@ function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {
   const enc = (t) => Buffer.from(t).toString('base64');
   let baseReads = 0;
   const getRef = async (args) => {
+    if (baseError && args.ref === 'heads/main') {
+      calls.push({ name: 'git.getRef', args });
+      throw Object.assign(new Error(baseError.message), { status: baseError.status });
+    }
     const res = await shared.getRef(args);
     if (baseMovesTo && args.ref === 'heads/main' && baseReads++ > 0) return { data: { object: { sha: baseMovesTo } } };
     return res;
@@ -91,7 +95,7 @@ function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {
 
   const github = {
     paginate: shared.paginateWith(() => [
-      { name: 'consumer-repo', owner: { login: ORG }, default_branch: 'main', archived: false, fork: false },
+      { name: repoName, owner: { login: ORG }, default_branch: 'main', archived: false, fork: false },
     ]),
     request: async (route, args) => {
       calls.push({ name: `request ${route}`, args });
@@ -499,6 +503,41 @@ async function ownershipScenarios() {
     assert.match(addBody, /- \[x\] Low/, 'restoring an absent managed file is additive');
   }
   console.log(`ok: ${label} — Apply PR body passes governance-pr gates (strict) with exact base, source and changes`);
+
+  // The plan is read at one pinned commit: every read after the opt-out probe
+  // names the base sha, so a file changed on the default branch mid-plan is
+  // judged against the same commit the final BASE_MOVED check pins.
+  {
+    const r = await runClass({ files: { ...managedOk, ...marker('non_constellation_python'), [TEMPLATE]: canonicalTemplate } });
+    const reads = r.calls.filter((c) => c.name === 'repos.getContent').slice(1);
+    assert.ok(reads.length > 3);
+    for (const c of reads) assert.strictEqual(c.args.ref, 'base-sha', `${label}: ${c.args.path} read off the pinned base`);
+    assert.deepStrictEqual(r.deletes.map((d) => d.args.path), [TEMPLATE]);
+  }
+  console.log(`ok: ${label} — every planning read is pinned to the base sha`);
+
+  // An org-override class is reported as such, not as a marker.
+  {
+    const r = await runClass({ repoName: 'l9-repo-template', files: divergent });
+    assert.strictEqual(r.klass, 'non_constellation_python');
+    const body = r.calls.find((c) => c.name === 'pulls.create').args.body;
+    assert.match(body, /class: {2}non_constellation_python \(org override\)/);
+    assert.doesNotMatch(body, /\(marker\)/);
+  }
+  console.log(`ok: ${label} — override-classified repo: PR body names the org override, not a marker`);
+
+  // An empty repository has nothing to sync and is not a failure; any other
+  // base-ref error is.
+  {
+    let r = await runClass({ files: divergent, baseError: { status: 409, message: 'Git Repository is empty.' } });
+    assert.strictEqual(r.status, 'UNINITIALIZED');
+    assert.deepStrictEqual(r.failures, []);
+    assert.strictEqual(mutatedAny(r), false);
+    r = await runClass({ files: divergent, baseError: { status: 409, message: 'Conflict' } });
+    assert.strictEqual(r.status, 'UNREACHABLE');
+    assert.strictEqual(r.failures.length, 1);
+  }
+  console.log(`ok: ${label} — empty repo reported UNINITIALIZED; other base-ref errors fail`);
 }
 
 (async () => {
@@ -524,7 +563,7 @@ async function ownershipScenarios() {
     `${label}: the open-PR probe must actually run`,
   );
   const probeIdx = r.names.indexOf('pulls.list');
-  const refReadIdx = r.names.indexOf('git.getRef');
+  const refReadIdx = r.calls.findIndex((c) => c.name === 'git.getRef' && c.args.ref === `heads/${BRANCH}`);
   assert.ok(
     refReadIdx === -1 || probeIdx < refReadIdx,
     `${label}: the open-PR probe must precede any branch ref read`,
