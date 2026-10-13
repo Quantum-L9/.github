@@ -112,9 +112,16 @@ python3 scripts/publish-projection.py check --authority-root "$AUTH" --revision 
   and only while the fetched canonical `main` tip still has the same source
   and profile digests (`STALE` otherwise).
 - **Coherent reads.** `check` resolves one commit and reads the index and
-  the pair from it, compares file hashes with the index, re-verifies the
-  pair, and reports `CURRENT`, `STALE` (material change at the pin), or
-  `REJECTED`.
+  the pair from it, and compares file hashes with the index. It re-verifies
+  the pair against the authority at the revision its receipt asserts, which
+  must be an ancestor of the pin. It reports `CURRENT` when the pin's source
+  and profile digests equal the published ones (catalog or registry edits
+  elsewhere do not change that), `STALE` on a material change, and
+  `REJECTED` otherwise.
+- **Canonical shapes.** Artifact and receipt must satisfy
+  `semantics/projection_artifact.schema.yaml` and
+  `semantics/compiler_receipt.schema.yaml` at the pinned revision (required
+  fields, constants, types). An unknown schema type is `BLOCKED`.
 
 Exit codes: 0 ok, 1 `REJECTED`, 2 usage, 3 `BLOCKED`, 4 `STALE`, 5 `CONFLICT`.
 

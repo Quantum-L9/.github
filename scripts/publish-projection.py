@@ -60,6 +60,8 @@ except ImportError as exc:  # an interpreter without PyYAML is Unknown, not REJE
 OWNER_REPOSITORY = "Quantum-L9/.github"
 PRODUCER = "l9-semantic-compiler"
 REGISTRY_PATH = "semantics/canonical_sources.yaml"
+ARTIFACT_SCHEMA_PATH = "semantics/projection_artifact.schema.yaml"
+RECEIPT_SCHEMA_PATH = "semantics/compiler_receipt.schema.yaml"
 CATALOG_REF = "l9.source/projection-profiles@1"
 ARTIFACT_SCHEMA = "l9.projection-artifact/v1"
 RECEIPT_SCHEMA = "l9.compiler-receipt/v1"
@@ -401,6 +403,11 @@ def compute_pins(
         "catalog_digest": digest_bytes(catalog_bytes),
         "registry_digest": digest_bytes(registry_bytes),
         "authority_owner": (registry.get("authority") or {}).get("owner"),
+        # Canonical shapes the pair must satisfy, read at the same revision.
+        "schemas": {
+            "artifact": load_yaml(read(ARTIFACT_SCHEMA_PATH), ARTIFACT_SCHEMA_PATH),
+            "receipt": load_yaml(read(RECEIPT_SCHEMA_PATH), RECEIPT_SCHEMA_PATH),
+        },
     }
 
 
@@ -410,6 +417,62 @@ def compute_pins(
 def _expect(cond: bool, reason: str, **detail: Any) -> None:
     if not cond:
         raise Outcome("REJECTED", reason, **detail)
+
+
+_DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
+_TYPE_CHECKS = {
+    "string": lambda v: isinstance(v, str),
+    "semantic_ref": lambda v: isinstance(v, str) and bool(v),
+    "semantic_digest": lambda v: isinstance(v, str) and bool(_DIGEST.fullmatch(v)),
+    "array": lambda v: isinstance(v, list),
+    "object": lambda v: isinstance(v, dict),
+    "any": lambda v: True,
+}
+
+
+def require_schema(doc: dict[str, Any], schema: dict[str, Any], what: str) -> None:
+    """Enforce a canonical l9.schema-definition/v1: required, const, type, nested required."""
+    required = schema.get("required")
+    if not isinstance(required, list) or not required:
+        raise Outcome(
+            "BLOCKED",
+            "SCHEMA_UNRESOLVED",
+            input=what,
+            detail="schema declares no required fields",
+        )
+    missing = sorted(set(required) - set(doc))
+    _expect(not missing, "SCHEMA_REQUIRED_FIELD_MISSING", input=what, missing=missing)
+    for key, rule in (schema.get("properties") or {}).items():
+        if key not in doc or not isinstance(rule, dict):
+            continue
+        value = doc[key]
+        if "const" in rule:
+            _expect(
+                value == rule["const"], "SCHEMA_CONST_MISMATCH", input=what, field=key
+            )
+        kind = rule.get("type")
+        if kind is not None:
+            check = _TYPE_CHECKS.get(kind)
+            if check is None:  # an unknown schema type is unresolved law, not a pass
+                raise Outcome(
+                    "BLOCKED",
+                    "SCHEMA_TYPE_UNRESOLVED",
+                    input=what,
+                    field=key,
+                    type=kind,
+                )
+            _expect(
+                check(value), "SCHEMA_TYPE_MISMATCH", input=what, field=key, type=kind
+            )
+        nested = rule.get("required")
+        if isinstance(nested, list) and isinstance(value, dict):
+            _expect(
+                set(nested) <= set(value),
+                "SCHEMA_REQUIRED_FIELD_MISSING",
+                input=what,
+                field=key,
+                missing=sorted(set(nested) - set(value)),
+            )
 
 
 def verify_pair(
@@ -424,8 +487,10 @@ def verify_pair(
     (publication). None: only digest equality with the pins is required and
     the asserted revision is returned for the caller to place (currentness).
     """
-    artifact = load_json(artifact_bytes, "projection.json")
-    receipt = load_json(receipt_bytes, "receipt.json")
+    artifact = load_json(artifact_bytes, PROJECTION_FILE)
+    receipt = load_json(receipt_bytes, RECEIPT_FILE)
+    require_schema(artifact, pins["schemas"]["artifact"], PROJECTION_FILE)
+    require_schema(receipt, pins["schemas"]["receipt"], RECEIPT_FILE)
     _expect(
         artifact.get("schema") == ARTIFACT_SCHEMA,
         "ARTIFACT_SCHEMA_MISMATCH",
@@ -887,35 +952,51 @@ def check_publication(
             file=name,
         )
         pair.append(data)
-    if (current.get("source_digest"), current.get("profile_digest")) != (
-        pins["source_digest"],
-        pins["profile_digest"],
-    ):
+
+    # The pair binds the authority at the revision its receipt asserts. That
+    # revision is trusted only as an ancestor of the independent pin, never
+    # because the index or receipt says so.
+    published = (
+        load_json(pair[1], RECEIPT_FILE).get("governing_coordinates") or {}
+    ).get("authority_revision")
+    _expect(
+        isinstance(published, str) and bool(_SHA1.fullmatch(published)),
+        "RECEIPT_REVISION_UNASSERTED",
+    )
+    if not is_ancestor(authority_root, published, revision):
         raise Outcome(
-            "STALE",
-            "MATERIAL_INPUT_CHANGED",
-            commit=fixed,
-            published_revision=current.get("authority_revision"),
-            pinned_revision=revision,
+            "REJECTED",
+            "PUBLISHED_REVISION_NOT_IN_PINNED_HISTORY",
+            published=published,
+            pinned=revision,
         )
-    facts = verify_pair(pair[0], pair[1], pins, expected_revision=None)
+    facts = verify_pair(
+        pair[0],
+        pair[1],
+        compute_pins(authority_root, published, profile_ref, source_class),
+        published,
+    )
     _expect(
         facts["receipt_digest"] == current.get("receipt_digest"),
         "INDEX_RECEIPT_MISMATCH",
     )
-    if not is_ancestor(authority_root, facts["receipt_authority_revision"], revision):
+
+    # Currentness is semantic: the source and profile digests, as the consumer binds them.
+    observed = (pins["source_digest"], pins["profile_digest"])
+    if (current.get("source_digest"), current.get("profile_digest")) != observed:
         raise Outcome(
-            "REJECTED",
-            "PUBLISHED_REVISION_NOT_IN_PINNED_HISTORY",
-            published=facts["receipt_authority_revision"],
-            pinned=revision,
+            "STALE",
+            "MATERIAL_INPUT_CHANGED",
+            commit=fixed,
+            published_revision=published,
+            pinned_revision=revision,
         )
     return {
         "status": "CURRENT",
         "commit": fixed,
         "entry": entry_key(pins),
         "pinned_revision": revision,
-        "published_authority_revision": facts["receipt_authority_revision"],
+        "published_authority_revision": published,
         **facts,
     }
 
@@ -938,7 +1019,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     revision = bind_authority(authority, args.revision)
     pins = compute_pins(authority, revision, args.profile, args.source_class)
     if args.command == "pins":
-        return {"status": "PINNED", **pins}
+        return {"status": "PINNED", **{k: v for k, v in pins.items() if k != "schemas"}}
     if args.command == "check":
         return check_publication(
             Path(args.repo),

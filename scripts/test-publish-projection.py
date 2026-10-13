@@ -30,6 +30,14 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+# The fixture authority carries this repository's real canonical schemas.
+SCHEMAS = {
+    path: (HERE.parent / path).read_text()
+    for path in (
+        "semantics/projection_artifact.schema.yaml",
+        "semantics/compiler_receipt.schema.yaml",
+    )
+}
 _spec = importlib.util.spec_from_file_location(
     "publish_projection", HERE / "publish-projection.py"
 )
@@ -180,6 +188,7 @@ class Fixture(unittest.TestCase):
                 "semantics/canonical_sources.yaml": REGISTRY,
                 "semantics/projection_profiles.yaml": CATALOG,
                 "semantics/invariants.yaml": invariants("first"),
+                **SCHEMAS,
             },
             "authority 1",
         )
@@ -339,6 +348,21 @@ class VerifyTests(Fixture):
             (self.pair / name).write_text(json.dumps(doc))
             self.assertRejected(reason)
             (self.pair / name).write_text(original)
+        # A receipt missing schema-required fields is rejected even with a
+        # recomputed identity and digest (Codex P1 on PR #180).
+        receipt_path = self.pair / "receipt.json"
+        original = receipt_path.read_text()
+        doc = json.loads(original)
+        for field in ("claim", "verification_basis", "receipt_digest"):
+            doc.pop(field)
+        doc["receipt_identity"] = "pending"
+        doc["receipt_identity"] = (
+            "l9.receipt-instance/" + pp.digest(doc).split(":", 1)[1]
+        )
+        doc["receipt_digest"] = pp.digest(doc)
+        receipt_path.write_text(json.dumps(doc))
+        self.assertRejected("SCHEMA_REQUIRED_FIELD_MISSING")
+        receipt_path.write_text(original)
 
     def test_receipt_asserting_another_revision_is_rejected(self):
         self.assertRejected("RECEIPT_REVISION_MISMATCH", revision="d" * 40)
@@ -445,7 +469,21 @@ class PublishTests(Fixture):
     def test_unrelated_revision_does_not_republish(self):
         self.publish(self.pair, self.rev1, "--apply")
         first = self.tip()
-        rev2 = commit_files(self.auth, {"README.md": "unrelated\n"}, "unrelated change")
+        # Unrelated to the bound source and profile, but it moves the catalog and
+        # registry digests the retained receipt binds (Codex P1 on PR #180).
+        rev2 = commit_files(
+            self.auth,
+            {
+                "README.md": "unrelated\n",
+                "semantics/projection_profiles.yaml": CATALOG.replace(
+                    "projection_profiles:\n",
+                    "projection_profiles:\n  - id: l9.projection/other@1\n    sources: {}\n",
+                ),
+                "semantics/canonical_sources.yaml": REGISTRY
+                + "  - id: l9.source/other@1\n    path: semantics/other.yaml\n",
+            },
+            "unrelated change",
+        )
         self.fetch_origin()
         pair2 = make_pair(self.tmp / "out", self.pins(rev2), rev2)
         code, out = self.publish(pair2, rev2, "--apply")
