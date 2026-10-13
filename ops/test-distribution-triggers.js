@@ -109,4 +109,49 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   console.log(`ok: ${label} — dispatch only; dry-run (default) and seed modes; governance-distribution`);
 }
 
+// ── auto-seed-new-repo.yml: hourly + repo_created + dispatch, dry run default ─
+{
+  const label = 'auto-seed-new-repo.yml';
+  const text = read('.github/workflows/auto-seed-new-repo.yml');
+  const block = onBlock(text);
+  assert.deepStrictEqual(events(block), ['schedule', 'repository_dispatch', 'workflow_dispatch'], `${label}: trigger set changed`);
+  assert.ok(block.some((l) => /^\s+- cron: '20 \* \* \* \*'\s*$/.test(l)), `${label}: hourly sweep must stay`);
+  assert.ok(block.some((l) => /types: \[repo_created\]/.test(l)), `${label}: repo_created fast path must stay`);
+  const dry = input(block, 'dry_run');
+  assert.ok(dry.includes('type: boolean') && dry.includes('default: true'), `${label}: operator dispatch defaults to dry run`);
+  assert.match(text, /^ {4}environment: governance-distribution\s*$/m);
+  assert.match(text, /^ {2}group: auto-seed-new-repo\s*$/m);
+  console.log(`ok: ${label} — hourly sweep, repo_created, dry-run dispatch preserved`);
+}
+
+// ── Retired: the push-driven org_template_updated fanout ────────────────────
+// dispatch-template-update.yml pushed `repository_dispatch(org_template_updated)`
+// to every seeded consumer on a template change. Drift is restored only by a
+// dispatched Manual Update now; no workflow here may fan an event out again.
+{
+  const dir = path.join(root, '.github/workflows');
+  assert.ok(!fs.existsSync(path.join(dir, 'dispatch-template-update.yml')), 'dispatch-template-update.yml is retired');
+  for (const f of fs.readdirSync(dir).filter((n) => /\.ya?ml$/.test(n))) {
+    const text = read(`.github/workflows/${f}`);
+    assert.doesNotMatch(text, /org_template_updated/, `${f}: the retired consumer sync event is back`);
+    assert.doesNotMatch(text, /createDispatchEvent/, `${f}: a consumer event fanout is back`);
+  }
+  assert.doesNotMatch(read('Makefile'), /dispatch-template-update/, 'Makefile still runs the retired dispatcher');
+  console.log('ok: org_template_updated fanout retired — no workflow emits a consumer dispatch event');
+}
+
+// ── Canonical governance caller pin ─────────────────────────────────────────
+{
+  const caller = read('policies/governance-caller.yml');
+  const pins = [...caller.matchAll(/^\s*uses: Quantum-L9\/\.github\/\.github\/workflows\/(governance-(?:pr|issue)\.yml)@(\S+)/gm)]
+    .map((m) => [m[1], m[2]]);
+  assert.deepStrictEqual(pins, [
+    ['governance-pr.yml', '02ea092a098563b27970d21416fabc47dd005fb0'],
+    ['governance-issue.yml', '02ea092a098563b27970d21416fabc47dd005fb0'],
+  ], 'both caller refs follow the merged .github commit carrying the PR body job');
+  assert.match(caller, /pull-requests: write/);
+  assert.match(caller, /issues: write/);
+  console.log('ok: governance caller pins both workflows at 02ea092a; permissions unchanged');
+}
+
 console.log('\nall distribution trigger scenarios passed');
