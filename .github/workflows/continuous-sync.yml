@@ -9,18 +9,24 @@
 # environment (CANONICAL_LAW §14), so the job must run in that environment;
 # outside it both resolve empty and token minting fails before any read.
 #
+# Class first: the repo's class (policies/repo-classes.yml, marker > override
+# > default) and its root CODEOWNERS are resolved before anything is planned,
+# and a path is eligible only when the class-filtered seed payload
+# (ops/build-seed-payload.js) carries it. A malformed marker plans nothing.
 # Managed (overwrite, not missing-only — docs/DISTRIBUTION.md):
-#   .github/CODEOWNERS, .github/dependabot.yml   every repo, exact bytes
-#   .github/pull_request_template.md             by repo class
-#     (policies/repo-classes.yml): a class that seeds `pr-templates` carries
-#     the canonical bytes; a class that INHERITS it carries no copy, so a
-#     divergent one is removed and GitHub serves this repo's template live
+#   .github/CODEOWNERS, .github/dependabot.yml   exact bytes, where the class
+#     materializes them (self_governed does not; a root CODEOWNERS wins)
+#   .github/pull_request_template.md             by repo class: a class that
+#     seeds `pr-templates` carries the canonical bytes; a class that INHERITS
+#     it carries no copy. A local copy that is byte-identical to the org
+#     template is removed; a divergent one is BLOCKED_OWNERSHIP, never deleted
 #   .github/workflows/governance.yml             re-pinned only: the
 #     governance-pr/-issue `uses:` SHAs follow policies/governance-caller.yml;
 #     the rest of a consumer's caller (e.g. `strict: true`) is theirs
 # Alternate templates (PULL_REQUEST_TEMPLATE/, root or docs/ copies) are
-# reported per repo for classification, never edited. Writes are one atomic
-# commit per repo, moved by ops/seed-branch-safety.js (provenance + CAS).
+# reported per repo for classification, never edited. A path another open PR
+# already changes is BLOCKED_CONFLICT. Writes are one atomic commit per repo,
+# moved by ops/seed-branch-safety.js (provenance + CAS).
 name: Manual Update (governance drift remediation)
 
 on:
@@ -74,8 +80,9 @@ jobs:
               loadRepoClasses, classForRepo, resolveProfile, matchPattern,
             } = require('./ops/repo-class-profile.js');
             const {
-              SYNC_COMMIT_SUBJECT, assessSeedBranch, moveSeedBranch,
+              SYNC_COMMIT_SUBJECT, assessSeedBranch, assessOpenPrOverlap, moveSeedBranch,
             } = require('./ops/seed-branch-safety.js');
+            const { buildSeedPayload } = require('./ops/build-seed-payload.js');
             const DRY = process.env.DRY_RUN !== 'false';
             const FILTER = process.env.FILTER;
             const BRANCH = 'chore/governance-sync';
@@ -83,6 +90,7 @@ jobs:
             const TEMPLATE = '.github/pull_request_template.md';
             const CALLER = '.github/workflows/governance.yml';
             const SYNC_LOGIN = process.env.APP_SLUG ? `${process.env.APP_SLUG}[bot]` : '';
+            const SOURCE_SHA = process.env.GITHUB_SHA || 'unknown';
             // Any ref form (full SHA, tag, branch, short SHA): only the
             // canonical full SHA is in sync.
             const PIN_RE = /(Quantum-L9\/\.github\/\.github\/workflows\/governance-(?:pr|issue)\.yml@)([^\s#'"]+)/g;
@@ -96,11 +104,8 @@ jobs:
               core.setFailed('policies/governance-caller.yml carries no governance-pr.yml@<sha> pin');
               return;
             }
-            // Managed for every repository, exact bytes (unchanged contract).
-            const MANAGED = {
-              '.github/CODEOWNERS': fs.readFileSync('policies/CODEOWNERS', 'utf8'),
-              '.github/dependabot.yml': fs.readFileSync('.github/dependabot.yml', 'utf8'),
-            };
+            // Fully managed, exact bytes, where the class payload carries them.
+            const MANAGED = ['.github/CODEOWNERS', '.github/dependabot.yml'];
 
             // 404 is an answer ("absent"). Anything else is not, and must not
             // be read as "in sync" — that used to report unreadable repos as clean.
@@ -114,7 +119,8 @@ jobs:
                 throw Object.assign(e, { phase: 'read' });
               }
             };
-            const same = (a, b) => a.trim() === b.trim();
+            // Exact bytes: whitespace-only drift is drift.
+            const same = (a, b) => a === b;
 
             const all = await github.paginate(github.rest.repos.listForOrg, {
               org: ORG, type: 'all', per_page: 100
@@ -136,51 +142,67 @@ jobs:
                   continue;
                 }
 
-                // What this repository should carry: path -> {action, content, sha, why}.
+                // Class before plan: a declared class that cannot be honoured
+                // plans nothing at all, managed files included.
+                const marker = await read(o, n, classes.marker_path);
+                if (marker.state === 'dir') throw Object.assign(new Error(`${classes.marker_path} is a directory`), { phase: 'read' });
+                const decided = classForRepo(classes, n, marker.state === 'present' ? marker.text : null);
+                if (decided.error) {
+                  klass = 'unresolved';
+                  row('BLOCKED_POLICY', `class: ${decided.error} — nothing planned`);
+                  continue;
+                }
+                const profile = resolveProfile(classes, decided.name);
+                klass = profile.name;
+                const rootOwners = await read(o, n, 'CODEOWNERS');
+                if (rootOwners.state === 'present') notes.push('root CODEOWNERS present; .github/CODEOWNERS not managed');
+                // What this class materializes, from the one shared builder.
+                const eligible = buildSeedPayload({
+                  fs, profile, hasRootCodeowners: rootOwners.state === 'present', repository: `${o}/${n}`,
+                });
+
+                // What this repository should carry: path -> {action, content, why, existed}.
                 const plan = [];
-                for (const [path, expected] of Object.entries(MANAGED)) {
+                for (const path of MANAGED) {
+                  if (!(path in eligible)) continue;
                   const cur = await read(o, n, path);
-                  if (cur.state !== 'present' || !same(cur.text, expected)) {
-                    plan.push({ path, action: 'write', content: expected, why: 'restore' });
+                  if (cur.state !== 'present' || !same(cur.text, eligible[path])) {
+                    plan.push({ path, action: 'write', content: eligible[path], why: 'restore', existed: cur.state === 'present' });
                   }
                 }
 
-                const marker = await read(o, n, classes.marker_path);
-                const decided = classForRepo(classes, n, marker.state === 'present' ? marker.text : null);
                 let inherited = false;
-                if (decided.error) {
-                  // A declared class we cannot honour: touch nothing class-dependent.
-                  klass = 'unresolved';
-                  notes.push(`class: ${decided.error}`);
-                } else {
-                  const profile = resolveProfile(classes, decided.name);
-                  klass = profile.name;
-                  const seeds = profile.seed_categories || [];
-                  const tpl = await read(o, n, TEMPLATE);
-                  if (matchPattern(profile.inherit || [], TEMPLATE)) {
-                    inherited = true;
-                    // A local copy blocks inheritance and is, by policy, not theirs.
-                    if (tpl.state === 'present') {
-                      plan.push({ path: TEMPLATE, action: 'delete', why: 'remove' });
-                    }
-                  } else if (seeds.includes('pr-templates') && !matchPattern(profile.forbid || [], TEMPLATE)) {
-                    if (tpl.state !== 'present' || !same(tpl.text, canonicalTemplate)) {
-                      plan.push({ path: TEMPLATE, action: 'write', content: canonicalTemplate, why: 'restore' });
+                let ownershipBlocked = false;
+                const tpl = await read(o, n, TEMPLATE);
+                if (matchPattern(profile.inherit || [], TEMPLATE)) {
+                  inherited = true;
+                  // A local copy blocks inheritance. Only a byte-identical copy
+                  // of the org template is provably ours to remove.
+                  if (tpl.state === 'present') {
+                    if (same(tpl.text, canonicalTemplate)) {
+                      plan.push({ path: TEMPLATE, action: 'delete', why: 'remove', existed: true });
+                    } else {
+                      ownershipBlocked = true;
+                      notes.push(`BLOCKED_OWNERSHIP ${TEMPLATE}: divergent local template, ownership unproven (reported, not deleted)`);
                     }
                   }
-                  if (seeds.includes('governance') && !matchPattern(profile.forbid || [], CALLER)) {
-                    const caller = await read(o, n, CALLER);
-                    if (caller.state === 'present') {
-                      const repinned = caller.text.replace(PIN_RE, `$1${canonicalPin}`);
-                      if (!PIN_RE.test(caller.text)) {
-                        notes.push('governance caller calls neither governance-pr.yml nor governance-issue.yml (reported, not edited)');
-                      } else if (repinned !== caller.text) {
-                        plan.push({ path: CALLER, action: 'write', content: repinned, why: 're-pin' });
-                      }
-                      PIN_RE.lastIndex = 0;
-                    } else {
-                      notes.push('governance caller absent (seeded missing-only by seed-governance)');
+                } else if (TEMPLATE in eligible) {
+                  if (tpl.state !== 'present' || !same(tpl.text, eligible[TEMPLATE])) {
+                    plan.push({ path: TEMPLATE, action: 'write', content: eligible[TEMPLATE], why: 'restore', existed: tpl.state === 'present' });
+                  }
+                }
+                if (CALLER in eligible) {
+                  const caller = await read(o, n, CALLER);
+                  if (caller.state === 'present') {
+                    const repinned = caller.text.replace(PIN_RE, `$1${canonicalPin}`);
+                    if (!PIN_RE.test(caller.text)) {
+                      notes.push('governance caller calls neither governance-pr.yml nor governance-issue.yml (reported, not edited)');
+                    } else if (repinned !== caller.text) {
+                      plan.push({ path: CALLER, action: 'write', content: repinned, why: 're-pin', existed: true });
                     }
+                    PIN_RE.lastIndex = 0;
+                  } else {
+                    notes.push('governance caller absent (seeded missing-only by seed-governance)');
                   }
                 }
 
@@ -197,10 +219,21 @@ jobs:
                 }
 
                 if (plan.length === 0) {
-                  row(decided.error ? 'BLOCKED_POLICY' : inherited ? 'INHERITED' : 'CANONICAL_COPY', 'in sync');
+                  row(ownershipBlocked ? 'BLOCKED_OWNERSHIP' : inherited ? 'INHERITED' : 'CANONICAL_COPY', 'in sync');
                   continue;
                 }
                 const summary = plan.map(d => `${d.why} ${d.path}`).join(', ');
+
+                // Another open PR already changing a planned path would turn
+                // this PR into a merge conflict. Refuse before any write.
+                const overlap = await assessOpenPrOverlap({
+                  github, owner: o, repo: n, branch: BRANCH, paths: plan.map(d => d.path),
+                });
+                if (overlap.action === 'block') {
+                  row(overlap.status, `${overlap.reason} (${summary})`);
+                  continue;
+                }
+
                 if (DRY) {
                   row('DRIFT', `dry run: ${summary}`);
                   continue;
@@ -264,6 +297,13 @@ jobs:
                   tree: tree.data.sha,
                   parents: [baseSha],
                 });
+                // The commit is built on baseSha. If the default branch moved
+                // since, do not publish it: the next Apply replans.
+                const baseNow = (await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` })).data.object.sha;
+                if (baseNow !== baseSha) {
+                  row('BASE_MOVED', `${base} moved ${baseSha.slice(0, 7)} → ${baseNow.slice(0, 7)} during the run — branch not moved; re-run Apply (${summary})`);
+                  continue;
+                }
                 const moved = await moveSeedBranch({
                   github, owner: o, repo: n, branch: BRANCH,
                   expectedSha: gate.sha, commitSha: commit.data.sha,
@@ -275,18 +315,48 @@ jobs:
 
                 // No open-PR branch here: the guard above returned early for
                 // those, so this always opens a fresh PR.
+                // Update-specific body in the sections governance-pr.yml
+                // checks. Facts only: what changes, on which exact base, from
+                // which source; nothing claims a check this run did not make.
+                const additive = plan.every(d => d.action === 'write' && !d.existed);
                 const pr = await github.rest.pulls.create({
                   owner: o, repo: n, head: BRANCH, base,
                   title: 'chore(governance): restore drifted governance files',
                   body: [
-                    `Governance files have drifted from the ${ORG}/.github standard (class \`${klass}\`).`,
+                    '## Problem',
+                    '',
+                    `${plan.length} governance file(s) managed by ${ORG}/.github have drifted from the org standard for this repository's class \`${klass}\` (${profile.resolved_from}) — see \`policies/repo-classes.yml\`.`,
+                    '',
+                    '## Fix',
                     '',
                     ...plan.map(d => `- **${d.why}** \`${d.path}\`` + (
-                      d.action === 'delete' ? ` — this class inherits it live from ${ORG}/.github; a local copy blocks that`
+                      d.action === 'delete' ? ` — this class inherits it live from ${ORG}/.github; this local copy is byte-identical to the org template and blocks that`
                         : d.why === 're-pin' ? ` — \`uses:\` pins moved to \`${canonicalPin}\`; the rest of the file is unchanged`
                           : ' — replaced with the org bytes')),
+                    ...notes.filter(t => /^BLOCKED_OWNERSHIP/.test(t)).map(t => `- not changed: ${t}`),
                     '',
                     'Review and merge. To opt out of governance sync, create `.l9/no-sync` in your repo.',
+                    '',
+                    '## Risk',
+                    '',
+                    `- [${additive ? 'x' : ' '}] Low — additive, reversible, no data or contract change`,
+                    `- [${additive ? ' ' : 'x'}] Medium — touches shared code, config, or a public interface`,
+                    '- [ ] High — breaking change, migration, IAM/network, or irreversible',
+                    '',
+                    '## Evidence',
+                    '',
+                    '```text',
+                    `source: ${ORG}/.github@${SOURCE_SHA}`,
+                    `base:   ${base}@${baseSha}`,
+                    `class:  ${klass} (${profile.resolved_from})`,
+                    `changes (${plan.length}):`,
+                    ...plan.map(d => `  ${d.action === 'delete' ? 'delete' : d.existed ? 'modify' : 'add'}  ${d.path}`),
+                    '```',
+                    '',
+                    '## Gates',
+                    '',
+                    '- [x] No other open PR changed these paths when the update was planned (a PR opened later is not covered)',
+                    "- [ ] Consumer CI passes on this PR — unverified: Manual Update neither runs nor observes this repository's checks",
                     '',
                     '_Opened by a manual Apply of Quantum-L9/.github continuous-sync.yml._',
                   ].join('\n'),
