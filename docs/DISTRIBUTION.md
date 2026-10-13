@@ -124,8 +124,8 @@ Alternate templates (a `PULL_REQUEST_TEMPLATE/` directory, root or `docs/`
 copies) are reported per repository and never edited. Each run's summary gives
 every repository one status: `INHERITED`, `CANONICAL_COPY`, `UPDATE_PR_OPEN`,
 `UPDATE_PENDING_MERGE`, `DRIFT` (dry run), `BLOCKED_PERMISSION`,
-`BLOCKED_POLICY`, `OPTED_OUT`, `UNREACHABLE`, or `UNVERIFIED`; the last three
-unresolved states fail the run. A push to `main` that changes the template,
+`BLOCKED_POLICY`, `OPTED_OUT`, `UNREACHABLE`, or `UNVERIFIED`. Any repository
+left `UNREACHABLE`, `BLOCKED_PERMISSION`, or `UNVERIFIED` fails the run. A push to `main` that changes the template,
 the caller, CODEOWNERS, dependabot, or the class policy starts a run, so
 convergence does not wait for the weekly schedule. Each repository gets one
 atomic commit, moved onto the sync branch through the seeders' guarded path
