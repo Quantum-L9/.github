@@ -13,14 +13,17 @@ on:
         default: true    # pr-files.yml (this repo) runs only the body job;
                          # pr-gates.yml already judges this repo's bodies.
 
+# Read-only by default; the one job that edits the PR body asks for write
+# itself. `gates` reads the event payload and writes only the job summary.
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   gates:
     if: inputs.gates && github.event.pull_request.draft == false && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:

@@ -123,7 +123,7 @@ async function run({ reads = [pr()], updateStatus, strict = 'false', proc = {} }
     fs.rmSync(cwd, { recursive: true, force: true });
   }
   const updates = calls.filter((c) => c.name === 'pulls.update');
-  const status = core.tables.length ? core.tables[core.tables.length - 1][1][0] : null;
+  const status = core.tables.length ? core.tables.at(-1)[1][0] : null;
   return { calls, updates, core, status, runs: fake.runs };
 }
 
@@ -221,12 +221,14 @@ scenario('pr-files.yml delegates to the body job and runs no renderer of its own
 });
 
 /** One end-to-end run with the real composer, when a checkout is supplied. */
+// Child processes resolve git and python3 from fixed system directories only.
+const FIXED_PATH = '/usr/bin:/bin';
 if (process.env.L9_COMPOSER_CHECKOUT) {
   scenario('end to end: a push from another client refreshes the real body', async () => {
     const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'pr-body-e2e-'));
     const git = (...a) => childProcess.execFileSync('git', ['-C', path.join(cwd, 'pr'), ...a], {
       encoding: 'utf8',
-      env: { ...process.env, GIT_AUTHOR_NAME: 't', GIT_AUTHOR_EMAIL: 't@x', GIT_COMMITTER_NAME: 't', GIT_COMMITTER_EMAIL: 't@x' },
+      env: { PATH: FIXED_PATH, GIT_AUTHOR_NAME: 't', GIT_AUTHOR_EMAIL: 't@x', GIT_COMMITTER_NAME: 't', GIT_COMMITTER_EMAIL: 't@x' },
     });
     fs.mkdirSync(path.join(cwd, 'pr'));
     git('init', '-q', '-b', 'main');
@@ -242,7 +244,7 @@ if (process.env.L9_COMPOSER_CHECKOUT) {
     const composer = path.join(process.env.L9_COMPOSER_CHECKOUT, 'ops/scripts/compose_pr_body.py');
     fs.writeFileSync(path.join(cwd, 'template.md'), template);
     const first = childProcess.execFileSync('python3', [composer, '--workspace', path.join(cwd, 'pr'),
-      '--pr-base', base, '--template', path.join(cwd, 'template.md')], { encoding: 'utf8' });
+      '--pr-base', base, '--template', path.join(cwd, 'template.md')], { encoding: 'utf8', env: { PATH: FIXED_PATH } });
     const reviewed = first.replace('<!-- EVIDENCE:END -->', '<!-- EVIDENCE:END -->\n\nReviewer note kept.');
     fs.writeFileSync(path.join(cwd, 'pr', 'c.py'), 'c\n');
     git('add', 'c.py');
