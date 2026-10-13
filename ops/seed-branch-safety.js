@@ -263,7 +263,68 @@ async function moveSeedBranch({ github, owner, repo, branch, expectedSha, commit
   return { moved: true, reason: 'rebuilt' };
 }
 
+/**
+ * Refuse a write whose destination paths another open PR already changes.
+ *
+ * The seeders and Manual Update add files on a branch of their own; a second
+ * pending PR that touches the same path would turn their PR into a merge
+ * conflict on the consumer. Read-only. Every open PR is listed and its files
+ * (with the previous name of a rename) intersected with `paths`. Only the
+ * caller's own PR, `branch` in this repository, is excluded: assessSeedBranch
+ * already guards it.
+ *
+ * Fail closed: when the PRs or their files cannot be read, the answer is a
+ * named blocker, never "no overlap". This narrows a race; it does not close
+ * one — a PR opened after this read is not seen.
+ *
+ * @param {object} opts
+ * @param {object} opts.github
+ * @param {string} opts.owner
+ * @param {string} opts.repo
+ * @param {string} opts.branch  the caller's own head branch
+ * @param {string[]} opts.paths candidate destination paths
+ * @returns {Promise<{action: 'proceed'|'block', status: string|null, reason: string}>}
+ */
+async function assessOpenPrOverlap({ github, owner, repo, branch, paths }) {
+  const wanted = new Set(paths);
+  const blocked = (e, what) => ({
+    action: 'block',
+    status: e.status === 403 || e.status === 401 ? 'BLOCKED_PERMISSION' : 'UNREACHABLE',
+    reason: `${what} unreadable (${e.status || 'error'}): ${String(e.message || e).slice(0, 80)} — nothing written`,
+  });
+  let prs;
+  try {
+    prs = await github.paginate(github.rest.pulls.list, { owner, repo, state: 'open', per_page: 100 });
+  } catch (e) {
+    return blocked(e, 'open pull requests');
+  }
+  for (const pr of prs) {
+    const own = pr.head && pr.head.ref === branch && pr.head.repo && pr.head.repo.full_name === `${owner}/${repo}`;
+    if (own) continue;
+    let files;
+    try {
+      files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: pr.number, per_page: 100 });
+    } catch (e) {
+      return blocked(e, `files of PR #${pr.number}`);
+    }
+    // The files endpoint stops at 3000 entries; past that the list is not proof.
+    if (files.length >= 3000) {
+      return { action: 'block', status: 'UNREACHABLE', reason: `PR #${pr.number} lists 3000+ files — overlap unprovable, nothing written` };
+    }
+    const hits = [...new Set(files.flatMap((f) => [f.filename, f.previous_filename]).filter((p) => wanted.has(p)))];
+    if (hits.length) {
+      return {
+        action: 'block',
+        status: 'BLOCKED_CONFLICT',
+        reason: `open PR #${pr.number} (${pr.head ? pr.head.ref : '?'}) also changes ${hits.join(', ')} — nothing written`,
+      };
+    }
+  }
+  return { action: 'proceed', status: null, reason: 'no other open PR changes these paths' };
+}
+
 module.exports = {
+  assessOpenPrOverlap,
   SYNC_COMMIT_SUBJECT,
   SEED_COMMIT_SUBJECT,
   isSeedCommitMessage,

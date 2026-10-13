@@ -91,6 +91,7 @@ jobs:
             } = require('./ops/build-seed-payload.js');
             const {
               assessSeedBranch,
+              assessOpenPrOverlap,
               moveSeedBranch,
             } = require('./ops/seed-branch-safety.js');
             const {
@@ -121,24 +122,25 @@ jobs:
               ? explicitCategories.join(',')
               : 'all (per repo class)';
 
-            const exists = async (owner, repo, path, ref) => {
+            // Only a 404 means "absent". 403, 409, 5xx, or a directory where a
+            // file belongs are not answers: they throw, so an unreadable repo
+            // can never be planned as if its files were missing.
+            const readFile = async (owner, repo, path, ref) => {
+              let res;
               try {
-                await github.rest.repos.getContent({ owner, repo, path, ...(ref ? { ref } : {}) });
-                return true;
-              } catch {
-                return false;
+                res = await github.rest.repos.getContent({ owner, repo, path, ...(ref ? { ref } : {}) });
+              } catch (e) {
+                if (e.status === 404) return null;
+                throw e;
               }
+              const d = res.data;
+              if (!d || Array.isArray(d) || (d.type && d.type !== 'file') || typeof d.content !== 'string') {
+                throw Object.assign(new Error(`${path} is not a readable file (got ${Array.isArray(d) ? 'a directory' : (d && d.type) || 'no content'})`), { status: 'NOT_A_FILE' });
+              }
+              return Buffer.from(d.content, 'base64').toString('utf8');
             };
-
-            const readText = async (owner, repo, path) => {
-              try {
-                const res = await github.rest.repos.getContent({ owner, repo, path });
-                if (res.data && res.data.content) {
-                  return Buffer.from(res.data.content, 'base64').toString('utf8');
-                }
-              } catch { /* missing */ }
-              return null;
-            };
+            const exists = async (owner, repo, path, ref) => (await readFile(owner, repo, path, ref)) !== null;
+            const SOURCE_SHA = process.env.GITHUB_SHA || 'unknown';
 
             const all = await github.paginate(github.rest.repos.listForOrg, {
               org: 'Quantum-L9', type: 'all', per_page: 100,
@@ -149,6 +151,7 @@ jobs:
             const rows = [];
             const unresolved = [];
             const forbidden = [];
+            const conflicts = [];
             let failures = 0;
 
             core.info(`categories=${categoriesLabel} (default class ${DEFAULT_CATEGORIES.join(',')}; all known ${ALL_CATEGORIES.join(',')})`);
@@ -158,18 +161,11 @@ jobs:
               let profile = null;
               try {
                 const hasRootCodeowners = await exists(o, n, 'CODEOWNERS');
-                const hasPython = (await exists(o, n, 'pyproject.toml'))
-                  || (await exists(o, n, 'requirements.txt'));
-                const hasPackageJson = await exists(o, n, 'package.json');
 
-                // Same class probe as auto-seed-new-repo.yml: existence first,
-                // because readText() returns null for both a missing file and a
-                // failed fetch, and a transient fetch error must not fall
-                // through to `default` — the widest payload.
-                let marker = null;
-                if (await exists(o, n, classes.marker_path)) {
-                  marker = (await readText(o, n, classes.marker_path)) ?? '';
-                }
+                // Same class probe as auto-seed-new-repo.yml: null only on a
+                // 404. A failed fetch throws instead of falling through to
+                // `default` — the widest payload.
+                const marker = await readFile(o, n, classes.marker_path);
                 const decided = classForRepo(classes, n, marker);
                 if (decided.error) {
                   rows.push([n, 'unresolved', `skipped: ${decided.error}`]);
@@ -189,8 +185,6 @@ jobs:
                     categories: explicitCategories ?? undefined,
                     profile,
                     hasRootCodeowners,
-                    hasPython,
-                    hasPackageJson,
                     repository: `${o}/${n}`,
                   });
                 } catch (e) {
@@ -242,6 +236,18 @@ jobs:
                 }
                 const branchSha = gate.sha;
 
+                // A different open PR already changing a path this seed would
+                // add makes the seed PR a merge conflict. Refuse before any write.
+                const overlap = await assessOpenPrOverlap({
+                  github, owner: o, repo: n, branch: BRANCH, paths: writes,
+                });
+                if (overlap.action === 'block') {
+                  rows.push([n, profile.name, `${overlap.status}: ${overlap.reason}`]);
+                  if (overlap.status === 'BLOCKED_CONFLICT') conflicts.push(n);
+                  else failures += 1;
+                  continue;
+                }
+
                 if (MODE === 'dry-run') {
                   const note = hasRootCodeowners ? '; preserve root CODEOWNERS' : '';
                   const preview = writes.length <= 6
@@ -258,7 +264,7 @@ jobs:
                 // Atomic single commit: all writes or none (no orphan partial branches).
                 const treeItems = [];
                 for (const path of writes) {
-                  if (await exists(o, n, path, base)) continue;
+                  if (await exists(o, n, path, baseSha)) continue;
                   const blob = await github.rest.git.createBlob({
                     owner: o, repo: n,
                     content: Buffer.from(payload[path]).toString('base64'),
@@ -284,6 +290,14 @@ jobs:
                   parents: [baseSha],
                 });
 
+                // The commit is built on baseSha. If the default branch moved
+                // since, do not publish it: the next run replans from the new tip.
+                const baseNow = (await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` })).data.object.sha;
+                if (baseNow !== baseSha) {
+                  rows.push([n, profile.name, `BASE_MOVED: ${base} moved ${baseSha.slice(0, 7)} → ${baseNow.slice(0, 7)} during the run — branch not moved; next run replans`]);
+                  continue;
+                }
+
                 const moved = await moveSeedBranch({
                   github, owner: o, repo: n, branch: BRANCH,
                   expectedSha: branchSha, commitSha: commit.data.sha,
@@ -293,30 +307,50 @@ jobs:
                   continue;
                 }
 
-                const listed = treeItems.map(t => `- \`${t.path}\``);
+                // Seed-specific body in the sections governance-pr.yml checks.
+                // Facts only: what was added, on which exact base, from which
+                // source. Nothing here claims a check this run did not make.
+                const added = treeItems.map(t => t.path);
+                const behavioral = added.some(p => p === '.github/CODEOWNERS'
+                  || p === '.github/dependabot.yml' || p.startsWith('.github/workflows/'));
                 const bodyLines = [
-                  'Seeds org health and ownership files from `Quantum-L9/.github`. CI is not distributed from this repository.',
+                  '## Problem',
                   '',
-                  `**Repo class:** \`${profile.name}\` (${profile.resolved_from}) — see \`policies/repo-classes.yml\`.`,
+                  `This repository is missing ${added.length} file(s) that its repo class \`${profile.name}\` (${profile.resolved_from}) materializes from \`Quantum-L9/.github\` — see \`policies/repo-classes.yml\`.`,
                   profile.inherit.length
                     ? `Inherited from the org \`.github\` repo and deliberately **not** copied here: ${profile.inherit.map(p => `\`${p}\``).join(', ')}.`
                     : '',
                   '',
-                  `Categories: \`${categoriesLabel}\`.`,
+                  '## Fix',
                   '',
-                  '### Files in this PR',
-                  ...listed,
+                  `Adds only the missing files listed under Evidence, in one commit on \`${BRANCH}\`. Existing files were left untouched (missing-only seed). Categories: \`${categoriesLabel}\`.`,
                   hasRootCodeowners
-                    ? '- root `CODEOWNERS` already present — **not** overwritten by `.github/CODEOWNERS`'
+                    ? 'Root `CODEOWNERS` is present and is **not** overridden by `.github/CODEOWNERS`.'
                     : '',
-                  '',
-                  'Existing files were left untouched (missing-only seed).',
-                  '`.github/workflows/governance.yml` is **advisory** (`strict` defaults false).',
-                  'CI callers are not distributed from this repository. See `docs/BOUNDARIES.md`.',
-                  '',
+                  '`.github/workflows/governance.yml`, where added, is **advisory** (`strict` defaults false). CI callers are not distributed from this repository. See `docs/BOUNDARIES.md`.',
                   'Source map: `policies/mandatory-files.yml` · sync twin: `ops/sync-org-files.sh`.',
-                  '',
                   'While this PR is open the seeder leaves the branch alone — commit review fixes onto it freely.',
+                  '',
+                  '## Risk',
+                  '',
+                  `- [${behavioral ? ' ' : 'x'}] Low — additive, reversible, no data or contract change`,
+                  `- [${behavioral ? 'x' : ' '}] Medium — touches shared code, config, or a public interface`,
+                  '- [ ] High — breaking change, migration, IAM/network, or irreversible',
+                  '',
+                  '## Evidence',
+                  '',
+                  '```text',
+                  `source: Quantum-L9/.github@${SOURCE_SHA}`,
+                  `base:   ${base}@${baseSha}`,
+                  `class:  ${profile.name} (${profile.resolved_from})`,
+                  `added (${added.length}):`,
+                  ...added.map(p => `  ${p}`),
+                  '```',
+                  '',
+                  '## Gates',
+                  '',
+                  '- [x] No other open PR changed these paths when the seed was planned (a PR opened later is not covered)',
+                  "- [ ] Consumer CI passes on this PR — unverified: the seeder neither runs nor observes this repository's checks",
                 ].filter((line, idx, arr) => !(line === '' && arr[idx - 1] === ''));
 
                 let prNumber;
@@ -370,6 +404,12 @@ jobs:
               core.warning(
                 `${unresolved.length} repo(s) declare an unresolvable class and were skipped: ` +
                   `${unresolved.join(', ')} — fix the marker; they are NOT seeded under default`,
+              );
+            }
+            if (conflicts.length) {
+              core.warning(
+                `${conflicts.length} repo(s) not seeded because another open PR changes a path the seed would add: ` +
+                  `${conflicts.join(', ')} — nothing was written; the next run replans`,
               );
             }
             if (forbidden.length) {
