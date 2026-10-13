@@ -82,10 +82,12 @@ function makeGithub(reads, { updateStatus } = {}) {
 /** The process surface: git rev-parse and the two composer modes. */
 function makeProcess({ checkedOut = HEAD, status = 'updated', next = 'NEW BODY', composeError, checkError }) {
   const runs = [];
+  const rendered = [];
   const execFileSync = (cmd, args) => {
     runs.push([cmd, ...args]);
     if (cmd === 'git') return `${checkedOut}\n`;
     if (args.includes('--refresh-body')) {
+      rendered.push(fs.readFileSync('body.md', 'utf8'));
       if (composeError) throw Object.assign(new Error('exit 2'), { stderr: composeError });
       fs.writeFileSync('status.json', JSON.stringify({ status }));
       return next;
@@ -96,7 +98,7 @@ function makeProcess({ checkedOut = HEAD, status = 'updated', next = 'NEW BODY',
     }
     throw new Error(`unexpected ${cmd} ${args.join(' ')}`);
   };
-  return { runs, execFileSync };
+  return { runs, rendered, execFileSync };
 }
 
 const pr = (over = {}) => ({ state: 'open', head: { sha: HEAD }, base: { sha: BASE }, body: 'OLD', ...over });
@@ -124,7 +126,7 @@ async function run({ reads = [pr()], updateStatus, strict = 'false', proc = {} }
   }
   const updates = calls.filter((c) => c.name === 'pulls.update');
   const status = core.tables.length ? core.tables.at(-1)[1][0] : null;
-  return { calls, updates, core, status, runs: fake.runs };
+  return { calls, updates, core, status, runs: fake.runs, rendered: fake.rendered };
 }
 
 const scenarios = [];
@@ -172,7 +174,6 @@ scenario('a closed PR is not edited', async () => {
 for (const [what, moved] of [
   ['head', pr({ head: { sha: 'd'.repeat(40) } })],
   ['base', pr({ base: { sha: 'e'.repeat(40) } })],
-  ['body', pr({ body: 'EDITED BY A REVIEWER MEANWHILE' })],
 ]) {
   scenario(`a PR whose ${what} moved during the refresh is not overwritten`, async () => {
     const r = await run({ reads: [pr(), moved] });
@@ -180,6 +181,21 @@ for (const [what, moved] of [
     assert.strictEqual(r.status, 'SKIPPED_MOVED');
   });
 }
+
+scenario('a reviewer edit during the refresh is re-rendered from, not overwritten', async () => {
+  const edited = pr({ body: 'EDITED BY A REVIEWER MEANWHILE' });
+  const r = await run({ reads: [pr(), edited, edited] });
+  assert.deepStrictEqual(r.rendered, ['OLD', 'EDITED BY A REVIEWER MEANWHILE'], 'second render starts from their text');
+  assert.strictEqual(r.updates.length, 1);
+  assert.strictEqual(r.status, 'UPDATED');
+});
+
+scenario('a body that keeps changing is left for the next event', async () => {
+  const r = await run({ reads: [pr(), pr({ body: 'e1' }), pr({ body: 'e2' }), pr({ body: 'e3' })] });
+  assert.strictEqual(r.updates.length, 0);
+  assert.strictEqual(r.status, 'SKIPPED_MOVED');
+  assert.strictEqual(r.rendered.length, 3);
+});
 
 scenario('a read-only token is a reported block, not a pass or a failure', async () => {
   const r = await run({ updateStatus: 403 });

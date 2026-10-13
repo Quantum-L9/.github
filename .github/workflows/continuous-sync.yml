@@ -12,7 +12,8 @@
 #     governance-pr/-issue `uses:` SHAs follow policies/governance-caller.yml;
 #     the rest of a consumer's caller (e.g. `strict: true`) is theirs
 # Alternate templates (PULL_REQUEST_TEMPLATE/, root or docs/ copies) are
-# reported per repo for classification, never edited.
+# reported per repo for classification, never edited. Writes are one atomic
+# commit per repo, moved by ops/seed-branch-safety.js (provenance + CAS).
 name: Continuous Sync (drift remediation)
 
 on:
@@ -63,6 +64,9 @@ jobs:
         env:
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
           FILTER: ${{ inputs.repo_filter || '' }}
+          # The App's commit identity: an installation token cannot call /user,
+          # so branch provenance is checked against `<app-slug>[bot]`.
+          APP_SLUG: ${{ steps.token.outputs.app-slug }}
         with:
           github-token: ${{ steps.token.outputs.token }}
           script: |
@@ -70,16 +74,19 @@ jobs:
             const {
               loadRepoClasses, classForRepo, resolveProfile, matchPattern,
             } = require('./ops/repo-class-profile.js');
+            const {
+              SYNC_COMMIT_SUBJECT, assessSeedBranch, moveSeedBranch,
+            } = require('./ops/seed-branch-safety.js');
             const DRY = process.env.DRY_RUN === 'true';
             const FILTER = process.env.FILTER;
             const BRANCH = 'chore/governance-sync';
             const ORG = 'Quantum-L9';
             const TEMPLATE = '.github/pull_request_template.md';
             const CALLER = '.github/workflows/governance.yml';
-            // Subjects this workflow writes. A sync branch carrying any other
-            // commit holds someone's work and is never reset (fail closed).
-            const SYNC_SUBJECT = /^chore\(governance\): (?:restore|remove|re-pin) \S/;
-            const PIN_RE = /(Quantum-L9\/\.github\/\.github\/workflows\/governance-(?:pr|issue)\.yml@)([0-9a-f]{40})/g;
+            const SYNC_LOGIN = process.env.APP_SLUG ? `${process.env.APP_SLUG}[bot]` : '';
+            // Any ref form (full SHA, tag, branch, short SHA): only the
+            // canonical full SHA is in sync.
+            const PIN_RE = /(Quantum-L9\/\.github\/\.github\/workflows\/governance-(?:pr|issue)\.yml@)([^\s#'"]+)/g;
             const ALT_NAME = /^pull_request_template(\.md)?$/i;
 
             const classes = loadRepoClasses(fs);
@@ -166,9 +173,12 @@ jobs:
                     const caller = await read(o, n, CALLER);
                     if (caller.state === 'present') {
                       const repinned = caller.text.replace(PIN_RE, `$1${canonicalPin}`);
-                      if (repinned !== caller.text) {
+                      if (!PIN_RE.test(caller.text)) {
+                        notes.push('governance caller calls neither governance-pr.yml nor governance-issue.yml (reported, not edited)');
+                      } else if (repinned !== caller.text) {
                         plan.push({ path: CALLER, action: 'write', content: repinned, why: 're-pin' });
                       }
+                      PIN_RE.lastIndex = 0;
                     } else {
                       notes.push('governance caller absent (seeded missing-only by seed-governance)');
                     }
@@ -215,49 +225,53 @@ jobs:
                   continue;
                 }
 
-                const ref = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
-
-                // Create, or reset an existing branch only when every commit on
-                // it is one this workflow writes. A closed PR's branch can still
-                // carry a person's commits; those are never discarded.
-                try {
-                  await github.rest.git.createRef({
-                    owner: o, repo: n, ref: `refs/heads/${BRANCH}`, sha: ref.data.object.sha
-                  });
-                } catch (e) {
-                  if (e.status !== 422) throw e;
-                  const cmp = await github.rest.repos.compareCommits({
-                    owner: o, repo: n, basehead: `${base}...${BRANCH}`
-                  }).then(r => r.data).catch(() => null);
-                  const foreign = !cmp || !Array.isArray(cmp.commits)
-                    || cmp.commits.some(c => !SYNC_SUBJECT.test(((c.commit && c.commit.message) || '').split('\n')[0]));
-                  if (foreign) {
-                    row('BLOCKED_POLICY', `${BRANCH} carries commits this workflow did not write (or could not be compared); left alone`);
-                    continue;
-                  }
-                  await github.rest.git.updateRef({
-                    owner: o, repo: n, ref: `heads/${BRANCH}`, sha: ref.data.object.sha, force: true
-                  });
+                // The branch is rebuilt as "default branch + one sync commit"
+                // through the seeders' guarded path: it is replaced only when it
+                // holds nothing but this workflow's own verified commit (subject,
+                // committer identity, signature), and the move is a server-side
+                // compare-and-swap on the sha that verdict was computed from.
+                const gate = await assessSeedBranch({
+                  github, owner: o, repo: n, base, branch: BRANCH,
+                  subject: SYNC_COMMIT_SUBJECT, seederLogin: SYNC_LOGIN,
+                });
+                if (gate.action === 'skip') {
+                  row('BLOCKED_POLICY', `${gate.reason} (${summary})`);
+                  continue;
                 }
 
+                const baseSha = (await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` })).data.object.sha;
+                const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
+                const treeItems = [];
                 for (const d of plan) {
-                  const onBranch = await read(o, n, d.path, BRANCH);
-                  const sha = onBranch.state === 'present' ? onBranch.sha : undefined;
                   if (d.action === 'delete') {
-                    if (sha) {
-                      await github.rest.repos.deleteFile({
-                        owner: o, repo: n, path: d.path, branch: BRANCH, sha,
-                        message: `chore(governance): remove ${d.path} (inherited from ${ORG}/.github)`,
-                      });
-                    }
+                    treeItems.push({ path: d.path, mode: '100644', type: 'blob', sha: null });
                     continue;
                   }
-                  await github.rest.repos.createOrUpdateFileContents({
-                    owner: o, repo: n, path: d.path, branch: BRANCH,
-                    message: `chore(governance): ${d.why} ${d.path} to org standard`,
-                    content: Buffer.from(d.content).toString('base64'),
-                    sha,
+                  const blob = await github.rest.git.createBlob({
+                    owner: o, repo: n, content: Buffer.from(d.content).toString('base64'), encoding: 'base64',
                   });
+                  treeItems.push({ path: d.path, mode: '100644', type: 'blob', sha: blob.data.sha });
+                }
+                const tree = await github.rest.git.createTree({
+                  owner: o, repo: n, base_tree: baseCommit.data.tree.sha, tree: treeItems,
+                });
+                const commit = await github.rest.git.createCommit({
+                  owner: o, repo: n,
+                  message: [
+                    `chore(governance): sync ${plan.length} org-managed file(s)`,
+                    '',
+                    ...plan.map(d => `${d.why} ${d.path}`),
+                  ].join('\n'),
+                  tree: tree.data.sha,
+                  parents: [baseSha],
+                });
+                const moved = await moveSeedBranch({
+                  github, owner: o, repo: n, branch: BRANCH,
+                  expectedSha: gate.sha, commitSha: commit.data.sha,
+                });
+                if (!moved.moved) {
+                  row('BLOCKED_POLICY', `${moved.reason} (${summary})`);
+                  continue;
                 }
 
                 // No open-PR branch here: the guard above returned early for

@@ -127,8 +127,11 @@ every repository one status: `INHERITED`, `CANONICAL_COPY`, `UPDATE_PR_OPEN`,
 `BLOCKED_POLICY`, `OPTED_OUT`, `UNREACHABLE`, or `UNVERIFIED`; the last three
 unresolved states fail the run. A push to `main` that changes the template,
 the caller, CODEOWNERS, dependabot, or the class policy starts a run, so
-convergence does not wait for the weekly schedule. The sync branch is reset
-only when every commit on it is one this workflow wrote.
+convergence does not wait for the weekly schedule. Each repository gets one
+atomic commit, moved onto the sync branch through the seeders' guarded path
+(`ops/seed-branch-safety.js`): only when the branch holds nothing but this
+workflow's own verified commit (subject, `<app-slug>[bot]` committer,
+signature), and as a server-side compare-and-swap on the inspected sha.
 
 **PR body.** The template's machine-owned regions (`PROTECTED-ROOT-PATHS`,
 `EVIDENCE`, `CHANGES-BY-INTENT`, `FILES-TOUCHED`) are filled by one renderer,
