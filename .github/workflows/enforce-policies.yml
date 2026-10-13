@@ -77,14 +77,20 @@ jobs:
             const filesPolicy = parseYaml('policies/mandatory-files.yml');
             const classes = loadRepoClasses(fs);
 
+            // Only a 404 means "absent". Anything else (403, 5xx, a directory
+            // where a file belongs) throws: an unreadable path is not missing.
             const readText = async (repo, path) => {
+              let res;
               try {
-                const res = await github.rest.repos.getContent({ owner: ORG, repo, path });
-                if (res.data && res.data.content) {
-                  return Buffer.from(res.data.content, 'base64').toString('utf8');
-                }
-              } catch { /* missing */ }
-              return null;
+                res = await github.rest.repos.getContent({ owner: ORG, repo, path });
+              } catch (e) {
+                if (e.status === 404) return null;
+                throw e;
+              }
+              if (!res.data || Array.isArray(res.data) || typeof res.data.content !== 'string') {
+                throw Object.assign(new Error(`${path} is not a readable file`), { status: 'NOT_A_FILE' });
+              }
+              return Buffer.from(res.data.content, 'base64').toString('utf8');
             };
 
             const all = await github.paginate(github.rest.repos.listForOrg, {
@@ -153,28 +159,32 @@ jobs:
               // file its own class forbids is noise that trains people to
               // ignore this report.
               if (!fileExceptions.includes(n)) {
-                // Existence first, so a failed fetch is not mistaken for an
-                // absent marker (which would enforce the widest class).
+                // A failed marker fetch is not an absent marker, and an
+                // unresolvable class is not `default`: either way this repo's
+                // mandatory files are not assessed against a class it is not.
                 let markerText = null;
-                const markerHit = await github.rest.repos.getContent({
-                  owner: ORG, repo: n, path: classes.marker_path,
-                }).then(() => true).catch(() => false);
-                if (markerHit) markerText = (await readText(n, classes.marker_path)) ?? '';
-
-                const decidedClass = classForRepo(classes, n, markerText);
-                if (decidedClass.error) {
-                  findings.push(`unresolvable repo class: ${decidedClass.error}`);
+                let markerError = null;
+                try {
+                  markerText = await readText(n, classes.marker_path);
+                } catch (e) {
+                  markerError = `${classes.marker_path} unreadable (${e.status || 'error'})`;
                 }
-                const profile = resolveProfile(classes, decidedClass.name);
-                for (const file of (filesPolicy.files || [])) {
-                  if (waivesMandatoryFile(profile, file.path)) continue;
-
-                  const exists = await github.rest.repos.getContent({
-                    owner: ORG, repo: n, path: file.path
-                  }).then(() => true).catch(() => false);
-
-                  if (!exists) {
-                    findings.push(`missing: ${file.path}`);
+                const decidedClass = markerError
+                  ? { error: markerError }
+                  : classForRepo(classes, n, markerText);
+                if (decidedClass.error) {
+                  findings.push(`unresolved repo class: ${decidedClass.error} — mandatory files not assessed`);
+                } else {
+                  const profile = resolveProfile(classes, decidedClass.name);
+                  for (const file of (filesPolicy.files || [])) {
+                    if (waivesMandatoryFile(profile, file.path)) continue;
+                    try {
+                      if ((await readText(n, file.path)) === null) {
+                        findings.push(`missing: ${file.path}`);
+                      }
+                    } catch (e) {
+                      findings.push(`unverified: ${file.path} unreadable (${e.status || 'error'})`);
+                    }
                   }
                 }
               }

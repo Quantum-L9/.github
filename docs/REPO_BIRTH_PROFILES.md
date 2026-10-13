@@ -59,8 +59,9 @@ resolves through `overrides`, then `default_class`. It never resolves to
 something wider than the repository asked for.
 
 Every distribution path makes this one decision through
-`ops/repo-class-profile.js`: the hourly auto-seed, the dispatch seeder, and
-the manual shell sync. None of them has a category list of its own; `all`
+`ops/repo-class-profile.js`: the hourly auto-seed, the dispatch seeder, the
+manual shell sync, and Manual Update (`continuous-sync.yml`), which plans only
+paths the class-filtered payload carries. None of them has a category list of its own; `all`
 means the class's `seed_categories`, and an explicit category still passes
 through the class, so INHERIT destinations drop and a FORBID destination is a
 refusal with the class and path named.

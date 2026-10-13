@@ -499,3 +499,81 @@ try {
 } finally {
   process.chdir(origCwd);
 }
+
+// ── enforce-policies.yml: class reads fail closed (GAR G9, V18) ─────────────
+// The real `script:` body runs against a stubbed API. A marker that cannot be
+// read, or that declares an unknown class, must not be assessed as `default`
+// (the widest mandatory set), and an unreadable mandatory file is not missing.
+(async () => {
+  const { loadScriptModule, makeCore, makeScopedRequire } = require('./workflow-script-harness.js');
+  const root = path.resolve(__dirname, '..');
+  const enforce = loadScriptModule(path.join(root, '.github/workflows/enforce-policies.yml'), 'enforce-policies-');
+  const MARKER = '.l9/org-birth-profile.yaml';
+  const policies = {
+    'policies/repo-settings.yml': { defaults: {} },
+    'policies/mandatory-files.yml': { files: [{ path: '.github/workflows/governance.yml' }, { path: 'README.md' }] },
+  };
+  const runEnforce = async ({ files = {}, errors = {} }) => {
+    const scoped = makeScopedRequire(root);
+    const req = (m) => (m === 'child_process'
+      ? { execSync: (cmd) => JSON.stringify(policies[Object.keys(policies).find((p) => cmd.includes(p))]) }
+      : scoped(m));
+    const github = {
+      paginate: async () => [{ name: 'consumer-repo', archived: false, fork: false }],
+      rest: {
+        repos: {
+          listForOrg: () => {},
+          get: async () => ({ data: {} }),
+          getContent: async ({ path: p }) => {
+            if (errors[p]) throw Object.assign(new Error(`HTTP ${errors[p]}`), { status: errors[p] });
+            if (p in files) return { data: { type: 'file', content: Buffer.from(files[p]).toString('base64') } };
+            throw Object.assign(new Error('Not Found'), { status: 404 });
+          },
+        },
+      },
+    };
+    const core = makeCore();
+    const prev = process.cwd();
+    const prevEnv = { DRY_RUN: process.env.DRY_RUN, FILTER: process.env.FILTER };
+    process.chdir(root);
+    Object.assign(process.env, { DRY_RUN: 'true', FILTER: '' });
+    try {
+      await enforce(github, core, {}, req);
+    } finally {
+      process.chdir(prev);
+      for (const [k, v] of Object.entries(prevEnv)) {
+        if (v === undefined) delete process.env[k];
+        else process.env[k] = v;
+      }
+    }
+    // The summary table lists only non-compliant repositories.
+    const row = core.tables.at(-1).slice(1).find((r) => r[0] === 'consumer-repo');
+    return row ? row[1] : 'compliant';
+  };
+
+  // Marker 403: not absent, so no default-class assessment.
+  let status = await runEnforce({ errors: { [MARKER]: 403 } });
+  assert.match(status, /unresolved repo class: .*unreadable \(403\) — mandatory files not assessed/);
+  assert.doesNotMatch(status, /missing:/, 'a 403 marker was assessed as the default class');
+  // Malformed / unknown declared class: reported, not widened to default.
+  for (const text of ['profile: no_such_class\n', 'garbage\n']) {
+    status = await runEnforce({ files: { [MARKER]: text } });
+    assert.match(status, /unresolved repo class: .*— mandatory files not assessed/);
+    assert.doesNotMatch(status, /missing:/);
+  }
+  // Absent marker (404): default class, real absence is reported.
+  status = await runEnforce({});
+  assert.match(status, /missing: \.github\/workflows\/governance\.yml/);
+  assert.match(status, /missing: README\.md/);
+  // A declared class still waives what it must not carry.
+  status = await runEnforce({ files: { [MARKER]: 'profile: non_constellation_python\n', 'README.md': '# x\n' } });
+  assert.strictEqual(status, 'compliant');
+  // An unreadable mandatory file is unverified, not missing.
+  status = await runEnforce({ files: { '.github/workflows/governance.yml': 'x' }, errors: { 'README.md': 500 } });
+  assert.match(status, /unverified: README\.md unreadable \(500\)/);
+  assert.doesNotMatch(status, /missing: README\.md/);
+  console.log('ok: enforce-policies — unreadable/malformed marker is unresolved, never assessed as default; unreadable files are unverified, not missing');
+})().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
