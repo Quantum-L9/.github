@@ -8794,6 +8794,7 @@ CODING_INVARIANT_IDS = (
     "L9-CORRECTNESS-001",
     "L9-GLOBALIZATION-001",
 )
+PROJECTION_CONTRACT_ID = "l9.contract/projection@1"
 CODING_CONTRACT_IDS = (
     "l9.contract/authority-boundary@1",
     "l9.contract/monotonic-subordination@1",
@@ -8803,7 +8804,7 @@ CODING_CONTRACT_IDS = (
     "l9.contract/assurance-and-verification@1",
     "l9.contract/unknown-and-degradation@1",
     "l9.contract/provenance-and-coordinate@1",
-    "l9.contract/projection@1",
+    PROJECTION_CONTRACT_ID,
     "l9.contract/validation-and-correctness@1",
 )
 CODING_AUTHORITY_SECTIONS = (
@@ -9015,6 +9016,73 @@ def _rc028_section_selectors(
     return selected
 
 
+def _rc028_source_selection(
+    name: str, sources: dict, catalog: dict, docs: dict[str, dict], report: Report
+) -> set[str] | None:
+    """Ids or sections one source selects, after checking them against the
+    pinned set; None when the source cannot be resolved or has no selectors."""
+    _path, _artifact, collection, pinned = CODING_SOURCES[name]
+    ledger = _rc028_source_ledger(name, catalog, docs, report)
+    if ledger is None:
+        return None
+    block = sources.get(name)
+    selectors = block.get("selectors") if isinstance(block, dict) else None
+    field = f"{CODING_PROFILE_LABEL}.sources.{name}.selectors"
+    if not isinstance(selectors, list) or not selectors:
+        _rc028_fail(
+            field,
+            selectors,
+            "coding-agent execution source must own a non-empty selectors list",
+            report,
+        )
+        return None
+    if collection is None:
+        chosen = _rc028_section_selectors(name, selectors, ledger, report)
+    else:
+        chosen = _rc028_record_selectors(name, selectors, ledger, report)
+    if chosen != set(pinned):
+        _rc028_fail(
+            field,
+            {
+                "missing": sorted(set(pinned) - chosen),
+                "unexpected": sorted(chosen - set(pinned)),
+            },
+            f"{CODING_PROFILE_ID} is immutable: its {name} selection must be exactly the pinned set; "
+            "a different selection is a new profile version",
+            report,
+        )
+    return chosen
+
+
+def _rc028_closure(
+    contracts: object, selected: dict[str, set[str]], report: Report
+) -> None:
+    """Every source_invariants entry of a selected contract must be selected."""
+    field = f"{CODING_PROFILE_LABEL}.sources.invariants.selectors"
+    for contract in contracts if isinstance(contracts, list) else []:
+        contract_id = contract.get("id") if isinstance(contract, dict) else None
+        if not isinstance(contract_id, str) or contract_id not in selected["contracts"]:
+            continue
+        cited = contract.get("source_invariants")
+        for invariant in cited if isinstance(cited, list) else []:
+            if not isinstance(invariant, str):
+                _rc028_fail(
+                    field,
+                    invariant,
+                    f"selected contract {contract_id} cites a non-string source_invariants entry; "
+                    "closure cannot be decided, so it fails closed",
+                    report,
+                )
+            elif invariant not in selected["invariants"]:
+                _rc028_fail(
+                    field,
+                    invariant,
+                    f"selected contract {contract_id} cites an invariant the profile does not "
+                    "select; the projection must close over its contracts' source_invariants",
+                    report,
+                )
+
+
 def _rc028_sources(
     profile: dict, catalog: dict, docs: dict[str, dict], report: Report
 ) -> None:
@@ -9024,7 +9092,7 @@ def _rc028_sources(
         _rc028_fail(
             f"{label}.sources",
             sources,
-            "profile sources must be a source-local selector mapping",
+            "coding-agent execution profile sources must be a source-local selector mapping",
             report,
         )
         return
@@ -9036,65 +9104,15 @@ def _rc028_sources(
             report,
         )
     selected: dict[str, set[str]] = {}
-    for name, (_path, _artifact, collection, pinned) in CODING_SOURCES.items():
-        if name not in sources:
-            continue
-        ledger = _rc028_source_ledger(name, catalog, docs, report)
-        if ledger is None:
-            continue
-        block = sources.get(name)
-        selectors = block.get("selectors") if isinstance(block, dict) else None
-        field = f"{label}.sources.{name}.selectors"
-        if not isinstance(selectors, list) or not selectors:
-            _rc028_fail(
-                field, selectors, "source must own a non-empty selectors list", report
-            )
-            continue
-        if collection is None:
-            chosen = _rc028_section_selectors(name, selectors, ledger, report)
-        else:
-            chosen = _rc028_record_selectors(name, selectors, ledger, report)
-        selected[name] = chosen
-        if chosen != set(pinned):
-            _rc028_fail(
-                field,
-                {
-                    "missing": sorted(set(pinned) - chosen),
-                    "unexpected": sorted(chosen - set(pinned)),
-                },
-                f"{CODING_PROFILE_ID} is immutable: its {name} selection must be exactly the pinned set; "
-                "a different selection is a new profile version",
-                report,
-            )
+    for name in CODING_SOURCES:
+        if name in sources:
+            chosen = _rc028_source_selection(name, sources, catalog, docs, report)
+            if chosen is not None:
+                selected[name] = chosen
     if "contracts" in selected and "invariants" in selected:
-        contracts = (docs.get(CONTRACTS_PATH) or {}).get("contracts") or []
-        for contract in contracts if isinstance(contracts, list) else []:
-            if not isinstance(contract, dict):
-                continue
-            contract_id = contract.get("id")
-            if (
-                not isinstance(contract_id, str)
-                or contract_id not in selected["contracts"]
-            ):
-                continue
-            cited = contract.get("source_invariants")
-            for invariant in cited if isinstance(cited, list) else []:
-                if not isinstance(invariant, str):
-                    _rc028_fail(
-                        f"{label}.sources.invariants.selectors",
-                        invariant,
-                        f"selected contract {contract_id} cites a non-string source_invariants entry; "
-                        "closure cannot be decided, so it fails closed",
-                        report,
-                    )
-                elif invariant not in selected["invariants"]:
-                    _rc028_fail(
-                        f"{label}.sources.invariants.selectors",
-                        invariant,
-                        f"selected contract {contract_id} cites an invariant the profile does not "
-                        "select; the projection must close over its contracts' source_invariants",
-                        report,
-                    )
+        _rc028_closure(
+            (docs.get(CONTRACTS_PATH) or {}).get("contracts"), selected, report
+        )
 
 
 def _evaluate_rc028(docs: dict[str, dict], report: Report) -> None:
@@ -9251,7 +9269,7 @@ def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
     cases.append(("selected invariant deleted", case, selectors.format("invariants")))
     reasons["selected invariant deleted"] = "must resolve to exactly one record"
     case, _, _ = mutated()
-    ledger_record(case, CONTRACTS_PATH, "contracts", "l9.contract/projection@1")[
+    ledger_record(case, CONTRACTS_PATH, "contracts", PROJECTION_CONTRACT_ID)[
         "source_invariants"
     ].append("L9-HARD-001")
     cases.append(
@@ -9265,7 +9283,7 @@ def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
         "cites an invariant the profile does not select"
     )
     case, _, _ = mutated()
-    ledger_record(case, CONTRACTS_PATH, "contracts", "l9.contract/projection@1")[
+    ledger_record(case, CONTRACTS_PATH, "contracts", PROJECTION_CONTRACT_ID)[
         "source_invariants"
     ].append({"id": "L9-AUTH-001"})
     cases.append(
