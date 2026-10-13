@@ -1,12 +1,14 @@
 # Quantum-L9/.github
 
-`semantics/` is the Semantic Foundation v3.6.0 candidate. This repository owns
+`semantics/` is the Semantic Foundation. This repository owns
 that language for the organization. A domain repository owns the meaning of its
 own capability. Do not copy this tree into a product repository. Cite the
 ledger's `artifact_id`.
 
-The release record is [`docs/semantic-foundation/v3.6.0/`](docs/semantic-foundation/v3.6.0/README.md).
-The decisions are ADR-001 through ADR-013 in [`docs/adr/`](docs/adr/README.md).
+The release record is the highest version directory under
+[`docs/semantic-foundation/`](docs/semantic-foundation/); `make validate` runs
+`scripts/validate-semantics.py` against it.
+The decisions are the accepted records in [`docs/adr/`](docs/adr/README.md).
 Agent instructions for the language are [`AGENTS.md`](AGENTS.md).
 
 **ProductTopology** is the product contract
@@ -107,9 +109,9 @@ class receives. An absent marker resolves to `default`. A FORBID hit throws.
 ## Layout
 
 ```text
-semantics/          Semantic Foundation v3.6.0 candidate — the language this repo owns
-docs/adr/           ADR-001 … ADR-013
-docs/semantic-foundation/v3.6.0/   release record (v3.5.0/ is the predecessor record)
+semantics/          Semantic Foundation — the language this repo owns
+docs/adr/           accepted decision records (index: docs/adr/README.md)
+docs/semantic-foundation/<version>/   release records; the highest version is current
 policies/           repo classes, settings, mandatory files, consumer CODEOWNERS, governance caller
 rulesets/           org rulesets, evaluate only
 ops/                activation, seed payload, birth, pin audit

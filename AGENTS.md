@@ -1,6 +1,8 @@
 # Agents
 
-`semantics/` is the Semantic Foundation v3.6.0 candidate. `Quantum-L9/.github`
+`semantics/` is the Semantic Foundation. Its current release record is the
+highest version directory under `docs/semantic-foundation/`; `make validate`
+checks the ledgers against that record. `Quantum-L9/.github`
 owns this language. A domain repository owns the meaning of its own capability. Read the
 ledger below for a decision that is already global. Cite its `artifact_id`.
 Do not copy this tree into a product repository.
@@ -29,8 +31,9 @@ ActorIdentity to SurfaceIdentity, and they do not select GovernanceProfile.
 
 `semantics/canonical_sources.yaml` is the source registry. A registered source
 names its path and whether derivation is allowed. Global contracts live only
-in `semantics/contracts.yaml`. The decisions are ADR-001 through ADR-013 in
-`docs/adr/`. The release record is `docs/semantic-foundation/v3.6.0/`.
+in `semantics/contracts.yaml`. The decisions are the accepted records in
+`docs/adr/`, indexed by `docs/adr/README.md`. The release record is the highest
+version directory under `docs/semantic-foundation/`.
 
 Add a ledger here only when it retires a decision that would otherwise be
 remade in every product (ADR-010). Register it in
