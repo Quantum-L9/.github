@@ -28,13 +28,15 @@ const {
  * @param {typeof import('fs')} opts.fs
  * @param {string[]} [opts.categories]  subset of ALL_CATEGORIES; default DEFAULT
  * @param {boolean} [opts.hasRootCodeowners]  skip .github/CODEOWNERS when root CODEOWNERS exists
- * @param {boolean} [opts.hasPython]  seed Python lint caller only when true
- * @param {boolean} [opts.hasPackageJson]  add Ruff to extensions.json when Python
  * @param {string} [opts.repository]  owner/name — rewrite SECURITY / contact_links
  * @param {object} [opts.profile]  resolved repo-class profile (ops/repo-class-profile.js).
  *   When given and `categories` is not explicitly passed, the profile's
  *   `seed_categories` decide the category set. INHERIT dests are dropped
  *   (GitHub supplies them org-wide); a FORBID dest throws.
+ *
+ * Every source an activated category names is required. A missing or
+ * non-file source throws before any caller writes, so a deleted template can
+ * never shrink the payload into a smaller "seeded" result.
  * @returns {Record<string, string>} destPath → file contents
  */
 
@@ -70,6 +72,22 @@ const PR_TEMPLATES_MATERIALIZED = Object.freeze([
   '.github/PULL_REQUEST_TEMPLATE/release.md',
 ]);
 
+// The issue forms a consumer carries locally, by name. The directory is never
+// swept: a form added to this repository is not distributed until it is named
+// here, and a named form that disappears fails the build.
+const ISSUE_TEMPLATES_MATERIALIZED = Object.freeze([
+  '.github/ISSUE_TEMPLATE/1-bug.yml',
+  '.github/ISSUE_TEMPLATE/2-feature.yml',
+  '.github/ISSUE_TEMPLATE/3-task.yml',
+  '.github/ISSUE_TEMPLATE/4-incident.yml',
+  '.github/ISSUE_TEMPLATE/ci-failure.yml',
+  '.github/ISSUE_TEMPLATE/gov-violation.yml',
+  '.github/ISSUE_TEMPLATE/config.yml',
+]);
+
+// Retained exports, no longer read by the builder: the issue-template sweep
+// they described is gone, and the CI dests are not seeded by anything. Kept
+// because callers outside this repository are not known.
 const SKIP_ISSUE_TEMPLATES = Object.freeze([
   'bug_report.yml',
   'feature_request.yml',
@@ -99,8 +117,12 @@ function parseCategories(raw) {
   return wanted;
 }
 
-function readIfFile(fs, path) {
-  if (!fs.existsSync(path) || !fs.statSync(path).isFile()) return null;
+function readRequired(fs, path) {
+  if (!fs.existsSync(path) || !fs.statSync(path).isFile()) {
+    throw new Error(
+      `seed source ${path} is missing or not a file — refusing to build an incomplete payload`,
+    );
+  }
   return fs.readFileSync(path, 'utf8');
 }
 
@@ -147,8 +169,6 @@ function buildSeedPayload({
   fs,
   categories,
   hasRootCodeowners = false,
-  hasPython = false,
-  hasPackageJson = false,
   repository = '',
   profile = null,
 } = {}) {
@@ -175,48 +195,36 @@ function buildSeedPayload({
     switch (cat) {
       case 'codeowners': {
         if (hasRootCodeowners) break;
-        const body = readIfFile(fs, 'policies/CODEOWNERS');
-        if (body != null) payload['.github/CODEOWNERS'] = body;
+        payload['.github/CODEOWNERS'] = readRequired(fs, 'policies/CODEOWNERS');
         break;
       }
       case 'dependabot': {
-        const body = readIfFile(fs, '.github/dependabot.yml');
-        if (body != null) payload['.github/dependabot.yml'] = body;
+        payload['.github/dependabot.yml'] = readRequired(fs, '.github/dependabot.yml');
         break;
       }
       case 'governance': {
-        const body = readIfFile(fs, 'policies/governance-caller.yml');
-        if (body != null) payload['.github/workflows/governance.yml'] = body;
+        payload['.github/workflows/governance.yml'] = readRequired(fs, 'policies/governance-caller.yml');
         break;
       }
       case 'labels': {
-        const body = readIfFile(fs, '.github/labels.yml');
-        if (body != null) payload['.github/labels.yml'] = body;
+        payload['.github/labels.yml'] = readRequired(fs, '.github/labels.yml');
         break;
       }
       case 'community-health': {
         for (const f of COMMUNITY_HEALTH_MATERIALIZED) {
-          const body = readIfFile(fs, f);
-          if (body != null) payload[f] = applyRepoPlaceholders(body, repository);
+          payload[f] = applyRepoPlaceholders(readRequired(fs, f), repository);
         }
         break;
       }
       case 'issue-templates': {
-        const dir = '.github/ISSUE_TEMPLATE';
-        if (!fs.existsSync(dir)) break;
-        for (const name of fs.readdirSync(dir)) {
-          if (SKIP_ISSUE_TEMPLATES.includes(name)) continue;
-          const body = readIfFile(fs, `${dir}/${name}`);
-          if (body != null) {
-            payload[`.github/ISSUE_TEMPLATE/${name}`] = applyRepoPlaceholders(body, repository);
-          }
+        for (const f of ISSUE_TEMPLATES_MATERIALIZED) {
+          payload[f] = applyRepoPlaceholders(readRequired(fs, f), repository);
         }
         break;
       }
       case 'pr-templates': {
         for (const f of PR_TEMPLATES_MATERIALIZED) {
-          const body = readIfFile(fs, f);
-          if (body != null) payload[f] = body;
+          payload[f] = readRequired(fs, f);
         }
         break;
       }
@@ -280,10 +288,6 @@ function planConsumerSeed({ fs, path, consumerRoot, repository = '', categories 
     fs,
     categories: explicit ?? profile.seed_categories,
     hasRootCodeowners: fs.existsSync(path.join(consumerRoot, 'CODEOWNERS')),
-    hasPython:
-      fs.existsSync(path.join(consumerRoot, 'pyproject.toml')) ||
-      fs.existsSync(path.join(consumerRoot, 'requirements.txt')),
-    hasPackageJson: fs.existsSync(path.join(consumerRoot, 'package.json')),
     repository,
   });
   // Applied here rather than through `profile:` so the inherited list is
@@ -363,6 +367,7 @@ module.exports = {
   RETIRED_CATEGORIES,
   COMMUNITY_HEALTH_MATERIALIZED,
   PR_TEMPLATES_MATERIALIZED,
+  ISSUE_TEMPLATES_MATERIALIZED,
   SKIP_ISSUE_TEMPLATES,
   PYTHON_LINT_DEST,
   STOCK_BIOME_SCHEMA,
