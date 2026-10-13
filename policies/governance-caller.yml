@@ -4,7 +4,7 @@
 # Governance logic lives in Quantum-L9/.github/.github/workflows/governance-*.yml.
 # Shipping a change there: merge it, set both `uses:` SHAs below to that merge
 # commit, and record the same SHA in ops/governance-v1-pin.txt
-# (ops/test-build-seed-payload.js fails when they disagree). Consumers that
+# (ops/test-distribution-triggers.js fails when they disagree). Consumers that
 # already carry a caller are re-pinned by a manual continuous-sync dispatch
 # (docs/DISTRIBUTION.md). No tag is involved: moving one retargets nothing.
 #

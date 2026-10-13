@@ -1,6 +1,6 @@
 # Recorded pin for policies/governance-caller.yml: the one full commit SHA on
 # Quantum-L9/.github main that both `uses:` lines (governance-pr.yml and
 # governance-issue.yml) call. A pin, not a moving tag: change it by editing the
-# caller and this line together; ops/test-build-seed-payload.js enforces that
+# caller and this line together; ops/test-distribution-triggers.js enforces that
 # they agree. (The file name predates the retired v1-tag scheme.)
 caller 02ea092a098563b27970d21416fabc47dd005fb0

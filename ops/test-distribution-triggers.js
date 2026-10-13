@@ -145,13 +145,17 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   const caller = read('policies/governance-caller.yml');
   const pins = [...caller.matchAll(/^\s*uses: Quantum-L9\/\.github\/\.github\/workflows\/(governance-(?:pr|issue)\.yml)@(\S+)/gm)]
     .map((m) => [m[1], m[2]]);
+  // The pin record is the one place a re-pin is written; the caller must match
+  // it exactly, so the documented re-pin (caller + record) is all validate needs.
+  const record = read('ops/governance-v1-pin.txt').match(/^caller ([0-9a-f]{40})$/m);
+  assert.ok(record, 'ops/governance-v1-pin.txt must record `caller <40-hex sha>`');
   assert.deepStrictEqual(pins, [
-    ['governance-pr.yml', '02ea092a098563b27970d21416fabc47dd005fb0'],
-    ['governance-issue.yml', '02ea092a098563b27970d21416fabc47dd005fb0'],
-  ], 'both caller refs follow the merged .github commit carrying the PR body job');
+    ['governance-pr.yml', record[1]],
+    ['governance-issue.yml', record[1]],
+  ], 'both caller refs must pin the SHA recorded in ops/governance-v1-pin.txt');
   assert.match(caller, /pull-requests: write/);
   assert.match(caller, /issues: write/);
-  console.log('ok: governance caller pins both workflows at 02ea092a; permissions unchanged');
+  console.log(`ok: governance caller pins both workflows at the recorded ${record[1].slice(0, 8)}; permissions unchanged`);
 }
 
 console.log('\nall distribution trigger scenarios passed');
