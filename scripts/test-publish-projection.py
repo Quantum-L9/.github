@@ -263,7 +263,7 @@ class PinTests(Fixture):
             before["source_digest"], pp.digest_bytes(invariants("first").encode())
         )
 
-    def test_untrusted_pins_are_blocked(self):
+    def test_untrusted_pins_and_malformed_authority_are_blocked(self):
         def blocked(rev: str) -> str:
             with self.assertRaises(pp.Outcome) as ctx:
                 pp.bind_authority(self.auth, rev)
@@ -276,6 +276,34 @@ class PinTests(Fixture):
             self.auth, {"README.md": "local\n"}, "local only"
         )  # origin/main not moved
         self.assertEqual(blocked(local_only), "REVISION_PIN_NOT_IN_FETCHED_ORIGIN")
+
+        # Malformed authority fails closed with a typed reason, never a traceback
+        # (Copilot review on PR #180).
+        def unreadable(files: dict) -> str:
+            rev = commit_files(self.auth, files, "malformed authority")
+            self.fetch_origin()
+            with self.assertRaises(pp.Outcome) as ctx:
+                self.pins(rev)
+            self.assertEqual(ctx.exception.status, "BLOCKED")
+            return ctx.exception.reason
+
+        self.assertEqual(
+            unreadable(
+                {"semantics/canonical_sources.yaml": REGISTRY + "? [a, b]\n: c\n"}
+            ),
+            "AUTHORITY_UNREADABLE",
+        )
+        self.assertEqual(
+            unreadable(
+                {
+                    "semantics/canonical_sources.yaml": REGISTRY,
+                    "semantics/projection_profiles.yaml": CATALOG.replace(
+                        "    canonical_artifact: invariants.yaml\n", "    other: x\n"
+                    ),
+                }
+            ),
+            "SOURCE_CLASS_CANONICAL_ARTIFACT_ABSENT",
+        )
         sh(
             self.auth,
             "remote",

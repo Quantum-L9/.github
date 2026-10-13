@@ -69,7 +69,7 @@ commit a consumer resolved.
 
 ```bash
 PIN=$(gh api repos/Quantum-L9/.github/commits/main --jq .sha)   # independent record
-AUTH=/path/to/Quantum-L9-.github   # fetched, HEAD == $PIN, clean semantics/
+AUTH=/path/to/github-clone-of/.github   # Quantum-L9/.github; fetched, HEAD == $PIN, clean semantics/
 
 # 1. Pins for the producer
 python3 scripts/publish-projection.py pins --authority-root "$AUTH" --revision "$PIN"

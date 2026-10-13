@@ -141,11 +141,17 @@ def _unique_mapping(
     seen = set()
     for key_node, _ in node.value:
         key = loader.construct_object(key_node, deep=deep)
-        if key in seen:
+        try:
+            duplicate = key in seen
+            seen.add(key)
+        except TypeError as exc:  # a list or mapping key: not plain YAML law
+            raise yaml.constructor.ConstructorError(
+                None, None, f"unhashable key {key!r}", key_node.start_mark
+            ) from exc
+        if duplicate:
             raise yaml.constructor.ConstructorError(
                 None, None, f"duplicate key {key!r}", key_node.start_mark
             )
-        seen.add(key)
     return loader.construct_mapping(node, deep=deep)
 
 
@@ -365,6 +371,8 @@ def compute_pins(
         return found[0]
 
     catalog_path = entry(id=CATALOG_REF).get("path")
+    if not isinstance(catalog_path, str) or not catalog_path:
+        raise Outcome("BLOCKED", "CATALOG_PATH_ABSENT", ref=CATALOG_REF)
     catalog_bytes = read(str(catalog_path))
     catalog = load_yaml(catalog_bytes, str(catalog_path))
     profiles = [
@@ -381,6 +389,12 @@ def compute_pins(
     class_artifact = (
         (catalog.get("source_classes") or {}).get(source_class) or {}
     ).get("canonical_artifact")
+    if not isinstance(class_artifact, str) or not class_artifact:
+        raise Outcome(
+            "BLOCKED",
+            "SOURCE_CLASS_CANONICAL_ARTIFACT_ABSENT",
+            source_class=source_class,
+        )
     source = entry(path=f"semantics/{class_artifact}")
     if (
         source.get("canonical") is not True
