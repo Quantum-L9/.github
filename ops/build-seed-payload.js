@@ -117,13 +117,16 @@ function parseCategories(raw) {
   return wanted;
 }
 
+// One read, no prior existence check: the read itself is the proof. ENOENT
+// (missing) and EISDIR (a directory) both fail the build.
 function readRequired(fs, path) {
-  if (!fs.existsSync(path) || !fs.statSync(path).isFile()) {
+  try {
+    return fs.readFileSync(path, 'utf8');
+  } catch (err) {
     throw new Error(
-      `seed source ${path} is missing or not a file — refusing to build an incomplete payload`,
+      `seed source ${path} is missing or not a file (${err.code || err.message}) — refusing to build an incomplete payload`,
     );
   }
-  return fs.readFileSync(path, 'utf8');
 }
 
 function assertJsonInYaml(text, dest) {

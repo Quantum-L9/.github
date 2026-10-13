@@ -171,11 +171,16 @@ try {
   // ── Required sources (G1): a named source that is gone fails the build ────
   // An fs view over this checkout that hides some paths and adds others, so
   // the real fixtures are never touched.
+  const enoent = (p) => Object.assign(new Error(`ENOENT: no such file, open '${p}'`), { code: 'ENOENT' });
   const fsWith = ({ hide = [], add = {} } = {}) => ({
     ...fs,
     existsSync: (p) => (p in add) || (!hide.includes(p) && fs.existsSync(p)),
     statSync: (p) => ((p in add) ? { isFile: () => true } : fs.statSync(p)),
-    readFileSync: (p, enc) => ((p in add) ? add[p] : fs.readFileSync(p, enc)),
+    readFileSync: (p, enc) => {
+      if (p in add) return add[p];
+      if (hide.includes(p)) throw enoent(p);
+      return fs.readFileSync(p, enc);
+    },
     readdirSync: (p) => {
       const extra = Object.keys(add).filter((a) => a.startsWith(`${p}/`)).map((a) => a.slice(p.length + 1));
       return [...fs.readdirSync(p).filter((n) => !hide.includes(`${p}/${n}`)), ...extra];
@@ -198,7 +203,7 @@ try {
   ]) {
     assert.throws(
       () => buildSeedPayload({ fs: fsWith({ hide: [src] }), categories: [cat] }),
-      new RegExp(`seed source ${src.replace(/[./]/g, '\\$&')} is missing`),
+      (err) => err.message.includes(`seed source ${src} is missing`),
       `${cat}: a missing source must throw`,
     );
   }
