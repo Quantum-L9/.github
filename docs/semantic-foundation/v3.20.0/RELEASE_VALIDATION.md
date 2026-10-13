@@ -39,11 +39,14 @@ RC-028 governs the exact coordinate `l9.projection/coding-agent-execution@1` and
 - every authority-model selector names one top-level section the ledger declares;
 - each source's selection equals its pinned set exactly. An admitted `@1` profile is immutable (`L9-REVISION-001`), so a different selection requires a new profile version;
 - every `source_invariants` entry of every selected contract is itself selected;
-- the output schema is exactly `l9.projection.coding-agent-execution/v1`;
-- the profile declares the five boundaries it does not carry;
+- the entry carries exactly the keys `id`, `class`, `consumer`, `purpose`, `sources`, `output`, `forbidden` (extra keys inside a source block are caught by the entry digest below);
+- `output` is exactly `{schema: l9.projection.coding-agent-execution/v1}`;
+- `forbidden` is exactly the five boundaries the profile does not carry, as strings without duplicates;
+- the whole entry hashes to a pinned canonical-JSON sha256 (`27941a4987ec3861f4e312d991d8016e0769dafa5a5ed6026947c8dfdccc6346`). This enforces `authority_model.yaml` `profile_publication.existing_profile_versions_are_immutable` for every field, including purpose text, so a change of any kind requires a new profile version. The pin is validator-local and does not declare the ledger's `semantic_digest` canonicalization;
+- malformed `output`, `forbidden`, `source_classes`, or `source_invariants` values produce located RC-028 failures, never an aborted run;
 - no string in the profile references a skill (`l9-coding-agent`, `skills/`, `SKILL.md`).
 
-The negative-case batch proves fail-closed behavior at the intended field for **27** cases. The ledger-side and closure cases must also fail for their stated reason, so the pinned-set check cannot mask them:
+The negative-case batch proves fail-closed behavior at the intended field for **34** cases. The ledger-side and closure cases must also fail for their stated reason, so the pinned-set check cannot mask them:
 
 - profile deleted or duplicated;
 - consumer not authorized; wrong profile class;
@@ -54,7 +57,8 @@ The negative-case batch proves fail-closed behavior at the intended field for **
 - obligation stripped; immutable `@1` selection changed; contract closure broken;
 - human authority stripped; a selector naming a missing authority section;
 - source class retargeted; source registration not projectable;
-- skill dependency; wrong output schema; authority boundary dropped;
+- skill dependency; wrong output schema; output not a mapping; authority boundary dropped;
+- `@1` purpose changed in place; undeclared field added; forbidden extended in place; forbidden holding a mapping; `source_classes` not a mapping; a source class entry not a mapping;
 - with the profile unchanged: a selected invariant demoted from global; a selected invariant deleted; a selected contract citing an unselected invariant; a selected contract citing a non-string invariant entry.
 
 Byte-level tampering of any selected ledger or of the profile catalog is caught by SC-008 against this release's `HASHES.sha256`.

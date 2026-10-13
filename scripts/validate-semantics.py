@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
+import json
 import re
 import sys
 from pathlib import Path
@@ -8841,6 +8842,19 @@ CODING_FORBIDDEN = {
     "repository_local_policy_as_global_law",
     "execution_publication_or_merge_authority_grant",
 }
+CODING_PROFILE_KEYS = {
+    "id",
+    "class",
+    "consumer",
+    "purpose",
+    "sources",
+    "output",
+    "forbidden",
+}
+# Canonical-JSON sha256 of the admitted @1 entry (see _rc028_profile_digest).
+CODING_PROFILE_DIGEST = (
+    "27941a4987ec3861f4e312d991d8016e0769dafa5a5ed6026947c8dfdccc6346"
+)
 ID_EQUALITY_SELECTOR = re.compile(
     r'^\$\.(?P<collection>[A-Za-z_]\w*)\[\?\(@\.id=="(?P<id>[^"]+)"\)\]$'
 )
@@ -8862,8 +8876,26 @@ def _rc028_strings(value: object) -> list[str]:
     return []
 
 
+def _rc028_profile_digest(profile: dict) -> str:
+    """sha256 of the profile entry as canonical JSON (sorted keys, compact
+    separators). A validator-local pin of the admitted entry, not a declaration
+    of the ledger's semantic_digest canonicalization."""
+    encoded = json.dumps(
+        profile, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def _rc028_profile_shape(profile: dict, report: Report) -> None:
     label = CODING_PROFILE_LABEL
+    if set(profile) != CODING_PROFILE_KEYS:
+        _rc028_fail(
+            f"{label}.keys",
+            sorted(map(str, profile)),
+            f"profile must carry exactly {sorted(CODING_PROFILE_KEYS)}; an undeclared field "
+            "would add meaning the release record does not admit",
+            report,
+        )
     if profile.get("class") != "runtime":
         _rc028_fail(
             f"{label}.class",
@@ -8879,20 +8911,26 @@ def _rc028_profile_shape(profile: dict, report: Report) -> None:
             "the operating plane that binds coding-agent surfaces",
             report,
         )
-    output_schema = (profile.get("output") or {}).get("schema")
-    if output_schema != CODING_OUTPUT_SCHEMA:
+    output = profile.get("output")
+    if _mapping(output) != {"schema": CODING_OUTPUT_SCHEMA}:
         _rc028_fail(
-            f"{label}.output.schema",
-            output_schema,
-            f"output schema must be exactly {CODING_OUTPUT_SCHEMA!r}; it is the downstream consumer contract",
+            f"{label}.output",
+            output,
+            f"output must be exactly {{schema: {CODING_OUTPUT_SCHEMA}}}; it is the downstream "
+            "consumer contract",
             report,
         )
-    missing_forbidden = sorted(CODING_FORBIDDEN - set(profile.get("forbidden") or []))
-    if missing_forbidden:
+    forbidden = _list(profile.get("forbidden"))
+    if (
+        not all(isinstance(item, str) for item in forbidden)
+        or len(forbidden) != len(set(forbidden))
+        or set(forbidden) != CODING_FORBIDDEN
+    ):
         _rc028_fail(
             f"{label}.forbidden",
-            missing_forbidden,
-            "coding-agent execution projection must declare the boundaries it does not carry",
+            profile.get("forbidden"),
+            f"forbidden must be exactly {sorted(CODING_FORBIDDEN)}: the boundaries this "
+            "profile does not carry",
             report,
         )
     skill_refs = sorted(
@@ -8905,6 +8943,16 @@ def _rc028_profile_shape(profile: dict, report: Report) -> None:
             "coding-agent execution projection must not reference or depend on a skill",
             report,
         )
+    digest = _rc028_profile_digest(profile)
+    if digest != CODING_PROFILE_DIGEST:
+        _rc028_fail(
+            f"{label}.digest",
+            digest,
+            f"{CODING_PROFILE_ID} is immutable (authority_model profile_publication."
+            "existing_profile_versions_are_immutable): its entry must hash to "
+            f"{CODING_PROFILE_DIGEST}; any change, including purpose text, is a new profile version",
+            report,
+        )
 
 
 def _rc028_source_ledger(
@@ -8913,7 +8961,7 @@ def _rc028_source_ledger(
     """The canonical ledger a source names, or None after failing closed when
     the source class, its registration, or the ledger identity does not hold."""
     ledger_path, artifact_id, _collection, _pinned = CODING_SOURCES[name]
-    declared = ((catalog.get("source_classes") or {}).get(name) or {}).get(
+    declared = _mapping(_mapping(catalog.get("source_classes")).get(name)).get(
         "canonical_artifact"
     )
     ledger = docs.get(ledger_path) or {}
@@ -9242,7 +9290,40 @@ def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
     cases.append(("skill dependency", case, field))
     case, _, profile = mutated()
     profile["output"]["schema"] = "l9.projection.coding-agent-execution/v2"
-    cases.append(("wrong output schema", case, f"{field}.output.schema"))
+    cases.append(("wrong output schema", case, f"{field}.output"))
+    case, _, profile = mutated()
+    profile["output"] = "bad"
+    cases.append(("output not a mapping", case, f"{field}.output"))
+    case, _, profile = mutated()
+    profile["purpose"] = "Rebound to a different meaning."
+    cases.append(("@1 purpose changed in place", case, f"{field}.digest"))
+    case, _, profile = mutated()
+    profile["grants"] = ["merge"]
+    cases.append(("undeclared field added", case, f"{field}.keys"))
+    case, _, profile = mutated()
+    profile["forbidden"].append("new_prohibition")
+    cases.append(("forbidden extended in place", case, f"{field}.forbidden"))
+    case, _, profile = mutated()
+    profile["forbidden"].append({"boundary": "x"})
+    cases.append(("forbidden holds a mapping", case, f"{field}.forbidden"))
+    case, _, _ = mutated()
+    case[PROFILES_PATH]["source_classes"] = ["invariants"]
+    cases.append(
+        (
+            "source_classes not a mapping",
+            case,
+            "source_classes.invariants.canonical_artifact",
+        )
+    )
+    case, _, _ = mutated()
+    case[PROFILES_PATH]["source_classes"]["invariants"] = "invariants.yaml"
+    cases.append(
+        (
+            "source class entry not a mapping",
+            case,
+            "source_classes.invariants.canonical_artifact",
+        )
+    )
     case, _, profile = mutated()
     profile["forbidden"].remove("execution_publication_or_merge_authority_grant")
     cases.append(("authority boundary dropped", case, f"{field}.forbidden"))
@@ -9301,6 +9382,7 @@ def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
     reasons["contract closure broken"] = (
         "cites an invariant the profile does not select"
     )
+    reasons["skill dependency"] = "must not reference or depend on a skill"
     for label, candidate, field_name in cases:
         candidate_report = Report()
         _evaluate_rc028(candidate, candidate_report)

@@ -72,7 +72,7 @@ v3.20.0 adds no ADR. Adding a projection profile to the existing catalog needs n
 ## Semantic changes
 
 - `semantics/projection_profiles.yaml`: adds `l9.projection/coding-agent-execution@1`, a runtime profile for consumer `Cursor-Governance`. It selects 19 global invariants and 10 global contracts by exact id, closed over the contracts' `source_invariants`, plus the `agent_authority`, `human_authority`, `escalation_rules`, and `admission_rules` sections of `semantics/authority_model.yaml`. It emits `l9.projection.coding-agent-execution/v1`. The profile count rises from 24 to 25.
-- `scripts/validate-semantics.py`: adds RC-028 and its 27 fail-closed negative cases.
+- `scripts/validate-semantics.py`: adds RC-028 and its 34 fail-closed negative cases.
 
 No invariant, contract, schema, source registration, vocabulary term, capability, artifact authority class, ProductKind, repository class, composition profile, technology/provider binding, actor or surface identity, producer, or execution semantic is added.
 
