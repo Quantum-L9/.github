@@ -37,7 +37,7 @@ The profile names no skill, command, adapter, host, or surface, and it grants no
 
 - No admitted deterministic projection producer currently emits `l9.projection-artifact/v1` with an `l9.compiler-receipt/v1` for any profile. This release does not add one and does not mock a receipt.
 - The `semantic_digest` canonicalization named by the artifact and receipt schemas is not declared in a ledger.
-- `l9.schema/projection-artifact@1` carries a single `source_ref` / `source_digest`, while this profile, like most catalog profiles, selects from three sources. Whether a produced artifact is one per source or a composed projection under `composed_projection_rules` is not declared for this profile.
+- `l9.schema/projection-artifact@1` carries a single `source_ref` / `source_digest`, while this profile, like most catalog profiles, selects from more than one source. Whether a produced artifact is one per source or a composed projection under `composed_projection_rules` is not declared for this profile.
 
 Producing and binding the projection remain downstream work and are not claimed here.
 

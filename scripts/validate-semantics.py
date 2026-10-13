@@ -8961,7 +8961,7 @@ def _rc028_record_selectors(
             scopes.setdefault(record["id"], []).append(record.get("scope"))
     selected: set[str] = set()
     for selector in selectors:
-        match = ID_EQUALITY_SELECTOR.match(str(selector))
+        match = ID_EQUALITY_SELECTOR.fullmatch(str(selector))
         if match is None or match.group("collection") != collection:
             _rc028_fail(
                 field,
@@ -9000,7 +9000,7 @@ def _rc028_section_selectors(
     field = f"{CODING_PROFILE_LABEL}.sources.{name}.selectors"
     selected: set[str] = set()
     for selector in selectors:
-        match = TOP_LEVEL_SELECTOR.match(str(selector))
+        match = TOP_LEVEL_SELECTOR.fullmatch(str(selector))
         if match is None or match.group("section") not in ledger:
             _rc028_fail(
                 field,
@@ -9068,19 +9068,30 @@ def _rc028_sources(
             )
     if "contracts" in selected and "invariants" in selected:
         contracts = (docs.get(CONTRACTS_PATH) or {}).get("contracts") or []
-        for contract in contracts:
+        for contract in contracts if isinstance(contracts, list) else []:
+            if not isinstance(contract, dict):
+                continue
+            contract_id = contract.get("id")
             if (
-                not isinstance(contract, dict)
-                or contract.get("id") not in selected["contracts"]
+                not isinstance(contract_id, str)
+                or contract_id not in selected["contracts"]
             ):
                 continue
             cited = contract.get("source_invariants")
             for invariant in cited if isinstance(cited, list) else []:
-                if invariant not in selected["invariants"]:
+                if not isinstance(invariant, str):
                     _rc028_fail(
                         f"{label}.sources.invariants.selectors",
                         invariant,
-                        f"selected contract {contract['id']} cites an invariant the profile does not "
+                        f"selected contract {contract_id} cites a non-string source_invariants entry; "
+                        "closure cannot be decided, so it fails closed",
+                        report,
+                    )
+                elif invariant not in selected["invariants"]:
+                    _rc028_fail(
+                        f"{label}.sources.invariants.selectors",
+                        invariant,
+                        f"selected contract {contract_id} cites an invariant the profile does not "
                         "select; the projection must close over its contracts' source_invariants",
                         report,
                     )
@@ -9157,6 +9168,11 @@ def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
     selector_list(profile, "invariants").append(selector_list(profile, "invariants")[0])
     cases.append(("duplicate selector", case, selectors.format("invariants")))
     case, _, profile = mutated()
+    selector_list(profile, "invariants")[0] += "\n"
+    cases.append(
+        ("selector with trailing newline", case, selectors.format("invariants"))
+    )
+    case, _, profile = mutated()
     selector_list(profile, "invariants").append(
         '$.invariants[?(@.id=="INV-VALIDATION-MONOTONICITY")]'
     )
@@ -9212,11 +9228,69 @@ def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
     case, _, profile = mutated()
     profile["forbidden"].remove("execution_publication_or_merge_authority_grant")
     cases.append(("authority boundary dropped", case, f"{field}.forbidden"))
+    # Ledger-side cases leave the profile untouched, so the pinned-set check
+    # cannot mask them: each must fail for its own stated reason.
+    reasons: dict[str, str] = {}
+
+    def ledger_record(case: dict, path: str, collection: str, record_id: str) -> dict:
+        record, _ = _unique_entry(case[path][collection], "id", record_id)
+        return record
+
+    case, _, _ = mutated()
+    ledger_record(case, INVARIANTS_PATH, "invariants", "L9-AUTH-001")["scope"] = (
+        "domain"
+    )
+    cases.append(
+        ("selected invariant demoted from global", case, selectors.format("invariants"))
+    )
+    reasons["selected invariant demoted from global"] = "must have scope global"
+    case, _, _ = mutated()
+    case[INVARIANTS_PATH]["invariants"].remove(
+        ledger_record(case, INVARIANTS_PATH, "invariants", "L9-AUTH-001")
+    )
+    cases.append(("selected invariant deleted", case, selectors.format("invariants")))
+    reasons["selected invariant deleted"] = "must resolve to exactly one record"
+    case, _, _ = mutated()
+    ledger_record(case, CONTRACTS_PATH, "contracts", "l9.contract/projection@1")[
+        "source_invariants"
+    ].append("L9-HARD-001")
+    cases.append(
+        (
+            "selected contract cites an unselected invariant",
+            case,
+            selectors.format("invariants"),
+        )
+    )
+    reasons["selected contract cites an unselected invariant"] = (
+        "cites an invariant the profile does not select"
+    )
+    case, _, _ = mutated()
+    ledger_record(case, CONTRACTS_PATH, "contracts", "l9.contract/projection@1")[
+        "source_invariants"
+    ].append({"id": "L9-AUTH-001"})
+    cases.append(
+        (
+            "selected contract cites a non-string invariant",
+            case,
+            selectors.format("invariants"),
+        )
+    )
+    reasons["selected contract cites a non-string invariant"] = (
+        "non-string source_invariants entry"
+    )
+    reasons["selector names an undeclared id"] = "must resolve to exactly one record"
+    reasons["non-global record selected"] = "must have scope global"
+    reasons["contract closure broken"] = (
+        "cites an invariant the profile does not select"
+    )
     for label, candidate, field_name in cases:
         candidate_report = Report()
         _evaluate_rc028(candidate, candidate_report)
         prefix = f"FAIL RC-028 {PROFILES_PATH} {field_name}="
-        if not any(f.startswith(prefix) for f in candidate_report.failures):
+        reason = reasons.get(label, "")
+        if not any(
+            f.startswith(prefix) and reason in f for f in candidate_report.failures
+        ):
             report.fail(
                 "RC-028",
                 VALIDATOR_PATH,
@@ -9230,7 +9304,8 @@ def _check_rc028_negative_cases(docs: dict[str, dict], report: Report) -> None:
     ):
         report.ok(
             "RC-028-NEG",
-            f"{len(cases)} coding-agent execution projection negative cases fail closed at their intended field",
+            f"{len(cases)} coding-agent execution projection negative cases fail closed at their intended field, "
+            "ledger-side and closure cases for their stated reason",
         )
 
 

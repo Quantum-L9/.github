@@ -43,18 +43,19 @@ RC-028 governs the exact coordinate `l9.projection/coding-agent-execution@1` and
 - the profile declares the five boundaries it does not carry;
 - no string in the profile references a skill (`l9-coding-agent`, `skills/`, `SKILL.md`).
 
-The negative-case batch proves fail-closed behavior at the intended field for **22** cases:
+The negative-case batch proves fail-closed behavior at the intended field for **27** cases. The ledger-side and closure cases must also fail for their stated reason, so the pinned-set check cannot mask them:
 
 - profile deleted or duplicated;
 - consumer not authorized; wrong profile class;
 - contracts source missing; unpinned source added;
 - a selector naming an undeclared id;
-- arbitrary wildcard selector; arbitrary scope-filter selector; selector crossing into another source; duplicate selector;
+- arbitrary wildcard selector; arbitrary scope-filter selector; selector crossing into another source; duplicate selector; selector with a trailing newline;
 - non-global record selected;
 - obligation stripped; immutable `@1` selection changed; contract closure broken;
 - human authority stripped; a selector naming a missing authority section;
 - source class retargeted; source registration not projectable;
-- skill dependency; wrong output schema; authority boundary dropped.
+- skill dependency; wrong output schema; authority boundary dropped;
+- with the profile unchanged: a selected invariant demoted from global; a selected invariant deleted; a selected contract citing an unselected invariant; a selected contract citing a non-string invariant entry.
 
 Byte-level tampering of any selected ledger or of the profile catalog is caught by SC-008 against this release's `HASHES.sha256`.
 
