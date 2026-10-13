@@ -9,12 +9,24 @@ what the organization applies to it.
 The organization does not copy every `.github` file into every repository. It
 applies every capability that is applicable to that repository's class.
 
-| Mode | Meaning | Example |
+Every surface the organization owns is in exactly one of four modes. This
+document is the authority for what the modes mean. `policies/repo-classes.yml`
+is the authority for which mode each class puts a surface in.
+
+| Mode | Rule | Example |
 | --- | --- | --- |
-| **INHERIT** | GitHub supplies it from `Quantum-L9/.github`. The repository must not carry a copy. | `CODE_OF_CONDUCT.md`, `.github/ISSUE_TEMPLATE/*`, `.github/pull_request_template.md` |
-| **MATERIALIZE** | The repository must contain the file. Seeded missing-only. | `.github/CODEOWNERS`, `.github/dependabot.yml`, `.github/labels.yml` |
-| **REMOTE APPLY** | GitHub API state, not a file. | labels, repository settings |
-| **FORBID** | The repository must never carry this path. A payload that would write one throws. | `.github/workflows/l9-analysis.yml`, `.github/workflows/governance.yml` |
+| **INHERIT** | GitHub supplies an organization-owned default live from `Quantum-L9/.github`. The repository should not carry a duplicate unless local bytes are genuinely required; a local copy replaces inheritance for that file entirely. | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml` |
+| **MATERIALIZE** | The consumer requires repository-local bytes or consumer-specific content. Seeded missing-only; an existing file is never overwritten. | `.github/CODEOWNERS`, `.github/dependabot.yml`, `SECURITY.md` (advisory URLs rewritten per consumer), `.github/ISSUE_TEMPLATE/*` (`config.yml` carries consumer routing), `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md` |
+| **REMOTE APPLY** | The realization is GitHub or API state rather than a repository file. | labels, repository settings |
+| **FORBID** | A local copy would create a second owner, violate architecture, or distribute a centrally owned capability. A payload that would write one throws. | application CI (`.github/workflows/l9-analysis.yml`, `.github/workflows/governance.yml` for governed classes), Semantic Foundation files, `AGENTS.md`, `Makefile`, `pyproject.toml`, IDE and tooling config |
+
+Three surfaces are MATERIALIZE only because their bytes differ per consumer:
+`SECURITY.md` and `.github/ISSUE_TEMPLATE/config.yml` carry the consumer's
+advisory URL, and `.github/workflows/governance.yml` pins a SHA per class. The
+remaining community-health surfaces are byte-identical everywhere, so they are
+INHERIT and never copied. `.github/labels.yml` is a REMOTE APPLY surface
+(`sync-labels-all.yml`); it is materialized only for the class whose template
+requires the file locally, never as a universal copy.
 
 ## Why FORBID exists
 
@@ -46,6 +58,13 @@ The organization honours what the repository declares. An absent marker
 resolves through `overrides`, then `default_class`. It never resolves to
 something wider than the repository asked for.
 
+Every distribution path makes this one decision through
+`ops/repo-class-profile.js`: the hourly auto-seed, the dispatch seeder, and
+the manual shell sync. None of them has a category list of its own; `all`
+means the class's `seed_categories`, and an explicit category still passes
+through the class, so INHERIT destinations drop and a FORBID destination is a
+refusal with the class and path named.
+
 ## Classes
 
 Path lists live in `policies/repo-classes.yml`. Every class remote-applies
@@ -53,13 +72,19 @@ labels and repository settings.
 
 | Class | For | Materialize (`seed_categories`) | Inherit | Forbid |
 | --- | --- | --- | --- | --- |
-| `default` | No marker and no override | `codeowners`, `dependabot`, `governance`, `community-health`, `issue-templates`, `pr-templates` | nothing | nothing |
-| `non_constellation_python` | `l9-repo-template` offspring | `codeowners`, `dependabot`, `labels` | `CODE_OF_CONDUCT.md`, `FUNDING.yml`, issue templates, PR templates | org CI distribution paths, the governance caller, retired CI pin files |
-| `self_governed` | `l9-ci-core`, `l9-meta-injector` | nothing | community-health files, `FUNDING.yml`, issue templates, PR templates | org CI distribution paths and the governance caller |
+| `default` | No marker and no override | `codeowners`, `dependabot`, `governance`, `community-health` (`SECURITY.md` only), `issue-templates`, `pr-templates` (default + `release.md`) | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml` | nothing |
+| `non_constellation_python` | `l9-repo-template` offspring | `codeowners`, `dependabot`, `labels`, `community-health` (`SECURITY.md` only) | the passive community-health surfaces above, issue templates, PR templates | org CI distribution paths, the governance caller, retired CI pin files |
+| `self_governed` | `l9-ci-core`, `l9-meta-injector` | nothing | every community-health surface including `SECURITY.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml`, issue templates, PR templates | org CI distribution paths and the governance caller |
 
-`default` reproduces `DEFAULT_CATEGORIES` in `ops/build-seed-payload.js`.
-`ops/test-repo-class-profile.js` asserts that. Adding a class is how behavior
-changes. Editing `default` is not.
+`default` reproduces `DEFAULT_CATEGORIES` in `ops/build-seed-payload.js` and
+inherits the passive community-health surfaces. `ops/test-repo-class-profile.js`
+asserts both the materialized destination set and the exact inherit set.
+Adding a class is how behavior changes. Editing `default` is not.
+
+`community-health` is one category with one materialized file. `SECURITY.md`
+is MATERIALIZE because its advisory URL is rewritten per consumer;
+`non_constellation_python` lists the category for exactly that file. The
+passive surfaces are INHERIT in every class.
 
 `labels` is opt-in for `default` and materialized for
 `non_constellation_python`. `.github/labels.yml` is required by
@@ -100,8 +125,10 @@ the override and default path.
 | Surface | Uses |
 | --- | --- |
 | `ops/repo-class-profile.js` | resolver — load, parse marker, resolve, apply, waive |
-| `ops/build-seed-payload.js` | `profile` option: class picks the categories; INHERIT drops, FORBID throws |
+| `ops/build-seed-payload.js` | `profile` option: class picks the categories; INHERIT drops, FORBID throws. `planConsumerSeed` is the manual-seed decision: class, payload, missing-only selection |
 | `.github/workflows/auto-seed-new-repo.yml` | per-repo class resolution; reports the class per row |
+| `.github/workflows/seed-governance.yml` | same per-repo class resolution; `all` means the class's categories; an explicit category a class forbids is a reported skip, never a write |
+| `ops/sync-org-files.sh` | thin shell entrypoint over `planConsumerSeed`; same class decision, missing-only, refuses a FORBID request or a malformed marker |
 | `.github/workflows/repo-birth-bootstrap.yml` | targeted REMOTE APPLY for one repo |
 | `.github/workflows/enforce-policies.yml` | honours `mandatory_files_waive` |
 | `l9-repo-template` `scripts/birth-runner/new_repo.py` | reads the same file to apply the profile locally, before creation |

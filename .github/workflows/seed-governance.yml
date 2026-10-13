@@ -1,8 +1,18 @@
 name: Seed org templates into consumers
 
-# Physically seeds health and ownership files. CI is never seeded.
-# Default `all` omits labels.yml (org sync-labels-all),
-# LICENSE, FUNDING.yml, SUPPORT.md, and duplicate issue templates.
+# Physically seeds ownership files, SECURITY.md, and templates. CI is never
+# seeded. Default `all` omits labels.yml (org sync-labels-all), LICENSE, the
+# inherited community-health files (CODE_OF_CONDUCT.md, CONTRIBUTING.md,
+# SUPPORT.md, FUNDING.yml, VULNERABILITY_REPORT.yml), and duplicate issue
+# templates.
+#
+# Repo-class aware, same as auto-seed-new-repo.yml: every target resolves its
+# class from `.l9/org-birth-profile.yaml` against policies/repo-classes.yml
+# (marker > override > default; a malformed or unknown marker is skipped and
+# reported, never widened to default). `all` means the class's own
+# seed_categories. An explicit category list still passes through the class:
+# INHERIT destinations drop, and a FORBID destination skips that repo with the
+# class and path named — it is never written.
 #
 # Matches ops/sync-org-files.sh. CI is not distributed from here — see
 # docs/BOUNDARIES.md.
@@ -34,9 +44,11 @@ on:
         default: ""
       categories:
         description: >-
-          Comma-separated categories, or "all" (default set: codeowners,
-          dependabot, governance, community-health, issue-templates,
-          pr-templates). Opt-in: labels. Retired (fail closed): on-org-update.
+          Comma-separated categories, or "all" (= each repo's class
+          seed_categories; default class: codeowners, dependabot, governance,
+          community-health, issue-templates, pr-templates). Opt-in: labels.
+          A category a repo's class forbids skips that repo. Retired (fail
+          closed): on-org-update.
         type: string
         default: all
 
@@ -81,18 +93,33 @@ jobs:
               assessSeedBranch,
               moveSeedBranch,
             } = require('./ops/seed-branch-safety.js');
+            const {
+              loadRepoClasses,
+              classForRepo,
+              resolveProfile,
+            } = require('./ops/repo-class-profile.js');
 
             const MODE = process.env.SEED_MODE || 'dry-run';
             const FILTER = process.env.SEED_REPO_FILTER || '';
             const BRANCH = 'chore/seed-governance';
+            const classes = loadRepoClasses(fs);
 
-            let categories;
-            try {
-              categories = parseCategories(process.env.SEED_CATEGORIES || 'all');
-            } catch (e) {
-              core.setFailed(e.message);
-              return;
+            // `all` is not a category list: it means "whatever this repo's
+            // class materializes". Only an explicit list is parsed here, and
+            // it still passes through the class (INHERIT drops, FORBID skips).
+            const rawCategories = (process.env.SEED_CATEGORIES || 'all').trim();
+            let explicitCategories = null;
+            if (rawCategories && rawCategories !== 'all') {
+              try {
+                explicitCategories = parseCategories(rawCategories);
+              } catch (e) {
+                core.setFailed(e.message);
+                return;
+              }
             }
+            const categoriesLabel = explicitCategories
+              ? explicitCategories.join(',')
+              : 'all (per repo class)';
 
             const exists = async (owner, repo, path, ref) => {
               try {
@@ -120,29 +147,65 @@ jobs:
               !r.archived && !r.fork && r.name !== '.github' && (!FILTER || r.name.includes(FILTER)));
 
             const rows = [];
+            const unresolved = [];
+            const forbidden = [];
             let failures = 0;
 
-            core.info(`categories=${categories.join(',')} (default ${DEFAULT_CATEGORIES.join(',')}; all ${ALL_CATEGORIES.join(',')})`);
+            core.info(`categories=${categoriesLabel} (default class ${DEFAULT_CATEGORIES.join(',')}; all known ${ALL_CATEGORIES.join(',')})`);
 
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
+              let profile = null;
               try {
                 const hasRootCodeowners = await exists(o, n, 'CODEOWNERS');
                 const hasPython = (await exists(o, n, 'pyproject.toml'))
                   || (await exists(o, n, 'requirements.txt'));
                 const hasPackageJson = await exists(o, n, 'package.json');
-                const payload = buildSeedPayload({
-                  fs,
-                  categories,
-                  hasRootCodeowners,
-                  hasPython,
-                  hasPackageJson,
-                  repository: `${o}/${n}`,
-                });
+
+                // Same class probe as auto-seed-new-repo.yml: existence first,
+                // because readText() returns null for both a missing file and a
+                // failed fetch, and a transient fetch error must not fall
+                // through to `default` — the widest payload.
+                let marker = null;
+                if (await exists(o, n, classes.marker_path)) {
+                  marker = (await readText(o, n, classes.marker_path)) ?? '';
+                }
+                const decided = classForRepo(classes, n, marker);
+                if (decided.error) {
+                  rows.push([n, 'unresolved', `skipped: ${decided.error}`]);
+                  unresolved.push(n);
+                  continue;
+                }
+                profile = resolveProfile(classes, decided.name);
+                if (decided.name) profile.resolved_from = decided.source;
+
+                let payload;
+                try {
+                  payload = buildSeedPayload({
+                    fs,
+                    // null lets the class's seed_categories decide; an explicit
+                    // list is still filtered by the class (INHERIT) and refused
+                    // on a FORBID hit.
+                    categories: explicitCategories ?? undefined,
+                    profile,
+                    hasRootCodeowners,
+                    hasPython,
+                    hasPackageJson,
+                    repository: `${o}/${n}`,
+                  });
+                } catch (e) {
+                  if (!/violates repo class/.test(e.message || '')) throw e;
+                  // An explicit category this class forbids: report the class
+                  // and the path, write nothing, and keep sweeping.
+                  const why = String(e.message).replace(/\s+/g, ' ').slice(0, 200);
+                  rows.push([n, profile.name, `skipped (class forbids requested category): ${why}`]);
+                  forbidden.push(n);
+                  continue;
+                }
                 const paths = Object.keys(payload);
 
                 if (!paths.length) {
-                  rows.push([n, 'skipped (nothing safe to seed)']);
+                  rows.push([n, profile.name, 'skipped (nothing safe to seed)']);
                   continue;
                 }
 
@@ -156,7 +219,7 @@ jobs:
                 }
                 const { writes } = selectSeedWrites(payload, existingByPath);
                 if (!writes.length) {
-                  rows.push([n, hasRootCodeowners
+                  rows.push([n, profile.name, hasRootCodeowners
                     ? 'already seeded (root CODEOWNERS preserved)'
                     : 'already seeded']);
                   continue;
@@ -174,7 +237,7 @@ jobs:
                   github, owner: o, repo: n, base, branch: BRANCH,
                 });
                 if (gate.action === 'skip') {
-                  rows.push([n, gate.reason]);
+                  rows.push([n, profile.name, gate.reason]);
                   continue;
                 }
                 const branchSha = gate.sha;
@@ -185,7 +248,7 @@ jobs:
                     ? writes.join(', ')
                     : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
                   const onto = branchSha ? `; rebuild ${BRANCH}` : '';
-                  rows.push([n, `would seed ${writes.length} file(s): ${preview}${note}${onto}`]);
+                  rows.push([n, profile.name, `would seed ${writes.length} file(s): ${preview}${note}${onto}`]);
                   continue;
                 }
                 const baseRef = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
@@ -205,7 +268,7 @@ jobs:
                 }
 
                 if (!treeItems.length) {
-                  rows.push([n, 'already seeded']);
+                  rows.push([n, profile.name, 'already seeded']);
                   continue;
                 }
 
@@ -226,7 +289,7 @@ jobs:
                   expectedSha: branchSha, commitSha: commit.data.sha,
                 });
                 if (!moved.moved) {
-                  rows.push([n, moved.reason]);
+                  rows.push([n, profile.name, moved.reason]);
                   continue;
                 }
 
@@ -234,7 +297,12 @@ jobs:
                 const bodyLines = [
                   'Seeds org health and ownership files from `Quantum-L9/.github`. CI is not distributed from this repository.',
                   '',
-                  `Categories: \`${categories.join('`, `')}\`.`,
+                  `**Repo class:** \`${profile.name}\` (${profile.resolved_from}) — see \`policies/repo-classes.yml\`.`,
+                  profile.inherit.length
+                    ? `Inherited from the org \`.github\` repo and deliberately **not** copied here: ${profile.inherit.map(p => `\`${p}\``).join(', ')}.`
+                    : '',
+                  '',
+                  `Categories: \`${categoriesLabel}\`.`,
                   '',
                   '### Files in this PR',
                   ...listed,
@@ -270,7 +338,7 @@ jobs:
                     throw e;
                   }
                 }
-                rows.push([n, `PR #${prNumber} (${treeItems.length} file(s))`]);
+                rows.push([n, profile.name, `PR #${prNumber} (${treeItems.length} file(s))`]);
               } catch (e) {
                 failures += 1;
                 const msg = `${e.status || ''} ${e.message || e}`.replace(/\s+/g, ' ').slice(0, 200);
@@ -281,18 +349,35 @@ jobs:
                   : '';
                 const line = `failed: ${msg}${hint}`;
                 core.error(`${n}: ${line}`);
-                rows.push([n, line]);
+                rows.push([n, profile ? profile.name : '?', line]);
               }
             }
 
             await core.summary
               .addHeading(`Seed (${MODE}) — ${rows.length} repos`, 2)
-              .addRaw(`\nCategories: \`${categories.join('`, `')}\`\n`)
+              .addRaw(`\nCategories: \`${categoriesLabel}\`\n`)
               .addTable([
-                [{ data: 'repo', header: true }, { data: 'result', header: true }],
+                [
+                  { data: 'repo', header: true },
+                  { data: 'class', header: true },
+                  { data: 'result', header: true },
+                ],
                 ...rows.map(r => r.map(String)),
               ])
               .write();
+
+            if (unresolved.length) {
+              core.warning(
+                `${unresolved.length} repo(s) declare an unresolvable class and were skipped: ` +
+                  `${unresolved.join(', ')} — fix the marker; they are NOT seeded under default`,
+              );
+            }
+            if (forbidden.length) {
+              core.warning(
+                `${forbidden.length} repo(s) skipped because their class forbids a requested category: ` +
+                  `${forbidden.join(', ')} — nothing was written to them; run with categories=all to seed what each class allows`,
+              );
+            }
 
             if (failures > 0) {
               core.setFailed(`${failures} repo(s) failed seeding — see job summary`);

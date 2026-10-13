@@ -1,6 +1,11 @@
 'use strict';
 
-const { applyProfile } = require('./repo-class-profile.js');
+const {
+  applyProfile,
+  classForRepo,
+  loadRepoClasses,
+  resolveProfile,
+} = require('./repo-class-profile.js');
 
 /**
  * Build the consumer-repo seed payload from the canonical files in this repo.
@@ -12,6 +17,12 @@ const { applyProfile } = require('./repo-class-profile.js');
  * stay parseable but are not in `all`. Missing-only: an existing consumer
  * file is left untouched. CI workflows are not in the payload. Canonical CI
  * is Quantum-L9/l9-ci-core `.github/workflows/org-ci.yml`.
+ *
+ * The payload MATERIALIZES only what needs repository-local bytes.
+ * `community-health` is SECURITY.md alone (consumer-specific advisory
+ * routing). CODE_OF_CONDUCT.md, CONTRIBUTING.md, SUPPORT.md, FUNDING.yml and
+ * VULNERABILITY_REPORT.yml are INHERIT: GitHub serves them org-wide, so they
+ * are never in the payload. Modes: docs/REPO_BIRTH_PROFILES.md.
  *
  * @param {object} opts
  * @param {typeof import('fs')} opts.fs
@@ -46,10 +57,17 @@ const RETIRED_CATEGORIES = Object.freeze(['on-org-update', 'l9-ci-pack']);
 
 const ALL_CATEGORIES = Object.freeze([...DEFAULT_CATEGORIES, ...OPT_IN_CATEGORIES]);
 
-const COMMUNITY_HEALTH_DEFAULT = Object.freeze([
-  'CODE_OF_CONDUCT.md',
-  'CONTRIBUTING.md',
-  'SECURITY.md',
+// The one community-health file with consumer-specific content: its advisory
+// URLs are rewritten per consumer. Every other community-health file is
+// INHERIT and must not be listed here.
+const COMMUNITY_HEALTH_MATERIALIZED = Object.freeze(['SECURITY.md']);
+
+// Both PR templates a consumer carries locally. `.github/PULL_REQUEST_TEMPLATE/`
+// is read by name, never by directory listing, so a template added to this
+// repository is not distributed until it is named here.
+const PR_TEMPLATES_MATERIALIZED = Object.freeze([
+  '.github/pull_request_template.md',
+  '.github/PULL_REQUEST_TEMPLATE/release.md',
 ]);
 
 const SKIP_ISSUE_TEMPLATES = Object.freeze([
@@ -177,7 +195,7 @@ function buildSeedPayload({
         break;
       }
       case 'community-health': {
-        for (const f of COMMUNITY_HEALTH_DEFAULT) {
+        for (const f of COMMUNITY_HEALTH_MATERIALIZED) {
           const body = readIfFile(fs, f);
           if (body != null) payload[f] = applyRepoPlaceholders(body, repository);
         }
@@ -196,8 +214,10 @@ function buildSeedPayload({
         break;
       }
       case 'pr-templates': {
-        const human = readIfFile(fs, '.github/pull_request_template.md');
-        if (human != null) payload['.github/pull_request_template.md'] = human;
+        for (const f of PR_TEMPLATES_MATERIALIZED) {
+          const body = readIfFile(fs, f);
+          if (body != null) payload[f] = body;
+        }
         break;
       }
       default:
@@ -216,12 +236,133 @@ function buildSeedPayload({
   return payload;
 }
 
+/**
+ * Plan a seed into a local consumer checkout under the repository's class.
+ *
+ * This is the one policy path for a manual seed: the same marker > override >
+ * default resolution as the Actions seeders, the same payload, the same
+ * missing-only selection. ops/sync-org-files.sh calls it and writes nothing
+ * on its own, so the shell entrypoint cannot drift from the class contract.
+ *
+ * @param {object} o
+ * @param {typeof import('fs')} o.fs
+ * @param {typeof import('path')} o.path
+ * @param {string} o.consumerRoot  absolute path of the consumer checkout
+ * @param {string} [o.repository]  owner/name; '' when the consumer has no remote
+ * @param {string|string[]|null} [o.categories]  explicit categories; null/'all'
+ *   lets the class decide. An explicit category the class forbids throws.
+ * @returns {{profile: object, writes: string[], kept: string[],
+ *   inherited: string[], payload: Record<string,string>}}
+ */
+function planConsumerSeed({ fs, path, consumerRoot, repository = '', categories = null }) {
+  if (!fs || !path) throw new Error('planConsumerSeed requires fs and path');
+  const classes = loadRepoClasses(fs);
+  const markerFile = path.join(consumerRoot, classes.marker_path);
+  // Absent and malformed are different answers: an absent marker resolves
+  // through overrides to default; a present but unreadable one fails closed.
+  const marker = fs.existsSync(markerFile) ? fs.readFileSync(markerFile, 'utf8') : null;
+  const repoName = repository ? repository.split('/').pop() : null;
+  const decided = classForRepo(classes, repoName, marker);
+  if (decided.error) {
+    throw new Error(`refusing to seed ${consumerRoot}: ${decided.error}`);
+  }
+  const profile = resolveProfile(classes, decided.name);
+  if (decided.name) profile.resolved_from = decided.source;
+
+  let explicit = null;
+  if (Array.isArray(categories)) {
+    explicit = categories;
+  } else if (typeof categories === 'string' && !/^\s*(all)?\s*$/.test(categories)) {
+    explicit = parseCategories(categories);
+  }
+
+  const payload = buildSeedPayload({
+    fs,
+    categories: explicit ?? profile.seed_categories,
+    hasRootCodeowners: fs.existsSync(path.join(consumerRoot, 'CODEOWNERS')),
+    hasPython:
+      fs.existsSync(path.join(consumerRoot, 'pyproject.toml')) ||
+      fs.existsSync(path.join(consumerRoot, 'requirements.txt')),
+    hasPackageJson: fs.existsSync(path.join(consumerRoot, 'package.json')),
+    repository,
+  });
+  // Applied here rather than through `profile:` so the inherited list is
+  // reportable. FORBID still throws, exactly as it does in the seeders.
+  const { inherited } = applyProfile(payload, profile);
+
+  const existingByPath = {};
+  for (const dest of Object.keys(payload)) {
+    existingByPath[dest] = fs.existsSync(path.join(consumerRoot, dest)) ? true : null;
+  }
+  const { writes, kept } = selectSeedWrites(payload, existingByPath);
+  return { profile, writes, kept, inherited, payload };
+}
+
+/**
+ * CLI: `node ops/build-seed-payload.js --consumer <dir> [--repository o/n]
+ *   [--categories all|a,b,...] [--dry-run]`
+ * Writes missing destinations only; an existing file is reported and kept.
+ * Exit 2 on a refused target (malformed marker, FORBID hit, retired or
+ * unknown category) so a wrapper cannot mistake a refusal for a clean run.
+ */
+function main(argv) {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const args = { consumer: '', repository: '', categories: 'all', dryRun: false };
+  const valued = { '--consumer': 'consumer', '--repository': 'repository', '--categories': 'categories' };
+  for (let i = 0; i < argv.length; i += 1) {
+    const a = argv[i];
+    if (a === '--dry-run') {
+      args.dryRun = true;
+    } else if (a in valued) {
+      i += 1;
+      args[valued[a]] = argv[i] ?? '';
+    } else {
+      throw new Error(`unknown argument: ${a}`);
+    }
+  }
+  if (args.categories === '') args.categories = 'all';
+  if (!args.consumer) throw new Error('--consumer <dir> is required');
+  const consumerRoot = path.resolve(args.consumer);
+  if (!fs.existsSync(consumerRoot) || !fs.statSync(consumerRoot).isDirectory()) {
+    throw new Error(`consumer repo path does not exist: ${consumerRoot}`);
+  }
+  // Templates are read by repo-relative path; the org root is this file's parent.
+  process.chdir(path.resolve(__dirname, '..'));
+
+  const plan = planConsumerSeed({
+    fs, path, consumerRoot, repository: args.repository, categories: args.categories,
+  });
+  console.log(`class: ${plan.profile.name} (${plan.profile.resolved_from})`);
+  for (const dest of plan.inherited) console.log(`  ~ ${dest} (inherited from the org .github repo; not copied)`);
+  for (const dest of plan.kept) console.log(`  = ${dest} (exists; kept)`);
+  for (const dest of plan.writes) {
+    if (!args.dryRun) {
+      const target = path.join(consumerRoot, dest);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.writeFileSync(target, plan.payload[dest]);
+    }
+    console.log(`  ${args.dryRun ? '+' : '✓'} ${dest}${args.dryRun ? ' (would write)' : ''}`);
+  }
+  if (!plan.writes.length && !plan.kept.length) console.log('  (nothing to materialize for this class)');
+}
+
+if (require.main === module) {
+  try {
+    main(process.argv.slice(2));
+  } catch (err) {
+    console.error(`❌ ERROR: ${err.message}`);
+    process.exit(2);
+  }
+}
+
 module.exports = {
   ALL_CATEGORIES,
   DEFAULT_CATEGORIES,
   OPT_IN_CATEGORIES,
   RETIRED_CATEGORIES,
-  COMMUNITY_HEALTH_DEFAULT,
+  COMMUNITY_HEALTH_MATERIALIZED,
+  PR_TEMPLATES_MATERIALIZED,
   SKIP_ISSUE_TEMPLATES,
   PYTHON_LINT_DEST,
   STOCK_BIOME_SCHEMA,
@@ -229,4 +370,5 @@ module.exports = {
   buildSeedPayload,
   selectSeedWrites,
   applyRepoPlaceholders,
+  planConsumerSeed,
 };

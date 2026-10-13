@@ -42,6 +42,7 @@ const WORKFLOWS = [
       SEED_REPO_FILTER: '',
       SEED_CATEGORIES: 'all',
     }),
+    explicitCategoriesEnv: (list) => ({ SEED_CATEGORIES: list }),
   },
 ];
 
@@ -53,37 +54,45 @@ const MUTATIONS = new Set([
   'graphql.updateRefs',
 ]);
 
+const MARKER_PATH = '.l9/org-birth-profile.yaml';
+
 /**
  * @param {string} BRANCH               seed branch the workflow under test uses
  * @param {null|{sha,aheadBy,commits}} branch  stubbed remote branch state;
  *   commits are `{message, committer, verified}` fixtures, oldest first
  * @param {number[]} openPRs            open PR numbers with head BRANCH
+ * @param {{name: string, marker?: string}[]} repos  org repos the sweep sees;
+ *   a repo with `marker` serves it at MARKER_PATH, every other path is missing
  */
-function makeGithub(BRANCH, { branch = null, openPRs = [] }) {
+function makeGithub(BRANCH, { branch = null, openPRs = [], repos = [{ name: 'consumer-repo' }] }) {
   const calls = [];
   const state = { sha: branch ? branch.sha : null };
+  const markerFor = (repo) => repos.find((r) => r.name === repo)?.marker;
+  // The branch state is one shared `sha`, which is exactly what the
+  // single-repo guard scenarios observe. A multi-repo sweep must not let the
+  // first repo's createRef make every later repo look like it already has a
+  // seed branch, so with several repos the ref stays per-run fresh.
+  const sharedBranchState = repos.length === 1;
   const record = (name) => async (args) => {
     calls.push({ name, args });
     if (name === 'git.createBlob') return { data: { sha: 'blob-sha' } };
     if (name === 'git.createTree') return { data: { sha: 'tree-sha' } };
     if (name === 'git.createCommit') return { data: { sha: 'new-commit-sha' } };
     if (name === 'pulls.create') return { data: { number: 999 } };
-    if (name === 'git.createRef') state.sha = args.sha;
+    if (name === 'git.createRef' && sharedBranchState) state.sha = args.sha;
     return { data: {} };
   };
 
   const shared = makeBranchStubs({ branch: BRANCH, state, calls, openPRs, record });
 
   const github = {
-    paginate: async () => [
-      {
-        name: 'consumer-repo',
-        owner: { login: 'Quantum-L9' },
-        default_branch: 'main',
-        archived: false,
-        fork: false,
-      },
-    ],
+    paginate: async () => repos.map((r) => ({
+      name: r.name,
+      owner: { login: 'Quantum-L9' },
+      default_branch: 'main',
+      archived: false,
+      fork: false,
+    })),
     request: async (route, args) => {
       calls.push({ name: `request ${route}`, args });
       assert.strictEqual(route, 'GET /repos/{owner}/{repo}/compare/{basehead}');
@@ -125,8 +134,13 @@ function makeGithub(BRANCH, { branch = null, openPRs = [] }) {
         },
       },
       repos: {
-        // Every seed path is missing on the consumer: the full payload is selected.
-        getContent: async () => {
+        // Every seed path is missing on the consumer, so the whole class
+        // payload is selected. Only a declared class marker is served.
+        getContent: async (args) => {
+          const marker = markerFor(args.repo);
+          if (args.path === MARKER_PATH && marker !== undefined) {
+            return { data: { content: Buffer.from(marker, 'utf8').toString('base64') } };
+          }
           throw notFound('Not Found');
         },
         get: async () => {
@@ -254,6 +268,109 @@ function makeRunner(wf) {
     r = await run({ branch: null, dry: true });
     assert.strictEqual(r.mutated, false, `${label}: dry run must not write`);
     console.log(`ok: ${label} — dry run performs no writes`);
+
+    // ── Repo-class policy: both seeders classify every target the same way ──
+    // marker > override > default; a malformed explicit marker is skipped and
+    // reported; FORBID destinations are never written; INHERIT destinations
+    // are never copied. Proven on the written blobs (seed) and on the
+    // reported rows (dry run), so neither mode can emit a forbidden path.
+    const blobPaths = (res) => res.calls
+      .filter((c) => c.name === 'git.createTree')
+      .flatMap((c) => c.args.tree.map((t) => t.path))
+      .sort();
+    const rowFor = (res, name) => res.rows.find((row) => row[0] === name);
+    const FORBIDDEN_FOR_GOVERNED = [
+      '.github/workflows/governance.yml',
+      '.github/workflows/l9-analysis.yml',
+      '.github/workflows/l9-lint-test.yml',
+      '.github/workflows/on-org-update.yml',
+    ];
+    const INHERITED_BY_DEFAULT = [
+      'CODE_OF_CONDUCT.md', 'CONTRIBUTING.md', 'SUPPORT.md',
+      '.github/FUNDING.yml', '.github/VULNERABILITY_REPORT.yml',
+    ];
+    const classRepos = [
+      { name: 'plain-repo' },
+      { name: 'ncp-repo', marker: 'schema: l9.org-birth-profile-marker/v1\nprofile: non_constellation_python\n' },
+      { name: 'self-repo', marker: 'profile: self_governed\n' },
+      { name: 'typo-repo', marker: 'profile: non_constelation_python\n' },
+      { name: 'l9-ci-core' }, // no marker; classified by the org override
+    ];
+
+    // 7. Seed mode: the blobs written per repo are exactly the class payload.
+    r = await run({ branch: null, repos: classRepos });
+    const treesByRepo = {};
+    for (const c of r.calls) {
+      if (c.name === 'git.createTree') {
+        treesByRepo[c.args.repo] = c.args.tree.map((t) => t.path).sort();
+      }
+    }
+    assert.ok(treesByRepo['plain-repo'], `${label}: default-class repo must be seeded`);
+    assert.ok(treesByRepo['plain-repo'].includes('.github/workflows/governance.yml'));
+    assert.ok(treesByRepo['plain-repo'].includes('SECURITY.md'));
+    assert.ok(treesByRepo['plain-repo'].includes('.github/PULL_REQUEST_TEMPLATE/release.md'));
+    for (const inherited of INHERITED_BY_DEFAULT) {
+      assert.ok(!treesByRepo['plain-repo'].includes(inherited), `${label}: default must not copy ${inherited}`);
+    }
+    assert.deepStrictEqual(
+      treesByRepo['ncp-repo'],
+      ['.github/CODEOWNERS', '.github/dependabot.yml', '.github/labels.yml', 'SECURITY.md'],
+      `${label}: non_constellation_python must receive exactly its class payload`,
+    );
+    for (const denied of FORBIDDEN_FOR_GOVERNED) {
+      assert.ok(!treesByRepo['ncp-repo'].includes(denied), `${label}: wrote forbidden ${denied} to ncp-repo`);
+    }
+    assert.strictEqual(treesByRepo['self-repo'], undefined, `${label}: self_governed must get no tree`);
+    assert.strictEqual(treesByRepo['l9-ci-core'], undefined, `${label}: override-classified self_governed repo must get no tree`);
+    assert.strictEqual(treesByRepo['typo-repo'], undefined, `${label}: malformed marker must not be seeded`);
+    assert.match(rowFor(r, 'typo-repo')[2], /skipped: .*unknown class non_constelation_python/, `${label}: malformed marker is reported`);
+    assert.strictEqual(rowFor(r, 'typo-repo')[1], 'unresolved');
+    assert.match(rowFor(r, 'self-repo')[2], /nothing safe to seed/);
+    assert.strictEqual(rowFor(r, 'ncp-repo')[1], 'non_constellation_python');
+    assert.strictEqual(rowFor(r, 'plain-repo')[1], 'default');
+    assert.deepStrictEqual(r.failures, [], `${label}: class skips are not run failures`);
+    assert.ok(r.warnings.some((w) => /typo-repo/.test(w)), `${label}: unresolved marker must raise a warning`);
+    console.log(`ok: ${label} — seed mode writes exactly each class's payload; forbidden paths never, malformed markers skipped`);
+
+    // 8. Dry run: the reported preview carries the same class decision.
+    r = await run({ branch: null, dry: true, repos: classRepos });
+    assert.strictEqual(r.mutated, false, `${label}: dry run with classes must not write`);
+    assert.strictEqual(blobPaths(r).length, 0);
+    const ncpPreview = rowFor(r, 'ncp-repo')[2];
+    assert.match(ncpPreview, /would seed 4/, `${label}: ncp dry run previews 4 files (got ${ncpPreview})`);
+    for (const denied of FORBIDDEN_FOR_GOVERNED) {
+      assert.ok(!ncpPreview.includes(denied), `${label}: dry-run preview names forbidden ${denied}`);
+    }
+    assert.match(rowFor(r, 'self-repo')[2], /nothing safe to seed/);
+    assert.match(rowFor(r, 'typo-repo')[2], /skipped: .*unknown class/);
+    assert.match(rowFor(r, 'plain-repo')[2], /would seed 13/);
+    console.log(`ok: ${label} — dry run previews the class payload and never a forbidden path`);
+
+    // 9. An explicit category the class forbids skips the repo with the class
+    //    and path named, writes nothing, and the run still succeeds. Only the
+    //    dispatch seeder takes an explicit category list.
+    if (wf.explicitCategoriesEnv) {
+      r = await run({ branch: null, repos: classRepos, envExtra: wf.explicitCategoriesEnv('governance') });
+      const forbidRow = rowFor(r, 'ncp-repo');
+      assert.match(forbidRow[2], /class forbids requested category/, `${label}: explicit forbidden category must be a reported skip`);
+      assert.match(forbidRow[2], /governance\.yml/);
+      assert.strictEqual(forbidRow[1], 'non_constellation_python');
+      assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.repo === 'ncp-repo'), `${label}: wrote to a repo whose class forbids the request`);
+      assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.repo === 'self-repo'));
+      assert.ok(r.calls.some((c) => c.name === 'git.createTree' && c.args.repo === 'plain-repo'), `${label}: default class still receives the explicit category`);
+      assert.deepStrictEqual(r.failures, []);
+      assert.ok(r.warnings.some((w) => /forbids a requested category/.test(w)));
+      // Same request, dry run: the same skip, still nothing written.
+      r = await run({ branch: null, dry: true, repos: classRepos, envExtra: wf.explicitCategoriesEnv('governance') });
+      assert.match(rowFor(r, 'ncp-repo')[2], /class forbids requested category/);
+      assert.strictEqual(r.mutated, false);
+      // An explicit category the class inherits drops out, never copies.
+      r = await run({ branch: null, repos: classRepos, envExtra: wf.explicitCategoriesEnv('community-health,pr-templates') });
+      const ncpTree = r.calls.find((c) => c.name === 'git.createTree' && c.args.repo === 'ncp-repo');
+      assert.deepStrictEqual(ncpTree.args.tree.map((t) => t.path), ['SECURITY.md'], `${label}: inherited PR templates must drop for ncp`);
+      assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.repo === 'self-repo'), `${label}: self_governed inherits SECURITY.md and templates`);
+      console.log(`ok: ${label} — explicit categories pass through the class: FORBID skips with reason, INHERIT drops`);
+    }
   }
 })().catch((e) => {
   console.error(e);

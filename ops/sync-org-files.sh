@@ -1,42 +1,50 @@
 #!/usr/bin/env bash
 # ops/sync-org-files.sh
-# Syncs org-level files into a consumer repo. Inheritable files are read from
-# the canonical copies GitHub serves (repo root and .github/). Consumer-only
-# CODEOWNERS and the governance caller live in policies/.
+# Seeds org-level files into a local consumer checkout. Thin shell entrypoint
+# over the one policy path: ops/build-seed-payload.js (planConsumerSeed).
 #
-# Org-side seeding of community-health and ownership files. CI is NOT seeded
-# from this repository. The on-org-update category is RETIRED and fails closed.
+# The consumer's class is resolved from `.l9/org-birth-profile.yaml` against
+# policies/repo-classes.yml exactly as the Actions seeders do (marker >
+# override > default; a malformed or unknown explicit marker fails closed).
+# INHERIT destinations are never copied, a FORBID destination refuses the
+# run, and MATERIALIZE is missing-only: an existing consumer file is kept
+# byte-for-byte and reported. CI is NOT seeded from this repository.
+# The on-org-update / l9-ci-pack categories are RETIRED and fail closed.
 # Canonical CI is l9-ci-core.
 #
-# Usage (from the org repo root):
-#   ops/sync-org-files.sh <consumer-repo-path> [--include-all|--include <category>...]
+# Usage (from anywhere; the org root is resolved from this script):
+#   ops/sync-org-files.sh <consumer-repo-path> [--include-all|--include <category>...] [--dry-run]
 #
-# Categories (default `all` = DEFAULT set; labels is opt-in):
+# Categories (`all` / no flag = the consumer's class decides; labels is opt-in
+# for the default class and materialized for non_constellation_python):
 #   codeowners        .github/CODEOWNERS (path-scoped; skip if root CODEOWNERS)
 #   dependabot        .github/dependabot.yml (github-actions only)
-#   governance        .github/workflows/governance.yml
-#   community-health  CODE_OF_CONDUCT.md, CONTRIBUTING.md, SECURITY.md
-#                     (no LICENSE, FUNDING.yml, SUPPORT.md); advisory links
-#                     are rewritten to the consumer's origin remote
+#   governance        .github/workflows/governance.yml (FORBID for governed classes)
+#   community-health  SECURITY.md only; advisory links are rewritten to the
+#                     consumer's origin remote. CODE_OF_CONDUCT.md,
+#                     CONTRIBUTING.md, SUPPORT.md, FUNDING.yml and
+#                     VULNERABILITY_REPORT.yml are INHERIT (GitHub serves
+#                     them org-wide) and are never copied. No LICENSE.
 #   issue-templates   numbered chooser + ci-failure +
 #                     gov-violation + config.yml
 #                     (no bug_report / feature_request / EXAMPLE.md)
 #   pr-templates      .github/pull_request_template.md (the file make pr fills)
-#   labels            OPT-IN — org sync-labels-all.yml already fans labels
+#                     + .github/PULL_REQUEST_TEMPLATE/release.md
+#   labels            opt-in for `default` — org sync-labels-all.yml fans labels
 #   on-org-update     RETIRED — legacy receiver; fails closed
 #
-# Default (no --include flag): DEFAULT_CATEGORIES (not labels).
-# Actions twin: .github/workflows/seed-governance.yml (ops/build-seed-payload.js).
+# An explicit --include that names a category the consumer's class forbids is
+# refused with the class and path named; nothing is written.
+# Actions twin: .github/workflows/seed-governance.yml (same module).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ORG_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-POLICIES_DIR="$ORG_ROOT/policies"
 
 usage() {
-  echo "Usage: $0 <consumer-repo-path> [--include-all|--include <category>...]" >&2
-  echo "Default: codeowners dependabot governance community-health issue-templates pr-templates" >&2
-  echo "Opt-in:  labels" >&2
+  echo "Usage: $0 <consumer-repo-path> [--include-all|--include <category>...] [--dry-run]" >&2
+  echo "Default: the consumer's repo class decides (policies/repo-classes.yml)" >&2
+  echo "Categories: codeowners dependabot governance community-health issue-templates pr-templates labels" >&2
   echo "Retired: on-org-update, l9-ci-pack (fail closed)" >&2
   exit 1
 }
@@ -53,168 +61,82 @@ if [[ ! -d "$CONSUMER_ROOT" ]]; then
   exit 1
 fi
 
-# Parse categories
-DEFAULT_CATEGORIES=(codeowners dependabot governance community-health issue-templates pr-templates)
-ALL_CATEGORIES=("${DEFAULT_CATEGORIES[@]}" labels)
+# Policy, payload and missing-only selection live in Node. Without it the
+# shell cannot honor the class contract, so it refuses rather than copying.
+if ! command -v node >/dev/null 2>&1; then
+  echo "❌ ERROR: node is required: ops/build-seed-payload.js resolves the consumer's repo class." >&2
+  echo "   Refusing to copy files without class resolution (FORBID / INHERIT / missing-only)." >&2
+  exit 1
+fi
+
 RETIRED_CATEGORIES=(on-org-update l9-ci-pack)
 CATEGORIES=()
-HAS_PYTHON=0
-if [[ -f "$CONSUMER_ROOT/pyproject.toml" || -f "$CONSUMER_ROOT/requirements.txt" ]]; then
-  HAS_PYTHON=1
-fi
+DRY_RUN=0
 
-# GitHub reads .github/CODEOWNERS in preference to a root CODEOWNERS, so seeding
-# the path-scoped template over an existing root file silently drops the
-# consumer's ownership rules for every path the template does not list.
-# Mirrors buildSeedPayload({ hasRootCodeowners }).
-HAS_ROOT_CODEOWNERS=0
-if [[ -f "$CONSUMER_ROOT/CODEOWNERS" ]]; then
-  HAS_ROOT_CODEOWNERS=1
-fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --include-all)
+      shift
+      ;;
+    --include)
+      shift
+      while [[ $# -gt 0 && "$1" != --* ]]; do
+        CATEGORIES+=("$1")
+        shift
+      done
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      shift
+      ;;
+    *)
+      echo "❌ ERROR: unknown argument: $1" >&2
+      usage
+      ;;
+  esac
+done
 
-# owner/name of the consumer, used to point advisory links at the consumer
-# rather than at this org repo. Mirrors applyRepoPlaceholders(text, repository).
+for cat in "${CATEGORIES[@]+"${CATEGORIES[@]}"}"; do
+  for retired in "${RETIRED_CATEGORIES[@]}"; do
+    if [[ "$cat" == "$retired" ]]; then
+      # RETIRED. An explicit include must not report a completed sync that
+      # copied nothing. CI is Quantum-L9/l9-ci-core, not a pack copied here.
+      echo "❌ ERROR: seed category '$cat' is RETIRED." >&2
+      echo "   CI is Quantum-L9/l9-ci-core, not a file copied from this repo." >&2
+      exit 1
+    fi
+  done
+done
+
+# owner/name of the consumer: names the repo for class overrides and points
+# advisory links at the consumer rather than at this org repo.
 CONSUMER_REPO=""
 if remote_url="$(git -C "$CONSUMER_ROOT" remote get-url origin 2>/dev/null)"; then
   CONSUMER_REPO="$(printf '%s' "$remote_url" \
     | sed -E 's#^git@github\.com:#https://github.com/#; s#^https://[^/]*/##; s#\.git$##')"
 fi
 
-if [[ $# -eq 0 ]] || [[ "${1:-}" == "--include-all" ]]; then
-  CATEGORIES=("${DEFAULT_CATEGORIES[@]}")
-else
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --include)
-        shift
-        while [[ $# -gt 0 && "$1" != --* ]]; do
-          CATEGORIES+=("$1")
-          shift
-        done
-        ;;
-      *)
-        echo "❌ ERROR: unknown argument: $1" >&2
-        usage
-        ;;
-    esac
-  done
-fi
-
 if [[ ${#CATEGORIES[@]} -eq 0 ]]; then
-  echo "❌ ERROR: no categories specified." >&2
-  usage
+  CATEGORY_ARG="all"
+else
+  CATEGORY_ARG="$(IFS=,; printf '%s' "${CATEGORIES[*]}")"
 fi
-
-sync_file() {
-  local src="$1"
-  local dest="$2"
-  mkdir -p "$(dirname "$dest")"
-  cp "$src" "$dest"
-  rel="${dest#"$CONSUMER_ROOT"/}"
-  echo "  ✓ $rel"
-}
-
-# Same copy, with this org repo's advisory URLs rewritten to the consumer's, so
-# a synced SECURITY.md / issue-template config.yml does not route vulnerability
-# reports to Quantum-L9/.github while claiming to target the consumer.
-ADVISORY_INBOX_STOCK="https://github.com/Quantum-L9/.github/security/advisories/new"
-ADVISORY_POLICY_STOCK="https://github.com/Quantum-L9/.github/security/policy"
-
-sync_file_with_placeholders() {
-  local src="$1"
-  local dest="$2"
-  if [[ -z "$CONSUMER_REPO" ]]; then
-    sync_file "$src" "$dest"
-    return
-  fi
-  local advisory="https://github.com/${CONSUMER_REPO}/security/advisories/new"
-  mkdir -p "$(dirname "$dest")"
-  ADVISORY_INBOX_STOCK="$ADVISORY_INBOX_STOCK" \
-  ADVISORY_POLICY_STOCK="$ADVISORY_POLICY_STOCK" \
-  ADVISORY_NEW="$advisory" \
-  python3 -c 'import os,sys
-src, dest = sys.argv[1], sys.argv[2]
-with open(src, encoding="utf-8") as fh:
-    text = fh.read()
-new = os.environ["ADVISORY_NEW"]
-for stock in (os.environ["ADVISORY_INBOX_STOCK"], os.environ["ADVISORY_POLICY_STOCK"]):
-    text = text.replace(stock, new)
-with open(dest, "w", encoding="utf-8") as fh:
-    fh.write(text)' "$src" "$dest"
-  rel="${dest#"$CONSUMER_ROOT"/}"
-  echo "  ✓ $rel (advisory links → $CONSUMER_REPO)"
-}
 
 echo "=== Syncing org files to $(basename "$CONSUMER_ROOT") ==="
-echo "Categories: ${CATEGORIES[*]}"
+echo "Categories: ${CATEGORY_ARG}"
+[[ -n "$CONSUMER_REPO" ]] && echo "Repository: ${CONSUMER_REPO}"
 echo ""
 
-for cat in "${CATEGORIES[@]}"; do
-  case "$cat" in
-    codeowners)
-      echo "── CODEOWNERS ──"
-      if [[ "$HAS_ROOT_CODEOWNERS" -eq 1 ]]; then
-        echo "  skip .github/CODEOWNERS (root CODEOWNERS present; it stays authoritative)"
-      else
-        sync_file "$POLICIES_DIR/CODEOWNERS" "$CONSUMER_ROOT/.github/CODEOWNERS"
-      fi
-      ;;
-    dependabot)
-      echo "── dependabot.yml ──"
-      sync_file ".github/dependabot.yml" "$CONSUMER_ROOT/.github/dependabot.yml"
-      ;;
-    governance)
-      echo "── governance caller ──"
-      sync_file "$POLICIES_DIR/governance-caller.yml" "$CONSUMER_ROOT/.github/workflows/governance.yml"
-      ;;
-    labels)
-      echo "── labels.yml ──"
-      sync_file ".github/labels.yml" "$CONSUMER_ROOT/.github/labels.yml"
-      ;;
-    community-health)
-      echo "── community health ──"
-      for f in CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md; do
-        if [[ -f "$f" ]]; then
-          sync_file_with_placeholders "$f" "$CONSUMER_ROOT/$f"
-        fi
-      done
-      ;;
-    issue-templates)
-      echo "── issue templates ──"
-      mkdir -p "$CONSUMER_ROOT/.github/ISSUE_TEMPLATE"
-      for f in .github/ISSUE_TEMPLATE/*; do
-        [[ -f "$f" ]] || continue
-        name="$(basename "$f")"
-        case "$name" in
-          bug_report.yml|feature_request.yml|EXAMPLE.md) continue ;;
-        esac
-        sync_file_with_placeholders "$f" "$CONSUMER_ROOT/.github/ISSUE_TEMPLATE/$name"
-      done
-      ;;
-    pr-templates)
-      echo "── PR template ──"
-      sync_file ".github/pull_request_template.md" \
-        "$CONSUMER_ROOT/.github/pull_request_template.md"
-      ;;
-    on-org-update)
-      # RETIRED. This receiver's only action was running
-      # scripts/sync_ci_from_pack.py, the consumer half of the old copy loop.
-      echo "❌ ERROR: seed category 'on-org-update' is RETIRED." >&2
-      echo "   It existed to run scripts/sync_ci_from_pack.py, which is gone." >&2
-      exit 1
-      ;;
-    l9-ci-pack)
-      # RETIRED. The pack files are gone. An explicit include must not
-      # report a completed sync that copied nothing.
-      echo "❌ ERROR: seed category 'l9-ci-pack' is RETIRED." >&2
-      echo "   CI is Quantum-L9/l9-ci-core, not a pack copied from this repo." >&2
-      exit 1
-      ;;
-    *)
-      echo "⚠️  WARNING: unknown category '$cat', skipping." >&2
-      ;;
-  esac
-  echo ""
-done
+NODE_ARGS=(--consumer "$CONSUMER_ROOT" --repository "$CONSUMER_REPO" --categories "$CATEGORY_ARG")
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  NODE_ARGS+=(--dry-run)
+fi
 
-echo "✅ Sync complete."
+node "$ORG_ROOT/ops/build-seed-payload.js" "${NODE_ARGS[@]}"
+
+echo ""
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  echo "✅ Dry run complete (nothing written)."
+else
+  echo "✅ Sync complete."
+fi

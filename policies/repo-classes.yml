@@ -27,7 +27,7 @@
   },
   "classes": {
     "default": {
-      "description": "No class marker. Materialize codeowners, dependabot, governance, community-health, issue templates, and pull-request templates. Apply labels and repository settings.",
+      "description": "No class marker. Materialize codeowners, dependabot, governance, SECURITY.md, issue templates, and pull-request templates. Inherit the passive community-health surfaces. Apply labels and repository settings.",
       "seed_categories": [
         "codeowners",
         "dependabot",
@@ -36,7 +36,13 @@
         "issue-templates",
         "pr-templates"
       ],
-      "inherit": [],
+      "inherit": [
+        "CODE_OF_CONDUCT.md",
+        "CONTRIBUTING.md",
+        "SUPPORT.md",
+        ".github/FUNDING.yml",
+        ".github/VULNERABILITY_REPORT.yml"
+      ],
       "forbid": [],
       "remote_apply": {
         "labels": true,
@@ -45,13 +51,15 @@
       "mandatory_files_waive": []
     },
     "self_governed": {
-      "description": "Materialize nothing. Apply labels and repository settings. Forbid the org CI distribution paths and the governance caller.",
+      "description": "Materialize nothing. Inherit every community-health surface, including SECURITY.md. Apply labels and repository settings. Forbid the org CI distribution paths and the governance caller.",
       "seed_categories": [],
       "inherit": [
         "CODE_OF_CONDUCT.md",
         "CONTRIBUTING.md",
         "SECURITY.md",
+        "SUPPORT.md",
         ".github/FUNDING.yml",
+        ".github/VULNERABILITY_REPORT.yml",
         ".github/ISSUE_TEMPLATE/**",
         ".github/pull_request_template.md",
         ".github/PULL_REQUEST_TEMPLATE/**"
@@ -75,15 +83,19 @@
       ]
     },
     "non_constellation_python": {
-      "description": "Materialize codeowners, dependabot, and labels. Inherit community-health files. Forbid org CI distribution paths and the retired consumer CI pin files.",
+      "description": "Materialize codeowners, dependabot, labels, and SECURITY.md (consumer-specific advisory routing). Inherit the passive community-health surfaces, issue templates, and pull-request templates. Forbid org CI distribution paths and the retired consumer CI pin files.",
       "seed_categories": [
         "codeowners",
         "dependabot",
-        "labels"
+        "labels",
+        "community-health"
       ],
       "inherit": [
         "CODE_OF_CONDUCT.md",
+        "CONTRIBUTING.md",
+        "SUPPORT.md",
         ".github/FUNDING.yml",
+        ".github/VULNERABILITY_REPORT.yml",
         ".github/ISSUE_TEMPLATE/**",
         ".github/pull_request_template.md",
         ".github/PULL_REQUEST_TEMPLATE/**"

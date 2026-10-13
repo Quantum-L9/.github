@@ -1,7 +1,9 @@
 'use strict';
 
 /**
- * Asserts the default seed payload is stack-aware and omits drop-ranked dests.
+ * Asserts the default seed payload MATERIALIZES exactly the repository-local
+ * surfaces and omits every INHERIT, REMOTE APPLY, and FORBID dest
+ * (docs/REPO_BIRTH_PROFILES.md).
  * Run from the Quantum-L9/.github repo root:
  *   node ops/test-build-seed-payload.js
  */
@@ -17,6 +19,10 @@ const {
   PYTHON_LINT_DEST,
   RETIRED_CATEGORIES,
 } = require('./build-seed-payload.js');
+
+// Explicit comparator: a default `.sort()` compares by string conversion,
+// which is an implicit ordering rule one refactor away from being wrong.
+const byName = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 
 const root = path.resolve(__dirname, '..');
 const origCwd = process.cwd();
@@ -44,12 +50,34 @@ try {
   assert.deepStrictEqual(parseCategories('labels'), ['labels']);
 
   const defaultPayload = buildSeedPayload({ fs, categories: 'all' });
+
+  // MATERIALIZE: every dest a default consumer must carry as local bytes.
+  for (const dest of [
+    'SECURITY.md',
+    '.github/CODEOWNERS',
+    '.github/dependabot.yml',
+    '.github/workflows/governance.yml',
+    '.github/ISSUE_TEMPLATE/1-bug.yml',
+    '.github/ISSUE_TEMPLATE/2-feature.yml',
+    '.github/pull_request_template.md',
+    '.github/PULL_REQUEST_TEMPLATE/release.md',
+  ]) {
+    assert.ok(dest in defaultPayload, `default payload must materialize ${dest}`);
+  }
+
+  // Never in the payload: INHERIT surfaces GitHub serves org-wide, REMOTE APPLY
+  // state, retired CI, the deleted infra template, and LICENSE.
   for (const dest of [
     'LICENSE',
-    '.github/FUNDING.yml',
+    'CODE_OF_CONDUCT.md',
+    'CONTRIBUTING.md',
     'SUPPORT.md',
-    '.github/workflows/on-org-update.yml',
+    '.github/FUNDING.yml',
+    '.github/VULNERABILITY_REPORT.yml',
+    '.github/PULL_REQUEST_TEMPLATE/infra.md',
     '.github/labels.yml',
+    '.github/workflows/on-org-update.yml',
+    '.github/workflows/l9-lint-test.yml',
     '.github/ISSUE_TEMPLATE/bug_report.yml',
     '.github/ISSUE_TEMPLATE/feature_request.yml',
     '.github/ISSUE_TEMPLATE/seed-ci-failure.yml',
@@ -58,6 +86,25 @@ try {
     assert.ok(!(dest in defaultPayload), `default payload must omit ${dest}`);
   }
 
+  // community-health is SECURITY.md alone: the one file with consumer-specific
+  // routing. The passive surfaces are INHERIT and never copied.
+  const communityHealth = buildSeedPayload({ fs, categories: ['community-health'] });
+  assert.deepStrictEqual(Object.keys(communityHealth), ['SECURITY.md']);
+
+  // pr-templates materializes the human template and the release template,
+  // by name. The deleted infra template must never reappear via a directory
+  // copy.
+  const prTemplates = buildSeedPayload({ fs, categories: ['pr-templates'] });
+  assert.deepStrictEqual(Object.keys(prTemplates).sort(byName), [
+    '.github/PULL_REQUEST_TEMPLATE/release.md',
+    '.github/pull_request_template.md',
+  ]);
+  assert.match(prTemplates['.github/PULL_REQUEST_TEMPLATE/release.md'], /^## Release/);
+  assert.ok(
+    !fs.existsSync('.github/PULL_REQUEST_TEMPLATE/infra.md'),
+    'the infra PR template is deleted, not merely unseeded',
+  );
+
   // `.github/workflows/l9-lint-test.yml` was the pack's Python lint caller. It
   // is FORBID in both governed repo classes and is no longer seeded by anything,
   // so the default payload must omit it at every hasPython setting.
@@ -65,14 +112,6 @@ try {
     !(PYTHON_LINT_DEST in buildSeedPayload({ fs, categories: 'all', hasPython: true })),
     'the retired Python lint caller must not be seeded, even for a Python repo',
   );
-  const contributing = defaultPayload['CONTRIBUTING.md'];
-  assert.ok(contributing, 'CONTRIBUTING.md is default-seeded');
-  assert.doesNotMatch(contributing, /\.cursor\/rules/);
-  assert.doesNotMatch(contributing, /\.cursor\/skills/);
-  assert.doesNotMatch(contributing, /\.cursor\/commands/);
-  assert.match(contributing, /PR_REMEDIATE=0 make pr/);
-  assert.match(contributing, /l9-governance/);
-
   const security = buildSeedPayload({
     fs,
     categories: ['community-health'],
@@ -130,9 +169,10 @@ try {
   const pin = fs.readFileSync('ops/governance-v1-pin.txt', 'utf8');
   assert.match(pin, /7ed3ab8650583f6659a6caf061eae77dbd3ed1be/);
 
-  console.log('ok: default payload drops LICENSE/FUNDING/SUPPORT/labels/on-org-update/dup issues');
+  console.log('ok: default payload materializes SECURITY.md, ownership, governance caller, issue + PR templates');
+  console.log('ok: default payload omits INHERIT surfaces (CoC/CONTRIBUTING/SUPPORT/FUNDING/VULNERABILITY_REPORT), LICENSE, labels, retired CI, infra.md');
+  console.log('ok: community-health is SECURITY.md alone; release.md is materialized by pr-templates');
   console.log('ok: Python lint dest is not seeded');
-  console.log('ok: CONTRIBUTING has no v2 .cursor/rules|skills|commands ritual');
   console.log('ok: existing files are left untouched');
 } finally {
   process.chdir(origCwd);
