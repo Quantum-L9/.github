@@ -513,17 +513,26 @@ try {
     'policies/repo-settings.yml': { defaults: {} },
     'policies/mandatory-files.yml': { files: [{ path: '.github/workflows/governance.yml' }, { path: 'README.md' }] },
   };
-  const runEnforce = async ({ files = {}, errors = {} }) => {
+  // `dryRun` is the DRY_RUN env the step receives. A scheduled run has no
+  // inputs, so it gets 'false' (`inputs.dry_run || 'false'`) and APPLIES
+  // settings: that is the mode a fail-open probe would damage.
+  const runEnforceFull = async ({ files = {}, errors = {}, dryRun = 'true', settings, current = {} }) => {
     const scoped = makeScopedRequire(root);
+    const pol = settings ? { ...policies, 'policies/repo-settings.yml': settings } : policies;
     const req = (m) => (m === 'child_process'
-      ? { execSync: (cmd) => JSON.stringify(policies[Object.keys(policies).find((p) => cmd.includes(p))]) }
+      ? { execSync: (cmd) => JSON.stringify(pol[Object.keys(pol).find((p) => cmd.includes(p))]) }
       : scoped(m));
+    const updates = [];
     const github = {
       paginate: async () => [{ name: 'consumer-repo', archived: false, fork: false }],
       rest: {
         repos: {
           listForOrg: () => {},
-          get: async () => ({ data: {} }),
+          get: async () => ({ data: current }),
+          update: async (args) => {
+            updates.push(args);
+            return { data: {} };
+          },
           getContent: async ({ path: p }) => {
             if (errors[p]) throw Object.assign(new Error(`HTTP ${errors[p]}`), { status: errors[p] });
             if (p in files) return { data: { type: 'file', content: Buffer.from(files[p]).toString('base64') } };
@@ -536,7 +545,7 @@ try {
     const prev = process.cwd();
     const prevEnv = { DRY_RUN: process.env.DRY_RUN, FILTER: process.env.FILTER };
     process.chdir(root);
-    Object.assign(process.env, { DRY_RUN: 'true', FILTER: '' });
+    Object.assign(process.env, { DRY_RUN: dryRun, FILTER: '' });
     try {
       await enforce(github, core, {}, req);
     } finally {
@@ -548,8 +557,9 @@ try {
     }
     // The summary table lists only non-compliant repositories.
     const row = core.tables.at(-1).slice(1).find((r) => r[0] === 'consumer-repo');
-    return row ? row[1] : 'compliant';
+    return { status: row ? row[1] : 'compliant', updates, failures: core.failures };
   };
+  const runEnforce = async (opts) => (await runEnforceFull(opts)).status;
 
   // Marker 403: not absent, so no default-class assessment.
   let status = await runEnforce({ errors: { [MARKER]: 403 } });
@@ -573,6 +583,43 @@ try {
   assert.match(status, /unverified: README\.md unreadable \(500\)/);
   assert.doesNotMatch(status, /missing: README\.md/);
   console.log('ok: enforce-policies — unreadable/malformed marker is unresolved, never assessed as default; unreadable files are unverified, not missing');
+
+  // ── the opt-out probe fails closed (F1) ──────────────────────────────────
+  // `.l9/no-policy-enforcement` gates a settings WRITE. Only a 404 means the
+  // marker is absent; a 403/5xx is an unread opt-out, so the repository is
+  // neither enforced nor reported compliant, and the run fails. Driven with
+  // settings drift so a fail-open probe would be observable as repos.update.
+  const OPT_OUT = '.l9/no-policy-enforcement';
+  const drift = { settings: { defaults: { has_wiki: false } }, current: { has_wiki: true } };
+  const healthy = { '.github/workflows/governance.yml': 'x', 'README.md': '# x\n' };
+  for (const dryRun of ['false', 'true']) { // 'false' = scheduled run / Apply
+    for (const code of [403, 500, 502]) {
+      const r = await runEnforceFull({ ...drift, dryRun, files: healthy, errors: { [OPT_OUT]: code } });
+      assert.deepStrictEqual(r.updates, [], `opt-out probe ${code} (DRY_RUN=${dryRun}) still called repos.update`);
+      assert.match(r.status, new RegExp(`^BLOCKED: ${OPT_OUT.replace(/[.]/g, '\\.')} unreadable \\(${code}\\)`));
+      assert.doesNotMatch(r.status, /compliant|settings (fixed|drift)/);
+      assert.strictEqual(r.failures.length, 1, `opt-out probe ${code} must fail the run`);
+      assert.match(r.failures[0], /consumer-repo/);
+    }
+  }
+  // 404 is a real absence: enforcement proceeds, a scheduled run applies.
+  {
+    const r = await runEnforceFull({ ...drift, dryRun: 'false', files: healthy });
+    assert.deepStrictEqual(r.updates, [{ owner: 'Quantum-L9', repo: 'consumer-repo', has_wiki: false }]);
+    assert.strictEqual(r.status, 'settings fixed: has_wiki');
+    assert.deepStrictEqual(r.failures, []);
+    const preview = await runEnforceFull({ ...drift, dryRun: 'true', files: healthy });
+    assert.deepStrictEqual(preview.updates, []);
+    assert.match(preview.status, /settings drift: has_wiki=true→false/);
+  }
+  // A present marker is an honoured opt-out: no write, no failure.
+  for (const dryRun of ['false', 'true']) {
+    const r = await runEnforceFull({ ...drift, dryRun, files: { ...healthy, [OPT_OUT]: '' } });
+    assert.deepStrictEqual(r.updates, []);
+    assert.strictEqual(r.status, 'opted out');
+    assert.deepStrictEqual(r.failures, []);
+  }
+  console.log('ok: enforce-policies — opt-out probe 403/5xx blocks the repo (no repos.update, run fails); 404 enforces; a present marker opts out');
 })().catch((e) => {
   console.error(e);
   process.exit(1);
