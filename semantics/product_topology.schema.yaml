@@ -53,6 +53,7 @@ properties:
       id: semantic_ref
       kind: product_kind_or_explicit_unknown
       archetype_ref: semantic_ref_or_explicit_unknown
+      kind_exception_ref: semantic_ref_or_null
       name: string
       versioning_family: semantic_ref_or_string
       status: semantic_ref_or_string
@@ -449,6 +450,7 @@ semantic_rules:
 - governance_profile_is_not_identity
 - dynamic_identity_is_resolved_into_identity_assertion_not_authored_as_static_session_fact
 - valid_identity_assertion_is_consumed_not_rederived
+- product_kind_exception_is_claimed_only_by_explicit_reference_and_exact_subject_binding
 kind_resolution:
   canonical_source: product_kinds.yaml
   admitted_kind_rule: Declared kind must resolve to an admitted ProductKind before ProductManifest may pass the
@@ -456,3 +458,11 @@ kind_resolution:
   unknown_rule: A product whose ProductKind or archetype is not yet admitted remains representable through explicit
     material Unknowns; the compiler must not guess or coerce a nearest kind.
   archetype_rule: Resolved archetype must come from the catalog bound by the resolved ProductKind.
+  exception_rule: Absent product.kind_exception_ref, declared consumption and deployment models must equal the resolved
+    kind's models. A declared product.kind_exception_ref must resolve to an admitted entry of product_kinds.yaml#kind_exceptions
+    whose kind, subject product, canonical repository, and archetype equal the declaration; the entry's effective models
+    and enumerated departures then apply and every undisplaced obligation remains. Any unresolved, unadmitted, malformed,
+    or unbound claim is invalid, never ignored and never coerced to the nearest kind. ProductTopology and ProductManifest are
+    release-independent, so an exception's release floor (subject.applies_from_release) is a product-kind release obligation
+    enforced at product release admission through l9.contract/product-release@1 (applicable_product_kind_requirements_are_resolved).
+  exception_catalog: product_kinds.yaml#kind_exceptions

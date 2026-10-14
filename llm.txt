@@ -16,7 +16,7 @@ Do not copy `semantics/` into a product repository. Cite `artifact_id`. The comp
 - [Contracts](semantics/contracts.yaml): the single global contract catalog
 - [Invariants](semantics/invariants.yaml): global invariants
 - [Product topology schema](semantics/product_topology.schema.yaml): shape of the authoritative product contract
-- [Product kinds](semantics/product_kinds.yaml): Node and Dependency; kind follows consumption and deployment
+- [Product kinds](semantics/product_kinds.yaml): Node and Dependency; kind follows consumption and deployment; one product-scoped exception (hosted Memory Dependency)
 - [Node archetypes](semantics/node_archetypes.yaml): architecture obligations for a Node
 - [Dependency archetypes](semantics/dependency_archetypes.yaml): architecture obligations for a Dependency
 - [Identity model](semantics/identity_model.yaml): identity dimensions stay distinct

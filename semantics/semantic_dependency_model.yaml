@@ -133,6 +133,7 @@ dependency_rules:
     depends_on:
     - product_topology
     - product_kinds
+    - repository_registry
     change_effect: archetype_architecture_and_manifest_stale
   product_archetype_resolution:
     depends_on:

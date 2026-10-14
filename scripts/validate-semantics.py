@@ -9425,6 +9425,2285 @@ def check_rc028(docs: dict[str, dict], report: Report) -> None:
         _check_rc028_negative_cases(docs, report)
 
 
+# RC-029 ProductKind exception closure. A product-kind exception is canonical
+# law admitted by the ProductKind owner (product_kinds.yaml#kind_exceptions)
+# that lets one exactly identified product keep its kind while an enumerated
+# set of that kind's obligations is displaced. RC-029 pins the single admitted
+# exception and the exception model exactly (field pins plus a canonical
+# digest), proves every displaced obligation resolves to real, unprotected
+# law of the excepted kind, proves each ledger that states kind law carries
+# the exact-product qualifier, and evaluates ProductTopology witnesses under
+# l9.contract/product-kind@1: ordinary Node and Dependency witnesses and the
+# exact Memory hosted-service topology resolve; copied, unbound, malformed,
+# unauthorized, authority-inflating, and security-relaxing claims are invalid.
+PRODUCT_KINDS_PATH = "semantics/product_kinds.yaml"
+ARCH_RULES_PATH = "semantics/architecture_rules.yaml"
+ARCH_PATTERNS_PATH = "semantics/architecture_patterns.yaml"
+DEPENDENCY_ARCHETYPES_PATH = "semantics/dependency_archetypes.yaml"
+TOPOLOGY_SCHEMA_PATH = "semantics/product_topology.schema.yaml"
+MANIFEST_SCHEMA_PATH = "semantics/product_manifest.schema.yaml"
+SOLVER_CATALOG_PATH = "semantics/solver_catalog.yaml"
+REGISTRY_PATH = "semantics/repository_registry.yaml"
+RC029_ADR_PATH = "docs/adr/ADR-011-product-kind-node-dependency-taxonomy.md"
+RC029_ADR_ANCHOR = "amendment-2026-10-14-memory-hosted-service-exception"
+# GitHub derives the anchor above from this heading's text.
+RC029_ADR_HEADING = "## Amendment 2026-10-14: Memory hosted-service exception"
+RC029_OWNER = "Quantum-L9/.github"
+RC029_EXCEPTION_ID = "l9.product-kind-exception/memory-hosted-service@1"
+RC029_EXCEPTION_PATH = "kind_exceptions[0]"
+# sha256 of json.dumps(<entry>, sort_keys=True, separators=(",", ":")). Any
+# change to the admitted bytes, pinned field or not, needs a reviewed
+# validator change and a new dated ADR-011 amendment.
+RC029_EXCEPTION_DIGEST = (
+    "f811ec16abd18e61be27027d44941a3a7030e878d4efecc281be6652a4d3fc41"
+)
+RC029_MODEL_DIGEST = "2170c30e211e087184f4943912fb36ce956851bee6ac6136abd0f3b11ee499d8"
+RC029_SUBJECT = {
+    "product_ref": "l9-graphiti-memory:product/l9-graphite-memory",
+    "canonical_repository": "Quantum-L9/l9-graphiti-memory",
+    "repository_ref": "l9-graphiti-memory",
+    "archetype_ref": "l9.dependency-archetype/semantic-subsystem@1",
+    "applies_from_release": "3.0.0",
+}
+RC029_EFFECTIVE_MODELS = {
+    "consumption_model": "remote_invocation",
+    "deployment_model": "independent_runtime",
+}
+RC029_PROTOCOL = "mcp_streamable_http"
+RC029_REMOTE = {
+    "protocol": RC029_PROTOCOL,
+    "authentication": "required",
+    "authorization": "namespace_scoped",
+    "gate_routing": "ordinary_agent_mcp_requests_are_actor_to_service_consumption_not_gate_routed_inter_product_work",
+}
+RC029_PERSISTENCE_REF = "technology_capabilities.yaml#technologies[postgresql]"
+RC029_DEPLOYMENT = {
+    "hosting": "one_independent_operational_service",
+    "process_lifecycle_owner": "product",
+    "operational_health_owner": "product",
+    "canonical_persistence": {
+        "technology_ref": RC029_PERSISTENCE_REF,
+        "role": "shared_canonical_persistence_backend",
+        "semantic_owner_unchanged": True,
+    },
+    "hosting_coordinate": "deployment_owned",
+}
+RC029_IDENTITY = {
+    "identity_dimensions": ["product_identity", "release_identity", "runtime_identity"],
+    "runtime_identity_rule": "RuntimeIdentity(memory_service_instance) = RuntimeIdentity(admitted Memory service "
+    "deployment); it is never ConstellationIdentity and confers no Gate admission or routability.",
+}
+RC029_HOSTED_ADMISSION = {
+    "states": [
+        "deployed",
+        "release_identity_bound",
+        "runtime_identity_bound",
+        "authentication_enforced",
+        "health_ready",
+        "service_admitted",
+        "degraded_or_current",
+        "withdrawn",
+    ],
+    "rule": "Successful deployment does not self-admit the Memory service; service admission binds the exact admitted "
+    "release and never confers Constellation identity, Gate admission, or routability.",
+    "topology_declaration": {
+        "field": "admission.kind_specific_requirements",
+        "requires": "service_admitted",
+    },
+    "distinctions": {
+        "declaration": "A bound ProductTopology declares service_admitted as a kind-specific admission requirement.",
+        "resolution": "Product release admission resolves that requirement under l9.contract/product-release@1 "
+        "without admitting any running service.",
+        "admission": "Only the applicable target-class authority admits an exact running Memory service deployment; "
+        "topology validation, release admission, and deployment never do.",
+    },
+}
+_RC029_PK = "product_kinds.yaml#kinds.dependency."
+_RC029_RULE = "architecture_rules.yaml#rules[l9.arch-rule/product-kind-dependency@1].derive.architecture_obligations."
+_RC029_PATTERN = "architecture_patterns.yaml#patterns[l9.pattern/dependency-package@1]."
+_RC029_ARCHETYPES = "dependency_archetypes.yaml#"
+_RC029_REMOTE_ONLY = "remote_invocation_through_authenticated_mcp_streamable_http_only"
+_RC029_ONE_SERVICE = "independent_runtime_as_one_operational_service"
+_RC029_OWNED_LIFECYCLE = "product_owned_server_process_lifecycle_and_operational_health"
+_RC029_SERVICE_RUNTIME = "service_runtime_identity_rule"
+RC029_DEPARTURES = {
+    _RC029_PK + "consumption_model": _RC029_REMOTE_ONLY,
+    _RC029_PK + "deployment_model": _RC029_ONE_SERVICE,
+    _RC029_PK + "requires.consumer_owned_process_lifecycle": _RC029_OWNED_LIFECYCLE,
+    _RC029_PK
+    + "forbidden.remote_invocation_as_canonical_consumption": "remote_invocation_only_through_authenticated_mcp_streamable_http",
+    _RC029_PK
+    + "identity_dimensions": "product_release_and_service_runtime_identity_without_constellation_identity",
+    _RC029_PK + "runtime_identity_rule": _RC029_SERVICE_RUNTIME,
+    _RC029_PK
+    + "consumer_binding_required": "hosted_service_admission_and_remote_consumer_authentication",
+    _RC029_RULE + "local_composition": _RC029_REMOTE_ONLY,
+    _RC029_RULE + "consumer_bound_artifact": _RC029_ONE_SERVICE,
+    _RC029_RULE + "consumer_owned_process_lifecycle": _RC029_OWNED_LIFECYCLE,
+    _RC029_PATTERN + "lifecycle": _RC029_OWNED_LIFECYCLE,
+    _RC029_PATTERN + "runtime_identity": _RC029_SERVICE_RUNTIME,
+    _RC029_PATTERN
+    + "preconditions.independent_deployment_not_required": _RC029_ONE_SERVICE,
+    _RC029_PATTERN
+    + "guarantees.consumer_owns_process_lifecycle": _RC029_OWNED_LIFECYCLE,
+    _RC029_PATTERN
+    + "guarantees.canonical_consumption_is_local_composition": _RC029_REMOTE_ONLY,
+    _RC029_PATTERN
+    + "guarantees.canonical_deployment_is_consumer_bound_artifact": _RC029_ONE_SERVICE,
+    _RC029_PATTERN
+    + "forbidden.separate_runtime_identity_without_explicit_node_binding": _RC029_SERVICE_RUNTIME,
+    _RC029_ARCHETYPES
+    + "global_rules.dependencies_are_locally_composed": _RC029_REMOTE_ONLY,
+    _RC029_ARCHETYPES
+    + "global_rules.dependency_runtime_identity_is_consumer_bound": _RC029_SERVICE_RUNTIME,
+    _RC029_ARCHETYPES
+    + "archetypes[l9.dependency-archetype/semantic-subsystem@1].properties.consumer_bound_runtime": _RC029_OWNED_LIFECYCLE,
+}
+RC029_PROTECTED_REQUIREMENTS = frozenset(
+    {
+        "installable_artifact",
+        "public_programmatic_contract",
+        "no_independent_constellation_runtime_identity",
+        "no_independent_constellation_identity",
+        "actor_identity_when_local_authorship_is_material",
+        "surface_identity_when_local_surface_affects_governance_or_projection",
+        "product_release_admission",
+    }
+)
+RC029_PROTECTED_PROHIBITIONS = frozenset(
+    {
+        "implicit_gate_registration",
+        "independent_constellation_identity_as_dependency",
+        "provider_identity_as_product_identity",
+    }
+)
+RC029_PROTECTED = RC029_PROTECTED_REQUIREMENTS | RC029_PROTECTED_PROHIBITIONS
+RC029_RETAINED_REQUIREMENTS = RC029_PROTECTED_REQUIREMENTS | frozenset(
+    {
+        "l9.pattern/dependency-package@1",
+        "canonical_semantic_ownership_by_the_memory_semantic_owner",
+        "actor_attribution_for_every_consequential_memory_operation",
+        "tenant_isolation",
+        "namespace_authorization",
+        "credential_protection",
+        "lifecycle_consistency",
+        "provenance",
+        "immutable_release_identity",
+        "deployment_admission",
+    }
+)
+RC029_FORBIDDEN = frozenset(
+    {
+        "constellation_identity_through_exception",
+        "gate_admission_through_exception",
+        "gate_routing_authority_through_exception",
+        "node_archetype_binding_through_exception",
+        "runnable_node_pattern_requirement_through_exception",
+        "peer_url_awareness_through_exception",
+        "unauthenticated_remote_consumption",
+        "credential_material_in_topology_or_exception",
+        "exception_inheritance_by_another_product",
+        "hosting_coordinate_as_semantic_category",
+    }
+)
+RC029_BINDING_REQUIRES = [
+    "topology_declares_kind_exception_ref_equal_to_the_exception_id",
+    "exception_catalog_is_exactly_the_admitted_set",
+    "exception_status_is_admitted",
+    "exception_authority_owner_is_the_product_kind_owner",
+    "exception_kind_equals_declared_product_kind",
+    "subject_product_ref_equals_declared_product_id",
+    "subject_canonical_repository_equals_declared_identity_canonical_repository",
+    "subject_archetype_ref_equals_declared_product_archetype_ref",
+    "subject_repository_ref_resolves_to_a_current_repository_registry_entry_with_the_same_coordinate",
+    "release_admitted_under_the_claim_is_at_or_after_subject_applies_from_release",
+]
+RC029_MODEL_RULES = [
+    "exception_applies_only_to_its_exact_subject",
+    "matching_configuration_without_exact_subject_binding_is_invalid",
+    "exception_displaces_only_its_enumerated_obligations",
+    "undisplaced_kind_archetype_and_global_obligations_remain_in_force",
+    "exception_never_changes_product_kind_archetype_or_archetype_catalog",
+    "exception_never_grants_constellation_identity_gate_admission_or_routing_authority",
+    "exception_never_relaxes_security_attribution_isolation_authorization_provenance_or_admission",
+    "malformed_unadmitted_or_unbound_exception_claim_is_invalid_not_ignored",
+    "absent_exception_claim_means_kind_law_applies_unmodified",
+    "release_floor_is_a_product_kind_release_obligation_enforced_at_product_release_admission_through_l9_contract_product_release_at_1",
+    "hosting_coordinates_remain_deployment_owned_and_are_not_semantic_categories",
+]
+RC029_EXCEPTION_KEYS = frozenset(
+    {
+        "id",
+        "status",
+        "kind",
+        "authority",
+        "subject",
+        "purpose",
+        "effective_models",
+        "remote_consumption",
+        "deployment",
+        "identity",
+        "departures",
+        "retained_requirements",
+        "retained_prohibitions",
+        "hosted_service_admission",
+        "forbidden",
+    }
+)
+RC029_NODE_ONLY_ADMISSION = frozenset({"gate_admitted", "routable"})
+RC029_CREDENTIAL_KEYS = frozenset(
+    {
+        "token",
+        "tokens",
+        "secret",
+        "secrets",
+        "password",
+        "dsn",
+        "credential",
+        "credentials",
+        "api_key",
+        "bearer",
+    }
+)
+RC029_CREDENTIAL_VALUE = re.compile(
+    r"[a-z][a-z0-9+.-]*://[^/\s:@]+:[^@\s]+@|\bbearer\s+\S+|\b(?:ghp|gho|sk)_[A-Za-z0-9]{8,}",
+    re.IGNORECASE,
+)
+# Identity dimensions whose applicability ProductKind law decides; actor and
+# surface are conditional obligations of every kind.
+RC029_KIND_DIMENSIONS = {
+    "product": "product_identity",
+    "release": "release_identity",
+    "runtime": "runtime_identity",
+    "constellation": "constellation_identity",
+}
+# Global rules that scope kind law; True must be present, and the bare,
+# unconditional spelling must be absent.
+RC029_GLOBAL_QUALIFIERS = (
+    (
+        PRODUCT_KINDS_PATH,
+        "product_kind_is_determined_by_canonical_consumption_and_deployment_model_unless_an_admitted_product_kind_exception_binds_the_exact_product",
+        "product_kind_is_determined_by_canonical_consumption_and_deployment_model",
+    ),
+    (
+        PRODUCT_KINDS_PATH,
+        "kind_law_applies_unmodified_unless_an_admitted_product_kind_exception_binds_the_exact_product",
+        None,
+    ),
+    (
+        PRODUCT_KINDS_PATH,
+        "product_kind_exception_is_not_a_product_kind_archetype_or_waiver_class",
+        None,
+    ),
+    (
+        PRODUCT_KINDS_PATH,
+        "product_kind_exception_is_admitted_only_by_the_product_kind_owner",
+        None,
+    ),
+    (
+        ARCH_RULES_PATH,
+        "kind_rule_obligations_apply_unmodified_unless_an_admitted_product_kind_exception_binds_the_exact_product",
+        None,
+    ),
+    (
+        ARCH_PATTERNS_PATH,
+        "pattern_obligations_apply_unmodified_unless_an_admitted_product_kind_exception_displaces_them_for_its_exact_product",
+        None,
+    ),
+    (
+        DEPENDENCY_ARCHETYPES_PATH,
+        "archetype_obligations_apply_unmodified_unless_an_admitted_product_kind_exception_displaces_them_for_its_exact_product",
+        None,
+    ),
+)
+RC029_DEP_GUARANTEE = "dependency_means_local_composition_plus_consumer_bound_artifact"
+RC029_TOPOLOGY_GUARANTEE = "product_kind_constrains_consumption_and_deployment"
+RC029_KIND_CONTRACT = {
+    "purpose_suffix": "an exactly bound admitted product-kind exception is the only departure from that classification.",
+    "source_invariants": ["L9-MONOTONIC-001"],
+    "applies_to": ["product_kind_exception_claims"],
+    "requires": [
+        "exactly_bound_admitted_product_kind_exception_when_declared_models_depart_from_kind"
+    ],
+    "guarantees": [
+        RC029_DEP_GUARANTEE
+        + "_unless_an_admitted_product_kind_exception_binds_the_exact_product",
+        "product_kind_exception_displaces_only_enumerated_obligations_of_its_exact_subject",
+        "product_kind_exception_preserves_kind_archetype_and_all_undisplaced_obligations",
+    ],
+    "forbidden": [
+        "product_kind_exception_claimed_without_exact_subject_binding",
+        "product_kind_exception_admitted_by_the_subject_or_a_consumer",
+        "product_kind_exception_used_to_acquire_constellation_identity_gate_admission_or_routing_authority",
+        "product_kind_exception_used_to_relax_security_attribution_isolation_authorization_or_admission",
+    ],
+    "outcomes": {
+        "resolved": "declared_kind_consumption_deployment_and_archetype_are_coherent_directly_or_through_an_exactly_bound_admitted_product_kind_exception",
+        "invalid": "declared_kind_conflicts_with_consumption_or_deployment_without_an_exactly_bound_admitted_product_kind_exception",
+    },
+}
+RC029_TOPOLOGY_GUARANTEE_QUALIFIED = (
+    RC029_TOPOLOGY_GUARANTEE
+    + "_except_as_an_exactly_bound_admitted_product_kind_exception_enumerates"
+)
+RC029_DEPENDENCY_TERM_RULES = [
+    "departs_only_through_an_admitted_product_kind_exception_bound_to_the_exact_product"
+]
+RC029_MANIFEST_GATE_ITEMS = (
+    "product_kind_exception_absent_or_exactly_bound_and_admitted",
+)
+RC029_MANIFEST_RULE = "manifest_product_kind_exception_ref_is_required_when_the_source_topology_declares_one"
+# ProductTopology and ProductManifest are release-independent; the release
+# floor binds at product release admission through this contract.
+RC029_RELEASE_CONTRACT = "l9.contract/product-release@1"
+DEPENDENCY_MODEL_PATH = "semantics/semantic_dependency_model.yaml"
+RC029_SOLVER_FLAG = (
+    "applies_admitted_product_kind_exceptions_only_by_exact_subject_binding"
+)
+RC029_EXCEPTION_SELECTOR = "$.kind_exceptions"
+RC029_STAGE_PROFILES = (
+    "l9.projection/stage-product-topology@2",
+    "l9.projection/stage-semantic-resolution@2",
+)
+# authority_model.yaml#profile_publication.existing_profile_versions_are_immutable:
+# the three @1 profiles stay byte-for-byte as admitted (canonical digest of
+# the parsed entry at aedf271), and each @2 successor adds exactly these
+# selections while preserving every predecessor selection.
+RC029_IMMUTABLE_PROFILE_DIGESTS = {
+    "l9.projection/stage-product-topology@1": "a7493b1da0c00ad58494dd0f8a0dd7bc7f72a82b7a53a8fb95646ee653bfb420",
+    "l9.projection/stage-semantic-resolution@1": "e59ea6d496a94d3a78eac40a95f195897e1a96d8f0250b832b902341adfce06f",
+    "l9.projection/product-identity-topology@1": "e9d88e2772f26b73ef77e14337866a7a7a66161dd4ec2bbb9c09465dc2166972",
+}
+RC029_PROFILE_SUCCESSORS = {
+    "l9.projection/stage-product-topology@1": (
+        "l9.projection/stage-product-topology@2",
+        {"product_kinds": ["$.kind_exception_model", "$.kind_exceptions"]},
+    ),
+    "l9.projection/stage-semantic-resolution@1": (
+        "l9.projection/stage-semantic-resolution@2",
+        {"product_kinds": ["$.kind_exceptions"]},
+    ),
+    "l9.projection/product-identity-topology@1": (
+        "l9.projection/product-identity-topology@2",
+        {"product_topology": ["$.product.kind_exception_ref"]},
+    ),
+}
+RC029_REF_SEGMENT = re.compile(r"\.?([A-Za-z_]\w*)(?:\[([^\]]+)\])?")
+
+
+def _rc029_digest(value: object) -> str:
+    return hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
+def _rc029_fail(
+    path: str, field: str, value: object, message: str, report: Report
+) -> None:
+    report.fail("RC-029", path, field, value, message)
+
+
+def _rc029_by_id(entries: object, entry_id: str) -> dict | None:
+    for entry in _list(entries):
+        if _mapping(entry).get("id") == entry_id:
+            return _mapping(entry)
+    return None
+
+
+def _rc029_contract(docs: dict[str, dict], contract_id: str) -> dict:
+    return (
+        _rc029_by_id(_mapping(docs.get(CONTRACTS_PATH)).get("contracts"), contract_id)
+        or {}
+    )
+
+
+def _rc029_resolve_ref(docs: dict[str, dict], ref: object) -> object:
+    """Resolve <ledger>.yaml#<seg>(.<seg>)*, seg = name | name[id], or None.
+
+    A terminal name under a list is list membership; under a mapping it is a
+    key. An entry id matches an ``id`` field of a list entry.
+    """
+    if not isinstance(ref, str) or "#" not in ref:
+        return None
+    ledger, _, pointer = ref.partition("#")
+    node: object = docs.get(f"semantics/{ledger}")
+    segments = RC029_REF_SEGMENT.findall(pointer)
+    rebuilt = "".join(f".{n}[{i}]" if i else f".{n}" for n, i in segments)
+    if node is None or not segments or rebuilt.lstrip(".") != pointer:
+        return None
+    for name, entry_id in segments:
+        if isinstance(node, dict) and name in node:
+            node = node[name]
+        elif isinstance(node, list) and not entry_id and name in node:
+            node = name
+            continue
+        else:
+            return None
+        if entry_id:
+            node = _rc029_by_id(node, entry_id)
+            if node is None:
+                return None
+    return node
+
+
+def _rc029_tokens(node: object, found: set[str]) -> set[str]:
+    """Every key and string leaf under ``node``."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            found.add(str(key))
+            _rc029_tokens(value, found)
+    elif isinstance(node, list):
+        for value in node:
+            _rc029_tokens(value, found)
+    elif isinstance(node, str):
+        found.add(node)
+    return found
+
+
+def _rc029_kind_scope(docs: dict[str, dict], kind_name: str, ref: str) -> bool:
+    """A displaced obligation must belong to the excepted kind's own law."""
+    kind = _mapping(
+        _mapping(_mapping(docs.get(PRODUCT_KINDS_PATH)).get("kinds")).get(kind_name)
+    )
+    ledger, _, pointer = ref.partition("#")
+    if ledger == "product_kinds.yaml":
+        return pointer.startswith(f"kinds.{kind_name}.")
+    if ledger == "architecture_rules.yaml":
+        match = re.match(r"rules\[([^\]]+)\]", pointer)
+        rules = _mapping(docs.get(ARCH_RULES_PATH)).get("rules")
+        rule = _rc029_by_id(rules, match.group(1)) if match else None
+        return (
+            rule is not None
+            and _mapping(rule.get("when")).get("product_kind") == kind_name
+        )
+    if ledger == "architecture_patterns.yaml":
+        match = re.match(r"patterns\[([^\]]+)\]", pointer)
+        return bool(match) and match.group(1) in _list(kind.get("required_patterns"))
+    if ledger != kind.get("archetype_catalog"):
+        return False
+    match = re.match(r"archetypes\[([^\]]+)\]", pointer)
+    return match is None or match.group(1) == RC029_SUBJECT["archetype_ref"]
+
+
+def _rc029_credentials(node: object, trail: str, found: list[str]) -> list[str]:
+    """Credential-shaped keys or values anywhere under ``node``."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            here = f"{trail}.{key}" if trail else str(key)
+            if str(key).lower() in RC029_CREDENTIAL_KEYS:
+                found.append(here)
+            _rc029_credentials(value, here, found)
+    elif isinstance(node, list):
+        for index, value in enumerate(node):
+            _rc029_credentials(value, f"{trail}[{index}]", found)
+    elif isinstance(node, str) and RC029_CREDENTIAL_VALUE.search(node):
+        found.append(trail)
+    return found
+
+
+def _rc029_model_problems(docs: dict[str, dict]) -> list[tuple[str, object, str]]:
+    """Fail-closed pins of product_kinds.yaml#kind_exception_model."""
+    model = _mapping(_mapping(docs.get(PRODUCT_KINDS_PATH)).get("kind_exception_model"))
+    problems: list[tuple[str, object, str]] = []
+    if (
+        model.get("admission_authority") != RC029_OWNER
+        or model.get("claim_field")
+        != "product_topology.schema.yaml#properties.product.fields.kind_exception_ref"
+    ):
+        problems.append(
+            (
+                "kind_exception_model",
+                model or None,
+                "exception model must name the owner and the claim field",
+            )
+        )
+    if model.get("binding_requires") != RC029_BINDING_REQUIRES:
+        problems.append(
+            (
+                "kind_exception_model.binding_requires",
+                model.get("binding_requires"),
+                "binding requirements must be exactly the admitted set",
+            )
+        )
+    if model.get("rules") != RC029_MODEL_RULES:
+        problems.append(
+            (
+                "kind_exception_model.rules",
+                model.get("rules"),
+                "exception rules must be exactly the admitted set",
+            )
+        )
+    for field, expected in (
+        ("protected_requirements", RC029_PROTECTED_REQUIREMENTS),
+        ("protected_prohibitions", RC029_PROTECTED_PROHIBITIONS),
+    ):
+        value = _list(model.get(field))
+        if set(value) != expected or len(value) != len(expected):
+            problems.append(
+                (
+                    f"kind_exception_model.{field}",
+                    value,
+                    "protected obligations must be exactly the admitted set",
+                )
+            )
+    if _rc029_digest(model) != RC029_MODEL_DIGEST:
+        problems.append(
+            (
+                "kind_exception_model.canonical_digest",
+                _rc029_digest(model),
+                "exception model bytes differ from the admitted model",
+            )
+        )
+    return problems
+
+
+def _rc029_departure_problems(
+    docs: dict[str, dict], kind_name: str, departures: list
+) -> list[tuple[str, object, str]]:
+    label = f"{RC029_EXCEPTION_PATH}.departures"
+    problems: list[tuple[str, object, str]] = []
+    displaced: dict[str, object] = {}
+    for index, departure in enumerate(departures):
+        ref = _mapping(departure).get("displaces")
+        target = _rc029_resolve_ref(docs, ref)
+        terminal = ref.rsplit(".", 1)[-1] if isinstance(ref, str) else None
+        touched = _rc029_tokens(target, {str(terminal)})
+        here = f"{label}[{index}]"
+        replacement = _mapping(departure).get("replacement")
+        if target is None:
+            problems.append(
+                (
+                    f"{here}.displaces",
+                    ref,
+                    "departure must resolve to a declared obligation",
+                )
+            )
+        elif not _rc029_kind_scope(docs, kind_name, str(ref)):
+            problems.append(
+                (
+                    f"{here}.scope",
+                    ref,
+                    "departure must displace the excepted kind's own law",
+                )
+            )
+        if touched & RC029_PROTECTED:
+            problems.append(
+                (
+                    f"{here}.protected",
+                    sorted(touched & RC029_PROTECTED),
+                    "departure may not displace a protected obligation",
+                )
+            )
+        if replacement != RC029_DEPARTURES.get(str(ref)):
+            problems.append(
+                (
+                    f"{here}.replacement",
+                    replacement,
+                    "replacement must be the admitted replacement",
+                )
+            )
+        displaced[str(ref)] = _mapping(departure).get("replacement")
+    if displaced != RC029_DEPARTURES or len(departures) != len(RC029_DEPARTURES):
+        problems.append(
+            (
+                label,
+                sorted(set(displaced) ^ set(RC029_DEPARTURES)),
+                "departures must be exactly the admitted set",
+            )
+        )
+    return problems
+
+
+def _rc029_exception_problems(
+    docs: dict[str, dict], entry: object
+) -> list[tuple[str, object, str]]:
+    """Fail-closed well-formedness, authority, and pins of the one exception."""
+    label = RC029_EXCEPTION_PATH
+    if not isinstance(entry, dict):
+        return [(label, entry, "exception entry must be a mapping")]
+    problems: list[tuple[str, object, str]] = []
+
+    def pin(field: str, expected: object, message: str) -> None:
+        if entry.get(field) != expected:
+            problems.append((f"{label}.{field}", entry.get(field), message))
+
+    if set(entry) != RC029_EXCEPTION_KEYS:
+        problems.append(
+            (
+                label,
+                sorted(set(entry) ^ RC029_EXCEPTION_KEYS),
+                "exception keys must be exactly the admitted shape",
+            )
+        )
+    pin("status", "admitted", "only an admitted exception may bind")
+    authority = _mapping(entry.get("authority"))
+    if (
+        authority.get("owner") != RC029_OWNER
+        or authority.get("authority_class") != "canonical"
+    ):
+        problems.append(
+            (
+                f"{label}.authority",
+                entry.get("authority"),
+                "exception must be canonical law admitted by the ProductKind owner",
+            )
+        )
+    decision = str(authority.get("decision_ref") or "")
+    if (
+        decision != f"{RC029_ADR_PATH}#{RC029_ADR_ANCHOR}"
+        or RC029_ADR_HEADING not in str(docs.get(RC029_ADR_PATH) or "")
+    ):
+        problems.append(
+            (
+                f"{label}.authority.decision_ref",
+                decision or None,
+                "decision must resolve to the dated ADR-011 amendment",
+            )
+        )
+    kinds_doc = _mapping(docs.get(PRODUCT_KINDS_PATH))
+    kind_name = str(entry.get("kind"))
+    if kind_name not in _list(
+        _mapping(kinds_doc.get("catalog_status")).get("admitted_kinds")
+    ):
+        problems.append(
+            (
+                f"{label}.kind",
+                entry.get("kind"),
+                "exception kind must be an admitted ProductKind",
+            )
+        )
+    kind = _mapping(_mapping(kinds_doc.get("kinds")).get(kind_name))
+    pin(
+        "subject",
+        RC029_SUBJECT,
+        "exception subject must be the exact admitted Memory subject",
+    )
+    subject = _mapping(entry.get("subject"))
+    repo = _rc029_by_id(
+        _mapping(docs.get(REGISTRY_PATH)).get("repositories"),
+        str(subject.get("repository_ref")),
+    )
+    coordinate = _mapping(_mapping(repo).get("coordinate"))
+    if (
+        repo is None
+        or repo.get("lifecycle") != "current"
+        or f"{coordinate.get('organization')}/{coordinate.get('repository')}"
+        != subject.get("canonical_repository")
+    ):
+        problems.append(
+            (
+                f"{label}.subject.repository_ref",
+                subject.get("repository_ref"),
+                "subject repository must be a current registry entry with the same coordinate",
+            )
+        )
+    catalog = _mapping(docs.get(f"semantics/{kind.get('archetype_catalog')}")).get(
+        "archetypes"
+    )
+    if _rc029_by_id(catalog, str(subject.get("archetype_ref"))) is None:
+        problems.append(
+            (
+                f"{label}.subject.archetype_ref",
+                subject.get("archetype_ref"),
+                "subject archetype must belong to the exception kind's catalog",
+            )
+        )
+    terms = _mapping(_mapping(docs.get(VOCABULARY_PATH)).get("terms"))
+    models = _mapping(entry.get("effective_models"))
+    vocabulary_ok = all(
+        models.get(name) in _mapping(_mapping(terms.get(name)).get("admitted_values"))
+        for name in ("consumption_model", "deployment_model")
+    )
+    if not vocabulary_ok or models != RC029_EFFECTIVE_MODELS:
+        problems.append(
+            (
+                f"{label}.effective_models",
+                entry.get("effective_models"),
+                "effective models must be admitted vocabulary values equal to the admitted departure",
+            )
+        )
+    pin(
+        "remote_consumption",
+        RC029_REMOTE,
+        "remote consumption must be authenticated, namespace-authorized MCP Streamable HTTP that is not Gate-routed inter-product work",
+    )
+    pin(
+        "deployment",
+        RC029_DEPLOYMENT,
+        "deployment must be one product-owned service with unchanged semantic ownership and a deployment-owned coordinate",
+    )
+    persistence = _rc029_resolve_ref(
+        docs,
+        _mapping(_mapping(entry.get("deployment")).get("canonical_persistence")).get(
+            "technology_ref"
+        ),
+    )
+    if "persistence_provider" not in _list(_mapping(persistence).get("target_roles")):
+        problems.append(
+            (
+                f"{label}.deployment.canonical_persistence",
+                _mapping(entry.get("deployment")).get("canonical_persistence"),
+                "persistence must resolve to a registered persistence-provider technology",
+            )
+        )
+    pin(
+        "identity",
+        RC029_IDENTITY,
+        "identity must add only service runtime identity, never Constellation identity",
+    )
+    pin(
+        "hosted_service_admission",
+        RC029_HOSTED_ADMISSION,
+        "hosted admission must not self-admit or confer Gate admission or routability",
+    )
+    problems += _rc029_departure_problems(
+        docs, kind_name, _list(entry.get("departures"))
+    )
+    for field, expected in (
+        ("retained_requirements", RC029_RETAINED_REQUIREMENTS),
+        ("retained_prohibitions", RC029_PROTECTED_PROHIBITIONS),
+        ("forbidden", RC029_FORBIDDEN),
+    ):
+        value = _list(entry.get(field))
+        if set(value) != expected or len(value) != len(expected):
+            problems.append(
+                (
+                    f"{label}.{field}",
+                    sorted(set(value) ^ expected),
+                    f"{field} must be exactly the admitted set",
+                )
+            )
+    credentials = _rc029_credentials(entry, label, [])
+    if credentials:
+        problems.append(
+            (
+                f"{label}.credentials",
+                credentials,
+                "credential material may not appear in an exception",
+            )
+        )
+    if _rc029_digest(entry) != RC029_EXCEPTION_DIGEST:
+        problems.append(
+            (
+                f"{label}.canonical_digest",
+                _rc029_digest(entry),
+                "exception bytes differ from the admitted exception",
+            )
+        )
+    return problems
+
+
+def _rc029_admitted_exception(
+    docs: dict[str, dict], exception_id: object
+) -> dict | None:
+    """Only the exact, well-formed, owner-authorized exception can bind.
+
+    A catalog holding anything but the exact admitted set, or a drifted
+    exception model, binds nothing.
+    """
+    exceptions = _list(_mapping(docs.get(PRODUCT_KINDS_PATH)).get("kind_exceptions"))
+    if [_mapping(e).get("id") for e in exceptions] != [
+        RC029_EXCEPTION_ID
+    ] or exception_id != RC029_EXCEPTION_ID:
+        return None
+    if _rc029_model_problems(docs) or _rc029_exception_problems(docs, exceptions[0]):
+        return None
+    return exceptions[0]
+
+
+def _rc029_topology_coherence(
+    docs: dict[str, dict], topology: dict
+) -> list[tuple[str, str]]:
+    """Evaluate l9.contract/product-kind@1 coherence for one ProductTopology."""
+    found: list[tuple[str, str]] = []
+    kinds = _mapping(_mapping(docs.get(PRODUCT_KINDS_PATH)).get("kinds"))
+    product = _mapping(topology.get("product"))
+    kind_name = product.get("kind")
+    admitted = _list(
+        _mapping(_mapping(docs.get(PRODUCT_KINDS_PATH)).get("catalog_status")).get(
+            "admitted_kinds"
+        )
+    )
+    if kind_name not in admitted:
+        return [("product.kind", "kind is not an admitted ProductKind")]
+    kind = _mapping(kinds.get(kind_name))
+    catalog = _mapping(docs.get(f"semantics/{kind.get('archetype_catalog')}")).get(
+        "archetypes"
+    )
+    if _rc029_by_id(catalog, str(product.get("archetype_ref"))) is None:
+        found.append(
+            ("product.archetype_ref", "archetype is not in the declared kind's catalog")
+        )
+    identity = _mapping(topology.get("identity"))
+    dimensions = _mapping(identity.get("dimensions"))
+    security = _mapping(topology.get("security"))
+    required_patterns = set(
+        _list(_mapping(topology.get("architecture")).get("required_pattern_refs"))
+    )
+    expected = {
+        name: kind.get(name) for name in ("consumption_model", "deployment_model")
+    }
+    allowed_dimensions = set(_list(kind.get("identity_dimensions")))
+    claim = product.get("kind_exception_ref")
+    if claim is not None:
+        entry = _rc029_admitted_exception(docs, claim)
+        subject = _mapping(_mapping(entry).get("subject"))
+        if entry is None:
+            found.append(
+                (
+                    "product.kind_exception_ref",
+                    "claim does not resolve to an admitted, well-formed exception",
+                )
+            )
+        elif (
+            entry.get("kind") != kind_name
+            or subject.get("product_ref") != product.get("id")
+            or subject.get("canonical_repository")
+            != identity.get("canonical_repository")
+            or subject.get("archetype_ref") != product.get("archetype_ref")
+        ):
+            found.append(
+                (
+                    "product.kind_exception_ref",
+                    "claim is not bound to the exception's exact subject",
+                )
+            )
+        else:
+            expected = dict(_mapping(entry.get("effective_models")))
+            allowed_dimensions = set(
+                _list(_mapping(entry.get("identity")).get("identity_dimensions"))
+            )
+            protocol = _mapping(entry.get("remote_consumption")).get("protocol")
+            if protocol not in _list(
+                _mapping(topology.get("consumption")).get("public_entry_modes")
+            ):
+                found.append(
+                    (
+                        "consumption.public_entry_modes",
+                        "the excepted remote protocol must be declared",
+                    )
+                )
+            if not _list(security.get("authentication_contract_refs")):
+                found.append(
+                    (
+                        "security.authentication_contract_refs",
+                        "excepted remote consumption must be authenticated",
+                    )
+                )
+            if not _list(security.get("authorization_contract_refs")):
+                found.append(
+                    (
+                        "security.authorization_contract_refs",
+                        "excepted remote consumption must be namespace-authorized",
+                    )
+                )
+            for dimension in ("product", "release", "actor"):
+                if _mapping(dimensions.get(dimension)).get("applicable") is not True:
+                    found.append(
+                        (
+                            f"identity.dimensions.{dimension}",
+                            "the exception retains product, release, and actor identity",
+                        )
+                    )
+            # The exception's own identity dimensions are positive
+            # obligations: the hosted service carries its own runtime
+            # identity, which is never Constellation identity.
+            if (
+                "runtime_identity" in allowed_dimensions
+                and _mapping(dimensions.get("runtime")).get("applicable") is not True
+            ):
+                found.append(
+                    (
+                        "identity.dimensions.runtime",
+                        "the hosted Memory service's own runtime identity is required by the bound exception",
+                    )
+                )
+            declaration = _mapping(
+                _mapping(entry.get("hosted_service_admission")).get(
+                    "topology_declaration"
+                )
+            )
+            required = declaration.get("requires")
+            declared = _list(
+                _mapping(topology.get("admission")).get("kind_specific_requirements")
+            )
+            if not required or required not in declared:
+                found.append(
+                    (
+                        "admission.kind_specific_requirements",
+                        "the hosted-service admission requirement must be declared; declaring it does not admit a running service",
+                    )
+                )
+    for name, value in (
+        ("consumption_model", _mapping(topology.get("consumption")).get("model")),
+        ("deployment_model", _mapping(topology.get("deployment")).get("model")),
+    ):
+        if value != expected.get(name):
+            field = (
+                "consumption.model"
+                if name == "consumption_model"
+                else "deployment.model"
+            )
+            found.append(
+                (
+                    field,
+                    f"{name} contradicts the declared kind and no bound exception admits it",
+                )
+            )
+    for dimension, coordinate in RC029_KIND_DIMENSIONS.items():
+        if (
+            _mapping(dimensions.get(dimension)).get("applicable") is True
+            and coordinate not in allowed_dimensions
+        ):
+            found.append(
+                (
+                    f"identity.dimensions.{dimension}",
+                    f"{coordinate} is not an identity dimension of this kind or bound exception",
+                )
+            )
+    if not set(_list(kind.get("required_patterns"))) <= required_patterns:
+        found.append(
+            (
+                "architecture.required_pattern_refs",
+                "kind-required patterns are retained",
+            )
+        )
+    if _rc029_credentials(topology, "", []):
+        found.append(
+            ("credentials", "credential material may not appear in a ProductTopology")
+        )
+    if kind_name == "dependency":
+        node = _mapping(kinds.get("node"))
+        if (
+            _mapping(topology.get("communication")).get(
+                "constellation_boundary_required"
+            )
+            is True
+        ):
+            found.append(
+                (
+                    "communication.constellation_boundary_required",
+                    "a Dependency never participates in Gate-routed Constellation communication",
+                )
+            )
+        if required_patterns & set(_list(node.get("required_patterns"))):
+            found.append(
+                (
+                    "architecture.required_pattern_refs",
+                    "a Dependency never requires Node patterns",
+                )
+            )
+        if (
+            set(
+                _list(
+                    _mapping(topology.get("admission")).get(
+                        "kind_specific_requirements"
+                    )
+                )
+            )
+            & RC029_NODE_ONLY_ADMISSION
+        ):
+            found.append(
+                (
+                    "admission.kind_specific_requirements",
+                    "a Dependency never acquires Gate admission or routability",
+                )
+            )
+    return found
+
+
+def _rc029_node_witness() -> dict:
+    return {
+        "schema": "l9.product-topology/v1",
+        "product": {
+            "id": "rc029-witness:product/ordinary-node",
+            "kind": "node",
+            "archetype_ref": "l9.node-archetype/semantic-capability@1",
+        },
+        "identity": {
+            "canonical_repository": "Quantum-L9/rc029-ordinary-node",
+            "dimensions": {
+                "product": {"applicable": True},
+                "release": {"applicable": True},
+                "runtime": {"applicable": True},
+                "constellation": {"applicable": True},
+                "actor": {"applicable": True},
+            },
+        },
+        "consumption": {"model": "remote_invocation"},
+        "deployment": {"model": "independent_runtime"},
+        "architecture": {
+            "required_pattern_refs": [
+                "l9.pattern/runnable-node@1",
+                "l9.pattern/semantic-core-gate-adapter@1",
+                "l9.pattern/authority-candidate-admission@1",
+            ]
+        },
+        "communication": {"constellation_boundary_required": True},
+        "admission": {"kind_specific_requirements": ["gate_admitted", "routable"]},
+    }
+
+
+def _rc029_dependency_witness() -> dict:
+    return {
+        "schema": "l9.product-topology/v1",
+        "product": {
+            "id": "rc029-witness:product/ordinary-dependency",
+            "kind": "dependency",
+            "archetype_ref": "l9.dependency-archetype/semantic-subsystem@1",
+        },
+        "identity": {
+            "canonical_repository": "Quantum-L9/rc029-ordinary-dependency",
+            "dimensions": {
+                "product": {"applicable": True},
+                "release": {"applicable": True},
+                "runtime": {"applicable": False},
+                "constellation": {"applicable": False},
+                "actor": {"applicable": True},
+            },
+        },
+        "consumption": {
+            "model": "local_composition",
+            "public_entry_modes": ["python_sdk"],
+        },
+        "deployment": {"model": "consumer_bound_artifact"},
+        "architecture": {"required_pattern_refs": ["l9.pattern/dependency-package@1"]},
+        "communication": {"constellation_boundary_required": False},
+        "admission": {"kind_specific_requirements": []},
+    }
+
+
+def _rc029_memory_witness() -> dict:
+    """The exact Memory hosted-service topology scenario."""
+    return {
+        "schema": "l9.product-topology/v1",
+        "product": {
+            "id": RC029_SUBJECT["product_ref"],
+            "kind": "dependency",
+            "archetype_ref": RC029_SUBJECT["archetype_ref"],
+            "kind_exception_ref": RC029_EXCEPTION_ID,
+        },
+        "identity": {
+            "semantic_owner": "l9-graphiti-memory:authority/memory-architecture",
+            "canonical_repository": RC029_SUBJECT["canonical_repository"],
+            "dimensions": {
+                "product": {"applicable": True},
+                "release": {"applicable": True},
+                "runtime": {"applicable": True},
+                "constellation": {"applicable": False},
+                "actor": {"applicable": True},
+            },
+        },
+        "consumption": {
+            "model": "remote_invocation",
+            "public_entry_modes": [RC029_PROTOCOL, "python_sdk", "cli"],
+        },
+        "deployment": {
+            "model": "independent_runtime",
+            "artifact_forms": ["wheel", "sdist"],
+        },
+        "architecture": {
+            "required_pattern_refs": ["l9.pattern/dependency-package@1"],
+            "forbidden_pattern_refs": [
+                "l9.pattern/runnable-node@1",
+                "l9.pattern/semantic-core-gate-adapter@1",
+            ],
+        },
+        "communication": {"constellation_boundary_required": False},
+        "security": {
+            "authentication_contract_refs": [
+                "l9-graphiti-memory:contract/mcp-authentication@1"
+            ],
+            "authorization_contract_refs": [
+                "l9-graphiti-memory:contract/namespace-authorization@1"
+            ],
+        },
+        "admission": {"kind_specific_requirements": ["service_admitted"]},
+    }
+
+
+RC029_WITNESSES = (
+    ("ordinary Node", _rc029_node_witness),
+    ("ordinary Dependency", _rc029_dependency_witness),
+    ("exact Memory hosted-service topology", _rc029_memory_witness),
+)
+
+
+def _rc029_profile_succession(docs: dict[str, dict], report: Report) -> None:
+    """Existing @1 profiles are immutable; Memory selections ride @2 successors."""
+    profiles = [
+        _mapping(p)
+        for p in _list(_mapping(docs.get(PROFILES_PATH)).get("projection_profiles"))
+    ]
+    by_id: dict[object, list[dict]] = {}
+    for profile in profiles:
+        by_id.setdefault(profile.get("id"), []).append(profile)
+    for old, digest in RC029_IMMUTABLE_PROFILE_DIGESTS.items():
+        entries = by_id.get(old, [])
+        if len(entries) != 1 or _rc029_digest(entries[0]) != digest:
+            _rc029_fail(
+                PROFILES_PATH,
+                f"projection_profiles[{old}].canonical_digest",
+                len(entries),
+                "an existing profile version is immutable; selections change only through a successor version",
+                report,
+            )
+    for old, (new, added) in RC029_PROFILE_SUCCESSORS.items():
+        label = f"projection_profiles[{new}]"
+        entries = by_id.get(new, [])
+        if len(entries) != 1:
+            _rc029_fail(
+                PROFILES_PATH,
+                label,
+                len(entries),
+                "the successor profile must exist exactly once",
+                report,
+            )
+            continue
+        successor = entries[0]
+        predecessor = (by_id.get(old) or [{}])[0]
+        if successor.get("successor_of") != old or any(
+            successor.get(key) != predecessor.get(key)
+            for key in ("class", "consumer", "output")
+        ):
+            _rc029_fail(
+                PROFILES_PATH,
+                f"{label}.successor_of",
+                successor.get("successor_of"),
+                "the successor must name its exact predecessor and keep its class, consumer, and output",
+                report,
+            )
+        expected = copy.deepcopy(_mapping(predecessor.get("sources")))
+        for source, selectors in added.items():
+            block = expected.setdefault(source, {"selectors": []})
+            block["selectors"] = list(_list(block.get("selectors"))) + list(selectors)
+        if _mapping(successor.get("sources")) != expected:
+            _rc029_fail(
+                PROFILES_PATH,
+                f"{label}.sources",
+                successor.get("sources"),
+                "the successor must preserve every predecessor selection and add exactly the admitted selections",
+                report,
+            )
+    superseded = {p.get("successor_of") for p in profiles if p.get("successor_of")}
+    for profile in profiles:
+        target = profile.get("successor_of")
+        if target is not None and len(by_id.get(target, [])) != 1:
+            _rc029_fail(
+                PROFILES_PATH,
+                f"projection_profiles[{profile.get('id')}].successor_of",
+                target,
+                "successor_of must name exactly one existing profile",
+                report,
+            )
+    current: dict[object, list[object]] = {}
+    for profile in profiles:
+        if profile.get("class") == "stage" and profile.get("id") not in superseded:
+            current.setdefault(profile.get("consumer"), []).append(profile.get("id"))
+    expected_current = {
+        (by_id.get(new) or [{}])[0].get("consumer"): new
+        for new, _added in RC029_PROFILE_SUCCESSORS.values()
+        if (by_id.get(new) or [{}])[0].get("class") == "stage"
+    }
+    for consumer, ids in sorted(current.items(), key=lambda item: str(item[0])):
+        wanted = expected_current.get(consumer)
+        if len(ids) != 1 or (wanted is not None and ids != [wanted]):
+            _rc029_fail(
+                PROFILES_PATH,
+                "projection_profiles.consumer_resolution",
+                {str(consumer): ids},
+                "each stage consumer must resolve to exactly one unsuperseded profile, the admitted successor where one exists",
+                report,
+            )
+    for consumer in expected_current:
+        if consumer not in current:
+            _rc029_fail(
+                PROFILES_PATH,
+                "projection_profiles.consumer_resolution",
+                {str(consumer): []},
+                "each stage consumer must resolve to exactly one unsuperseded profile, the admitted successor where one exists",
+                report,
+            )
+
+
+def _rc029_reconciliation(docs: dict[str, dict], report: Report) -> None:
+    for path, rule, bare in RC029_GLOBAL_QUALIFIERS:
+        rules = _mapping(_mapping(docs.get(path)).get("global_rules"))
+        if rules.get(rule) is not True or (bare is not None and bare in rules):
+            _rc029_fail(
+                path,
+                f"global_rules.{rule}",
+                rules.get(rule),
+                "unconditional kind law must carry the exact-product exception qualifier",
+                report,
+            )
+    label = "contracts[l9.contract/product-kind@1]"
+    contract = _rc029_contract(docs, "l9.contract/product-kind@1")
+    if not " ".join(str(contract.get("purpose") or "").split()).endswith(
+        RC029_KIND_CONTRACT["purpose_suffix"]
+    ):
+        _rc029_fail(
+            CONTRACTS_PATH,
+            f"{label}.purpose",
+            contract.get("purpose"),
+            "kind classification must name the exception as its only departure",
+            report,
+        )
+    for field in (
+        "source_invariants",
+        "applies_to",
+        "requires",
+        "guarantees",
+        "forbidden",
+    ):
+        if not set(RC029_KIND_CONTRACT[field]) <= set(_list(contract.get(field))):
+            _rc029_fail(
+                CONTRACTS_PATH,
+                f"{label}.{field}",
+                contract.get(field),
+                "product-kind@1 must carry the exception clauses",
+                report,
+            )
+    if RC029_DEP_GUARANTEE in _list(contract.get("guarantees")):
+        _rc029_fail(
+            CONTRACTS_PATH,
+            f"{label}.guarantees",
+            RC029_DEP_GUARANTEE,
+            "Dependency meaning may not remain unconditional",
+            report,
+        )
+    outcomes = _mapping(contract.get("outcomes"))
+    for outcome, expected in RC029_KIND_CONTRACT["outcomes"].items():
+        if outcomes.get(outcome) != expected:
+            _rc029_fail(
+                CONTRACTS_PATH,
+                f"{label}.outcomes.{outcome}",
+                outcomes.get(outcome),
+                "outcome must account for an exactly bound exception",
+                report,
+            )
+    guarantees = _list(
+        _rc029_contract(docs, "l9.contract/product-topology@1").get("guarantees")
+    )
+    if (
+        RC029_TOPOLOGY_GUARANTEE in guarantees
+        or RC029_TOPOLOGY_GUARANTEE_QUALIFIED not in guarantees
+    ):
+        _rc029_fail(
+            CONTRACTS_PATH,
+            "contracts[l9.contract/product-topology@1].guarantees",
+            guarantees,
+            "topology kind constraint must be qualified by the exact-product exception",
+            report,
+        )
+    if (
+        _rc029_by_id(
+            _mapping(docs.get(ARCH_RULES_PATH)).get("rules"),
+            "l9.arch-rule/product-kind-exception@1",
+        )
+        is None
+    ):
+        _rc029_fail(
+            ARCH_RULES_PATH,
+            "rules[l9.arch-rule/product-kind-exception@1]",
+            None,
+            "architecture entailment must derive exception obligations",
+            report,
+        )
+    terms = _mapping(_mapping(docs.get(VOCABULARY_PATH)).get("terms"))
+    if (
+        _mapping(terms.get("product_kind_exception")).get("detailed_model")
+        != "product_kinds.yaml"
+    ):
+        _rc029_fail(
+            VOCABULARY_PATH,
+            "terms.product_kind_exception",
+            terms.get("product_kind_exception"),
+            "vocabulary must define the exception",
+            report,
+        )
+    if _mapping(terms.get("dependency")).get("rules") != RC029_DEPENDENCY_TERM_RULES:
+        _rc029_fail(
+            VOCABULARY_PATH,
+            "terms.dependency.rules",
+            _mapping(terms.get("dependency")).get("rules"),
+            "vocabulary Dependency must carry the exact-product qualifier",
+            report,
+        )
+    topology = _mapping(docs.get(TOPOLOGY_SCHEMA_PATH))
+    product_fields = _mapping(
+        _mapping(_mapping(topology.get("properties")).get("product")).get("fields")
+    )
+    resolution = _mapping(topology.get("kind_resolution"))
+    if (
+        "kind_exception_ref" not in product_fields
+        or not resolution.get("exception_rule")
+        or resolution.get("exception_catalog") != "product_kinds.yaml#kind_exceptions"
+    ):
+        _rc029_fail(
+            TOPOLOGY_SCHEMA_PATH,
+            "kind_resolution.exception_rule",
+            resolution.get("exception_rule"),
+            "ProductTopology must carry the claim field and the exception resolution rule",
+            report,
+        )
+    manifest = _mapping(docs.get(MANIFEST_SCHEMA_PATH))
+    gate = _list(_mapping(manifest.get("resolved_manifest_gate")).get("all_of"))
+    manifest_fields = _mapping(
+        _mapping(_mapping(manifest.get("properties")).get("product")).get("fields")
+    )
+    if (
+        not set(RC029_MANIFEST_GATE_ITEMS) <= set(gate)
+        or "kind_exception_ref" not in manifest_fields
+    ):
+        _rc029_fail(
+            MANIFEST_SCHEMA_PATH,
+            "resolved_manifest_gate.all_of",
+            gate,
+            "ProductManifest must preserve the applied exception and gate on its binding",
+            report,
+        )
+    if RC029_MANIFEST_RULE not in _list(manifest.get("semantic_rules")):
+        _rc029_fail(
+            MANIFEST_SCHEMA_PATH,
+            "semantic_rules",
+            manifest.get("semantic_rules"),
+            "ProductManifest must require the exception coordinate when the source topology claims one",
+            report,
+        )
+    if RC029_RELEASE_CONTRACT not in str(resolution.get("exception_rule") or ""):
+        _rc029_fail(
+            TOPOLOGY_SCHEMA_PATH,
+            "kind_resolution.exception_rule.release_floor",
+            resolution.get("exception_rule"),
+            "the release floor must bind at product release admission through l9.contract/product-release@1",
+            report,
+        )
+    kind_resolution = _mapping(
+        _mapping(_mapping(docs.get(DEPENDENCY_MODEL_PATH)).get("dependency_rules")).get(
+            "product_kind_resolution"
+        )
+    )
+    if "repository_registry" not in _list(kind_resolution.get("depends_on")):
+        _rc029_fail(
+            DEPENDENCY_MODEL_PATH,
+            "dependency_rules.product_kind_resolution.depends_on",
+            kind_resolution.get("depends_on"),
+            "product-kind resolution must be invalidated when the exception subject's registry entry changes",
+            report,
+        )
+    profiles = _list(_mapping(docs.get(PROFILES_PATH)).get("projection_profiles"))
+    for profile_id in RC029_STAGE_PROFILES:
+        sources = _mapping(_mapping(_rc029_by_id(profiles, profile_id)).get("sources"))
+        selectors = _list(_mapping(sources.get("product_kinds")).get("selectors"))
+        if RC029_EXCEPTION_SELECTOR not in selectors:
+            _rc029_fail(
+                PROFILES_PATH,
+                f"projection_profiles[{profile_id}].sources.product_kinds.selectors",
+                selectors,
+                "compiler stage must project the exception catalog",
+                report,
+            )
+    _rc029_profile_succession(docs, report)
+    solvers = _mapping(docs.get(SOLVER_CATALOG_PATH)).get("solvers")
+    solver = _mapping(_rc029_by_id(solvers, "product-topology-validator/v1"))
+    if _mapping(solver.get("properties")).get(RC029_SOLVER_FLAG) is not True:
+        _rc029_fail(
+            SOLVER_CATALOG_PATH,
+            f"solvers[product-topology-validator/v1].properties.{RC029_SOLVER_FLAG}",
+            None,
+            "product-topology validator must declare exact-subject exception binding",
+            report,
+        )
+
+
+def _evaluate_rc029(docs: dict[str, dict], report: Report) -> None:
+    for field, value, message in _rc029_model_problems(docs):
+        _rc029_fail(PRODUCT_KINDS_PATH, field, value, message, report)
+    exceptions = _mapping(docs.get(PRODUCT_KINDS_PATH)).get("kind_exceptions")
+    ids = [_mapping(e).get("id") for e in _list(exceptions)]
+    if ids != [RC029_EXCEPTION_ID]:
+        _rc029_fail(
+            PRODUCT_KINDS_PATH,
+            "kind_exceptions",
+            ids,
+            "exactly the one admitted Memory exception may exist; no generalized waiver catalog",
+            report,
+        )
+    for entry in _list(exceptions)[:1]:
+        for field, value, message in _rc029_exception_problems(docs, entry):
+            _rc029_fail(PRODUCT_KINDS_PATH, field, value, message, report)
+    _rc029_reconciliation(docs, report)
+    for label, build in RC029_WITNESSES:
+        for field, message in _rc029_topology_coherence(docs, build()):
+            _rc029_fail(
+                VALIDATOR_PATH, f"witness[{label}].{field}", label, message, report
+            )
+
+
+def _rc029_set(value: object, *path: str):
+    def apply(witness: dict) -> None:
+        node = witness
+        for key in path[:-1]:
+            node = node[key]
+        node[path[-1]] = value
+
+    return apply
+
+
+def _rc029_witness_cases() -> list[tuple]:
+    """Known-bad ProductTopology witnesses, the field each must fail at, and,
+    where a field carries more than one obligation, the reason it must fail."""
+
+    def build(builder, *mutations) -> dict:
+        witness = builder()
+        for mutate in mutations:
+            mutate(witness)
+        return witness
+
+    memory, dependency, node = (
+        _rc029_memory_witness,
+        _rc029_dependency_witness,
+        _rc029_node_witness,
+    )
+    copycat_id = _rc029_set("rc029-witness:product/copycat", "product", "id")
+    copycat_repo = _rc029_set(
+        "Quantum-L9/rc029-copycat", "identity", "canonical_repository"
+    )
+    return [
+        (
+            "unrelated Dependency configured for remote canonical consumption",
+            build(
+                dependency,
+                _rc029_set("remote_invocation", "consumption", "model"),
+                _rc029_set("independent_runtime", "deployment", "model"),
+            ),
+            "consumption.model",
+        ),
+        (
+            "unrelated Dependency copies Memory configuration including the claim",
+            build(memory, copycat_id, copycat_repo),
+            "product.kind_exception_ref",
+        ),
+        (
+            "copy keeps Memory's product id under another repository",
+            build(memory, copycat_repo),
+            "product.kind_exception_ref",
+        ),
+        (
+            "copy keeps Memory's repository under another product id",
+            build(memory, copycat_id),
+            "product.kind_exception_ref",
+        ),
+        (
+            "Memory configuration without the explicit claim",
+            build(memory, _rc029_set(None, "product", "kind_exception_ref")),
+            "consumption.model",
+        ),
+        (
+            "claim names an unknown exception",
+            build(
+                memory,
+                _rc029_set(
+                    "l9.product-kind-exception/nope@1", "product", "kind_exception_ref"
+                ),
+            ),
+            "product.kind_exception_ref",
+        ),
+        (
+            "Node claims the Memory exception",
+            build(
+                node, _rc029_set(RC029_EXCEPTION_ID, "product", "kind_exception_ref")
+            ),
+            "product.kind_exception_ref",
+        ),
+        (
+            "Memory claims Constellation identity",
+            build(
+                memory,
+                _rc029_set(
+                    {"applicable": True}, "identity", "dimensions", "constellation"
+                ),
+            ),
+            "identity.dimensions.constellation",
+        ),
+        (
+            "Memory requires Node runtime and Gate adapter patterns",
+            build(
+                memory,
+                _rc029_set(
+                    [
+                        "l9.pattern/dependency-package@1",
+                        "l9.pattern/runnable-node@1",
+                        "l9.pattern/semantic-core-gate-adapter@1",
+                    ],
+                    "architecture",
+                    "required_pattern_refs",
+                ),
+            ),
+            "architecture.required_pattern_refs",
+        ),
+        (
+            "Memory joins Gate-routed Constellation communication",
+            build(
+                memory,
+                _rc029_set(True, "communication", "constellation_boundary_required"),
+            ),
+            "communication.constellation_boundary_required",
+        ),
+        (
+            "Memory acquires Gate admission and routability",
+            build(
+                memory,
+                _rc029_set(
+                    ["service_admitted", "gate_admitted", "routable"],
+                    "admission",
+                    "kind_specific_requirements",
+                ),
+            ),
+            "admission.kind_specific_requirements",
+        ),
+        (
+            "Memory drops authentication",
+            build(memory, _rc029_set([], "security", "authentication_contract_refs")),
+            "security.authentication_contract_refs",
+        ),
+        (
+            "Memory drops namespace authorization",
+            build(memory, _rc029_set([], "security", "authorization_contract_refs")),
+            "security.authorization_contract_refs",
+        ),
+        (
+            "Memory drops agent attribution",
+            build(
+                memory,
+                _rc029_set({"applicable": False}, "identity", "dimensions", "actor"),
+            ),
+            "identity.dimensions.actor",
+        ),
+        (
+            "Memory drops release identity",
+            build(
+                memory,
+                _rc029_set({"applicable": False}, "identity", "dimensions", "release"),
+            ),
+            "identity.dimensions.release",
+        ),
+        (
+            "Memory omits MCP Streamable HTTP",
+            build(
+                memory,
+                _rc029_set(
+                    ["python_sdk", "mcp_http"], "consumption", "public_entry_modes"
+                ),
+            ),
+            "consumption.public_entry_modes",
+        ),
+        (
+            "Memory drops the retained Dependency package pattern",
+            build(memory, _rc029_set([], "architecture", "required_pattern_refs")),
+            "architecture.required_pattern_refs",
+        ),
+        (
+            "Memory declares a deployment model the exception does not admit",
+            build(memory, _rc029_set("consumer_bound_artifact", "deployment", "model")),
+            "deployment.model",
+        ),
+        (
+            "Memory carries credential material",
+            build(
+                memory,
+                _rc029_set({"token": "redacted"}, "security", "credential"),
+            ),
+            "credentials",
+        ),
+        (
+            "unrelated Dependency copies the displaced service runtime identity without a claim",
+            build(
+                dependency,
+                _rc029_set({"applicable": True}, "identity", "dimensions", "runtime"),
+            ),
+            "identity.dimensions.runtime",
+        ),
+        (
+            "Memory omits the hosted service's own runtime identity",
+            build(
+                memory,
+                _rc029_set({"applicable": False}, "identity", "dimensions", "runtime"),
+            ),
+            "identity.dimensions.runtime",
+            "own runtime identity is required",
+        ),
+        (
+            "Memory omits the hosted-service admission requirement",
+            build(memory, _rc029_set([], "admission", "kind_specific_requirements")),
+            "admission.kind_specific_requirements",
+            "hosted-service admission requirement must be declared",
+        ),
+    ]
+
+
+def _rc029_case(docs: dict[str, dict], mutate) -> dict:
+    candidate = copy.deepcopy(docs)
+    mutate(candidate)
+    return candidate
+
+
+def _rc029_entry(candidate: dict) -> dict:
+    return candidate[PRODUCT_KINDS_PATH]["kind_exceptions"][0]
+
+
+def _rc029_model(candidate: dict) -> dict:
+    return candidate[PRODUCT_KINDS_PATH]["kind_exception_model"]
+
+
+def _rc029_catalog_cases(docs: dict[str, dict]) -> list[tuple[str, dict, str, str]]:
+    """Exception and exception-model mutations and the field each must fail at."""
+    e, m, label = _rc029_entry, _rc029_model, RC029_EXCEPTION_PATH
+
+    def departure(index: int, **changes):
+        return lambda c: e(c)["departures"][index].update(changes)
+
+    p = PRODUCT_KINDS_PATH
+    n = len(RC029_DEPARTURES)
+    cases = [
+        (
+            "malformed exception without a subject",
+            lambda c: e(c).pop("subject"),
+            f"{label}.subject",
+        ),
+        (
+            "exception admitted by a non-owner",
+            lambda c: e(c)["authority"].update(owner="Quantum-L9/l9-graphiti-memory"),
+            f"{label}.authority",
+        ),
+        (
+            "exception left as a candidate",
+            lambda c: e(c).update(status="candidate"),
+            f"{label}.status",
+        ),
+        (
+            "ADR-011 amendment removed",
+            lambda c: c.update(
+                {RC029_ADR_PATH: str(c[RC029_ADR_PATH]).replace(RC029_ADR_HEADING, "")}
+            ),
+            f"{label}.authority.decision_ref",
+        ),
+        (
+            "departure displaces a protected obligation",
+            lambda c: e(c)["departures"].append(
+                {
+                    "displaces": "product_kinds.yaml#kinds.dependency.forbidden.implicit_gate_registration",
+                    "replacement": "gate_registration",
+                }
+            ),
+            f"{label}.departures[{n}].protected",
+        ),
+        (
+            "departure displaces a parent mapping holding a protected obligation",
+            departure(
+                0, displaces="product_kinds.yaml#kinds.dependency.admission_model"
+            ),
+            f"{label}.departures[0].protected",
+        ),
+        (
+            "departure displaces an unresolvable obligation",
+            departure(0, displaces="product_kinds.yaml#kinds.dependency.nope"),
+            f"{label}.departures[0].displaces",
+        ),
+        (
+            "departure displaces Node law",
+            departure(0, displaces="product_kinds.yaml#kinds.node.consumption_model"),
+            f"{label}.departures[0].scope",
+        ),
+        (
+            "departure replacement grants Constellation identity",
+            departure(
+                0,
+                replacement="constellation_identity_and_gate_routed_inter_product_work",
+            ),
+            f"{label}.departures[0].replacement",
+        ),
+        (
+            "generalized waiver: second exception for another product",
+            lambda c: c[p]["kind_exceptions"].append(
+                dict(copy.deepcopy(e(c)), id="l9.product-kind-exception/other@1")
+            ),
+            "kind_exceptions",
+        ),
+        (
+            "exception adds Constellation identity",
+            lambda c: e(c)["identity"]["identity_dimensions"].append(
+                "constellation_identity"
+            ),
+            f"{label}.identity",
+        ),
+        (
+            "runtime identity rule rewritten to Constellation identity",
+            lambda c: e(c)["identity"].update(
+                runtime_identity_rule="RuntimeIdentity(memory) = ConstellationIdentity(memory); confers Gate admission and routability"
+            ),
+            f"{label}.identity",
+        ),
+        (
+            "hosted admission confers Gate admission",
+            lambda c: e(c)["hosted_service_admission"]["states"].append(
+                "gate_admitted"
+            ),
+            f"{label}.hosted_service_admission",
+        ),
+        (
+            "hosted admission rule rewritten to self-admit",
+            lambda c: e(c)["hosted_service_admission"].update(
+                rule="Successful deployment self-admits the Memory service and confers Gate admission and routability."
+            ),
+            f"{label}.hosted_service_admission",
+        ),
+        (
+            "hosted admission states reduced",
+            lambda c: e(c)["hosted_service_admission"].update(
+                states=["service_admitted"]
+            ),
+            f"{label}.hosted_service_admission",
+        ),
+        (
+            "hosted admission loses its topology declaration",
+            lambda c: e(c)["hosted_service_admission"].pop("topology_declaration"),
+            f"{label}.hosted_service_admission",
+        ),
+        (
+            "remote consumption made unauthenticated",
+            lambda c: e(c)["remote_consumption"].update(authentication="optional"),
+            f"{label}.remote_consumption",
+        ),
+        (
+            "agent MCP requests declared Gate-routed inter-product work",
+            lambda c: e(c)["remote_consumption"].update(
+                gate_routing="ordinary_agent_mcp_requests_are_gate_routed_inter_product_work"
+            ),
+            f"{label}.remote_consumption",
+        ),
+        (
+            "semantic ownership no longer unchanged",
+            lambda c: e(c)["deployment"]["canonical_persistence"].update(
+                semantic_owner_unchanged=False
+            ),
+            f"{label}.deployment",
+        ),
+        (
+            "process lifecycle handed to Gate",
+            lambda c: e(c)["deployment"].update(process_lifecycle_owner="gate"),
+            f"{label}.deployment",
+        ),
+        (
+            "persistence names an unregistered technology",
+            lambda c: e(c)["deployment"]["canonical_persistence"].update(
+                technology_ref="technology_capabilities.yaml#technologies[nope]"
+            ),
+            f"{label}.deployment.canonical_persistence",
+        ),
+        (
+            "tenant isolation dropped from retained requirements",
+            lambda c: e(c)["retained_requirements"].remove("tenant_isolation"),
+            f"{label}.retained_requirements",
+        ),
+        (
+            "implicit Gate registration dropped from retained prohibitions",
+            lambda c: e(c)["retained_prohibitions"].remove(
+                "implicit_gate_registration"
+            ),
+            f"{label}.retained_prohibitions",
+        ),
+        (
+            "Gate routing authority no longer forbidden",
+            lambda c: e(c)["forbidden"].remove(
+                "gate_routing_authority_through_exception"
+            ),
+            f"{label}.forbidden",
+        ),
+        (
+            "subject repository absent from the registry",
+            lambda c: c[REGISTRY_PATH].update(
+                repositories=[
+                    r
+                    for r in c[REGISTRY_PATH]["repositories"]
+                    if r.get("id") != "l9-graphiti-memory"
+                ]
+            ),
+            f"{label}.subject.repository_ref",
+        ),
+        (
+            "credential-shaped key in the exception",
+            lambda c: e(c)["deployment"]["canonical_persistence"].update(
+                dsn="redacted"
+            ),
+            f"{label}.credentials",
+        ),
+        (
+            "credential embedded in a value",
+            lambda c: e(c)["deployment"].update(
+                hosting_coordinate="postgresql://memory:hunter2@db.internal/memory"
+            ),
+            f"{label}.credentials",
+        ),
+        (
+            "effective model outside the vocabulary",
+            lambda c: e(c)["effective_models"].update(consumption_model="mcp_hosted"),
+            f"{label}.effective_models",
+        ),
+        (
+            "unpinned purpose text drifts",
+            lambda c: e(c).update(
+                purpose="Memory may be hosted however its operators prefer."
+            ),
+            f"{label}.canonical_digest",
+        ),
+        (
+            "protected prohibitions shrunk",
+            lambda c: m(c)["protected_prohibitions"].remove(
+                "implicit_gate_registration"
+            ),
+            "kind_exception_model.protected_prohibitions",
+        ),
+        (
+            "protected requirements shrunk",
+            lambda c: m(c)["protected_requirements"].remove(
+                "product_release_admission"
+            ),
+            "kind_exception_model.protected_requirements",
+        ),
+        (
+            "binding requirements emptied",
+            lambda c: m(c).update(binding_requires=[]),
+            "kind_exception_model.binding_requires",
+        ),
+        (
+            "exception rule inverted to inheritance",
+            lambda c: m(c)["rules"].__setitem__(
+                1, "matching_configuration_inherits_the_exception"
+            ),
+            "kind_exception_model.rules",
+        ),
+        (
+            "exception model definition drifts",
+            lambda c: m(c).update(definition="Any product may depart from its kind."),
+            "kind_exception_model.canonical_digest",
+        ),
+    ]
+    return [
+        (name, _rc029_case(docs, mutate), p, field) for name, mutate, field in cases
+    ]
+
+
+def _rc029_reconciliation_cases(
+    docs: dict[str, dict],
+) -> list[tuple[str, dict, str, str]]:
+    kind_label = "contracts[l9.contract/product-kind@1]"
+
+    def kind_contract(candidate: dict) -> dict:
+        return _rc029_contract(candidate, "l9.contract/product-kind@1")
+
+    def replace(items: list, old: str, new: str) -> None:
+        items[items.index(old)] = new
+
+    def global_rule(path: str, rule: str):
+        return lambda c: c[path]["global_rules"].pop(rule)
+
+    def revert_classification(c: dict) -> None:
+        rules = c[PRODUCT_KINDS_PATH]["global_rules"]
+        rules.pop(RC029_GLOBAL_QUALIFIERS[0][1])
+        rules[RC029_GLOBAL_QUALIFIERS[0][2]] = True
+
+    def drop_selector(c: dict) -> None:
+        profile = _rc029_by_id(
+            c[PROFILES_PATH]["projection_profiles"], RC029_STAGE_PROFILES[0]
+        )
+        profile["sources"]["product_kinds"]["selectors"].remove(
+            RC029_EXCEPTION_SELECTOR
+        )
+
+    def drop_solver_flag(c: dict) -> None:
+        solver = _rc029_by_id(
+            c[SOLVER_CATALOG_PATH]["solvers"], "product-topology-validator/v1"
+        )
+        solver["properties"].pop(RC029_SOLVER_FLAG)
+
+    qualified_dep = RC029_KIND_CONTRACT["guarantees"][0]
+    archetype_rule = RC029_GLOBAL_QUALIFIERS[-1][1]
+    owner_rule = RC029_GLOBAL_QUALIFIERS[3][1]
+    cases = [
+        (
+            "Dependency guarantee reverted to unconditional",
+            lambda c: replace(
+                kind_contract(c)["guarantees"], qualified_dep, RC029_DEP_GUARANTEE
+            ),
+            CONTRACTS_PATH,
+            f"{kind_label}.guarantees",
+        ),
+        (
+            "invalid outcome ignores bound exceptions",
+            lambda c: kind_contract(c)["outcomes"].update(
+                invalid="declared_kind_conflicts_with_consumption_or_deployment"
+            ),
+            CONTRACTS_PATH,
+            f"{kind_label}.outcomes.invalid",
+        ),
+        (
+            "resolved outcome ignores bound exceptions",
+            lambda c: kind_contract(c)["outcomes"].update(
+                resolved="declared_kind_consumption_deployment_and_archetype_are_coherent"
+            ),
+            CONTRACTS_PATH,
+            f"{kind_label}.outcomes.resolved",
+        ),
+        (
+            "exception requirement removed from product-kind@1",
+            lambda c: kind_contract(c)["requires"].remove(
+                RC029_KIND_CONTRACT["requires"][0]
+            ),
+            CONTRACTS_PATH,
+            f"{kind_label}.requires",
+        ),
+        (
+            "exception prohibition removed from product-kind@1",
+            lambda c: kind_contract(c)["forbidden"].remove(
+                RC029_KIND_CONTRACT["forbidden"][2]
+            ),
+            CONTRACTS_PATH,
+            f"{kind_label}.forbidden",
+        ),
+        (
+            "classification purpose loses its only-departure qualifier",
+            lambda c: kind_contract(c).update(
+                purpose="Classify an L9 product by its canonical consumption and deployment boundary."
+            ),
+            CONTRACTS_PATH,
+            f"{kind_label}.purpose",
+        ),
+        (
+            "product-topology@1 kind constraint reverted to unconditional",
+            lambda c: replace(
+                _rc029_contract(c, "l9.contract/product-topology@1")["guarantees"],
+                RC029_TOPOLOGY_GUARANTEE_QUALIFIED,
+                RC029_TOPOLOGY_GUARANTEE,
+            ),
+            CONTRACTS_PATH,
+            "contracts[l9.contract/product-topology@1].guarantees",
+        ),
+        (
+            "global classification rule reverted to unconditional",
+            revert_classification,
+            PRODUCT_KINDS_PATH,
+            f"global_rules.{RC029_GLOBAL_QUALIFIERS[0][1]}",
+        ),
+        (
+            "owner-only admission rule removed",
+            global_rule(PRODUCT_KINDS_PATH, owner_rule),
+            PRODUCT_KINDS_PATH,
+            f"global_rules.{owner_rule}",
+        ),
+        (
+            "archetype qualifier removed",
+            global_rule(DEPENDENCY_ARCHETYPES_PATH, archetype_rule),
+            DEPENDENCY_ARCHETYPES_PATH,
+            f"global_rules.{archetype_rule}",
+        ),
+        (
+            "exception architecture rule removed",
+            lambda c: c[ARCH_RULES_PATH].update(
+                rules=[
+                    r
+                    for r in c[ARCH_RULES_PATH]["rules"]
+                    if r.get("id") != "l9.arch-rule/product-kind-exception@1"
+                ]
+            ),
+            ARCH_RULES_PATH,
+            "rules[l9.arch-rule/product-kind-exception@1]",
+        ),
+        (
+            "ProductTopology claim field removed",
+            lambda c: c[TOPOLOGY_SCHEMA_PATH]["properties"]["product"]["fields"].pop(
+                "kind_exception_ref"
+            ),
+            TOPOLOGY_SCHEMA_PATH,
+            "kind_resolution.exception_rule",
+        ),
+        (
+            "ProductManifest binding gate item removed",
+            lambda c: c[MANIFEST_SCHEMA_PATH]["resolved_manifest_gate"][
+                "all_of"
+            ].remove(RC029_MANIFEST_GATE_ITEMS[0]),
+            MANIFEST_SCHEMA_PATH,
+            "resolved_manifest_gate.all_of",
+        ),
+        (
+            "ProductManifest no longer requires the claimed exception coordinate",
+            lambda c: c[MANIFEST_SCHEMA_PATH]["semantic_rules"].remove(
+                RC029_MANIFEST_RULE
+            ),
+            MANIFEST_SCHEMA_PATH,
+            "semantic_rules",
+        ),
+        (
+            "release floor detached from product release admission",
+            lambda c: c[TOPOLOGY_SCHEMA_PATH]["kind_resolution"].update(
+                exception_rule="Exceptions bind by exact subject."
+            ),
+            TOPOLOGY_SCHEMA_PATH,
+            "kind_resolution.exception_rule.release_floor",
+        ),
+        (
+            "registry dropped from product-kind invalidation dependencies",
+            lambda c: c[DEPENDENCY_MODEL_PATH]["dependency_rules"][
+                "product_kind_resolution"
+            ]["depends_on"].remove("repository_registry"),
+            DEPENDENCY_MODEL_PATH,
+            "dependency_rules.product_kind_resolution.depends_on",
+        ),
+        (
+            "compiler stage stops projecting the exception catalog",
+            drop_selector,
+            PROFILES_PATH,
+            f"projection_profiles[{RC029_STAGE_PROFILES[0]}].sources.product_kinds.selectors",
+        ),
+        (
+            "vocabulary loses the exception term",
+            lambda c: c[VOCABULARY_PATH]["terms"].pop("product_kind_exception"),
+            VOCABULARY_PATH,
+            "terms.product_kind_exception",
+        ),
+        (
+            "vocabulary Dependency qualifier replaced",
+            lambda c: c[VOCABULARY_PATH]["terms"]["dependency"].update(
+                rules=["anything"]
+            ),
+            VOCABULARY_PATH,
+            "terms.dependency.rules",
+        ),
+        (
+            "product-topology validator loses exact-subject binding",
+            drop_solver_flag,
+            SOLVER_CATALOG_PATH,
+            f"solvers[product-topology-validator/v1].properties.{RC029_SOLVER_FLAG}",
+        ),
+    ]
+    topology_v1, semantic_v1, identity_v1 = RC029_IMMUTABLE_PROFILE_DIGESTS
+    topology_v2 = RC029_PROFILE_SUCCESSORS[topology_v1][0]
+    identity_v2 = RC029_PROFILE_SUCCESSORS[identity_v1][0]
+
+    def profile(c: dict, profile_id: str) -> dict:
+        return _rc029_by_id(c[PROFILES_PATH]["projection_profiles"], profile_id)
+
+    def drop_profile(profile_id: str):
+        def apply(c: dict) -> None:
+            catalog = c[PROFILES_PATH]["projection_profiles"]
+            catalog.remove(_rc029_by_id(catalog, profile_id))
+
+        return apply
+
+    def add_profile(entry: dict):
+        return lambda c: c[PROFILES_PATH]["projection_profiles"].append(entry)
+
+    cases += [
+        (
+            "existing stage profile @1 edited in place",
+            lambda c: profile(c, topology_v1)["sources"]["product_kinds"][
+                "selectors"
+            ].append("$.kind_exceptions"),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v1}].canonical_digest",
+        ),
+        (
+            "existing identity profile @1 edited in place",
+            lambda c: profile(c, identity_v1)["sources"]["product_topology"][
+                "selectors"
+            ].append("$.product.kind_exception_ref"),
+            PROFILES_PATH,
+            f"projection_profiles[{identity_v1}].canonical_digest",
+        ),
+        (
+            "existing semantic-resolution profile @1 removed",
+            drop_profile(semantic_v1),
+            PROFILES_PATH,
+            f"projection_profiles[{semantic_v1}].canonical_digest",
+        ),
+        (
+            "stage successor @2 removed",
+            drop_profile(topology_v2),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v2}]",
+        ),
+        (
+            "stage successor @2 drops a predecessor selection",
+            lambda c: profile(c, topology_v2)["sources"]["authority_model"][
+                "selectors"
+            ].remove("$.admission_rules"),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v2}].sources",
+        ),
+        (
+            "stage successor @2 adds an unadmitted selection",
+            lambda c: profile(c, topology_v2)["sources"]["product_kinds"][
+                "selectors"
+            ].append("$.catalog_status"),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v2}].sources",
+        ),
+        (
+            "stage successor @2 no longer names its predecessor",
+            lambda c: profile(c, topology_v2).pop("successor_of"),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v2}].successor_of",
+        ),
+        (
+            "stage successor @2 retargets another stage consumer",
+            lambda c: profile(c, topology_v2).update(
+                consumer="semantic_build_stage.semantic_resolution"
+            ),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v2}].successor_of",
+        ),
+        (
+            "second unsuperseded profile competes for the topology stage",
+            add_profile(
+                {
+                    "id": "l9.projection/stage-product-topology-shadow@1",
+                    "class": "stage",
+                    "consumer": "semantic_build_stage.product_topology",
+                    "purpose": "shadow",
+                    "sources": {},
+                    "output": {"schema": "x"},
+                }
+            ),
+            PROFILES_PATH,
+            "projection_profiles.consumer_resolution",
+        ),
+        (
+            "successor_of names a profile that does not exist",
+            add_profile(
+                {
+                    "id": "l9.projection/stage-ghost@2",
+                    "successor_of": "l9.projection/stage-ghost@1",
+                    "class": "consumer",
+                    "consumer": "nobody",
+                    "purpose": "ghost",
+                    "sources": {},
+                    "output": {"schema": "x"},
+                }
+            ),
+            PROFILES_PATH,
+            "projection_profiles[l9.projection/stage-ghost@2].successor_of",
+        ),
+        (
+            "identity successor @2 loses the exception claim selection",
+            lambda c: profile(c, identity_v2)["sources"]["product_topology"][
+                "selectors"
+            ].remove("$.product.kind_exception_ref"),
+            PROFILES_PATH,
+            f"projection_profiles[{identity_v2}].sources",
+        ),
+    ]
+    return [
+        (name, _rc029_case(docs, mutate), path, field)
+        for name, mutate, path, field in cases
+    ]
+
+
+def _check_rc029_negative_cases(docs: dict[str, dict], report: Report) -> int:
+    before = len(report.failures)
+    count = 0
+    for label, witness, field, *expected in _rc029_witness_cases():
+        count += 1
+        reason = expected[0] if expected else None
+        if not any(
+            found == field and (reason is None or reason in message)
+            for found, message in _rc029_topology_coherence(docs, witness)
+        ):
+            _rc029_fail(
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"known-bad witness did not fail closed at {field} for its intended reason",
+                report,
+            )
+    catalog_cases = _rc029_catalog_cases(docs)
+    for label, candidate, path, field in catalog_cases + _rc029_reconciliation_cases(
+        docs
+    ):
+        count += 1
+        candidate_report = Report()
+        _evaluate_rc029(candidate, candidate_report)
+        prefix = f"FAIL RC-029 {path} {field}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            _rc029_fail(
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {path} {field}",
+                report,
+            )
+    # A broken exception or model must unbind the Memory claim while ordinary
+    # Node and Dependency products keep resolving exactly as before.
+    for label, candidate, _path, _field in catalog_cases:
+        fields = {
+            f for f, _ in _rc029_topology_coherence(candidate, _rc029_memory_witness())
+        }
+        if "product.kind_exception_ref" not in fields:
+            _rc029_fail(
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                "Memory claim still bound against a malformed or unauthorized exception",
+                report,
+            )
+        for ordinary, build in RC029_WITNESSES[:2]:
+            if _rc029_topology_coherence(candidate, build()):
+                _rc029_fail(
+                    VALIDATOR_PATH,
+                    "negative_case",
+                    label,
+                    f"{ordinary} witness changed outcome under an exception mutation",
+                    report,
+                )
+    stripped = copy.deepcopy(docs)
+    stripped[PRODUCT_KINDS_PATH].pop("kind_exceptions", None)
+    stripped[PRODUCT_KINDS_PATH].pop("kind_exception_model", None)
+    for ordinary, build in RC029_WITNESSES[:2]:
+        if _rc029_topology_coherence(stripped, build()):
+            _rc029_fail(
+                VALIDATOR_PATH,
+                "negative_case",
+                ordinary,
+                "ordinary witness depends on the exception catalog",
+                report,
+            )
+    return count if len(report.failures) == before else -1
+
+
+def check_rc029(root: Path, docs: dict[str, dict], report: Report) -> None:
+    adr = root / RC029_ADR_PATH
+    candidate = dict(docs)
+    candidate[RC029_ADR_PATH] = adr.read_text(encoding="utf-8") if adr.is_file() else ""
+    before = len(report.failures)
+    _evaluate_rc029(candidate, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-029",
+            f"{RC029_EXCEPTION_ID} is the single admitted product-kind exception, pinned field by field and by "
+            f"canonical digest, bound to {RC029_SUBJECT['product_ref']} at {RC029_SUBJECT['canonical_repository']}; "
+            f"its {len(RC029_DEPARTURES)} departures resolve to unprotected Dependency law, every ledger stating kind "
+            "law carries the exact-product qualifier, and the ordinary Node, ordinary Dependency, and exact Memory "
+            "hosted-service witnesses resolve under l9.contract/product-kind@1",
+        )
+        count = _check_rc029_negative_cases(candidate, report)
+        if count > 0:
+            report.ok(
+                "RC-029-NEG",
+                f"{count} product-kind exception negative cases fail closed at their intended field; "
+                "malformed or unauthorized exceptions unbind Memory while ordinary witnesses keep their outcome",
+            )
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -9484,6 +11763,7 @@ def main(argv: list[str]) -> int:
     check_rc026(docs, report)
     check_rc027(docs, report)
     check_rc028(docs, report)
+    check_rc029(root, docs, report)
     check_sc009(observed, root, report)
     for line in report.passes:
         print(line)

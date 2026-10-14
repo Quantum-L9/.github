@@ -20,6 +20,7 @@ global_rules:
   dependencies_are_locally_composed: true
   dependency_runtime_identity_is_consumer_bound: true
   package_complexity_does_not_imply_node_kind: true
+  archetype_obligations_apply_unmodified_unless_an_admitted_product_kind_exception_displaces_them_for_its_exact_product: true
 archetypes:
   - id: l9.dependency-archetype/semantic-subsystem@1
     purpose: >

@@ -21,7 +21,7 @@ derivation:
       admission: canonical_active
     - artifact: contracts.yaml
       artifact_id: l9.contracts/global@1
-      sha256: fe6064bf5a4dd9849fbb8033c1ff66dcc9bddb2672d5824a1af60d84e7327896
+      sha256: f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79
       item_count: 26
       admission: canonical_active
   rule: >
