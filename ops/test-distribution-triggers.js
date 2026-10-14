@@ -141,21 +141,53 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
 }
 
 // ── Canonical governance caller pin ─────────────────────────────────────────
-{
-  const caller = read('policies/governance-caller.yml');
+// The pinned commit: the merge of #176 on main, the commit carrying both
+// reusable workflows the caller invokes. Choosing a successor is an operator
+// decision; it changes this constant, the caller and the record together.
+const GOVERNANCE_CALLER_PIN = '02ea092a098563b27970d21416fabc47dd005fb0';
+
+/**
+ * The pin record is the one place a re-pin is written; both caller `uses:`
+ * lines must name exactly the SHA it records. Returns that SHA, or throws.
+ */
+function checkCallerPin(caller, recordText) {
   const pins = [...caller.matchAll(/^\s*uses: Quantum-L9\/\.github\/\.github\/workflows\/(governance-(?:pr|issue)\.yml)@(\S+)/gm)]
     .map((m) => [m[1], m[2]]);
-  // The pin record is the one place a re-pin is written; the caller must match
-  // it exactly, so the documented re-pin (caller + record) is all validate needs.
-  const record = read('ops/governance-v1-pin.txt').match(/^caller ([0-9a-f]{40})$/m);
+  const record = recordText.match(/^caller ([0-9a-f]{40})$/m);
   assert.ok(record, 'ops/governance-v1-pin.txt must record `caller <40-hex sha>`');
   assert.deepStrictEqual(pins, [
     ['governance-pr.yml', record[1]],
     ['governance-issue.yml', record[1]],
   ], 'both caller refs must pin the SHA recorded in ops/governance-v1-pin.txt');
+  return record[1];
+}
+
+{
+  const caller = read('policies/governance-caller.yml');
+  const recordText = read('ops/governance-v1-pin.txt');
+  const pinned = checkCallerPin(caller, recordText);
+  assert.strictEqual(pinned, GOVERNANCE_CALLER_PIN, 'caller and record must pin exactly the merge of #176');
   assert.match(caller, /pull-requests: write/);
   assert.match(caller, /issues: write/);
-  console.log(`ok: governance caller pins both workflows at the recorded ${record[1].slice(0, 8)}; permissions unchanged`);
+
+  // Negative controls: a record and a caller that disagree fail, in either
+  // direction and on either `uses:` line; a moving tag is not a pin.
+  const other = '1f42b33249310d59a270c05f30cbc75d663185e6';
+  const firstUse = (text, sha) => text.replace(`governance-pr.yml@${GOVERNANCE_CALLER_PIN}`, `governance-pr.yml@${sha}`);
+  const secondUse = (text, sha) => text.replace(`governance-issue.yml@${GOVERNANCE_CALLER_PIN}`, `governance-issue.yml@${sha}`);
+  for (const [what, c, r] of [
+    ['record names another sha', caller, recordText.replace(`caller ${GOVERNANCE_CALLER_PIN}`, `caller ${other}`)],
+    ['governance-pr.yml pins another sha', firstUse(caller, other), recordText],
+    ['governance-issue.yml pins another sha', secondUse(caller, other), recordText],
+    ['caller uses the moving v1 tag', secondUse(firstUse(caller, 'v1'), 'v1'), recordText],
+    ['record is a moving tag', caller, recordText.replace(`caller ${GOVERNANCE_CALLER_PIN}`, 'v1 7ed3ab8650583f6659a6caf061eae77dbd3ed1be')],
+  ]) {
+    assert.notStrictEqual(c + r, caller + recordText, `negative control "${what}" did not change its fixture`);
+    assert.throws(() => checkCallerPin(c, r), assert.AssertionError, `mismatch not caught: ${what}`);
+  }
+  // A coordinated re-pin passes the agreement check but is not this pin.
+  assert.notStrictEqual(checkCallerPin(firstUse(secondUse(caller, other), other), `caller ${other}\n`), GOVERNANCE_CALLER_PIN);
+  console.log(`ok: governance caller and pin record both pin exactly ${GOVERNANCE_CALLER_PIN.slice(0, 8)}; a mismatch or moving tag fails; permissions unchanged`);
 }
 
 console.log('\nall distribution trigger scenarios passed');

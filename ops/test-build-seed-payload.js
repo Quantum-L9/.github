@@ -241,7 +241,6 @@ try {
     /violates repo class non_constellation_python: \.github\/workflows\/governance\.yml/,
   );
 
-
   console.log('ok: default payload materializes SECURITY.md, ownership, governance caller, issue + PR templates');
   console.log('ok: default payload omits INHERIT surfaces (CoC/CONTRIBUTING/SUPPORT/FUNDING/VULNERABILITY_REPORT), LICENSE, labels, retired CI, infra.md');
   console.log('ok: community-health is SECURITY.md alone; release.md is materialized by pr-templates');
