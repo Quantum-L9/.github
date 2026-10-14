@@ -908,7 +908,6 @@ IDENTITY_TOPOLOGY_SELECTORS = (
     "$.governance",
     "$.product.id",
     "$.product.kind",
-    "$.product.kind_exception_ref",
 )
 STAGE_CONSUMER_PREFIX = "semantic_build_stage."
 OLD_PATTERN_FIELD = "required_capabilities"
@@ -9456,7 +9455,7 @@ RC029_EXCEPTION_PATH = "kind_exceptions[0]"
 # change to the admitted bytes, pinned field or not, needs a reviewed
 # validator change and a new dated ADR-011 amendment.
 RC029_EXCEPTION_DIGEST = (
-    "690cfe90e72db2d4a8f29462e89be66b3f5398bbd564a2b0e2be81c56a72f1b3"
+    "f811ec16abd18e61be27027d44941a3a7030e878d4efecc281be6652a4d3fc41"
 )
 RC029_MODEL_DIGEST = "2170c30e211e087184f4943912fb36ce956851bee6ac6136abd0f3b11ee499d8"
 RC029_SUBJECT = {
@@ -9507,6 +9506,17 @@ RC029_HOSTED_ADMISSION = {
     ],
     "rule": "Successful deployment does not self-admit the Memory service; service admission binds the exact admitted "
     "release and never confers Constellation identity, Gate admission, or routability.",
+    "topology_declaration": {
+        "field": "admission.kind_specific_requirements",
+        "requires": "service_admitted",
+    },
+    "distinctions": {
+        "declaration": "A bound ProductTopology declares service_admitted as a kind-specific admission requirement.",
+        "resolution": "Product release admission resolves that requirement under l9.contract/product-release@1 "
+        "without admitting any running service.",
+        "admission": "Only the applicable target-class authority admits an exact running Memory service deployment; "
+        "topology validation, release admission, and deployment never do.",
+    },
 }
 _RC029_PK = "product_kinds.yaml#kinds.dependency."
 _RC029_RULE = "architecture_rules.yaml#rules[l9.arch-rule/product-kind-dependency@1].derive.architecture_obligations."
@@ -9752,9 +9762,32 @@ RC029_SOLVER_FLAG = (
 )
 RC029_EXCEPTION_SELECTOR = "$.kind_exceptions"
 RC029_STAGE_PROFILES = (
-    "l9.projection/stage-product-topology@1",
-    "l9.projection/stage-semantic-resolution@1",
+    "l9.projection/stage-product-topology@2",
+    "l9.projection/stage-semantic-resolution@2",
 )
+# authority_model.yaml#profile_publication.existing_profile_versions_are_immutable:
+# the three @1 profiles stay byte-for-byte as admitted (canonical digest of
+# the parsed entry at aedf271), and each @2 successor adds exactly these
+# selections while preserving every predecessor selection.
+RC029_IMMUTABLE_PROFILE_DIGESTS = {
+    "l9.projection/stage-product-topology@1": "a7493b1da0c00ad58494dd0f8a0dd7bc7f72a82b7a53a8fb95646ee653bfb420",
+    "l9.projection/stage-semantic-resolution@1": "e59ea6d496a94d3a78eac40a95f195897e1a96d8f0250b832b902341adfce06f",
+    "l9.projection/product-identity-topology@1": "e9d88e2772f26b73ef77e14337866a7a7a66161dd4ec2bbb9c09465dc2166972",
+}
+RC029_PROFILE_SUCCESSORS = {
+    "l9.projection/stage-product-topology@1": (
+        "l9.projection/stage-product-topology@2",
+        {"product_kinds": ["$.kind_exception_model", "$.kind_exceptions"]},
+    ),
+    "l9.projection/stage-semantic-resolution@1": (
+        "l9.projection/stage-semantic-resolution@2",
+        {"product_kinds": ["$.kind_exceptions"]},
+    ),
+    "l9.projection/product-identity-topology@1": (
+        "l9.projection/product-identity-topology@2",
+        {"product_topology": ["$.product.kind_exception_ref"]},
+    ),
+}
 RC029_REF_SEGMENT = re.compile(r"\.?([A-Za-z_]\w*)(?:\[([^\]]+)\])?")
 
 
@@ -10272,6 +10305,35 @@ def _rc029_topology_coherence(
                             "the exception retains product, release, and actor identity",
                         )
                     )
+            # The exception's own identity dimensions are positive
+            # obligations: the hosted service carries its own runtime
+            # identity, which is never Constellation identity.
+            if (
+                "runtime_identity" in allowed_dimensions
+                and _mapping(dimensions.get("runtime")).get("applicable") is not True
+            ):
+                found.append(
+                    (
+                        "identity.dimensions.runtime",
+                        "the hosted Memory service's own runtime identity is required by the bound exception",
+                    )
+                )
+            declaration = _mapping(
+                _mapping(entry.get("hosted_service_admission")).get(
+                    "topology_declaration"
+                )
+            )
+            required = declaration.get("requires")
+            declared = _list(
+                _mapping(topology.get("admission")).get("kind_specific_requirements")
+            )
+            if not required or required not in declared:
+                found.append(
+                    (
+                        "admission.kind_specific_requirements",
+                        "the hosted-service admission requirement must be declared; declaring it does not admit a running service",
+                    )
+                )
     for name, value in (
         ("consumption_model", _mapping(topology.get("consumption")).get("model")),
         ("deployment_model", _mapping(topology.get("deployment")).get("model")),
@@ -10467,6 +10529,103 @@ RC029_WITNESSES = (
 )
 
 
+def _rc029_profile_succession(docs: dict[str, dict], report: Report) -> None:
+    """Existing @1 profiles are immutable; Memory selections ride @2 successors."""
+    profiles = [
+        _mapping(p)
+        for p in _list(_mapping(docs.get(PROFILES_PATH)).get("projection_profiles"))
+    ]
+    by_id: dict[object, list[dict]] = {}
+    for profile in profiles:
+        by_id.setdefault(profile.get("id"), []).append(profile)
+    for old, digest in RC029_IMMUTABLE_PROFILE_DIGESTS.items():
+        entries = by_id.get(old, [])
+        if len(entries) != 1 or _rc029_digest(entries[0]) != digest:
+            _rc029_fail(
+                PROFILES_PATH,
+                f"projection_profiles[{old}].canonical_digest",
+                len(entries),
+                "an existing profile version is immutable; selections change only through a successor version",
+                report,
+            )
+    for old, (new, added) in RC029_PROFILE_SUCCESSORS.items():
+        label = f"projection_profiles[{new}]"
+        entries = by_id.get(new, [])
+        if len(entries) != 1:
+            _rc029_fail(
+                PROFILES_PATH,
+                label,
+                len(entries),
+                "the successor profile must exist exactly once",
+                report,
+            )
+            continue
+        successor = entries[0]
+        predecessor = (by_id.get(old) or [{}])[0]
+        if successor.get("successor_of") != old or any(
+            successor.get(key) != predecessor.get(key)
+            for key in ("class", "consumer", "output")
+        ):
+            _rc029_fail(
+                PROFILES_PATH,
+                f"{label}.successor_of",
+                successor.get("successor_of"),
+                "the successor must name its exact predecessor and keep its class, consumer, and output",
+                report,
+            )
+        expected = copy.deepcopy(_mapping(predecessor.get("sources")))
+        for source, selectors in added.items():
+            block = expected.setdefault(source, {"selectors": []})
+            block["selectors"] = list(_list(block.get("selectors"))) + list(selectors)
+        if _mapping(successor.get("sources")) != expected:
+            _rc029_fail(
+                PROFILES_PATH,
+                f"{label}.sources",
+                successor.get("sources"),
+                "the successor must preserve every predecessor selection and add exactly the admitted selections",
+                report,
+            )
+    superseded = {p.get("successor_of") for p in profiles if p.get("successor_of")}
+    for profile in profiles:
+        target = profile.get("successor_of")
+        if target is not None and len(by_id.get(target, [])) != 1:
+            _rc029_fail(
+                PROFILES_PATH,
+                f"projection_profiles[{profile.get('id')}].successor_of",
+                target,
+                "successor_of must name exactly one existing profile",
+                report,
+            )
+    current: dict[object, list[object]] = {}
+    for profile in profiles:
+        if profile.get("class") == "stage" and profile.get("id") not in superseded:
+            current.setdefault(profile.get("consumer"), []).append(profile.get("id"))
+    expected_current = {
+        (by_id.get(new) or [{}])[0].get("consumer"): new
+        for new, _added in RC029_PROFILE_SUCCESSORS.values()
+        if (by_id.get(new) or [{}])[0].get("class") == "stage"
+    }
+    for consumer, ids in sorted(current.items(), key=lambda item: str(item[0])):
+        wanted = expected_current.get(consumer)
+        if len(ids) != 1 or (wanted is not None and ids != [wanted]):
+            _rc029_fail(
+                PROFILES_PATH,
+                "projection_profiles.consumer_resolution",
+                {str(consumer): ids},
+                "each stage consumer must resolve to exactly one unsuperseded profile, the admitted successor where one exists",
+                report,
+            )
+    for consumer in expected_current:
+        if consumer not in current:
+            _rc029_fail(
+                PROFILES_PATH,
+                "projection_profiles.consumer_resolution",
+                {str(consumer): []},
+                "each stage consumer must resolve to exactly one unsuperseded profile, the admitted successor where one exists",
+                report,
+            )
+
+
 def _rc029_reconciliation(docs: dict[str, dict], report: Report) -> None:
     for path, rule, bare in RC029_GLOBAL_QUALIFIERS:
         rules = _mapping(_mapping(docs.get(path)).get("global_rules"))
@@ -10645,6 +10804,7 @@ def _rc029_reconciliation(docs: dict[str, dict], report: Report) -> None:
                 "compiler stage must project the exception catalog",
                 report,
             )
+    _rc029_profile_succession(docs, report)
     solvers = _mapping(docs.get(SOLVER_CATALOG_PATH)).get("solvers")
     solver = _mapping(_rc029_by_id(solvers, "product-topology-validator/v1"))
     if _mapping(solver.get("properties")).get(RC029_SOLVER_FLAG) is not True:
@@ -10691,8 +10851,9 @@ def _rc029_set(value: object, *path: str):
     return apply
 
 
-def _rc029_witness_cases() -> list[tuple[str, dict, str]]:
-    """Known-bad ProductTopology witnesses and the field each must fail at."""
+def _rc029_witness_cases() -> list[tuple]:
+    """Known-bad ProductTopology witnesses, the field each must fail at, and,
+    where a field carries more than one obligation, the reason it must fail."""
 
     def build(builder, *mutations) -> dict:
         witness = builder()
@@ -10864,6 +11025,21 @@ def _rc029_witness_cases() -> list[tuple[str, dict, str]]:
             ),
             "identity.dimensions.runtime",
         ),
+        (
+            "Memory omits the hosted service's own runtime identity",
+            build(
+                memory,
+                _rc029_set({"applicable": False}, "identity", "dimensions", "runtime"),
+            ),
+            "identity.dimensions.runtime",
+            "own runtime identity is required",
+        ),
+        (
+            "Memory omits the hosted-service admission requirement",
+            build(memory, _rc029_set([], "admission", "kind_specific_requirements")),
+            "admission.kind_specific_requirements",
+            "hosted-service admission requirement must be declared",
+        ),
     ]
 
 
@@ -10988,6 +11164,11 @@ def _rc029_catalog_cases(docs: dict[str, dict]) -> list[tuple[str, dict, str, st
             lambda c: e(c)["hosted_service_admission"].update(
                 states=["service_admitted"]
             ),
+            f"{label}.hosted_service_admission",
+        ),
+        (
+            "hosted admission loses its topology declaration",
+            lambda c: e(c)["hosted_service_admission"].pop("topology_declaration"),
             f"{label}.hosted_service_admission",
         ),
         (
@@ -11306,6 +11487,122 @@ def _rc029_reconciliation_cases(
             f"solvers[product-topology-validator/v1].properties.{RC029_SOLVER_FLAG}",
         ),
     ]
+    topology_v1, semantic_v1, identity_v1 = RC029_IMMUTABLE_PROFILE_DIGESTS
+    topology_v2 = RC029_PROFILE_SUCCESSORS[topology_v1][0]
+    identity_v2 = RC029_PROFILE_SUCCESSORS[identity_v1][0]
+
+    def profile(c: dict, profile_id: str) -> dict:
+        return _rc029_by_id(c[PROFILES_PATH]["projection_profiles"], profile_id)
+
+    def drop_profile(profile_id: str):
+        def apply(c: dict) -> None:
+            catalog = c[PROFILES_PATH]["projection_profiles"]
+            catalog.remove(_rc029_by_id(catalog, profile_id))
+
+        return apply
+
+    def add_profile(entry: dict):
+        return lambda c: c[PROFILES_PATH]["projection_profiles"].append(entry)
+
+    cases += [
+        (
+            "existing stage profile @1 edited in place",
+            lambda c: profile(c, topology_v1)["sources"]["product_kinds"][
+                "selectors"
+            ].append("$.kind_exceptions"),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v1}].canonical_digest",
+        ),
+        (
+            "existing identity profile @1 edited in place",
+            lambda c: profile(c, identity_v1)["sources"]["product_topology"][
+                "selectors"
+            ].append("$.product.kind_exception_ref"),
+            PROFILES_PATH,
+            f"projection_profiles[{identity_v1}].canonical_digest",
+        ),
+        (
+            "existing semantic-resolution profile @1 removed",
+            drop_profile(semantic_v1),
+            PROFILES_PATH,
+            f"projection_profiles[{semantic_v1}].canonical_digest",
+        ),
+        (
+            "stage successor @2 removed",
+            drop_profile(topology_v2),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v2}]",
+        ),
+        (
+            "stage successor @2 drops a predecessor selection",
+            lambda c: profile(c, topology_v2)["sources"]["authority_model"][
+                "selectors"
+            ].remove("$.admission_rules"),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v2}].sources",
+        ),
+        (
+            "stage successor @2 adds an unadmitted selection",
+            lambda c: profile(c, topology_v2)["sources"]["product_kinds"][
+                "selectors"
+            ].append("$.catalog_status"),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v2}].sources",
+        ),
+        (
+            "stage successor @2 no longer names its predecessor",
+            lambda c: profile(c, topology_v2).pop("successor_of"),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v2}].successor_of",
+        ),
+        (
+            "stage successor @2 retargets another stage consumer",
+            lambda c: profile(c, topology_v2).update(
+                consumer="semantic_build_stage.semantic_resolution"
+            ),
+            PROFILES_PATH,
+            f"projection_profiles[{topology_v2}].successor_of",
+        ),
+        (
+            "second unsuperseded profile competes for the topology stage",
+            add_profile(
+                {
+                    "id": "l9.projection/stage-product-topology-shadow@1",
+                    "class": "stage",
+                    "consumer": "semantic_build_stage.product_topology",
+                    "purpose": "shadow",
+                    "sources": {},
+                    "output": {"schema": "x"},
+                }
+            ),
+            PROFILES_PATH,
+            "projection_profiles.consumer_resolution",
+        ),
+        (
+            "successor_of names a profile that does not exist",
+            add_profile(
+                {
+                    "id": "l9.projection/stage-ghost@2",
+                    "successor_of": "l9.projection/stage-ghost@1",
+                    "class": "consumer",
+                    "consumer": "nobody",
+                    "purpose": "ghost",
+                    "sources": {},
+                    "output": {"schema": "x"},
+                }
+            ),
+            PROFILES_PATH,
+            "projection_profiles[l9.projection/stage-ghost@2].successor_of",
+        ),
+        (
+            "identity successor @2 loses the exception claim selection",
+            lambda c: profile(c, identity_v2)["sources"]["product_topology"][
+                "selectors"
+            ].remove("$.product.kind_exception_ref"),
+            PROFILES_PATH,
+            f"projection_profiles[{identity_v2}].sources",
+        ),
+    ]
     return [
         (name, _rc029_case(docs, mutate), path, field)
         for name, mutate, path, field in cases
@@ -11315,14 +11612,18 @@ def _rc029_reconciliation_cases(
 def _check_rc029_negative_cases(docs: dict[str, dict], report: Report) -> int:
     before = len(report.failures)
     count = 0
-    for label, witness, field in _rc029_witness_cases():
+    for label, witness, field, *expected in _rc029_witness_cases():
         count += 1
-        if field not in {f for f, _ in _rc029_topology_coherence(docs, witness)}:
+        reason = expected[0] if expected else None
+        if not any(
+            found == field and (reason is None or reason in message)
+            for found, message in _rc029_topology_coherence(docs, witness)
+        ):
             _rc029_fail(
                 VALIDATOR_PATH,
                 "negative_case",
                 label,
-                f"known-bad witness did not fail closed at {field}",
+                f"known-bad witness did not fail closed at {field} for its intended reason",
                 report,
             )
     catalog_cases = _rc029_catalog_cases(docs)

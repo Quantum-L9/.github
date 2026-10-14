@@ -31,7 +31,7 @@ RC-029 must prove the following.
    - `remote_consumption`: authenticated, namespace-authorized MCP Streamable HTTP, and ordinary agent requests are not Gate-routed inter-product work;
    - `deployment`: one product-owned service with a deployment-owned coordinate and unchanged semantic ownership. Its PostgreSQL persistence ref resolves to a registered `persistence_provider` technology;
    - `identity`: service runtime identity only, never Constellation identity;
-   - `hosted_service_admission`: no self-admission, no `gate_admitted` or `routable`.
+   - `hosted_service_admission`: no self-admission, no `gate_admitted` or `routable`, a topology declaration requiring `service_admitted`, and the declaration / resolution / admission distinctions.
 
 **Departures**
 
@@ -68,13 +68,15 @@ RC-029 must prove the following.
 
 **Witnesses**
 
-17. Under `l9.contract/product-kind@1` coherence, the ordinary Node witness, the ordinary Dependency witness and the exact Memory hosted-service ProductTopology witness all resolve. Identity dimensions are checked against the kind's dimensions, or against a bound exception's dimensions.
+17. A bound Memory topology must declare the hosted service's own runtime identity (never Constellation identity) and must declare `service_admitted` in `admission.kind_specific_requirements`. Declaring is not resolving (product release admission) and not admitting a running service (target-class authority). Topology validation never admits a service.
+18. The three existing `@1` projection profiles match their admitted canonical digests. Each `@2` successor names its predecessor, keeps its class, consumer and output, and selects exactly the predecessor's selections plus the admitted additions. Every stage consumer resolves to exactly one unsuperseded profile, which is the admitted successor where one exists.
+19. Under `l9.contract/product-kind@1` coherence, the ordinary Node witness, the ordinary Dependency witness and the exact Memory hosted-service ProductTopology witness all resolve. Identity dimensions are checked against the kind's dimensions, or against a bound exception's dimensions.
 
 ## Hostile negative cases
 
-RC-029 carries **73** isolated negative cases. Each must fail at its intended RC-029 field.
+RC-029 carries **87** isolated negative cases. Each must fail at its intended RC-029 field.
 
-### Known-bad ProductTopology witnesses (20)
+### Known-bad ProductTopology witnesses (22)
 
 - unrelated Dependency configured for remote canonical consumption: fails at `consumption.model`.
 - unrelated Dependency copies Memory configuration including the claim: fails at `product.kind_exception_ref`.
@@ -96,8 +98,10 @@ RC-029 carries **73** isolated negative cases. Each must fail at its intended RC
 - Memory declares a deployment model the exception does not admit: fails at `deployment.model`.
 - Memory carries credential material: fails at `credentials`.
 - unrelated Dependency copies the displaced service runtime identity without a claim: fails at `identity.dimensions.runtime`.
+- Memory omits the hosted service's own runtime identity: fails at `identity.dimensions.runtime` because "own runtime identity is required".
+- Memory omits the hosted-service admission requirement: fails at `admission.kind_specific_requirements` because "hosted-service admission requirement must be declared".
 
-### Malformed, unauthorized, or drifted exceptions and exception model (33)
+### Malformed, unauthorized, or drifted exceptions and exception model (34)
 
 - malformed exception without a subject: fails at `kind_exceptions[0].subject`.
 - exception admitted by a non-owner: fails at `kind_exceptions[0].authority`.
@@ -114,6 +118,7 @@ RC-029 carries **73** isolated negative cases. Each must fail at its intended RC
 - hosted admission confers Gate admission: fails at `kind_exceptions[0].hosted_service_admission`.
 - hosted admission rule rewritten to self-admit: fails at `kind_exceptions[0].hosted_service_admission`.
 - hosted admission states reduced: fails at `kind_exceptions[0].hosted_service_admission`.
+- hosted admission loses its topology declaration: fails at `kind_exceptions[0].hosted_service_admission`.
 - remote consumption made unauthenticated: fails at `kind_exceptions[0].remote_consumption`.
 - agent MCP requests declared Gate-routed inter-product work: fails at `kind_exceptions[0].remote_consumption`.
 - semantic ownership no longer unchanged: fails at `kind_exceptions[0].deployment`.
@@ -135,7 +140,7 @@ RC-029 carries **73** isolated negative cases. Each must fail at its intended RC
 
 Each of these must also leave the Memory claim **unbound** (`product.kind_exception_ref`). The ordinary Node and Dependency witnesses must keep their outcome.
 
-### Reconciliation regressions (20)
+### Reconciliation, profile immutability, and succession regressions (31)
 
 - Dependency guarantee reverted to unconditional: fails at `semantics/contracts.yaml` `contracts[l9.contract/product-kind@1].guarantees`.
 - invalid outcome ignores bound exceptions: fails at `semantics/contracts.yaml` `contracts[l9.contract/product-kind@1].outcomes.invalid`.
@@ -153,10 +158,21 @@ Each of these must also leave the Memory claim **unbound** (`product.kind_except
 - ProductManifest no longer requires the claimed exception coordinate: fails at `semantics/product_manifest.schema.yaml` `semantic_rules`.
 - release floor detached from product release admission: fails at `semantics/product_topology.schema.yaml` `kind_resolution.exception_rule.release_floor`.
 - registry dropped from product-kind invalidation dependencies: fails at `semantics/semantic_dependency_model.yaml` `dependency_rules.product_kind_resolution.depends_on`.
-- compiler stage stops projecting the exception catalog: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/stage-product-topology@1].sources.product_kinds.selectors`.
+- compiler stage stops projecting the exception catalog: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/stage-product-topology@2].sources.product_kinds.selectors`.
 - vocabulary loses the exception term: fails at `semantics/vocabulary.yaml` `terms.product_kind_exception`.
 - vocabulary Dependency qualifier replaced: fails at `semantics/vocabulary.yaml` `terms.dependency.rules`.
 - product-topology validator loses exact-subject binding: fails at `semantics/solver_catalog.yaml` `solvers[product-topology-validator/v1].properties.applies_admitted_product_kind_exceptions_only_by_exact_subject_binding`.
+- existing stage profile @1 edited in place: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/stage-product-topology@1].canonical_digest`.
+- existing identity profile @1 edited in place: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/product-identity-topology@1].canonical_digest`.
+- existing semantic-resolution profile @1 removed: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/stage-semantic-resolution@1].canonical_digest`.
+- stage successor @2 removed: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/stage-product-topology@2]`.
+- stage successor @2 drops a predecessor selection: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/stage-product-topology@2].sources`.
+- stage successor @2 adds an unadmitted selection: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/stage-product-topology@2].sources`.
+- stage successor @2 no longer names its predecessor: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/stage-product-topology@2].successor_of`.
+- stage successor @2 retargets another stage consumer: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/stage-product-topology@2].successor_of`.
+- second unsuperseded profile competes for the topology stage: fails at `semantics/projection_profiles.yaml` `projection_profiles.consumer_resolution`.
+- successor_of names a profile that does not exist: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/stage-ghost@2].successor_of`.
+- identity successor @2 loses the exception claim selection: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/product-identity-topology@2].sources`.
 
 The ordinary Node and Dependency witnesses must also resolve when the exception catalog and model are removed entirely. This proves existing products do not depend on them.
 
@@ -168,8 +184,9 @@ Crashes, unrelated failures, skipped cases, or default success are not passes.
 
 The v3.21.0 validator was run against the **unmodified** stacked baseline at `aedf271d6a401c3515637bb70339a49e7cc92319` (PR #179 head; the same result holds at `main` `f9993ed19a07cc3a2cd3f6b512be7573f1fa897e`). The result was exit 1:
 
-- 39 RC-029 failures (the model and catalog are absent, the 7 global-rule qualifiers are absent, the product-kind and product-topology contract clauses are absent, the exception rule, vocabulary, schema, projection, solver, manifest-rule, release-floor and dependency-model reconciliation are absent, and the Memory witness fails at `product.kind_exception_ref`, `consumption.model`, `deployment.model` and `identity.dimensions.runtime`);
-- one RC-005 failure, because the identity projection did not select `$.product.kind_exception_ref`.
+- 42 RC-029 failures (the model and catalog are absent, the 7 global-rule qualifiers are absent, the product-kind and product-topology contract clauses are absent, the exception rule, vocabulary, schema, solver, manifest-rule, release-floor and dependency-model reconciliation are absent, the three `@2` successor profiles are absent, and the Memory witness fails at `product.kind_exception_ref`, `consumption.model`, `deployment.model` and `identity.dimensions.runtime`).
+
+RC-005 passes against the baseline, because the `@1` identity profile is not modified.
 
 The ordinary Node and ordinary Dependency witnesses produced **no** failures against the baseline. Against the candidate bytes the same validator passes every check.
 
@@ -179,7 +196,7 @@ ProductTopology and ProductManifest are release-independent, so RC-029 cannot ev
 
 ## Preserved closure
 
-RC-001 through RC-028 (including the v3.20.0 coding-agent-execution projection check) and SC-001 through SC-010 remain in force with no weakened assertion. RC-005 strengthens: its pinned identity-projection selection gains `$.product.kind_exception_ref`.
+RC-001 through RC-028 (including the v3.20.0 coding-agent-execution projection check) and SC-001 through SC-010 remain in force with no weakened assertion. RC-005 is unchanged and still pins the admitted `l9.projection/product-identity-topology@1` selection. RC-021 still checks `l9.projection/stage-product-topology@1`, and the `@2` successor must preserve every one of its selections.
 
 ## Downstream consequences (not changed here)
 

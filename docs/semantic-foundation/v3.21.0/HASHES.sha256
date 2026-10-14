@@ -1,6 +1,6 @@
-3fcdea83881baadb3dfb0e85b3a19374037ea405e37608bcce331198464a1c4b  ./MANIFEST.md
-ab0e73b851f9e0d04748fb6f83f0774f1a938e42f5d0bbe24ec7d5bae1c18b68  ./README.md
-1785d636b43880657ef4ba5c7b882e5adc2a36a7b23b1dcb17de12ea97de390c  ./RELEASE_VALIDATION.md
+2c8644585d9e3d4c9fc891c2301f639aa7bd1bc80025c40e4d828667974157c6  ./MANIFEST.md
+2ff5a152f57c9699d8da29119d982c3eaa2d3bbe6c43db2f716832cd7b3d03dd  ./README.md
+61cf7d44dd146d09590dd868ccb92a00fb7679755c4082f29baa2279783b1165  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -11,7 +11,7 @@ e6ddf56c1285da2aadf7b9a6663ba35ccb1bb4ccfbcd73aba350f4d0d9a6f875  ./docs/adr/ADR
 48e2988079894839ccaf2780eddd3b36f1aeef66e77a2897c74feeba67ea225d  ./docs/adr/ADR-008-product-manifest-proof-carrying-realization.md
 9f385aec5eb92fa11f2e9944b215aa1e5da94b88bc05d8d0bea4f2beb34b8c7c  ./docs/adr/ADR-009-wiring-profiles-projections-invalidation.md
 ef62249c01489165f1e2513a1d4ebb5bd8a6309362812ad2eb80899bfed54b3a  ./docs/adr/ADR-010-ownership-boundaries-no-recipes.md
-618b70f2a77ab9a80b9a57c78b41042ab8ebad7540063d490dfbde9e9c8617c8  ./docs/adr/ADR-011-product-kind-node-dependency-taxonomy.md
+e3951986c23c1a159e1108b115f3a7b793c095c19c2e9df84f42447cbfdc6918  ./docs/adr/ADR-011-product-kind-node-dependency-taxonomy.md
 0bcccf1323c159f90bdab6cf3ef62f5483cf095c9b7d9832dca2494e7eb6c548  ./docs/adr/ADR-012-identity-topology-first-class-primitive.md
 3b526d70f894d0f51ca9d16d835d5b49d62d09e9fd1bf4b03b56d3bae8546ac1  ./docs/adr/ADR-013-global-actor-and-surface-identity-registries.md
 6eb1dcdabe14283a159a167c2535c066d6123d709c83086ed902badfc2189835  ./docs/adr/ADR-014-strategic-cognition-reasoning-plane.md
@@ -51,12 +51,12 @@ bfae1312b4177677b0f788b1ae57acac1b70996b76f900de3b5015382bf53f34  ./semantics/ir
 57bb49405e9b888ad5bcfbc3d580755fb7c330e45983bb99821113bf930132bc  ./semantics/node_archetypes.yaml
 3a1fea5eed1ee1b43e16f0adabefd8ef5151702ed5b9dc14801d642183b41017  ./semantics/packet_catalog.yaml
 f53354d355b2d1f5a2e69fb80a30eccb4e73fa8bacaea43071f12a0270a07098  ./semantics/port_catalog.yaml
-4901f92d6ce269fa5ac445404ae1deb7214336a6ae5f70c6e773ca0e4e3217bd  ./semantics/product_kinds.yaml
+294ae7a47b93619bd655619874d962b244e5c027eb6dd31ea508c53d129ace13  ./semantics/product_kinds.yaml
 7e31b8202e9daece716e1f5a9fa2c6bb5cb7e6f1bc42115fba708538b6fd6efa  ./semantics/product_manifest.schema.yaml
 5ecf2e7a18eef93177230a7f379453dfcd444bedad9f74eba4d1504737bc6520  ./semantics/product_topology.schema.yaml
 92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e  ./semantics/projection_artifact.schema.yaml
 fe5d79a65acd7e2587337136d4874b04399d9166d2b652accefd2309fc986be2  ./semantics/projection_engine_contract.yaml
-c2c25bf3a7e9c4749cebc37a212d28cda282942ce9a5e59725b5fc19b1778fcc  ./semantics/projection_profiles.yaml
+0104b4276b593ab019d04e23834553b1578d0c9b194f5bc1ac3e6e423165200a  ./semantics/projection_profiles.yaml
 0dc3a305a53cbd6f2f1e0cba440d21cf7b3c6b241285a15be8bdb185babc1c84  ./semantics/receipt_catalog.yaml
 1ba62a3e03423a35a55fd08dcc53bd8ce377d5c2406da32cc741ee7a385b7cdd  ./semantics/repository_classes.yaml
 0b8d3df4da548e0f5f511bbc19c233d19bce478515217cbfe507014674295cb2  ./semantics/repository_registry.yaml

@@ -306,6 +306,15 @@ kind_exceptions:
     - withdrawn
     rule: Successful deployment does not self-admit the Memory service; service admission binds the exact admitted
       release and never confers Constellation identity, Gate admission, or routability.
+    topology_declaration:
+      field: admission.kind_specific_requirements
+      requires: service_admitted
+    distinctions:
+      declaration: A bound ProductTopology declares service_admitted as a kind-specific admission requirement.
+      resolution: Product release admission resolves that requirement under l9.contract/product-release@1 without
+        admitting any running service.
+      admission: Only the applicable target-class authority admits an exact running Memory service deployment;
+        topology validation, release admission, and deployment never do.
   forbidden:
   - constellation_identity_through_exception
   - gate_admission_through_exception

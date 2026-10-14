@@ -72,6 +72,7 @@ v3.21.0 adds no ADR. Instead it appends a dated amendment, "Amendment 2026-10-14
 ## Semantic changes
 
 - `semantics/product_kinds.yaml`:
+  - the exception's `hosted_service_admission` gains `topology_declaration` (`admission.kind_specific_requirements` requires `service_admitted`) and `distinctions` (declaration, resolution, admission);
   - adds `kind_exception_model` (binding requirements including the release floor, rules, protected requirements, and protected prohibitions);
   - adds exactly one `kind_exceptions` entry, `l9.product-kind-exception/memory-hosted-service@1`, bound to `l9-graphiti-memory:product/l9-graphite-memory` in `Quantum-L9/l9-graphiti-memory`;
   - renames the global rule `product_kind_is_determined_by_canonical_consumption_and_deployment_model` to its qualified form `…_unless_an_admitted_product_kind_exception_binds_the_exact_product`, and adds three global rules that scope kind law to the exact product and to owner-only admission;
@@ -93,14 +94,15 @@ v3.21.0 adds no ADR. Instead it appends a dated amendment, "Amendment 2026-10-14
   - adds the semantic rule `manifest_preserves_the_exact_applied_product_kind_exception_coordinate`.
 - `semantics/semantic_dependency_model.yaml`: `product_kind_resolution.depends_on` gains `repository_registry`, so a change to the exception subject's registry entry invalidates kind resolution and the manifests downstream of it.
 - `semantics/projection_profiles.yaml`:
-  - the ProductTopology stage now selects `$.kind_exception_model` and `$.kind_exceptions`;
-  - the semantic-resolution stage now selects `$.kind_exceptions`;
-  - the identity projection now selects `$.product.kind_exception_ref`.
+  - `l9.projection/stage-product-topology@1`, `l9.projection/stage-semantic-resolution@1` and `l9.projection/product-identity-topology@1` are unchanged (`authority_model.yaml#profile_publication.existing_profile_versions_are_immutable`);
+  - adds successors `l9.projection/stage-product-topology@2` (adds `$.kind_exception_model`, `$.kind_exceptions`), `l9.projection/stage-semantic-resolution@2` (adds `$.kind_exceptions`) and `l9.projection/product-identity-topology@2` (adds `$.product.kind_exception_ref`), each with `successor_of` naming its predecessor and the same class, consumer and output;
+  - adds global rules for immutability, successor selection preservation, stage-consumer resolution and historical validity, and validation rules PROJECTION-013 to PROJECTION-015;
+  - `l9.projection/coding-agent-execution@1` (PR #179) is untouched.
 - `semantics/solver_catalog.yaml`: the product-topology validator declares `applies_admitted_product_kind_exceptions_only_by_exact_subject_binding`.
 - `semantics/capabilities.yaml`, `semantics/lifecycle.yaml`, `semantics/receipt_catalog.yaml`: derivation source digests are refreshed for the new `contracts.yaml` and `capabilities.yaml` bytes. Item counts and derived content are unchanged.
 - `scripts/validate-semantics.py`:
-  - adds RC-029, with 3 positive ProductTopology witnesses, field-and-digest pins of the exception and its model, and 73 hostile negative cases;
-  - RC-005 pins the identity projection selection, including `$.product.kind_exception_ref`.
+  - adds RC-029, with 3 positive ProductTopology witnesses, field-and-digest pins of the exception and its model, profile immutability and succession checks, required hosted runtime identity and hosted-service admission declaration, and 87 hostile negative cases;
+  - RC-005 is unchanged: it still pins `l9.projection/product-identity-topology@1` to its admitted selection.
 
 Nothing else is added: no ProductKind, archetype, pattern, contract, invariant, capability, artifact authority class, repository class, technology, actor or surface identity, service, or generalized waiver mechanism.
 

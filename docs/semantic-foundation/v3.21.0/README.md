@@ -19,9 +19,9 @@ v3.21.0 adds one narrowly bounded product-kind exception. Under it, `Quantum-L9/
   - the global rules of `product_kinds.yaml`, `architecture_rules.yaml`, `architecture_patterns.yaml` and `dependency_archetypes.yaml`;
   - the vocabulary `dependency` term.
 - The ProductTopology schema and the ProductManifest schema carry the claim. A manifest must carry it whenever its source topology claims an exception.
-- `semantic_dependency_model.yaml` adds `repository_registry` to the dependencies of product-kind resolution, so a registry change invalidates it. The compiler-stage projections select the exception catalog, and the identity projection selects the claim. The product-topology solver declares exact-subject binding.
+- `semantic_dependency_model.yaml` adds `repository_registry` to the dependencies of product-kind resolution, so a registry change invalidates it. The three existing projection profiles stay byte-for-byte as admitted. New `@2` successors (`stage-product-topology@2`, `stage-semantic-resolution@2`, `product-identity-topology@2`) declare `successor_of` and add only the exception selections. Each stage consumer resolves to its unique unsuperseded profile. The product-topology solver declares exact-subject binding.
 - ADR-011 gains a dated amendment. Its original decision is unchanged.
-- RC-029 pins the exception and its model, field by field and by canonical digest, and evaluates ProductTopology witnesses under `l9.contract/product-kind@1`. It has 73 hostile negative cases.
+- RC-029 pins the exception and its model, field by field and by canonical digest, and evaluates ProductTopology witnesses under `l9.contract/product-kind@1`. It has 87 hostile negative cases.
 
 ## Before → after canonical rules
 
@@ -58,7 +58,7 @@ The exception displaces nothing outside its 20 enumerated obligations. It explic
 - immutable release identity;
 - deployment admission.
 
-Hosted-service admission has its own state sequence. It does not self-admit, and it never confers Gate admission or routability.
+The hosted service's own runtime identity is required. Hosted-service admission has its own state sequence. A bound topology must declare `service_admitted`. That declaration is not resolution (release admission) and not admission of a running service (target-class authority). It does not self-admit, and it never confers Gate admission or routability.
 
 ## Contraction decisions
 

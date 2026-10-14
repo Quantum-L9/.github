@@ -66,7 +66,12 @@ The exception enumerates exactly 20 displaced obligations across `product_kinds.
 - immutable release identity;
 - deployment admission.
 
-Hosted-service admission does not self-admit, and it never confers Gate admission or routability.
+The hosted service carries its own runtime identity, and a bound topology must declare it. Hosted-service admission does not self-admit, and it never confers Gate admission or routability. A bound topology must declare `service_admitted` in `admission.kind_specific_requirements`. Three things stay distinct:
+- declaring that requirement in a topology;
+- resolving it at product release admission;
+- admitting an exact running service, which only the applicable target-class authority does.
+
+Topology validation never admits a running service.
 
 **Forbidden.** The exception may not be used to acquire Constellation identity, Gate admission, Gate routing authority, a Node archetype, or the runnable-node pattern. It forbids unauthenticated remote consumption, credential material, inheritance by another product, and treating a hosting coordinate as a semantic category.
 
@@ -84,7 +89,7 @@ The following also change:
 - `product_topology.schema.yaml` gains the claim field `product.kind_exception_ref` and `kind_resolution.exception_rule`;
 - `product_manifest.schema.yaml` preserves the applied exception, gates on its binding, and requires the coordinate whenever the source topology claims one;
 - `semantic_dependency_model.yaml` makes product-kind resolution depend on `repository_registry`, so a change to the subject's registry entry invalidates it;
-- the compiler stage projections and the identity projection select the exception catalog and the claim;
+- the three existing projection profiles `l9.projection/stage-product-topology@1`, `stage-semantic-resolution@1` and `product-identity-topology@1` stay byte-for-byte as admitted (`authority_model.yaml#profile_publication.existing_profile_versions_are_immutable`). New `@2` successors declare `successor_of` and add only the exception selections, and each stage consumer resolves to its unique unsuperseded profile (PROJECTION-013 to PROJECTION-015);
 - the product-topology validator in `solver_catalog.yaml` declares exact-subject binding.
 
 RC-028 in `scripts/validate-semantics.py` pins this single exception and its model, field by field and by canonical digest. It pins every reconciliation listed above. It evaluates ordinary Node, ordinary Dependency, and exact Memory ProductTopology witnesses under `l9.contract/product-kind@1` kind coherence.
