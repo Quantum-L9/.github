@@ -444,8 +444,46 @@ _TYPE_CHECKS = {
 }
 
 
+def _require_rule(value: Any, rule: dict[str, Any], what: str, field: str) -> None:
+    """Enforce one property rule: const, enum, type, required, and items per element."""
+    if "const" in rule:
+        _expect(
+            value == rule["const"], "SCHEMA_CONST_MISMATCH", input=what, field=field
+        )
+    if "enum" in rule:
+        allowed = rule["enum"]
+        if not isinstance(allowed, list):  # never a substring test on a scalar
+            raise Outcome("BLOCKED", "SCHEMA_ENUM_UNRESOLVED", input=what, field=field)
+        _expect(value in allowed, "SCHEMA_ENUM_MISMATCH", input=what, field=field)
+    kind = rule.get("type")
+    if kind is not None:
+        check = _TYPE_CHECKS.get(kind)
+        if check is None:  # an unknown schema type is unresolved law, not a pass
+            raise Outcome(
+                "BLOCKED", "SCHEMA_TYPE_UNRESOLVED", input=what, field=field, type=kind
+            )
+        _expect(
+            check(value), "SCHEMA_TYPE_MISMATCH", input=what, field=field, type=kind
+        )
+    nested = rule.get("required")
+    if isinstance(nested, list):
+        # A rule that requires keys requires a mapping to hold them.
+        present = set(value) if isinstance(value, dict) else set()
+        _expect(
+            set(nested) <= present,
+            "SCHEMA_REQUIRED_FIELD_MISSING",
+            input=what,
+            field=field,
+            missing=sorted(set(nested) - present),
+        )
+    items = rule.get("items")
+    if isinstance(items, dict) and isinstance(value, list):
+        for index, item in enumerate(value):
+            _require_rule(item, items, what, f"{field}[{index}]")
+
+
 def require_schema(doc: dict[str, Any], schema: dict[str, Any], what: str) -> None:
-    """Enforce a canonical l9.schema-definition/v1: required, const, type, nested required."""
+    """Enforce a canonical l9.schema-definition/v1: required, then each property rule."""
     required = schema.get("required")
     if not isinstance(required, list) or not required:
         raise Outcome(
@@ -457,36 +495,8 @@ def require_schema(doc: dict[str, Any], schema: dict[str, Any], what: str) -> No
     missing = sorted(set(required) - set(doc))
     _expect(not missing, "SCHEMA_REQUIRED_FIELD_MISSING", input=what, missing=missing)
     for key, rule in (schema.get("properties") or {}).items():
-        if key not in doc or not isinstance(rule, dict):
-            continue
-        value = doc[key]
-        if "const" in rule:
-            _expect(
-                value == rule["const"], "SCHEMA_CONST_MISMATCH", input=what, field=key
-            )
-        kind = rule.get("type")
-        if kind is not None:
-            check = _TYPE_CHECKS.get(kind)
-            if check is None:  # an unknown schema type is unresolved law, not a pass
-                raise Outcome(
-                    "BLOCKED",
-                    "SCHEMA_TYPE_UNRESOLVED",
-                    input=what,
-                    field=key,
-                    type=kind,
-                )
-            _expect(
-                check(value), "SCHEMA_TYPE_MISMATCH", input=what, field=key, type=kind
-            )
-        nested = rule.get("required")
-        if isinstance(nested, list) and isinstance(value, dict):
-            _expect(
-                set(nested) <= set(value),
-                "SCHEMA_REQUIRED_FIELD_MISSING",
-                input=what,
-                field=key,
-                missing=sorted(set(nested) - set(value)),
-            )
+        if key in doc and isinstance(rule, dict):
+            _require_rule(doc[key], rule, what, key)
 
 
 def verify_pair(

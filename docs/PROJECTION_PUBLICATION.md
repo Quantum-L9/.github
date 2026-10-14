@@ -121,7 +121,9 @@ python3 scripts/publish-projection.py check --authority-root "$AUTH" --revision 
 - **Canonical shapes.** Artifact and receipt must satisfy
   `semantics/projection_artifact.schema.yaml` and
   `semantics/compiler_receipt.schema.yaml` at the pinned revision (required
-  fields, constants, types). An unknown schema type is `BLOCKED`.
+  fields, constants, enums, types, and `items` rules on every array element,
+  so each receipt `inputs` entry needs `ref` and `digest`). An unknown schema
+  type or a non-list enum is `BLOCKED`.
 
 Exit codes: 0 ok, 1 `REJECTED`, 2 usage, 3 `BLOCKED`, 4 `STALE`, 5 `CONFLICT`.
 

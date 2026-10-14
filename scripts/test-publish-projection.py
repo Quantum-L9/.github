@@ -392,6 +392,49 @@ class VerifyTests(Fixture):
         self.assertRejected("SCHEMA_REQUIRED_FIELD_MISSING")
         receipt_path.write_text(original)
 
+    def resign_receipt(self, edit) -> None:
+        """Apply `edit` to the receipt, then recompute its identity and digest."""
+        receipt_path = self.pair / "receipt.json"
+        doc = json.loads(receipt_path.read_text())
+        edit(doc)
+        doc.pop("receipt_digest")
+        doc["receipt_identity"] = "pending"
+        doc["receipt_identity"] = (
+            "l9.receipt-instance/" + pp.digest(doc).split(":", 1)[1]
+        )
+        doc["receipt_digest"] = pp.digest(doc)
+        receipt_path.write_text(json.dumps(doc))
+
+    def test_malformed_receipt_input_entries_are_rejected(self):
+        # The receipt schema requires every `inputs` item to carry ref and
+        # digest. The two bound inputs stay present, so only the item
+        # constraint can reject these (GAR audit finding on PR #180).
+        original = (self.pair / "receipt.json").read_text()
+        for extra in (
+            {"ref": "l9.source/extra@1"},
+            {"digest": "sha256:" + "0" * 64},
+            "l9.source/extra@1",
+        ):
+            with self.subTest(extra=extra):
+                self.resign_receipt(lambda d, e=extra: d["inputs"].append(e))
+                self.assertRejected("SCHEMA_REQUIRED_FIELD_MISSING")
+                (self.pair / "receipt.json").write_text(original)
+        # A well-formed extra input is not a schema violation.
+        self.resign_receipt(
+            lambda d: d["inputs"].append(
+                {"ref": "l9.source/extra@1", "digest": "sha256:" + "0" * 64}
+            )
+        )
+        self.verify()
+
+    def test_receipt_enum_outside_the_schema_is_rejected(self):
+        original = (self.pair / "receipt.json").read_text()
+        for field in ("operation", "result"):
+            with self.subTest(field=field):
+                self.resign_receipt(lambda d, f=field: d.update({f: "undeclared"}))
+                self.assertRejected("SCHEMA_ENUM_MISMATCH")
+                (self.pair / "receipt.json").write_text(original)
+
     def test_receipt_asserting_another_revision_is_rejected(self):
         self.assertRejected("RECEIPT_REVISION_MISMATCH", revision="d" * 40)
 
