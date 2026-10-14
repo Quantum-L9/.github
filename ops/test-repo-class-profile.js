@@ -596,7 +596,7 @@ try {
     for (const code of [403, 500, 502]) {
       const r = await runEnforceFull({ ...drift, dryRun, files: healthy, errors: { [OPT_OUT]: code } });
       assert.deepStrictEqual(r.updates, [], `opt-out probe ${code} (DRY_RUN=${dryRun}) still called repos.update`);
-      assert.match(r.status, new RegExp(`^BLOCKED: ${OPT_OUT.replace(/[.]/g, '\\.')} unreadable \\(${code}\\)`));
+      assert.ok(r.status.startsWith(`BLOCKED: ${OPT_OUT} unreadable (${code})`), `opt-out probe ${code}: status ${r.status}`);
       assert.doesNotMatch(r.status, /compliant|settings (fixed|drift)/);
       assert.strictEqual(r.failures.length, 1, `opt-out probe ${code} must fail the run`);
       assert.match(r.failures[0], /consumer-repo/);
