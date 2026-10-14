@@ -2,9 +2,10 @@
 # full commit SHA on main, so main can move without retargeting any consumer.
 #
 # Governance logic lives in Quantum-L9/.github/.github/workflows/governance-*.yml.
-# Shipping a change there: merge it, set both `uses:` SHAs below to that merge
-# commit, and record the same SHA in ops/governance-v1-pin.txt
-# (ops/test-distribution-triggers.js fails when they disagree). Consumers that
+# Shipping a change there: merge it, then (an operator decision) set both
+# `uses:` SHAs below to that merge commit, record the same SHA in
+# ops/governance-v1-pin.txt, and set GOVERNANCE_CALLER_PIN in
+# ops/test-distribution-triggers.js (it fails unless all three agree). Consumers that
 # already carry a caller are re-pinned by a manual continuous-sync dispatch
 # (docs/DISTRIBUTION.md). No tag is involved: moving one retargets nothing.
 #
