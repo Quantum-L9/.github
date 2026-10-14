@@ -323,9 +323,7 @@ class PinTests(Fixture):
         self.assertEqual(good["source_ref"], "l9.source/invariants@1")
 
         admitted = (
-            "source_classes:\n"
-            "  invariants:\n"
-            "    canonical_artifact: invariants.yaml\n"
+            "source_classes:\n  invariants:\n    canonical_artifact: invariants.yaml\n"
         )
 
         def blocked(source_classes: str) -> str:
