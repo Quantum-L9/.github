@@ -5,13 +5,13 @@
  * stubbed GitHub API and asserts it never rewrites the sync branch while a PR
  * is open on it.
  *
- * Why this is separate from test-seed-workflow-branch-guard.js: the two seed
- * workflows build a commit and move the ref with a GraphQL compare-and-swap,
- * so their proof is shaped around `git.createCommit` / `graphql.updateRefs`.
- * continuous-sync instead resets the ref with REST `git.updateRef({force})`
- * and writes files with `repos.createOrUpdateFileContents`. Same hazard,
- * different call surface — so it gets its own harness rather than distorting
- * the seed one.
+ * Why this is separate from test-seed-workflow-branch-guard.js: continuous-sync
+ * moves its branch through the same guarded path as the seeders (one atomic
+ * commit, then a GraphQL `updateRefs` compare-and-swap via
+ * ops/seed-branch-safety.js), but it plans differently — overwrite of managed
+ * paths by class, not missing-only — and authenticates as the governance App,
+ * whose provenance identity is `<app-slug>[bot]`. Its fixtures and verdicts
+ * are therefore its own.
  *
  * The defect (issue #60): the open-PR check ran AFTER the ref reset, so the
  * branch was already clobbered by the time the workflow reported
@@ -29,6 +29,7 @@ const {
   makeScopedRequire,
   makeScriptRunner,
   makeBranchStubs,
+  loadGovernanceGates,
 } = require('./workflow-script-harness.js');
 
 const root = path.resolve(__dirname, '..');
@@ -45,6 +46,7 @@ const MUTATIONS = new Set([
 ]);
 
 const APP_SLUG = 'l9-governance';
+const SOURCE_SHA = 'f'.repeat(40);
 const SYNC_LOGIN = `${APP_SLUG}[bot]`;
 const SYNC_COMMIT_SUBJECT_RE = require('./seed-branch-safety.js').SYNC_COMMIT_SUBJECT;
 const SYNC_COMMIT = {
@@ -66,8 +68,14 @@ const SYNC_COMMIT = {
  * @param {object} [o.files]      consumer files; anything else 404s
  * @param {object} [o.dirs]       directory listings
  * @param {object} [o.errors]     path -> HTTP status thrown on read
+ * @param {object[]} [o.otherPRs] other open PRs (see makeBranchStubs)
+ * @param {number} [o.listError]  HTTP status listing all open PRs throws
+ * @param {string} [o.baseMovesTo] the default branch reads this sha after its first read
+ * @param {object} [o.atBase]     files committed at the pinned base (`base-sha`)
+ *   that an unpinned read — one made before the pin, against an older tip —
+ *   does not see
  */
-function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {}, errors = {} } = {}) {
+function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {}, errors = {}, otherPRs = [], listError, baseMovesTo, repoName = 'consumer-repo', baseError, atBase = {} } = {}) {
   const calls = [];
   const state = { sha: branch ? branch.sha : null };
   const record = (name, ret = {}) => async (args) => {
@@ -75,13 +83,23 @@ function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {
     if (name === 'git.createRef') state.sha = args.sha;
     return { data: ret };
   };
-  const shared = makeBranchStubs({ branch: BRANCH, state, calls, openPRs, record });
+  const shared = makeBranchStubs({ branch: BRANCH, state, calls, openPRs, otherPRs, listError, record });
   const enc = (t) => Buffer.from(t).toString('base64');
+  let baseReads = 0;
+  const getRef = async (args) => {
+    if (baseError && args.ref === 'heads/main') {
+      calls.push({ name: 'git.getRef', args });
+      throw Object.assign(new Error(baseError.message), { status: baseError.status });
+    }
+    const res = await shared.getRef(args);
+    if (baseMovesTo && args.ref === 'heads/main' && baseReads++ > 0) return { data: { object: { sha: baseMovesTo } } };
+    return res;
+  };
 
   const github = {
-    paginate: async () => [
-      { name: 'consumer-repo', owner: { login: ORG }, default_branch: 'main', archived: false, fork: false },
-    ],
+    paginate: shared.paginateWith(() => [
+      { name: repoName, owner: { login: ORG }, default_branch: 'main', archived: false, fork: false },
+    ]),
     request: async (route, args) => {
       calls.push({ name: `request ${route}`, args });
       assert.strictEqual(route, 'GET /repos/{owner}/{repo}/compare/{basehead}');
@@ -122,19 +140,21 @@ function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {
           calls.push({ name: 'repos.getContent', args });
           if (errors[args.path]) throw Object.assign(new Error('boom'), { status: errors[args.path] });
           if (args.path in dirs) return { data: dirs[args.path].map((n) => ({ name: n, type: n.includes('.') ? 'file' : 'dir' })) };
-          if (args.path in files) return { data: { sha: `sha-${args.path}`, content: enc(files[args.path]) } };
+          const visible = args.ref === 'base-sha' ? { ...files, ...atBase } : files;
+          if (args.path in visible) return { data: { sha: `sha-${args.path}`, content: enc(visible[args.path]) } };
           throw notFound('Not Found');
         },
       },
       pulls: {
         list: shared.pulls.list,
+        listFiles: shared.pulls.listFiles,
         create: async (args) => {
           calls.push({ name: 'pulls.create', args });
           return { data: { number: 999 } };
         },
       },
       git: {
-        getRef: shared.getRef,
+        getRef,
         getCommit: async () => ({ data: { tree: { sha: 'base-tree-sha' } } }),
         createBlob: async (args) => {
           calls.push({ name: 'git.createBlob', args });
@@ -159,7 +179,7 @@ const run = makeScriptRunner({
   file: path.join(root, WORKFLOW),
   root,
   tmpTag: 'sync-guard-',
-  envFor: (dry) => ({ DRY_RUN: dry ? 'true' : 'false', FILTER: '', APP_SLUG }),
+  envFor: (dry) => ({ DRY_RUN: dry ? 'true' : 'false', FILTER: '', APP_SLUG, GITHUB_SHA: SOURCE_SHA }),
   makeGithub,
   mutations: MUTATIONS,
 });
@@ -180,17 +200,18 @@ const managedOk = {
   '.github/dependabot.yml': fs.readFileSync(path.join(root, '.github/dependabot.yml'), 'utf8'),
 };
 const syncScript = loadScriptModule(path.join(root, WORKFLOW), 'sync-class-');
+const gates = loadGovernanceGates(root);
 
-async function runClass({ files = {}, dirs = {}, errors = {}, dry = false, branch = null }) {
-  const { github, calls, state } = makeGithub({ files, dirs, errors, branch });
+async function runClass({ files = {}, dirs = {}, errors = {}, dry = false, branch = null, ...more }) {
+  const { github, calls, state } = makeGithub({ files, dirs, errors, branch, ...more });
   const tables = [];
   const failures = [];
   const summary = { addHeading: () => summary, addRaw: () => summary, addTable: (t) => { tables.push(t); return summary; }, write: async () => summary };
   const core = { info() {}, error() {}, setFailed: (m) => failures.push(m), summary };
   const prev = process.cwd();
-  const prevEnv = { DRY_RUN: process.env.DRY_RUN, FILTER: process.env.FILTER, APP_SLUG: process.env.APP_SLUG };
+  const prevEnv = { DRY_RUN: process.env.DRY_RUN, FILTER: process.env.FILTER, APP_SLUG: process.env.APP_SLUG, GITHUB_SHA: process.env.GITHUB_SHA };
   process.chdir(root);
-  Object.assign(process.env, { DRY_RUN: dry ? 'true' : 'false', FILTER: '', APP_SLUG });
+  Object.assign(process.env, { DRY_RUN: dry ? 'true' : 'false', FILTER: '', APP_SLUG, GITHUB_SHA: SOURCE_SHA });
   try {
     await syncScript(github, core, {}, makeScopedRequire(root));
   } finally {
@@ -294,7 +315,7 @@ async function classScenarios() {
 }
 
 /** The only calls a Preview may make: reads. Everything else writes. */
-const READS = new Set(['repos.getContent', 'pulls.list', 'git.getRef', 'request GET /repos/{owner}/{repo}/compare/{basehead}']);
+const READS = new Set(['repos.getContent', 'pulls.list', 'pulls.listFiles', 'git.getRef', 'request GET /repos/{owner}/{repo}/compare/{basehead}']);
 const writesOf = (calls) => calls.filter((c) => !READS.has(c.name));
 
 /**
@@ -362,10 +383,214 @@ async function manualModeScenarios() {
   for (const dry of [true, false]) {
     r = await runClass({ files: { ...drifted, '.l9/no-sync': '' }, branch: stale, dry });
     assert.strictEqual(r.status, 'OPTED_OUT');
-    assert.deepStrictEqual(r.calls.map((c) => c.name), ['repos.getContent'], `${label}: opted-out repo was probed past its marker`);
+    // The base is pinned first, then the marker is read AT that pin; nothing
+    // else is probed.
+    assert.deepStrictEqual(r.calls.map((c) => c.name), ['git.getRef', 'repos.getContent'], `${label}: opted-out repo was probed past its marker`);
+    assert.strictEqual(r.calls[0].args.ref, 'heads/main');
+    assert.deepStrictEqual([r.calls[1].args.path, r.calls[1].args.ref], ['.l9/no-sync', 'base-sha'], `${label}: opt-out read off the pinned base`);
     assert.strictEqual(r.state.sha, 'stale-sync-branch');
   }
   console.log(`ok: ${label} — .l9/no-sync repos are left untouched in Preview and Apply`);
+
+  // A .l9/no-sync that is a directory is a malformed opt-out, not "absent":
+  // it fails closed like the class marker — unresolved, nothing planned.
+  for (const dry of [true, false]) {
+    r = await runClass({ files: drifted, dirs: { '.l9/no-sync': ['README.md'] }, branch: stale, dry });
+    assert.strictEqual(r.status, 'UNREACHABLE', `${label}: no-sync directory was synced (${r.status})`);
+    assert.match(r.detail, /\.l9\/no-sync is a directory/);
+    assert.deepStrictEqual(writesOf(r.calls), [], `${label}: no-sync directory still wrote`);
+    assert.deepStrictEqual(r.calls.map((c) => c.name), ['git.getRef', 'repos.getContent'], `${label}: no-sync directory was probed past its marker`);
+    assert.strictEqual(r.state.sha, 'stale-sync-branch');
+  }
+  console.log(`ok: ${label} — a .l9/no-sync directory fails closed in Preview and Apply`);
+
+  // F3: the opt-out is read at the same pinned commit as the plan.
+  // (a) A marker committed between an unpinned probe and the pin is part of
+  //     the snapshot: it opts the repo out. A probe made before the pin would
+  //     miss it and publish into a repo that had opted out, and BASE_MOVED
+  //     would not fire because the base did not move after the pin.
+  for (const dry of [true, false]) {
+    r = await runClass({ files: drifted, branch: stale, dry, atBase: { '.l9/no-sync': '' } });
+    assert.strictEqual(r.status, 'OPTED_OUT', `${label}: opt-out committed at the pinned base ignored (dry=${dry})`);
+    assert.deepStrictEqual(writesOf(r.calls), [], `${label}: wrote to an opted-out repo (dry=${dry})`);
+    assert.strictEqual(r.state.sha, 'stale-sync-branch');
+  }
+  // (b) A marker committed after the pinned snapshot moves the base: the final
+  //     BASE_MOVED check refuses publication. No ref moves, no PR.
+  r = await runClass({ files: drifted, branch: stale, baseMovesTo: 'base-with-no-sync' });
+  assert.strictEqual(r.status, 'BASE_MOVED');
+  assert.ok(!r.calls.some((c) => ['git.createRef', 'graphql.updateRefs', 'pulls.create'].includes(c.name)),
+    `${label}: published past an opt-out landed after the snapshot`);
+  assert.strictEqual(r.state.sha, 'stale-sync-branch');
+  // (c) An opt-out nobody could read is not "absent": named blocker, run
+  //     fails, and not one non-read call is made in either mode.
+  for (const [code, status] of [[403, 'BLOCKED_PERMISSION'], [500, 'UNREACHABLE'], [502, 'UNREACHABLE']]) {
+    for (const dry of [true, false]) {
+      r = await runClass({ files: drifted, branch: stale, dry, errors: { '.l9/no-sync': code } });
+      assert.strictEqual(r.status, status, `${label}: opt-out ${code} (dry=${dry})`);
+      assert.deepStrictEqual(writesOf(r.calls), [], `${label}: opt-out ${code} still wrote (dry=${dry})`);
+      assert.strictEqual(r.failures.length, 1, `${label}: opt-out ${code} must fail the run`);
+      assert.ok(!r.calls.some((c) => c.name === 'repos.getContent' && c.args.path !== '.l9/no-sync'),
+        `${label}: planned past an unreadable opt-out (${code})`);
+    }
+  }
+  console.log(`ok: ${label} — opt-out read at the pinned base; one landing after the snapshot is BASE_MOVED; 403/5xx blocks with no write`);
+}
+
+/**
+ * Class before plan, exact bytes, ownership, overlap, a moving base, and the
+ * PR body (GAR G3/G4/G5/G6, V06–V16).
+ */
+async function ownershipScenarios() {
+  const label = 'continuous-sync (class, ownership, overlap)';
+  const marker = (cls) => ({ '.l9/org-birth-profile.yaml': `profile: ${cls}\n` });
+  const divergent = { '.github/CODEOWNERS': '* @someone-else\n', '.github/dependabot.yml': 'version: 2\nupdates: []\n' };
+  const mutatedAny = (r) => writesOf(r.calls).length > 0;
+
+  // V06: self_governed never plans CODEOWNERS / dependabot, however divergent.
+  for (const dry of [true, false]) {
+    const r = await runClass({ files: { ...divergent, ...marker('self_governed') }, dry });
+    assert.strictEqual(r.klass, 'self_governed');
+    assert.strictEqual(r.status, 'INHERITED', `${label}: self_governed planned a write (${r.detail})`);
+    assert.strictEqual(mutatedAny(r), false);
+  }
+  // l9-ci-core is self_governed by org override: same answer with no marker.
+  console.log(`ok: ${label} — self_governed: CODEOWNERS/dependabot never planned or written`);
+
+  // A malformed or unknown marker plans nothing — not even CODEOWNERS.
+  for (const text of ['profile: no_such_class\n', 'garbage\n']) {
+    const r = await runClass({ files: { ...divergent, '.l9/org-birth-profile.yaml': text } });
+    assert.strictEqual(r.status, 'BLOCKED_POLICY');
+    assert.match(r.detail, /nothing planned/);
+    assert.strictEqual(mutatedAny(r), false, `${label}: malformed marker still wrote`);
+  }
+  // A marker that cannot be read (403) is not "absent".
+  {
+    const r = await runClass({ files: divergent, errors: { '.l9/org-birth-profile.yaml': 403 } });
+    assert.strictEqual(r.status, 'BLOCKED_PERMISSION');
+    assert.strictEqual(mutatedAny(r), false);
+  }
+  console.log(`ok: ${label} — malformed/unknown/unreadable marker: no writes at all`);
+
+  // V07: a root CODEOWNERS means .github/CODEOWNERS is not managed.
+  {
+    const r = await runClass({ files: { ...managedOk, [TEMPLATE]: canonicalTemplate, CODEOWNERS: '* @owner\n' } });
+    assert.strictEqual(r.status, 'CANONICAL_COPY', r.detail);
+    const r2 = await runClass({ files: { 'CODEOWNERS': '* @owner\n', '.github/dependabot.yml': managedOk['.github/dependabot.yml'], [TEMPLATE]: canonicalTemplate } });
+    assert.ok(!r2.writes.some((w) => w.args.path === '.github/CODEOWNERS'), `${label}: wrote .github/CODEOWNERS over a root CODEOWNERS`);
+    assert.strictEqual(r2.status, 'CANONICAL_COPY');
+  }
+  console.log(`ok: ${label} — root CODEOWNERS present: .github/CODEOWNERS never written`);
+
+  // V08: whitespace-only difference in a fully managed file is drift.
+  {
+    const r = await runClass({ files: { ...managedOk, '.github/dependabot.yml': `${managedOk['.github/dependabot.yml']}\n`, [TEMPLATE]: canonicalTemplate } });
+    assert.deepStrictEqual(r.writes.map((w) => w.args.path), ['.github/dependabot.yml']);
+    assert.strictEqual(Buffer.from(r.writes[0].args.content, 'base64').toString(), managedOk['.github/dependabot.yml']);
+  }
+  console.log(`ok: ${label} — exact-byte comparison: trailing whitespace is drift`);
+
+  // non_constellation_python: CODEOWNERS/dependabot managed; template inherited.
+  {
+    const r = await runClass({ files: { ...divergent, ...marker('non_constellation_python') } });
+    assert.deepStrictEqual(r.writes.map((w) => w.args.path).sort(), ['.github/CODEOWNERS', '.github/dependabot.yml']);
+  }
+
+  // V10: a divergent local template under an INHERIT class is not deleted.
+  for (const cls of ['self_governed', 'non_constellation_python']) {
+    for (const dry of [true, false]) {
+      const r = await runClass({ files: { ...managedOk, ...marker(cls), [TEMPLATE]: '## our own\n' }, dry });
+      assert.strictEqual(r.deletes.length, 0, `${label}: ${cls} deleted an unproven local template`);
+      assert.match(r.detail, /BLOCKED_OWNERSHIP \.github\/pull_request_template\.md/);
+      if (cls === 'self_governed') assert.strictEqual(r.status, 'BLOCKED_OWNERSHIP');
+    }
+  }
+  console.log(`ok: ${label} — divergent template under an INHERIT class: BLOCKED_OWNERSHIP, never deleted`);
+
+  // V11: another open PR changes a planned path (directly or by rename).
+  const drifted = { ...managedOk, [TEMPLATE]: '## stale\n' };
+  for (const files of [[{ filename: TEMPLATE }], [{ filename: 'docs/t.md', previous_filename: TEMPLATE }]]) {
+    for (const dry of [true, false]) {
+      const r = await runClass({ files: drifted, dry, otherPRs: [{ number: 51, ref: 'chore/seed-governance', files }] });
+      assert.strictEqual(r.status, 'BLOCKED_CONFLICT');
+      assert.match(r.detail, /open PR #51 \(chore\/seed-governance\) also changes \.github\/pull_request_template\.md/);
+      assert.strictEqual(mutatedAny(r), false);
+      assert.deepStrictEqual(r.failures, []);
+    }
+  }
+  // V12: an unrelated PR does not block.
+  {
+    const r = await runClass({ files: drifted, otherPRs: [{ number: 52, ref: 'x', files: [{ filename: 'README.md' }] }] });
+    assert.strictEqual(r.status, 'UPDATE_PR_OPEN');
+  }
+  // V13: the PR listing cannot be read.
+  for (const [opts, status] of [[{ otherPRs: [{ number: 53, ref: 'x', filesError: 403 }] }, 'BLOCKED_PERMISSION'], [{ listError: 503 }, 'UNREACHABLE']]) {
+    const r = await runClass({ files: drifted, ...opts });
+    assert.strictEqual(r.status, status);
+    assert.strictEqual(mutatedAny(r), false);
+  }
+  console.log(`ok: ${label} — overlapping pending PR: BLOCKED_CONFLICT; unreadable listing: named blocker; no write`);
+
+  // V15: the default branch moves between plan and commit.
+  {
+    const r = await runClass({ files: drifted, baseMovesTo: 'base-moved' });
+    assert.strictEqual(r.status, 'BASE_MOVED');
+    assert.ok(!r.calls.some((c) => ['git.createRef', 'graphql.updateRefs', 'pulls.create'].includes(c.name)));
+  }
+  console.log(`ok: ${label} — a base that moves before publication stops; no ref or PR`);
+
+  // V16 / V23: the Apply PR body passes the org validator and states facts only.
+  {
+    const r = await runClass({ files: drifted });
+    const body = r.calls.find((c) => c.name === 'pulls.create').args.body;
+    assert.deepStrictEqual(await gates(body), [], `${label}: Manual Update PR body fails governance-pr gates`);
+    assert.match(body, new RegExp(`source: Quantum-L9/\\.github@${SOURCE_SHA}`));
+    assert.match(body, /base: {3}main@base-sha/);
+    assert.match(body, /^ {2}modify {2}\.github\/pull_request_template\.md$/m);
+    assert.match(body, /- \[x\] Medium/, 'overwriting consumer bytes is not Low');
+    assert.doesNotMatch(body, /- \[x\][^\n]*CI passes/i);
+    const add = await runClass({ files: { '.github/dependabot.yml': managedOk['.github/dependabot.yml'], [TEMPLATE]: canonicalTemplate } });
+    const addBody = add.calls.find((c) => c.name === 'pulls.create').args.body;
+    assert.deepStrictEqual(await gates(addBody), []);
+    assert.match(addBody, /- \[x\] Low/, 'restoring an absent managed file is additive');
+  }
+  console.log(`ok: ${label} — Apply PR body passes governance-pr gates (strict) with exact base, source and changes`);
+
+  // The plan is read at one pinned commit: every read, the opt-out probe
+  // included, names the base sha, so a file changed on the default branch mid-plan is
+  // judged against the same commit the final BASE_MOVED check pins.
+  {
+    const r = await runClass({ files: { ...managedOk, ...marker('non_constellation_python'), [TEMPLATE]: canonicalTemplate } });
+    const reads = r.calls.filter((c) => c.name === 'repos.getContent');
+    assert.strictEqual(reads[0].args.path, '.l9/no-sync', `${label}: the opt-out is the first read`);
+    assert.ok(reads.length > 3);
+    for (const c of reads) assert.strictEqual(c.args.ref, 'base-sha', `${label}: ${c.args.path} read off the pinned base`);
+    assert.deepStrictEqual(r.deletes.map((d) => d.args.path), [TEMPLATE]);
+  }
+  console.log(`ok: ${label} — every planning read is pinned to the base sha`);
+
+  // An org-override class is reported as such, not as a marker.
+  {
+    const r = await runClass({ repoName: 'l9-repo-template', files: divergent });
+    assert.strictEqual(r.klass, 'non_constellation_python');
+    const body = r.calls.find((c) => c.name === 'pulls.create').args.body;
+    assert.match(body, /class: {2}non_constellation_python \(org override\)/);
+    assert.doesNotMatch(body, /\(marker\)/);
+  }
+  console.log(`ok: ${label} — override-classified repo: PR body names the org override, not a marker`);
+
+  // An empty repository has nothing to sync and is not a failure; any other
+  // base-ref error is.
+  {
+    let r = await runClass({ files: divergent, baseError: { status: 409, message: 'Git Repository is empty.' } });
+    assert.strictEqual(r.status, 'UNINITIALIZED');
+    assert.deepStrictEqual(r.failures, []);
+    assert.strictEqual(mutatedAny(r), false);
+    r = await runClass({ files: divergent, baseError: { status: 409, message: 'Conflict' } });
+    assert.strictEqual(r.status, 'UNREACHABLE');
+    assert.strictEqual(r.failures.length, 1);
+  }
+  console.log(`ok: ${label} — empty repo reported UNINITIALIZED; other base-ref errors fail`);
 }
 
 (async () => {
@@ -391,7 +616,7 @@ async function manualModeScenarios() {
     `${label}: the open-PR probe must actually run`,
   );
   const probeIdx = r.names.indexOf('pulls.list');
-  const refReadIdx = r.names.indexOf('git.getRef');
+  const refReadIdx = r.calls.findIndex((c) => c.name === 'git.getRef' && c.args.ref === `heads/${BRANCH}`);
   assert.ok(
     refReadIdx === -1 || probeIdx < refReadIdx,
     `${label}: the open-PR probe must precede any branch ref read`,
@@ -448,6 +673,7 @@ async function manualModeScenarios() {
 
   await classScenarios();
   await manualModeScenarios();
+  await ownershipScenarios();
   console.log('\nall continuous-sync branch-guard scenarios passed');
 })().catch((e) => {
   console.error(e);

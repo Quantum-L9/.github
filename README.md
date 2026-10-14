@@ -90,7 +90,6 @@ Canonical CI is `Quantum-L9/l9-ci-core` (`org-ci.yml`).
 | Policy enforcement | `enforce-policies.yml` | settings correction |
 | SHA-pin audit | `audit-pins-org.yml` | report |
 | Preflight | `preflight-scheduled.yml` | report |
-| Template dispatch | `dispatch-template-update.yml` | event |
 | Birth bootstrap | `repo-birth-bootstrap.yml` | REMOTE APPLY for one repo |
 | Copilot governance | `.github/copilot-instructions.md` | advisory |
 | Custom properties | `ops/properties-schema.json` | metadata |

@@ -18,7 +18,9 @@ const {
   OPT_IN_CATEGORIES,
   PYTHON_LINT_DEST,
   RETIRED_CATEGORIES,
+  ISSUE_TEMPLATES_MATERIALIZED,
 } = require('./build-seed-payload.js');
+const { loadRepoClasses, resolveProfile } = require('./repo-class-profile.js');
 
 // Explicit comparator: a default `.sort()` compares by string conversion,
 // which is an implicit ordering rule one refactor away from being wrong.
@@ -164,6 +166,79 @@ try {
   assert.ok(
     !('.vscode/extensions.json' in defaultPayload),
     'editor recommendations are no longer seeded into consumer repositories',
+  );
+
+  // ── Required sources (G1): a named source that is gone fails the build ────
+  // An fs view over this checkout that hides some paths and adds others, so
+  // the real fixtures are never touched.
+  const enoent = (p) => Object.assign(new Error(`ENOENT: no such file, open '${p}'`), { code: 'ENOENT' });
+  const fsWith = ({ hide = [], add = {} } = {}) => ({
+    ...fs,
+    existsSync: (p) => (p in add) || (!hide.includes(p) && fs.existsSync(p)),
+    statSync: (p) => ((p in add) ? { isFile: () => true } : fs.statSync(p)),
+    readFileSync: (p, enc) => {
+      if (p in add) return add[p];
+      if (hide.includes(p)) throw enoent(p);
+      return fs.readFileSync(p, enc);
+    },
+    readdirSync: (p) => {
+      const extra = Object.keys(add).filter((a) => a.startsWith(`${p}/`)).map((a) => a.slice(p.length + 1));
+      return [...fs.readdirSync(p).filter((n) => !hide.includes(`${p}/${n}`)), ...extra];
+    },
+  });
+
+  // V01: the named release template is missing.
+  assert.throws(
+    () => buildSeedPayload({ fs: fsWith({ hide: ['.github/PULL_REQUEST_TEMPLATE/release.md'] }), categories: 'all' }),
+    /seed source \.github\/PULL_REQUEST_TEMPLATE\/release\.md is missing/,
+    'a missing named PR template must fail the build, not shrink the payload',
+  );
+  // Every activated category's sources are required, not only templates.
+  for (const [cat, src] of [
+    ['codeowners', 'policies/CODEOWNERS'],
+    ['dependabot', '.github/dependabot.yml'],
+    ['governance', 'policies/governance-caller.yml'],
+    ['community-health', 'SECURITY.md'],
+    ['labels', '.github/labels.yml'],
+  ]) {
+    assert.throws(
+      () => buildSeedPayload({ fs: fsWith({ hide: [src] }), categories: [cat] }),
+      (err) => err.message.includes(`seed source ${src} is missing`),
+      `${cat}: a missing source must throw`,
+    );
+  }
+  // A category not requested does not need its source.
+  assert.doesNotThrow(() => buildSeedPayload({ fs: fsWith({ hide: ['.github/labels.yml'] }), categories: 'all' }));
+
+  // V02: a required issue form is missing → throws; an unnamed new form is
+  // never swept into the payload.
+  assert.throws(
+    () => buildSeedPayload({ fs: fsWith({ hide: ['.github/ISSUE_TEMPLATE/3-task.yml'] }), categories: ['issue-templates'] }),
+    /seed source \.github\/ISSUE_TEMPLATE\/3-task\.yml is missing/,
+  );
+  const withNewForm = buildSeedPayload({
+    fs: fsWith({ add: { '.github/ISSUE_TEMPLATE/9-new.yml': 'name: new\n' } }),
+    categories: ['issue-templates'],
+  });
+  assert.ok(!('.github/ISSUE_TEMPLATE/9-new.yml' in withNewForm), 'an unnamed issue form must not be distributed');
+  assert.deepStrictEqual(Object.keys(withNewForm).sort(byName), [...ISSUE_TEMPLATES_MATERIALIZED].sort(byName));
+  assert.strictEqual(ISSUE_TEMPLATES_MATERIALIZED.length, 7);
+
+  // Exact class payload sizes (13 / 4 / 0).
+  const classes = loadRepoClasses(fs);
+  const sizes = Object.fromEntries(['default', 'non_constellation_python', 'self_governed'].map((c) => [
+    c, Object.keys(buildSeedPayload({ fs, profile: resolveProfile(classes, c) })).length,
+  ]));
+  assert.deepStrictEqual(sizes, { default: 13, non_constellation_python: 4, self_governed: 0 });
+
+  // V21: every eligible file already present → nothing to write.
+  const present = Object.fromEntries(Object.keys(defaultPayload).map((p) => [p, true]));
+  assert.deepStrictEqual(selectSeedWrites(defaultPayload, present).writes, []);
+
+  // V24: an explicit category the class forbids throws, naming class and path.
+  assert.throws(
+    () => buildSeedPayload({ fs, categories: ['governance'], profile: resolveProfile(classes, 'non_constellation_python') }),
+    /violates repo class non_constellation_python: \.github\/workflows\/governance\.yml/,
   );
 
   const pin = fs.readFileSync('ops/governance-v1-pin.txt', 'utf8');

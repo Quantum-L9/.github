@@ -3,7 +3,7 @@ SHELL := /bin/bash
 .PHONY: help activate preflight validate sync-labels sync-labels-all \
         seed-dry seed-apply birth-bootstrap birth-seed \
         apply-rulesets set-properties pin-actions audit-pins enforce-dry enforce-apply \
-        dispatch clean
+        clean
 
 # ─── Info ────────────────────────────────────────────────────────────────────
 help: ## Show all targets
@@ -81,10 +81,6 @@ enforce-dry: ## Dry-run: show policy drift without fixing
 
 enforce-apply: ## Enforce policies (auto-correct settings, report missing files)
 	@gh workflow run enforce-policies.yml -f dry_run=false
-
-# ─── Cross-Repo Dispatch ─────────────────────────────────────────────────────
-dispatch: ## Notify all consumer repos of template changes
-	@gh workflow run dispatch-template-update.yml
 
 # ─── Cleanup ─────────────────────────────────────────────────────────────────
 clean: ## Remove generated artifacts

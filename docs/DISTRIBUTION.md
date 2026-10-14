@@ -24,7 +24,7 @@ files. Consumer-only files live in `policies/`:
 - `policies/governance-caller.yml` → `.github/workflows/governance.yml`
 - `.github/dependabot.yml`, `.github/labels.yml` (opt-in)
 - `SECURITY.md` (`community-health`; advisory URLs rewritten to the consumer)
-- `.github/ISSUE_TEMPLATE/*` (`config.yml` advisory URL rewritten to the consumer)
+- `.github/ISSUE_TEMPLATE/` — seven named forms (`1-bug.yml`, `2-feature.yml`, `3-task.yml`, `4-incident.yml`, `ci-failure.yml`, `gov-violation.yml`, `config.yml`), never a directory sweep; `config.yml` advisory URL rewritten to the consumer
 - `.github/pull_request_template.md` and `.github/PULL_REQUEST_TEMPLATE/release.md` (`pr-templates`, named files, never a directory copy)
 
 `community-health` copies `SECURITY.md` only. It is the one community-health
@@ -42,9 +42,30 @@ category list is filtered by the class: INHERIT drops, FORBID is refused with
 the class and path named. Every entrypoint is missing-only; the shell path
 reports each existing file as kept and a second run is byte-identical.
 
+Every source a requested category names is required: a missing one fails the
+build before any consumer is touched, so the payload never shrinks silently.
+Only a 404 reads as "absent" on a consumer; a 403, 409, 5xx, or a directory
+where a file belongs fails that repository instead of planning a write or
+falling back to `default`. Before writing, both seeders list the consumer's
+other open PRs; one already changing a planned path (including a rename's
+previous name) leaves the repository `BLOCKED_CONFLICT` with nothing written,
+and a listing that cannot be read is `BLOCKED_PERMISSION` or `UNREACHABLE`.
+Both seeders pin the default-branch commit before the first policy read; root
+`CODEOWNERS`, the class marker and every destination are read at that commit,
+and a branch that cannot be pinned plans nothing. The default branch is
+re-read before the seed branch moves; if it moved, the
+run stops for that repository (`BASE_MOVED`) and the next one replans. This
+narrows the race with other writers; it does not close it. An empty repository
+is reported `UNINITIALIZED_NOT_SEEDED` by the hourly sweep and retried; no
+other 409 is treated that way.
+
 `continuous-sync.yml` (Manual Update) is the exception to missing-only. It
-restores `.github/CODEOWNERS` and `.github/dependabot.yml` when they drift,
-unless the repo has `.l9/no-sync`. It runs only when dispatched: nothing
+restores `.github/CODEOWNERS` and `.github/dependabot.yml` to the exact org
+bytes when they drift, unless the repo has `.l9/no-sync`, and only where the
+repository's class materializes them: it resolves the class (and a root
+`CODEOWNERS`, which wins) first and plans from the same class-filtered payload
+the seeders build, so a `self_governed` repository gets neither file and a
+malformed marker gets nothing. It runs only when dispatched: nothing
 schedules it and no push starts it. `dry_run=true` (Preview, the default)
 reports drift and writes nothing; `dry_run=false` (Apply) opens one reviewable
 PR per drifted repository. Any value other than an explicit `false` previews.
@@ -153,14 +174,21 @@ anywhere else. `continuous-sync.yml` extends its exception to missing-only
 | Path | Class rule | Sync action |
 | --- | --- | --- |
 | `.github/pull_request_template.md` | class seeds `pr-templates` | carry the canonical bytes; a divergent copy is replaced |
-| `.github/pull_request_template.md` | class INHERITS it | carry no copy; a local one blocks inheritance and is removed |
+| `.github/pull_request_template.md` | class INHERITS it | carry no copy; a local copy byte-identical to the org template blocks inheritance and is removed; a divergent one is `BLOCKED_OWNERSHIP` and left in place |
 | `.github/workflows/governance.yml` | class seeds `governance` | re-pin only: the `governance-pr.yml` / `governance-issue.yml` `uses:` SHAs follow `policies/governance-caller.yml`; everything else in the consumer's caller (e.g. `strict: true`) is kept |
 
 Alternate templates (a `PULL_REQUEST_TEMPLATE/` directory, root or `docs/`
 copies) are reported per repository and never edited. Each run's summary gives
 every repository one status: `INHERITED`, `CANONICAL_COPY`, `UPDATE_PR_OPEN`,
 `UPDATE_PENDING_MERGE`, `DRIFT` (Preview), `BLOCKED_PERMISSION`,
-`BLOCKED_POLICY`, `OPTED_OUT`, `UNREACHABLE`, or `UNVERIFIED`. Any repository
+`BLOCKED_POLICY`, `BLOCKED_OWNERSHIP`, `BLOCKED_CONFLICT` (another open PR
+changes a planned path), `BASE_MOVED`, `UNINITIALIZED` (no commits),
+`OPTED_OUT`, `UNREACHABLE`, or `UNVERIFIED`. Every planning read, the
+`.l9/no-sync` opt-out included, is pinned to the default-branch commit read
+first, and that commit is re-checked before the sync branch moves, so an
+opt-out committed mid-run stops publication (`BASE_MOVED`). A `.l9/no-sync`
+that is a directory, like a class marker that is one, is `UNREACHABLE` with
+nothing planned, never read as absent. Any repository
 left `UNREACHABLE`, `BLOCKED_PERMISSION`, or `UNVERIFIED` fails the run. A
 change to the template, the caller, CODEOWNERS, dependabot, or the class policy
 reaches consumers only when an operator dispatches the workflow. Preview first,
@@ -179,6 +207,13 @@ runs that composer at the commit pinned in the job (`COMPOSER` and the checkout
 an unchanged body is never PATCHed; a head no local gate measured is marked
 `STALE` in Evidence, never claimed. This repository's own PRs get the same job
 through `pr-files.yml`.
+
+PRs the seeders and Manual Update open carry their own short body in the
+sections the `gates` job checks — Problem, Fix, Risk (exactly one), Evidence
+(source commit, exact base, class, and the changed paths), Gates — built from
+what the run did. Consumer CI is left unchecked as unverified; nothing claims a
+check the run did not observe. They are not a second composer: they have no
+machine-owned regions, so the `body` job leaves them as written.
 
 **Shipping a body or gate change to consumers.** Merge the
 `governance-pr.yml` change, set the merged commit as the pin in
