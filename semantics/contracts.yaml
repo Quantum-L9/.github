@@ -575,7 +575,8 @@ contracts:
     unresolved: one_or_more_required_capability_states_cannot_be_resolved
 - id: l9.contract/product-kind@1
   purpose: Classify an L9 product by its canonical consumption and deployment boundary without inferring kind from
-    implementation technology, repository shape, semantic complexity, or incidental process topology.
+    implementation technology, repository shape, semantic complexity, or incidental process topology; an exactly bound
+    admitted product-kind exception is the only departure from that classification.
   scope: global
   owner: Quantum-L9/.github
   source_invariants:
@@ -584,30 +585,39 @@ contracts:
   - L9-OWNER-001
   - L9-COMPAT-001
   - L9-UNKNOWN-001
+  - L9-MONOTONIC-001
   applies_to:
   - product_topologies
   - product_kind_resolution
   - product_archetype_resolution
+  - product_kind_exception_claims
   requires:
   - declared_product_kind
   - declared_consumption_model
   - declared_deployment_model
   - admitted_kind_semantics
   - kind_compatible_archetype
+  - exactly_bound_admitted_product_kind_exception_when_declared_models_depart_from_kind
   guarantees:
   - node_means_remote_invocation_plus_independent_runtime
-  - dependency_means_local_composition_plus_consumer_bound_artifact
+  - dependency_means_local_composition_plus_consumer_bound_artifact_unless_an_admitted_product_kind_exception_binds_the_exact_product
   - kind_does_not_transfer_semantic_ownership
   - kind_specific_archetype_catalog_is_selected_mechanically
+  - product_kind_exception_displaces_only_enumerated_obligations_of_its_exact_subject
+  - product_kind_exception_preserves_kind_archetype_and_all_undisplaced_obligations
   forbidden:
   - kind_inferred_from_provider
   - kind_inferred_from_repository_shape
   - kind_inferred_from_package_format
   - kind_inferred_from_semantic_complexity
   - sdk_kind_assumed_before_admission
+  - product_kind_exception_claimed_without_exact_subject_binding
+  - product_kind_exception_admitted_by_the_subject_or_a_consumer
+  - product_kind_exception_used_to_acquire_constellation_identity_gate_admission_or_routing_authority
+  - product_kind_exception_used_to_relax_security_attribution_isolation_authorization_or_admission
   outcomes:
-    resolved: declared_kind_consumption_deployment_and_archetype_are_coherent
-    invalid: declared_kind_conflicts_with_consumption_or_deployment
+    resolved: declared_kind_consumption_deployment_and_archetype_are_coherent_directly_or_through_an_exactly_bound_admitted_product_kind_exception
+    invalid: declared_kind_conflicts_with_consumption_or_deployment_without_an_exactly_bound_admitted_product_kind_exception
     unresolved: kind_or_archetype_semantics_are_not_admitted
 - id: l9.contract/product-topology@1
   purpose: Define the authoritative ProductTopology contract from which every L9 product is compiled using one shared
@@ -648,7 +658,7 @@ contracts:
   guarantees:
   - one_topology_vocabulary_describes_all_l9_products
   - product_owner_declares_semantics_not_compiler_derivable_structure
-  - product_kind_constrains_consumption_and_deployment
+  - product_kind_constrains_consumption_and_deployment_except_as_an_exactly_bound_admitted_product_kind_exception_enumerates
   - archetype_specializes_exact_product_kind
   - omitted_derivable_structure_may_be_resolved_downstream
   - product_semantic_decisions_remain_explicit

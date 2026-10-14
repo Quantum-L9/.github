@@ -19,6 +19,7 @@ global_rules:
   patterns_must_reference_canonical_vocabulary: true
   patterns_must_not_expand_authority: true
   architecture_synthesis_may_only_select_admitted_patterns: true
+  pattern_obligations_apply_unmodified_unless_an_admitted_product_kind_exception_displaces_them_for_its_exact_product: true
 pattern_classes:
   semantic_structure:
     definition: 'Pattern governing semantic ownership, domain boundaries, and canonical implementation structure.

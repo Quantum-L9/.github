@@ -3,6 +3,7 @@ product:
   id: null
   kind: null
   archetype_ref: null
+  kind_exception_ref: null
   name: null
   versioning_family: null
   status: null

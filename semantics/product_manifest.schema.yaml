@@ -49,6 +49,11 @@ properties:
     - id
     - kind
     - archetype_ref
+    fields:
+      id: semantic_ref
+      kind: product_kind
+      archetype_ref: semantic_ref
+      kind_exception_ref: semantic_ref_or_null
   source_topology:
     type: object
     required:
@@ -127,6 +132,8 @@ resolved_manifest_gate:
   - source_product_topology_valid
   - product_kind_resolved
   - product_archetype_resolved
+  - product_kind_exception_absent_or_exactly_bound_and_admitted
+  - product_kind_exception_release_floor_satisfied_when_claimed
   - governance_profile_separate_from_identity
   - identity_resolution_contract_resolved
   - identity_topology_resolved
@@ -150,6 +157,7 @@ semantic_rules:
 - manifest_does_not_become_product_or_domain_owner
 - manifest_preserves_exact_source_topology_and_profile_coordinates
 - manifest_preserves_product_kind_and_archetype_identity
+- manifest_preserves_the_exact_applied_product_kind_exception_coordinate
 - material_upstream_change_invalidates_currentness_until_recompiled_or_compatibility_proven
 - manifest_preserves_identity_dimension_semantics
 - manifest_preserves_identity_resolution_and_assertion_contract_coordinates

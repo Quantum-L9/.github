@@ -141,6 +141,7 @@ solvers:
     validates_product_kind_coherence: true
     validates_archetype_kind_membership: true
     rejects_unadmitted_product_kind: true
+    applies_admitted_product_kind_exceptions_only_by_exact_subject_binding: true
 - id: requirement-closure-validator/v1
   class: satisfiability
   stage: requirement_resolution

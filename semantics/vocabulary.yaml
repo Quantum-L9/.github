@@ -1064,6 +1064,17 @@ terms:
     subtype_of: product_kind
     definition: L9 product whose canonical consumption is local composition and canonical deployment is a consumer-bound
       installable artifact.
+    rules:
+    - departs_only_through_an_admitted_product_kind_exception_bound_to_the_exact_product
+  product_kind_exception:
+    semantic_class: architecture_classification
+    definition: Canonical, owner-admitted departure that lets one exactly identified product keep its ProductKind while
+      an enumerated set of that kind's obligations is displaced; it is not a ProductKind, archetype, or waiver class.
+    detailed_model: product_kinds.yaml
+    rules:
+    - binds_exact_product_identity_and_canonical_repository
+    - claimed_only_by_explicit_reference
+    - grants_no_constellation_identity_gate_admission_or_routing_authority
   adapter:
     semantic_class: realization_boundary
     definition: Concrete translator or realization boundary that implements an owner-defined port using a provider,

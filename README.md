@@ -33,6 +33,15 @@ SDK is not an admitted kind. Archetypes specialize a kind without redefining
 it: `semantics/node_archetypes.yaml` and
 `semantics/dependency_archetypes.yaml`.
 
+Since v3.21.0, `semantics/product_kinds.yaml#kind_exceptions` holds exactly one
+product-scoped exception (ADR-011, amendment of 2026-10-14). It applies to
+`Quantum-L9/l9-graphiti-memory`, which stays a Dependency but runs as one
+hosted service. Agents reach that service through authenticated MCP
+Streamable HTTP. The exception is not a kind, and it grants no Node
+identity or Gate authority. A product binds it only by claiming it
+explicitly, and only with its exact product identity and repository. Every
+other product follows the table above unchanged.
+
 Identity dimensions stay distinct in `semantics/identity_model.yaml`.
 GovernanceProfile selects policy. ActorIdentity names who acted. Downstream
 work consumes an assertion that matches

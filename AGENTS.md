@@ -18,6 +18,9 @@ remote invocation with an independent runtime. A Dependency is installed and
 composed inside a consumer. SDK is not an admitted kind. Kind follows
 consumption and deployment. Archetypes specialize a kind:
 `semantics/node_archetypes.yaml` and `semantics/dependency_archetypes.yaml`.
+The only departure is `product_kinds.yaml#kind_exceptions`, which v3.21.0
+admits for the hosted Memory Dependency alone (ADR-011, amendment of
+2026-10-14). It binds by exact product and repository, and RC-028 pins it.
 
 Identity dimensions stay distinct in `semantics/identity_model.yaml`.
 Downstream work consumes an assertion that matches

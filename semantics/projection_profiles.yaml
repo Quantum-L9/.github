@@ -1012,6 +1012,8 @@ projection_profiles:
       - $.global_rules
       - $.kinds
       - $.unresolved_kind_candidates
+      - $.kind_exception_model
+      - $.kind_exceptions
     dependency_archetypes:
       selectors:
       - $.archetypes
@@ -1088,6 +1090,7 @@ projection_profiles:
     product_kinds:
       selectors:
       - $.kinds
+      - $.kind_exceptions
     dependency_archetypes:
       selectors:
       - $.archetypes
@@ -1131,6 +1134,7 @@ projection_profiles:
       - $.governance
       - $.product.id
       - $.product.kind
+      - $.product.kind_exception_ref
     identity_model:
       selectors:
       - $
