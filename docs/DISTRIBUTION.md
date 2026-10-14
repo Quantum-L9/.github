@@ -186,7 +186,9 @@ changes a planned path), `BASE_MOVED`, `UNINITIALIZED` (no commits),
 `OPTED_OUT`, `UNREACHABLE`, or `UNVERIFIED`. Every planning read, the
 `.l9/no-sync` opt-out included, is pinned to the default-branch commit read
 first, and that commit is re-checked before the sync branch moves, so an
-opt-out committed mid-run stops publication (`BASE_MOVED`). Any repository
+opt-out committed mid-run stops publication (`BASE_MOVED`). A `.l9/no-sync`
+that is a directory, like a class marker that is one, is `UNREACHABLE` with
+nothing planned, never read as absent. Any repository
 left `UNREACHABLE`, `BLOCKED_PERMISSION`, or `UNVERIFIED` fails the run. A
 change to the template, the caller, CODEOWNERS, dependabot, or the class policy
 reaches consumers only when an operator dispatches the workflow. Preview first,

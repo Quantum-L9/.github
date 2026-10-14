@@ -158,7 +158,9 @@ jobs:
                   throw Object.assign(new Error(`${base} could not be pinned to a commit`), { phase: 'read' });
                 }
 
-                if ((await read(o, n, '.l9/no-sync', baseSha)).state === 'present') {
+                const noSync = await read(o, n, '.l9/no-sync', baseSha);
+                if (noSync.state === 'dir') throw Object.assign(new Error('.l9/no-sync is a directory'), { phase: 'read' });
+                if (noSync.state === 'present') {
                   row('OPTED_OUT', '.l9/no-sync');
                   continue;
                 }

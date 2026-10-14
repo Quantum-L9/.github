@@ -392,6 +392,18 @@ async function manualModeScenarios() {
   }
   console.log(`ok: ${label} — .l9/no-sync repos are left untouched in Preview and Apply`);
 
+  // A .l9/no-sync that is a directory is a malformed opt-out, not "absent":
+  // it fails closed like the class marker — unresolved, nothing planned.
+  for (const dry of [true, false]) {
+    r = await runClass({ files: drifted, dirs: { '.l9/no-sync': ['README.md'] }, branch: stale, dry });
+    assert.strictEqual(r.status, 'UNREACHABLE', `${label}: no-sync directory was synced (${r.status})`);
+    assert.match(r.detail, /\.l9\/no-sync is a directory/);
+    assert.deepStrictEqual(writesOf(r.calls), [], `${label}: no-sync directory still wrote`);
+    assert.deepStrictEqual(r.calls.map((c) => c.name), ['git.getRef', 'repos.getContent'], `${label}: no-sync directory was probed past its marker`);
+    assert.strictEqual(r.state.sha, 'stale-sync-branch');
+  }
+  console.log(`ok: ${label} — a .l9/no-sync directory fails closed in Preview and Apply`);
+
   // F3: the opt-out is read at the same pinned commit as the plan.
   // (a) A marker committed between an unpinned probe and the pin is part of
   //     the snapshot: it opts the repo out. A probe made before the pin would
