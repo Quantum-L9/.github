@@ -105,15 +105,30 @@ jobs:
             const fileExceptions = (filesPolicy.exceptions || []).map(e => e.repo);
 
             const rows = [];
+            const blocked = [];
 
             for (const repo of targets) {
               const n = repo.name;
               const findings = [];
 
-              // Check opt-out
-              const optOut = await github.rest.repos.getContent({
-                owner: ORG, repo: n, path: '.l9/no-policy-enforcement'
-              }).then(() => true).catch(() => false);
+              // Check opt-out. It gates a settings WRITE, so it fails closed:
+              // only a 404 means the marker is absent. A 403/5xx is an opt-out
+              // nobody could read — the repo is neither enforced nor reported
+              // compliant, and the run fails below.
+              let optOut;
+              try {
+                await github.rest.repos.getContent({
+                  owner: ORG, repo: n, path: '.l9/no-policy-enforcement'
+                });
+                optOut = true;
+              } catch (e) {
+                if (e.status !== 404) {
+                  rows.push([n, `BLOCKED: .l9/no-policy-enforcement unreadable (${e.status || 'error'}) — settings and files not assessed`]);
+                  blocked.push(n);
+                  continue;
+                }
+                optOut = false;
+              }
 
               if (optOut) {
                 rows.push([n, 'opted out']);
@@ -205,3 +220,6 @@ jobs:
                 ...rows.filter(r => r[1] !== 'compliant').map(r => r.map(String))
               ])
               .write();
+            if (blocked.length) {
+              core.setFailed(`${blocked.length} repo(s) not assessed — opt-out marker unreadable: ${blocked.join(', ')}`);
+            }

@@ -109,9 +109,11 @@ jobs:
 
             // 404 is an answer ("absent"). Anything else is not, and must not
             // be read as "in sync" — that used to report unreadable repos as clean.
+            // Every read names the pinned base sha; an unpinned read is refused.
             const read = async (o, n, path, ref) => {
+              if (!ref) throw Object.assign(new Error(`${path}: read without a pinned base`), { phase: 'read' });
               try {
-                const r = await github.rest.repos.getContent({ owner: o, repo: n, path, ...(ref ? { ref } : {}) });
+                const r = await github.rest.repos.getContent({ owner: o, repo: n, path, ref });
                 if (Array.isArray(r.data)) return { state: 'dir', entries: r.data };
                 return { state: 'present', sha: r.data.sha, text: Buffer.from(r.data.content || '', 'base64').toString('utf8') };
               } catch (e) {
@@ -137,14 +139,10 @@ jobs:
               const notes = [];
               const row = (status, detail) => rows.push([n, klass, status, [detail, ...notes].filter(Boolean).join('; ')]);
               try {
-                if ((await read(o, n, '.l9/no-sync')).state === 'present') {
-                  row('OPTED_OUT', '.l9/no-sync');
-                  continue;
-                }
-
-                // The whole plan is read at one pinned commit; the base is
-                // re-checked just before the ref move, so nothing planned can
-                // change underneath it unseen.
+                // The whole plan — the .l9/no-sync opt-out included — is read at
+                // one pinned commit; the base is re-checked just before the ref
+                // move, so nothing planned can change underneath it unseen. An
+                // opt-out committed after the pin moves the base: BASE_MOVED.
                 const base = repo.default_branch;
                 let baseSha;
                 try {
@@ -155,6 +153,14 @@ jobs:
                     continue;
                   }
                   throw Object.assign(e, { phase: 'read' });
+                }
+                if (typeof baseSha !== 'string' || !baseSha) {
+                  throw Object.assign(new Error(`${base} could not be pinned to a commit`), { phase: 'read' });
+                }
+
+                if ((await read(o, n, '.l9/no-sync', baseSha)).state === 'present') {
+                  row('OPTED_OUT', '.l9/no-sync');
+                  continue;
                 }
 
                 // Class before plan: a declared class that cannot be honoured

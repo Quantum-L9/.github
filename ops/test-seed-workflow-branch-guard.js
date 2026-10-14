@@ -150,7 +150,14 @@ function makeGithub(BRANCH, { branch = null, openPRs = [], otherPRs = [], listEr
           if (r.errors?.[args.path]) {
             throw Object.assign(new Error(`HTTP ${r.errors[args.path]}`), { status: r.errors[args.path] });
           }
-          const files = { ...(r.files || {}), ...(r.marker !== undefined ? { [MARKER_PATH]: r.marker } : {}) };
+          // `atBase` is content committed at the pinned base (`base-sha`,
+          // what heads/main resolves to) that an unpinned read — one that
+          // ran before the pin, against an older tip — does not see.
+          const files = {
+            ...(r.files || {}),
+            ...(r.marker !== undefined ? { [MARKER_PATH]: r.marker } : {}),
+            ...(args.ref === 'base-sha' ? r.atBase || {} : {}),
+          };
           if (args.path in files) {
             return { data: { type: 'file', content: Buffer.from(files[args.path], 'utf8').toString('base64') } };
           }
@@ -223,6 +230,65 @@ async function failClosedScenarios(wf, run, label) {
     assert.match(rowOf(r)[2], /is not a readable file/);
   }
   console.log(`ok: ${label} — 403/409/5xx and non-file reads fail closed: no default class, no write`);
+
+  // F2: the plan is read at the base it is committed onto. The base sha is
+  // pinned before the first policy read, and every getContent — root
+  // CODEOWNERS, class marker, each destination, and the second missing-only
+  // pass — names that sha. A marker committed between an unpinned plan and
+  // the pin would otherwise be planned as `default` and committed onto a base
+  // that declares non_constellation_python: a stale-class write that the
+  // final BASE_MOVED check cannot see, because the base did not move after
+  // the pin.
+  for (const dry of [false, true]) {
+    const r = await run({
+      branch: null,
+      dry,
+      repos: one('consumer-repo', { atBase: { [MARKER_PATH]: 'profile: non_constellation_python\n' } }),
+    });
+    const reads = r.calls.filter((c) => c.name === 'repos.getContent');
+    assert.ok(reads.some((c) => c.args.path === 'CODEOWNERS'), `${label}: root CODEOWNERS was not read`);
+    assert.ok(reads.some((c) => c.args.path === MARKER_PATH), `${label}: class marker was not read`);
+    for (const c of reads) {
+      assert.strictEqual(c.args.ref, 'base-sha', `${label}: ${c.args.path} read off the pinned base (dry=${dry})`);
+    }
+    const pin = r.calls.findIndex((c) => c.name === 'git.getRef' && c.args.ref === 'heads/main');
+    const firstRead = r.calls.findIndex((c) => c.name === 'repos.getContent');
+    assert.ok(pin !== -1 && pin < firstRead, `${label}: base must be pinned before the first policy read (dry=${dry})`);
+    assert.strictEqual(rowOf(r)[1], 'non_constellation_python', `${label}: planned under a stale class (dry=${dry})`);
+    if (dry) {
+      assert.match(rowOf(r)[2], /would seed 4/);
+      assert.strictEqual(wrote(r), false);
+    } else {
+      const tree = r.calls.find((c) => c.name === 'git.createTree').args.tree.map((t) => t.path).sort();
+      assert.deepStrictEqual(tree, ['.github/CODEOWNERS', '.github/dependabot.yml', '.github/labels.yml', 'SECURITY.md'],
+        `${label}: stale-class write`);
+      assert.ok(!tree.includes('.github/workflows/governance.yml'));
+    }
+  }
+  // A destination committed at the pinned base is present, not missing.
+  {
+    const r = await run({ branch: null, repos: one('consumer-repo', { atBase: { 'SECURITY.md': '# consumer-owned\n' } }) });
+    const tree = r.calls.find((c) => c.name === 'git.createTree').args.tree.map((t) => t.path);
+    assert.ok(!tree.includes('SECURITY.md'), `${label}: overwrote a file present at the pinned base`);
+  }
+  // A base that cannot be pinned plans nothing: no policy read, no write.
+  for (const status of [403, 500]) {
+    const r = await run({
+      branch: null,
+      mutateGithub: (github) => {
+        const real = github.rest.git.getRef;
+        github.rest.git.getRef = async (args) => {
+          if (args.ref === 'heads/main') throw Object.assign(new Error(`HTTP ${status}`), { status });
+          return real(args);
+        };
+      },
+    });
+    assert.strictEqual(r.names.includes('repos.getContent'), false, `${label}: planned without a pinned base (${status})`);
+    assert.strictEqual(wrote(r), false);
+    assert.match(rowOf(r)[2], /^failed:/);
+    assert.strictEqual(r.failures.length, 1);
+  }
+  console.log(`ok: ${label} — base pinned before planning; every read names it; no stale-class write; unpinnable base fails closed`);
 
   // V11: a different open PR changes a planned path (directly, or by rename).
   for (const files of [[{ filename: 'SECURITY.md' }], [{ filename: 'docs/security.md', previous_filename: 'SECURITY.md' }]]) {
@@ -327,6 +393,12 @@ async function failClosedScenarios(wf, run, label) {
     assert.ok(r.calls.some((c) => c.name === 'pulls.create' && c.args.repo === 'plain-repo'), `${label}: sweep stopped at the empty repo`);
     assert.deepStrictEqual(r.failures, [], `${label}: an empty repo is not a failure`);
     assert.ok(r.warnings.some((w) => /no commits and were NOT seeded: empty-repo/.test(w)));
+    // The base pin runs first in a dry run too, so a preview reports the same
+    // state rather than "would seed" onto a branch that does not exist.
+    r = await run({ branch: null, dry: true, repos: [{ name: 'empty-repo' }], mutateGithub: emptyRepo(409, 'Git Repository is empty.') });
+    assert.match(rowOf(r, 'empty-repo')[2], /^UNINITIALIZED_NOT_SEEDED/);
+    assert.deepStrictEqual(r.failures, []);
+    assert.ok(!r.names.includes('repos.getContent'), `${label}: planned an empty repo`);
     console.log(`ok: ${label} — empty repository reported UNINITIALIZED_NOT_SEEDED; sweep continues`);
 
     // V20: any other 409, or a 403, at the ref stage is a failure, never seeded.
