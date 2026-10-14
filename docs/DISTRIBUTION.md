@@ -50,7 +50,10 @@ falling back to `default`. Before writing, both seeders list the consumer's
 other open PRs; one already changing a planned path (including a rename's
 previous name) leaves the repository `BLOCKED_CONFLICT` with nothing written,
 and a listing that cannot be read is `BLOCKED_PERMISSION` or `UNREACHABLE`.
-The default branch is re-read before the seed branch moves; if it moved, the
+Both seeders pin the default-branch commit before the first policy read; root
+`CODEOWNERS`, the class marker and every destination are read at that commit,
+and a branch that cannot be pinned plans nothing. The default branch is
+re-read before the seed branch moves; if it moved, the
 run stops for that repository (`BASE_MOVED`) and the next one replans. This
 narrows the race with other writers; it does not close it. An empty repository
 is reported `UNINITIALIZED_NOT_SEEDED` by the hourly sweep and retried; no
@@ -180,9 +183,10 @@ every repository one status: `INHERITED`, `CANONICAL_COPY`, `UPDATE_PR_OPEN`,
 `UPDATE_PENDING_MERGE`, `DRIFT` (Preview), `BLOCKED_PERMISSION`,
 `BLOCKED_POLICY`, `BLOCKED_OWNERSHIP`, `BLOCKED_CONFLICT` (another open PR
 changes a planned path), `BASE_MOVED`, `UNINITIALIZED` (no commits),
-`OPTED_OUT`, `UNREACHABLE`, or `UNVERIFIED`. Every planning read is pinned to
-the default-branch commit read first, and that commit is re-checked before the
-sync branch moves. Any repository
+`OPTED_OUT`, `UNREACHABLE`, or `UNVERIFIED`. Every planning read, the
+`.l9/no-sync` opt-out included, is pinned to the default-branch commit read
+first, and that commit is re-checked before the sync branch moves, so an
+opt-out committed mid-run stops publication (`BASE_MOVED`). Any repository
 left `UNREACHABLE`, `BLOCKED_PERMISSION`, or `UNVERIFIED` fails the run. A
 change to the template, the caller, CODEOWNERS, dependabot, or the class policy
 reaches consumers only when an operator dispatches the workflow. Preview first,

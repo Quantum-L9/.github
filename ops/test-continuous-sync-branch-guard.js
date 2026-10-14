@@ -71,8 +71,11 @@ const SYNC_COMMIT = {
  * @param {object[]} [o.otherPRs] other open PRs (see makeBranchStubs)
  * @param {number} [o.listError]  HTTP status listing all open PRs throws
  * @param {string} [o.baseMovesTo] the default branch reads this sha after its first read
+ * @param {object} [o.atBase]     files committed at the pinned base (`base-sha`)
+ *   that an unpinned read — one made before the pin, against an older tip —
+ *   does not see
  */
-function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {}, errors = {}, otherPRs = [], listError, baseMovesTo, repoName = 'consumer-repo', baseError } = {}) {
+function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {}, errors = {}, otherPRs = [], listError, baseMovesTo, repoName = 'consumer-repo', baseError, atBase = {} } = {}) {
   const calls = [];
   const state = { sha: branch ? branch.sha : null };
   const record = (name, ret = {}) => async (args) => {
@@ -137,7 +140,8 @@ function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {
           calls.push({ name: 'repos.getContent', args });
           if (errors[args.path]) throw Object.assign(new Error('boom'), { status: errors[args.path] });
           if (args.path in dirs) return { data: dirs[args.path].map((n) => ({ name: n, type: n.includes('.') ? 'file' : 'dir' })) };
-          if (args.path in files) return { data: { sha: `sha-${args.path}`, content: enc(files[args.path]) } };
+          const visible = args.ref === 'base-sha' ? { ...files, ...atBase } : files;
+          if (args.path in visible) return { data: { sha: `sha-${args.path}`, content: enc(visible[args.path]) } };
           throw notFound('Not Found');
         },
       },
@@ -379,10 +383,46 @@ async function manualModeScenarios() {
   for (const dry of [true, false]) {
     r = await runClass({ files: { ...drifted, '.l9/no-sync': '' }, branch: stale, dry });
     assert.strictEqual(r.status, 'OPTED_OUT');
-    assert.deepStrictEqual(r.calls.map((c) => c.name), ['repos.getContent'], `${label}: opted-out repo was probed past its marker`);
+    // The base is pinned first, then the marker is read AT that pin; nothing
+    // else is probed.
+    assert.deepStrictEqual(r.calls.map((c) => c.name), ['git.getRef', 'repos.getContent'], `${label}: opted-out repo was probed past its marker`);
+    assert.strictEqual(r.calls[0].args.ref, 'heads/main');
+    assert.deepStrictEqual([r.calls[1].args.path, r.calls[1].args.ref], ['.l9/no-sync', 'base-sha'], `${label}: opt-out read off the pinned base`);
     assert.strictEqual(r.state.sha, 'stale-sync-branch');
   }
   console.log(`ok: ${label} — .l9/no-sync repos are left untouched in Preview and Apply`);
+
+  // F3: the opt-out is read at the same pinned commit as the plan.
+  // (a) A marker committed between an unpinned probe and the pin is part of
+  //     the snapshot: it opts the repo out. A probe made before the pin would
+  //     miss it and publish into a repo that had opted out, and BASE_MOVED
+  //     would not fire because the base did not move after the pin.
+  for (const dry of [true, false]) {
+    r = await runClass({ files: drifted, branch: stale, dry, atBase: { '.l9/no-sync': '' } });
+    assert.strictEqual(r.status, 'OPTED_OUT', `${label}: opt-out committed at the pinned base ignored (dry=${dry})`);
+    assert.deepStrictEqual(writesOf(r.calls), [], `${label}: wrote to an opted-out repo (dry=${dry})`);
+    assert.strictEqual(r.state.sha, 'stale-sync-branch');
+  }
+  // (b) A marker committed after the pinned snapshot moves the base: the final
+  //     BASE_MOVED check refuses publication. No ref moves, no PR.
+  r = await runClass({ files: drifted, branch: stale, baseMovesTo: 'base-with-no-sync' });
+  assert.strictEqual(r.status, 'BASE_MOVED');
+  assert.ok(!r.calls.some((c) => ['git.createRef', 'graphql.updateRefs', 'pulls.create'].includes(c.name)),
+    `${label}: published past an opt-out landed after the snapshot`);
+  assert.strictEqual(r.state.sha, 'stale-sync-branch');
+  // (c) An opt-out nobody could read is not "absent": named blocker, run
+  //     fails, and not one non-read call is made in either mode.
+  for (const [code, status] of [[403, 'BLOCKED_PERMISSION'], [500, 'UNREACHABLE'], [502, 'UNREACHABLE']]) {
+    for (const dry of [true, false]) {
+      r = await runClass({ files: drifted, branch: stale, dry, errors: { '.l9/no-sync': code } });
+      assert.strictEqual(r.status, status, `${label}: opt-out ${code} (dry=${dry})`);
+      assert.deepStrictEqual(writesOf(r.calls), [], `${label}: opt-out ${code} still wrote (dry=${dry})`);
+      assert.strictEqual(r.failures.length, 1, `${label}: opt-out ${code} must fail the run`);
+      assert.ok(!r.calls.some((c) => c.name === 'repos.getContent' && c.args.path !== '.l9/no-sync'),
+        `${label}: planned past an unreadable opt-out (${code})`);
+    }
+  }
+  console.log(`ok: ${label} — opt-out read at the pinned base; one landing after the snapshot is BASE_MOVED; 403/5xx blocks with no write`);
 }
 
 /**
@@ -504,12 +544,13 @@ async function ownershipScenarios() {
   }
   console.log(`ok: ${label} — Apply PR body passes governance-pr gates (strict) with exact base, source and changes`);
 
-  // The plan is read at one pinned commit: every read after the opt-out probe
-  // names the base sha, so a file changed on the default branch mid-plan is
+  // The plan is read at one pinned commit: every read, the opt-out probe
+  // included, names the base sha, so a file changed on the default branch mid-plan is
   // judged against the same commit the final BASE_MOVED check pins.
   {
     const r = await runClass({ files: { ...managedOk, ...marker('non_constellation_python'), [TEMPLATE]: canonicalTemplate } });
-    const reads = r.calls.filter((c) => c.name === 'repos.getContent').slice(1);
+    const reads = r.calls.filter((c) => c.name === 'repos.getContent');
+    assert.strictEqual(reads[0].args.path, '.l9/no-sync', `${label}: the opt-out is the first read`);
     assert.ok(reads.length > 3);
     for (const c of reads) assert.strictEqual(c.args.ref, 'base-sha', `${label}: ${c.args.path} read off the pinned base`);
     assert.deepStrictEqual(r.deletes.map((d) => d.args.path), [TEMPLATE]);
