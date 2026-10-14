@@ -106,10 +106,13 @@ jobs:
             // Only a 404 means "absent". 403, 409, 5xx, or a directory where a
             // file belongs are not answers: they throw, so an unreadable repo
             // can never be planned as if its files were missing.
+            // Every read names the pinned base sha (see the pin below); a read
+            // without one would describe whatever the branch is by then.
             const readFile = async (owner, repo, path, ref) => {
+              if (!ref) throw Object.assign(new Error(`${path}: read without a pinned base`), { status: 'UNPINNED' });
               let res;
               try {
-                res = await github.rest.repos.getContent({ owner, repo, path, ...(ref ? { ref } : {}) });
+                res = await github.rest.repos.getContent({ owner, repo, path, ref });
               } catch (e) {
                 if (e.status === 404) return null;
                 throw e;
@@ -146,7 +149,19 @@ jobs:
             for (const repo of targets) {
               const o = repo.owner.login, n = repo.name;
               try {
-                const hasRootCodeowners = await exists(o, n, 'CODEOWNERS');
+                // Pin the base before any policy read. Root CODEOWNERS, the class
+                // marker and every destination are read at this one sha, the
+                // commit is built on it, and the final BASE_MOVED check compares
+                // against it, so the plan cannot describe a different tree than
+                // the one the seed commit lands on. No sha, no plan.
+                const base = repo.default_branch;
+                const baseRef = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
+                const baseSha = baseRef && baseRef.data && baseRef.data.object && baseRef.data.object.sha;
+                if (typeof baseSha !== 'string' || !baseSha) {
+                  throw Object.assign(new Error(`${base} could not be pinned to a commit`), { status: 'UNPINNED' });
+                }
+
+                const hasRootCodeowners = await exists(o, n, 'CODEOWNERS', baseSha);
 
                 // The repository declares its own class; the organization
                 // honours it. Absent and unreadable are different answers:
@@ -154,7 +169,7 @@ jobs:
                 // so a transient API error never falls through to `default` —
                 // the widest payload. Only a genuinely absent marker reaches
                 // the override/default path.
-                const marker = FORCED_CLASS ? null : await readFile(o, n, classes.marker_path);
+                const marker = FORCED_CLASS ? null : await readFile(o, n, classes.marker_path, baseSha);
                 const decided = FORCED_CLASS
                   ? { name: FORCED_CLASS, source: 'operator input', error: null }
                   : classForRepo(classes, n, marker);
@@ -185,7 +200,7 @@ jobs:
 
                 const existingByPath = {};
                 for (const p of paths) {
-                  if (!(await exists(o, n, p))) {
+                  if (!(await exists(o, n, p, baseSha))) {
                     existingByPath[p] = null;
                     continue;
                   }
@@ -196,8 +211,6 @@ jobs:
                   rows.push([n, profile.name, 'already seeded']);
                   continue;
                 }
-
-                const base = repo.default_branch;
 
                 // ── Seed-branch safety gate ────────────────────────────────
                 // The rebuild below constructs the branch as "current default
@@ -234,8 +247,6 @@ jobs:
                   rows.push([n, profile.name, `would seed ${writes.length}: ${preview}${onto}`]);
                   continue;
                 }
-                const baseRef = await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` });
-                const baseSha = baseRef.data.object.sha;
                 const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
 
                 const treeItems = [];
