@@ -1189,6 +1189,65 @@ projection_profiles:
   - build_backend_invention
   - target_artifact_as_semantic_authority
   - node_or_package_json_semantics_in_first_version
+- id: l9.projection/coding-agent-execution@1
+  class: runtime
+  consumer: Cursor-Governance
+  purpose: >-
+    Supply the coding-agent execution surfaces that the Cursor-Governance operating plane binds with
+    the admitted global invariants, contracts, and authority rules that govern repository work by an
+    agent: authority and scope boundaries, upstream source fidelity, bounded implementation without
+    authority expansion, verification independent of the candidate, explicit Unknown and truthful
+    failure, and no self-authorized admission or publication. The profile selects admitted records
+    by exact id. It adds no obligation, names no skill, command, adapter, or host, and grants no
+    execution, publication, or merge authority; those stay with their owners.
+  sources:
+    invariants:
+      selectors:
+      - '$.invariants[?(@.id=="L9-AUTH-001")]'
+      - '$.invariants[?(@.id=="L9-AUTH-002")]'
+      - '$.invariants[?(@.id=="L9-OWNER-001")]'
+      - '$.invariants[?(@.id=="L9-MONOTONIC-001")]'
+      - '$.invariants[?(@.id=="L9-PROMOTION-001")]'
+      - '$.invariants[?(@.id=="L9-DERIVED-001")]'
+      - '$.invariants[?(@.id=="L9-EVIDENCE-001")]'
+      - '$.invariants[?(@.id=="L9-ASSURANCE-001")]'
+      - '$.invariants[?(@.id=="L9-UNKNOWN-001")]'
+      - '$.invariants[?(@.id=="L9-DEGRADE-001")]'
+      - '$.invariants[?(@.id=="L9-PROV-001")]'
+      - '$.invariants[?(@.id=="L9-COORD-001")]'
+      - '$.invariants[?(@.id=="L9-COMPAT-001")]'
+      - '$.invariants[?(@.id=="L9-REVISION-001")]'
+      - '$.invariants[?(@.id=="L9-ADMISSION-001")]'
+      - '$.invariants[?(@.id=="L9-PROJECTION-001")]'
+      - '$.invariants[?(@.id=="L9-VALIDATION-001")]'
+      - '$.invariants[?(@.id=="L9-CORRECTNESS-001")]'
+      - '$.invariants[?(@.id=="L9-GLOBALIZATION-001")]'
+    contracts:
+      selectors:
+      - '$.contracts[?(@.id=="l9.contract/authority-boundary@1")]'
+      - '$.contracts[?(@.id=="l9.contract/monotonic-subordination@1")]'
+      - '$.contracts[?(@.id=="l9.contract/admission-and-promotion@1")]'
+      - '$.contracts[?(@.id=="l9.contract/derived-artifact@1")]'
+      - '$.contracts[?(@.id=="l9.contract/evidence-and-receipt@1")]'
+      - '$.contracts[?(@.id=="l9.contract/assurance-and-verification@1")]'
+      - '$.contracts[?(@.id=="l9.contract/unknown-and-degradation@1")]'
+      - '$.contracts[?(@.id=="l9.contract/provenance-and-coordinate@1")]'
+      - '$.contracts[?(@.id=="l9.contract/projection@1")]'
+      - '$.contracts[?(@.id=="l9.contract/validation-and-correctness@1")]'
+    authority_model:
+      selectors:
+      - $.agent_authority
+      - $.human_authority
+      - $.escalation_rules
+      - $.admission_rules
+  output:
+    schema: l9.projection.coding-agent-execution/v1
+  forbidden:
+  - obligation_not_admitted_in_a_selected_source
+  - skill_command_or_routing_semantics
+  - adapter_host_or_surface_specific_semantics
+  - repository_local_policy_as_global_law
+  - execution_publication_or_merge_authority_grant
 
 projection_engine_contract_ref:
   artifact: projection_engine_contract.yaml
