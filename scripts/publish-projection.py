@@ -386,9 +386,28 @@ def compute_pins(
         )
     profile = profiles[0]
     selectors = _single_selector(profile, source_class)
-    class_artifact = (
-        (catalog.get("source_classes") or {}).get(source_class) or {}
-    ).get("canonical_artifact")
+    # source_classes and the selected entry are mappings in admitted catalogs.
+    # A scalar or list has no .get; fail closed before attribute access.
+    source_classes = catalog.get("source_classes")
+    if source_classes is None:
+        source_classes = {}
+    elif not isinstance(source_classes, dict):
+        raise Outcome(
+            "BLOCKED",
+            "SOURCE_CLASSES_MALFORMED",
+            observed=type(source_classes).__name__,
+        )
+    class_entry = source_classes.get(source_class)
+    if class_entry is None:
+        class_entry = {}
+    elif not isinstance(class_entry, dict):
+        raise Outcome(
+            "BLOCKED",
+            "SOURCE_CLASS_ENTRY_MALFORMED",
+            source_class=source_class,
+            observed=type(class_entry).__name__,
+        )
+    class_artifact = class_entry.get("canonical_artifact")
     if not isinstance(class_artifact, str) or not class_artifact:
         raise Outcome(
             "BLOCKED",

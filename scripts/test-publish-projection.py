@@ -313,6 +313,55 @@ class PinTests(Fixture):
         )
         self.assertEqual(blocked(self.rev1), "AUTHORITY_ORIGIN_UNVERIFIED")
 
+    def test_malformed_source_class_shapes_are_blocked(self):
+        """Scalar or list source_classes, and a scalar or list selected entry.
+
+        At d313a0ce each shape reached .get() and raised AttributeError.
+        """
+        good = self.pins(self.rev1)
+        self.assertEqual(good["source_path"], "semantics/invariants.yaml")
+        self.assertEqual(good["source_ref"], "l9.source/invariants@1")
+
+        admitted = (
+            "source_classes:\n"
+            "  invariants:\n"
+            "    canonical_artifact: invariants.yaml\n"
+        )
+
+        def blocked(source_classes: str) -> str:
+            rev = commit_files(
+                self.auth,
+                {
+                    "semantics/projection_profiles.yaml": CATALOG.replace(
+                        admitted, source_classes, 1
+                    )
+                },
+                "malformed source_classes",
+            )
+            self.fetch_origin()
+            with self.assertRaises(pp.Outcome) as ctx:
+                self.pins(rev)
+            self.assertEqual(ctx.exception.status, "BLOCKED")
+            return ctx.exception.reason
+
+        self.assertEqual(
+            blocked("source_classes: invariants.yaml\n"),
+            "SOURCE_CLASSES_MALFORMED",
+        )
+        self.assertEqual(
+            blocked("source_classes:\n  - invariants\n"),
+            "SOURCE_CLASSES_MALFORMED",
+        )
+        self.assertEqual(
+            blocked("source_classes:\n  invariants: invariants.yaml\n"),
+            "SOURCE_CLASS_ENTRY_MALFORMED",
+        )
+        self.assertEqual(
+            blocked("source_classes:\n  invariants:\n    - invariants.yaml\n"),
+            "SOURCE_CLASS_ENTRY_MALFORMED",
+        )
+        self.assertEqual(self.pins(self.rev1), good)
+
 
 class VerifyTests(Fixture):
     def setUp(self) -> None:
