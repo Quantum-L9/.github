@@ -39,7 +39,7 @@ Reclassifying Memory as a Node, adding a third ProductKind, or relaxing Dependen
 - the subject repository is a current entry in `repository_registry.yaml`;
 - the exception catalog holds exactly the admitted set, and the exception model is unchanged.
 
-The ProductTopology is release-independent, so the release floor (`subject.applies_from_release: 3.0.0`) is enforced when a release is admitted under the claim. The ProductManifest gate item `product_kind_exception_release_floor_satisfied_when_claimed` enforces it.
+ProductTopology and ProductManifest are both release-independent, so the release floor (`subject.applies_from_release: 3.0.0`) is a product-kind release obligation. It is enforced at product release admission through `l9.contract/product-release@1`, which requires `applicable_product_kind_requirements_are_resolved` and derives kind-specific release obligations from product-kind law. A ProductManifest must carry `product.kind_exception_ref` whenever its source topology claims an exception.
 
 Copying Memory's configuration does not bind the exception. A malformed, unadmitted, unauthorized, or unbound claim is invalid. It is never ignored and never coerced to the nearest kind.
 
@@ -82,7 +82,8 @@ The ledgers that state Dependency law unconditionally now carry an exact-product
 The following also change:
 - `architecture_rules.yaml` gains `l9.arch-rule/product-kind-exception@1`;
 - `product_topology.schema.yaml` gains the claim field `product.kind_exception_ref` and `kind_resolution.exception_rule`;
-- `product_manifest.schema.yaml` preserves the applied exception and gates on it;
+- `product_manifest.schema.yaml` preserves the applied exception, gates on its binding, and requires the coordinate whenever the source topology claims one;
+- `semantic_dependency_model.yaml` makes product-kind resolution depend on `repository_registry`, so a change to the subject's registry entry invalidates it;
 - the compiler stage projections and the identity projection select the exception catalog and the claim;
 - the product-topology validator in `solver_catalog.yaml` declares exact-subject binding.
 

@@ -85,11 +85,13 @@ v3.21.0 adds no ADR. Instead it appends a dated amendment, "Amendment 2026-10-14
 - `semantics/architecture_patterns.yaml`: adds global rule `pattern_obligations_apply_unmodified_unless_an_admitted_product_kind_exception_displaces_them_for_its_exact_product`. No pattern changes.
 - `semantics/dependency_archetypes.yaml`: adds global rule `archetype_obligations_apply_unmodified_unless_an_admitted_product_kind_exception_displaces_them_for_its_exact_product`. No archetype changes.
 - `semantics/vocabulary.yaml`: adds the term `product_kind_exception` and an exact-product qualifier rule on `dependency`.
-- `semantics/product_topology.schema.yaml`: adds the claim field `product.kind_exception_ref`, the semantic rule `product_kind_exception_is_claimed_only_by_explicit_reference_and_exact_subject_binding`, and `kind_resolution.exception_rule` / `exception_catalog`. The rule states where the release floor is enforced.
+- `semantics/product_topology.schema.yaml`: adds the claim field `product.kind_exception_ref`, the semantic rule `product_kind_exception_is_claimed_only_by_explicit_reference_and_exact_subject_binding`, and `kind_resolution.exception_rule` / `exception_catalog`. The rule states that the release floor binds at product release admission through `l9.contract/product-release@1`.
 - `semantics/product_manifest.schema.yaml`:
   - adds typed `product.fields`, including `kind_exception_ref`;
-  - adds the resolved-manifest gate items `product_kind_exception_absent_or_exactly_bound_and_admitted` and `product_kind_exception_release_floor_satisfied_when_claimed`;
+  - adds the resolved-manifest gate item `product_kind_exception_absent_or_exactly_bound_and_admitted`;
+  - adds the semantic rule `manifest_product_kind_exception_ref_is_required_when_the_source_topology_declares_one`;
   - adds the semantic rule `manifest_preserves_the_exact_applied_product_kind_exception_coordinate`.
+- `semantics/semantic_dependency_model.yaml`: `product_kind_resolution.depends_on` gains `repository_registry`, so a change to the exception subject's registry entry invalidates kind resolution and the manifests downstream of it.
 - `semantics/projection_profiles.yaml`:
   - the ProductTopology stage now selects `$.kind_exception_model` and `$.kind_exceptions`;
   - the semantic-resolution stage now selects `$.kind_exceptions`;
@@ -97,7 +99,7 @@ v3.21.0 adds no ADR. Instead it appends a dated amendment, "Amendment 2026-10-14
 - `semantics/solver_catalog.yaml`: the product-topology validator declares `applies_admitted_product_kind_exceptions_only_by_exact_subject_binding`.
 - `semantics/capabilities.yaml`, `semantics/lifecycle.yaml`, `semantics/receipt_catalog.yaml`: derivation source digests are refreshed for the new `contracts.yaml` and `capabilities.yaml` bytes. Item counts and derived content are unchanged.
 - `scripts/validate-semantics.py`:
-  - adds RC-029, with 3 positive ProductTopology witnesses, field-and-digest pins of the exception and its model, and 71 hostile negative cases;
+  - adds RC-029, with 3 positive ProductTopology witnesses, field-and-digest pins of the exception and its model, and 73 hostile negative cases;
   - RC-005 pins the identity projection selection, including `$.product.kind_exception_ref`.
 
 Nothing else is added: no ProductKind, archetype, pattern, contract, invariant, capability, artifact authority class, repository class, technology, actor or surface identity, service, or generalized waiver mechanism.

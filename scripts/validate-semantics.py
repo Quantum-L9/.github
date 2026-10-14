@@ -9458,7 +9458,7 @@ RC029_EXCEPTION_PATH = "kind_exceptions[0]"
 RC029_EXCEPTION_DIGEST = (
     "690cfe90e72db2d4a8f29462e89be66b3f5398bbd564a2b0e2be81c56a72f1b3"
 )
-RC029_MODEL_DIGEST = "c1d94c90037681e179243ebda1f88222e7cbcf94dba7e1e0fea2c4adc7ae3c77"
+RC029_MODEL_DIGEST = "2170c30e211e087184f4943912fb36ce956851bee6ac6136abd0f3b11ee499d8"
 RC029_SUBJECT = {
     "product_ref": "l9-graphiti-memory:product/l9-graphite-memory",
     "canonical_repository": "Quantum-L9/l9-graphiti-memory",
@@ -9618,7 +9618,7 @@ RC029_MODEL_RULES = [
     "exception_never_relaxes_security_attribution_isolation_authorization_provenance_or_admission",
     "malformed_unadmitted_or_unbound_exception_claim_is_invalid_not_ignored",
     "absent_exception_claim_means_kind_law_applies_unmodified",
-    "release_floor_is_enforced_at_release_admission_because_product_topology_is_release_independent",
+    "release_floor_is_a_product_kind_release_obligation_enforced_at_product_release_admission_through_l9_contract_product_release_at_1",
     "hosting_coordinates_remain_deployment_owned_and_are_not_semantic_categories",
 ]
 RC029_EXCEPTION_KEYS = frozenset(
@@ -9741,8 +9741,12 @@ RC029_DEPENDENCY_TERM_RULES = [
 ]
 RC029_MANIFEST_GATE_ITEMS = (
     "product_kind_exception_absent_or_exactly_bound_and_admitted",
-    "product_kind_exception_release_floor_satisfied_when_claimed",
 )
+RC029_MANIFEST_RULE = "manifest_product_kind_exception_ref_is_required_when_the_source_topology_declares_one"
+# ProductTopology and ProductManifest are release-independent; the release
+# floor binds at product release admission through this contract.
+RC029_RELEASE_CONTRACT = "l9.contract/product-release@1"
+DEPENDENCY_MODEL_PATH = "semantics/semantic_dependency_model.yaml"
 RC029_SOLVER_FLAG = (
     "applies_admitted_product_kind_exceptions_only_by_exact_subject_binding"
 )
@@ -10597,7 +10601,36 @@ def _rc029_reconciliation(docs: dict[str, dict], report: Report) -> None:
             MANIFEST_SCHEMA_PATH,
             "resolved_manifest_gate.all_of",
             gate,
-            "ProductManifest must preserve the applied exception and gate on its binding and release floor",
+            "ProductManifest must preserve the applied exception and gate on its binding",
+            report,
+        )
+    if RC029_MANIFEST_RULE not in _list(manifest.get("semantic_rules")):
+        _rc029_fail(
+            MANIFEST_SCHEMA_PATH,
+            "semantic_rules",
+            manifest.get("semantic_rules"),
+            "ProductManifest must require the exception coordinate when the source topology claims one",
+            report,
+        )
+    if RC029_RELEASE_CONTRACT not in str(resolution.get("exception_rule") or ""):
+        _rc029_fail(
+            TOPOLOGY_SCHEMA_PATH,
+            "kind_resolution.exception_rule.release_floor",
+            resolution.get("exception_rule"),
+            "the release floor must bind at product release admission through l9.contract/product-release@1",
+            report,
+        )
+    kind_resolution = _mapping(
+        _mapping(_mapping(docs.get(DEPENDENCY_MODEL_PATH)).get("dependency_rules")).get(
+            "product_kind_resolution"
+        )
+    )
+    if "repository_registry" not in _list(kind_resolution.get("depends_on")):
+        _rc029_fail(
+            DEPENDENCY_MODEL_PATH,
+            "dependency_rules.product_kind_resolution.depends_on",
+            kind_resolution.get("depends_on"),
+            "product-kind resolution must be invalidated when the exception subject's registry entry changes",
             report,
         )
     profiles = _list(_mapping(docs.get(PROFILES_PATH)).get("projection_profiles"))
@@ -11223,12 +11256,28 @@ def _rc029_reconciliation_cases(
             "resolved_manifest_gate.all_of",
         ),
         (
-            "ProductManifest release-floor gate item removed",
-            lambda c: c[MANIFEST_SCHEMA_PATH]["resolved_manifest_gate"][
-                "all_of"
-            ].remove(RC029_MANIFEST_GATE_ITEMS[1]),
+            "ProductManifest no longer requires the claimed exception coordinate",
+            lambda c: c[MANIFEST_SCHEMA_PATH]["semantic_rules"].remove(
+                RC029_MANIFEST_RULE
+            ),
             MANIFEST_SCHEMA_PATH,
-            "resolved_manifest_gate.all_of",
+            "semantic_rules",
+        ),
+        (
+            "release floor detached from product release admission",
+            lambda c: c[TOPOLOGY_SCHEMA_PATH]["kind_resolution"].update(
+                exception_rule="Exceptions bind by exact subject."
+            ),
+            TOPOLOGY_SCHEMA_PATH,
+            "kind_resolution.exception_rule.release_floor",
+        ),
+        (
+            "registry dropped from product-kind invalidation dependencies",
+            lambda c: c[DEPENDENCY_MODEL_PATH]["dependency_rules"][
+                "product_kind_resolution"
+            ]["depends_on"].remove("repository_registry"),
+            DEPENDENCY_MODEL_PATH,
+            "dependency_rules.product_kind_resolution.depends_on",
         ),
         (
             "compiler stage stops projecting the exception catalog",

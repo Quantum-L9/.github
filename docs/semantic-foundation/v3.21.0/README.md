@@ -11,16 +11,17 @@ v3.21.0 adds one narrowly bounded product-kind exception. Under it, `Quantum-L9/
   - product `l9-graphiti-memory:product/l9-graphite-memory`;
   - canonical repository `Quantum-L9/l9-graphiti-memory`, which is registry entry `l9-graphiti-memory`;
   - archetype `l9.dependency-archetype/semantic-subsystem@1`.
-- The release floor is `3.0.0`. A ProductTopology is release-independent, so the floor is enforced when a release is admitted under the claim, through ProductManifest gate item `product_kind_exception_release_floor_satisfied_when_claimed`.
+- The release floor is `3.0.0`. ProductTopology and ProductManifest are release-independent, so the floor binds at product release admission through `l9.contract/product-release@1` (`applicable_product_kind_requirements_are_resolved`).
 - A ProductTopology claims the exception only through `product.kind_exception_ref`.
 - For that subject, 20 enumerated Dependency obligations are displaced. Every other obligation remains.
 - Every ledger that stated kind law unconditionally now scopes it to "unless an admitted exception binds the exact product", including the global rule that kind is determined by consumption and deployment:
   - contracts `l9.contract/product-kind@1` (including its purpose) and `l9.contract/product-topology@1`;
   - the global rules of `product_kinds.yaml`, `architecture_rules.yaml`, `architecture_patterns.yaml` and `dependency_archetypes.yaml`;
   - the vocabulary `dependency` term.
-- The ProductTopology schema and the ProductManifest schema carry the claim. The compiler-stage projections select the exception catalog, and the identity projection selects the claim. The product-topology solver declares exact-subject binding.
+- The ProductTopology schema and the ProductManifest schema carry the claim. A manifest must carry it whenever its source topology claims an exception.
+- `semantic_dependency_model.yaml` adds `repository_registry` to the dependencies of product-kind resolution, so a registry change invalidates it. The compiler-stage projections select the exception catalog, and the identity projection selects the claim. The product-topology solver declares exact-subject binding.
 - ADR-011 gains a dated amendment. Its original decision is unchanged.
-- RC-029 pins the exception and its model, field by field and by canonical digest, and evaluates ProductTopology witnesses under `l9.contract/product-kind@1`. It has 71 hostile negative cases.
+- RC-029 pins the exception and its model, field by field and by canonical digest, and evaluates ProductTopology witnesses under `l9.contract/product-kind@1`. It has 73 hostile negative cases.
 
 ## Before → after canonical rules
 

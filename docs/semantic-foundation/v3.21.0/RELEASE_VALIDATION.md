@@ -60,7 +60,9 @@ RC-029 must prove the following.
 16. These also exist:
     - `l9.arch-rule/product-kind-exception@1`;
     - the ProductTopology claim field, exception rule and exception catalog;
-    - the ProductManifest claim field and both gate items (binding, release floor);
+    - the ProductManifest claim field, its binding gate item, and the rule requiring the coordinate when the source topology claims one;
+    - a release floor that binds at product release admission through `l9.contract/product-release@1`;
+    - `repository_registry` in the `product_kind_resolution` dependencies of `semantic_dependency_model.yaml`;
     - both compiler-stage `$.kind_exceptions` selectors;
     - the product-topology solver flag.
 
@@ -70,7 +72,7 @@ RC-029 must prove the following.
 
 ## Hostile negative cases
 
-RC-029 carries **71** isolated negative cases. Each must fail at its intended RC-029 field.
+RC-029 carries **73** isolated negative cases. Each must fail at its intended RC-029 field.
 
 ### Known-bad ProductTopology witnesses (20)
 
@@ -133,7 +135,7 @@ RC-029 carries **71** isolated negative cases. Each must fail at its intended RC
 
 Each of these must also leave the Memory claim **unbound** (`product.kind_exception_ref`). The ordinary Node and Dependency witnesses must keep their outcome.
 
-### Reconciliation regressions (18)
+### Reconciliation regressions (20)
 
 - Dependency guarantee reverted to unconditional: fails at `semantics/contracts.yaml` `contracts[l9.contract/product-kind@1].guarantees`.
 - invalid outcome ignores bound exceptions: fails at `semantics/contracts.yaml` `contracts[l9.contract/product-kind@1].outcomes.invalid`.
@@ -148,7 +150,9 @@ Each of these must also leave the Memory claim **unbound** (`product.kind_except
 - exception architecture rule removed: fails at `semantics/architecture_rules.yaml` `rules[l9.arch-rule/product-kind-exception@1]`.
 - ProductTopology claim field removed: fails at `semantics/product_topology.schema.yaml` `kind_resolution.exception_rule`.
 - ProductManifest binding gate item removed: fails at `semantics/product_manifest.schema.yaml` `resolved_manifest_gate.all_of`.
-- ProductManifest release-floor gate item removed: fails at `semantics/product_manifest.schema.yaml` `resolved_manifest_gate.all_of`.
+- ProductManifest no longer requires the claimed exception coordinate: fails at `semantics/product_manifest.schema.yaml` `semantic_rules`.
+- release floor detached from product release admission: fails at `semantics/product_topology.schema.yaml` `kind_resolution.exception_rule.release_floor`.
+- registry dropped from product-kind invalidation dependencies: fails at `semantics/semantic_dependency_model.yaml` `dependency_rules.product_kind_resolution.depends_on`.
 - compiler stage stops projecting the exception catalog: fails at `semantics/projection_profiles.yaml` `projection_profiles[l9.projection/stage-product-topology@1].sources.product_kinds.selectors`.
 - vocabulary loses the exception term: fails at `semantics/vocabulary.yaml` `terms.product_kind_exception`.
 - vocabulary Dependency qualifier replaced: fails at `semantics/vocabulary.yaml` `terms.dependency.rules`.
@@ -164,14 +168,14 @@ Crashes, unrelated failures, skipped cases, or default success are not passes.
 
 The v3.21.0 validator was run against the **unmodified** stacked baseline at `aedf271d6a401c3515637bb70339a49e7cc92319` (PR #179 head; the same result holds at `main` `f9993ed19a07cc3a2cd3f6b512be7573f1fa897e`). The result was exit 1:
 
-- 36 RC-029 failures (the model and catalog are absent, the 7 global-rule qualifiers are absent, the product-kind and product-topology contract clauses are absent, the exception rule, vocabulary, schema, projection and solver reconciliation are absent, and the Memory witness fails at `product.kind_exception_ref`, `consumption.model`, `deployment.model` and `identity.dimensions.runtime`);
+- 39 RC-029 failures (the model and catalog are absent, the 7 global-rule qualifiers are absent, the product-kind and product-topology contract clauses are absent, the exception rule, vocabulary, schema, projection, solver, manifest-rule, release-floor and dependency-model reconciliation are absent, and the Memory witness fails at `product.kind_exception_ref`, `consumption.model`, `deployment.model` and `identity.dimensions.runtime`);
 - one RC-005 failure, because the identity projection did not select `$.product.kind_exception_ref`.
 
 The ordinary Node and ordinary Dependency witnesses produced **no** failures against the baseline. Against the candidate bytes the same validator passes every check.
 
 ## Scope limit, stated explicitly
 
-A ProductTopology is release-independent, so RC-029 cannot evaluate the release floor (`applies_from_release: 3.0.0`) on a topology witness. The floor is canonical law in `kind_exception_model.binding_requires` and `rules`, in `kind_resolution.exception_rule`, and in the ProductManifest resolved-gate item `product_kind_exception_release_floor_satisfied_when_claimed`. It is enforced where a release is admitted. Enforcing it against Memory's release binding is part of the downstream handoff.
+ProductTopology and ProductManifest are release-independent, so RC-029 cannot evaluate the release floor (`applies_from_release: 3.0.0`) on a witness. The floor is canonical law in `kind_exception_model.binding_requires` and `rules` and in `kind_resolution.exception_rule`. It binds at product release admission through `l9.contract/product-release@1` (`applicable_product_kind_requirements_are_resolved`), and RC-029 pins that binding. Enforcing it against Memory's release binding is part of the downstream handoff.
 
 ## Preserved closure
 

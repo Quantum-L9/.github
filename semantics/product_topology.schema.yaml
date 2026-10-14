@@ -462,6 +462,7 @@ kind_resolution:
     kind's models. A declared product.kind_exception_ref must resolve to an admitted entry of product_kinds.yaml#kind_exceptions
     whose kind, subject product, canonical repository, and archetype equal the declaration; the entry's effective models
     and enumerated departures then apply and every undisplaced obligation remains. Any unresolved, unadmitted, malformed,
-    or unbound claim is invalid, never ignored and never coerced to the nearest kind. The ProductTopology is release-independent,
-    so an exception's release floor (subject.applies_from_release) is enforced when a release is admitted under the claim.
+    or unbound claim is invalid, never ignored and never coerced to the nearest kind. ProductTopology and ProductManifest are
+    release-independent, so an exception's release floor (subject.applies_from_release) is a product-kind release obligation
+    enforced at product release admission through l9.contract/product-release@1 (applicable_product_kind_requirements_are_resolved).
   exception_catalog: product_kinds.yaml#kind_exceptions
