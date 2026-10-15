@@ -5,7 +5,8 @@
 # gate, the branch guard inside both seed workflows and continuous-sync
 # (including its class-aware PR-template and caller re-pin management and its
 # Preview / Apply modes), the manual-only trigger contract of the distribution
-# workflows, and the governance-pr.yml PR-body refresh job.
+# workflows, the governance-pr.yml PR-body refresh job, and the advisory
+# governance-report.yml posture classification (no unverified all-clear).
 # Run from the root of the Quantum-L9/.github repo.
 set -euo pipefail
 
@@ -23,7 +24,8 @@ if command -v node &>/dev/null; then
     ops/test-seed-workflow-branch-guard.js \
     ops/test-continuous-sync-branch-guard.js \
     ops/test-distribution-triggers.js \
-    ops/test-governance-pr-body.js; do
+    ops/test-governance-pr-body.js \
+    ops/test-governance-report.js; do
     if node "$t"; then
       echo "✅ $t"
       PASS=$((PASS+1))

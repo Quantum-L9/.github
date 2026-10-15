@@ -20,15 +20,30 @@ jobs:
   report:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
+            const fs = require('fs');
+            const {
+              callerRefs,
+              classifyActionsPermission,
+              buildPostureReport,
+            } = require('./ops/governance-report.js');
             const ORG = 'Quantum-L9';
             const repos = (await github.paginate(github.rest.repos.listForOrg, { org: ORG, type: 'all', per_page: 100 }))
               .filter(r => !r.archived && !r.fork);
 
+            // Raw presence: true present, false absent (404 only), null unobserved.
             const has = async (repo, path) =>
-              github.rest.repos.getContent({ owner: ORG, repo, path }).then(() => true).catch(() => false);
+              github.rest.repos.getContent({ owner: ORG, repo, path })
+                .then(() => true, (e) => (e.status === 404 ? false : null));
+
+            // What a consumer's Actions policy must admit: the caller's own refs.
+            const refs = callerRefs(fs.readFileSync('policies/governance-caller.yml', 'utf8'));
 
             const rows = [];
             for (const r of repos) {
@@ -37,52 +52,25 @@ jobs:
                 has(r.name, '.github/workflows/governance.yml'),
                 has(r.name, '.github/dependabot.yml'),
               ]);
-              let actions = '?';
-              try {
-                const p = await github.rest.actions.getGithubActionsPermissionsRepository({ owner: ORG, repo: r.name });
-                actions = p.data.enabled === false ? 'disabled'
-                        : (p.data.allowed_actions === 'local_only' ? 'local_only' : 'ok');
-              } catch (e) { actions = 'unreadable'; }
+              // ALLOWED only when demonstrably allowed; a read failure is UNKNOWN.
+              const actions = await classifyActionsPermission({
+                readPermissions: async () =>
+                  (await github.rest.actions.getGithubActionsPermissionsRepository({ owner: ORG, repo: r.name })).data,
+                readSelected: async () =>
+                  (await github.rest.actions.getAllowedActionsRepository({ owner: ORG, repo: r.name })).data,
+                refs,
+              });
               rows.push({ name: r.name, co, caller, dep, actions });
             }
 
-            const tick = b => b ? '✅' : '⬜';
-            const pct = k => Math.round(100 * rows.filter(r => r[k]).length / (rows.length || 1));
-            const blocked = rows.filter(r => r.actions === 'disabled' || r.actions === 'local_only');
-
-            const body = [
-              `_Advisory posture report. Nothing here blocks anything. Generated ${new Date().toISOString().slice(0,10)}._`,
-              '',
-              `**Coverage across ${rows.length} active repos** — CODEOWNERS ${pct('co')}% · governance caller ${pct('caller')}% · dependabot ${pct('dep')}%`,
-              '',
-              blocked.length
-                ? `> [!NOTE]\n> ${blocked.length} repo(s) have an Actions policy that would prevent the governance caller from running: ` +
-                  blocked.map(r => `\`${r.name}\` (${r.actions})`).join(', ') + '. See docs/DISTRIBUTION.md Appendix B.'
-                : '> [!NOTE]\n> All repos permit cross-repo reusable workflows.',
-              '',
-              '| Repo | CODEOWNERS | Caller | Dependabot | Actions |',
-              '| --- | :-: | :-: | :-: | :-: |',
-              ...rows.map(r => `| \`${r.name}\` | ${tick(r.co)} | ${tick(r.caller)} | ${tick(r.dep)} | ${r.actions === 'ok' ? 'ok' : '⚠️ ' + r.actions} |`),
-              '',
-              '### Not measured here, on purpose',
-              '',
-              'Test results, lint findings, type errors, code scanning, and CI failure',
-              'diagnosis are owned by `l9-ci-sdk`, `l9-ci-core`, and `l9-ci-debt-resolver`.',
-              'This report deliberately does not recompute them — see `docs/BOUNDARIES.md`.',
-              '',
-              '### Promotion readiness',
-              '',
-              'Per `docs/ADVISORY.md`, rung 1 needs 4 consecutive weekly reports plus a',
-              'named highest-signal finding. Do not promote a gate without that evidence.',
-            ].join('\n');
+            const { body, refresh } = buildPostureReport(rows, { date: new Date().toISOString().slice(0, 10) });
 
             const TITLE = 'Governance posture (advisory, weekly)';
             const open = await github.rest.issues.listForRepo({ ...context.repo, state: 'open', labels: 'advisory', per_page: 20 });
             const existing = open.data.find(i => i.title === TITLE);
             if (existing) {
               await github.rest.issues.update({ ...context.repo, issue_number: existing.number, body });
-              await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number,
-                body: `Refreshed ${new Date().toISOString().slice(0,10)} — CODEOWNERS ${pct('co')}%, caller ${pct('caller')}%, dependabot ${pct('dep')}%.` });
+              await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body: refresh });
             } else {
               await github.rest.issues.create({ ...context.repo, title: TITLE, body, labels: ['advisory'] });
             }
