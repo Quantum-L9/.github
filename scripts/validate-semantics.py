@@ -11721,6 +11721,16 @@ AI_COMPOSITION_DIGEST = (
     "7b40fe358e3f1496a19389742874de622040fe124cb5139b8343680108df09c1"
 )
 AI_COMPOSED_SCHEMA = "l9.composed-projection.architecture-intelligence/v1"
+# Both payload schema ledgers are pinned whole, like the profiles: a field type or a
+# nested items.required constraint cannot be weakened in place.
+AI_SCHEMA_DIGESTS = {
+    AI_OUTPUT_SCHEMA: (
+        "2fe465856073209700a97faaf52406ce4b9db53b31c5297bea2de8989c1e6823"
+    ),
+    AI_COMPOSED_SCHEMA: (
+        "6e85fc292186aafc461af524e0fe8401b26a544f22870d32ebf847f9ad02e80b"
+    ),
+}
 AI_FORBIDDEN = (
     "provider_implementation_details",
     "target_rendering_details",
@@ -11933,6 +11943,18 @@ def _evaluate_rc030(docs: dict[str, dict], report: Report) -> None:
                 f"exactly one schema must define {schema_id}",
                 report,
             )
+            continue
+        schema_path = f"semantics/{defining[0]}"
+        observed = _rc028_profile_digest(docs.get(schema_path) or {})
+        if observed != AI_SCHEMA_DIGESTS[schema_id]:
+            _rc030_fail(
+                schema_path,
+                "digest",
+                observed,
+                "an admitted @1 payload schema is immutable, field constraints included; "
+                "a change requires a new schema version",
+                report,
+            )
     composed_names = _rc030_schema_defining(docs, AI_COMPOSED_SCHEMA)
     if len(composed_names) == 1:
         schema_path = f"semantics/{composed_names[0]}"
@@ -12073,6 +12095,7 @@ def _check_rc030_negative_cases(docs: dict[str, dict], report: Report) -> None:
         return next(p for p in doc["profiles"] if p.get("id") == AI_COMPOSITION_ID)
 
     composed_path = "semantics/" + _rc030_schema_defining(docs, AI_COMPOSED_SCHEMA)[0]
+    projection_path = "semantics/" + _rc030_schema_defining(docs, AI_OUTPUT_SCHEMA)[0]
     cases = [
         (
             "profile deleted",
@@ -12189,6 +12212,26 @@ def _check_rc030_negative_cases(docs: dict[str, dict], report: Report) -> None:
             "properties.invariants.required",
         ),
         (
+            "composed schema record identity requirement removed",
+            composed_path,
+            lambda d: d["properties"]["invariants"]["properties"]["invariants"][
+                "items"
+            ]["required"].remove("id"),
+            "digest",
+        ),
+        (
+            "composed schema section typed as anything",
+            composed_path,
+            lambda d: d["properties"]["invariants"]["properties"].update(invariants={}),
+            "digest",
+        ),
+        (
+            "projection schema field constraint weakened",
+            projection_path,
+            lambda d: d["properties"].update(invariants={}),
+            "digest",
+        ),
+        (
             "composed schema unregistered",
             COMPILER_MANIFEST_PATH,
             lambda d: d["requires"]["artifact_schemas"].remove(
@@ -12226,7 +12269,8 @@ def check_rc030(docs: dict[str, dict], report: Report) -> None:
         report.ok(
             "RC-030",
             f"{AI_PROFILE_ID} and {AI_COMPOSITION_ID} exist once at their pinned digests; "
-            f"{AI_OUTPUT_SCHEMA} and {AI_COMPOSED_SCHEMA} are each defined by one registered schema; "
+            f"{AI_OUTPUT_SCHEMA} and {AI_COMPOSED_SCHEMA} are each defined by one registered schema "
+            "at its pinned digest; "
             "the composed schema names exactly one namespace per declared source class with exactly its "
             "selected sections; every forbidden category has a declared criterion; every composition "
             "profile selects exactly one declared placement strategy",
