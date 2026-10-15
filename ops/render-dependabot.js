@@ -31,6 +31,13 @@ const PEP621_RE = /^\[project\]\s*$/m;
 
 const SHAPE_BOOLEANS = Object.freeze(['uvLock', 'pep621', 'preCommit']);
 
+// Code-unit order, not locale order: the render must be byte-identical on
+// every runner, whatever its locale.
+const byCodeUnit = (a, b) => {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
+};
+
 function readRequired(fs, path) {
   try {
     return fs.readFileSync(path);
@@ -48,7 +55,7 @@ function readRequired(fs, path) {
  */
 function shapeFromRoot({ names, pyprojectText = null } = {}) {
   if (!Array.isArray(names) || names.some((n) => typeof n !== 'string')) {
-    throw new Error('shapeFromRoot requires names: string[] (the repository root file names)');
+    throw new TypeError('shapeFromRoot requires names: string[] (the repository root file names)');
   }
   const hasPyproject = names.includes(PYPROJECT);
   if (hasPyproject && typeof pyprojectText !== 'string') {
@@ -56,7 +63,7 @@ function shapeFromRoot({ names, pyprojectText = null } = {}) {
   }
   return Object.freeze({
     uvLock: names.includes(UV_LOCK),
-    requirements: Object.freeze([...new Set(names.filter((n) => REQUIREMENTS_RE.test(n)))].sort()),
+    requirements: Object.freeze([...new Set(names.filter((n) => REQUIREMENTS_RE.test(n)))].sort(byCodeUnit)),
     pep621: hasPyproject && PEP621_RE.test(pyprojectText),
     preCommit: names.includes(PRE_COMMIT_CONFIG),
   });
@@ -76,7 +83,7 @@ async function probeRepoShape({ listRoot, readText }) {
   if (!Array.isArray(entries)) {
     throw new Error('repository root listing is not a directory listing');
   }
-  const names = entries.filter((e) => e && e.type === 'file').map((e) => e.name);
+  const names = entries.filter((e) => e?.type === 'file').map((e) => e.name);
   let pyprojectText = null;
   if (names.includes(PYPROJECT)) {
     pyprojectText = await readText(PYPROJECT);
@@ -89,15 +96,15 @@ async function probeRepoShape({ listRoot, readText }) {
 
 function assertShape(shape) {
   if (!shape || typeof shape !== 'object') {
-    throw new Error('renderDependabot requires a repository shape (ops/render-dependabot.js shapeFromRoot); refusing to render without one');
+    throw new TypeError('renderDependabot requires a repository shape (ops/render-dependabot.js shapeFromRoot); refusing to render without one');
   }
   for (const key of SHAPE_BOOLEANS) {
     if (typeof shape[key] !== 'boolean') {
-      throw new Error(`repository shape.${key} must be a boolean (got ${typeof shape[key]})`);
+      throw new TypeError(`repository shape.${key} must be a boolean (got ${typeof shape[key]})`);
     }
   }
   if (!Array.isArray(shape.requirements) || shape.requirements.some((n) => typeof n !== 'string')) {
-    throw new Error('repository shape.requirements must be a string[]');
+    throw new TypeError('repository shape.requirements must be a string[]');
   }
 }
 
@@ -138,14 +145,15 @@ function loadCoreOwnedNames(fs) {
     }
   }
   for (const ecosystem of Object.keys(byEcosystem)) {
-    byEcosystem[ecosystem] = [...new Set(byEcosystem[ecosystem])].sort();
+    byEcosystem[ecosystem] = [...new Set(byEcosystem[ecosystem])].sort(byCodeUnit);
   }
   return byEcosystem;
 }
 
 function fragment(fs, name, ignoreNames = []) {
-  const text = readRequired(fs, `${FRAGMENT_DIR}/${name}.yml.tpl`).toString('utf8').replace(/\r\n/g, '\n');
-  const lines = text.replace(/\n+$/, '').split('\n');
+  const text = readRequired(fs, `${FRAGMENT_DIR}/${name}.yml.tpl`).toString('utf8').replaceAll('\r\n', '\n');
+  const lines = text.split('\n');
+  while (lines.length && lines.at(-1) === '') lines.pop();
   const tokens = lines.filter((l) => l.includes(IGNORE_TOKEN));
   if (tokens.length > 1) throw new Error(`fragment ${name} carries more than one ${IGNORE_TOKEN}`);
   if (!tokens.length) return lines;

@@ -34,6 +34,11 @@ const root = path.resolve(__dirname, '..');
 const FIXTURES = 'ops/fixtures/dependabot';
 const ACTION_IGNORES = ['Quantum-L9/.github*', 'Quantum-L9/l9-ci-core*', 'Quantum-L9/l9-ci-sdk*'];
 const PYTHON_ECOSYSTEMS = ['uv', 'pip', 'pre-commit'];
+// The renderer sorts in code-unit order; the assertions use the same order.
+const byCodeUnit = (a, b) => {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
+};
 
 // What each fixture must render, independently of its golden bytes.
 const EXPECTED_ECOSYSTEMS = {
@@ -59,7 +64,10 @@ function entries(yml) {
 /** A read-only fs view of this checkout with some files replaced. */
 const fsWith = (replace) => ({
   ...fs,
-  readFileSync: (p, enc) => (p in replace ? (enc ? replace[p] : Buffer.from(replace[p])) : fs.readFileSync(p, enc)),
+  readFileSync: (p, enc) => {
+    if (!(p in replace)) return fs.readFileSync(p, enc);
+    return enc ? replace[p] : Buffer.from(replace[p]);
+  },
 });
 
 const origCwd = process.cwd();
@@ -67,8 +75,8 @@ process.chdir(root);
 
 (async () => {
   const owned = loadCoreOwnedNames(fs);
-  const fixtures = fs.readdirSync(FIXTURES, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
-  assert.deepStrictEqual(fixtures, Object.keys(EXPECTED_ECOSYSTEMS).sort(), 'every fixture is asserted, and every asserted fixture exists');
+  const fixtures = fs.readdirSync(FIXTURES, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort(byCodeUnit);
+  assert.deepStrictEqual(fixtures, Object.keys(EXPECTED_ECOSYSTEMS).sort(byCodeUnit), 'every fixture is asserted, and every asserted fixture exists');
 
   for (const name of fixtures) {
     const spec = JSON.parse(fs.readFileSync(`${FIXTURES}/${name}/root.json`, 'utf8'));
@@ -89,7 +97,7 @@ process.chdir(root);
     for (const ecosystem of PYTHON_ECOSYSTEMS) {
       if (!byEcosystem[ecosystem]) continue;
       const want = owned[ecosystem];
-      assert.ok(want && want.length, `${ecosystem}: Core lists no owned names`);
+      assert.ok(want?.length, `${ecosystem}: Core lists no owned names`);
       assert.deepStrictEqual(byEcosystem[ecosystem].ignores, want, `${name}: ${ecosystem} ignores every Core-owned name, sorted`);
     }
     for (const entry of Object.values(byEcosystem)) {
@@ -105,7 +113,7 @@ process.chdir(root);
   // every rendered ecosystem, and nothing a non-dependency lock key names.
   const vendored = JSON.parse(fs.readFileSync('policies/vendor/l9-ci-core/core-owned-tools.json', 'utf8'));
   for (const ecosystem of PYTHON_ECOSYSTEMS) {
-    const fromCore = [...new Set(vendored.tools.flatMap((t) => (t.ecosystems || {})[ecosystem] || []))].sort();
+    const fromCore = [...new Set(vendored.tools.flatMap((t) => t.ecosystems?.[ecosystem] || []))].sort(byCodeUnit);
     assert.deepStrictEqual(owned[ecosystem], fromCore, `${ecosystem}: derived names drift from the vendored list`);
   }
   for (const key of Object.keys(vendored.non_dependency_lock_keys)) {

@@ -212,6 +212,38 @@ const wrote = (r) => r.names.some((n) => WRITES.has(n));
 const one = (name, extra = {}) => [{ name, ...extra }];
 
 /**
+ * dependabot.yml is rendered for the repository's root (ADR 0019). A uv repo
+ * is seeded with its uv render; a root that cannot be listed seeds nothing at
+ * all rather than a github-actions-only dependabot.yml.
+ */
+async function dependabotSeedScenarios(run, label) {
+  const rowOf = (r, name = 'consumer-repo') => r.rows.find((row) => row[0] === name);
+  const uvFiles = { 'uv.lock': 'version = 1\n', 'pyproject.toml': '[project]\nname = "x"\n' };
+  const prev = process.cwd();
+  process.chdir(root);
+  const uvRender = renderDependabot({ fs, shape: shapeFromRoot({ names: Object.keys(uvFiles), pyprojectText: uvFiles['pyproject.toml'] }) });
+  process.chdir(prev);
+
+  const r = await run({ branch: null, repos: one('consumer-repo', { files: uvFiles }) });
+  const tree = r.calls.find((c) => c.name === 'git.createTree').args.tree.map((t) => t.path);
+  assert.ok(tree.includes('.github/dependabot.yml'), `${label}: uv repo not seeded with dependabot.yml`);
+  const blobs = r.calls.filter((c) => c.name === 'git.createBlob').map((c) => Buffer.from(c.args.content, 'base64').toString());
+  assert.ok(blobs.includes(uvRender), `${label}: seeded dependabot.yml is not the uv render`);
+  const rootRead = r.calls.find((c) => c.name === 'repos.getContent' && c.args.path === '');
+  assert.strictEqual(rootRead?.args.ref, 'base-sha', `${label}: root listing not read at the pinned base`);
+
+  for (const [what, errors] of [['root listing 403', { '': 403 }], ['root listing 404', { '': 404 }], ['pyproject.toml 500', { 'pyproject.toml': 500 }]]) {
+    for (const dry of [false, true]) {
+      const bad = await run({ branch: null, dry, repos: one('consumer-repo', { files: uvFiles, errors }) });
+      assert.strictEqual(wrote(bad), false, `${label}: ${what} must write nothing (dry=${dry})`);
+      assert.strictEqual(bad.failures.length, 1, `${label}: ${what} must fail the run (dry=${dry})`);
+      assert.match(rowOf(bad)[2], /failed:/);
+    }
+  }
+  console.log(`ok: ${label} — dependabot.yml seeded as the root's render; an unlistable root seeds nothing`);
+}
+
+/**
  * Reads that fail, competing PRs, a moving base, an empty repository, and the
  * PR body: every case either writes exactly the class payload or nothing.
  */
@@ -245,32 +277,6 @@ async function failClosedScenarios(wf, run, label) {
   }
   console.log(`ok: ${label} — 403/409/5xx and non-file reads fail closed: no default class, no write`);
 
-  // dependabot.yml is rendered for the repository's root (ADR 0019). A uv
-  // repo is seeded with its uv render; a root that cannot be listed seeds
-  // nothing at all rather than a github-actions-only dependabot.yml.
-  {
-    const uvFiles = { 'uv.lock': 'version = 1\n', 'pyproject.toml': '[project]\nname = "x"\n' };
-    const prev = process.cwd();
-    process.chdir(root);
-    const uvRender = renderDependabot({ fs, shape: shapeFromRoot({ names: Object.keys(uvFiles), pyprojectText: uvFiles['pyproject.toml'] }) });
-    process.chdir(prev);
-    const r = await run({ branch: null, repos: one('consumer-repo', { files: uvFiles }) });
-    const tree = r.calls.find((c) => c.name === 'git.createTree').args.tree.map((t) => t.path);
-    assert.ok(tree.includes('.github/dependabot.yml'), `${label}: uv repo not seeded with dependabot.yml`);
-    const blobs = r.calls.filter((c) => c.name === 'git.createBlob').map((c) => Buffer.from(c.args.content, 'base64').toString());
-    assert.ok(blobs.includes(uvRender), `${label}: seeded dependabot.yml is not the uv render`);
-    const rootRead = r.calls.find((c) => c.name === 'repos.getContent' && c.args.path === '');
-    assert.strictEqual(rootRead && rootRead.args.ref, 'base-sha', `${label}: root listing not read at the pinned base`);
-    for (const [what, errors] of [['root listing 403', { '': 403 }], ['root listing 404', { '': 404 }], ['pyproject.toml 500', { 'pyproject.toml': 500 }]]) {
-      for (const dry of [false, true]) {
-        const bad = await run({ branch: null, dry, repos: one('consumer-repo', { files: uvFiles, errors }) });
-        assert.strictEqual(wrote(bad), false, `${label}: ${what} must write nothing (dry=${dry})`);
-        assert.strictEqual(bad.failures.length, 1, `${label}: ${what} must fail the run (dry=${dry})`);
-        assert.match(rowOf(bad)[2], /failed:/);
-      }
-    }
-  }
-  console.log(`ok: ${label} — dependabot.yml seeded as the root's render; an unlistable root seeds nothing`);
 
   // F2: the plan is read at the base it is committed onto. The base sha is
   // pinned before the first policy read, and every getContent — root
@@ -654,6 +660,7 @@ async function failClosedScenarios(wf, run, label) {
     }
 
     await failClosedScenarios(wf, run, label);
+    await dependabotSeedScenarios(run, label);
   }
 })().catch((e) => {
   console.error(e);
