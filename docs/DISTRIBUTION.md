@@ -208,6 +208,17 @@ an unchanged body is never PATCHed; a head no local gate measured is marked
 `STALE` in Evidence, never claimed. This repository's own PRs get the same job
 through `pr-files.yml`.
 
+The template's visible order puts the inventory first (Files touched, then
+Changes by intent) and Protected-root last; the `L9_PROTECTED_ROOT_PR` stamp
+stays the first line. It carries no placeholder the composer cannot honestly
+complete: no bare `Closes #`, no sample paths, no sample evidence. The
+composer marks each receipt `BOUND`, `STALE` or `UNVERIFIED` against the tree
+it describes, ticks a Gate box only from a bound receipt that measured it, and
+writes an explicit *unresolved* marker into fields that need the author's
+judgment (Reviewer focus, an applicable Semantic change, an unevidenced Type of
+Change). No PR needs a repository-wide manifest or per-file metadata header:
+the body's regions are the inventory.
+
 PRs the seeders and Manual Update open carry their own short body in the
 sections the `gates` job checks — Problem, Fix, Risk (exactly one), Evidence
 (source commit, exact base, class, and the changed paths), Gates — built from
