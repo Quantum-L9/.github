@@ -45,12 +45,67 @@ const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { statu
   assert.ok(!patternCovers('Quantum-L9.github*', refs[0]), '"." is literal, not any character');
   assert.ok(!patternCovers('', refs[0]));
 
-  // ── actions the reusable workflows run in turn ──────────────────────────
-  const actionRefs = reusableWorkflowActionRefs(refs, (p) => fs.readFileSync(path.join(root, p), 'utf8'));
+  // ── actions the reusable workflows run in turn, at the pinned commit ────
+  // A reader over fixed bytes keyed by `<path>@<sha>`; anything else is a 404.
+  const pinnedReader = (bytes, calls = []) => async (o) => {
+    calls.push(o);
+    const key = `${o.path}@${o.ref}`;
+    if (!(key in bytes)) throw httpError(404);
+    if (bytes[key] instanceof Error) throw bytes[key];
+    return bytes[key];
+  };
+  const headText = (p) => fs.readFileSync(path.join(root, p), 'utf8');
+  const pinOf = (r) => r.split('@')[1];
+  const pathOf = (r) => r.replace(/^Quantum-L9\/\.github\//, '').split('@')[0];
+  // Fixture: the bytes the caller's pinned commit serves for each workflow.
+  const PINNED = Object.fromEntries(refs.map((r) => [`${pathOf(r)}@${pinOf(r)}`, headText(pathOf(r))]));
+  const readCalls = [];
+  const actionRefs = await reusableWorkflowActionRefs(refs, pinnedReader(PINNED, readCalls));
   assert.ok(actionRefs.length >= 2, 'the reusable workflows run GitHub-owned actions');
   assert.ok(actionRefs.every((r) => /^actions\/(checkout|github-script)@[0-9a-f]{40}$/.test(r)), actionRefs.join(', '));
+  assert.deepStrictEqual(readCalls.map((c) => `${c.owner}/${c.repo}/${c.path}@${c.ref}`), refs, 'each workflow is read at its own pinned SHA');
   assert.deepStrictEqual(workflowActionRefs('steps:\n  - uses: ./local\n  - uses: docker://alpine\n  - uses: actions/checkout@abc # v1\n'), ['actions/checkout@abc']);
-  assert.throws(() => reusableWorkflowActionRefs(['Other/repo/.github/workflows/x.yml@abc'], () => ''), /not a Quantum-L9\/\.github/);
+
+  // Drift: the pinned commit runs actions/setup-node, current HEAD does not.
+  // The verdict follows the pinned bytes, never the checkout.
+  const OLD = 'a'.repeat(40);
+  const NODE = `actions/setup-node@${'b'.repeat(40)}`;
+  const drifted = [`Quantum-L9/.github/.github/workflows/governance-pr.yml@${OLD}`];
+  const pinnedOnly = { [`.github/workflows/governance-pr.yml@${OLD}`]: `jobs:\n  a:\n    steps:\n      - uses: ${NODE}\n` };
+  const driftRefs = await reusableWorkflowActionRefs(drifted, pinnedReader(pinnedOnly));
+  assert.deepStrictEqual(driftRefs, [NODE]);
+  const headRefs = workflowActionRefs(headText('.github/workflows/governance-pr.yml'));
+  assert.ok(!headRefs.includes(NODE) && headRefs.length, 'fixture: HEAD and the pinned commit differ');
+  const onlyHeadActions = { patterns_allowed: ['actions/checkout@*', 'actions/github-script@*'], github_owned_allowed: false };
+  const SELECTED = { enabled: true, allowed_actions: 'selected' };
+  const verdictFor = (ars) => classifyActionsPermission({
+    readPermissions: async () => SELECTED, readSelected: async () => onlyHeadActions, refs: drifted, actionRefs: ars,
+  });
+  assert.strictEqual((await verdictFor(headRefs)).state, STATES.ALLOWED, 'HEAD bytes would have admitted the caller');
+  const pinnedVerdict = await verdictFor(driftRefs);
+  assert.strictEqual(pinnedVerdict.state, STATES.BLOCKED, 'the pinned bytes run an action the policy denies');
+  assert.match(pinnedVerdict.detail, /selected-denied \(actions\/setup-node\)/);
+
+  // Missing pinned revision, unreadable or empty pinned workflow: rejects (UNKNOWN), no HEAD fallback.
+  await assert.rejects(reusableWorkflowActionRefs(drifted, pinnedReader({})), (e) => e.status === 404);
+  await assert.rejects(reusableWorkflowActionRefs(drifted, pinnedReader({ [`.github/workflows/governance-pr.yml@${OLD}`]: httpError(403) })), (e) => e.status === 403);
+  await assert.rejects(reusableWorkflowActionRefs(drifted, pinnedReader({ [`.github/workflows/governance-pr.yml@${OLD}`]: null })), /returned no workflow text/);
+  // Invalid or unsupported references are refused before any read.
+  for (const bad of [
+    `Other/repo/.github/workflows/x.yml@${OLD}`,
+    'Quantum-L9/.github/.github/workflows/governance-pr.yml@main',
+    'Quantum-L9/.github/.github/workflows/governance-pr.yml@abc1234',
+    `Quantum-L9/.github/.github/workflows/governance-pr.yml@${'A'.repeat(40)}`,
+    `Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml@${OLD}`,
+    `Quantum-L9/.github/.github/actions/x@${OLD}`,
+  ]) {
+    const seen = [];
+    await assert.rejects(reusableWorkflowActionRefs([bad], pinnedReader(PINNED, seen)), /not a Quantum-L9\/\.github reusable workflow pinned to a full SHA/, bad);
+    assert.strictEqual(seen.length, 0, `${bad} was read`);
+  }
+  // A caller ref not pinned to a SHA is surfaced, not silently dropped.
+  assert.deepStrictEqual(callerRefs('    uses: Quantum-L9/.github/.github/workflows/governance-pr.yml@main  # floating\n'),
+    ['Quantum-L9/.github/.github/workflows/governance-pr.yml@main']);
 
   // ── classification ──────────────────────────────────────────────────────
   const classify = (perms, selected) => classifyActionsPermission({
@@ -150,14 +205,24 @@ const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { statu
   // ── the real governance-report.yml script, against a stubbed API ────────
   const script = loadScriptModule(path.join(root, '.github/workflows/governance-report.yml'), 'governance-report-');
   const scoped = makeScopedRequire(root);
-  const runReport = async ({ repos, existing = null }) => {
+  let pinnedReadLog = [];
+  const runReport = async ({ repos, existing = null, pinnedError = null }) => {
+    pinnedReadLog = [];
     const calls = [];
     const github = {
       paginate: async () => Object.keys(repos).map((name) => ({ name, archived: false, fork: false })),
       rest: {
         repos: {
           listForOrg: () => {},
-          getContent: async ({ repo, path: p }) => {
+          getContent: async ({ owner, repo, path: p, ref }) => {
+            if (repo === '.github' && ref !== undefined) {
+              // The caller's pinned reusable workflows, served at their SHA only.
+              pinnedReadLog.push({ owner, repo, path: p, ref });
+              if (pinnedError) throw httpError(pinnedError);
+              const key = `${p}@${ref}`;
+              if (!(key in PINNED)) throw httpError(404);
+              return { data: { type: 'file', content: Buffer.from(PINNED[key]).toString('base64') } };
+            }
             const r = repos[repo];
             if (r.contentError) throw httpError(r.contentError);
             if ((r.files || []).includes(p)) return { data: { type: 'file', content: '' } };
@@ -222,6 +287,21 @@ const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { statu
   assert.strictEqual(created.title, 'Governance posture (advisory, weekly)');
   assert.deepStrictEqual(created.labels, ['advisory']);
   assert.ok(created.body.includes(ALL_CLEAR));
+  assert.deepStrictEqual(pinnedReadLog.map((o) => `${o.owner}/${o.repo}/${o.path}@${o.ref}`), refs, 'the real script reads each workflow at its pinned SHA');
+
+  // The pinned workflows cannot be read: a selected policy is UNKNOWN, never
+  // judged against this checkout's workflows; `all` is unaffected.
+  calls = await runReport({
+    repos: {
+      a: { files: FILES, perms: { enabled: true, allowed_actions: 'all' } },
+      b: { files: FILES, perms: { enabled: true, allowed_actions: 'selected' }, selected: { patterns_allowed: [], github_owned_allowed: true } },
+    },
+    pinnedError: 403,
+  });
+  const unreadBody = calls.find((c) => c[0] === 'create')[1].body;
+  assert.ok(!unreadBody.includes(ALL_CLEAR));
+  assert.match(unreadBody, /1 verified allowed · 0 blocked · 1 UNKNOWN/);
+  assert.match(unreadBody, /`b` \(selected; actions used by the reusable workflows were not read\)/);
 
   // Mixed via the real script: a selected allow-list that cannot be read is UNKNOWN.
   calls = await runReport({

@@ -45,10 +45,18 @@ jobs:
 
             // What a consumer's Actions policy must admit: the caller's own refs.
             const refs = callerRefs(fs.readFileSync('policies/governance-caller.yml', 'utf8'));
-            // ...and the actions those reusable workflows run; null means unread (UNKNOWN).
+            // ...and the actions those reusable workflows run, read at the exact
+            // commit the caller pins (not this checkout); null means unread (UNKNOWN).
+            const readPinned = async ({ owner, repo, path, ref }) => {
+              const res = await github.rest.repos.getContent({ owner, repo, path, ref });
+              if (!res.data || Array.isArray(res.data) || typeof res.data.content !== 'string') {
+                throw new Error(`${path}@${ref} is not a readable file`);
+              }
+              return Buffer.from(res.data.content, 'base64').toString('utf8');
+            };
             let actionRefs = null;
             try {
-              actionRefs = reusableWorkflowActionRefs(refs, (p) => fs.readFileSync(p, 'utf8'));
+              actionRefs = await reusableWorkflowActionRefs(refs, readPinned);
             } catch (e) {
               core.warning(`reusable workflow actions unread: ${e.message}`);
             }

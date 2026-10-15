@@ -13,7 +13,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { parseLabels, extractLabelReferences, checkLabelClosure } = require('./label-taxonomy.js');
+const { parseLabels, parseLabelLines, extractLabelReferences, checkLabelClosure } = require('./label-taxonomy.js');
 
 const root = path.resolve(__dirname, '..');
 const origCwd = process.cwd();
@@ -84,7 +84,7 @@ try {
   const names = new Set(refs.map((r) => r.name));
   // Discovery is not empty by accident: each consumer kind is witnessed.
   for (const expected of ['pinned', 'stale', 'advisory', 'area:ci', 'area:governance', 'needs:triage',
-    'area:ci-self', 'area:ops']) {
+    'area:ci-self', 'area:ops', 'dependencies', 'needs:external']) {
     assert.ok(names.has(expected), `closure discovery missed ${expected}`);
   }
   // The retired synonyms the two unnumbered forms used are no longer referenced.
@@ -95,6 +95,24 @@ try {
   assert.deepStrictEqual(closure.missing, [], 'every referenced label is declared in .github/labels.yml');
   assert.deepStrictEqual(closure.duplicated, [], 'every referenced label is declared exactly once');
   assert.ok(closure.ok && closure.resolved === refs.length);
+
+  // #132: `dependencies` (Dependabot's implicit label) and `needs:external`
+  // are declared exactly once, and needs:external is never staled.
+  const declared = parseLabelLines(taxonomyText).map((l) => l.name);
+  for (const name of ['dependencies', 'needs:external']) {
+    assert.strictEqual(declared.filter((n) => n === name).length, 1, `${name} declared exactly once`);
+  }
+  assert.ok(refs.some((r) => r.name === 'dependencies' && /dependabot\.yml \(dependabot\)$/.test(r.source)),
+    'dependabot.yml sets no labels, so its implicit dependencies label is a reference');
+  const staleExempt = fs.readFileSync('.github/workflows/stale.yml', 'utf8').match(/^\s*exempt-issue-labels:\s*"([^"]*)"/m);
+  assert.ok(staleExempt?.[1].split(',').includes('needs:external'), 'needs:external is exempt from stale');
+  assert.ok(!/^\s*only-labels:.*needs:external/m.test(fs.readFileSync('.github/workflows/stale.yml', 'utf8')));
+  // The pre-#132 taxonomy (neither label) fails this closure, naming both.
+  const without = taxonomyText.split('\n')
+    .filter((l) => !/name: "(dependencies|needs:external)"/.test(l)).join('\n');
+  const before = checkLabelClosure(without, refs);
+  assert.strictEqual(before.ok, false);
+  assert.deepStrictEqual([...new Set(before.missing.map((m) => m.name))].sort(), ['dependencies', 'needs:external']);
 
   // Positive witness: a representative reference resolves.
   assert.deepStrictEqual(
@@ -121,6 +139,23 @@ try {
     ['dependencies', 'area:ci'],
   );
   assert.deepStrictEqual(extractLabelReferences('dependabot', '    labels: ["a", "b"]\n'), ['a', 'b']);
+  // Implicit default: an entry without `labels:` applies `dependencies`; an
+  // explicit list (empty included) replaces the default.
+  assert.deepStrictEqual(
+    extractLabelReferences('dependabot', 'updates:\n  - package-ecosystem: github-actions\n    directory: "/"\n    groups:\n      g:\n        patterns: ["*"]\n'),
+    ['dependencies'],
+  );
+  assert.deepStrictEqual(
+    extractLabelReferences('dependabot', 'updates:\n  - package-ecosystem: npm\n    labels: [ ]\n'),
+    [],
+  );
+  // Two ecosystems: Dependabot adds an ecosystem label this module cannot
+  // name, so an unlabelled entry fails closure instead of passing silently.
+  const multi = extractLabelReferences('dependabot',
+    'updates:\n  - package-ecosystem: pip\n    directory: /\n  - package-ecosystem: npm\n    labels: ["area:ci"]\n');
+  assert.deepStrictEqual(multi.slice(0, 2), ['dependencies', '<dependabot default ecosystem label for pip>']);
+  assert.ok(multi.includes('area:ci'));
+  assert.strictEqual(checkLabelClosure(taxonomyText, multi.map((name) => ({ source: 'x', name }))).ok, false);
   assert.deepStrictEqual(extractLabelReferences('issue-form', 'name: x\nlabels:\n  - "a"\n  - b\nbody: []\n'), ['a', 'b']);
   assert.deepStrictEqual(extractLabelReferences('labeler', '"area:x":\n  - changed-files: []\n'), ['area:x']);
   assert.deepStrictEqual(

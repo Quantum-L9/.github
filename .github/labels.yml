@@ -21,11 +21,13 @@
 - { name: "scope:XL", color: "e4e669", description: "Needs a design doc first" }
 - { name: "needs:triage", color: "ededed", description: "Awaiting maintainer review" }
 - { name: "needs:info", color: "ededed", description: "Blocked on the reporter; eligible for stale" }
+- { name: "needs:external", color: "ededed", description: "Blocked on another repository or vendor; exempt from stale" }
 - { name: "pinned", color: "fef2c0", description: "Keep open; exempt from stale" }
 - { name: "stale", color: "ededed", description: "No activity; set and cleared by stale.yml" }
 - { name: "advisory", color: "ededed", description: "Advisory report; informs, never blocks (governance-report.yml)" }
 - { name: "regression", color: "5319e7", description: "Worked in an earlier version" }
 - { name: "breaking", color: "5319e7", description: "Requires a major version bump" }
+- { name: "dependencies", color: "0366d6", description: "Dependency version bump (Dependabot)" }
 - { name: "env:prod", color: "1d76db", description: "Observed in production" }
 - { name: "area:ci", color: "1d76db", description: "CI/CD pipelines" }
 - { name: "area:governance", color: "5319e7", description: "registry, ADR template, governance docs" }

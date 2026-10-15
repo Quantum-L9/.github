@@ -24,13 +24,15 @@ const statusOf = (e) => e?.status || 'error';
 /**
  * The reusable-workflow references the distributed governance caller makes,
  * e.g. `Quantum-L9/.github/.github/workflows/governance-pr.yml@<sha>`.
- * These are what a consumer's Actions policy must admit.
+ * These are what a consumer's Actions policy must admit. Every such `uses:`
+ * is returned whatever its ref, so one not pinned to a full SHA reaches
+ * reusableWorkflowActionRefs() and is refused there instead of being dropped.
  *
  * @param {string} callerText contents of policies/governance-caller.yml
  * @returns {string[]}
  */
 function callerRefs(callerText) {
-  return [...String(callerText || '').matchAll(/^\s*uses:\s*(Quantum-L9\/\.github\/\.github\/workflows\/[^@\s]+@[0-9a-f]{40})/gm)]
+  return [...String(callerText || '').matchAll(/^\s*uses:\s*(Quantum-L9\/\.github\/\.github\/workflows\/[^@\s]+@[^\s#]+)/gm)]
     .map((m) => m[1]);
 }
 
@@ -62,23 +64,33 @@ function workflowActionRefs(workflowText) {
     .map((m) => m[1]);
 }
 
+// `owner/repo/.github/workflows/<file>.yml@<40-hex sha>`: the only caller
+// reference shape whose workflow bytes are fixed, so the only one evaluated.
+const PINNED_WORKFLOW_REF = /^(Quantum-L9)\/(\.github)\/(\.github\/workflows\/[^@/]+\.ya?ml)@([0-9a-f]{40})$/;
+
 /**
  * The actions the governance caller's reusable workflows run in turn. A
  * consumer's `selected` policy has to admit these too, or the caller's jobs
- * cannot start. The workflows are read from this checkout (the source of the
- * caller's pinned revision); a read failure propagates so the caller can
- * report UNKNOWN instead of a partial list.
+ * cannot start. Each workflow is read at the exact commit the caller pins —
+ * never at this repository's current checkout, which is a later commit and
+ * may run different actions. A reference that is not a Quantum-L9/.github
+ * workflow pinned to a full SHA, or a pinned workflow that cannot be read,
+ * rejects, so the caller reports UNKNOWN instead of a partial or
+ * substituted list.
  *
  * @param {string[]} refs caller references (callerRefs)
- * @param {(path: string) => string} readLocal reads a repository-relative file
- * @returns {string[]} unique references, caller references excluded
+ * @param {(o: {owner: string, repo: string, path: string, ref: string}) => Promise<string>} readAt
+ *   workflow text at that exact commit; throws when it cannot be read
+ * @returns {Promise<string[]>} unique references, caller references excluded
  */
-function reusableWorkflowActionRefs(refs, readLocal) {
+async function reusableWorkflowActionRefs(refs, readAt) {
   const out = new Set();
   for (const ref of refs) {
-    const m = /^Quantum-L9\/\.github\/(\.github\/workflows\/[^@]+)@/.exec(ref);
-    if (!m) throw new Error(`not a Quantum-L9/.github reusable workflow: ${ref}`);
-    for (const used of workflowActionRefs(readLocal(m[1]))) out.add(used);
+    const m = PINNED_WORKFLOW_REF.exec(ref);
+    if (!m) throw new Error(`not a Quantum-L9/.github reusable workflow pinned to a full SHA: ${ref}`);
+    const text = await readAt({ owner: m[1], repo: m[2], path: m[3], ref: m[4] });
+    if (typeof text !== 'string') throw new Error(`${m[3]}@${m[4]} returned no workflow text`);
+    for (const used of workflowActionRefs(text)) out.add(used);
   }
   return [...out].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }

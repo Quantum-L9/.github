@@ -89,10 +89,43 @@ function staleWorkflowLabels(text) {
   return out;
 }
 
-/** `labels:` lists under Dependabot `updates` entries (flow or block). */
+// Dependabot's own label when an `updates` entry sets no `labels:` (GitHub
+// docs, "Dependabot options reference" > labels): every PR gets
+// `dependencies`, plus a per-ecosystem label once more than one package
+// manager is configured. `labels: [ ]` disables both.
+const DEPENDABOT_DEFAULT_LABEL = 'dependencies';
+
+/**
+ * Labels Dependabot applies: the explicit `labels:` lists under `updates`
+ * entries (flow or block), plus the implicit default for every
+ * `- package-ecosystem:` entry that sets none. The per-ecosystem default
+ * label is not derivable here, so with more than one ecosystem an entry
+ * without `labels:` yields a reference no taxonomy declares and the closure
+ * fails closed until the entry names its labels explicitly.
+ */
 function dependabotLabels(text) {
   const lines = String(text || '').split('\n');
   const out = [];
+  const entries = [];
+  lines.forEach((l, i) => {
+    const m = l.match(/^(\s*)-\s*package-ecosystem:\s*["']?([^"'\s#]+)/);
+    if (!m) return;
+    let end = lines.length;
+    for (let j = i + 1; j < lines.length; j++) {
+      const next = lines[j];
+      if (!next.trim() || /^\s*#/.test(next)) continue;
+      const indent = next.match(/^(\s*)/)[1].length;
+      if (indent < m[1].length || (indent === m[1].length && /^\s*-/.test(next))) { end = j; break; }
+    }
+    const body = lines.slice(i + 1, end);
+    entries.push({ ecosystem: m[2], hasLabels: body.some((b) => /^\s*labels:/.test(b)) });
+  });
+  const ecosystems = new Set(entries.map((e) => e.ecosystem));
+  for (const e of entries) {
+    if (e.hasLabels) continue;
+    out.push(DEPENDABOT_DEFAULT_LABEL);
+    if (ecosystems.size > 1) out.push(`<dependabot default ecosystem label for ${e.ecosystem}>`);
+  }
   lines.forEach((l, i) => {
     const m = l.match(/^(\s*)labels:\s*(.*?)\s*$/);
     if (!m) return;
