@@ -659,9 +659,10 @@ enforceSuite.then(async () => {
     ],
   };
   const policyText = fs.readFileSync('policies/mandatory-files.yml', 'utf8');
-  for (const f of filesPolicy.files) assert.match(policyText, new RegExp(`^  - path: ${f.path.replace(/\./g, '\\.')}$`, 'm'));
+  const escapeRegExp = (s) => s.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
+  for (const f of filesPolicy.files) assert.match(policyText, new RegExp(`^  - path: ${escapeRegExp(f.path)}$`, 'm'));
   assert.strictEqual((policyText.match(/^ {2}- path: /gm) || []).length, filesPolicy.files.length, 'fixture lists every mandatory path');
-  for (const e of filesPolicy.exceptions) assert.match(policyText, new RegExp(`repo: "${e.repo.replace(/\./g, '\\.')}"`));
+  for (const e of filesPolicy.exceptions) assert.match(policyText, new RegExp(`repo: "${escapeRegExp(e.repo)}"`));
   process.chdir(prevCwd);
 
   const MARKER = doc.marker_path;
