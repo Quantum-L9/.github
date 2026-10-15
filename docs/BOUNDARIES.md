@@ -15,7 +15,8 @@ It does not execute, lint, test, scan, or remediate code.
 | Passive community-health files (`CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `FUNDING.yml`, `VULNERABILITY_REPORT.yml`) | **this repo** | INHERIT: GitHub serves them live; never seeded |
 | `SECURITY.md` | **this repo** | MATERIALIZE: seeded missing-only because it carries consumer-specific advisory routing |
 | Issue templates, default PR template, release PR template | **this repo** | MATERIALIZE: seeded missing-only; `ISSUE_TEMPLATE/config.yml` carries consumer-specific routing |
-| CODEOWNERS, dependabot, governance caller | **this repo** | MATERIALIZE: `policies/CODEOWNERS`, `.github/dependabot.yml`, `policies/governance-caller.yml` |
+| CODEOWNERS, governance caller | **this repo** | MATERIALIZE: `policies/CODEOWNERS`, `policies/governance-caller.yml` |
+| dependabot | **this repo** (renderer); tool versions stay Core-owned | MANAGED-RENDERED ([ADR 0019](adr/0019-dependabot-managed-rendered.md)): `ops/render-dependabot.js` per repository root; ignores Core-owned tools and Core/SDK/`.github` pins |
 | Labels, repository settings | **this repo** | REMOTE APPLY: API state, never a seeded file |
 | Semantic Foundation (`semantics/`) | **this repo** | owned here, never in the seed payload |
 | Which capabilities a class receives | **this repo** | `policies/repo-classes.yml` |

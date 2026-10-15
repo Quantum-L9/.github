@@ -18,7 +18,8 @@
 # Categories (`all` / no flag = the consumer's class decides; labels is opt-in
 # for the default class and materialized for non_constellation_python):
 #   codeowners        .github/CODEOWNERS (path-scoped; skip if root CODEOWNERS)
-#   dependabot        .github/dependabot.yml (github-actions only)
+#   dependabot        .github/dependabot.yml, rendered for the consumer root
+#                     (ops/render-dependabot.js, ADR 0019)
 #   governance        .github/workflows/governance.yml (FORBID for governed classes)
 #   community-health  SECURITY.md only; advisory links are rewritten to the
 #                     consumer's origin remote. CODE_OF_CONDUCT.md,

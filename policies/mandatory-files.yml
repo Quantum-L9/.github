@@ -21,6 +21,9 @@ files:
 
   - path: .github/dependabot.yml
     source: .github/dependabot.yml
+    # mode: managed (rendered) — continuous-sync restores the render for the
+    # repository's root shape (ops/render-dependabot.js, ADR
+    # docs/adr/0019-dependabot-managed-rendered.md), not this file's bytes.
     mode: managed
 
   # LICENSE is not part of universal governance distribution. GitHub does not

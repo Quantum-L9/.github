@@ -3,6 +3,12 @@
 #   Preview (dry_run=true, the default): reports drift per repo, writes nothing.
 #   Apply   (dry_run=false):             one reviewable PR per drifted repo.
 # Repos can opt out with a .l9/no-sync marker file.
+# Rollout of the rendered dependabot.yml (ADR 0019): do not run Apply on a
+# .github revision without ops/render-dependabot.js; the older verbatim copy
+# overwrites legitimate uv / pip / pre-commit entries with actions-only bytes.
+# Until the renderer is merged, a repo with extra ecosystems opts out with
+# .l9/no-sync. After it is merged, Preview one repo at a time and Apply per
+# repo only on explicit operator approval (docs/DISTRIBUTION.md).
 #
 # Auth: the l9-governance-seeder App. Its GOVERNANCE_APP_ID variable and
 # GOVERNANCE_APP_PRIVATE_KEY secret live on the governance-distribution
