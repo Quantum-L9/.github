@@ -23,8 +23,7 @@ if command -v node &>/dev/null; then
     ops/test-seed-workflow-branch-guard.js \
     ops/test-continuous-sync-branch-guard.js \
     ops/test-distribution-triggers.js \
-    ops/test-governance-pr-body.js \
-    ops/test-pr-template.js; do
+    ops/test-governance-pr-body.js; do
     if node "$t"; then
       echo "✅ $t"
       PASS=$((PASS+1))
@@ -41,6 +40,15 @@ if bash ops/test-sync-org-files.sh; then
   PASS=$((PASS+1))
 else
   echo "❌ ops/test-sync-org-files.sh"
+  FAIL=$((FAIL+1))
+fi
+# The canonical PR template's machine contract. node is required here, not
+# optional: every governed PR body is composed from this one file.
+if node ops/test-pr-template.js; then
+  echo "✅ ops/test-pr-template.js"
+  PASS=$((PASS+1))
+else
+  echo "❌ ops/test-pr-template.js"
   FAIL=$((FAIL+1))
 fi
 if command -v yamllint &>/dev/null; then
