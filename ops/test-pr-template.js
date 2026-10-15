@@ -56,8 +56,16 @@ function check(name, fn) {
     console.log(`ok - ${name}`);
   } catch (e) {
     failures += 1;
-    console.log(`not ok - ${name}\n  ${e.message.split('\n').join('\n  ')}`);
+    console.log(`not ok - ${name}\n  ${e.message.replaceAll('\n', '\n  ')}`);
   }
+}
+
+/** `## ` headings in order, by line — no regex, so no backtracking. */
+function headingsOf(text) {
+  return text
+    .split('\n')
+    .filter((line) => line.startsWith('## '))
+    .map((line) => line.slice(3).trim());
 }
 
 check('the protected-root stamp is the first line', () => {
@@ -65,8 +73,7 @@ check('the protected-root stamp is the first line', () => {
 });
 
 check('sections follow the canonical order, inventory first', () => {
-  const headings = [...template.matchAll(/^## (.+?)\s*$/gm)].map((m) => m[1]);
-  assert.deepStrictEqual(headings, ORDER);
+  assert.deepStrictEqual(headingsOf(template), ORDER);
 });
 
 check('every machine-owned region is declared exactly once, START before END', () => {
@@ -88,8 +95,7 @@ check('each region sits under its own section', () => {
   };
   for (const [name, heading] of Object.entries(owner)) {
     const at = template.indexOf(`<!-- ${name}:START -->`);
-    const before = [...template.slice(0, at).matchAll(/^## (.+?)\s*$/gm)].map((m) => m[1]);
-    assert.strictEqual(before[before.length - 1], heading, name);
+    assert.strictEqual(headingsOf(template.slice(0, at)).at(-1), heading, name);
   }
 });
 
