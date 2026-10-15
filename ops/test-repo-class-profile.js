@@ -504,7 +504,7 @@ try {
 // The real `script:` body runs against a stubbed API. A marker that cannot be
 // read, or that declares an unknown class, must not be assessed as `default`
 // (the widest mandatory set), and an unreadable mandatory file is not missing.
-(async () => {
+const enforceSuite = (async () => {
   const { loadScriptModule, makeCore, makeScopedRequire } = require('./workflow-script-harness.js');
   const root = path.resolve(__dirname, '..');
   const enforce = loadScriptModule(path.join(root, '.github/workflows/enforce-policies.yml'), 'enforce-policies-');
@@ -621,6 +621,229 @@ try {
   }
   console.log('ok: enforce-policies — opt-out probe 403/5xx blocks the repo (no repos.update, run fails); 404 enforces; a present marker opts out');
 })().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
+
+// ── Mandatory-file coverage for preflight-scheduled.yml (#151) ──────────────
+// Class-aware, read-only: marker > override > default, class waivers and the
+// policy's repo exceptions, exactly as enforce-policies.yml enforces them. An
+// unread path is unobserved (never present, never missing) and an unresolved
+// class is never assessed as `default`. Chained after the enforce-policies
+// suite: both chdir around awaited workflow scripts, so running them
+// concurrently races on the process cwd.
+enforceSuite.then(async () => {
+  const {
+    VERDICTS,
+    assessMandatoryFiles,
+    summarizeMandatoryCoverage,
+    describeMandatoryCoverage,
+  } = require('./repo-class-profile.js');
+  const { loadScriptModule, makeCore, makeScopedRequire } = require('./workflow-script-harness.js');
+  const root = path.resolve(__dirname, '..');
+  const prevCwd = process.cwd();
+  process.chdir(root);
+  const doc = loadRepoClasses(fs);
+  // The live policy, transcribed. Its text is asserted below so this fixture
+  // cannot drift from policies/mandatory-files.yml unnoticed.
+  const filesPolicy = {
+    files: [
+      { path: '.github/CODEOWNERS' },
+      { path: '.github/dependabot.yml' },
+      { path: '.github/workflows/governance.yml' },
+      { path: 'README.md' },
+    ],
+    exceptions: [
+      { repo: '.github', reason: 'This IS the template source' },
+      { repo: 'Cursor-Governance', reason: 'Policy SSOT — has its own governance model' },
+    ],
+  };
+  const policyText = fs.readFileSync('policies/mandatory-files.yml', 'utf8');
+  for (const f of filesPolicy.files) assert.match(policyText, new RegExp(`^  - path: ${f.path.replace(/\./g, '\\.')}$`, 'm'));
+  assert.strictEqual((policyText.match(/^ {2}- path: /gm) || []).length, filesPolicy.files.length, 'fixture lists every mandatory path');
+  for (const e of filesPolicy.exceptions) assert.match(policyText, new RegExp(`repo: "${e.repo.replace(/\./g, '\\.')}"`));
+  process.chdir(prevCwd);
+
+  const MARKER = doc.marker_path;
+  const ALL = ['.github/CODEOWNERS', '.github/dependabot.yml', '.github/workflows/governance.yml', 'README.md'];
+  const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { status });
+  // files: path -> text (present); errors: path -> HTTP status; else 404.
+  const reader = ({ files = {}, errors = {} }) => async (p) => {
+    if (errors[p]) throw httpError(errors[p]);
+    return p in files ? files[p] : null;
+  };
+  const present = (paths, extra = {}) => ({ ...Object.fromEntries(paths.map((p) => [p, 'x'])), ...extra });
+  const assess = (repoName, r) => assessMandatoryFiles({ doc, filesPolicy, repoName, readText: reader(r) });
+  const verdicts = (a) => Object.fromEntries(a.files.map((f) => [f.path, f.verdict]));
+
+  // default (no marker, no override): every mandatory path is required.
+  let a = await assess('consumer', { files: present(ALL) });
+  assert.strictEqual(a.className, 'default');
+  assert.ok(a.files.every((f) => f.verdict === VERDICTS.PRESENT));
+
+  // Genuine missing requirement: a default repo without dependabot.yml.
+  a = await assess('consumer', { files: present(ALL.filter((p) => p !== '.github/dependabot.yml')) });
+  assert.strictEqual(verdicts(a)['.github/dependabot.yml'], VERDICTS.MISSING);
+  const missingSummary = summarizeMandatoryCoverage([a]);
+  assert.deepStrictEqual(missingSummary.noncompliant, [{ repo: 'consumer', className: 'default', missing: ['.github/dependabot.yml'], unobserved: [] }]);
+  assert.strictEqual(missingSummary.pct, 0);
+
+  // non_constellation_python (marker): the governance caller is waived, the rest required.
+  a = await assess('py-repo', { files: present(['.github/CODEOWNERS', '.github/dependabot.yml', 'README.md'], { [MARKER]: 'profile: non_constellation_python\n' }) });
+  assert.strictEqual(a.className, 'non_constellation_python');
+  assert.strictEqual(verdicts(a)['.github/workflows/governance.yml'], VERDICTS.WAIVED);
+  assert.deepStrictEqual(summarizeMandatoryCoverage([a]).compliant, ['py-repo']);
+
+  // self_governed (org override l9-ci-core): CODEOWNERS, dependabot and the
+  // caller are waived; README.md is still required. Raw two-file presence
+  // would have called this repo "unseeded".
+  a = await assess('l9-ci-core', { files: present(['README.md']) });
+  assert.strictEqual(a.className, 'self_governed');
+  assert.deepStrictEqual(verdicts(a), {
+    '.github/CODEOWNERS': VERDICTS.WAIVED,
+    '.github/dependabot.yml': VERDICTS.WAIVED,
+    '.github/workflows/governance.yml': VERDICTS.WAIVED,
+    'README.md': VERDICTS.PRESENT,
+  });
+  assert.deepStrictEqual(summarizeMandatoryCoverage([a]).compliant, ['l9-ci-core']);
+  // A class that waives every listed path is not applicable, not compliant.
+  const narrow = await assessMandatoryFiles({
+    doc, filesPolicy: { files: [{ path: '.github/CODEOWNERS' }] }, repoName: 'l9-ci-core', readText: reader({}),
+  });
+  const naSummary = summarizeMandatoryCoverage([narrow]);
+  assert.strictEqual(naSummary.notApplicable.length, 1);
+  assert.strictEqual(naSummary.eligible, 0);
+
+  // Cursor-Governance: policy exception, outside the denominator, never read.
+  let reads = 0;
+  a = await assessMandatoryFiles({ doc, filesPolicy, repoName: 'Cursor-Governance', readText: async () => { reads++; return null; } });
+  assert.strictEqual(a.status, 'exempt');
+  assert.strictEqual(reads, 0, 'an excepted repository is not probed');
+  assert.ok(a.files.every((f) => f.verdict === VERDICTS.WAIVED));
+
+  // 404 vs 403/500: only a 404 is missing.
+  a = await assess('consumer', { files: present(['.github/workflows/governance.yml']), errors: { '.github/CODEOWNERS': 403, '.github/dependabot.yml': 500 } });
+  assert.deepStrictEqual(verdicts(a), {
+    '.github/CODEOWNERS': VERDICTS.UNOBSERVED,
+    '.github/dependabot.yml': VERDICTS.UNOBSERVED,
+    '.github/workflows/governance.yml': VERDICTS.PRESENT,
+    'README.md': VERDICTS.MISSING,
+  });
+  assert.match(a.files[0].detail, /unreadable \(403\)/);
+  assert.match(a.files[1].detail, /unreadable \(500\)/);
+  // All-unread but nothing missing: unobserved, in the denominator, not compliant.
+  a = await assess('consumer', { files: present(['README.md', '.github/workflows/governance.yml']), errors: { '.github/CODEOWNERS': 403, '.github/dependabot.yml': 500 } });
+  let s = summarizeMandatoryCoverage([a]);
+  assert.deepStrictEqual(s.compliant, []);
+  assert.strictEqual(s.unobserved.length, 1);
+  assert.strictEqual(s.eligible, 1);
+  assert.strictEqual(describeMandatoryCoverage(s).level, 'warn');
+
+  // Malformed / unknown marker, and an unreadable marker: unresolved, never default.
+  for (const r of [{ files: { [MARKER]: 'garbage\n' } }, { files: { [MARKER]: 'profile: no_such_class\n' } }, { errors: { [MARKER]: 403 } }, { errors: { [MARKER]: 500 } }]) {
+    a = await assess('consumer', { ...r, files: { ...present(ALL), ...(r.files || {}) } });
+    assert.strictEqual(a.status, 'unresolved');
+    assert.ok(a.files.every((f) => f.verdict === VERDICTS.UNOBSERVED), 'unresolved class assessed as a class');
+    s = summarizeMandatoryCoverage([a]);
+    assert.deepStrictEqual(s.compliant, [], 'all files present yet unresolved class counted compliant');
+    assert.strictEqual(s.unobserved.length, 1);
+  }
+
+  // Zero eligible repositories: no percentage, never 100%.
+  const exemptOnly = await assessMandatoryFiles({ doc, filesPolicy, repoName: 'Cursor-Governance', readText: reader({}) });
+  s = summarizeMandatoryCoverage([exemptOnly]);
+  assert.strictEqual(s.eligible, 0);
+  assert.strictEqual(s.pct, null);
+  let d = describeMandatoryCoverage(s);
+  assert.strictEqual(d.level, 'warn');
+  assert.match(d.line, /no eligible repositories .* compliance not computed/);
+  assert.doesNotMatch(d.line, /100%/);
+  s = summarizeMandatoryCoverage([]);
+  assert.strictEqual(s.pct, null);
+  assert.match(describeMandatoryCoverage(s).line, /no eligible repositories \(0 active/);
+
+  // An unreadable policy is reported, never scored.
+  await assert.rejects(assessMandatoryFiles({ doc, filesPolicy: {}, repoName: 'x', readText: reader({}) }), /no readable files list/);
+  await assert.rejects(assessMandatoryFiles({ doc, filesPolicy: { files: [] }, repoName: 'x', readText: reader({}) }), /no readable files list/);
+  d = describeMandatoryCoverage(null, { policyError: 'boom' });
+  assert.strictEqual(d.level, 'warn');
+  assert.match(d.line, /UNOBSERVED — policy unreadable \(boom\)/);
+
+  // Mixed org: denominator excludes the exempt repo, keeps the unobserved one.
+  const mixed = [
+    await assess('consumer-ok', { files: present(ALL) }),
+    await assess('consumer-missing', { files: present(ALL.filter((p) => p !== 'README.md')) }),
+    await assess('consumer-403', { files: present(ALL.slice(1)), errors: { '.github/CODEOWNERS': 403 } }),
+    await assess('l9-ci-core', { files: present(['README.md']) }),
+    exemptOnly,
+  ];
+  s = summarizeMandatoryCoverage(mixed);
+  assert.deepStrictEqual(s.compliant, ['consumer-ok', 'l9-ci-core']);
+  assert.strictEqual(s.eligible, 4);
+  assert.strictEqual(s.pct, 50);
+  d = describeMandatoryCoverage(s);
+  assert.match(d.line, /^Mandatory-file compliance: 2\/4 eligible repos \(50%\) — 1 missing a required file, 1 unobserved, 1 exempt, 0 not applicable$/);
+  assert.strictEqual(d.sections.length, 3);
+  console.log('ok: preflight coverage — default / non_constellation_python / self_governed / Cursor-Governance exception resolve via the shared class profile');
+  console.log('ok: preflight coverage — 404 is missing, 403/500 unobserved; malformed/unknown/unreadable marker unresolved; zero eligible is not 100%');
+
+  // ── the real preflight-scheduled.yml script, against a stubbed API ──────
+  const preflight = loadScriptModule(path.join(root, '.github/workflows/preflight-scheduled.yml'), 'preflight-');
+  const runPreflight = async (repos) => {
+    const scoped = makeScopedRequire(root);
+    const req = (m) => (m === 'child_process' ? { execSync: () => JSON.stringify(filesPolicy) } : scoped(m));
+    const created = [];
+    const github = {
+      paginate: async () => Object.keys(repos).map((name) => ({ name, archived: false, fork: false })),
+      rest: {
+        repos: {
+          listForOrg: () => {},
+          get: async () => ({ data: { private: false } }),
+          getContent: async ({ repo, path: p }) => {
+            const r = repos[repo];
+            if (r.errors?.[p]) throw httpError(r.errors[p]);
+            if (r.files && p in r.files) return { data: { type: 'file', content: Buffer.from(r.files[p]).toString('base64') } };
+            throw httpError(404);
+          },
+        },
+        actions: { getGithubActionsPermissionsOrganization: async () => ({ data: { allowed_actions: 'all' } }) },
+        issues: {
+          listForRepo: async () => ({ data: [] }),
+          create: async (args) => { created.push(args); return { data: { number: 1 } }; },
+          update: async () => ({ data: {} }),
+        },
+      },
+    };
+    const core = makeCore();
+    const prev = process.cwd();
+    process.chdir(root);
+    try {
+      await preflight(github, core, {}, req);
+    } finally {
+      process.chdir(prev);
+    }
+    assert.strictEqual(created.length, 1);
+    assert.deepStrictEqual(created[0].labels, ['area:ops'], 'issue identity unchanged');
+    assert.strictEqual(created[0].title, 'Preflight: org configuration status');
+    return { body: created[0].body, warnings: core.warnings };
+  };
+  let run = await runPreflight({
+    'Cursor-Governance': {},
+    'l9-ci-core': { files: { 'README.md': '# x' } },
+    'consumer-ok': { files: present(ALL) },
+    'consumer-403': { files: present(ALL.slice(1)), errors: { '.github/CODEOWNERS': 403 } },
+  });
+  assert.match(run.body, /\*\*Mandatory-file compliance:\*\* 2\/3 eligible \(67%\)/);
+  assert.match(run.body, /\*\*Raw presence \(CODEOWNERS \+ dependabot, not compliance\):\*\* 1\/4/);
+  assert.match(run.body, /## Unobserved — not counted as compliant\n\n- `consumer-403`: \.github\/CODEOWNERS unreadable \(403\)/);
+  assert.match(run.body, /`Cursor-Governance`: mandatory-files exception/);
+  assert.doesNotMatch(run.body, /Seeded:|Unseeded repos/);
+  assert.ok(run.warnings.some((w) => /Mandatory-file compliance: 2\/3/.test(w)));
+  run = await runPreflight({ 'Cursor-Governance': {} });
+  assert.match(run.body, /\*\*Mandatory-file compliance:\*\* not computed — no eligible repos/);
+  assert.doesNotMatch(run.body, /NaN|100%/);
+  console.log('ok: preflight-scheduled.yml — real script reports class-aware compliance, raw presence separately, unobserved repos listed, zero-eligible not scored; issue identity unchanged');
+}).catch((e) => {
   console.error(e);
   process.exit(1);
 });
