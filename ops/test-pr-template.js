@@ -60,9 +60,6 @@ function check(name, fn) {
   }
 }
 
-/** Visible text: HTML comments removed, so a hint inside one is not content. */
-const visible = template.replace(/<!--[\s\S]*?-->/g, '');
-
 check('the protected-root stamp is the first line', () => {
   assert.strictEqual(template.split('\n')[0], '<!-- L9_PROTECTED_ROOT_PR -->');
 });
@@ -97,7 +94,9 @@ check('each region sits under its own section', () => {
 });
 
 check('no placeholder the composer cannot honestly complete', () => {
-  assert.doesNotMatch(visible, /Closes #(?!\d)/, 'bare "Closes #" renders dangling with no issue');
+  // Anywhere in the file, comments included: GitHub may read a closing
+  // keyword wherever it appears, and with no issue it renders dangling.
+  assert.doesNotMatch(template, /Closes #(?!\d)/, 'bare "Closes #" renders dangling with no issue');
   assert.doesNotMatch(template, /path\/to\//, 'sample paths read as changed files');
   assert.doesNotMatch(template, /^\$ (pytest|ruff)/m, 'a sample command reads as evidence');
 });
