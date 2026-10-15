@@ -102,17 +102,21 @@ try {
   for (const name of ['dependencies', 'needs:external']) {
     assert.strictEqual(declared.filter((n) => n === name).length, 1, `${name} declared exactly once`);
   }
-  assert.ok(refs.some((r) => r.name === 'dependencies' && /dependabot\.yml \(dependabot\)$/.test(r.source)),
+  assert.ok(refs.some((r) => r.name === 'dependencies' && r.source.endsWith('dependabot.yml (dependabot)')),
     'dependabot.yml sets no labels, so its implicit dependencies label is a reference');
-  const staleExempt = fs.readFileSync('.github/workflows/stale.yml', 'utf8').match(/^\s*exempt-issue-labels:\s*"([^"]*)"/m);
-  assert.ok(staleExempt?.[1].split(',').includes('needs:external'), 'needs:external is exempt from stale');
-  assert.ok(!/^\s*only-labels:.*needs:external/m.test(fs.readFileSync('.github/workflows/stale.yml', 'utf8')));
+  const staleInput = (key) => {
+    const line = fs.readFileSync('.github/workflows/stale.yml', 'utf8').split('\n')
+      .map((l) => l.trim()).find((l) => l.startsWith(`${key}:`));
+    return line ? line.slice(key.length + 1).trim().replace(/^"|"$/g, '').split(',') : [];
+  };
+  assert.ok(staleInput('exempt-issue-labels').includes('needs:external'), 'needs:external is exempt from stale');
+  assert.ok(!staleInput('only-labels').includes('needs:external'), 'needs:external is never a stale trigger');
   // The pre-#132 taxonomy (neither label) fails this closure, naming both.
   const without = taxonomyText.split('\n')
     .filter((l) => !/name: "(dependencies|needs:external)"/.test(l)).join('\n');
   const before = checkLabelClosure(without, refs);
   assert.strictEqual(before.ok, false);
-  assert.deepStrictEqual([...new Set(before.missing.map((m) => m.name))].sort(), ['dependencies', 'needs:external']);
+  assert.deepStrictEqual([...new Set(before.missing.map((m) => m.name))].sort((a, b) => a.localeCompare(b)), ['dependencies', 'needs:external']);
 
   // Positive witness: a representative reference resolves.
   assert.deepStrictEqual(

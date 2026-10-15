@@ -108,13 +108,13 @@ function dependabotLabels(text) {
   const out = [];
   const entries = [];
   lines.forEach((l, i) => {
-    const m = l.match(/^(\s*)-\s*package-ecosystem:\s*["']?([^"'\s#]+)/);
+    const m = /^(\s*)-\s*package-ecosystem:\s*["']?([^"'\s#]+)/.exec(l);
     if (!m) return;
     let end = lines.length;
     for (let j = i + 1; j < lines.length; j++) {
       const next = lines[j];
       if (!next.trim() || /^\s*#/.test(next)) continue;
-      const indent = next.match(/^(\s*)/)[1].length;
+      const indent = next.length - next.trimStart().length;
       if (indent < m[1].length || (indent === m[1].length && /^\s*-/.test(next))) { end = j; break; }
     }
     const body = lines.slice(i + 1, end);
