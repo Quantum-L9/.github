@@ -23,7 +23,8 @@ if command -v node &>/dev/null; then
     ops/test-seed-workflow-branch-guard.js \
     ops/test-continuous-sync-branch-guard.js \
     ops/test-distribution-triggers.js \
-    ops/test-governance-pr-body.js; do
+    ops/test-governance-pr-body.js \
+    ops/test-pr-template.js; do
     if node "$t"; then
       echo "✅ $t"
       PASS=$((PASS+1))
