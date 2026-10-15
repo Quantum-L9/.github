@@ -80,7 +80,7 @@ function reusableWorkflowActionRefs(refs, readLocal) {
     if (!m) throw new Error(`not a Quantum-L9/.github reusable workflow: ${ref}`);
     for (const used of workflowActionRefs(readLocal(m[1]))) out.add(used);
   }
-  return [...out].sort();
+  return [...out].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 const OWNER = 'quantum-l9';
