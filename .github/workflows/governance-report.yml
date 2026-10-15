@@ -30,6 +30,7 @@ jobs:
             const fs = require('fs');
             const {
               callerRefs,
+              reusableWorkflowActionRefs,
               classifyActionsPermission,
               buildPostureReport,
             } = require('./ops/governance-report.js');
@@ -44,6 +45,13 @@ jobs:
 
             // What a consumer's Actions policy must admit: the caller's own refs.
             const refs = callerRefs(fs.readFileSync('policies/governance-caller.yml', 'utf8'));
+            // ...and the actions those reusable workflows run; null means unread (UNKNOWN).
+            let actionRefs = null;
+            try {
+              actionRefs = reusableWorkflowActionRefs(refs, (p) => fs.readFileSync(p, 'utf8'));
+            } catch (e) {
+              core.warning(`reusable workflow actions unread: ${e.message}`);
+            }
 
             const rows = [];
             for (const r of repos) {
@@ -59,6 +67,7 @@ jobs:
                 readSelected: async () =>
                   (await github.rest.actions.getAllowedActionsRepository({ owner: ORG, repo: r.name })).data,
                 refs,
+                actionRefs,
               });
               rows.push({ name: r.name, co, caller, dep, actions });
             }

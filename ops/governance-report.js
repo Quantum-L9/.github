@@ -50,25 +50,89 @@ function patternCovers(pattern, ref) {
 }
 
 /**
+ * Remote action and reusable-workflow references in a workflow file
+ * (`uses: owner/repo[/path]@ref`). Local (`./`) and `docker://` steps are not
+ * governed by the allow-list and are left out.
+ *
+ * @param {string} workflowText
+ * @returns {string[]}
+ */
+function workflowActionRefs(workflowText) {
+  return [...String(workflowText || '').matchAll(/^\s*(?:-\s*)?uses:\s*([A-Za-z0-9_.-]+\/[^@\s#]+@[^\s#]+)/gm)]
+    .map((m) => m[1]);
+}
+
+/**
+ * The actions the governance caller's reusable workflows run in turn. A
+ * consumer's `selected` policy has to admit these too, or the caller's jobs
+ * cannot start. The workflows are read from this checkout (the source of the
+ * caller's pinned revision); a read failure propagates so the caller can
+ * report UNKNOWN instead of a partial list.
+ *
+ * @param {string[]} refs caller references (callerRefs)
+ * @param {(path: string) => string} readLocal reads a repository-relative file
+ * @returns {string[]} unique references, caller references excluded
+ */
+function reusableWorkflowActionRefs(refs, readLocal) {
+  const out = new Set();
+  for (const ref of refs) {
+    const m = /^Quantum-L9\/\.github\/(\.github\/workflows\/[^@]+)@/.exec(ref);
+    if (!m) throw new Error(`not a Quantum-L9/.github reusable workflow: ${ref}`);
+    for (const used of workflowActionRefs(readLocal(m[1]))) out.add(used);
+  }
+  return [...out].sort();
+}
+
+const OWNER = 'quantum-l9';
+const GITHUB_OWNED = new Set(['actions', 'github']);
+
+/**
+ * Decide one reference under a repository's `selected` policy, following
+ * GitHub's documented rules for "Allow OWNER, and select non-OWNER, actions
+ * and reusable workflows": a matching `!` pattern blocks; actions and reusable
+ * workflows in the same organization are allowed; GitHub-owned actions follow
+ * `github_owned_allowed`; anything else needs a positive pattern. Marketplace
+ * "verified creator" status is not observable here, so a reference that only
+ * `verified_allowed` could admit is UNKNOWN.
+ */
+function selectedVerdict(ref, selected, positive, negative) {
+  if (negative.some((p) => patternCovers(p, ref))) return STATES.BLOCKED;
+  const owner = ref.split('/')[0].toLowerCase();
+  if (owner === OWNER) return STATES.ALLOWED;
+  if (positive.some((p) => patternCovers(p, ref))) return STATES.ALLOWED;
+  if (GITHUB_OWNED.has(owner)) {
+    if (selected.github_owned_allowed === true) return STATES.ALLOWED;
+    return selected.github_owned_allowed === false ? STATES.BLOCKED : STATES.UNKNOWN;
+  }
+  return selected.verified_allowed === true ? STATES.UNKNOWN : STATES.BLOCKED;
+}
+
+/**
  * Classify one repository's Actions policy for the governance caller.
  *
  *   read fails                         -> UNKNOWN  (unreadable, with status)
  *   enabled === false                  -> BLOCKED  (disabled)
  *   allowed_actions === 'local_only'   -> BLOCKED  (local_only)
  *   allowed_actions === 'all'          -> ALLOWED
- *   allowed_actions === 'selected'     -> read the allow-list:
- *       read fails                     -> UNKNOWN
- *       every caller ref covered       -> ALLOWED
- *       otherwise                      -> BLOCKED  (selected-denied)
+ *   allowed_actions === 'selected'     -> read the allow-list and decide every
+ *                                         caller reference and every action its
+ *                                         reusable workflows use (selectedVerdict):
+ *       read fails / actions unread    -> UNKNOWN
+ *       any reference blocked          -> BLOCKED  (selected-denied)
+ *       any reference undecidable      -> UNKNOWN
+ *       all allowed                    -> ALLOWED
  *   anything else / no caller refs     -> UNKNOWN
  *
  * @param {object} o
  * @param {() => Promise<{enabled?: boolean, allowed_actions?: string}>} o.readPermissions
- * @param {() => Promise<{patterns_allowed?: string[]}>} o.readSelected
+ * @param {() => Promise<{patterns_allowed?: string[], github_owned_allowed?: boolean,
+ *   verified_allowed?: boolean}>} o.readSelected
  * @param {string[]} o.refs  caller references the policy must admit
+ * @param {string[]|null} o.actionRefs  actions the caller's reusable workflows use;
+ *   null when they could not be read
  * @returns {Promise<{state: string, detail: string}>}
  */
-async function classifyActionsPermission({ readPermissions, readSelected, refs }) {
+async function classifyActionsPermission({ readPermissions, readSelected, refs, actionRefs }) {
   let perms;
   try {
     perms = await readPermissions();
@@ -94,10 +158,18 @@ async function classifyActionsPermission({ readPermissions, readSelected, refs }
   }
   const patterns = selected?.patterns_allowed;
   if (!Array.isArray(patterns)) return { state: STATES.UNKNOWN, detail: 'selected; allow-list has no patterns field' };
-  const uncovered = refs.filter((ref) => !patterns.some((p) => patternCovers(p, ref)));
-  return uncovered.length
-    ? { state: STATES.BLOCKED, detail: 'selected-denied (allow-list omits Quantum-L9/.github)' }
-    : { state: STATES.ALLOWED, detail: 'selected (allow-list admits the caller)' };
+  if (!Array.isArray(actionRefs)) {
+    return { state: STATES.UNKNOWN, detail: 'selected; actions used by the reusable workflows were not read' };
+  }
+  const strings = patterns.filter((p) => typeof p === 'string');
+  const negative = strings.filter((p) => p.startsWith('!')).map((p) => p.slice(1));
+  const positive = strings.filter((p) => !p.startsWith('!'));
+  const verdicts = [...refs, ...actionRefs].map((ref) => [ref, selectedVerdict(ref, selected, positive, negative)]);
+  const blocked = verdicts.find(([, v]) => v === STATES.BLOCKED);
+  if (blocked) return { state: STATES.BLOCKED, detail: `selected-denied (${blocked[0].split('@')[0]})` };
+  const unknown = verdicts.find(([, v]) => v === STATES.UNKNOWN);
+  if (unknown) return { state: STATES.UNKNOWN, detail: `selected; cannot verify ${unknown[0].split('@')[0]}` };
+  return { state: STATES.ALLOWED, detail: 'selected (admits the caller and the actions it runs)' };
 }
 
 const PRESENCE = Object.freeze([
@@ -193,6 +265,8 @@ module.exports = {
   STATES,
   callerRefs,
   patternCovers,
+  workflowActionRefs,
+  reusableWorkflowActionRefs,
   classifyActionsPermission,
   buildPostureReport,
 };

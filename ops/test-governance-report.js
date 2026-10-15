@@ -19,6 +19,8 @@ const {
   STATES,
   callerRefs,
   patternCovers,
+  workflowActionRefs,
+  reusableWorkflowActionRefs,
   classifyActionsPermission,
   buildPostureReport,
 } = require('./governance-report.js');
@@ -43,12 +45,21 @@ const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { statu
   assert.ok(!patternCovers('Quantum-L9.github*', refs[0]), '"." is literal, not any character');
   assert.ok(!patternCovers('', refs[0]));
 
+  // ── actions the reusable workflows run in turn ──────────────────────────
+  const actionRefs = reusableWorkflowActionRefs(refs, (p) => fs.readFileSync(path.join(root, p), 'utf8'));
+  assert.ok(actionRefs.length >= 2, 'the reusable workflows run GitHub-owned actions');
+  assert.ok(actionRefs.every((r) => /^actions\/(checkout|github-script)@[0-9a-f]{40}$/.test(r)), actionRefs.join(', '));
+  assert.deepStrictEqual(workflowActionRefs('steps:\n  - uses: ./local\n  - uses: docker://alpine\n  - uses: actions/checkout@abc # v1\n'), ['actions/checkout@abc']);
+  assert.throws(() => reusableWorkflowActionRefs(['Other/repo/.github/workflows/x.yml@abc'], () => ''), /not a Quantum-L9\/\.github/);
+
   // ── classification ──────────────────────────────────────────────────────
   const classify = (perms, selected) => classifyActionsPermission({
     readPermissions: async () => { if (perms instanceof Error) throw perms; return perms; },
     readSelected: async () => { if (selected instanceof Error) throw selected; return selected; },
     refs,
+    actionRefs,
   });
+  const SEL = { enabled: true, allowed_actions: 'selected' };
   const cases = [
     [httpError(403), undefined, STATES.UNKNOWN, /permissions unreadable \(403\)/],
     [httpError(404), undefined, STATES.UNKNOWN, /permissions unreadable \(404\)/],
@@ -58,8 +69,16 @@ const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { statu
     [{ enabled: true, allowed_actions: 'all' }, undefined, STATES.ALLOWED, /^all$/],
     [{ enabled: true, allowed_actions: 'selected' }, httpError(403), STATES.UNKNOWN, /allow-list unreadable \(403\)/],
     [{ enabled: true, allowed_actions: 'selected' }, {}, STATES.UNKNOWN, /no patterns field/],
-    [{ enabled: true, allowed_actions: 'selected' }, { patterns_allowed: ['actions/*'] }, STATES.BLOCKED, /selected-denied/],
-    [{ enabled: true, allowed_actions: 'selected' }, { patterns_allowed: ['Quantum-L9/*'] }, STATES.ALLOWED, /selected/],
+    // Same-organization workflows need no pattern; the GitHub-owned actions they
+    // run follow github_owned_allowed or a positive pattern.
+    [SEL, { patterns_allowed: [], github_owned_allowed: true }, STATES.ALLOWED, /^selected \(admits/],
+    [SEL, { patterns_allowed: ['actions/*'], github_owned_allowed: false }, STATES.ALLOWED, /^selected \(admits/],
+    [SEL, { patterns_allowed: ['Quantum-L9/*'], github_owned_allowed: false }, STATES.BLOCKED, /selected-denied \(actions\/(checkout|github-script)\)/],
+    [SEL, { patterns_allowed: ['Quantum-L9/*'] }, STATES.UNKNOWN, /cannot verify actions\//],
+    // A `!` pattern blocks even under a broader allow.
+    [SEL, { patterns_allowed: ['Quantum-L9/*', '!Quantum-L9/.github/*'], github_owned_allowed: true }, STATES.BLOCKED, /selected-denied \(Quantum-L9\/\.github\/\.github\/workflows\/governance-/],
+    [SEL, { patterns_allowed: ['*', '!actions/checkout@*'], github_owned_allowed: true }, STATES.BLOCKED, /selected-denied \(actions\/checkout\)/],
+    [SEL, { patterns_allowed: ['!Other/*'], github_owned_allowed: true }, STATES.ALLOWED, /^selected \(admits/],
     [{ enabled: true, allowed_actions: 'something_new' }, undefined, STATES.UNKNOWN, /allowed_actions=something_new/],
     [{ allowed_actions: 'all' }, undefined, STATES.UNKNOWN, /enabled=undefined/],
     [null, undefined, STATES.UNKNOWN, /empty/],
@@ -72,10 +91,18 @@ const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { statu
   // `selected` with nothing to verify against is not a pass.
   assert.strictEqual((await classifyActionsPermission({
     readPermissions: async () => ({ enabled: true, allowed_actions: 'selected' }),
-    readSelected: async () => ({ patterns_allowed: ['Quantum-L9/*'] }),
+    readSelected: async () => ({ patterns_allowed: ['Quantum-L9/*'], github_owned_allowed: true }),
     refs: [],
+    actionRefs,
   })).state, STATES.UNKNOWN);
-  console.log('ok: Actions policy — unreadable/unverifiable is UNKNOWN; disabled, local_only and selected-denied are blocked; only all / covering allow-list is allowed');
+  // Unread reusable workflows are not a pass either.
+  assert.match((await classifyActionsPermission({
+    readPermissions: async () => SEL,
+    readSelected: async () => ({ patterns_allowed: [], github_owned_allowed: true }),
+    refs,
+    actionRefs: null,
+  })).detail, /actions used by the reusable workflows were not read/);
+  console.log('ok: Actions policy — unreadable/unverifiable is UNKNOWN; disabled, local_only and selected-denied are blocked; only all, or a selected policy that admits the caller and every action it runs, is allowed; `!` patterns block');
 
   // ── rendering ───────────────────────────────────────────────────────────
   const row = (name, actions, presence = {}) => ({ name, co: true, caller: true, dep: true, ...presence, actions });
@@ -96,7 +123,7 @@ const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { statu
   rep = buildPostureReport([
     row('ok', allowedAll),
     row('off', { state: STATES.BLOCKED, detail: 'disabled' }),
-    row('sel', { state: STATES.BLOCKED, detail: 'selected-denied (allow-list omits Quantum-L9/.github)' }),
+    row('sel', { state: STATES.BLOCKED, detail: 'selected-denied (actions/checkout)' }),
     row('unk', unknown403, { co: null, dep: false }),
   ], { date });
   assert.ok(!rep.body.includes(ALL_CLEAR));
@@ -107,7 +134,7 @@ const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { statu
   assert.match(rep.body, /\| `unk` \| ❓ \| ✅ \| ⬜ \| ❓ UNKNOWN/);
 
   // Verified-all-allowed: the only state that earns the all-clear. Positive witness.
-  rep = buildPostureReport([row('a', allowedAll), row('b', { state: STATES.ALLOWED, detail: 'selected (allow-list admits the caller)' })], { date });
+  rep = buildPostureReport([row('a', allowedAll), row('b', { state: STATES.ALLOWED, detail: 'selected (admits the caller and the actions it runs)' })], { date });
   assert.ok(rep.body.includes(ALL_CLEAR), 'verified-all-allowed prints the all-clear');
   assert.doesNotMatch(rep.body, /UNKNOWN, not counted|would prevent/);
   assert.match(rep.body, /2 verified allowed · 0 blocked · 0 UNKNOWN/);
@@ -188,7 +215,7 @@ const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { statu
   calls = await runReport({
     repos: {
       a: { files: FILES, perms: { enabled: true, allowed_actions: 'all' } },
-      b: { files: FILES, perms: { enabled: true, allowed_actions: 'selected' }, selected: { patterns_allowed: ['Quantum-L9/*'] } },
+      b: { files: FILES, perms: { enabled: true, allowed_actions: 'selected' }, selected: { patterns_allowed: [], github_owned_allowed: true } },
     },
   });
   const created = calls.find((c) => c[0] === 'create')[1];
