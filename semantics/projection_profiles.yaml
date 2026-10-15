@@ -1778,7 +1778,7 @@ forbidden_constraints:
       - source_class: technology_capabilities
         selector: $.technologies[?(@.class=="target")]
     unrelated_domain_payloads:
-      criterion: selection_closure
+      criterion: source_authority
 validation_rules:
 - id: PROJECTION-001
   rule: every_projection_profile_has_unique_versioned_id

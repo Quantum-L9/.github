@@ -37,3 +37,39 @@ forbidden:
   - silent_semantic_precedence
   - source_authority_creation
   - semantic_conflict_reconciliation_without_declared_rule
+placement_strategies:
+  deep_merge:
+    merge_strategy:
+      mappings: deep_merge_if_disjoint
+      sequences: preserve_source_order
+      scalar_collision: conflict
+      semantic_identity_collision: require_equivalence
+    profile_fields_forbidden:
+    - composes
+    rule: Component payloads merge at the root. Mappings merge only where keys are disjoint, any
+      scalar collision is a conflict, sequences keep component order, and an identity-bearing
+      record asserted twice must be canonically equivalent.
+  source_class_namespace:
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    profile_fields_required:
+    - composes.projection_profile
+    rules:
+    - each_component_payload_is_placed_whole_under_the_source_class_that_declares_its_source_in_the_composed_projection_profile
+    - every_component_is_projected_under_the_composed_projection_profile_at_its_current_digest
+    - components_cover_each_declared_source_class_exactly_once
+    - a_duplicate_component_is_a_conflict_even_when_byte_identical
+    - an_identity_bearing_record_is_a_sequence_member_carrying_a_string_id
+    - two_sources_asserting_one_identity_bearing_record_must_be_canonically_equivalent
+    - components_are_recorded_in_declaration_order_with_source_class_source_ref_and_source_digest
+    - no_component_value_is_merged_concatenated_reconciled_or_discarded
+    pipeline_step_realization:
+      detect_identity_collisions: duplicate_source_and_cross_source_semantic_identity
+      detect_semantic_conflicts: exact_source_coverage
+      merge_compatible_payloads: source_class_namespace_placement
+  rule: A composition profile selects exactly one placement strategy through its merge_strategy.
+    A strategy not declared here is unsupported and fails closed. The pipeline above is unchanged
+    for every strategy.

@@ -65,6 +65,8 @@ requires:
   - projection_artifact.schema.yaml
   - composed_projection.schema.yaml
   - compiler_receipt.schema.yaml
+  - architecture_intelligence_projection.schema.yaml
+  - architecture_intelligence_composition.schema.yaml
 capabilities:
 - canonical_source_resolution
 - profile_resolution
