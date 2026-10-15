@@ -81,6 +81,8 @@ jobs:
             const {
               buildSeedPayload,
               selectSeedWrites,
+              seedNeedsRepoShape,
+              probeRepoShape,
             } = require('./ops/build-seed-payload.js');
             const {
               assessSeedBranch,
@@ -124,6 +126,32 @@ jobs:
               return Buffer.from(d.content, 'base64').toString('utf8');
             };
             const exists = async (owner, repo, path, ref) => (await readFile(owner, repo, path, ref)) !== null;
+            // The root listing, for the dependabot shape. Same answers as
+            // readFile: 404 -> null, anything else that is not a directory
+            // listing throws. A repo whose root cannot be listed gets no
+            // dependabot render at all, never a github-actions-only one.
+            const listRoot = async (owner, repo, ref) => {
+              if (!ref) throw Object.assign(new Error('root listing without a pinned base'), { status: 'UNPINNED' });
+              let res;
+              try {
+                res = await github.rest.repos.getContent({ owner, repo, path: '', ref });
+              } catch (e) {
+                if (e.status === 404) return null;
+                throw e;
+              }
+              if (!Array.isArray(res.data)) {
+                throw Object.assign(new Error('repository root is not a directory listing'), { status: 'NOT_A_DIR' });
+              }
+              return res.data;
+            };
+            const shapeOf = async (owner, repo, ref) => probeRepoShape({
+              listRoot: async () => {
+                const entries = await listRoot(owner, repo, ref);
+                if (entries === null) throw Object.assign(new Error('repository root listing returned 404'), { status: 'NO_ROOT' });
+                return entries;
+              },
+              readText: (p) => readFile(owner, repo, p, ref),
+            });
             const SOURCE_SHA = process.env.GITHUB_SHA || 'unknown';
             // GitHub's exact answer for a repository with no commits. Only this
             // 409 means "nothing to seed onto yet"; any other 409 is a failure.
@@ -191,6 +219,7 @@ jobs:
                   profile,
                   hasRootCodeowners,
                   repository: `${o}/${n}`,
+                  repoShape: seedNeedsRepoShape({ profile }) ? await shapeOf(o, n, baseSha) : null,
                 });
                 const paths = Object.keys(payload);
                 if (!paths.length) {

@@ -1,0 +1,7 @@
+{
+  "names": [
+    "pyproject.toml",
+    "README.md"
+  ],
+  "pyproject": "[build-system]\nrequires = [\"hatchling\"]\n\n[project]\nname = \"example\"\nversion = \"0.1.0\"\n"
+}
