@@ -19,9 +19,26 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
+      # Same pinned parser enforce-policies.yml reads policies/mandatory-files.yml with.
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: |
+          pip install --only-binary=:all: "pyyaml==6.0.2"
+
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
           script: |
+            const { execSync } = require('child_process');
+            const fs = require('fs');
+            const {
+              loadRepoClasses,
+              assessMandatoryFiles,
+              summarizeMandatoryCoverage,
+              describeMandatoryCoverage,
+            } = require('./ops/repo-class-profile.js');
             const ORG = 'Quantum-L9';
             const findings = [];
             const info = (msg) => { core.info(msg); findings.push(`✓ ${msg}`); };
@@ -35,33 +52,72 @@ jobs:
               info('.github repo is public — inheritance active');
             }
 
-            // 2. Check seeding coverage across repos
+            // 2. Mandatory-file compliance across repos, class-aware.
+            // The class decision, waivers and exceptions are the ones
+            // enforce-policies.yml enforces (ops/repo-class-profile.js); this
+            // job only observes. Raw presence of the two seeded files is kept
+            // as a separate, explicitly non-compliance number.
             const all = await github.paginate(github.rest.repos.listForOrg, {
               org: ORG, type: 'all', per_page: 100
             });
             const active = all.filter(r => !r.archived && !r.fork && r.name !== '.github');
 
-            let seeded = 0, unseeded = [];
+            // Only a 404 is absence; 403/5xx/not-a-file throw and stay unobserved.
+            const readerFor = (repo) => {
+              const cache = new Map();
+              return (path) => {
+                if (!cache.has(path)) {
+                  cache.set(path, github.rest.repos.getContent({ owner: ORG, repo, path }).then(
+                    (res) => {
+                      if (!res.data || Array.isArray(res.data) || typeof res.data.content !== 'string') {
+                        throw Object.assign(new Error(`${path} is not a readable file`), { status: 'NOT_A_FILE' });
+                      }
+                      return Buffer.from(res.data.content, 'base64').toString('utf8');
+                    },
+                    (e) => { if (e.status === 404) return null; throw e; },
+                  ));
+                }
+                return cache.get(path);
+              };
+            };
+
+            let policyError = null;
+            let classes = null;
+            let filesPolicy = null;
+            try {
+              classes = loadRepoClasses(fs);
+              filesPolicy = JSON.parse(execSync(
+                'python3 -c "import yaml,json,sys; print(json.dumps(yaml.safe_load(open(sys.argv[1]))))" policies/mandatory-files.yml',
+                { encoding: 'utf8' },
+              ));
+            } catch (e) {
+              policyError = e.message;
+            }
+
+            const RAW = ['.github/CODEOWNERS', '.github/dependabot.yml'];
+            let rawBoth = 0;
+            const rawUnobserved = [];
+            const assessments = [];
             for (const repo of active) {
-              const checks = await Promise.all([
-                github.rest.repos.getContent({ owner: ORG, repo: repo.name, path: '.github/CODEOWNERS' })
-                  .then(() => true).catch(() => false),
-                github.rest.repos.getContent({ owner: ORG, repo: repo.name, path: '.github/dependabot.yml' })
-                  .then(() => true).catch(() => false),
-              ]);
-              if (checks.every(Boolean)) {
-                seeded++;
-              } else {
-                unseeded.push(repo.name);
+              const readText = readerFor(repo.name);
+              const raw = await Promise.all(RAW.map(p => readText(p).then(t => t !== null, () => null)));
+              if (raw.includes(null)) rawUnobserved.push(repo.name);
+              else if (raw.every(Boolean)) rawBoth++;
+              if (!policyError) {
+                try {
+                  assessments.push(await assessMandatoryFiles({ doc: classes, filesPolicy, repoName: repo.name, readText }));
+                } catch (e) {
+                  policyError = e.message;
+                }
               }
             }
 
-            const pct = Math.round((seeded / active.length) * 100);
-            if (pct >= 90) {
-              info(`Seeding coverage: ${pct}% (${seeded}/${active.length} repos)`);
-            } else {
-              warn(`Seeding coverage: ${pct}% (${seeded}/${active.length} repos) — ${unseeded.length} unseeded`);
-            }
+            const coverage = policyError ? null : summarizeMandatoryCoverage(assessments);
+            const described = describeMandatoryCoverage(coverage, { policyError });
+            (described.level === 'info' ? info : warn)(described.line);
+            const rawLine = `Raw presence (not compliance): ${rawBoth}/${active.length} repos carry both ${RAW.join(' and ')}` +
+              (rawUnobserved.length ? ` (${rawUnobserved.length} unobserved)` : '');
+            findings.push(`ℹ️ ${rawLine}`);
 
             // 3. Check Actions permissions (org-level)
             try {
@@ -83,14 +139,16 @@ jobs:
               '',
               `**Date:** ${new Date().toISOString().slice(0, 10)}`,
               `**Active repos:** ${active.length}`,
-              `**Seeded:** ${seeded} (${pct}%)`,
+              coverage
+                ? `**Mandatory-file compliance:** ${coverage.eligible ? `${coverage.compliant.length}/${coverage.eligible} eligible (${coverage.pct}%)` : 'not computed — no eligible repos'}`
+                : '**Mandatory-file compliance:** UNOBSERVED',
+              `**Raw presence (CODEOWNERS + dependabot, not compliance):** ${rawBoth}/${active.length}`,
               '',
               '## Findings',
               '',
               ...findings,
               '',
-              unseeded.length > 0 ? `## Unseeded repos\n\n${unseeded.map(r => `- \`${r}\``).join('\n')}` : '',
-              '',
+              ...described.sections.flatMap(sec => [sec, '']),
               '---',
               '_Generated by preflight-scheduled.yml. No changes were made._',
             ].join('\n');

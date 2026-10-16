@@ -1,0 +1,290 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_architecture_intelligence_projection_payload_schema
+artifact_id: l9.schema/architecture-intelligence-projection@1
+canonical_source:
+  format: yaml
+  artifact: architecture_intelligence_projection.schema.yaml
+governed_by:
+  projection_profile_ref: l9.projection/architecture-intelligence@1
+purpose: 'Define the payload of one source projection emitted under l9.projection/architecture-intelligence@1. Each
+  declared section is typed and each record collection requires the identity fields its canonical source declares.
+  The payload is the exact declared selection of its source, which selection equivalence proves; this schema constrains
+  its shape and adds no meaning.
+
+  '
+type: object
+properties:
+  schema:
+    const: l9.projection.architecture-intelligence/v1
+  admission_rules:
+    type: object
+  agent_authority:
+    type: object
+  aliases:
+    type: array
+  archetypes:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - purpose
+  architecture_synthesis:
+    type: object
+  artifacts:
+    type: object
+  authority_classes:
+    type: object
+  binding_families:
+    type: object
+  binding_rules:
+    type: object
+  capabilities:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - semantic_owner
+      - semantic_scope
+      - purpose
+      - effect_class
+      - requires
+      - authorization_requirements
+  capability_classes:
+    type: object
+  capability_entry_contract:
+    type: object
+  capability_relations:
+    type: object
+  capability_state_dimensions:
+    type: object
+  catalog_authority_boundaries:
+    type: object
+  catalog_registration_contract:
+    type: object
+  catalog_status:
+    type: object
+  closure_rules:
+    type: string_list
+  compatibility:
+    type: object
+  compiler_authority:
+    type: object
+  composition_rules:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+  consumer_rules:
+    type: object
+  contracts:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - purpose
+      - scope
+      - guarantees
+      - forbidden
+  dependency_rules:
+    type: object
+  derivation:
+    type: object
+  derivation_rules:
+    type: string_list
+  does_not_own:
+    type: string_list
+  downstream_obligations:
+    type: object
+  effect_class_model:
+    type: object
+  escalation_rules:
+    type: object
+  global_admission_rules:
+    type: object
+  global_promotion:
+    type: object
+  global_rules:
+    type: object
+  governed_by:
+    type: object
+  human_authority:
+    type: object
+  identity_assertion:
+    type: object
+  identity_authority:
+    type: object
+  identity_binding:
+    type: object
+  identity_dimensions:
+    type: object
+  identity_resolution:
+    type: object
+  inputs:
+    type: string_list
+  invalidation_rules:
+    type: object
+  invariants:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - statement
+      - scope
+  invocability_contract:
+    type: object
+  kind_exception_model:
+    type: object
+  kind_exceptions:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - status
+      - authority
+      - kind
+      - subject
+  kind_resolution:
+    type: object
+  kinds:
+    type: object
+  lifecycle_relations:
+    type: object
+  lifecycles:
+    type: object
+  non_identity_dimensions:
+    type: object
+  outcome_semantics:
+    type: object
+  outputs:
+    type: object
+  pattern_classes:
+    type: object
+  patterns:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - class
+      - purpose
+      - guarantees
+  port_entry_contract:
+    type: object
+  ports:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - semantic_owner
+      - purpose
+      - contract_refs
+      - required_capabilities
+      - effect_class
+  product_admission_authority:
+    type: object
+  product_manifest_authority:
+    type: object
+  product_topology_authority:
+    type: object
+  profile_publication:
+    type: object
+  profile_shape:
+    type: object
+  profiles:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - language
+      - transport
+  project_contract_admission:
+    type: object
+  projection_profiles:
+    type: object
+  promotion_rules:
+    type: object
+  properties:
+    type: object
+  provider_realization_model:
+    type: object
+  purpose:
+    type: string
+  registration_requirements:
+    type: object
+  relationships:
+    type: object
+  repositories:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - coordinate
+      - lifecycle
+      - class_ref
+  repository_lifecycle:
+    type: object
+  required:
+    type: string_list
+  requirement_classes:
+    type: object
+  requirement_entry_contract:
+    type: object
+  requirement_model:
+    type: object
+  resolution:
+    type: object
+  resolution_order:
+    type: string_list
+  resolution_record:
+    type: object
+  resolution_rule:
+    type: string
+  resolved_manifest_gate:
+    type: object
+  result_domain:
+    type: object
+  rule_shape:
+    type: object
+  rules:
+    type: unknown_list
+  selection_rules:
+    type: string_list
+  semantic_rules:
+    type: string_list
+  state_dimension_rules:
+    type: string_list
+  state_semantics:
+    type: object
+  technologies:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - class
+  terms:
+    type: object
+  type:
+    type: string
+  unresolved_kind_candidates:
+    type: object
+  validation_rules:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - rule

@@ -45,3 +45,20 @@ profiles:
     conflict_result: invalid
     output:
       schema: l9.composed-projection.consumer-view/v1
+  - id: l9.compose/architecture-intelligence@1
+    purpose: >
+      Compose the per-source projections of l9.projection/architecture-intelligence@1
+      into one bounded view for l9-global-architect, preserving each projected
+      source whole under its canonical source-class identity.
+    accepts:
+      - projection_artifact
+    composes:
+      projection_profile: l9.projection/architecture-intelligence@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.architecture-intelligence/v1

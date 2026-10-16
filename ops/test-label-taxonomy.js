@@ -13,7 +13,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { parseLabels } = require('./label-taxonomy.js');
+const { parseLabels, parseLabelLines, extractLabelReferences, checkLabelClosure } = require('./label-taxonomy.js');
 
 const root = path.resolve(__dirname, '..');
 const origCwd = process.cwd();
@@ -58,6 +58,118 @@ try {
 
   console.log(`ok: org taxonomy parses (${labels.length} labels, all three fields, hex colors)`);
   console.log('ok: partial, commented, and duplicate label lines are skipped, not half-applied');
+
+  // ── Producer-to-consumer closure (#132) ──────────────────────────────────
+  // Every label a consumer names literally must resolve to exactly one
+  // taxonomy entry. Consumers: every issue form, the stale workflow, the
+  // Dependabot config, the PR labeler config, and every workflow script that
+  // writes or filters by a literal label (the advisory report among them).
+  const taxonomyText = fs.readFileSync('.github/labels.yml', 'utf8');
+  const refs = [];
+  const addRefs = (kind, file) => {
+    for (const name of extractLabelReferences(kind, fs.readFileSync(file, 'utf8'))) {
+      refs.push({ source: `${file} (${kind})`, name });
+    }
+  };
+  const forms = fs.readdirSync('.github/ISSUE_TEMPLATE')
+    .filter((f) => /\.ya?ml$/.test(f) && f !== 'config.yml');
+  assert.ok(forms.length >= 6, 'issue forms discovered');
+  for (const f of forms) addRefs('issue-form', `.github/ISSUE_TEMPLATE/${f}`);
+  addRefs('stale', '.github/workflows/stale.yml');
+  addRefs('dependabot', '.github/dependabot.yml');
+  addRefs('labeler', '.github/labeler.yml');
+  for (const f of fs.readdirSync('.github/workflows').filter((w) => /\.ya?ml$/.test(w))) {
+    addRefs('workflow-script', `.github/workflows/${f}`);
+  }
+  const names = new Set(refs.map((r) => r.name));
+  // Discovery is not empty by accident: each consumer kind is witnessed.
+  for (const expected of ['pinned', 'stale', 'advisory', 'area:ci', 'area:governance', 'needs:triage',
+    'area:ci-self', 'area:ops', 'dependencies', 'needs:external']) {
+    assert.ok(names.has(expected), `closure discovery missed ${expected}`);
+  }
+  // The retired synonyms the two unnumbered forms used are no longer referenced.
+  for (const retired of ['ci-failure', 'triage', 'governance', 'violation']) {
+    assert.ok(!names.has(retired), `retired label ${retired} is still referenced`);
+  }
+  const closure = checkLabelClosure(taxonomyText, refs);
+  assert.deepStrictEqual(closure.missing, [], 'every referenced label is declared in .github/labels.yml');
+  assert.deepStrictEqual(closure.duplicated, [], 'every referenced label is declared exactly once');
+  assert.ok(closure.ok && closure.resolved === refs.length);
+
+  // #132: `dependencies` (Dependabot's implicit label) and `needs:external`
+  // are declared exactly once, and needs:external is never staled.
+  const declared = parseLabelLines(taxonomyText).map((l) => l.name);
+  for (const name of ['dependencies', 'needs:external']) {
+    assert.strictEqual(declared.filter((n) => n === name).length, 1, `${name} declared exactly once`);
+  }
+  assert.ok(refs.some((r) => r.name === 'dependencies' && r.source.endsWith('dependabot.yml (dependabot)')),
+    'dependabot.yml sets no labels, so its implicit dependencies label is a reference');
+  const staleInput = (key) => {
+    const line = fs.readFileSync('.github/workflows/stale.yml', 'utf8').split('\n')
+      .map((l) => l.trim()).find((l) => l.startsWith(`${key}:`));
+    return line ? line.slice(key.length + 1).trim().replace(/^"|"$/g, '').split(',') : [];
+  };
+  assert.ok(staleInput('exempt-issue-labels').includes('needs:external'), 'needs:external is exempt from stale');
+  assert.ok(!staleInput('only-labels').includes('needs:external'), 'needs:external is never a stale trigger');
+  // The pre-#132 taxonomy (neither label) fails this closure, naming both.
+  const without = taxonomyText.split('\n')
+    .filter((l) => !/name: "(dependencies|needs:external)"/.test(l)).join('\n');
+  const before = checkLabelClosure(without, refs);
+  assert.strictEqual(before.ok, false);
+  assert.deepStrictEqual([...new Set(before.missing.map((m) => m.name))].sort((a, b) => a.localeCompare(b)), ['dependencies', 'needs:external']);
+
+  // Positive witness: a representative reference resolves.
+  assert.deepStrictEqual(
+    checkLabelClosure(taxonomyText, [{ source: 'witness', name: 'type:bug' }]),
+    { ok: true, missing: [], duplicated: [], resolved: 1 },
+  );
+  // Negative witness: a missing reference is detected and named, not dropped.
+  const bad = checkLabelClosure(taxonomyText, [
+    { source: 'witness', name: 'type:bug' },
+    { source: '.github/ISSUE_TEMPLATE/x.yml', name: 'ci-failure' },
+  ]);
+  assert.strictEqual(bad.ok, false);
+  assert.deepStrictEqual(bad.missing, [{ source: '.github/ISSUE_TEMPLATE/x.yml', name: 'ci-failure' }]);
+  // Negative witness: a doubly-declared name is ambiguous, not resolved.
+  const dup = checkLabelClosure(`${taxonomyText}\n- { name: "stale", color: "000000", description: "dup" }\n`,
+    [{ source: 'witness', name: 'stale' }]);
+  assert.strictEqual(dup.ok, false);
+  assert.strictEqual(dup.duplicated[0].count, 2);
+
+  // Extractor witnesses on fixtures, so an empty real file is not mistaken
+  // for a working extractor (dependabot.yml currently declares no labels).
+  assert.deepStrictEqual(
+    extractLabelReferences('dependabot', 'updates:\n  - package-ecosystem: pip\n    labels:\n      - "dependencies"\n      - area:ci\n    schedule:\n      interval: weekly\n'),
+    ['dependencies', 'area:ci'],
+  );
+  assert.deepStrictEqual(extractLabelReferences('dependabot', '    labels: ["a", "b"]\n'), ['a', 'b']);
+  // Implicit default: an entry without `labels:` applies `dependencies`; an
+  // explicit list (empty included) replaces the default.
+  assert.deepStrictEqual(
+    extractLabelReferences('dependabot', 'updates:\n  - package-ecosystem: github-actions\n    directory: "/"\n    groups:\n      g:\n        patterns: ["*"]\n'),
+    ['dependencies'],
+  );
+  assert.deepStrictEqual(
+    extractLabelReferences('dependabot', 'updates:\n  - package-ecosystem: npm\n    labels: [ ]\n'),
+    [],
+  );
+  // Two ecosystems: Dependabot adds an ecosystem label this module cannot
+  // name, so an unlabelled entry fails closure instead of passing silently.
+  const multi = extractLabelReferences('dependabot',
+    'updates:\n  - package-ecosystem: pip\n    directory: /\n  - package-ecosystem: npm\n    labels: ["area:ci"]\n');
+  assert.deepStrictEqual(multi.slice(0, 2), ['dependencies', '<dependabot default ecosystem label for pip>']);
+  assert.ok(multi.includes('area:ci'));
+  assert.strictEqual(checkLabelClosure(taxonomyText, multi.map((name) => ({ source: 'x', name }))).ok, false);
+  assert.deepStrictEqual(extractLabelReferences('issue-form', 'name: x\nlabels:\n  - "a"\n  - b\nbody: []\n'), ['a', 'b']);
+  assert.deepStrictEqual(extractLabelReferences('labeler', '"area:x":\n  - changed-files: []\n'), ['area:x']);
+  assert.deepStrictEqual(
+    extractLabelReferences('workflow-script', "labels: [...add] ; labels: 'a,b' ; labels: ['c'] ; add.add('d')"),
+    ['a', 'b', 'c', 'd'],
+  );
+  assert.throws(() => extractLabelReferences('nope', ''), /unknown label consumer kind/);
+
+  console.log(`ok: label closure — ${refs.length} literal references across forms, stale, dependabot, labeler and workflow scripts resolve to exactly one taxonomy entry`);
+  console.log('ok: closure witnesses — a missing reference and a duplicated declaration are detected; a valid reference resolves');
 } finally {
   process.chdir(origCwd);
 }

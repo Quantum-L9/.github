@@ -10,6 +10,8 @@
  *   - ops/build-seed-payload.js        (payload filtering)
  *   - .github/workflows/auto-seed-new-repo.yml
  *   - .github/workflows/repo-birth-bootstrap.yml
+ *   - .github/workflows/enforce-policies.yml / preflight-scheduled.yml
+ *     (mandatory-file waivers; read-only coverage for the preflight)
  *   - Quantum-L9/l9-repo-template scripts/birth-runner/new_repo.py (via the
  *     same JSON-in-YAML file, read with json.loads)
  *
@@ -262,6 +264,210 @@ function waivesMandatoryFile(profile, path) {
   return matchPattern(profile.mandatory_files_waive, path) != null;
 }
 
+// ── Read-only mandatory-file coverage (preflight-scheduled.yml) ──────────────
+// The monthly preflight used to call a repository "seeded" when it carried
+// both .github/CODEOWNERS and .github/dependabot.yml, whatever its class. A
+// self_governed repository waives both, and Cursor-Governance is excepted
+// outright, so that number was raw presence, not compliance. The functions
+// below assess the same policy enforce-policies.yml enforces — class from
+// marker > override > default, the class's `mandatory_files_waive`, the
+// policy's repo `exceptions`, and the repository's policy opt-out marker —
+// without ever turning an unread path into "present" or "missing".
+
+// enforce-policies.yml skips a repository carrying this file ("opted out")
+// before any settings or mandatory-file check; only a 404 means absent there.
+const POLICY_OPT_OUT_PATH = '.l9/no-policy-enforcement';
+
+const VERDICTS = Object.freeze({
+  PRESENT: 'required-present',
+  MISSING: 'required-missing',
+  WAIVED: 'waived',
+  UNOBSERVED: 'unobserved',
+});
+
+const statusOf = (e) => e?.status || 'error';
+
+/**
+ * Assess one repository's mandatory files against its class.
+ *
+ * @param {object} o
+ * @param {object} o.doc          parsed repo-classes policy (loadRepoClasses)
+ * @param {object} o.filesPolicy  parsed policies/mandatory-files.yml
+ * @param {string} o.repoName     bare repository name
+ * @param {(path: string) => Promise<string|null>} o.readText  file contents;
+ *   null ONLY for a 404. Any other failure (403, 5xx, not a file) throws with
+ *   `.status`, and the path is unobserved — never present, never missing.
+ * @returns {Promise<{repo: string, status: 'exempt'|'opted-out'|'unresolved'|'assessed',
+ *   className: string|null, reason: string|null,
+ *   files: Array<{path: string, verdict: string, detail: string}>}>}
+ */
+async function assessMandatoryFiles({ doc, filesPolicy, repoName, readText }) {
+  const files = Array.isArray(filesPolicy?.files) ? filesPolicy.files : null;
+  if (!files?.length || files.some((f) => typeof f?.path !== 'string' || !f.path)) {
+    // A policy that names no paths would make every repository vacuously
+    // compliant; that is an unreadable policy, not an empty obligation.
+    throw new Error('mandatory-files policy declares no readable files list');
+  }
+  const exception = (filesPolicy.exceptions || []).find((e) => e?.repo === repoName);
+  if (exception) {
+    return {
+      repo: repoName,
+      status: 'exempt',
+      className: null,
+      reason: `mandatory-files exception: ${exception.reason || 'no reason recorded'}`,
+      files: files.map((f) => ({ path: f.path, verdict: VERDICTS.WAIVED, detail: 'repo exception' })),
+    };
+  }
+  const unresolved = (reason) => ({
+    repo: repoName,
+    status: 'unresolved',
+    className: null,
+    reason,
+    files: files.map((f) => ({ path: f.path, verdict: VERDICTS.UNOBSERVED, detail: 'class unresolved' })),
+  });
+  // An opted-out repository is outside mandatory-file enforcement, so it is
+  // outside the compliance denominator too. An opt-out nobody could read is
+  // neither: the repository is unobserved, never compliant.
+  let optOut;
+  try {
+    optOut = await readText(POLICY_OPT_OUT_PATH);
+  } catch (e) {
+    return unresolved(`${POLICY_OPT_OUT_PATH} unreadable (${statusOf(e)})`);
+  }
+  if (optOut !== null) {
+    return {
+      repo: repoName,
+      status: 'opted-out',
+      className: null,
+      reason: `${POLICY_OPT_OUT_PATH} present — opted out of policy enforcement`,
+      files: files.map((f) => ({ path: f.path, verdict: VERDICTS.WAIVED, detail: 'policy opt-out' })),
+    };
+  }
+  let markerText;
+  try {
+    markerText = await readText(doc.marker_path);
+  } catch (e) {
+    return unresolved(`${doc.marker_path} unreadable (${statusOf(e)})`);
+  }
+  const decided = classForRepo(doc, repoName, markerText);
+  if (decided.error) return unresolved(decided.error);
+  const profile = resolveProfile(doc, decided.name);
+  const out = [];
+  for (const f of files) {
+    if (waivesMandatoryFile(profile, f.path)) {
+      out.push({ path: f.path, verdict: VERDICTS.WAIVED, detail: `waived by class ${profile.name}` });
+      continue;
+    }
+    try {
+      const text = await readText(f.path);
+      out.push(text === null
+        ? { path: f.path, verdict: VERDICTS.MISSING, detail: '404' }
+        : { path: f.path, verdict: VERDICTS.PRESENT, detail: '' });
+    } catch (e) {
+      out.push({ path: f.path, verdict: VERDICTS.UNOBSERVED, detail: `unreadable (${statusOf(e)})` });
+    }
+  }
+  return { repo: repoName, status: 'assessed', className: profile.name, reason: decided.source, files: out };
+}
+
+/**
+ * Reduce per-repo assessments to an honest coverage summary.
+ *
+ * Denominator: repositories that are neither excepted, nor opted out of
+ * policy enforcement, nor without any applicable required path. An
+ * unobserved repository (an unreadable opt-out marker included) stays IN the
+ * denominator (it is not demonstrably compliant) and is listed separately.
+ * Zero eligible repositories yields `pct: null`, never 100%.
+ *
+ * @param {Array<Awaited<ReturnType<typeof assessMandatoryFiles>>>} assessments
+ */
+function summarizeMandatoryCoverage(assessments) {
+  const s = {
+    total: assessments.length,
+    exempt: [],
+    optedOut: [],
+    notApplicable: [],
+    compliant: [],
+    noncompliant: [],
+    unobserved: [],
+    eligible: 0,
+    pct: null,
+  };
+  for (const a of assessments) {
+    if (a.status === 'exempt') {
+      s.exempt.push({ repo: a.repo, reason: a.reason });
+      continue;
+    }
+    if (a.status === 'opted-out') {
+      s.optedOut.push({ repo: a.repo, reason: a.reason });
+      continue;
+    }
+    if (a.status === 'unresolved') {
+      s.unobserved.push({ repo: a.repo, reasons: [a.reason] });
+      continue;
+    }
+    const required = a.files.filter((f) => f.verdict !== VERDICTS.WAIVED);
+    if (!required.length) {
+      s.notApplicable.push({ repo: a.repo, reason: `class ${a.className} waives every mandatory path` });
+      continue;
+    }
+    const missing = required.filter((f) => f.verdict === VERDICTS.MISSING).map((f) => f.path);
+    const unread = required.filter((f) => f.verdict === VERDICTS.UNOBSERVED);
+    if (missing.length) {
+      s.noncompliant.push({ repo: a.repo, className: a.className, missing, unobserved: unread.map((f) => f.path) });
+    } else if (unread.length) {
+      s.unobserved.push({ repo: a.repo, reasons: unread.map((f) => `${f.path} ${f.detail}`) });
+    } else {
+      s.compliant.push(a.repo);
+    }
+  }
+  s.eligible = s.compliant.length + s.noncompliant.length + s.unobserved.length;
+  s.pct = s.eligible ? Math.round((100 * s.compliant.length) / s.eligible) : null;
+  return s;
+}
+
+/**
+ * Render the summary as report findings. `level` is 'info' only when the
+ * required coverage is demonstrably high: >= 90% compliant AND nothing
+ * unobserved. A policy that could not be read is reported, never scored.
+ *
+ * @param {ReturnType<typeof summarizeMandatoryCoverage>|null} s
+ * @param {{policyError?: string|null}} [opts]
+ * @returns {{level: 'info'|'warn', line: string, sections: string[]}}
+ */
+function describeMandatoryCoverage(s, { policyError = null } = {}) {
+  if (policyError || !s) {
+    return {
+      level: 'warn',
+      line: `Mandatory-file compliance: UNOBSERVED — policy unreadable (${policyError || 'no summary'}); no repository counted compliant`,
+      sections: [],
+    };
+  }
+  const tail = `${s.noncompliant.length} missing a required file, ${s.unobserved.length} unobserved, ` +
+    `${s.exempt.length} exempt, ${s.notApplicable.length} not applicable` +
+    (s.optedOut.length ? `, ${s.optedOut.length} opted out` : '');
+  const line = s.eligible === 0
+    ? `Mandatory-file compliance: no eligible repositories (${s.total} active; ${tail}) — compliance not computed`
+    : `Mandatory-file compliance: ${s.compliant.length}/${s.eligible} eligible repos (${s.pct}%) — ${tail}`;
+  const level = s.eligible > 0 && s.pct >= 90 && s.unobserved.length === 0 ? 'info' : 'warn';
+  const sections = [];
+  if (s.noncompliant.length) {
+    sections.push(`## Missing required files\n\n${s.noncompliant
+      .map((r) => `- \`${r.repo}\` (class \`${r.className}\`): ${r.missing.map((p) => `\`${p}\``).join(', ')}` +
+        (r.unobserved.length ? `; unobserved: ${r.unobserved.map((p) => `\`${p}\``).join(', ')}` : ''))
+      .join('\n')}`);
+  }
+  if (s.unobserved.length) {
+    sections.push(`## Unobserved — not counted as compliant\n\n${s.unobserved
+      .map((r) => `- \`${r.repo}\`: ${r.reasons.join('; ')}`).join('\n')}`);
+  }
+  if (s.exempt.length || s.optedOut.length || s.notApplicable.length) {
+    sections.push(`## Exempt / not applicable — outside the denominator\n\n${[...s.exempt, ...s.optedOut, ...s.notApplicable]
+      .map((r) => `- \`${r.repo}\`: ${r.reason}`).join('\n')}`);
+  }
+  return { level, line, sections };
+}
+
 module.exports = {
   DEFAULT_CLASSES_PATH,
   MODES,
@@ -273,4 +479,9 @@ module.exports = {
   resolveProfile,
   applyProfile,
   waivesMandatoryFile,
+  POLICY_OPT_OUT_PATH,
+  VERDICTS,
+  assessMandatoryFiles,
+  summarizeMandatoryCoverage,
+  describeMandatoryCoverage,
 };
