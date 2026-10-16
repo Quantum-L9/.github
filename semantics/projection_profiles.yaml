@@ -1364,6 +1364,367 @@ projection_profiles:
   - repository_local_policy_as_global_law
   - execution_publication_or_merge_authority_grant
 
+- id: l9.projection/architecture-intelligence@1
+  successor_of: l9.projection/gar-architecture-observer@1
+  class: consumer
+  consumer: l9-global-architect
+
+  purpose: >-
+    Supply the L9 Global Architect with source-bound projections
+    of applicable canonical architectural semantics for
+    reconnaissance, diagnosis, comparison, design, adversarial
+    challenge, optimization, and convergence.
+
+    Preserve applicable semantic identities, ownership,
+    prerequisites, obligations, outcomes, structures,
+    relationships, authority, lifecycle, dependencies,
+    and source provenance.
+
+    Preserve atomic canonical records and declared relationships
+    without inventing, reconstructing, or redefining canonical
+    meaning.
+
+    Distinguish mandatory architectural entailments from
+    recommended patterns, hard requirements from soft
+    objectives, and unresolved or incompatible conditions
+    from established architectural conclusions.
+
+    Preserve ProductKind, archetype, identity, topology,
+    product-kind exception, and realization authority
+    boundaries, including exact-subject exception binding.
+
+    Preserve the distinction between authoritative product
+    declarations, derived realization artifacts, evidence,
+    and architectural recommendations.
+
+    Preserve the predecessor observer's source selections
+    and observation-to-globalization semantics.
+
+    Architectural judgment by the consumer grants no
+    semantic compilation, mechanical validation, admission,
+    publication, execution, or strategic authority.
+
+  sources:
+
+    vocabulary:
+      selectors:
+        # Predecessor selections retained.
+        - $.terms.projection
+        - $.terms.derivation
+        - $.terms.synthesis
+        - $.terms.binding
+        - $.terms.lowering
+        - $.terms.rendering
+        - $.terms.semantic_owner
+        - $.terms.provider
+        - $.terms.harvest
+        - $.terms.globalization_candidate
+        - $.terms.admission
+        - $.terms.provenance
+
+        # Architectural vocabulary.
+        - $.terms.authority
+        - $.terms.invariant
+        - $.terms.contract
+        - $.terms.constraint
+        - $.terms.hard_constraint
+        - $.terms.objective
+        - $.terms.requirement
+        - $.terms.requirement_closure
+        - $.terms.resolution
+        - $.terms.capability
+        - $.terms.capability_closure
+        - $.terms.product
+        - $.terms.product_topology
+        - $.terms.product_manifest
+        - $.terms.product_kind
+        - $.terms.product_kind_exception
+        - $.terms.node
+        - $.terms.dependency
+        - $.terms.product_archetype
+        - $.terms.product_relationship
+        - $.terms.port
+        - $.terms.adapter
+        - $.terms.technology_profile
+        - $.terms.project_contract
+        - $.terms.identity_assertion
+
+        # Governing relationships.
+        - $.relationships.authority_flow
+        - $.relationships.project_contract_flow
+        - $.relationships.compilation_relationship
+        - $.relationships.binding_lowering_relationship
+        - $.relationships.projection_derivation_distinction
+        - $.relationships.harvest_promotion_flow
+        - $.relationships.identity_resolution_flow
+        - $.relationships.surgical_repair_flow
+
+    invariants:
+      selectors:
+        # Predecessor selections retained.
+        - $.invariants[*].id
+        - $.invariants[*].statement
+        - $.invariants[*].scope
+        - $.invariants[*].owner
+
+        # Full canonical records.
+        - $.invariants
+
+    contracts:
+      selectors:
+        # Predecessor selections retained.
+        - $.contracts[*].id
+        - $.contracts[*].purpose
+        - $.contracts[*].scope
+        - $.contracts[*].guarantees
+        - $.contracts[*].forbidden
+
+        # Complete contract semantics.
+        - $.derivation
+        - $.outcome_semantics
+        - $.contracts
+
+    requirement_model:
+      selectors:
+        - $.governed_by
+        - $.global_rules
+        - $.requirement_classes
+        - $.requirement_entry_contract
+        - $.closure_rules
+
+    resolution_model:
+      selectors:
+        - $.governed_by
+        - $.global_rules
+        - $.result_domain
+        - $.resolution_record
+        - $.selection_rules
+
+    architecture_rules:
+      selectors:
+        - $.governed_by
+        - $.global_rules
+        - $.rule_shape
+        - $.rules
+        - $.resolution_rule
+
+    product_topology:
+      selectors:
+        - $.governed_by
+        - $.purpose
+        - $.type
+        - $.required
+        - $.properties
+        - $.semantic_rules
+        - $.kind_resolution
+
+    product_kinds:
+      selectors:
+        - $.governed_by
+        - $.global_rules
+        - $.kinds
+        - $.unresolved_kind_candidates
+        - $.catalog_status
+        - $.kind_exception_model
+        - $.kind_exceptions
+
+    node_archetypes:
+      selectors:
+        - $.governed_by
+        - $.global_rules
+        - $.archetypes
+
+    dependency_archetypes:
+      selectors:
+        - $.governed_by
+        - $.global_rules
+        - $.archetypes
+
+    identity_model:
+      selectors:
+        - $.governed_by
+        - $.purpose
+        - $.global_rules
+        - $.identity_dimensions
+        - $.non_identity_dimensions
+        - $.identity_binding
+        - $.identity_resolution
+        - $.identity_assertion
+        - $.consumer_rules
+
+    architecture_patterns:
+      selectors:
+        # Predecessor selections retained.
+        - $.patterns[*].id
+        - $.patterns[*].class
+        - $.patterns[*].purpose
+        - $.patterns[*].preconditions
+        - $.patterns[*].guarantees
+        - $.patterns[*].forbidden
+        - $.patterns[*].compatible_with
+        - $.patterns[*].common_examples
+        - $.composition_rules[*]
+
+        # Complete architecture semantics.
+        - $.global_rules
+        - $.pattern_classes
+        - $.patterns
+        - $.composition_rules
+        - $.architecture_synthesis
+        - $.projection_profiles
+        - $.validation_rules
+
+    port_catalog:
+      selectors:
+        - $.governed_by
+        - $.global_rules
+        - $.port_entry_contract
+        - $.ports
+        - $.catalog_status
+
+    capabilities:
+      selectors:
+        # Predecessor selections retained.
+        - $.global_rules
+        - $.capability_entry_contract
+        - $.capability_state_dimensions
+        - $.invocability_contract
+        - $.capability_relations
+        - $.capabilities[*].id
+        - $.capabilities[*].semantic_owner
+        - $.capabilities[*].effect_class
+        - $.capabilities[*].requires
+
+        # Complete capability meaning.
+        - $.derivation
+        - $.catalog_authority_boundaries
+        - $.requirement_model
+        - $.effect_class_model
+        - $.state_dimension_rules
+        - $.provider_realization_model
+        - $.catalog_registration_contract
+        - $.capabilities
+        - $.catalog_status
+
+    capability_resolution:
+      selectors:
+        - $.governed_by
+        - $.inputs
+        - $.resolution_order
+        - $.outputs
+        - $.rules
+
+    technology_profiles:
+      selectors:
+        - $.governed_by
+        - $.global_rules
+        - $.profile_shape
+        - $.profiles
+        - $.resolution
+
+    technology_capabilities:
+      selectors:
+        - $.global_rules
+        - $.capability_classes
+        - '$.technologies[?(@.class=="language")]'
+        - '$.technologies[?(@.class=="framework")]'
+        - '$.technologies[?(@.class=="datastore")]'
+        - '$.technologies[?(@.class=="transport")]'
+        - $.binding_rules
+        - $.registration_requirements
+
+    binding_catalog:
+      selectors:
+        - $.binding_families.provider
+        - $.compatibility
+
+    repository_registry:
+      selectors:
+        - $.purpose
+        - $.global_rules
+        - $.does_not_own
+        - $.repository_lifecycle
+        - $.repositories
+        - $.aliases
+        - $.downstream_obligations
+
+    artifact_model:
+      selectors:
+        - $.artifacts.canonical_artifact
+        - $.artifacts.projection_artifact
+        - $.artifacts.composed_projection
+        - $.artifacts.derived_artifact
+        - $.artifacts.candidate_artifact
+        - $.artifacts.published_profile
+        - $.artifacts.distribution_packet
+        - $.artifacts.product_topology
+        - $.artifacts.product_manifest
+        - $.artifacts.identity_assertion
+        - $.artifacts.receipt
+        - $.authority_classes
+        - $.derivation_rules
+
+    product_manifest:
+      selectors:
+        - $.governed_by
+        - $.purpose
+        - $.type
+        - $.required
+        - $.properties
+        - $.resolved_manifest_gate
+        - $.semantic_rules
+
+    authority_model:
+      selectors:
+        # Predecessor selections retained.
+        - $.authority_classes
+        - $.admission_rules
+        - $.promotion_rules
+
+        # Architectural authority boundaries.
+        - $.global_admission_rules
+        - $.global_promotion
+        - $.profile_publication
+        - $.compiler_authority
+        - $.agent_authority
+        - $.human_authority
+        - $.escalation_rules
+        - $.project_contract_admission
+        - $.product_topology_authority
+        - $.product_admission_authority
+        - $.product_manifest_authority
+        - $.identity_authority
+
+    lifecycle:
+      selectors:
+        # Predecessor selections retained.
+        - $.lifecycles.architecture_pattern
+        - $.lifecycles.globalization_candidate
+        - $.lifecycles.harvest_packet
+
+        # Architectural lifecycle closure.
+        - $.global_rules
+        - $.state_semantics
+        - $.lifecycles.product_topology
+        - $.lifecycles.product_manifest
+        - $.lifecycles.identity_assertion
+        - $.lifecycles.profile
+        - $.lifecycles.published_artifact
+        - $.lifecycle_relations
+
+    semantic_dependency_model:
+      selectors:
+        - $.dependency_rules
+        - $.invalidation_rules
+
+  output:
+    schema: l9.projection.architecture-intelligence/v1
+
+  forbidden:
+    - provider_implementation_details
+    - target_rendering_details
+    - unrelated_domain_payloads
+
 projection_engine_contract_ref:
   artifact: projection_engine_contract.yaml
   artifact_id: l9.compiler/projection-engine@1
@@ -1399,6 +1760,25 @@ composed_projection_rules:
   - become_canonical_source
   - modify_component_projection_semantics
   - hide_semantic_conflicts
+forbidden_constraints:
+  criterion_language:
+    name: l9.forbidden-constraint
+    version: 1
+  definitions:
+    provider_implementation_details:
+      criterion: payload_excludes
+      excluded_selections:
+      - source_class: binding_catalog
+        selector: $.bindings[?(@.class=="provider")]
+    target_rendering_details:
+      criterion: payload_excludes
+      excluded_selections:
+      - source_class: binding_catalog
+        selector: $.bindings[?(@.class=="target")]
+      - source_class: technology_capabilities
+        selector: $.technologies[?(@.class=="target")]
+    unrelated_domain_payloads:
+      criterion: source_authority
 validation_rules:
 - id: PROJECTION-001
   rule: every_projection_profile_has_unique_versioned_id
@@ -1430,3 +1810,5 @@ validation_rules:
   rule: successor_profile_names_an_existing_predecessor_of_the_same_class_and_consumer_and_selects_a_superset_of_it
 - id: PROJECTION-015
   rule: each_stage_consumer_resolves_to_exactly_one_unsuperseded_stage_profile
+- id: PROJECTION-016
+  rule: a_forbidden_category_is_evaluated_only_through_a_criterion_declared_in_forbidden_constraints_and_otherwise_remains_unresolved

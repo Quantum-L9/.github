@@ -11704,6 +11704,580 @@ def check_rc029(root: Path, docs: dict[str, dict], report: Report) -> None:
             )
 
 
+# RC-030 Architecture-intelligence projection, source-namespaced composition,
+# payload schemas, and forbidden-constraint criteria (semantic foundation
+# v3.22.0 candidate). The projection profile and the composition profile are
+# pinned whole by canonical-JSON digest (validator-local, as RC-028), so any
+# in-place change needs a new version. The composed payload schema must name
+# exactly one namespace per declared source class and, inside each namespace,
+# exactly the sections that source's selectors produce.
+AI_PROFILE_ID = "l9.projection/architecture-intelligence@1"
+AI_PREDECESSOR_ID = "l9.projection/gar-architecture-observer@1"
+AI_CONSUMER = "l9-global-architect"
+AI_PROFILE_DIGEST = "f4dfd0599742efb66de16d545a2c903a32fd3318d307c419ef51e89933fafec4"
+AI_OUTPUT_SCHEMA = "l9.projection.architecture-intelligence/v1"
+AI_COMPOSITION_ID = "l9.compose/architecture-intelligence@1"
+AI_COMPOSITION_DIGEST = (
+    "7b40fe358e3f1496a19389742874de622040fe124cb5139b8343680108df09c1"
+)
+AI_COMPOSED_SCHEMA = "l9.composed-projection.architecture-intelligence/v1"
+# Both payload schema ledgers are pinned whole, like the profiles: a field type or a
+# nested items.required constraint cannot be weakened in place.
+AI_SCHEMA_DIGESTS = {
+    AI_OUTPUT_SCHEMA: (
+        "2fe465856073209700a97faaf52406ce4b9db53b31c5297bea2de8989c1e6823"
+    ),
+    AI_COMPOSED_SCHEMA: (
+        "6e85fc292186aafc461af524e0fe8401b26a544f22870d32ebf847f9ad02e80b"
+    ),
+}
+AI_FORBIDDEN = (
+    "provider_implementation_details",
+    "target_rendering_details",
+    "unrelated_domain_payloads",
+)
+FORBIDDEN_LANGUAGE = {"name": "l9.forbidden-constraint", "version": 1}
+FORBIDDEN_CRITERIA = {"payload_excludes", "source_authority"}
+NAMESPACE_STRATEGY = {
+    "placement": "source_class_namespace",
+    "source_coverage": "exact",
+    "duplicate_source": "conflict",
+    "semantic_identity_collision": "require_equivalence",
+}
+DEEP_MERGE_STRATEGY = {
+    "mappings": "deep_merge_if_disjoint",
+    "sequences": "preserve_source_order",
+    "scalar_collision": "conflict",
+    "semantic_identity_collision": "require_equivalence",
+}
+COMPOSITION_PROFILES_PATH = "semantics/composition_profiles.yaml"
+COMPOSITION_CONTRACT_PATH = "semantics/composition_engine_contract.yaml"
+COMPILER_MANIFEST_PATH = "semantics/generic_compiler_manifest.yaml"
+RC030_SELECTOR = re.compile(
+    r'^\$\.[A-Za-z0-9_-]+(\[\*\]|\[\?\(@\.[A-Za-z0-9_-]+\s*(==|contains)\s*"[^"]*"\)\])?'
+    r"(\.[A-Za-z0-9_-]+(\[\*\])?)*$"
+)
+
+
+def _rc030_fail(
+    path: str, field: str, value: object, message: str, report: Report
+) -> None:
+    report.fail("RC-030", path, field, value, message)
+
+
+def _rc030_section(selector: str) -> str:
+    return selector[2:].split(".")[0].split("[")[0]
+
+
+def _rc030_schema_defining(docs: dict[str, dict], schema_id: str) -> list[str]:
+    manifest = docs.get(COMPILER_MANIFEST_PATH) or {}
+    names = ((manifest.get("requires") or {}).get("artifact_schemas")) or []
+    return [
+        name
+        for name in names
+        if isinstance(name, str)
+        and (
+            ((docs.get(f"semantics/{name}") or {}).get("properties") or {}).get(
+                "schema"
+            )
+            or {}
+        ).get("const")
+        == schema_id
+    ]
+
+
+def _evaluate_rc030(docs: dict[str, dict], report: Report) -> None:
+    catalog = docs.get(PROFILES_PATH) or {}
+    profile, count = _unique_entry(
+        catalog.get("projection_profiles"), "id", AI_PROFILE_ID
+    )
+    if profile is None:
+        _rc030_fail(
+            PROFILES_PATH,
+            AI_PROFILE_ID,
+            count,
+            "profile must exist exactly once",
+            report,
+        )
+        return
+    label = f"projection_profiles[{AI_PROFILE_ID}]"
+    if profile.get("class") != "consumer" or profile.get("consumer") != AI_CONSUMER:
+        _rc030_fail(
+            PROFILES_PATH,
+            f"{label}.consumer",
+            profile.get("consumer"),
+            f"must be a consumer profile for {AI_CONSUMER}",
+            report,
+        )
+    if profile.get("successor_of") != AI_PREDECESSOR_ID:
+        _rc030_fail(
+            PROFILES_PATH,
+            f"{label}.successor_of",
+            profile.get("successor_of"),
+            f"must name {AI_PREDECESSOR_ID}",
+            report,
+        )
+    if _rc028_profile_digest(profile) != AI_PROFILE_DIGEST:
+        _rc030_fail(
+            PROFILES_PATH,
+            f"{label}.digest",
+            _rc028_profile_digest(profile),
+            "an admitted @1 profile is immutable; a change requires a new profile version",
+            report,
+        )
+    sources = _mapping(profile.get("sources"))
+    if (profile.get("output") or {}) != {"schema": AI_OUTPUT_SCHEMA}:
+        _rc030_fail(
+            PROFILES_PATH,
+            f"{label}.output",
+            profile.get("output"),
+            f"must be {AI_OUTPUT_SCHEMA}",
+            report,
+        )
+    if tuple(profile.get("forbidden") or ()) != AI_FORBIDDEN:
+        _rc030_fail(
+            PROFILES_PATH,
+            f"{label}.forbidden",
+            profile.get("forbidden"),
+            f"must be {list(AI_FORBIDDEN)}",
+            report,
+        )
+
+    # forbidden_constraints: every category the profile forbids has a declared,
+    # evaluable criterion over declared source classes.
+    constraints = catalog.get("forbidden_constraints")
+    if (
+        not isinstance(constraints, dict)
+        or constraints.get("criterion_language") != FORBIDDEN_LANGUAGE
+    ):
+        _rc030_fail(
+            PROFILES_PATH,
+            "forbidden_constraints.criterion_language",
+            (constraints or {}).get("criterion_language")
+            if isinstance(constraints, dict)
+            else constraints,
+            f"must be {FORBIDDEN_LANGUAGE}",
+            report,
+        )
+    definitions = _mapping(
+        (constraints or {}).get("definitions")
+        if isinstance(constraints, dict)
+        else None
+    )
+    source_classes = _mapping(catalog.get("source_classes"))
+    for token in AI_FORBIDDEN:
+        definition = definitions.get(token)
+        field = f"forbidden_constraints.definitions.{token}"
+        if (
+            not isinstance(definition, dict)
+            or definition.get("criterion") not in FORBIDDEN_CRITERIA
+        ):
+            _rc030_fail(
+                PROFILES_PATH,
+                field,
+                definition,
+                f"must declare one of {sorted(FORBIDDEN_CRITERIA)}",
+                report,
+            )
+            continue
+        if definition["criterion"] == "source_authority" and set(definition) != {
+            "criterion"
+        }:
+            _rc030_fail(
+                PROFILES_PATH,
+                field,
+                sorted(definition),
+                "source_authority takes no parameters",
+                report,
+            )
+        if definition["criterion"] == "payload_excludes":
+            entries = definition.get("excluded_selections")
+            if (
+                set(definition) != {"criterion", "excluded_selections"}
+                or not isinstance(entries, list)
+                or not entries
+            ):
+                _rc030_fail(
+                    PROFILES_PATH,
+                    field,
+                    definition,
+                    "payload_excludes needs a non-empty excluded_selections list",
+                    report,
+                )
+                continue
+            for entry in entries:
+                if (
+                    not isinstance(entry, dict)
+                    or set(entry) != {"source_class", "selector"}
+                    or entry.get("source_class") not in source_classes
+                    or not isinstance(entry.get("selector"), str)
+                    or not RC030_SELECTOR.match(entry["selector"])
+                ):
+                    _rc030_fail(
+                        PROFILES_PATH,
+                        f"{field}.excluded_selections",
+                        entry,
+                        "each entry is a declared source_class and an l9.selector",
+                        report,
+                    )
+    if not any(
+        isinstance(rule, dict) and rule.get("id") == "PROJECTION-016"
+        for rule in catalog.get("validation_rules") or []
+    ):
+        _rc030_fail(
+            PROFILES_PATH,
+            "validation_rules",
+            "PROJECTION-016",
+            "must be declared",
+            report,
+        )
+
+    # Payload schemas: each output schema is defined by exactly one registered artifact schema.
+    for schema_id in (AI_OUTPUT_SCHEMA, AI_COMPOSED_SCHEMA):
+        defining = _rc030_schema_defining(docs, schema_id)
+        if len(defining) != 1:
+            _rc030_fail(
+                COMPILER_MANIFEST_PATH,
+                "requires.artifact_schemas",
+                defining,
+                f"exactly one schema must define {schema_id}",
+                report,
+            )
+            continue
+        schema_path = f"semantics/{defining[0]}"
+        observed = _rc028_profile_digest(docs.get(schema_path) or {})
+        if observed != AI_SCHEMA_DIGESTS[schema_id]:
+            _rc030_fail(
+                schema_path,
+                "digest",
+                observed,
+                "an admitted @1 payload schema is immutable, field constraints included; "
+                "a change requires a new schema version",
+                report,
+            )
+    composed_names = _rc030_schema_defining(docs, AI_COMPOSED_SCHEMA)
+    if len(composed_names) == 1:
+        schema_path = f"semantics/{composed_names[0]}"
+        schema = docs.get(schema_path) or {}
+        expected = list(sources)
+        if schema.get("type") != "object" or schema.get("required") != expected:
+            _rc030_fail(
+                schema_path,
+                "required",
+                schema.get("required"),
+                "must require exactly the declared source classes, in declaration order",
+                report,
+            )
+        properties = _mapping(schema.get("properties"))
+        if set(properties) != {"schema", *expected}:
+            _rc030_fail(
+                schema_path,
+                "properties",
+                sorted(properties),
+                "must define exactly one namespace per declared source class",
+                report,
+            )
+        for source_class in expected:
+            namespace = _mapping(properties.get(source_class))
+            sections = list(
+                dict.fromkeys(
+                    _rc030_section(s)
+                    for s in (
+                        _mapping(sources.get(source_class)).get("selectors") or []
+                    )
+                    if isinstance(s, str)
+                )
+            )
+            if (
+                namespace.get("type") != "object"
+                or namespace.get("required") != sections
+            ):
+                _rc030_fail(
+                    schema_path,
+                    f"properties.{source_class}.required",
+                    namespace.get("required"),
+                    f"must require exactly {sections}, the sections its selectors produce",
+                    report,
+                )
+            if set(_mapping(namespace.get("properties"))) != set(sections):
+                _rc030_fail(
+                    schema_path,
+                    f"properties.{source_class}.properties",
+                    sorted(_mapping(namespace.get("properties"))),
+                    "must type exactly the selected sections",
+                    report,
+                )
+
+    # Composition contract and profiles.
+    contract = docs.get(COMPOSITION_CONTRACT_PATH) or {}
+    strategies = _mapping(contract.get("placement_strategies"))
+    declared = {
+        name: (_mapping(spec).get("merge_strategy"))
+        for name, spec in strategies.items()
+        if isinstance(spec, dict)
+    }
+    if (
+        declared.get("source_class_namespace") != NAMESPACE_STRATEGY
+        or declared.get("deep_merge") != DEEP_MERGE_STRATEGY
+    ):
+        _rc030_fail(
+            COMPOSITION_CONTRACT_PATH,
+            "placement_strategies",
+            declared,
+            "must declare deep_merge and source_class_namespace exactly",
+            report,
+        )
+    compositions = (docs.get(COMPOSITION_PROFILES_PATH) or {}).get("profiles") or []
+    for entry in compositions:
+        if not isinstance(entry, dict):
+            continue
+        strategy = entry.get("merge_strategy")
+        namespaced = strategy == NAMESPACE_STRATEGY
+        if strategy not in (NAMESPACE_STRATEGY, DEEP_MERGE_STRATEGY) or namespaced != (
+            "composes" in entry
+        ):
+            _rc030_fail(
+                COMPOSITION_PROFILES_PATH,
+                f"profiles[{entry.get('id')}].merge_strategy",
+                strategy,
+                "must select exactly one declared placement strategy; only source_class_namespace takes composes",
+                report,
+            )
+    composition, count = _unique_entry(compositions, "id", AI_COMPOSITION_ID)
+    if composition is None:
+        _rc030_fail(
+            COMPOSITION_PROFILES_PATH,
+            AI_COMPOSITION_ID,
+            count,
+            "composition profile must exist exactly once",
+            report,
+        )
+        return
+    clabel = f"profiles[{AI_COMPOSITION_ID}]"
+    if composition.get("composes") != {"projection_profile": AI_PROFILE_ID}:
+        _rc030_fail(
+            COMPOSITION_PROFILES_PATH,
+            f"{clabel}.composes",
+            composition.get("composes"),
+            f"must compose exactly {AI_PROFILE_ID}",
+            report,
+        )
+    if (composition.get("output") or {}) != {"schema": AI_COMPOSED_SCHEMA}:
+        _rc030_fail(
+            COMPOSITION_PROFILES_PATH,
+            f"{clabel}.output",
+            composition.get("output"),
+            f"must be {AI_COMPOSED_SCHEMA}",
+            report,
+        )
+    if _rc028_profile_digest(composition) != AI_COMPOSITION_DIGEST:
+        _rc030_fail(
+            COMPOSITION_PROFILES_PATH,
+            f"{clabel}.digest",
+            _rc028_profile_digest(composition),
+            "an admitted @1 composition profile is immutable; a change requires a new version",
+            report,
+        )
+
+
+def _check_rc030_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    def mutated(path: str, mutate) -> dict[str, dict]:
+        candidate = copy.deepcopy(docs)
+        mutate(candidate[path])
+        return candidate
+
+    def ai(doc: dict) -> dict:
+        return next(
+            p for p in doc["projection_profiles"] if p.get("id") == AI_PROFILE_ID
+        )
+
+    def comp(doc: dict) -> dict:
+        return next(p for p in doc["profiles"] if p.get("id") == AI_COMPOSITION_ID)
+
+    composed_path = "semantics/" + _rc030_schema_defining(docs, AI_COMPOSED_SCHEMA)[0]
+    projection_path = "semantics/" + _rc030_schema_defining(docs, AI_OUTPUT_SCHEMA)[0]
+    cases = [
+        (
+            "profile deleted",
+            PROFILES_PATH,
+            lambda d: d["projection_profiles"].remove(ai(d)),
+            AI_PROFILE_ID,
+        ),
+        (
+            "profile changed in place",
+            PROFILES_PATH,
+            lambda d: ai(d)["sources"]["invariants"]["selectors"].pop(),
+            f"projection_profiles[{AI_PROFILE_ID}].digest",
+        ),
+        (
+            "successor dropped",
+            PROFILES_PATH,
+            lambda d: ai(d).pop("successor_of"),
+            f"projection_profiles[{AI_PROFILE_ID}].successor_of",
+        ),
+        (
+            "forbidden category undefined",
+            PROFILES_PATH,
+            lambda d: d["forbidden_constraints"]["definitions"].pop(
+                "target_rendering_details"
+            ),
+            "forbidden_constraints.definitions.target_rendering_details",
+        ),
+        (
+            "retired selection_closure",
+            PROFILES_PATH,
+            lambda d: d["forbidden_constraints"]["definitions"].update(
+                unrelated_domain_payloads={"criterion": "selection_closure"}
+            ),
+            "forbidden_constraints.definitions.unrelated_domain_payloads",
+        ),
+        (
+            "undeclared excluded source class",
+            PROFILES_PATH,
+            lambda d: d["forbidden_constraints"]["definitions"][
+                "provider_implementation_details"
+            ]["excluded_selections"][0].update(source_class="nope"),
+            "forbidden_constraints.definitions.provider_implementation_details.excluded_selections",
+        ),
+        (
+            "criterion language changed",
+            PROFILES_PATH,
+            lambda d: d["forbidden_constraints"].update(
+                criterion_language={"name": "x", "version": 2}
+            ),
+            "forbidden_constraints.criterion_language",
+        ),
+        (
+            "PROJECTION-016 removed",
+            PROFILES_PATH,
+            lambda d: d.update(
+                validation_rules=[
+                    r for r in d["validation_rules"] if r.get("id") != "PROJECTION-016"
+                ]
+            ),
+            "validation_rules",
+        ),
+        (
+            "composition profile deleted",
+            COMPOSITION_PROFILES_PATH,
+            lambda d: d["profiles"].remove(comp(d)),
+            AI_COMPOSITION_ID,
+        ),
+        (
+            "composition retargeted",
+            COMPOSITION_PROFILES_PATH,
+            lambda d: comp(d).update(
+                composes={"projection_profile": AI_PREDECESSOR_ID}
+            ),
+            f"profiles[{AI_COMPOSITION_ID}].composes",
+        ),
+        (
+            "composition falls back to deep merge",
+            COMPOSITION_PROFILES_PATH,
+            lambda d: comp(d).update(merge_strategy=dict(DEEP_MERGE_STRATEGY)),
+            f"profiles[{AI_COMPOSITION_ID}].merge_strategy",
+        ),
+        (
+            "consumer-view given composes",
+            COMPOSITION_PROFILES_PATH,
+            lambda d: next(
+                p for p in d["profiles"] if p["id"] == "l9.compose/consumer-view@1"
+            ).update(composes={"projection_profile": AI_PROFILE_ID}),
+            "profiles[l9.compose/consumer-view@1].merge_strategy",
+        ),
+        (
+            "namespace strategy loosened",
+            COMPOSITION_CONTRACT_PATH,
+            lambda d: d["placement_strategies"]["source_class_namespace"][
+                "merge_strategy"
+            ].update(duplicate_source="keep_first"),
+            "placement_strategies",
+        ),
+        (
+            "composed schema drops a namespace",
+            composed_path,
+            lambda d: d["required"].pop(),
+            "required",
+        ),
+        (
+            "composed schema adds a namespace",
+            composed_path,
+            lambda d: d["properties"].update(extra={"type": "object"}),
+            "properties",
+        ),
+        (
+            "namespace section set drifts",
+            composed_path,
+            lambda d: d["properties"]["invariants"]["required"].append("unselected"),
+            "properties.invariants.required",
+        ),
+        (
+            "composed schema record identity requirement removed",
+            composed_path,
+            lambda d: d["properties"]["invariants"]["properties"]["invariants"][
+                "items"
+            ]["required"].remove("id"),
+            "digest",
+        ),
+        (
+            "composed schema section typed as anything",
+            composed_path,
+            lambda d: d["properties"]["invariants"]["properties"].update(invariants={}),
+            "digest",
+        ),
+        (
+            "projection schema field constraint weakened",
+            projection_path,
+            lambda d: d["properties"].update(invariants={}),
+            "digest",
+        ),
+        (
+            "composed schema unregistered",
+            COMPILER_MANIFEST_PATH,
+            lambda d: d["requires"]["artifact_schemas"].remove(
+                composed_path.split("/", 1)[1]
+            ),
+            "requires.artifact_schemas",
+        ),
+    ]
+    for label, path, mutate, field in cases:
+        candidate_report = Report()
+        _evaluate_rc030(mutated(path, mutate), candidate_report)
+        prefix = f"FAIL RC-030 {path} {field}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-030",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {path} {field}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-030 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-030-NEG",
+            f"{len(cases)} architecture-intelligence negative cases fail closed at their intended field",
+        )
+
+
+def check_rc030(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc030(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-030",
+            f"{AI_PROFILE_ID} and {AI_COMPOSITION_ID} exist once at their pinned digests; "
+            f"{AI_OUTPUT_SCHEMA} and {AI_COMPOSED_SCHEMA} are each defined by one registered schema "
+            "at its pinned digest; "
+            "the composed schema names exactly one namespace per declared source class with exactly its "
+            "selected sections; every forbidden category has a declared criterion; every composition "
+            "profile selects exactly one declared placement strategy",
+        )
+        _check_rc030_negative_cases(docs, report)
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -11764,6 +12338,7 @@ def main(argv: list[str]) -> int:
     check_rc027(docs, report)
     check_rc028(docs, report)
     check_rc029(root, docs, report)
+    check_rc030(docs, report)
     check_sc009(observed, root, report)
     for line in report.passes:
         print(line)
