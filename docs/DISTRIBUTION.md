@@ -205,8 +205,23 @@ and on every later PR event by the `body` job in `governance-pr.yml`, which
 runs that composer at the commit pinned in the job (`COMPOSER` and the checkout
 `ref`, moved together). Reviewer text outside the regions is never rewritten;
 an unchanged body is never PATCHed; a head no local gate measured is marked
-`STALE` in Evidence, never claimed. This repository's own PRs get the same job
-through `pr-files.yml`.
+`STALE` in Evidence, never claimed. On such a head the Protected-root paths are
+remeasured with the repository's own `validate_root_file_protection.py` (or
+marked not measured when it cannot run), and an Edit mode, Why or Proof that
+described an earlier head's path set is withdrawn as unverified rather than
+carried forward; a reviewer's own justification text is left as written. This
+repository's own PRs get the same job through `pr-files.yml`.
+
+The template's visible order puts the inventory first (Files touched, then
+Changes by intent) and Protected-root last; the `L9_PROTECTED_ROOT_PR` stamp
+stays the first line. It carries no placeholder the composer cannot honestly
+complete: no bare `Closes #`, no sample paths, no sample evidence. The
+composer marks each receipt `BOUND`, `STALE` or `UNVERIFIED` against the tree
+it describes, ticks a Gate box only from a bound receipt that measured it, and
+writes an explicit *unresolved* marker into fields that need the author's
+judgment (Reviewer focus, an applicable Semantic change, an unevidenced Type of
+Change). No PR needs a repository-wide manifest or per-file metadata header:
+the body's regions are the inventory.
 
 PRs the seeders and Manual Update open carry their own short body in the
 sections the `gates` job checks — Problem, Fix, Risk (exactly one), Evidence

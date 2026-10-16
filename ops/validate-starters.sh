@@ -45,6 +45,15 @@ else
   echo "❌ ops/test-sync-org-files.sh"
   FAIL=$((FAIL+1))
 fi
+# The canonical PR template's machine contract. node is required here, not
+# optional: every governed PR body is composed from this one file.
+if node ops/test-pr-template.js; then
+  echo "✅ ops/test-pr-template.js"
+  PASS=$((PASS+1))
+else
+  echo "❌ ops/test-pr-template.js"
+  FAIL=$((FAIL+1))
+fi
 if command -v yamllint &>/dev/null; then
   echo ""
   echo "=== yamllint (distributed labels) ==="
