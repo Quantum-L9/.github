@@ -66,6 +66,8 @@ const pythonYamlParser = (execFileSync) => (bytes) =>
   JSON.parse(execFileSync('python3', ['-I', '-c', YAML_TO_JSON], { input: bytes, encoding: 'utf8', maxBuffer: 16 << 20 }));
 
 const isText = (v) => typeof v === 'string' && v.length > 0;
+// Code-unit order: deterministic, independent of the runner's locale.
+const byCodeUnit = (a, b) => (a < b ? -1 : Number(a > b));
 const isMap = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
 /**
@@ -210,7 +212,7 @@ function reconcileDiscovery(census, discovered, org) {
   const unregistered = (listed || [])
     .map((r) => r.full_name)
     .filter((n) => !known.has(n.toLowerCase()))
-    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    .sort(byCodeUnit);
   return { members, unregistered, caseDrift };
 }
 
@@ -411,7 +413,7 @@ function censusSection(census, rows) {
   const { registry, classes } = census.provenance;
   const byClass = {};
   for (const r of rows) byClass[r.class_ref] = (byClass[r.class_ref] || 0) + 1;
-  const classLine = Object.keys(byClass).sort().map((c) => `\`${c}\` ×${byClass[c]}`).join(', ') || 'none';
+  const classLine = Object.keys(byClass).sort(byCodeUnit).map((c) => `\`${c}\` ×${byClass[c]}`).join(', ') || 'none';
   const lines = [
     `**Governed census** — ${rows.length} repositories: registry lifecycle \`${CENSUS_LIFECYCLE}\` with an admitted class (${classLine}). ` +
       `Source \`${registry.path}\` (\`${registry.artifact_id}\`) sha256 \`${short(registry.sha256)}\`, ` +

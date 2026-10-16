@@ -550,7 +550,7 @@ const censusOf = (registry, classes = classesDoc(), revision) =>
     id: 'a', coordinate: { provider: 'github', organization: 'Quantum-L9', repository: 'a' },
     full_name: 'Quantum-L9/a', lifecycle: 'current', class_ref: CLASS,
   });
-  assert.deepStrictEqual(Object.keys(before.provenance.registry).sort(), ['artifact_id', 'path', 'revision', 'sha256']);
+  assert.deepStrictEqual(Object.keys(before.provenance.registry).sort((a, b) => a.localeCompare(b)), ['artifact_id', 'path', 'revision', 'sha256']);
 
   // (8) The leading-dot `.github` repository is a member like any other.
   calls = await runReport({
@@ -567,7 +567,8 @@ const censusOf = (registry, classes = classesDoc(), revision) =>
   const realIo = {
     readBytes: (p) => fs.readFileSync(path.join(root, p)),
     parseYaml: pythonYamlParser(childProcess.execFileSync),
-    revision: childProcess.execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
+    // The witness checks the bytes and their digest; the revision is a fixture.
+    revision: 'f'.repeat(40),
   };
   const real = loadGovernedCensus(realIo);
   const realRegistry = loadCanonicalSource(REGISTRY_SOURCE, realIo).doc;
