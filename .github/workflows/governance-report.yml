@@ -20,69 +20,123 @@ jobs:
   report:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The governed census is read from semantics/repository_registry.yaml with
+      # the same pinned parser scripts/validate-semantics.py validates it with.
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Install the pinned YAML parser
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2"
+
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
+            const fs = require('fs');
+            const { execFileSync } = require('child_process');
+            const {
+              STATES,
+              pythonYamlParser,
+              loadGovernedCensus,
+              reconcileDiscovery,
+              callerRefs,
+              reusableWorkflowActionRefs,
+              classifyActionsPermission,
+              buildPostureReport,
+            } = require('./ops/governance-report.js');
             const ORG = 'Quantum-L9';
-            const repos = (await github.paginate(github.rest.repos.listForOrg, { org: ORG, type: 'all', per_page: 100 }))
-              .filter(r => !r.archived && !r.fork);
 
-            const has = async (repo, path) =>
-              github.rest.repos.getContent({ owner: ORG, repo, path }).then(() => true).catch(() => false);
-
-            const rows = [];
-            for (const r of repos) {
-              const [co, caller, dep] = await Promise.all([
-                has(r.name, '.github/CODEOWNERS'),
-                has(r.name, '.github/workflows/governance.yml'),
-                has(r.name, '.github/dependabot.yml'),
-              ]);
-              let actions = '?';
-              try {
-                const p = await github.rest.actions.getGithubActionsPermissionsRepository({ owner: ORG, repo: r.name });
-                actions = p.data.enabled === false ? 'disabled'
-                        : (p.data.allowed_actions === 'local_only' ? 'local_only' : 'ok');
-              } catch (e) { actions = 'unreadable'; }
-              rows.push({ name: r.name, co, caller, dep, actions });
+            // Membership is the registry's admission decision, read at this
+            // run's commit. A census that cannot be derived assesses nothing.
+            let census;
+            try {
+              census = loadGovernedCensus({
+                readBytes: (p) => fs.readFileSync(p),
+                parseYaml: pythonYamlParser(execFileSync),
+                revision: context.sha,
+              });
+            } catch (e) {
+              core.warning(`governed census not derived: ${e.message}`);
+              census = { error: e.message };
             }
 
-            const tick = b => b ? '✅' : '⬜';
-            const pct = k => Math.round(100 * rows.filter(r => r[k]).length / (rows.length || 1));
-            const blocked = rows.filter(r => r.actions === 'disabled' || r.actions === 'local_only');
+            // GitHub discovery is an observation, reconciled against the census;
+            // it never adds or removes a member.
+            let discovered = null;
+            if (!census.error) {
+              try {
+                discovered = await github.paginate(github.rest.repos.listForOrg, { org: ORG, type: 'all', per_page: 100 });
+              } catch (e) {
+                census.discoveryError = String(e.status || 'error');
+                core.warning(`GitHub discovery failed: ${e.message}`);
+              }
+            }
+            const plan = census.error ? { members: [], unregistered: [], caseDrift: [] } : reconcileDiscovery(census, discovered, ORG);
+            census.unregistered = plan.unregistered;
+            census.caseDrift = plan.caseDrift;
 
-            const body = [
-              `_Advisory posture report. Nothing here blocks anything. Generated ${new Date().toISOString().slice(0,10)}._`,
-              '',
-              `**Coverage across ${rows.length} active repos** — CODEOWNERS ${pct('co')}% · governance caller ${pct('caller')}% · dependabot ${pct('dep')}%`,
-              '',
-              blocked.length
-                ? `> [!NOTE]\n> ${blocked.length} repo(s) have an Actions policy that would prevent the governance caller from running: ` +
-                  blocked.map(r => `\`${r.name}\` (${r.actions})`).join(', ') + '. See docs/DISTRIBUTION.md Appendix B.'
-                : '> [!NOTE]\n> All repos permit cross-repo reusable workflows.',
-              '',
-              '| Repo | CODEOWNERS | Caller | Dependabot | Actions |',
-              '| --- | :-: | :-: | :-: | :-: |',
-              ...rows.map(r => `| \`${r.name}\` | ${tick(r.co)} | ${tick(r.caller)} | ${tick(r.dep)} | ${r.actions === 'ok' ? 'ok' : '⚠️ ' + r.actions} |`),
-              '',
-              '### Not measured here, on purpose',
-              '',
-              'Test results, lint findings, type errors, code scanning, and CI failure',
-              'diagnosis are owned by `l9-ci-sdk`, `l9-ci-core`, and `l9-ci-debt-resolver`.',
-              'This report deliberately does not recompute them — see `docs/BOUNDARIES.md`.',
-              '',
-              '### Promotion readiness',
-              '',
-              'Per `docs/ADVISORY.md`, rung 1 needs 4 consecutive weekly reports plus a',
-              'named highest-signal finding. Do not promote a gate without that evidence.',
-            ].join('\n');
+            // Raw presence: true present, false absent (404 only), null unobserved.
+            const has = async (owner, repo, path) =>
+              github.rest.repos.getContent({ owner, repo, path })
+                .then(() => true, (e) => (e.status === 404 ? false : null));
+
+            // What a consumer's Actions policy must admit: the caller's own refs.
+            const refs = callerRefs(fs.readFileSync('policies/governance-caller.yml', 'utf8'));
+            // ...and the actions those reusable workflows run, read at the exact
+            // commit the caller pins (not this checkout); null means unread (UNKNOWN).
+            const readPinned = async ({ owner, repo, path, ref }) => {
+              const res = await github.rest.repos.getContent({ owner, repo, path, ref });
+              if (!res.data || Array.isArray(res.data) || typeof res.data.content !== 'string') {
+                throw new Error(`${path}@${ref} is not a readable file`);
+              }
+              return Buffer.from(res.data.content, 'base64').toString('utf8');
+            };
+            let actionRefs = null;
+            try {
+              actionRefs = await reusableWorkflowActionRefs(refs, readPinned);
+            } catch (e) {
+              core.warning(`reusable workflow actions unread: ${e.message}`);
+            }
+
+            const rows = [];
+            for (const { member, repo, reason } of plan.members) {
+              const { organization: owner, repository: name } = member.coordinate;
+              const row = { ...member, name, reason, archived: repo?.archived, fork: repo?.fork };
+              if (!repo) {
+                // Not observed: a 404 here could mean "not visible", not "absent".
+                rows.push({ ...row, co: null, caller: null, dep: null, actions: { state: STATES.UNKNOWN, detail: reason } });
+                continue;
+              }
+              const [co, caller, dep] = await Promise.all([
+                has(owner, name, '.github/CODEOWNERS'),
+                has(owner, name, '.github/workflows/governance.yml'),
+                has(owner, name, '.github/dependabot.yml'),
+              ]);
+              // ALLOWED only when demonstrably allowed; a read failure is UNKNOWN.
+              const actions = await classifyActionsPermission({
+                readPermissions: async () =>
+                  (await github.rest.actions.getGithubActionsPermissionsRepository({ owner, repo: name })).data,
+                readSelected: async () =>
+                  (await github.rest.actions.getAllowedActionsRepository({ owner, repo: name })).data,
+                refs,
+                actionRefs,
+              });
+              rows.push({ ...row, co, caller, dep, actions });
+            }
+
+            const { body, refresh } = buildPostureReport(rows, { date: new Date().toISOString().slice(0, 10), census });
 
             const TITLE = 'Governance posture (advisory, weekly)';
             const open = await github.rest.issues.listForRepo({ ...context.repo, state: 'open', labels: 'advisory', per_page: 20 });
             const existing = open.data.find(i => i.title === TITLE);
             if (existing) {
               await github.rest.issues.update({ ...context.repo, issue_number: existing.number, body });
-              await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number,
-                body: `Refreshed ${new Date().toISOString().slice(0,10)} — CODEOWNERS ${pct('co')}%, caller ${pct('caller')}%, dependabot ${pct('dep')}%.` });
+              await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body: refresh });
             } else {
               await github.rest.issues.create({ ...context.repo, title: TITLE, body, labels: ['advisory'] });
             }
