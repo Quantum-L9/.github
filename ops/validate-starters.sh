@@ -6,7 +6,8 @@
 # (including its class-aware PR-template and caller re-pin management and its
 # Preview / Apply modes), the manual-only trigger contract of the distribution
 # workflows, the governance-pr.yml PR-body refresh job, and the advisory
-# governance-report.yml posture classification (no unverified all-clear).
+# governance-report.yml posture classification (no unverified all-clear) over
+# the registry-derived governed census (needs python3 with PyYAML).
 # Run from the root of the Quantum-L9/.github repo.
 set -euo pipefail
 

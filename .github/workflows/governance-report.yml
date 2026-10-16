@@ -24,23 +24,65 @@ jobs:
         with:
           persist-credentials: false
 
+      # The governed census is read from semantics/repository_registry.yaml with
+      # the same pinned parser scripts/validate-semantics.py validates it with.
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Install the pinned YAML parser
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2"
+
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const fs = require('fs');
+            const { execFileSync } = require('child_process');
             const {
+              STATES,
+              pythonYamlParser,
+              loadGovernedCensus,
+              reconcileDiscovery,
               callerRefs,
               reusableWorkflowActionRefs,
               classifyActionsPermission,
               buildPostureReport,
             } = require('./ops/governance-report.js');
             const ORG = 'Quantum-L9';
-            const repos = (await github.paginate(github.rest.repos.listForOrg, { org: ORG, type: 'all', per_page: 100 }))
-              .filter(r => !r.archived && !r.fork);
+
+            // Membership is the registry's admission decision, read at this
+            // run's commit. A census that cannot be derived assesses nothing.
+            let census;
+            try {
+              census = loadGovernedCensus({
+                readBytes: (p) => fs.readFileSync(p),
+                parseYaml: pythonYamlParser(execFileSync),
+                revision: context.sha,
+              });
+            } catch (e) {
+              core.warning(`governed census not derived: ${e.message}`);
+              census = { error: e.message };
+            }
+
+            // GitHub discovery is an observation, reconciled against the census;
+            // it never adds or removes a member.
+            let discovered = null;
+            if (!census.error) {
+              try {
+                discovered = await github.paginate(github.rest.repos.listForOrg, { org: ORG, type: 'all', per_page: 100 });
+              } catch (e) {
+                census.discoveryError = String(e.status || 'error');
+                core.warning(`GitHub discovery failed: ${e.message}`);
+              }
+            }
+            const plan = census.error ? { members: [], unregistered: [], caseDrift: [] } : reconcileDiscovery(census, discovered, ORG);
+            census.unregistered = plan.unregistered;
+            census.caseDrift = plan.caseDrift;
 
             // Raw presence: true present, false absent (404 only), null unobserved.
-            const has = async (repo, path) =>
-              github.rest.repos.getContent({ owner: ORG, repo, path })
+            const has = async (owner, repo, path) =>
+              github.rest.repos.getContent({ owner, repo, path })
                 .then(() => true, (e) => (e.status === 404 ? false : null));
 
             // What a consumer's Actions policy must admit: the caller's own refs.
@@ -62,25 +104,32 @@ jobs:
             }
 
             const rows = [];
-            for (const r of repos) {
+            for (const { member, repo, reason } of plan.members) {
+              const { organization: owner, repository: name } = member.coordinate;
+              const row = { ...member, name, reason, archived: repo?.archived, fork: repo?.fork };
+              if (!repo) {
+                // Not observed: a 404 here could mean "not visible", not "absent".
+                rows.push({ ...row, co: null, caller: null, dep: null, actions: { state: STATES.UNKNOWN, detail: reason } });
+                continue;
+              }
               const [co, caller, dep] = await Promise.all([
-                has(r.name, '.github/CODEOWNERS'),
-                has(r.name, '.github/workflows/governance.yml'),
-                has(r.name, '.github/dependabot.yml'),
+                has(owner, name, '.github/CODEOWNERS'),
+                has(owner, name, '.github/workflows/governance.yml'),
+                has(owner, name, '.github/dependabot.yml'),
               ]);
               // ALLOWED only when demonstrably allowed; a read failure is UNKNOWN.
               const actions = await classifyActionsPermission({
                 readPermissions: async () =>
-                  (await github.rest.actions.getGithubActionsPermissionsRepository({ owner: ORG, repo: r.name })).data,
+                  (await github.rest.actions.getGithubActionsPermissionsRepository({ owner, repo: name })).data,
                 readSelected: async () =>
-                  (await github.rest.actions.getAllowedActionsRepository({ owner: ORG, repo: r.name })).data,
+                  (await github.rest.actions.getAllowedActionsRepository({ owner, repo: name })).data,
                 refs,
                 actionRefs,
               });
-              rows.push({ name: r.name, co, caller, dep, actions });
+              rows.push({ ...row, co, caller, dep, actions });
             }
 
-            const { body, refresh } = buildPostureReport(rows, { date: new Date().toISOString().slice(0, 10) });
+            const { body, refresh } = buildPostureReport(rows, { date: new Date().toISOString().slice(0, 10), census });
 
             const TITLE = 'Governance posture (advisory, weekly)';
             const open = await github.rest.issues.listForRepo({ ...context.repo, state: 'open', labels: 'advisory', per_page: 20 });
