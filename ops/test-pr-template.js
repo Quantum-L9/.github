@@ -122,9 +122,10 @@ check('HTML comments never nest and every delimiter is balanced', () => {
   // body. The explanatory comment at the top used to spell the region
   // markers out literally, so GitHub rendered half of it. Scan the
   // delimiters in order; the real machine markers must each be a comment of
-  // their own, opened and closed at top level.
+  // their own, opened and closed at top level. HTML also ends a comment at
+  // `--!>`, so that counts as a closer too.
   let open = -1;
-  for (const match of template.matchAll(/<!--|-->/g)) {
+  for (const match of template.matchAll(/<!--|--!?>/g)) {
     if (match[0] === '<!--') {
       assert.strictEqual(
         open,
@@ -133,7 +134,7 @@ check('HTML comments never nest and every delimiter is balanced', () => {
       );
       open = match.index;
     } else {
-      assert.notStrictEqual(open, -1, `"-->" on line ${lineOf(match.index)} closes nothing`);
+      assert.notStrictEqual(open, -1, `"${match[0]}" on line ${lineOf(match.index)} closes nothing`);
       open = -1;
     }
   }
