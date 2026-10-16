@@ -205,8 +205,12 @@ and on every later PR event by the `body` job in `governance-pr.yml`, which
 runs that composer at the commit pinned in the job (`COMPOSER` and the checkout
 `ref`, moved together). Reviewer text outside the regions is never rewritten;
 an unchanged body is never PATCHed; a head no local gate measured is marked
-`STALE` in Evidence, never claimed. This repository's own PRs get the same job
-through `pr-files.yml`.
+`STALE` in Evidence, never claimed. On such a head the Protected-root paths are
+remeasured with the repository's own `validate_root_file_protection.py` (or
+marked not measured when it cannot run), and an Edit mode, Why or Proof that
+described an earlier head's path set is withdrawn as unverified rather than
+carried forward; a reviewer's own justification text is left as written. This
+repository's own PRs get the same job through `pr-files.yml`.
 
 The template's visible order puts the inventory first (Files touched, then
 Changes by intent) and Protected-root last; the `L9_PROTECTED_ROOT_PR` stamp

@@ -111,6 +111,41 @@ check('fill comments older composers replace are byte-identical', () => {
   for (const comment of FILL_COMMENTS) assert.ok(template.includes(comment), comment.slice(0, 60));
 });
 
+/** 1-based line of a character offset, for a message a person can act on. */
+function lineOf(offset) {
+  return template.slice(0, offset).split('\n').length;
+}
+
+check('HTML comments never nest and every delimiter is balanced', () => {
+  // A `<!--` written inside an open comment opens nothing: the next `-->`
+  // closes the OUTER comment early and the rest of its text renders as PR
+  // body. The explanatory comment at the top used to spell the region
+  // markers out literally, so GitHub rendered half of it. Scan the
+  // delimiters in order; the real machine markers must each be a comment of
+  // their own, opened and closed at top level.
+  let open = -1;
+  for (const match of template.matchAll(/<!--|-->/g)) {
+    if (match[0] === '<!--') {
+      assert.strictEqual(
+        open,
+        -1,
+        `"<!--" on line ${lineOf(match.index)} is inside the comment opened on line ${lineOf(open)}`,
+      );
+      open = match.index;
+    } else {
+      assert.notStrictEqual(open, -1, `"-->" on line ${lineOf(match.index)} closes nothing`);
+      open = -1;
+    }
+  }
+  assert.strictEqual(open, -1, `the comment opened on line ${lineOf(open)} is never closed`);
+  for (const name of REGIONS) {
+    for (const marker of [`<!-- ${name}:START -->`, `<!-- ${name}:END -->`]) {
+      const lines = template.split('\n').filter((line) => line.trim() === marker);
+      assert.strictEqual(lines.length, 1, `${marker} must be exactly one whole line`);
+    }
+  }
+});
+
 if (failures) {
   console.log(`pr template: ${failures} check(s) failed`);
   process.exit(1);
