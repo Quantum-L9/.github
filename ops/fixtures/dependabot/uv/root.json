@@ -1,0 +1,9 @@
+{
+  "names": [
+    "pyproject.toml",
+    "requirements.txt",
+    "uv.lock",
+    "README.md"
+  ],
+  "pyproject": "[project]\nname = \"example\"\nversion = \"0.1.0\"\n"
+}

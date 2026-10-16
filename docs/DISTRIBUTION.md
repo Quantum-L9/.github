@@ -60,9 +60,10 @@ is reported `UNINITIALIZED_NOT_SEEDED` by the hourly sweep and retried; no
 other 409 is treated that way.
 
 `continuous-sync.yml` (Manual Update) is the exception to missing-only. It
-restores `.github/CODEOWNERS` and `.github/dependabot.yml` to the exact org
-bytes when they drift, unless the repo has `.l9/no-sync`, and only where the
-repository's class materializes them: it resolves the class (and a root
+restores `.github/CODEOWNERS` to the exact org bytes, and
+`.github/dependabot.yml` to the render for the repository's root shape, when
+they drift. It skips a repository with `.l9/no-sync`, and acts only where the
+repository's class materializes the file: it resolves the class (and a root
 `CODEOWNERS`, which wins) first and plans from the same class-filtered payload
 the seeders build, so a `self_governed` repository gets neither file and a
 malformed marker gets nothing. It runs only when dispatched: nothing
@@ -71,6 +72,32 @@ reports drift and writes nothing; `dry_run=false` (Apply) opens one reviewable
 PR per drifted repository. Any value other than an explicit `false` previews.
 That workflow uses the governance GitHub App (`GOVERNANCE_APP_ID`), not
 `GH_TOKEN`.
+
+`.github/dependabot.yml` is MANAGED-RENDERED
+([ADR 0019](adr/0019-dependabot-managed-rendered.md)). `ops/render-dependabot.js`
+renders it from:
+
+- the fragments in `policies/dependabot/`;
+- the repository root, read at the pinned base:
+  - `github-actions` always;
+  - `uv` when there is a `uv.lock`;
+  - otherwise `pip` for a root `requirements*.txt` or a PEP 621 `pyproject.toml`;
+  - `pre-commit` when there is a `.pre-commit-config.yaml`;
+- Core's `core-owned-tools.json`, vendored at
+  `policies/vendor/l9-ci-core/` and digest-checked.
+
+The rendered file ignores Core-owned tools and the Core, SDK and `.github`
+action pins. Every entrypoint passes the shape to the one builder. A root that
+cannot be listed is `UNREACHABLE` (or `BLOCKED_PERMISSION`), never an
+actions-only render.
+
+**Rollout.** Do not run Apply until this renderer is merged. Before it, a
+restore wrote actions-only bytes over legitimate `uv` / `pip` / `pre-commit`
+entries. Until then, a repository with extra ecosystems opts out with
+`.l9/no-sync`. After merge, the operator Previews one repository at a time
+(`repo_filter` = `Cursor-Governance`, `l9-ci-sdk`, `gate_sdk`), reviews the
+planned `dependabot.yml` restore, and Applies per repository only on explicit
+approval.
 
 The `.github` repository must be public. A private one disables inheritance,
 and cross-repo `workflow_call` needs the callee to be readable.
@@ -106,7 +133,7 @@ Those workflows, and `repo-birth-bootstrap.yml`, run in the
 | Security policy | Edit `SECURITY.md` and merge. `self_governed` repos inherit it. Repos that were seeded a copy keep the old file; seed will not overwrite it. |
 | PR or issue template | Edit and merge. The seed sources are `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md`, and `.github/ISSUE_TEMPLATE/*`. Seeded copies are not overwritten. |
 | Governance gate rule | Edit `governance-pr.yml` or `governance-issue.yml`, then re-pin the SHA in `policies/governance-caller.yml` and update consumers that already have a caller. |
-| CODEOWNERS or dependabot | Edit `policies/CODEOWNERS` or `.github/dependabot.yml` and merge. Then dispatch `continuous-sync.yml`: Preview to read the drift, Apply to open a restore PR where those files drifted. |
+| CODEOWNERS or dependabot | Edit `policies/CODEOWNERS`, or the fragments in `policies/dependabot/` (then regenerate `.github/dependabot.yml` with `node ops/render-dependabot.js > .github/dependabot.yml`), and merge. A new Core list is vendored with its commit and sha256 in `policies/dependabot/core-owned-tools.source.json`. Then dispatch `continuous-sync.yml`: Preview to read the drift, Apply to open a restore PR where those files drifted. |
 | New repository | `auto-seed-new-repo.yml`, or `workflow_dispatch` on `seed-governance.yml`. `l9-repo-template` `make new-repo` dispatches `repo-birth-bootstrap.yml` for one repo. |
 
 ## Appendix A — secrets and called workflows

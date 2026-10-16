@@ -6,6 +6,12 @@ const {
   loadRepoClasses,
   resolveProfile,
 } = require('./repo-class-profile.js');
+const {
+  probeRepoShape,
+  renderDependabot,
+  shapeFromRoot,
+  shapeOfDirectory,
+} = require('./render-dependabot.js');
 
 /**
  * Build the consumer-repo seed payload from the canonical files in this repo.
@@ -33,6 +39,11 @@ const {
  *   When given and `categories` is not explicitly passed, the profile's
  *   `seed_categories` decide the category set. INHERIT dests are dropped
  *   (GitHub supplies them org-wide); a FORBID dest throws.
+ * @param {object} [opts.repoShape]  the consumer's root shape
+ *   (ops/render-dependabot.js shapeFromRoot / probeRepoShape). Required when
+ *   the `dependabot` category is active: dependabot.yml is rendered for the
+ *   shape (ADR docs/adr/0019-dependabot-managed-rendered.md), and a missing
+ *   shape throws rather than rendering github-actions only.
  *
  * Every source an activated category names is required. A missing or
  * non-file source throws before any caller writes, so a deleted template can
@@ -168,20 +179,34 @@ function selectSeedWrites(payload, existingByPath = {}) {
   return { writes, replaced, kept };
 }
 
+// An explicit `categories` argument always wins, so a caller can still ask
+// for a specific category set and get a loud FORBID error if that set
+// contradicts the class. With no explicit argument the class decides.
+function resolveCategories({ categories, profile = null } = {}) {
+  const requested =
+    categories == null && profile ? profile.seed_categories : categories;
+  return Array.isArray(requested) ? requested : parseCategories(requested);
+}
+
+/**
+ * Whether buildSeedPayload with these arguments renders dependabot.yml and
+ * therefore needs the consumer's repoShape. Lets a caller probe the root only
+ * when the class materializes dependabot.
+ */
+function seedNeedsRepoShape({ categories, profile = null } = {}) {
+  return resolveCategories({ categories, profile }).includes('dependabot');
+}
+
 function buildSeedPayload({
   fs,
   categories,
   hasRootCodeowners = false,
   repository = '',
   profile = null,
+  repoShape = null,
 } = {}) {
   if (!fs) throw new Error('buildSeedPayload requires fs');
-  // An explicit `categories` argument always wins, so a caller can still ask
-  // for a specific category set and get a loud FORBID error if that set
-  // contradicts the class. With no explicit argument the class decides.
-  const requested =
-    categories == null && profile ? profile.seed_categories : categories;
-  const cats = Array.isArray(requested) ? requested : parseCategories(requested);
+  const cats = resolveCategories({ categories, profile });
   const payload = {};
 
   for (const cat of cats) {
@@ -202,7 +227,13 @@ function buildSeedPayload({
         break;
       }
       case 'dependabot': {
-        payload['.github/dependabot.yml'] = readRequired(fs, '.github/dependabot.yml');
+        if (!repoShape) {
+          throw new Error(
+            'seed category dependabot requires repoShape: .github/dependabot.yml is rendered per ' +
+              'repository root (ops/render-dependabot.js) and is never defaulted to github-actions only',
+          );
+        }
+        payload['.github/dependabot.yml'] = renderDependabot({ fs, shape: repoShape });
         break;
       }
       case 'governance': {
@@ -287,11 +318,15 @@ function planConsumerSeed({ fs, path, consumerRoot, repository = '', categories 
     explicit = parseCategories(categories);
   }
 
+  const categoriesForClass = explicit ?? profile.seed_categories;
   const payload = buildSeedPayload({
     fs,
-    categories: explicit ?? profile.seed_categories,
+    categories: categoriesForClass,
     hasRootCodeowners: fs.existsSync(path.join(consumerRoot, 'CODEOWNERS')),
     repository,
+    repoShape: seedNeedsRepoShape({ categories: categoriesForClass })
+      ? shapeOfDirectory({ fs, path, dir: consumerRoot })
+      : null,
   });
   // Applied here rather than through `profile:` so the inherited list is
   // reportable. FORBID still throws, exactly as it does in the seeders.
@@ -375,7 +410,12 @@ module.exports = {
   PYTHON_LINT_DEST,
   STOCK_BIOME_SCHEMA,
   parseCategories,
+  resolveCategories,
+  seedNeedsRepoShape,
   buildSeedPayload,
+  renderDependabot,
+  shapeFromRoot,
+  probeRepoShape,
   selectSeedWrites,
   applyRepoPlaceholders,
   planConsumerSeed,

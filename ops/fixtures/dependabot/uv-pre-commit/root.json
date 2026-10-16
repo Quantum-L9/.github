@@ -1,0 +1,8 @@
+{
+  "names": [
+    ".pre-commit-config.yaml",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "pyproject": "[project]\nname = \"example\"\nversion = \"0.1.0\"\n"
+}

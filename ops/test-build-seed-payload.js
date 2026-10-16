@@ -21,6 +21,7 @@ const {
   ISSUE_TEMPLATES_MATERIALIZED,
 } = require('./build-seed-payload.js');
 const { loadRepoClasses, resolveProfile } = require('./repo-class-profile.js');
+const { shapeFromRoot } = require('./render-dependabot.js');
 
 // Explicit comparator: a default `.sort()` compares by string conversion,
 // which is an implicit ordering rule one refactor away from being wrong.
@@ -29,6 +30,10 @@ const byName = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 const root = path.resolve(__dirname, '..');
 const origCwd = process.cwd();
 process.chdir(root);
+
+// dependabot.yml is rendered per repository root (ADR 0019). A root with no
+// Python or pre-commit files renders github-actions only.
+const ACTIONS_ONLY = shapeFromRoot({ names: [] });
 
 try {
   // RETIRED: still parses as a name, but building it fails closed and 'all'
@@ -51,7 +56,7 @@ try {
   );
   assert.deepStrictEqual(parseCategories('labels'), ['labels']);
 
-  const defaultPayload = buildSeedPayload({ fs, categories: 'all' });
+  const defaultPayload = buildSeedPayload({ fs, categories: 'all', repoShape: ACTIONS_ONLY });
 
   // MATERIALIZE: every dest a default consumer must carry as local bytes.
   for (const dest of [
@@ -111,7 +116,7 @@ try {
   // is FORBID in both governed repo classes and is no longer seeded by anything,
   // so the default payload must omit it at every hasPython setting.
   assert.ok(
-    !(PYTHON_LINT_DEST in buildSeedPayload({ fs, categories: 'all', hasPython: true })),
+    !(PYTHON_LINT_DEST in buildSeedPayload({ fs, categories: 'all', repoShape: ACTIONS_ONLY, hasPython: true })),
     'the retired Python lint caller must not be seeded, even for a Python repo',
   );
   const security = buildSeedPayload({
@@ -129,11 +134,23 @@ try {
   })['.github/ISSUE_TEMPLATE/config.yml'];
   assert.match(cfg, /https:\/\/github\.com\/Quantum-L9\/example\/security\/advisories\/new/);
 
+  // The default payload's dependabot.yml is the github-actions-only golden,
+  // byte for byte; ops/test-render-dependabot.js covers every other shape.
   const dependabot = defaultPayload['.github/dependabot.yml'];
-  assert.match(dependabot, /package-ecosystem: github-actions/);
+  assert.strictEqual(dependabot, fs.readFileSync('ops/fixtures/dependabot/actions-only/expected.yml', 'utf8'));
   assert.match(dependabot, /open-pull-requests-limit: 2/);
-  assert.doesNotMatch(dependabot, /package-ecosystem: pip/);
+  assert.doesNotMatch(dependabot, /package-ecosystem: (pip|uv|pre-commit)/);
   assert.doesNotMatch(dependabot, /labels:/);
+  // No shape, no render: never a silent github-actions-only default.
+  for (const repoShape of [undefined, null]) {
+    assert.throws(
+      () => buildSeedPayload({ fs, categories: ['dependabot'], repoShape }),
+      /seed category dependabot requires repoShape/,
+    );
+  }
+  assert.throws(() => buildSeedPayload({ fs, categories: 'all' }), /requires repoShape/);
+  // A category set without dependabot needs no shape.
+  assert.doesNotThrow(() => buildSeedPayload({ fs, categories: ['codeowners'] }));
 
   const codeowners = defaultPayload['.github/CODEOWNERS'];
   assert.doesNotMatch(codeowners, /^\*\s+@Quantum-L9\/platform\s*$/m);
@@ -189,26 +206,29 @@ try {
 
   // V01: the named release template is missing.
   assert.throws(
-    () => buildSeedPayload({ fs: fsWith({ hide: ['.github/PULL_REQUEST_TEMPLATE/release.md'] }), categories: 'all' }),
+    () => buildSeedPayload({ fs: fsWith({ hide: ['.github/PULL_REQUEST_TEMPLATE/release.md'] }), categories: 'all', repoShape: ACTIONS_ONLY }),
     /seed source \.github\/PULL_REQUEST_TEMPLATE\/release\.md is missing/,
     'a missing named PR template must fail the build, not shrink the payload',
   );
   // Every activated category's sources are required, not only templates.
   for (const [cat, src] of [
     ['codeowners', 'policies/CODEOWNERS'],
-    ['dependabot', '.github/dependabot.yml'],
+    ['dependabot', 'policies/dependabot/header.yml.tpl'],
+    ['dependabot', 'policies/dependabot/base-actions.yml.tpl'],
+    ['dependabot', 'policies/dependabot/core-owned-tools.source.json'],
+    ['dependabot', 'policies/vendor/l9-ci-core/core-owned-tools.json'],
     ['governance', 'policies/governance-caller.yml'],
     ['community-health', 'SECURITY.md'],
     ['labels', '.github/labels.yml'],
   ]) {
     assert.throws(
-      () => buildSeedPayload({ fs: fsWith({ hide: [src] }), categories: [cat] }),
+      () => buildSeedPayload({ fs: fsWith({ hide: [src] }), categories: [cat], repoShape: ACTIONS_ONLY }),
       (err) => err.message.includes(`seed source ${src} is missing`),
       `${cat}: a missing source must throw`,
     );
   }
   // A category not requested does not need its source.
-  assert.doesNotThrow(() => buildSeedPayload({ fs: fsWith({ hide: ['.github/labels.yml'] }), categories: 'all' }));
+  assert.doesNotThrow(() => buildSeedPayload({ fs: fsWith({ hide: ['.github/labels.yml'] }), categories: 'all', repoShape: ACTIONS_ONLY }));
 
   // V02: a required issue form is missing → throws; an unnamed new form is
   // never swept into the payload.
@@ -227,7 +247,7 @@ try {
   // Exact class payload sizes (13 / 4 / 0).
   const classes = loadRepoClasses(fs);
   const sizes = Object.fromEntries(['default', 'non_constellation_python', 'self_governed'].map((c) => [
-    c, Object.keys(buildSeedPayload({ fs, profile: resolveProfile(classes, c) })).length,
+    c, Object.keys(buildSeedPayload({ fs, profile: resolveProfile(classes, c), repoShape: ACTIONS_ONLY })).length,
   ]));
   assert.deepStrictEqual(sizes, { default: 13, non_constellation_python: 4, self_governed: 0 });
 

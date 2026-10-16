@@ -45,6 +45,16 @@ const MUTATIONS = new Set([
   'pulls.create',
 ]);
 
+/** The root listing GitHub returns for a fixture's files: one entry per top-level name. */
+const rootEntries = (files) => {
+  const top = new Map();
+  for (const p of Object.keys(files)) {
+    const [head, ...rest] = p.split('/');
+    if (top.get(head) !== 'dir') top.set(head, rest.length ? 'dir' : 'file');
+  }
+  return [...top].map(([name, type]) => ({ name, type }));
+};
+
 const APP_SLUG = 'l9-governance';
 const SOURCE_SHA = 'f'.repeat(40);
 const SYNC_LOGIN = `${APP_SLUG}[bot]`;
@@ -141,6 +151,8 @@ function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {
           if (errors[args.path]) throw Object.assign(new Error('boom'), { status: errors[args.path] });
           if (args.path in dirs) return { data: dirs[args.path].map((n) => ({ name: n, type: n.includes('.') ? 'file' : 'dir' })) };
           const visible = args.ref === 'base-sha' ? { ...files, ...atBase } : files;
+          // A repository root always lists: what the fixture holds, by its top-level names.
+          if (args.path === '') return { data: rootEntries(visible) };
           if (args.path in visible) return { data: { sha: `sha-${args.path}`, content: enc(visible[args.path]) } };
           throw notFound('Not Found');
         },
@@ -195,9 +207,24 @@ const canonicalTemplate = fs.readFileSync(path.join(root, TEMPLATE), 'utf8');
 const canonicalPin = fs
   .readFileSync(path.join(root, 'policies/governance-caller.yml'), 'utf8')
   .match(/governance-pr\.yml@([0-9a-f]{40})/)[1];
+// dependabot.yml is rendered for the consumer's root (ADR 0019). These
+// fixtures hold no Python or pre-commit files at the root, so their canonical
+// bytes are the github-actions-only render; the shape-specific cases are in
+// dependabotShapeScenarios below.
+const { renderDependabot, shapeFromRoot } = require('./render-dependabot.js');
+const renderFor = (names, pyprojectText = null) => {
+  const prev = process.cwd();
+  process.chdir(root);
+  try {
+    return renderDependabot({ fs, shape: shapeFromRoot({ names, pyprojectText }) });
+  } finally {
+    process.chdir(prev);
+  }
+};
+const actionsOnly = renderFor([]);
 const managedOk = {
   '.github/CODEOWNERS': fs.readFileSync(path.join(root, 'policies/CODEOWNERS'), 'utf8'),
-  '.github/dependabot.yml': fs.readFileSync(path.join(root, '.github/dependabot.yml'), 'utf8'),
+  '.github/dependabot.yml': actionsOnly,
 };
 const syncScript = loadScriptModule(path.join(root, WORKFLOW), 'sync-class-');
 const gates = loadGovernanceGates(root);
@@ -593,6 +620,94 @@ async function ownershipScenarios() {
   console.log(`ok: ${label} — empty repo reported UNINITIALIZED; other base-ref errors fail`);
 }
 
+/**
+ * dependabot.yml is rendered for the repository's root (ADR 0019): the
+ * comparison and the restore both use the render for the shape read at the
+ * pinned base, and a root that cannot be listed plans nothing.
+ */
+async function dependabotShapeScenarios() {
+  const label = 'continuous-sync (rendered dependabot)';
+  const DEP = '.github/dependabot.yml';
+  const uvRoot = { 'uv.lock': 'version = 1\n', 'pyproject.toml': '[project]\nname = "x"\n', 'requirements.txt': 'x==1\n' };
+  const uvRender = renderFor(['pyproject.toml', 'requirements.txt', 'uv.lock'], uvRoot['pyproject.toml']);
+  assert.match(uvRender, /package-ecosystem: uv/);
+  // The bytes .github distributed before ADR 0019: github-actions only, for every repo.
+  const legacyTemplate = [
+    '# Managed by Quantum-L9/.github. dependabot.yml is NOT inheritable — it is seeded',
+    '# per repo and must live at .github/dependabot.yml on the default branch.',
+    '#',
+    '# Default seed is github-actions only (SHA-pin freshness). pip / npm ecosystems',
+    '# are not seeded unless a consumer adds them after a lockfile exists.',
+    '# ADVISORY POSTURE: this opens PRs only. No auto-merge, no major groups.',
+    'version: 2',
+    'updates:',
+    '  - package-ecosystem: github-actions',
+    '    directory: "/"',
+    '    schedule:',
+    '      interval: weekly',
+    '      day: monday',
+    '    open-pull-requests-limit: 2',
+    '    commit-message:',
+    '      prefix: "chore(deps)"',
+    '    groups:',
+    '      actions-minor-patch:',
+    '        patterns: ["*"]',
+    '        update-types: ["minor", "patch"]',
+    '',
+  ].join('\n');
+  const base = { '.github/CODEOWNERS': managedOk['.github/CODEOWNERS'], [TEMPLATE]: canonicalTemplate, ...uvRoot };
+
+  // A uv repo already holding its uv render is in sync: no write, no PR.
+  let r = await runClass({ files: { ...base, [DEP]: uvRender } });
+  assert.strictEqual(r.status, 'CANONICAL_COPY', r.detail);
+  assert.strictEqual(r.calls.some((c) => c.name === 'pulls.create'), false);
+  console.log(`ok: ${label} — uv repo holding its uv render: CANONICAL_COPY, no write`);
+
+  // The same repo holding the old actions-only bytes, or the actions-only
+  // render, is restored to the uv render — never to actions-only.
+  for (const [what, stale] of [['legacy template', legacyTemplate], ['actions-only render', actionsOnly]]) {
+    r = await runClass({ files: { ...base, [DEP]: stale } });
+    assert.strictEqual(r.status, 'UPDATE_PR_OPEN', `${what}: ${r.detail}`);
+    assert.deepStrictEqual(r.writes.map((w) => w.args.path), [DEP]);
+    assert.strictEqual(Buffer.from(r.writes[0].args.content, 'base64').toString(), uvRender, `${label}: ${what} not restored to the uv render`);
+  }
+  // Preview names the same restore and writes nothing.
+  r = await runClass({ files: { ...base, [DEP]: legacyTemplate }, dry: true });
+  assert.strictEqual(r.status, 'DRIFT');
+  assert.match(r.detail, /restore \.github\/dependabot\.yml/);
+  assert.deepStrictEqual(writesOf(r.calls), []);
+  console.log(`ok: ${label} — legacy or actions-only bytes in a uv repo restore to the uv render`);
+
+  // A root that cannot be listed, or a listed pyproject.toml that cannot be
+  // read, is not an empty root: named blocker, run fails, nothing written.
+  for (const [errors, status] of [
+    [{ '': 403 }, 'BLOCKED_PERMISSION'],
+    [{ '': 500 }, 'UNREACHABLE'],
+    [{ 'pyproject.toml': 502 }, 'UNREACHABLE'],
+  ]) {
+    for (const dry of [true, false]) {
+      r = await runClass({ files: { ...base, [DEP]: legacyTemplate }, errors, dry });
+      assert.strictEqual(r.status, status, `${label}: ${JSON.stringify(errors)} (dry=${dry}) → ${r.status}`);
+      assert.deepStrictEqual(writesOf(r.calls), [], `${label}: wrote with an unreadable root (${JSON.stringify(errors)})`);
+      assert.strictEqual(r.failures.length, 1);
+    }
+  }
+  // A root listing that answers 404 is not a directory listing either.
+  r = await runClass({ files: { ...base, [DEP]: legacyTemplate }, errors: { '': 404 } });
+  assert.strictEqual(r.status, 'UNREACHABLE');
+  assert.deepStrictEqual(writesOf(r.calls), []);
+  console.log(`ok: ${label} — unlistable root or unreadable pyproject.toml: no actions-only fallback, no write`);
+
+  // The root listing and pyproject.toml are read at the pinned base.
+  r = await runClass({ files: { ...base, [DEP]: uvRender } });
+  for (const p of ['', 'pyproject.toml']) {
+    const c = r.calls.find((x) => x.name === 'repos.getContent' && x.args.path === p);
+    assert.ok(c, `${label}: ${p || 'root'} not read`);
+    assert.strictEqual(c.args.ref, 'base-sha');
+  }
+  console.log(`ok: ${label} — root listing and pyproject.toml read at the pinned base`);
+}
+
 (async () => {
   const label = path.basename(WORKFLOW);
 
@@ -674,6 +789,7 @@ async function ownershipScenarios() {
   await classScenarios();
   await manualModeScenarios();
   await ownershipScenarios();
+  await dependabotShapeScenarios();
   console.log('\nall continuous-sync branch-guard scenarios passed');
 })().catch((e) => {
   console.error(e);

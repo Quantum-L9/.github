@@ -26,6 +26,10 @@ const {
   waivesMandatoryFile,
 } = require('./repo-class-profile.js');
 const os = require('node:os');
+// dependabot.yml is rendered per repository root (ADR 0019); these class
+// assertions hold for any shape, so they use the github-actions-only one.
+const { shapeFromRoot } = require('./render-dependabot.js');
+const ACTIONS_ONLY = shapeFromRoot({ names: [] });
 const {
   buildSeedPayload,
   DEFAULT_CATEGORIES,
@@ -132,7 +136,7 @@ try {
   assert.ok(!def.inherit.includes('SECURITY.md'), 'SECURITY.md is MATERIALIZE, never inherited by default');
   assert.deepStrictEqual(def.forbid, []);
   for (const hasPython of [true, false]) {
-    const profiled = buildSeedPayload({ fs, profile: def, hasPython, repository: 'Quantum-L9/x' });
+    const profiled = buildSeedPayload({ fs, repoShape: ACTIONS_ONLY, profile: def, hasPython, repository: 'Quantum-L9/x' });
     assert.deepStrictEqual(Object.keys(profiled).sort(byName), [
       '.github/CODEOWNERS',
       '.github/ISSUE_TEMPLATE/1-bug.yml',
@@ -150,7 +154,7 @@ try {
     ], `default class materializes exactly the repository-local surfaces (hasPython=${hasPython})`);
     // The inherit list names surfaces the categories never produce, so the
     // profile drops nothing: the unprofiled payload and the profiled one agree.
-    const legacy = buildSeedPayload({ fs, hasPython, repository: 'Quantum-L9/x' });
+    const legacy = buildSeedPayload({ fs, repoShape: ACTIONS_ONLY, hasPython, repository: 'Quantum-L9/x' });
     assert.deepStrictEqual(Object.keys(profiled).sort(byName), Object.keys(legacy).sort(byName));
     for (const dest of Object.keys(legacy)) {
       assert.strictEqual(profiled[dest], legacy[dest], `default class must not rewrite ${dest}`);
@@ -167,6 +171,7 @@ try {
   // ── the non-Constellation Python class ─────────────────────────────────
   const born = buildSeedPayload({
     fs,
+    repoShape: ACTIONS_ONLY,
     profile: ncp,
     hasPython: true,
     repository: 'Quantum-L9/l9-observability-core',
@@ -188,6 +193,7 @@ try {
   // only SECURITY.md remains.
   const ncpInheritProbe = buildSeedPayload({
     fs,
+    repoShape: ACTIONS_ONLY,
     profile: ncp,
     categories: ['community-health', 'issue-templates', 'pr-templates'],
     repository: 'Quantum-L9/l9-observability-core',
@@ -211,13 +217,13 @@ try {
   // REQUIRES .github/labels.yml. A class, not a global default, is what makes
   // both true at once.
   assert.ok(born['.github/labels.yml'], 'labels.yml is MATERIALIZE for this class');
-  const legacyAll = buildSeedPayload({ fs, categories: 'all' });
+  const legacyAll = buildSeedPayload({ fs, repoShape: ACTIONS_ONLY, categories: 'all' });
   assert.ok(!('.github/labels.yml' in legacyAll), 'labels stays out of the global default');
 
   // Asking for the historic default categories under this class is a loud
   // configuration error, not a silent drop.
   assert.throws(
-    () => buildSeedPayload({ fs, profile: ncp, categories: 'all', hasPython: true }),
+    () => buildSeedPayload({ fs, repoShape: ACTIONS_ONLY, profile: ncp, categories: 'all', hasPython: true }),
     (err) => {
       assert.match(err.message, /violates repo class non_constellation_python/);
       assert.match(err.message, /governance\.yml/);
@@ -227,7 +233,7 @@ try {
   );
 
   assert.ok(
-    !Object.keys(buildSeedPayload({ fs, categories: 'all', hasPython: true })).some((p) =>
+    !Object.keys(buildSeedPayload({ fs, repoShape: ACTIONS_ONLY, categories: 'all', hasPython: true })).some((p) =>
       p.endsWith('l9-analysis.yml'),
     ),
     'the default seed must not write a copied analysis workflow',
@@ -327,7 +333,8 @@ try {
   );
   for (const name of Object.keys(doc.classes)) {
     const payloadKeys = Object.keys(buildSeedPayload({
-      fs, profile: resolveProfile(doc, name), repository: 'Quantum-L9/x',
+      fs,
+      repoShape: ACTIONS_ONLY, profile: resolveProfile(doc, name), repository: 'Quantum-L9/x',
     }));
     assert.ok(!payloadKeys.includes('LICENSE'), `${name} must not seed LICENSE`);
   }
@@ -350,7 +357,8 @@ try {
   assert.deepStrictEqual(selfGoverned.seed_categories, [], 'self_governed materializes nothing');
   for (const hasPython of [true, false]) {
     const payload = buildSeedPayload({
-      fs, profile: selfGoverned, hasPython, repository: 'Quantum-L9/l9-ci-core',
+      fs,
+      repoShape: ACTIONS_ONLY, profile: selfGoverned, hasPython, repository: 'Quantum-L9/l9-ci-core',
     });
     assert.deepStrictEqual(
       Object.keys(payload), [],

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # ops/validate-starters.sh
-# Runs the ops/test-*.js suites: seed payload selection, the repo-class birth
+# Runs the ops/test-*.js suites: seed payload selection, the rendered
+# dependabot.yml (ops/render-dependabot.js, ADR 0019), the repo-class birth
 # profile contract, the shared label taxonomy parser, the seed-branch safety
 # gate, the branch guard inside both seed workflows and continuous-sync
 # (including its class-aware PR-template and caller re-pin management and its
@@ -16,9 +17,15 @@ FAIL=0
 
 echo "=== Quantum-L9 Workflow Starter Validation ==="
 
-if command -v node &>/dev/null; then
+# The JS suites are most of this gate. A runner without node used to skip
+# them and still report success; that is a failure, not a pass.
+if ! command -v node &>/dev/null; then
+  echo "❌ node not found — the ops/test-*.js suites cannot run"
+  FAIL=$((FAIL+1))
+else
   for t in \
     ops/test-build-seed-payload.js \
+    ops/test-render-dependabot.js \
     ops/test-repo-class-profile.js \
     ops/test-label-taxonomy.js \
     ops/test-seed-branch-safety.js \

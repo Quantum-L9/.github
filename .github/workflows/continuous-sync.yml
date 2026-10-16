@@ -3,6 +3,12 @@
 #   Preview (dry_run=true, the default): reports drift per repo, writes nothing.
 #   Apply   (dry_run=false):             one reviewable PR per drifted repo.
 # Repos can opt out with a .l9/no-sync marker file.
+# Rollout of the rendered dependabot.yml (ADR 0019): do not run Apply on a
+# .github revision without ops/render-dependabot.js; the older verbatim copy
+# overwrites legitimate uv / pip / pre-commit entries with actions-only bytes.
+# Until the renderer is merged, a repo with extra ecosystems opts out with
+# .l9/no-sync. After it is merged, Preview one repo at a time and Apply per
+# repo only on explicit operator approval (docs/DISTRIBUTION.md).
 #
 # Auth: the l9-governance-seeder App. Its GOVERNANCE_APP_ID variable and
 # GOVERNANCE_APP_PRIVATE_KEY secret live on the governance-distribution
@@ -15,7 +21,12 @@
 # (ops/build-seed-payload.js) carries it. A malformed marker plans nothing.
 # Managed (overwrite, not missing-only — docs/DISTRIBUTION.md):
 #   .github/CODEOWNERS, .github/dependabot.yml   exact bytes, where the class
-#     materializes them (self_governed does not; a root CODEOWNERS wins)
+#     materializes them (self_governed does not; a root CODEOWNERS wins).
+#     dependabot.yml is RENDERED per repository root by
+#     ops/render-dependabot.js (ADR docs/adr/0019-dependabot-managed-rendered.md):
+#     github-actions, plus uv / pip / pre-commit by what the root holds. The
+#     root listing is read at the pinned base; a listing that is not a readable
+#     directory is UNREACHABLE, never an actions-only render.
 #   .github/pull_request_template.md             by repo class: a class that
 #     seeds `pr-templates` carries the canonical bytes; a class that INHERITS
 #     it carries no copy. A local copy that is byte-identical to the org
@@ -82,7 +93,7 @@ jobs:
             const {
               SYNC_COMMIT_SUBJECT, assessSeedBranch, assessOpenPrOverlap, moveSeedBranch,
             } = require('./ops/seed-branch-safety.js');
-            const { buildSeedPayload } = require('./ops/build-seed-payload.js');
+            const { buildSeedPayload, seedNeedsRepoShape, probeRepoShape } = require('./ops/build-seed-payload.js');
             const DRY = process.env.DRY_RUN !== 'false';
             const FILTER = process.env.FILTER;
             const BRANCH = 'chore/governance-sync';
@@ -180,9 +191,31 @@ jobs:
                 klass = profile.name;
                 const rootOwners = await read(o, n, 'CODEOWNERS', baseSha);
                 if (rootOwners.state === 'present') notes.push('root CODEOWNERS present; .github/CODEOWNERS not managed');
+                // The root listing, at the pin. It decides the rendered
+                // dependabot ecosystems and is reused for the alternate-template
+                // report below. Not a readable directory = not an answer.
+                const rootListing = await read(o, n, '', baseSha);
+                if (rootListing.state !== 'dir') {
+                  throw Object.assign(new Error(`repository root is not a readable directory (${rootListing.state})`), { phase: 'read' });
+                }
+                let repoShape = null;
+                if (seedNeedsRepoShape({ profile })) {
+                  try {
+                    repoShape = await probeRepoShape({
+                      listRoot: async () => rootListing.entries,
+                      readText: async (p) => {
+                        const r = await read(o, n, p, baseSha);
+                        if (r.state === 'dir') throw new Error(`${p} is a directory`);
+                        return r.state === 'present' ? r.text : null;
+                      },
+                    });
+                  } catch (e) {
+                    throw Object.assign(e, { phase: 'read' });
+                  }
+                }
                 // What this class materializes, from the one shared builder.
                 const eligible = buildSeedPayload({
-                  fs, profile, hasRootCodeowners: rootOwners.state === 'present', repository: `${o}/${n}`,
+                  fs, profile, hasRootCodeowners: rootOwners.state === 'present', repository: `${o}/${n}`, repoShape,
                 });
 
                 // What this repository should carry: path -> {action, content, why, existed}.
@@ -233,7 +266,7 @@ jobs:
                 // GitHub also honours root and docs/ templates and a
                 // PULL_REQUEST_TEMPLATE/ directory. Report them; never edit.
                 for (const dir of ['', '.github', 'docs']) {
-                  const listing = await read(o, n, dir, baseSha);
+                  const listing = dir === '' ? rootListing : await read(o, n, dir, baseSha);
                   for (const e of listing.state === 'dir' ? listing.entries : []) {
                     const p = dir ? `${dir}/${e.name}` : e.name;
                     if (p !== TEMPLATE && (ALT_NAME.test(e.name) || /^pull_request_template$/i.test(e.name))) {
