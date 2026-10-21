@@ -45,7 +45,7 @@ Without running the producer, against the pinned authority revision read from co
 
 1. every committed file's bytes equal the lock;
 2. every artifact's envelope schema, `projection_digest`, profile pin and provenance equal the lock and the recomputed convention;
-3. every receipt: schema, `receipt_digest`, producer identity, `exact_subject_ref`, `output`, `profile`, `governing_coordinates.repository` and `revision`, `result: pass`, and the `payload_schema` criterion naming the profile's declared output schema;
+3. every receipt: schema, `receipt_digest`, producer identity, `operation` (`projection` for a per-source artifact, `composition` for the composed projection; a receipt for any other operation binds nothing), `exact_subject_ref`, `output`, `profile`, `governing_coordinates.repository` and `revision`, `result: pass` with no unresolved criteria, and the `payload_schema` criterion naming the profile's declared output schema;
 4. every `source_digest` equals the ledger bytes at the pinned revision, and the profile entry's canonical digest equals the pin;
 5. the committed source classes equal the profile's declared classes, in order;
 6. where a selector form permits it, the payload is re-selected from the ledger and compared record for record.
