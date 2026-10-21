@@ -12279,7 +12279,7 @@ def check_rc030(docs: dict[str, dict], report: Report) -> None:
 
 
 # RC-032 PR-audit projection, source-namespaced composition, payload schemas,
-# and selection closure (semantic foundation v3.24.0 candidate, ADR-021). One
+# and selection closure (semantic foundation v3.25.0 candidate, ADR-022). One
 # consumer profile, l9.projection/pr-audit@1, selects the admitted global law a
 # revision-bound pull-request audit cites: by exact id from record collections
 # and by whole section from the other ledgers. The profile, its composition
