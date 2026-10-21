@@ -46,7 +46,7 @@ binding_conventions:
     normalize:
       - mappings are re-keyed by the string form of each key and emitted in sorted key order
       - sequences keep their order
-      - bytes become the mapping {"$bytes_hex": <lowercase hex>}
+      - 'bytes become the mapping {"$bytes_hex": <lowercase hex>}'
     serialize: json.dumps(normalized, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     encoding: utf-8
   semantic_digest:
