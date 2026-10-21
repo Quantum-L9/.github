@@ -37,3 +37,38 @@ forbidden:
   - authority_expansion
   - arbitrary_consumer_mutation
   - executable_selector_code
+binding_conventions:
+  schema: l9.projection-binding-conventions/v1
+  rule: The producer emits exactly this shape and a consumer verifies exactly this shape.
+    No transport, publisher, index, or consumer may define a second digest, subject, or
+    output form for a projection artifact or its receipt (ADR-021).
+  canonical_json:
+    normalize:
+      - mappings are re-keyed by the string form of each key and emitted in sorted key order
+      - sequences keep their order
+      - 'bytes become the mapping {"$bytes_hex": <lowercase hex>}'
+    serialize: json.dumps(normalized, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    encoding: utf-8
+  semantic_digest:
+    form: sha256:<64 lowercase hex digits>
+    over: canonical_json of the value
+  source_digest:
+    over: the raw bytes of the canonical source ledger at the pinned authority revision
+  projection_digest:
+    over: the projection artifact envelope with its projection_digest field removed
+    note: every other envelope field, generated_by and payload included, is covered
+  receipt_identity:
+    form: l9.receipt-instance/<64 lowercase hex digits>
+    over: the receipt with receipt_identity set to the literal string pending and no receipt_digest field
+  receipt_digest:
+    over: the receipt with its receipt_digest field removed
+  subject:
+    exact_subject_ref: <projection_profile_ref>#<canonical_source_ref>
+    output_ref: <projection_profile_ref>#<canonical_source_ref>
+    output_digest: the artifact's projection_digest
+    note: the subject is keyed by canonical source ref, never by source class
+  multi_selector_source_classes: supported
+  transport:
+    rule: A projection is consumed from a bundle the consumer repository commits, cut by a pinned
+      producer revision and attested by replaying that producer; no branch, index, or publisher
+      holds a projection as authority (ADR-021).

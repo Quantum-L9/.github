@@ -1,150 +1,64 @@
 # Projection publication
 
-`scripts/publish-projection.py` moves producer-emitted semantic projections
-from the Semantic Compiler to the `projections` branch of this repository.
-It is separate from governance distribution (`docs/DISTRIBUTION.md`): Manual
-Update and Manual Seed do not call it, and it does not call them.
+How a projection of this repository's canonical semantics reaches a consumer, and what a consumer may trust. Governing law: `semantics/projection_engine_contract.yaml` `binding_conventions`, `semantics/composition_engine_contract.yaml` `binding_conventions`, ADR-019, ADR-020, ADR-021.
 
-**Status: implemented, not activated.** No workflow runs it, and the remote
-`projections` branch does not exist. See [Activation](#activation).
+**Status: active architecture.** The earlier `projections`-branch publisher (PR #180) is retired by ADR-021; no `projections` branch exists and none is created.
 
 ## Roles
 
-| Component | Role | Never |
-| --- | --- | --- |
-| `Quantum-L9/.github` `main` | Canonical sources, profiles, contracts, and this publisher | Holds generated projections |
-| `l9-semantic-compiler` | Produces the artifact/receipt pair (`semantics/vocabulary.yaml` gives it the `projection` role) | Publishes |
-| `scripts/publish-projection.py` | Verifies a pair, stages it, advances `projections` | Runs the compiler, executes selectors, builds or repairs a pair |
-| `Quantum-L9/.github` `projections` | Immutable pairs plus a transport index | Holds authority |
-| Consumers (e.g. the coding agent's `verify_canonical_binding.py`) | Verify independently | Run the producer |
+- **`Quantum-L9/.github` `main`** owns the canonical sources, the projection and composition profiles, the artifact and receipt schemas, and the conventions below. It holds no projection.
+- **`l9-semantic-compiler`** (the component `semantics/vocabulary.yaml` assigns the `projection` role, repository `Quantum-L9/l9-semantic-compiler-engine`) is the only producer. `project` emits one `l9.projection-artifact/v1` per source class of a profile and one `l9.compiler-receipt/v1` per artifact; `compose` emits one `l9.composed-projection/v1` and its receipt when a composition profile declares it.
+- **A consumer repository** commits the producer's output as a bundle, verifies it without running the producer, and attests production by trusted replay. The consumer never produces, repairs, or restates a projection.
 
-## Scope
+## The shape the producer emits
 
-One profile and source class:
-`l9.projection/cursor-governance-operating-plane@1` / `invariants`
-(`l9.source/invariants@1`, selector `$.invariants[?(@.scope=="global")]`).
-A class with more than one selector, or with a declared reshape, has no
-producer-defined payload shape and is refused as `UNSUPPORTED_SOURCE_CLASS`.
+Every value below is defined in `semantics/projection_engine_contract.yaml#binding_conventions` and realized by the producer. A consumer recomputes it; it never defines another.
 
-## Trust
+| Field | Computed over |
+|---|---|
+| `source_digest` | raw bytes of the canonical ledger at the pinned authority revision |
+| `projection_digest` | canonical JSON of the artifact with `projection_digest` removed |
+| `composition_digest` | canonical JSON of the composed projection with `composition_digest` removed |
+| `receipt_identity` | canonical JSON of the receipt with `receipt_identity` set to `pending` and no `receipt_digest` |
+| `receipt_digest` | canonical JSON of the receipt with `receipt_digest` removed |
+| `exact_subject_ref`, `output.ref` | `<projection_profile_ref>#<canonical_source_ref>` (composition: `<composition_profile_ref>#<projection_profile_ref>`) |
+| `output.digest` | the artifact's `projection_digest` (composition: `composition_digest`) |
 
-- **Revision pin.** Every command takes `--revision`, a 40-hex canonical
-  `main` SHA. It must come from an independent record of canonical `main`
-  (for example `gh api repos/Quantum-L9/.github/commits/main --jq .sha`),
-  never from a receipt, the index, or the checkout being checked. The
-  authority checkout must have origin `Quantum-L9/.github`, and the pin must
-  be contained in a fetched `origin` ref; otherwise the run is `BLOCKED`.
-- **Law bytes** are read from the pinned commit's objects, never from the
-  working tree or index.
-- **Digests** use the producer's conventions, recomputed here: sha256 of raw
-  source bytes, and sha256 of canonical JSON (sorted keys, compact, UTF-8)
-  for the payload, the profile entry, and the receipt.
-- **Receipts are unsigned.** A verified pair proves digest integrity and the
-  producer role. It does not authenticate the producer. Every index record
-  says `producer_authentication: unauthenticated_unkeyed_receipt`.
-- **Compiler revision** is recorded as `caller_asserted`.
-- **Arguments that reach git are validated first.** `--remote` must be an
-  already-configured remote name (no URL, no option), `--branch` and
-  `--canonical-ref` must be valid ref names, and `--commit` a full 40-hex
-  SHA. Producer files are read as regular files only; symlinks are refused.
+Canonical JSON: string-keyed mappings in sorted key order, sequences in order, bytes as `{"$bytes_hex": …}`, serialized with `sort_keys=True`, separators `(",", ":")`, `ensure_ascii=False`, encoded UTF-8. Every digest is `sha256:` plus 64 lowercase hex digits.
 
-## Layout of `projections`
+A receipt whose `result` is not `pass`, or whose `verification_basis.unresolved_criteria` is not empty, binds nothing. Multi-selector source classes are projected like any other.
 
-```
-index.json
-pairs/<source_class>/<receipt digest hex>/projection.json
-pairs/<source_class>/<receipt digest hex>/receipt.json
-```
+## Transport: a consumer-committed bundle
 
-Pair bytes are exactly the producer's files. `index.json` is a transport
-locator (`transport_format: quantum-l9-github/projections-index@1`), not
-semantic law. Per `<profile>#<source_class>` it records the current pair
-(path, file sha256s, projection and receipt digests, source and profile
-digests, authority revision, compiler name/version/revision) and every
-prior current pair under `history`. `previous_publication` names the parent
-commit; a commit cannot name itself, so the publication coordinate is the
-commit a consumer resolved.
+A consumer repository commits, under a path it owns:
 
-## Commands
+- `projections/<source_class>.projection.json` — the artifact for each source class of the profile, bytes exactly as the producer rendered them;
+- `receipts/<source_class>.receipt.json` — the receipt for each artifact;
+- `composed.json` and `receipts/composed.receipt.json` — only when the profile has a composition profile;
+- a lock file recording the authority repository and revision, the producer repository, revision, compiler and version, the profile pin, every component's `source_ref`, `source_digest`, `projection_digest`, file digest and receipt path, and the composed artifact's digests when present.
 
-```bash
-PIN=$(gh api repos/Quantum-L9/.github/commits/main --jq .sha)   # independent record
-AUTH=/path/to/github-clone-of/.github   # Quantum-L9/.github; fetched, HEAD == $PIN, clean semantics/
+The lock is the consumer's inventory, not authority. The authority revision it names must be a commit on this repository's `main`; the producer revision it names must be a commit on the producer repository's protected `main`.
 
-# 1. Pins for the producer
-python3 scripts/publish-projection.py pins --authority-root "$AUTH" --revision "$PIN"
+## What a consumer verifies
 
-# 2. Producer (in its own checkout, at an exact compiler revision)
-l9-semantic-compiler project --authority-root "$AUTH" \
-  --profile l9.projection/cursor-governance-operating-plane@1 --source-class invariants \
-  --output-dir OUT --authority-revision "$PIN" \
-  --expect-source-digest <source_digest> --expect-profile-digest <profile_digest>
+Without running the producer, against the pinned authority revision read from commit objects:
 
-# 3. Verify, then plan (writes nothing)
-python3 scripts/publish-projection.py verify  --authority-root "$AUTH" --revision "$PIN" --pair-dir OUT/invariants/<hex>
-python3 scripts/publish-projection.py publish --authority-root "$AUTH" --revision "$PIN" --pair-dir OUT/invariants/<hex> \
-  --repo "$AUTH" --remote origin --compiler-revision <compiler sha>
+1. every committed file's bytes equal the lock;
+2. every artifact's envelope schema, `projection_digest`, profile pin and provenance equal the lock and the recomputed convention;
+3. every receipt: schema, `receipt_digest`, producer identity, `operation` (`projection` for a per-source artifact, `composition` for the composed projection; a receipt for any other operation binds nothing), `exact_subject_ref`, `output`, `profile`, `governing_coordinates.repository` and `revision`, `result: pass` with no unresolved criteria, and the `payload_schema` criterion naming the profile's declared output schema;
+4. every `source_digest` equals the ledger bytes at the pinned revision, and the profile entry's canonical digest equals the pin;
+5. the committed source classes equal the profile's declared classes, in order;
+6. where a selector form permits it, the payload is re-selected from the ledger and compared record for record.
 
-# 4. Check a published commit (consumer side or post-publish)
-python3 scripts/publish-projection.py check --authority-root "$AUTH" --revision "$PIN" --repo "$AUTH" --commit <publication sha>
-```
+Any failure is `REJECTED` (bytes or receipts contradicted), `STALE` (the authority moved materially), or `BLOCKED` (something could not be established). A verified bundle is verified, not admitted: admission as law still needs the explicit decision record `semantics/authority_model.yaml#admission_rules` requires, whose form is not yet defined.
 
-`publish` only plans unless `--apply` is given.
+## What attests production
 
-## Publication rules
+Receipts are unkeyed. Production is attested by **trusted replay**: a workflow in the consumer repository, using only code from its default branch, checks out this repository at the lock's authority revision and the producer at the lock's producer revision, confirms both revisions are on their protected `main`, regenerates the bundle, and compares byte for byte. A bundle whose producer revision is not on the producer's `main` is not attested.
 
-- **One commit.** The pair and the updated index land in one commit on the
-  current tip, so the index is never published ahead of its pair. A run
-  interrupted before the ref moves leaves the branch and index untouched.
-- **Advance.** Locally by `git update-ref <ref> <new> <old>` (compare and
-  swap). Remotely by a plain, non-force push after confirming the remote tip
-  equals the base; the server refuses anything that is not a fast-forward.
-  A lost race is `CONFLICT` (exit 5): re-run from the new tip. The publisher
-  has no force, reset, or `+refspec` path.
-- **Never creates the branch.** An absent target branch is
-  `BLOCKED TARGET_REF_ABSENT`.
-- **Immutable pairs.** Identical replay is `NOOP_IDENTICAL`. Different bytes
-  at an existing pair path is `IMMUTABLE_PATH_COLLISION`. Prior pairs stay.
-- **Unrelated revisions.** A newer pin whose source and profile digests are
-  unchanged is `NOOP_UNCHANGED_SEMANTICS`; nothing is republished.
-- **Material changes.** Published as the new current pair, only from a
-  descendant of the current entry's revision (`ROLLBACK_REFUSED` otherwise),
-  and only while the fetched canonical `main` tip still has the same source
-  and profile digests (`STALE` otherwise).
-- **Coherent reads.** `check` resolves one commit and reads the index and
-  the pair from it, and compares file hashes with the index. It re-verifies
-  the pair against the authority at the revision its receipt asserts, which
-  must be an ancestor of the pin. It reports `CURRENT` when the pin's source
-  and profile digests equal the published ones (catalog or registry edits
-  elsewhere do not change that), `STALE` on a material change, and
-  `REJECTED` otherwise.
-- **Canonical shapes.** Artifact and receipt must satisfy
-  `semantics/projection_artifact.schema.yaml` and
-  `semantics/compiler_receipt.schema.yaml` at the pinned revision (required
-  fields, constants, enums, types, and `items` rules on every array element,
-  so each receipt `inputs` entry needs `ref` and `digest`). An unknown schema
-  type or a non-list enum is `BLOCKED`.
+## Current consumers
 
-Exit codes: 0 ok, 1 `REJECTED`, 2 usage, 3 `BLOCKED`, 4 `STALE`, 5 `CONFLICT`.
+- `l9.projection/architecture-intelligence@1` with `l9.compose/architecture-intelligence@1` — Cursor-Governance `generated/governance/architecture_intelligence/`, verified by the `l9-global-architect` skill (ADR-019).
+- `l9.projection/coding-agent-execution@1` (no composition profile) — Cursor-Governance `generated/governance/coding_agent_execution/`, verified by the `l9-coding-agent` skill (ADR-020).
 
-## Tests
-
-`python3 scripts/test-publish-projection.py` (CI: `validate-starters.yml`,
-semantics job). Disposable local git repositories only; pairs are a fixture
-following the producer's documented conventions. A real producer pair is
-exercised in the PR evidence, not in CI: the compiler repository is private.
-
-## Activation
-
-Not authorized by the implementation PR. Each item needs separate approval
-and proof:
-
-1. The Semantic Compiler `project` CLI merged and adopted at an exact SHA.
-2. A publisher runner with read access to that compiler revision, and write
-   access restricted to `refs/heads/projections`, with branch protection
-   observed (not assumed). Compiler code must never run with that write
-   credential.
-3. An operator creates `projections` (the publisher will not).
-4. A protected manual run publishes, then `check` and a clean consumer
-   (`verify_canonical_binding.py`, no compiler import) reach `BOUND` and
-   `CURRENT` at the published commit, with live negative controls.
+Both bundles are cut by one producer driver in the consumer repository and attested by one replay workflow.
