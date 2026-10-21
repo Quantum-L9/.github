@@ -18,7 +18,7 @@ With this tree and the producer at `Quantum-L9/l9-semantic-compiler-engine` PR #
 ## Outstanding Unknowns and findings
 
 - `obligation_not_admitted_in_a_selected_source` through `source_authority` restates a property the canonical loader already enforces and cannot fail on its own (the finding ADR-019 recorded for `unrelated_domain_payloads`).
-- The packet and port catalogs hold no records at this revision; `skill_command_or_routing_semantics` is proven by compiler tests and the live `invocability_contract` exclusion.
+- The port catalog holds no records at this revision, so its exclusion in `skill_command_or_routing_semantics` is proven by compiler tests only; the packet catalog (seven packet records) and the `invocability_contract` exclusion are live data.
 - No RC-031 validator check exists yet for the registration and the five criteria; RC-028 and SC-008 are the checks this candidate relies on.
 - The `semantic_digest` canonicalization is still not declared in a ledger.
 

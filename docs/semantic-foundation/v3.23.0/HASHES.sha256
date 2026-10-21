@@ -1,5 +1,5 @@
 b205900f469cb15b6d5256fc672e9b7904e415b9ce750be77483594611fe123a  ./MANIFEST.md
-98e98ffc63e140d4609c917aabc0c05e7d9fe52ef98cfbaf1bf0bf256771e760  ./README.md
+9155f114087191ecdb0ede01e8b1ecbeeb0e2333fd44768b0dfb8a660c316169  ./README.md
 01cb7d0a6dcac49de45d0d653f99ebe5e1ed28247b614dfa819cc031e369de34  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
@@ -20,7 +20,7 @@ d80fccf2f419fd9dbd8e938d0a97ab98c084fc3ea212289fa2da44429d18d3c6  ./docs/adr/ADR
 1781d37dd289bd0b10afecfc124ddbe468702ae6b51f07a017f5279018215966  ./docs/adr/ADR-017-federated-authority-graphs-and-strategic-plan-representation.md
 5cc0d8a4c314cc958aff1adfff48a7c9d0c497f5255699976f11725b88fc2f82  ./docs/adr/ADR-018-strategic-planning-cognition-artifact-representations.md
 f853a6bd29ccd7c07fcbf8837489436f22e680b3255d6b872fd3fb1e23ac0c87  ./docs/adr/ADR-019-architecture-intelligence-projection-and-source-namespaced-composition.md
-8bc67c41885bd4dd6c7db637a159389b404fc4e332b12a59f5a18d08f57a61c7  ./docs/adr/ADR-020-coding-agent-execution-projection-schema-and-forbidden-criteria.md
+7ab4b5f8147427f30f155a0ea7d4142ea76a63261ada37810f2d33e3da6363a6  ./docs/adr/ADR-020-coding-agent-execution-projection-schema-and-forbidden-criteria.md
 71835cb6531a3308a6ec7a6cdaa652b14c8184a1ae94bf6279611ae4ad33fe71  ./docs/adr/README.md
 34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f  ./semantics/actor_registry.yaml
 09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4  ./semantics/affected_strategic_closure.schema.yaml

@@ -29,7 +29,7 @@ An `unknown` receipt is honest, and the consumer must not relax its gate to acce
 ## Review findings (recorded, not resolved)
 
 - `obligation_not_admitted_in_a_selected_source` through `source_authority` carries the limitation ADR-019 recorded for `unrelated_domain_payloads`: the canonical loader already refuses a ledger owned by anyone else, so the criterion restates a property that cannot fail on its own. A criterion that proves no obligation beyond the selected records entered the payload would need selection-closure semantics the engine already proves through selection equivalence; it is not re-invented here.
-- The packet and port catalogs hold no records at this revision, so `skill_command_or_routing_semantics` is proven by the producer's tests and the live `invocability_contract` exclusion, not by live catalog data.
+- The port catalog holds no records at this revision, so that exclusion in `skill_command_or_routing_semantics` is proven by the producer's tests only. The packet catalog holds seven packet records and the `invocability_contract` exists, so those two exclusions are proven against live data.
 - No validator check (an RC-031 mirroring RC-030) is added in this candidate. SC-008 covers the release record; RC-028 covers the profile. A dedicated closure check for the schema registration and the five criteria is the next step before admission.
 
 ## Consequences
