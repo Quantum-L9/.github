@@ -41,8 +41,9 @@ ProductTopology
 - ADR-018: Strategic planning cognition artifact representations
 - ADR-019: Architecture intelligence projection and source-namespaced composition
 - ADR-020: Coding-agent execution projection payload schema and forbidden-constraint criteria
+- ADR-021: PR-audit projection, source-namespaced composition, payload schemas, and validator closure
 
-ADR-001 through ADR-020 are the global semantic decisions. They live in this
+ADR-001 through ADR-021 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions

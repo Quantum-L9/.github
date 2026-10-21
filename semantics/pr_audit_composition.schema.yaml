@@ -1,0 +1,502 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_pr_audit_composed_payload_schema
+artifact_id: l9.schema/pr-audit-composition@1
+canonical_source:
+  format: yaml
+  artifact: pr_audit_composition.schema.yaml
+governed_by:
+  composition_profile_ref: l9.compose/pr-audit@1
+  projection_profile_ref: l9.projection/pr-audit@1
+purpose: 'Define the payload composed under l9.compose/pr-audit@1: one namespace per source class declared by
+  l9.projection/pr-audit@1, in declaration order, each holding exactly that source''s selected sections with the
+  same constraints as its source projection. Namespacing lets sections that share a name across ledgers, such as
+  global_rules and authority_classes, keep their own source identity and their own constraints.
+
+  '
+type: object
+required:
+- vocabulary
+- invariants
+- contracts
+- authority_model
+- artifact_model
+- architecture_rules
+- architecture_patterns
+- capabilities
+- conformance_model
+- receipt_catalog
+- lifecycle
+- semantic_dependency_model
+- error_taxonomy
+properties:
+  schema:
+    const: l9.composed-projection.pr-audit/v1
+  vocabulary:
+    type: object
+    required:
+    - terms
+    properties:
+      terms:
+        type: object
+        required:
+        - authority
+        - law
+        - canonical_source
+        - semantic_owner
+        - semantic_ownership
+        - derived_artifact
+        - projection
+        - provenance
+        - semantic_digest
+        - receipt
+        - validation
+        - validation_receipt
+        - mechanical_validation
+        - conformance
+        - constraint
+        - hard_constraint
+        - admission_decision
+        - state_change
+        - invalidation
+        - impact_analysis
+        - dependency_scoped_invalidation
+        - surgical_revision
+        - semantic_preservation
+        - semantic_equivalence
+        - unsat_core
+        - bounded_autonomy
+        - published
+        fields:
+          authority: {type: object, required: [semantic_class, definition]}
+          law: {type: object, required: [semantic_class, definition]}
+          canonical_source: {type: object, required: [semantic_class, definition]}
+          semantic_owner: {type: object, required: [semantic_class, definition]}
+          semantic_ownership: {type: object, required: [semantic_class, definition]}
+          derived_artifact: {type: object, required: [semantic_class, definition]}
+          projection: {type: object, required: [semantic_class, definition]}
+          provenance: {type: object, required: [semantic_class, definition]}
+          semantic_digest: {type: object, required: [semantic_class, definition]}
+          receipt: {type: object, required: [semantic_class, definition]}
+          validation: {type: object, required: [semantic_class, definition]}
+          validation_receipt: {type: object, required: [semantic_class, definition]}
+          mechanical_validation: {type: object, required: [semantic_class, definition]}
+          conformance: {type: object, required: [semantic_class, definition]}
+          constraint: {type: object, required: [semantic_class, definition]}
+          hard_constraint: {type: object, required: [semantic_class, definition]}
+          admission_decision: {type: object, required: [semantic_class, definition]}
+          state_change: {type: object, required: [semantic_class, definition]}
+          invalidation: {type: object, required: [semantic_class, definition]}
+          impact_analysis: {type: object, required: [semantic_class, definition]}
+          dependency_scoped_invalidation: {type: object, required: [semantic_class, definition]}
+          surgical_revision: {type: object, required: [semantic_class, definition]}
+          semantic_preservation: {type: object, required: [semantic_class, definition]}
+          semantic_equivalence: {type: object, required: [semantic_class, definition]}
+          unsat_core: {type: object, required: [semantic_class, definition]}
+          bounded_autonomy: {type: object, required: [semantic_class, definition]}
+          published: {type: object, required: [semantic_class, definition]}
+  invariants:
+    type: object
+    required:
+    - invariants
+    properties:
+      invariants:
+        type: array
+        min_items: 24
+        items:
+          type: object
+          required:
+          - id
+          - statement
+          - scope
+          - owner
+          properties:
+            id: {type: string}
+            statement: {type: string}
+            scope: {const: global}
+            owner: {const: Quantum-L9/.github}
+  contracts:
+    type: object
+    required:
+    - contracts
+    properties:
+      contracts:
+        type: array
+        min_items: 16
+        items:
+          type: object
+          required:
+          - id
+          - purpose
+          - scope
+          - owner
+          - source_invariants
+          - requires
+          - guarantees
+          - forbidden
+          - outcomes
+          properties:
+            id: {type: string}
+            scope: {const: global}
+            owner: {const: Quantum-L9/.github}
+            source_invariants: {type: string_list, min_items: 1}
+            requires: {type: string_list}
+            guarantees: {type: string_list, min_items: 1}
+            forbidden: {type: string_list, min_items: 1}
+            outcomes: {type: object}
+  authority_model:
+    type: object
+    required:
+    - authority_classes
+    - admission_rules
+    - global_admission_rules
+    - promotion_rules
+    - agent_authority
+    - human_authority
+    - escalation_rules
+    properties:
+      authority_classes:
+        type: object
+        required:
+        - global_governance
+        - canonical
+        - derived
+        - candidate
+        - evidence
+        properties:
+          derived:
+            type: object
+            required: [may_self_promote]
+            properties:
+              may_self_promote: {const: false}
+          candidate:
+            type: object
+            required: [authoritative]
+            properties:
+              authoritative: {const: false}
+          evidence:
+            type: object
+            required: [grants_authority]
+            properties:
+              grants_authority: {const: false}
+      admission_rules:
+        type: object
+        required:
+        - global_requirements
+        - candidate_generation_is_not_admission
+        - self_admission_without_target_class_authority_forbidden
+        - changed_material_subject_requires_new_decision_unless_compatibility_preserves_it
+        properties:
+          global_requirements: {type: string_list, min_items: 6}
+          candidate_generation_is_not_admission: {const: true}
+          self_admission_without_target_class_authority_forbidden: {const: true}
+          changed_material_subject_requires_new_decision_unless_compatibility_preserves_it: {const: true}
+      global_admission_rules:
+        type: object
+        required:
+        - requirements
+        - requires_global_authority
+        - candidate_generation_is_not_admission
+        properties:
+          requires_global_authority: {const: true}
+          candidate_generation_is_not_admission: {const: true}
+      promotion_rules:
+        type: object
+        required:
+        - sequence
+        - globalization_candidate_is_not_global_authority
+        - authorized_global_state_change_required
+        properties:
+          sequence: {type: string_list, min_items: 1}
+          globalization_candidate_is_not_global_authority: {const: true}
+          authorized_global_state_change_required: {const: true}
+      agent_authority:
+        type: object
+        required: [rules]
+        properties:
+          rules: {type: string_list, min_items: 4}
+      human_authority:
+        type: object
+        required: [rules]
+        properties:
+          rules: {type: string_list, min_items: 3}
+      escalation_rules:
+        type: object
+        required:
+        - authority_missing
+        - semantic_conflict
+        - unknown
+        - changed_candidate_after_decision
+        properties:
+          authority_missing: {enum: [block]}
+          semantic_conflict: {enum: [block]}
+          unknown: {enum: [remain_unknown]}
+          changed_candidate_after_decision: {enum: [require_new_decision]}
+  artifact_model:
+    type: object
+    required:
+    - authority_classes
+    - derivation_rules
+    properties:
+      authority_classes:
+        type: object
+        required:
+        - canonical
+        - derived
+        - candidate
+        - evidence
+        properties:
+          canonical:
+            type: object
+            required: [authoritative, implicit_derivation]
+            properties:
+              authoritative: {const: true}
+              implicit_derivation: {const: false}
+          derived:
+            type: object
+            required: [authoritative, authority_expansion_allowed, implicit_promotion_forbidden]
+            properties:
+              authoritative: {const: false}
+              authority_expansion_allowed: {const: false}
+              implicit_promotion_forbidden: {const: true}
+          evidence:
+            type: object
+            required: [authoritative, grants_authority]
+            properties:
+              authoritative: {const: false}
+              grants_authority: {const: false}
+      derivation_rules:
+        type: string_list
+        min_items: 4
+  architecture_rules:
+    type: object
+    required:
+    - rules
+    properties:
+      rules:
+        type: array
+        min_items: 1
+        items:
+          type: object
+          required:
+          - id
+          - when
+          - derive
+          - source_refs
+          properties:
+            source_refs: {type: string_list, min_items: 1}
+  architecture_patterns:
+    type: object
+    required:
+    - patterns
+    properties:
+      patterns:
+        type: array
+        min_items: 6
+        items:
+          type: object
+          required:
+          - id
+          - class
+          - purpose
+          - guarantees
+          properties:
+            guarantees: {type: string_list, min_items: 1}
+  capabilities:
+    type: object
+    required:
+    - capability_state_dimensions
+    - state_dimension_rules
+    properties:
+      capability_state_dimensions:
+        type: object
+        required:
+        - declared
+        - admitted
+        - available
+        - authorized
+        - invocable
+      state_dimension_rules:
+        type: string_list
+        min_items: 1
+  conformance_model:
+    type: object
+    required:
+    - global_rules
+    - conformance_requirement_shape
+    properties:
+      global_rules:
+        type: object
+        required:
+        - proof_obligations_preexist_candidate_implementation
+        - every_conformance_requirement_traces_to_governing_semantics
+        - fixture_or_test_must_not_invent_law
+        - system_under_test_must_not_define_expected_result
+        - unresolved_semantics_do_not_compile_to_false_conformance
+        - conformance_evidence_does_not_grant_authority
+        properties:
+          fixture_or_test_must_not_invent_law: {const: true}
+          system_under_test_must_not_define_expected_result: {const: true}
+          unresolved_semantics_do_not_compile_to_false_conformance: {const: true}
+          conformance_evidence_does_not_grant_authority: {const: true}
+      conformance_requirement_shape:
+        type: object
+        required: [required]
+        properties:
+          required: {type: string_list, min_items: 1}
+  receipt_catalog:
+    type: object
+    required:
+    - global_rules
+    - receipt_kernel
+    - receipts
+    properties:
+      global_rules:
+        type: object
+        required:
+        - receipt_is_evidence
+        - receipt_does_not_grant_semantic_authority
+        - receipt_does_not_grant_execution_authority
+        - exact_subject_binding_is_required
+        - verification_must_not_depend_only_on_the_recorded_verdict
+        - material_subject_change_makes_prior_receipt_non_current_unless_compatibility_preserves_it
+        properties:
+          receipt_is_evidence: {const: true}
+          receipt_does_not_grant_semantic_authority: {const: true}
+          receipt_does_not_grant_execution_authority: {const: true}
+          exact_subject_binding_is_required: {const: true}
+          verification_must_not_depend_only_on_the_recorded_verdict: {const: true}
+          material_subject_change_makes_prior_receipt_non_current_unless_compatibility_preserves_it: {const: true}
+      receipt_kernel:
+        type: object
+        required:
+        - required_semantics
+        - field_semantics
+        - authority
+        - currentness
+        - forbidden
+        properties:
+          required_semantics: {type: string_list, min_items: 1}
+          forbidden: {type: string_list, min_items: 1}
+          authority:
+            type: object
+            required:
+            - class
+            - grants_semantic_authority
+            - grants_execution_authority
+            properties:
+              class: {const: evidence}
+              grants_semantic_authority: {const: false}
+              grants_execution_authority: {const: false}
+      receipts:
+        type: object
+        required:
+        - validation
+        - admission
+        properties:
+          validation:
+            type: object
+            required:
+            - family_id
+            - semantic_owner
+            - purpose
+            - additional_required_semantics
+            - result_semantics_source
+            - forbidden
+            properties:
+              family_id: {const: l9.receipt/validation@1}
+              additional_required_semantics: {type: string_list, min_items: 1}
+              forbidden: {type: string_list, min_items: 1}
+          admission:
+            type: object
+            required:
+            - family_id
+            - semantic_owner
+            - purpose
+            - additional_required_semantics
+            - result_semantics_source
+            - forbidden
+            properties:
+              family_id: {const: l9.receipt/admission@1}
+              additional_required_semantics: {type: string_list, min_items: 1}
+              forbidden: {type: string_list, min_items: 1}
+  lifecycle:
+    type: object
+    required:
+    - global_rules
+    - state_semantics
+    - lifecycles
+    properties:
+      global_rules:
+        type: object
+        required:
+        - lifecycle_state_does_not_create_authority
+        - admission_binds_exact_subject_revision_or_digest
+        - admitted_revision_content_is_immutable
+        - unknown_or_unresolved_state_remains_explicit
+        - derived_currentness_is_not_authority
+        - receipt_emission_does_not_imply_subject_admission_or_authorization
+        - published_is_stronger_than_file_presence
+        properties:
+          lifecycle_state_does_not_create_authority: {const: true}
+          admission_binds_exact_subject_revision_or_digest: {const: true}
+          admitted_revision_content_is_immutable: {const: true}
+          unknown_or_unresolved_state_remains_explicit: {const: true}
+          derived_currentness_is_not_authority: {const: true}
+          receipt_emission_does_not_imply_subject_admission_or_authorization: {const: true}
+          published_is_stronger_than_file_presence: {const: true}
+      state_semantics:
+        type: object
+        required:
+        - candidate
+        - admitted
+        - published
+        - current
+        - non_current
+        - superseded
+        - rejected
+        - unresolved
+      lifecycles:
+        type: object
+        required:
+        - published_artifact
+        properties:
+          published_artifact:
+            type: object
+            required:
+            - semantic_owner
+            - purpose
+            - stages
+            - publication_gate
+            - rules
+            properties:
+              stages: {type: string_list, min_items: 1}
+              rules: {type: string_list, min_items: 1}
+  semantic_dependency_model:
+    type: object
+    required:
+    - invalidation_rules
+    properties:
+      invalidation_rules:
+        type: object
+        required:
+        - source_digest_change
+        - profile_digest_change
+        - historical_artifacts_are_immutable
+        - silent_consumption_of_stale_input_forbidden
+        properties:
+          historical_artifacts_are_immutable: {const: true}
+          silent_consumption_of_stale_input_forbidden: {const: true}
+  error_taxonomy:
+    type: object
+    required:
+    - result_domains
+    properties:
+      result_domains:
+        type: object
+        required: [validation]
+        properties:
+          validation: {type: string_list, min_items: 5}

@@ -1725,6 +1725,153 @@ projection_profiles:
     - target_rendering_details
     - unrelated_domain_payloads
 
+- id: l9.projection/pr-audit@1
+  class: consumer
+  consumer: l9-pr-audit
+  purpose: >-
+    Supply a revision-bound pull-request audit consumer with the admitted global law it
+    cites when it judges a candidate change: who holds authority and what evidence may not
+    grant it; what a derived or generated artifact may and may not become; what a receipt,
+    validation result, or green check proves and does not prove; when a prior approval,
+    receipt, or audit stops being current; which capability states are distinct so that
+    file presence never proves reachability; and the canonical vocabulary for provenance,
+    invalidation, supersession, hard constraints, and Unknown. Records are selected by
+    exact id or by whole canonical section. The projection selects admitted global
+    semantics only; it adds no obligation, names no command, host, or adapter, carries no
+    repository-local policy, and grants no mutation, publication, merge, admission, or
+    execution authority; those stay with their owners.
+  sources:
+    vocabulary:
+      selectors:
+        - $.terms.authority
+        - $.terms.law
+        - $.terms.canonical_source
+        - $.terms.semantic_owner
+        - $.terms.semantic_ownership
+        - $.terms.derived_artifact
+        - $.terms.projection
+        - $.terms.provenance
+        - $.terms.semantic_digest
+        - $.terms.receipt
+        - $.terms.validation
+        - $.terms.validation_receipt
+        - $.terms.mechanical_validation
+        - $.terms.conformance
+        - $.terms.constraint
+        - $.terms.hard_constraint
+        - $.terms.admission_decision
+        - $.terms.state_change
+        - $.terms.invalidation
+        - $.terms.impact_analysis
+        - $.terms.dependency_scoped_invalidation
+        - $.terms.surgical_revision
+        - $.terms.semantic_preservation
+        - $.terms.semantic_equivalence
+        - $.terms.unsat_core
+        - $.terms.bounded_autonomy
+        - $.terms.published
+    invariants:
+      selectors:
+        - '$.invariants[?(@.id=="L9-AUTH-001")]'
+        - '$.invariants[?(@.id=="L9-AUTH-002")]'
+        - '$.invariants[?(@.id=="L9-OWNER-001")]'
+        - '$.invariants[?(@.id=="L9-SEM-001")]'
+        - '$.invariants[?(@.id=="L9-SCOPE-001")]'
+        - '$.invariants[?(@.id=="L9-MONOTONIC-001")]'
+        - '$.invariants[?(@.id=="L9-PROMOTION-001")]'
+        - '$.invariants[?(@.id=="L9-DERIVED-001")]'
+        - '$.invariants[?(@.id=="L9-PROJECTION-001")]'
+        - '$.invariants[?(@.id=="L9-GLOBALIZATION-001")]'
+        - '$.invariants[?(@.id=="L9-EVIDENCE-001")]'
+        - '$.invariants[?(@.id=="L9-ASSURANCE-001")]'
+        - '$.invariants[?(@.id=="L9-VALIDATION-001")]'
+        - '$.invariants[?(@.id=="L9-CORRECTNESS-001")]'
+        - '$.invariants[?(@.id=="L9-UNKNOWN-001")]'
+        - '$.invariants[?(@.id=="L9-HARD-001")]'
+        - '$.invariants[?(@.id=="L9-DEGRADE-001")]'
+        - '$.invariants[?(@.id=="L9-PROV-001")]'
+        - '$.invariants[?(@.id=="L9-COORD-001")]'
+        - '$.invariants[?(@.id=="L9-REVISION-001")]'
+        - '$.invariants[?(@.id=="L9-ADMISSION-001")]'
+        - '$.invariants[?(@.id=="L9-IDENTITY-001")]'
+        - '$.invariants[?(@.id=="L9-COMPAT-001")]'
+        - '$.invariants[?(@.id=="L9-CAPABILITY-001")]'
+    contracts:
+      selectors:
+        - '$.contracts[?(@.id=="l9.contract/authority-boundary@1")]'
+        - '$.contracts[?(@.id=="l9.contract/semantic-ownership@1")]'
+        - '$.contracts[?(@.id=="l9.contract/monotonic-subordination@1")]'
+        - '$.contracts[?(@.id=="l9.contract/admission-and-promotion@1")]'
+        - '$.contracts[?(@.id=="l9.contract/derived-artifact@1")]'
+        - '$.contracts[?(@.id=="l9.contract/evidence-and-receipt@1")]'
+        - '$.contracts[?(@.id=="l9.contract/assurance-and-verification@1")]'
+        - '$.contracts[?(@.id=="l9.contract/unknown-and-degradation@1")]'
+        - '$.contracts[?(@.id=="l9.contract/hard-constraint@1")]'
+        - '$.contracts[?(@.id=="l9.contract/provenance-and-coordinate@1")]'
+        - '$.contracts[?(@.id=="l9.contract/semantic-identity-and-compatibility@1")]'
+        - '$.contracts[?(@.id=="l9.contract/revision-and-supersession@1")]'
+        - '$.contracts[?(@.id=="l9.contract/projection@1")]'
+        - '$.contracts[?(@.id=="l9.contract/validation-and-correctness@1")]'
+        - '$.contracts[?(@.id=="l9.contract/capability-state@1")]'
+        - '$.contracts[?(@.id=="l9.contract/conformance-resolution@1")]'
+    authority_model:
+      selectors:
+        - $.authority_classes
+        - $.admission_rules
+        - $.global_admission_rules
+        - $.promotion_rules
+        - $.agent_authority
+        - $.human_authority
+        - $.escalation_rules
+    artifact_model:
+      selectors:
+        - $.authority_classes
+        - $.derivation_rules
+    architecture_rules:
+      selectors:
+        - '$.rules[?(@.id=="l9.arch-rule/canonical-source-multiple-views@1")]'
+    architecture_patterns:
+      selectors:
+        - '$.patterns[?(@.id=="l9.pattern/canonical-source-derived-projections@1")]'
+        - '$.patterns[?(@.id=="l9.pattern/global-plus-domain-layering@1")]'
+        - '$.patterns[?(@.id=="l9.pattern/control-plane-execution-plane-separation@1")]'
+        - '$.patterns[?(@.id=="l9.pattern/authority-candidate-admission@1")]'
+        - '$.patterns[?(@.id=="l9.pattern/immutable-revisioned-state@1")]'
+        - '$.patterns[?(@.id=="l9.pattern/read-model-non-authority@1")]'
+    capabilities:
+      selectors:
+        - $.capability_state_dimensions
+        - $.state_dimension_rules
+    conformance_model:
+      selectors:
+        - $.global_rules
+        - $.conformance_requirement_shape
+    receipt_catalog:
+      selectors:
+        - $.global_rules
+        - $.receipt_kernel
+        - $.receipts.validation
+        - $.receipts.admission
+    lifecycle:
+      selectors:
+        - $.global_rules
+        - $.state_semantics
+        - $.lifecycles.published_artifact
+    semantic_dependency_model:
+      selectors:
+        - $.invalidation_rules
+    error_taxonomy:
+      selectors:
+        - $.result_domains
+  output:
+    schema: l9.projection.pr-audit/v1
+  forbidden:
+    - obligation_not_admitted_in_a_selected_source
+    - skill_command_or_routing_semantics
+    - adapter_host_or_surface_specific_semantics
+    - repository_local_policy_as_global_law
+    - execution_publication_or_merge_authority_grant
+
 projection_engine_contract_ref:
   artifact: projection_engine_contract.yaml
   artifact_id: l9.compiler/projection-engine@1
