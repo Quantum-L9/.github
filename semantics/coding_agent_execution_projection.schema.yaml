@@ -1,0 +1,55 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_coding_agent_execution_projection_payload_schema
+artifact_id: l9.schema/coding-agent-execution-projection@1
+canonical_source:
+  format: yaml
+  artifact: coding_agent_execution_projection.schema.yaml
+governed_by:
+  projection_profile_ref: l9.projection/coding-agent-execution@1
+purpose: 'Define the payload of one source projection emitted under l9.projection/coding-agent-execution@1. The
+  profile selects admitted records by exact id from three registered ledgers, so a payload carries at most the
+  sections its source declares: invariants, contracts, or the four authority_model sections. Each record collection
+  requires the identity fields its canonical source declares. The payload is the exact declared selection of its
+  source, which selection equivalence proves; this schema constrains its shape and adds no meaning, obligation, or
+  authority.
+
+  '
+type: object
+properties:
+  schema:
+    const: l9.projection.coding-agent-execution/v1
+  invariants:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - statement
+      - scope
+      - owner
+  contracts:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - purpose
+      - scope
+      - guarantees
+      - forbidden
+  agent_authority:
+    type: object
+    required:
+    - rules
+  human_authority:
+    type: object
+    required:
+    - rules
+  escalation_rules:
+    type: object
+  admission_rules:
+    type: object

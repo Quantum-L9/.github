@@ -67,6 +67,7 @@ requires:
   - compiler_receipt.schema.yaml
   - architecture_intelligence_projection.schema.yaml
   - architecture_intelligence_composition.schema.yaml
+  - coding_agent_execution_projection.schema.yaml
 capabilities:
 - canonical_source_resolution
 - profile_resolution
