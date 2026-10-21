@@ -73,3 +73,17 @@ placement_strategies:
   rule: A composition profile selects exactly one placement strategy through its merge_strategy.
     A strategy not declared here is unsupported and fails closed. The pipeline above is unchanged
     for every strategy.
+binding_conventions:
+  schema: l9.composition-binding-conventions/v1
+  rule: The composed projection and its receipt use the canonical_json, semantic_digest,
+    receipt_identity and receipt_digest conventions declared in l9.compiler/projection-engine@1
+    binding_conventions (ADR-021).
+  composition_digest:
+    over: the composed projection envelope with its composition_digest field removed
+  subject:
+    exact_subject_ref: <composition_profile_ref>#<projection_profile_ref>
+    output_ref: <composition_profile_ref>#<projection_profile_ref>
+    output_digest: the composed projection's composition_digest
+  components:
+    projection_ref: <projection_profile_ref>#<canonical_source_ref>
+    recorded_with: [source_class, source_ref, source_digest, projection_digest]
