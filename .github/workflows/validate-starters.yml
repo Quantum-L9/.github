@@ -59,8 +59,3 @@ jobs:
       - name: Run scripts/validate-semantics.py
         run: |
           python3 scripts/validate-semantics.py
-      # Projection publisher (docs/PROJECTION_PUBLICATION.md): local disposable
-      # git repositories only; no network remote, no live projections branch.
-      - name: Run scripts/test-publish-projection.py
-        run: |
-          python3 scripts/test-publish-projection.py

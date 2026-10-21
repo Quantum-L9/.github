@@ -12278,7 +12278,7 @@ def check_rc030(docs: dict[str, dict], report: Report) -> None:
         _check_rc030_negative_cases(docs, report)
 
 
-# RC-031 PR-audit projection, source-namespaced composition, payload schemas,
+# RC-032 PR-audit projection, source-namespaced composition, payload schemas,
 # and selection closure (semantic foundation v3.24.0 candidate, ADR-021). One
 # consumer profile, l9.projection/pr-audit@1, selects the admitted global law a
 # revision-bound pull-request audit cites: by exact id from record collections
@@ -12509,13 +12509,13 @@ PRA_SOURCES: dict[str, tuple[str, str, str | None, tuple[str, ...]]] = {
 PRA_SCOPED_COLLECTIONS = {"invariants", "contracts"}
 
 
-def _rc031_fail(
+def _rc032_fail(
     path: str, field: str, value: object, message: str, report: Report
 ) -> None:
-    report.fail("RC-031", path, field, value, message)
+    report.fail("RC-032", path, field, value, message)
 
 
-def _rc031_source_ledger(
+def _rc032_source_ledger(
     name: str, catalog: dict, docs: dict[str, dict], report: Report
 ) -> dict | None:
     ledger_path, artifact_id, _collection, _pinned = PRA_SOURCES[name]
@@ -12528,7 +12528,7 @@ def _rc031_source_ledger(
         or ledger.get("artifact_id") != artifact_id
         or ledger.get("canonical") is not True
     ):
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             f"source_classes.{name}.canonical_artifact",
             declared,
@@ -12544,7 +12544,7 @@ def _rc031_source_ledger(
         or registration.get("canonical") is not True
         or registration.get("projection_allowed") is not True
     ):
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             f"source_classes.{name}",
             ledger_path,
@@ -12556,7 +12556,7 @@ def _rc031_source_ledger(
     return ledger
 
 
-def _rc031_record_selectors(
+def _rc032_record_selectors(
     name: str, selectors: list, ledger: dict, report: Report
 ) -> set[str]:
     ledger_path, _artifact_id, collection, _pinned = PRA_SOURCES[name]
@@ -12570,7 +12570,7 @@ def _rc031_record_selectors(
     for selector in selectors:
         match = ID_EQUALITY_SELECTOR.fullmatch(str(selector))
         if match is None or match.group("collection") != collection:
-            _rc031_fail(
+            _rc032_fail(
                 PROFILES_PATH,
                 field,
                 selector,
@@ -12581,7 +12581,7 @@ def _rc031_record_selectors(
             continue
         record_id = match.group("id")
         if record_id in selected:
-            _rc031_fail(
+            _rc032_fail(
                 PROFILES_PATH,
                 field,
                 selector,
@@ -12591,7 +12591,7 @@ def _rc031_record_selectors(
         selected.add(record_id)
         found = scopes.get(record_id, [])
         if len(found) != 1:
-            _rc031_fail(
+            _rc032_fail(
                 PROFILES_PATH,
                 field,
                 selector,
@@ -12599,7 +12599,7 @@ def _rc031_record_selectors(
                 report,
             )
         elif name in PRA_SCOPED_COLLECTIONS and found[0] != "global":
-            _rc031_fail(
+            _rc032_fail(
                 PROFILES_PATH,
                 field,
                 selector,
@@ -12609,7 +12609,7 @@ def _rc031_record_selectors(
     return selected
 
 
-def _rc031_section_selectors(
+def _rc032_section_selectors(
     name: str, selectors: list, ledger: dict, report: Report
 ) -> set[str]:
     ledger_path = PRA_SOURCES[name][0]
@@ -12624,7 +12624,7 @@ def _rc031_section_selectors(
             child = match.group("child")
             resolved = child is None or (isinstance(section, dict) and child in section)
         if not resolved:
-            _rc031_fail(
+            _rc032_fail(
                 PROFILES_PATH,
                 field,
                 selector,
@@ -12634,7 +12634,7 @@ def _rc031_section_selectors(
             )
             continue
         if text in selected:
-            _rc031_fail(
+            _rc032_fail(
                 PROFILES_PATH,
                 field,
                 selector,
@@ -12645,18 +12645,18 @@ def _rc031_section_selectors(
     return selected
 
 
-def _rc031_source_selection(
+def _rc032_source_selection(
     name: str, sources: dict, catalog: dict, docs: dict[str, dict], report: Report
 ) -> set[str] | None:
     _path, _artifact, collection, pinned = PRA_SOURCES[name]
-    ledger = _rc031_source_ledger(name, catalog, docs, report)
+    ledger = _rc032_source_ledger(name, catalog, docs, report)
     if ledger is None:
         return None
     block = sources.get(name)
     selectors = block.get("selectors") if isinstance(block, dict) else None
     field = f"{PRA_PROFILE_LABEL}.sources.{name}.selectors"
     if not isinstance(selectors, list) or not selectors:
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             field,
             selectors,
@@ -12665,11 +12665,11 @@ def _rc031_source_selection(
         )
         return None
     if collection is None:
-        chosen = _rc031_section_selectors(name, selectors, ledger, report)
+        chosen = _rc032_section_selectors(name, selectors, ledger, report)
     else:
-        chosen = _rc031_record_selectors(name, selectors, ledger, report)
+        chosen = _rc032_record_selectors(name, selectors, ledger, report)
     if chosen != set(pinned):
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             field,
             {
@@ -12683,7 +12683,7 @@ def _rc031_source_selection(
     return chosen
 
 
-def _rc031_closure(
+def _rc032_closure(
     contracts: object, selected: dict[str, set[str]], report: Report
 ) -> None:
     field = f"{PRA_PROFILE_LABEL}.sources.invariants.selectors"
@@ -12694,7 +12694,7 @@ def _rc031_closure(
         cited = contract.get("source_invariants")
         for invariant in cited if isinstance(cited, list) else []:
             if not isinstance(invariant, str):
-                _rc031_fail(
+                _rc032_fail(
                     PROFILES_PATH,
                     field,
                     invariant,
@@ -12703,7 +12703,7 @@ def _rc031_closure(
                     report,
                 )
             elif invariant not in selected["invariants"]:
-                _rc031_fail(
+                _rc032_fail(
                     PROFILES_PATH,
                     field,
                     invariant,
@@ -12713,7 +12713,7 @@ def _rc031_closure(
                 )
 
 
-def _rc031_exclusions(
+def _rc032_exclusions(
     profile: dict, catalog: dict, docs: dict[str, dict], report: Report
 ) -> None:
     """No selector of the profile may overlap a payload_excludes entry for its
@@ -12730,7 +12730,7 @@ def _rc031_exclusions(
             not isinstance(definition, dict)
             or definition.get("criterion") not in FORBIDDEN_CRITERIA
         ):
-            _rc031_fail(
+            _rc032_fail(
                 PROFILES_PATH,
                 field,
                 definition,
@@ -12795,7 +12795,7 @@ def _rc031_exclusions(
             else:
                 overlapping = selectors
             if overlapping:
-                _rc031_fail(
+                _rc032_fail(
                     PROFILES_PATH,
                     field,
                     {"excluded": excluded, "selectors": overlapping},
@@ -12805,12 +12805,12 @@ def _rc031_exclusions(
                 )
 
 
-def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> None:
+def _rc032_composition(profile: dict, docs: dict[str, dict], report: Report) -> None:
     sources = _mapping(profile.get("sources"))
     for schema_id in (PRA_OUTPUT_SCHEMA, PRA_COMPOSED_SCHEMA):
         defining = _rc030_schema_defining(docs, schema_id)
         if len(defining) != 1:
-            _rc031_fail(
+            _rc032_fail(
                 COMPILER_MANIFEST_PATH,
                 "requires.artifact_schemas",
                 defining,
@@ -12821,7 +12821,7 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
         schema_path = f"semantics/{defining[0]}"
         observed = _rc028_profile_digest(docs.get(schema_path) or {})
         if observed != PRA_SCHEMA_DIGESTS[schema_id]:
-            _rc031_fail(
+            _rc032_fail(
                 schema_path,
                 "digest",
                 observed,
@@ -12835,7 +12835,7 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
         schema = docs.get(schema_path) or {}
         expected = list(sources)
         if schema.get("type") != "object" or schema.get("required") != expected:
-            _rc031_fail(
+            _rc032_fail(
                 schema_path,
                 "required",
                 schema.get("required"),
@@ -12844,7 +12844,7 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
             )
         properties = _mapping(schema.get("properties"))
         if set(properties) != {"schema", *expected}:
-            _rc031_fail(
+            _rc032_fail(
                 schema_path,
                 "properties",
                 sorted(properties),
@@ -12866,7 +12866,7 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
                 namespace.get("type") != "object"
                 or namespace.get("required") != sections
             ):
-                _rc031_fail(
+                _rc032_fail(
                     schema_path,
                     f"properties.{source_class}.required",
                     namespace.get("required"),
@@ -12874,7 +12874,7 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
                     report,
                 )
             if set(_mapping(namespace.get("properties"))) != set(sections):
-                _rc031_fail(
+                _rc032_fail(
                     schema_path,
                     f"properties.{source_class}.properties",
                     sorted(_mapping(namespace.get("properties"))),
@@ -12884,7 +12884,7 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
     compositions = (docs.get(COMPOSITION_PROFILES_PATH) or {}).get("profiles") or []
     composition, count = _unique_entry(compositions, "id", PRA_COMPOSITION_ID)
     if composition is None:
-        _rc031_fail(
+        _rc032_fail(
             COMPOSITION_PROFILES_PATH,
             PRA_COMPOSITION_ID,
             count,
@@ -12894,7 +12894,7 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
         return
     clabel = f"profiles[{PRA_COMPOSITION_ID}]"
     if composition.get("composes") != {"projection_profile": PRA_PROFILE_ID}:
-        _rc031_fail(
+        _rc032_fail(
             COMPOSITION_PROFILES_PATH,
             f"{clabel}.composes",
             composition.get("composes"),
@@ -12902,7 +12902,7 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
             report,
         )
     if composition.get("merge_strategy") != NAMESPACE_STRATEGY:
-        _rc031_fail(
+        _rc032_fail(
             COMPOSITION_PROFILES_PATH,
             f"{clabel}.merge_strategy",
             composition.get("merge_strategy"),
@@ -12910,7 +12910,7 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
             report,
         )
     if (composition.get("output") or {}) != {"schema": PRA_COMPOSED_SCHEMA}:
-        _rc031_fail(
+        _rc032_fail(
             COMPOSITION_PROFILES_PATH,
             f"{clabel}.output",
             composition.get("output"),
@@ -12918,7 +12918,7 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
             report,
         )
     if _rc028_profile_digest(composition) != PRA_COMPOSITION_DIGEST:
-        _rc031_fail(
+        _rc032_fail(
             COMPOSITION_PROFILES_PATH,
             f"{clabel}.digest",
             _rc028_profile_digest(composition),
@@ -12927,13 +12927,13 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
         )
 
 
-def _evaluate_rc031(docs: dict[str, dict], report: Report) -> None:
+def _evaluate_rc032(docs: dict[str, dict], report: Report) -> None:
     catalog = docs.get(PROFILES_PATH) or {}
     profile, count = _unique_entry(
         catalog.get("projection_profiles"), "id", PRA_PROFILE_ID
     )
     if count != 1 or profile is None:
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             "projection_profiles",
             PRA_PROFILE_ID,
@@ -12943,7 +12943,7 @@ def _evaluate_rc031(docs: dict[str, dict], report: Report) -> None:
         return
     label = PRA_PROFILE_LABEL
     if set(profile) != PRA_PROFILE_KEYS:
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             f"{label}.keys",
             sorted(map(str, profile)),
@@ -12953,7 +12953,7 @@ def _evaluate_rc031(docs: dict[str, dict], report: Report) -> None:
             report,
         )
     if profile.get("class") != "consumer" or profile.get("consumer") != PRA_CONSUMER:
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             f"{label}.consumer",
             profile.get("consumer"),
@@ -12961,7 +12961,7 @@ def _evaluate_rc031(docs: dict[str, dict], report: Report) -> None:
             report,
         )
     if _mapping(profile.get("output")) != {"schema": PRA_OUTPUT_SCHEMA}:
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             f"{label}.output",
             profile.get("output"),
@@ -12969,7 +12969,7 @@ def _evaluate_rc031(docs: dict[str, dict], report: Report) -> None:
             report,
         )
     if tuple(_list(profile.get("forbidden"))) != PRA_FORBIDDEN:
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             f"{label}.forbidden",
             profile.get("forbidden"),
@@ -12986,7 +12986,7 @@ def _evaluate_rc031(docs: dict[str, dict], report: Report) -> None:
         }
     )
     if skill_refs:
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             label,
             skill_refs,
@@ -12996,7 +12996,7 @@ def _evaluate_rc031(docs: dict[str, dict], report: Report) -> None:
         )
     digest = _rc028_profile_digest(profile)
     if digest != PRA_PROFILE_DIGEST:
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             f"{label}.digest",
             digest,
@@ -13006,7 +13006,7 @@ def _evaluate_rc031(docs: dict[str, dict], report: Report) -> None:
         )
     sources = profile.get("sources")
     if not isinstance(sources, dict):
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             f"{label}.sources",
             sources,
@@ -13015,7 +13015,7 @@ def _evaluate_rc031(docs: dict[str, dict], report: Report) -> None:
         )
         return
     if list(sources) != list(PRA_SOURCES):
-        _rc031_fail(
+        _rc032_fail(
             PROFILES_PATH,
             f"{label}.sources",
             list(map(str, sources)),
@@ -13025,18 +13025,18 @@ def _evaluate_rc031(docs: dict[str, dict], report: Report) -> None:
     selected: dict[str, set[str]] = {}
     for name in PRA_SOURCES:
         if name in sources:
-            chosen = _rc031_source_selection(name, sources, catalog, docs, report)
+            chosen = _rc032_source_selection(name, sources, catalog, docs, report)
             if chosen is not None:
                 selected[name] = chosen
     if "contracts" in selected and "invariants" in selected:
-        _rc031_closure(
+        _rc032_closure(
             (docs.get(CONTRACTS_PATH) or {}).get("contracts"), selected, report
         )
-    _rc031_exclusions(profile, catalog, docs, report)
-    _rc031_composition(profile, docs, report)
+    _rc032_exclusions(profile, catalog, docs, report)
+    _rc032_composition(profile, docs, report)
 
 
-def _check_rc031_negative_cases(docs: dict[str, dict], report: Report) -> None:
+def _check_rc032_negative_cases(docs: dict[str, dict], report: Report) -> None:
     selectors = f"{PRA_PROFILE_LABEL}.sources.{{}}.selectors"
 
     def mutated(path: str, mutate) -> dict[str, dict]:
@@ -13326,34 +13326,34 @@ def _check_rc031_negative_cases(docs: dict[str, dict], report: Report) -> None:
     ledger_side = {CANONICAL_SOURCES_PATH, INVARIANTS_PATH, CONTRACTS_PATH}
     for label, path, mutate, field in cases:
         candidate_report = Report()
-        _evaluate_rc031(mutated(path, mutate), candidate_report)
+        _evaluate_rc032(mutated(path, mutate), candidate_report)
         report_path = PROFILES_PATH if path in ledger_side else path
-        prefix = f"FAIL RC-031 {report_path} {field}="
+        prefix = f"FAIL RC-032 {report_path} {field}="
         if not any(f.startswith(prefix) for f in candidate_report.failures):
             report.fail(
-                "RC-031",
+                "RC-032",
                 VALIDATOR_PATH,
                 "negative_case",
                 label,
                 f"negative case did not fail closed at {path} {field}",
             )
     if not any(
-        f.startswith(f"FAIL RC-031 {VALIDATOR_PATH} negative_case")
+        f.startswith(f"FAIL RC-032 {VALIDATOR_PATH} negative_case")
         for f in report.failures
     ):
         report.ok(
-            "RC-031-NEG",
+            "RC-032-NEG",
             f"{len(cases)} pr-audit projection negative cases fail closed at their intended field",
         )
 
 
-def check_rc031(docs: dict[str, dict], report: Report) -> None:
+def check_rc032(docs: dict[str, dict], report: Report) -> None:
     before = len(report.failures)
-    _evaluate_rc031(docs, report)
+    _evaluate_rc032(docs, report)
     if len(report.failures) == before:
         pinned = {name: len(spec[3]) for name, spec in PRA_SOURCES.items()}
         report.ok(
-            "RC-031",
+            "RC-032",
             f"{PRA_PROFILE_ID} exists once as the {PRA_CONSUMER} consumer profile at its pinned "
             f"digest, selects {pinned['invariants']} global invariants, {pinned['contracts']} "
             "global contracts closed over their source_invariants, and whole sections from "
@@ -13364,7 +13364,7 @@ def check_rc031(docs: dict[str, dict], report: Report) -> None:
             "and the composed schema names exactly one namespace per declared source class with "
             "exactly its selected sections",
         )
-        _check_rc031_negative_cases(docs, report)
+        _check_rc032_negative_cases(docs, report)
 
 
 def main(argv: list[str]) -> int:
@@ -13428,7 +13428,7 @@ def main(argv: list[str]) -> int:
     check_rc028(docs, report)
     check_rc029(root, docs, report)
     check_rc030(docs, report)
-    check_rc031(docs, report)
+    check_rc032(docs, report)
     check_sc009(observed, root, report)
     for line in report.passes:
         print(line)
