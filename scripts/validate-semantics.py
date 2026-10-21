@@ -12315,7 +12315,15 @@ PRA_FORBIDDEN = (
     "repository_local_policy_as_global_law",
     "execution_publication_or_merge_authority_grant",
 )
-PRA_PROFILE_KEYS = {"id", "class", "consumer", "purpose", "sources", "output", "forbidden"}
+PRA_PROFILE_KEYS = {
+    "id",
+    "class",
+    "consumer",
+    "purpose",
+    "sources",
+    "output",
+    "forbidden",
+}
 # The consumer is named only by the `consumer` field; no other string may bind
 # the profile to a skill pack or a skill file.
 PRA_SKILL_REFERENCE = re.compile(r"skills/|SKILL\.md", re.IGNORECASE)
@@ -12574,7 +12582,11 @@ def _rc031_record_selectors(
         record_id = match.group("id")
         if record_id in selected:
             _rc031_fail(
-                PROFILES_PATH, field, selector, "selector is declared more than once", report
+                PROFILES_PATH,
+                field,
+                selector,
+                "selector is declared more than once",
+                report,
             )
         selected.add(record_id)
         found = scopes.get(record_id, [])
@@ -12610,9 +12622,7 @@ def _rc031_section_selectors(
         if match is not None and match.group("section") in ledger:
             section = ledger[match.group("section")]
             child = match.group("child")
-            resolved = child is None or (
-                isinstance(section, dict) and child in section
-            )
+            resolved = child is None or (isinstance(section, dict) and child in section)
         if not resolved:
             _rc031_fail(
                 PROFILES_PATH,
@@ -12625,7 +12635,11 @@ def _rc031_section_selectors(
             continue
         if text in selected:
             _rc031_fail(
-                PROFILES_PATH, field, selector, "selector is declared more than once", report
+                PROFILES_PATH,
+                field,
+                selector,
+                "selector is declared more than once",
+                report,
             )
         selected.add(text)
     return selected
@@ -12705,7 +12719,9 @@ def _rc031_exclusions(
     """No selector of the profile may overlap a payload_excludes entry for its
     own source class: the producer decides the criterion against the canonical
     source, so an overlapping selection fails the receipt closed."""
-    definitions = _mapping(_mapping(catalog.get("forbidden_constraints")).get("definitions"))
+    definitions = _mapping(
+        _mapping(catalog.get("forbidden_constraints")).get("definitions")
+    )
     sources = _mapping(profile.get("sources"))
     for token in PRA_FORBIDDEN:
         definition = definitions.get(token)
@@ -12732,7 +12748,8 @@ def _rc031_exclusions(
             if source_class not in sources:
                 continue
             selectors = [
-                str(s) for s in _list(_mapping(sources.get(source_class)).get("selectors"))
+                str(s)
+                for s in _list(_mapping(sources.get(source_class)).get("selectors"))
             ]
             section_match = PRA_SECTION_SELECTOR.fullmatch(excluded)
             filter_match = PRA_EXCLUSION_FILTER.fullmatch(excluded)
@@ -12839,11 +12856,16 @@ def _rc031_composition(profile: dict, docs: dict[str, dict], report: Report) -> 
             sections = list(
                 dict.fromkeys(
                     _rc030_section(s)
-                    for s in (_mapping(sources.get(source_class)).get("selectors") or [])
+                    for s in (
+                        _mapping(sources.get(source_class)).get("selectors") or []
+                    )
                     if isinstance(s, str)
                 )
             )
-            if namespace.get("type") != "object" or namespace.get("required") != sections:
+            if (
+                namespace.get("type") != "object"
+                or namespace.get("required") != sections
+            ):
                 _rc031_fail(
                     schema_path,
                     f"properties.{source_class}.required",
@@ -13090,7 +13112,9 @@ def _check_rc031_negative_cases(docs: dict[str, dict], report: Report) -> None:
         (
             "skill dependency",
             PROFILES_PATH,
-            lambda d: pra(d).update(purpose=pra(d)["purpose"] + " Bound through skills/x."),
+            lambda d: pra(d).update(
+                purpose=pra(d)["purpose"] + " Bound through skills/x."
+            ),
             PRA_PROFILE_LABEL,
         ),
         (
@@ -13185,7 +13209,10 @@ def _check_rc031_negative_cases(docs: dict[str, dict], report: Report) -> None:
             lambda d: d["forbidden_constraints"]["definitions"][
                 "skill_command_or_routing_semantics"
             ]["excluded_selections"].append(
-                {"source_class": "capabilities", "selector": "$.capability_state_dimensions"}
+                {
+                    "source_class": "capabilities",
+                    "selector": "$.capability_state_dimensions",
+                }
             ),
             "forbidden_constraints.definitions.skill_command_or_routing_semantics",
         ),
@@ -13206,15 +13233,17 @@ def _check_rc031_negative_cases(docs: dict[str, dict], report: Report) -> None:
         (
             "source not projectable",
             CANONICAL_SOURCES_PATH,
-            lambda d: _unique_entry(d["sources"], "path", "semantics/receipt_catalog.yaml")[
-                0
-            ].update(projection_allowed=False),
+            lambda d: _unique_entry(
+                d["sources"], "path", "semantics/receipt_catalog.yaml"
+            )[0].update(projection_allowed=False),
             "source_classes.receipt_catalog",
         ),
         (
             "selected invariant demoted from global",
             INVARIANTS_PATH,
-            lambda d: ledger_record(d, "invariants", "L9-HARD-001").update(scope="domain"),
+            lambda d: ledger_record(d, "invariants", "L9-HARD-001").update(
+                scope="domain"
+            ),
             selectors.format("invariants"),
         ),
         (
@@ -13234,9 +13263,7 @@ def _check_rc031_negative_cases(docs: dict[str, dict], report: Report) -> None:
         (
             "composition retargeted",
             COMPOSITION_PROFILES_PATH,
-            lambda d: comp(d).update(
-                composes={"projection_profile": AI_PROFILE_ID}
-            ),
+            lambda d: comp(d).update(composes={"projection_profile": AI_PROFILE_ID}),
             f"profiles[{PRA_COMPOSITION_ID}].composes",
         ),
         (
@@ -13272,9 +13299,9 @@ def _check_rc031_negative_cases(docs: dict[str, dict], report: Report) -> None:
         (
             "composed schema scope pin removed",
             composed_path,
-            lambda d: d["properties"]["invariants"]["properties"]["invariants"]["items"][
-                "properties"
-            ].pop("scope"),
+            lambda d: d["properties"]["invariants"]["properties"]["invariants"][
+                "items"
+            ]["properties"].pop("scope"),
             "digest",
         ),
         (
