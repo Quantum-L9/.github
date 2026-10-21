@@ -68,6 +68,8 @@ requires:
   - architecture_intelligence_projection.schema.yaml
   - architecture_intelligence_composition.schema.yaml
   - coding_agent_execution_projection.schema.yaml
+  - pr_audit_projection.schema.yaml
+  - pr_audit_composition.schema.yaml
 capabilities:
 - canonical_source_resolution
 - profile_resolution

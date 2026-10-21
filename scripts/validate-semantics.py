@@ -12278,6 +12278,1095 @@ def check_rc030(docs: dict[str, dict], report: Report) -> None:
         _check_rc030_negative_cases(docs, report)
 
 
+# RC-032 PR-audit projection, source-namespaced composition, payload schemas,
+# and selection closure (semantic foundation v3.25.0 candidate, ADR-022). One
+# consumer profile, l9.projection/pr-audit@1, selects the admitted global law a
+# revision-bound pull-request audit cites: by exact id from record collections
+# and by whole section from the other ledgers. The profile, its composition
+# profile, and both payload schemas are pinned whole by canonical-JSON digest
+# (validator-local, as RC-028 and RC-030): an in-place change is a new version.
+# Selected contracts close over their source_invariants, every source is a
+# registered canonical ledger that permits projection, no selector overlaps a
+# forbidden exclusion for its own source class, and the composed schema names
+# exactly one namespace per declared source class with exactly the sections
+# its selectors produce. The check adds no invariant, contract, or criterion.
+PRA_PROFILE_ID = "l9.projection/pr-audit@1"
+PRA_CONSUMER = "l9-pr-audit"
+PRA_OUTPUT_SCHEMA = "l9.projection.pr-audit/v1"
+PRA_COMPOSITION_ID = "l9.compose/pr-audit@1"
+PRA_COMPOSED_SCHEMA = "l9.composed-projection.pr-audit/v1"
+PRA_PROFILE_LABEL = f"projection_profiles[{PRA_PROFILE_ID}]"
+PRA_PROFILE_DIGEST = "f38e47275f08cfe0d14af80d470a7e90af645d9e4612860062c16cbc57812941"
+PRA_COMPOSITION_DIGEST = (
+    "b5807ebc8cc2d4ddd918a42f527738fe16aff4eda9cfb1d46998a2a50297bb90"
+)
+PRA_SCHEMA_DIGESTS = {
+    PRA_OUTPUT_SCHEMA: (
+        "a20fa7af89297ecd2504714c14688191a5e7dc2de328e61c560144c9d719d4fe"
+    ),
+    PRA_COMPOSED_SCHEMA: (
+        "04de5a6495d7f39e88091035e378d188978c74d27cd5f6feebaeb1381e3db7f0"
+    ),
+}
+PRA_FORBIDDEN = (
+    "obligation_not_admitted_in_a_selected_source",
+    "skill_command_or_routing_semantics",
+    "adapter_host_or_surface_specific_semantics",
+    "repository_local_policy_as_global_law",
+    "execution_publication_or_merge_authority_grant",
+)
+PRA_PROFILE_KEYS = {
+    "id",
+    "class",
+    "consumer",
+    "purpose",
+    "sources",
+    "output",
+    "forbidden",
+}
+# The consumer is named only by the `consumer` field; no other string may bind
+# the profile to a skill pack or a skill file.
+PRA_SKILL_REFERENCE = re.compile(r"skills/|SKILL\.md", re.IGNORECASE)
+PRA_SECTION_SELECTOR = re.compile(
+    r"^\$\.(?P<section>[A-Za-z_]\w*)(?:\.(?P<child>[A-Za-z_]\w*))?$"
+)
+PRA_EXCLUSION_FILTER = re.compile(
+    r'^\$\.(?P<collection>[A-Za-z_]\w*)\[\?\(@\.(?P<field>[A-Za-z_]\w*)=="(?P<value>[^"]*)"\)\]$'
+)
+# source class -> (ledger path, artifact_id, id-keyed collection or None,
+# pinned record ids or pinned section selectors)
+PRA_SOURCES: dict[str, tuple[str, str, str | None, tuple[str, ...]]] = {
+    "vocabulary": (
+        "semantics/vocabulary.yaml",
+        "l9.vocabulary/global@1",
+        None,
+        (
+            "$.terms.authority",
+            "$.terms.law",
+            "$.terms.canonical_source",
+            "$.terms.semantic_owner",
+            "$.terms.semantic_ownership",
+            "$.terms.derived_artifact",
+            "$.terms.projection",
+            "$.terms.provenance",
+            "$.terms.semantic_digest",
+            "$.terms.receipt",
+            "$.terms.validation",
+            "$.terms.validation_receipt",
+            "$.terms.mechanical_validation",
+            "$.terms.conformance",
+            "$.terms.constraint",
+            "$.terms.hard_constraint",
+            "$.terms.admission_decision",
+            "$.terms.state_change",
+            "$.terms.invalidation",
+            "$.terms.impact_analysis",
+            "$.terms.dependency_scoped_invalidation",
+            "$.terms.surgical_revision",
+            "$.terms.semantic_preservation",
+            "$.terms.semantic_equivalence",
+            "$.terms.unsat_core",
+            "$.terms.bounded_autonomy",
+            "$.terms.published",
+        ),
+    ),
+    "invariants": (
+        INVARIANTS_PATH,
+        "l9.invariants/global@1",
+        "invariants",
+        (
+            "L9-AUTH-001",
+            "L9-AUTH-002",
+            "L9-OWNER-001",
+            "L9-SEM-001",
+            "L9-SCOPE-001",
+            "L9-MONOTONIC-001",
+            "L9-PROMOTION-001",
+            "L9-DERIVED-001",
+            "L9-PROJECTION-001",
+            "L9-GLOBALIZATION-001",
+            "L9-EVIDENCE-001",
+            "L9-ASSURANCE-001",
+            "L9-VALIDATION-001",
+            "L9-CORRECTNESS-001",
+            "L9-UNKNOWN-001",
+            "L9-HARD-001",
+            "L9-DEGRADE-001",
+            "L9-PROV-001",
+            "L9-COORD-001",
+            "L9-REVISION-001",
+            "L9-ADMISSION-001",
+            "L9-IDENTITY-001",
+            "L9-COMPAT-001",
+            "L9-CAPABILITY-001",
+        ),
+    ),
+    "contracts": (
+        CONTRACTS_PATH,
+        "l9.contracts/global@1",
+        "contracts",
+        (
+            "l9.contract/authority-boundary@1",
+            "l9.contract/semantic-ownership@1",
+            "l9.contract/monotonic-subordination@1",
+            "l9.contract/admission-and-promotion@1",
+            "l9.contract/derived-artifact@1",
+            "l9.contract/evidence-and-receipt@1",
+            "l9.contract/assurance-and-verification@1",
+            "l9.contract/unknown-and-degradation@1",
+            "l9.contract/hard-constraint@1",
+            "l9.contract/provenance-and-coordinate@1",
+            "l9.contract/semantic-identity-and-compatibility@1",
+            "l9.contract/revision-and-supersession@1",
+            "l9.contract/projection@1",
+            "l9.contract/validation-and-correctness@1",
+            "l9.contract/capability-state@1",
+            "l9.contract/conformance-resolution@1",
+        ),
+    ),
+    "authority_model": (
+        AUTHORITY_MODEL_PATH,
+        "l9.authority-model/global@1",
+        None,
+        (
+            "$.authority_classes",
+            "$.admission_rules",
+            "$.global_admission_rules",
+            "$.promotion_rules",
+            "$.agent_authority",
+            "$.human_authority",
+            "$.escalation_rules",
+        ),
+    ),
+    "artifact_model": (
+        "semantics/artifact_model.yaml",
+        "l9.artifact-model/global@1",
+        None,
+        ("$.authority_classes", "$.derivation_rules"),
+    ),
+    "architecture_rules": (
+        "semantics/architecture_rules.yaml",
+        "l9.architecture-rules/global@1",
+        "rules",
+        ("l9.arch-rule/canonical-source-multiple-views@1",),
+    ),
+    "architecture_patterns": (
+        "semantics/architecture_patterns.yaml",
+        "l9.architecture-patterns/global@1",
+        "patterns",
+        (
+            "l9.pattern/canonical-source-derived-projections@1",
+            "l9.pattern/global-plus-domain-layering@1",
+            "l9.pattern/control-plane-execution-plane-separation@1",
+            "l9.pattern/authority-candidate-admission@1",
+            "l9.pattern/immutable-revisioned-state@1",
+            "l9.pattern/read-model-non-authority@1",
+        ),
+    ),
+    "capabilities": (
+        "semantics/capabilities.yaml",
+        "l9.capabilities/global@1",
+        None,
+        ("$.capability_state_dimensions", "$.state_dimension_rules"),
+    ),
+    "conformance_model": (
+        "semantics/conformance_model.yaml",
+        "l9.conformance-model/global@1",
+        None,
+        ("$.global_rules", "$.conformance_requirement_shape"),
+    ),
+    "receipt_catalog": (
+        "semantics/receipt_catalog.yaml",
+        "l9.receipt-catalog/global@1",
+        None,
+        (
+            "$.global_rules",
+            "$.receipt_kernel",
+            "$.receipts.validation",
+            "$.receipts.admission",
+        ),
+    ),
+    "lifecycle": (
+        "semantics/lifecycle.yaml",
+        "l9.lifecycle/global@1",
+        None,
+        ("$.global_rules", "$.state_semantics", "$.lifecycles.published_artifact"),
+    ),
+    "semantic_dependency_model": (
+        "semantics/semantic_dependency_model.yaml",
+        "l9.semantic-dependency-model/global@1",
+        None,
+        ("$.invalidation_rules",),
+    ),
+    "error_taxonomy": (
+        "semantics/error_taxonomy.yaml",
+        "l9.error-taxonomy/global@1",
+        None,
+        ("$.result_domains",),
+    ),
+}
+# Record collections whose records carry a scope; a selected record must be global.
+PRA_SCOPED_COLLECTIONS = {"invariants", "contracts"}
+
+
+def _rc032_fail(
+    path: str, field: str, value: object, message: str, report: Report
+) -> None:
+    report.fail("RC-032", path, field, value, message)
+
+
+def _rc032_source_ledger(
+    name: str, catalog: dict, docs: dict[str, dict], report: Report
+) -> dict | None:
+    ledger_path, artifact_id, _collection, _pinned = PRA_SOURCES[name]
+    declared = _mapping(_mapping(catalog.get("source_classes")).get(name)).get(
+        "canonical_artifact"
+    )
+    ledger = docs.get(ledger_path) or {}
+    if (
+        declared != ledger_path.removeprefix("semantics/")
+        or ledger.get("artifact_id") != artifact_id
+        or ledger.get("canonical") is not True
+    ):
+        _rc032_fail(
+            PROFILES_PATH,
+            f"source_classes.{name}.canonical_artifact",
+            declared,
+            f"source {name} must resolve to the canonical ledger {ledger_path} ({artifact_id})",
+            report,
+        )
+        return None
+    registry = (docs.get(CANONICAL_SOURCES_PATH) or {}).get("sources")
+    registration, count = _unique_entry(registry, "path", ledger_path)
+    if (
+        count != 1
+        or registration is None
+        or registration.get("canonical") is not True
+        or registration.get("projection_allowed") is not True
+    ):
+        _rc032_fail(
+            PROFILES_PATH,
+            f"source_classes.{name}",
+            ledger_path,
+            f"source {name} must be registered once in {CANONICAL_SOURCES_PATH} as canonical "
+            "with projection_allowed: true",
+            report,
+        )
+        return None
+    return ledger
+
+
+def _rc032_record_selectors(
+    name: str, selectors: list, ledger: dict, report: Report
+) -> set[str]:
+    ledger_path, _artifact_id, collection, _pinned = PRA_SOURCES[name]
+    field = f"{PRA_PROFILE_LABEL}.sources.{name}.selectors"
+    records = ledger.get(collection)
+    scopes: dict[str, list] = {}
+    for record in records if isinstance(records, list) else []:
+        if isinstance(record, dict) and isinstance(record.get("id"), str):
+            scopes.setdefault(record["id"], []).append(record.get("scope"))
+    selected: set[str] = set()
+    for selector in selectors:
+        match = ID_EQUALITY_SELECTOR.fullmatch(str(selector))
+        if match is None or match.group("collection") != collection:
+            _rc032_fail(
+                PROFILES_PATH,
+                field,
+                selector,
+                f'selector must be an exact-id filter $.{collection}[?(@.id=="<id>")]; '
+                "wildcard, scope, field, and membership selectors are not admitted here",
+                report,
+            )
+            continue
+        record_id = match.group("id")
+        if record_id in selected:
+            _rc032_fail(
+                PROFILES_PATH,
+                field,
+                selector,
+                "selector is declared more than once",
+                report,
+            )
+        selected.add(record_id)
+        found = scopes.get(record_id, [])
+        if len(found) != 1:
+            _rc032_fail(
+                PROFILES_PATH,
+                field,
+                selector,
+                f"selector must resolve to exactly one record in {ledger_path} (found {len(found)})",
+                report,
+            )
+        elif name in PRA_SCOPED_COLLECTIONS and found[0] != "global":
+            _rc032_fail(
+                PROFILES_PATH,
+                field,
+                selector,
+                f"selected record must have scope global (found {found[0]!r})",
+                report,
+            )
+    return selected
+
+
+def _rc032_section_selectors(
+    name: str, selectors: list, ledger: dict, report: Report
+) -> set[str]:
+    ledger_path = PRA_SOURCES[name][0]
+    field = f"{PRA_PROFILE_LABEL}.sources.{name}.selectors"
+    selected: set[str] = set()
+    for selector in selectors:
+        text = str(selector)
+        match = PRA_SECTION_SELECTOR.fullmatch(text)
+        resolved = False
+        if match is not None and match.group("section") in ledger:
+            section = ledger[match.group("section")]
+            child = match.group("child")
+            resolved = child is None or (isinstance(section, dict) and child in section)
+        if not resolved:
+            _rc032_fail(
+                PROFILES_PATH,
+                field,
+                selector,
+                f"selector must name one top-level section of {ledger_path}, or one "
+                "named child of a mapping section",
+                report,
+            )
+            continue
+        if text in selected:
+            _rc032_fail(
+                PROFILES_PATH,
+                field,
+                selector,
+                "selector is declared more than once",
+                report,
+            )
+        selected.add(text)
+    return selected
+
+
+def _rc032_source_selection(
+    name: str, sources: dict, catalog: dict, docs: dict[str, dict], report: Report
+) -> set[str] | None:
+    _path, _artifact, collection, pinned = PRA_SOURCES[name]
+    ledger = _rc032_source_ledger(name, catalog, docs, report)
+    if ledger is None:
+        return None
+    block = sources.get(name)
+    selectors = block.get("selectors") if isinstance(block, dict) else None
+    field = f"{PRA_PROFILE_LABEL}.sources.{name}.selectors"
+    if not isinstance(selectors, list) or not selectors:
+        _rc032_fail(
+            PROFILES_PATH,
+            field,
+            selectors,
+            "pr-audit source must own a non-empty selectors list",
+            report,
+        )
+        return None
+    if collection is None:
+        chosen = _rc032_section_selectors(name, selectors, ledger, report)
+    else:
+        chosen = _rc032_record_selectors(name, selectors, ledger, report)
+    if chosen != set(pinned):
+        _rc032_fail(
+            PROFILES_PATH,
+            field,
+            {
+                "missing": sorted(set(pinned) - chosen),
+                "unexpected": sorted(chosen - set(pinned)),
+            },
+            f"{PRA_PROFILE_ID} is immutable: its {name} selection must be exactly the pinned "
+            "set; a different selection is a new profile version",
+            report,
+        )
+    return chosen
+
+
+def _rc032_closure(
+    contracts: object, selected: dict[str, set[str]], report: Report
+) -> None:
+    field = f"{PRA_PROFILE_LABEL}.sources.invariants.selectors"
+    for contract in contracts if isinstance(contracts, list) else []:
+        contract_id = contract.get("id") if isinstance(contract, dict) else None
+        if not isinstance(contract_id, str) or contract_id not in selected["contracts"]:
+            continue
+        cited = contract.get("source_invariants")
+        for invariant in cited if isinstance(cited, list) else []:
+            if not isinstance(invariant, str):
+                _rc032_fail(
+                    PROFILES_PATH,
+                    field,
+                    invariant,
+                    f"selected contract {contract_id} cites a non-string source_invariants "
+                    "entry; closure cannot be decided, so it fails closed",
+                    report,
+                )
+            elif invariant not in selected["invariants"]:
+                _rc032_fail(
+                    PROFILES_PATH,
+                    field,
+                    invariant,
+                    f"selected contract {contract_id} cites an invariant the profile does not "
+                    "select; the projection must close over its contracts' source_invariants",
+                    report,
+                )
+
+
+def _rc032_exclusions(
+    profile: dict, catalog: dict, docs: dict[str, dict], report: Report
+) -> None:
+    """No selector of the profile may overlap a payload_excludes entry for its
+    own source class: the producer decides the criterion against the canonical
+    source, so an overlapping selection fails the receipt closed."""
+    definitions = _mapping(
+        _mapping(catalog.get("forbidden_constraints")).get("definitions")
+    )
+    sources = _mapping(profile.get("sources"))
+    for token in PRA_FORBIDDEN:
+        definition = definitions.get(token)
+        field = f"forbidden_constraints.definitions.{token}"
+        if (
+            not isinstance(definition, dict)
+            or definition.get("criterion") not in FORBIDDEN_CRITERIA
+        ):
+            _rc032_fail(
+                PROFILES_PATH,
+                field,
+                definition,
+                f"must declare one of {sorted(FORBIDDEN_CRITERIA)}",
+                report,
+            )
+            continue
+        if definition["criterion"] != "payload_excludes":
+            continue
+        for entry in _list(definition.get("excluded_selections")):
+            if not isinstance(entry, dict):
+                continue
+            source_class = entry.get("source_class")
+            excluded = str(entry.get("selector", ""))
+            if source_class not in sources:
+                continue
+            selectors = [
+                str(s)
+                for s in _list(_mapping(sources.get(source_class)).get("selectors"))
+            ]
+            section_match = PRA_SECTION_SELECTOR.fullmatch(excluded)
+            filter_match = PRA_EXCLUSION_FILTER.fullmatch(excluded)
+            overlapping: list[str] = []
+            if section_match is not None:
+                ex_section = section_match.group("section")
+                ex_child = section_match.group("child")
+                for selector in selectors:
+                    match = PRA_SECTION_SELECTOR.fullmatch(selector)
+                    if match is None:
+                        if _rc030_section(selector) == ex_section and ex_child is None:
+                            overlapping.append(selector)
+                        continue
+                    if match.group("section") != ex_section:
+                        continue
+                    if ex_child is None or match.group("child") in (None, ex_child):
+                        overlapping.append(selector)
+            elif filter_match is not None:
+                ledger_path, _artifact, collection, _pinned = PRA_SOURCES.get(
+                    source_class, ("", "", None, ())
+                )
+                if filter_match.group("collection") != collection:
+                    for selector in selectors:
+                        if _rc030_section(selector) == filter_match.group("collection"):
+                            overlapping.append(selector)
+                else:
+                    records = (docs.get(ledger_path) or {}).get(collection)
+                    by_id = {
+                        r["id"]: r
+                        for r in (records if isinstance(records, list) else [])
+                        if isinstance(r, dict) and isinstance(r.get("id"), str)
+                    }
+                    for selector in selectors:
+                        match = ID_EQUALITY_SELECTOR.fullmatch(selector)
+                        if match is None:
+                            overlapping.append(selector)
+                            continue
+                        record = by_id.get(match.group("id"))
+                        if record is not None and str(
+                            record.get(filter_match.group("field"))
+                        ) == filter_match.group("value"):
+                            overlapping.append(selector)
+            else:
+                overlapping = selectors
+            if overlapping:
+                _rc032_fail(
+                    PROFILES_PATH,
+                    field,
+                    {"excluded": excluded, "selectors": overlapping},
+                    f"{PRA_PROFILE_ID} selects a path its own forbidden category excludes for "
+                    f"source {source_class}; the producer fails that receipt closed",
+                    report,
+                )
+
+
+def _rc032_composition(profile: dict, docs: dict[str, dict], report: Report) -> None:
+    sources = _mapping(profile.get("sources"))
+    for schema_id in (PRA_OUTPUT_SCHEMA, PRA_COMPOSED_SCHEMA):
+        defining = _rc030_schema_defining(docs, schema_id)
+        if len(defining) != 1:
+            _rc032_fail(
+                COMPILER_MANIFEST_PATH,
+                "requires.artifact_schemas",
+                defining,
+                f"exactly one registered schema must define {schema_id}",
+                report,
+            )
+            continue
+        schema_path = f"semantics/{defining[0]}"
+        observed = _rc028_profile_digest(docs.get(schema_path) or {})
+        if observed != PRA_SCHEMA_DIGESTS[schema_id]:
+            _rc032_fail(
+                schema_path,
+                "digest",
+                observed,
+                "an admitted @1 payload schema is immutable, field constraints included; "
+                "a change requires a new schema version",
+                report,
+            )
+    composed_names = _rc030_schema_defining(docs, PRA_COMPOSED_SCHEMA)
+    if len(composed_names) == 1:
+        schema_path = f"semantics/{composed_names[0]}"
+        schema = docs.get(schema_path) or {}
+        expected = list(sources)
+        if schema.get("type") != "object" or schema.get("required") != expected:
+            _rc032_fail(
+                schema_path,
+                "required",
+                schema.get("required"),
+                "must require exactly the declared source classes, in declaration order",
+                report,
+            )
+        properties = _mapping(schema.get("properties"))
+        if set(properties) != {"schema", *expected}:
+            _rc032_fail(
+                schema_path,
+                "properties",
+                sorted(properties),
+                "must define exactly one namespace per declared source class",
+                report,
+            )
+        for source_class in expected:
+            namespace = _mapping(properties.get(source_class))
+            sections = list(
+                dict.fromkeys(
+                    _rc030_section(s)
+                    for s in (
+                        _mapping(sources.get(source_class)).get("selectors") or []
+                    )
+                    if isinstance(s, str)
+                )
+            )
+            if (
+                namespace.get("type") != "object"
+                or namespace.get("required") != sections
+            ):
+                _rc032_fail(
+                    schema_path,
+                    f"properties.{source_class}.required",
+                    namespace.get("required"),
+                    f"must require exactly {sections}, the sections its selectors produce",
+                    report,
+                )
+            if set(_mapping(namespace.get("properties"))) != set(sections):
+                _rc032_fail(
+                    schema_path,
+                    f"properties.{source_class}.properties",
+                    sorted(_mapping(namespace.get("properties"))),
+                    "must type exactly the selected sections",
+                    report,
+                )
+    compositions = (docs.get(COMPOSITION_PROFILES_PATH) or {}).get("profiles") or []
+    composition, count = _unique_entry(compositions, "id", PRA_COMPOSITION_ID)
+    if composition is None:
+        _rc032_fail(
+            COMPOSITION_PROFILES_PATH,
+            PRA_COMPOSITION_ID,
+            count,
+            "composition profile must exist exactly once",
+            report,
+        )
+        return
+    clabel = f"profiles[{PRA_COMPOSITION_ID}]"
+    if composition.get("composes") != {"projection_profile": PRA_PROFILE_ID}:
+        _rc032_fail(
+            COMPOSITION_PROFILES_PATH,
+            f"{clabel}.composes",
+            composition.get("composes"),
+            f"must compose exactly {PRA_PROFILE_ID}",
+            report,
+        )
+    if composition.get("merge_strategy") != NAMESPACE_STRATEGY:
+        _rc032_fail(
+            COMPOSITION_PROFILES_PATH,
+            f"{clabel}.merge_strategy",
+            composition.get("merge_strategy"),
+            "must be the source_class_namespace placement strategy exactly",
+            report,
+        )
+    if (composition.get("output") or {}) != {"schema": PRA_COMPOSED_SCHEMA}:
+        _rc032_fail(
+            COMPOSITION_PROFILES_PATH,
+            f"{clabel}.output",
+            composition.get("output"),
+            f"must be {PRA_COMPOSED_SCHEMA}",
+            report,
+        )
+    if _rc028_profile_digest(composition) != PRA_COMPOSITION_DIGEST:
+        _rc032_fail(
+            COMPOSITION_PROFILES_PATH,
+            f"{clabel}.digest",
+            _rc028_profile_digest(composition),
+            "an admitted @1 composition profile is immutable; a change requires a new version",
+            report,
+        )
+
+
+def _evaluate_rc032(docs: dict[str, dict], report: Report) -> None:
+    catalog = docs.get(PROFILES_PATH) or {}
+    profile, count = _unique_entry(
+        catalog.get("projection_profiles"), "id", PRA_PROFILE_ID
+    )
+    if count != 1 or profile is None:
+        _rc032_fail(
+            PROFILES_PATH,
+            "projection_profiles",
+            PRA_PROFILE_ID,
+            f"pr-audit projection profile must exist exactly once (found {count})",
+            report,
+        )
+        return
+    label = PRA_PROFILE_LABEL
+    if set(profile) != PRA_PROFILE_KEYS:
+        _rc032_fail(
+            PROFILES_PATH,
+            f"{label}.keys",
+            sorted(map(str, profile)),
+            f"profile must carry exactly {sorted(PRA_PROFILE_KEYS)}; an undeclared field "
+            "would add meaning the release record does not admit, and `rules` or an extra "
+            "output key is reported unresolved by the producer",
+            report,
+        )
+    if profile.get("class") != "consumer" or profile.get("consumer") != PRA_CONSUMER:
+        _rc032_fail(
+            PROFILES_PATH,
+            f"{label}.consumer",
+            profile.get("consumer"),
+            f"must be a consumer profile for {PRA_CONSUMER}",
+            report,
+        )
+    if _mapping(profile.get("output")) != {"schema": PRA_OUTPUT_SCHEMA}:
+        _rc032_fail(
+            PROFILES_PATH,
+            f"{label}.output",
+            profile.get("output"),
+            f"output must be exactly {{schema: {PRA_OUTPUT_SCHEMA}}}",
+            report,
+        )
+    if tuple(_list(profile.get("forbidden"))) != PRA_FORBIDDEN:
+        _rc032_fail(
+            PROFILES_PATH,
+            f"{label}.forbidden",
+            profile.get("forbidden"),
+            f"forbidden must be exactly {list(PRA_FORBIDDEN)}, in order",
+            report,
+        )
+    skill_refs = sorted(
+        {
+            s
+            for key, value in profile.items()
+            if key != "consumer"
+            for s in _rc028_strings(value)
+            if PRA_SKILL_REFERENCE.search(s)
+        }
+    )
+    if skill_refs:
+        _rc032_fail(
+            PROFILES_PATH,
+            label,
+            skill_refs,
+            "pr-audit projection must not reference a skill pack or skill file; the consumer "
+            "is named by the consumer field only",
+            report,
+        )
+    digest = _rc028_profile_digest(profile)
+    if digest != PRA_PROFILE_DIGEST:
+        _rc032_fail(
+            PROFILES_PATH,
+            f"{label}.digest",
+            digest,
+            f"{PRA_PROFILE_ID} is immutable: its entry must hash to {PRA_PROFILE_DIGEST}; "
+            "any change, including purpose text, is a new profile version",
+            report,
+        )
+    sources = profile.get("sources")
+    if not isinstance(sources, dict):
+        _rc032_fail(
+            PROFILES_PATH,
+            f"{label}.sources",
+            sources,
+            "pr-audit profile sources must be a source-local selector mapping",
+            report,
+        )
+        return
+    if list(sources) != list(PRA_SOURCES):
+        _rc032_fail(
+            PROFILES_PATH,
+            f"{label}.sources",
+            list(map(str, sources)),
+            f"pr-audit projection sources must be exactly {list(PRA_SOURCES)}, in order",
+            report,
+        )
+    selected: dict[str, set[str]] = {}
+    for name in PRA_SOURCES:
+        if name in sources:
+            chosen = _rc032_source_selection(name, sources, catalog, docs, report)
+            if chosen is not None:
+                selected[name] = chosen
+    if "contracts" in selected and "invariants" in selected:
+        _rc032_closure(
+            (docs.get(CONTRACTS_PATH) or {}).get("contracts"), selected, report
+        )
+    _rc032_exclusions(profile, catalog, docs, report)
+    _rc032_composition(profile, docs, report)
+
+
+def _check_rc032_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    selectors = f"{PRA_PROFILE_LABEL}.sources.{{}}.selectors"
+
+    def mutated(path: str, mutate) -> dict[str, dict]:
+        candidate = copy.deepcopy(docs)
+        mutate(candidate[path])
+        return candidate
+
+    def pra(doc: dict) -> dict:
+        return next(
+            p for p in doc["projection_profiles"] if p.get("id") == PRA_PROFILE_ID
+        )
+
+    def comp(doc: dict) -> dict:
+        return next(p for p in doc["profiles"] if p.get("id") == PRA_COMPOSITION_ID)
+
+    def ledger_record(doc: dict, collection: str, record_id: str) -> dict:
+        record, _ = _unique_entry(doc[collection], "id", record_id)
+        return record
+
+    composed_path = "semantics/" + _rc030_schema_defining(docs, PRA_COMPOSED_SCHEMA)[0]
+    projection_path = "semantics/" + _rc030_schema_defining(docs, PRA_OUTPUT_SCHEMA)[0]
+    cases = [
+        (
+            "profile deleted",
+            PROFILES_PATH,
+            lambda d: d["projection_profiles"].remove(pra(d)),
+            "projection_profiles",
+        ),
+        (
+            "profile duplicated",
+            PROFILES_PATH,
+            lambda d: d["projection_profiles"].append(copy.deepcopy(pra(d))),
+            "projection_profiles",
+        ),
+        (
+            "wrong profile class",
+            PROFILES_PATH,
+            lambda d: pra(d).update({"class": "runtime"}),
+            f"{PRA_PROFILE_LABEL}.consumer",
+        ),
+        (
+            "consumer retargeted",
+            PROFILES_PATH,
+            lambda d: pra(d).update(consumer="Cursor-Governance"),
+            f"{PRA_PROFILE_LABEL}.consumer",
+        ),
+        (
+            "undeclared field added",
+            PROFILES_PATH,
+            lambda d: pra(d).update(rules=["any"]),
+            f"{PRA_PROFILE_LABEL}.keys",
+        ),
+        (
+            "output extended",
+            PROFILES_PATH,
+            lambda d: pra(d)["output"].update(reshape={"$literal": {}}),
+            f"{PRA_PROFILE_LABEL}.output",
+        ),
+        (
+            "forbidden reordered",
+            PROFILES_PATH,
+            lambda d: pra(d)["forbidden"].reverse(),
+            f"{PRA_PROFILE_LABEL}.forbidden",
+        ),
+        (
+            "authority boundary dropped",
+            PROFILES_PATH,
+            lambda d: pra(d)["forbidden"].remove(
+                "execution_publication_or_merge_authority_grant"
+            ),
+            f"{PRA_PROFILE_LABEL}.forbidden",
+        ),
+        (
+            "skill dependency",
+            PROFILES_PATH,
+            lambda d: pra(d).update(
+                purpose=pra(d)["purpose"] + " Bound through skills/x."
+            ),
+            PRA_PROFILE_LABEL,
+        ),
+        (
+            "@1 purpose changed in place",
+            PROFILES_PATH,
+            lambda d: pra(d).update(purpose="Rebound to a different meaning."),
+            f"{PRA_PROFILE_LABEL}.digest",
+        ),
+        (
+            "arbitrary wildcard selector",
+            PROFILES_PATH,
+            lambda d: pra(d)["sources"]["invariants"]["selectors"].append(
+                "$.invariants[*]"
+            ),
+            selectors.format("invariants"),
+        ),
+        (
+            "selector names an undeclared id",
+            PROFILES_PATH,
+            lambda d: pra(d)["sources"]["contracts"]["selectors"].append(
+                '$.contracts[?(@.id=="l9.contract/not-admitted@1")]'
+            ),
+            selectors.format("contracts"),
+        ),
+        (
+            "duplicate selector",
+            PROFILES_PATH,
+            lambda d: pra(d)["sources"]["vocabulary"]["selectors"].append(
+                "$.terms.authority"
+            ),
+            selectors.format("vocabulary"),
+        ),
+        (
+            "non-global record selected",
+            PROFILES_PATH,
+            lambda d: pra(d)["sources"]["invariants"]["selectors"].append(
+                '$.invariants[?(@.id=="INV-VALIDATION-MONOTONICITY")]'
+            ),
+            selectors.format("invariants"),
+        ),
+        (
+            "contract closure broken",
+            PROFILES_PATH,
+            lambda d: pra(d)["sources"]["invariants"]["selectors"].remove(
+                '$.invariants[?(@.id=="L9-CAPABILITY-001")]'
+            ),
+            selectors.format("invariants"),
+        ),
+        (
+            "section selector names a missing section",
+            PROFILES_PATH,
+            lambda d: pra(d)["sources"]["authority_model"]["selectors"].append(
+                "$.self_merge_authority"
+            ),
+            selectors.format("authority_model"),
+        ),
+        (
+            "nested selector names a missing child",
+            PROFILES_PATH,
+            lambda d: pra(d)["sources"]["receipt_catalog"]["selectors"].append(
+                "$.receipts.merge"
+            ),
+            selectors.format("receipt_catalog"),
+        ),
+        (
+            "excluded authority section selected",
+            PROFILES_PATH,
+            lambda d: pra(d)["sources"]["authority_model"]["selectors"].append(
+                "$.compiler_authority"
+            ),
+            "forbidden_constraints.definitions.execution_publication_or_merge_authority_grant",
+        ),
+        (
+            "excluded routing path selected",
+            PROFILES_PATH,
+            lambda d: pra(d)["sources"]["capabilities"]["selectors"].append(
+                "$.invocability_contract"
+            ),
+            "forbidden_constraints.definitions.skill_command_or_routing_semantics",
+        ),
+        (
+            "excluded source class added",
+            PROFILES_PATH,
+            lambda d: pra(d)["sources"].update(
+                repository_classes={"selectors": ["$.classes"]}
+            ),
+            "forbidden_constraints.definitions.repository_local_policy_as_global_law",
+        ),
+        (
+            "exclusion widened onto a selected section",
+            PROFILES_PATH,
+            lambda d: d["forbidden_constraints"]["definitions"][
+                "skill_command_or_routing_semantics"
+            ]["excluded_selections"].append(
+                {
+                    "source_class": "capabilities",
+                    "selector": "$.capability_state_dimensions",
+                }
+            ),
+            "forbidden_constraints.definitions.skill_command_or_routing_semantics",
+        ),
+        (
+            "forbidden category undefined",
+            PROFILES_PATH,
+            lambda d: d["forbidden_constraints"]["definitions"].pop(
+                "repository_local_policy_as_global_law"
+            ),
+            "forbidden_constraints.definitions.repository_local_policy_as_global_law",
+        ),
+        (
+            "source dropped",
+            PROFILES_PATH,
+            lambda d: pra(d)["sources"].pop("error_taxonomy"),
+            f"{PRA_PROFILE_LABEL}.sources",
+        ),
+        (
+            "source not projectable",
+            CANONICAL_SOURCES_PATH,
+            lambda d: _unique_entry(
+                d["sources"], "path", "semantics/receipt_catalog.yaml"
+            )[0].update(projection_allowed=False),
+            "source_classes.receipt_catalog",
+        ),
+        (
+            "selected invariant demoted from global",
+            INVARIANTS_PATH,
+            lambda d: ledger_record(d, "invariants", "L9-HARD-001").update(
+                scope="domain"
+            ),
+            selectors.format("invariants"),
+        ),
+        (
+            "selected contract cites an unselected invariant",
+            CONTRACTS_PATH,
+            lambda d: ledger_record(d, "contracts", "l9.contract/hard-constraint@1")[
+                "source_invariants"
+            ].append("L9-STRATEGY-001"),
+            selectors.format("invariants"),
+        ),
+        (
+            "composition profile deleted",
+            COMPOSITION_PROFILES_PATH,
+            lambda d: d["profiles"].remove(comp(d)),
+            PRA_COMPOSITION_ID,
+        ),
+        (
+            "composition retargeted",
+            COMPOSITION_PROFILES_PATH,
+            lambda d: comp(d).update(composes={"projection_profile": AI_PROFILE_ID}),
+            f"profiles[{PRA_COMPOSITION_ID}].composes",
+        ),
+        (
+            "composition falls back to deep merge",
+            COMPOSITION_PROFILES_PATH,
+            lambda d: comp(d).update(merge_strategy=dict(DEEP_MERGE_STRATEGY)),
+            f"profiles[{PRA_COMPOSITION_ID}].merge_strategy",
+        ),
+        (
+            "composition changed in place",
+            COMPOSITION_PROFILES_PATH,
+            lambda d: comp(d).update(purpose="Rebound."),
+            f"profiles[{PRA_COMPOSITION_ID}].digest",
+        ),
+        (
+            "composed schema drops a namespace",
+            composed_path,
+            lambda d: d["required"].pop(),
+            "required",
+        ),
+        (
+            "composed schema adds a namespace",
+            composed_path,
+            lambda d: d["properties"].update(extra={"type": "object"}),
+            "properties",
+        ),
+        (
+            "namespace section set drifts",
+            composed_path,
+            lambda d: d["properties"]["lifecycle"]["required"].append("unselected"),
+            "properties.lifecycle.required",
+        ),
+        (
+            "composed schema scope pin removed",
+            composed_path,
+            lambda d: d["properties"]["invariants"]["properties"]["invariants"][
+                "items"
+            ]["properties"].pop("scope"),
+            "digest",
+        ),
+        (
+            "projection schema escalation pin weakened",
+            projection_path,
+            lambda d: d["properties"]["escalation_rules"]["properties"].update(
+                unknown={"enum": ["remain_unknown", "assume_resolved"]}
+            ),
+            "digest",
+        ),
+        (
+            "projection schema unregistered",
+            COMPILER_MANIFEST_PATH,
+            lambda d: d["requires"]["artifact_schemas"].remove(
+                projection_path.split("/", 1)[1]
+            ),
+            "requires.artifact_schemas",
+        ),
+    ]
+    # Ledger-side cases leave the profile untouched; their failure is reported
+    # against the profile's selection, as RC-028 reports it.
+    ledger_side = {CANONICAL_SOURCES_PATH, INVARIANTS_PATH, CONTRACTS_PATH}
+    for label, path, mutate, field in cases:
+        candidate_report = Report()
+        _evaluate_rc032(mutated(path, mutate), candidate_report)
+        report_path = PROFILES_PATH if path in ledger_side else path
+        prefix = f"FAIL RC-032 {report_path} {field}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-032",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {path} {field}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-032 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-032-NEG",
+            f"{len(cases)} pr-audit projection negative cases fail closed at their intended field",
+        )
+
+
+def check_rc032(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc032(docs, report)
+    if len(report.failures) == before:
+        pinned = {name: len(spec[3]) for name, spec in PRA_SOURCES.items()}
+        report.ok(
+            "RC-032",
+            f"{PRA_PROFILE_ID} exists once as the {PRA_CONSUMER} consumer profile at its pinned "
+            f"digest, selects {pinned['invariants']} global invariants, {pinned['contracts']} "
+            "global contracts closed over their source_invariants, and whole sections from "
+            f"{len(PRA_SOURCES) - 2} further registered projectable ledgers, overlaps no forbidden "
+            f"exclusion, names no skill; {PRA_COMPOSITION_ID} composes it under "
+            f"source_class_namespace at its pinned digest; {PRA_OUTPUT_SCHEMA} and "
+            f"{PRA_COMPOSED_SCHEMA} are each defined by one registered schema at its pinned digest, "
+            "and the composed schema names exactly one namespace per declared source class with "
+            "exactly its selected sections",
+        )
+        _check_rc032_negative_cases(docs, report)
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -12339,6 +13428,7 @@ def main(argv: list[str]) -> int:
     check_rc028(docs, report)
     check_rc029(root, docs, report)
     check_rc030(docs, report)
+    check_rc032(docs, report)
     check_sc009(observed, root, report)
     for line in report.passes:
         print(line)
