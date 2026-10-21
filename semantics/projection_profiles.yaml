@@ -1788,7 +1788,7 @@ forbidden_constraints:
       criterion: payload_excludes
       excluded_selections:
       - source_class: packet_catalog
-        selector: $.packets[*]
+        selector: $.packets
       - source_class: port_catalog
         selector: $.ports[*]
       - source_class: capabilities
@@ -1812,7 +1812,7 @@ forbidden_constraints:
       - source_class: invariants
         selector: $.invariants[?(@.scope=="semantic_foundation_release")]
       - source_class: repository_classes
-        selector: $.classes[*]
+        selector: $.classes
       - source_class: repository_registry
         selector: $.repositories[*]
     execution_publication_or_merge_authority_grant:

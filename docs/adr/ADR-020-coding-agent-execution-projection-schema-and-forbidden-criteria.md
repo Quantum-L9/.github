@@ -19,9 +19,9 @@ An `unknown` receipt is honest, and the consumer must not relax its gate to acce
 
 2. **Forbidden-constraint criteria** in `l9.forbidden-constraint` v1 (PROJECTION-016), one per category the profile declares:
    - `obligation_not_admitted_in_a_selected_source`: `source_authority`. Every projected ledger must be owned by the catalog's authority, so the profile cannot carry a ledger a domain owner holds.
-   - `skill_command_or_routing_semantics`: `payload_excludes` the packet catalog (`$.packets[*]`), the port catalog (`$.ports[*]`), and the capability invocability contract (`$.invocability_contract`), the canonical paths where invocation and routing semantics are declared.
+   - `skill_command_or_routing_semantics`: `payload_excludes` the packet catalog (`$.packets`), the port catalog (`$.ports[*]`), and the capability invocability contract (`$.invocability_contract`), the canonical paths where invocation and routing semantics are declared.
    - `adapter_host_or_surface_specific_semantics`: `payload_excludes` surface records (`$.surfaces[*]`), the `adapter` and `surface_identity` terms, target-class bindings, and technology profiles.
-   - `repository_local_policy_as_global_law`: `payload_excludes` invariants whose scope is `semantic_foundation_release`, repository classes (`$.classes[*]`), and repository registry records (`$.repositories[*]`).
+   - `repository_local_policy_as_global_law`: `payload_excludes` invariants whose scope is `semantic_foundation_release`, repository classes (`$.classes`), and repository registry records (`$.repositories[*]`).
    - `execution_publication_or_merge_authority_grant`: `payload_excludes` the `authority_model` sections that grant distribution, rollout, profile publication, and compiler authority. These are siblings of the four sections the profile selects, so the criterion is decided against the same ledger the profile reads.
 
 3. **Profile unchanged.** `l9.projection/coding-agent-execution@1` is byte-for-byte as admitted at v3.20.0; RC-028 continues to pin it. Only the catalog-level `forbidden_constraints.definitions` and the schema registry grow.
