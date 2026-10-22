@@ -12,7 +12,8 @@ manufactures false confidence.
 | `governance-pr.yml` gates | `strict: false` default | No — `core.notice` + job summary |
 | `governance-issue.yml` triage | advisory | No — labels and comments only |
 | Issue form validations | required *fields*, not required checkboxes | No — only shapes new issues |
-| Org rulesets | `evaluate` | No — reports to Insights |
+| Org advisory rulesets (`org-advisory-*.json`) | `evaluate` | No — reports to Insights |
+| Org ruleset **L9 canonical CI required** (`rulesets/l9-canonical-ci-required.json`) | `active` | **Yes** — a merge needs a current passing `Analyze (central Core)` from `l9-ci-core` `org-ci.yml`. Canonical CI is the one promoted control; it is owned by `l9-ci-core` and recorded here as code. |
 | Secret scanning | alerts only | No |
 | Push protection | **not enabled** | No |
 | Dependabot | opens PRs | No — no auto-merge |
@@ -20,7 +21,7 @@ manufactures false confidence.
 
 Hard failures here fail closed toward advisory, not toward blocking a push:
 
-- `scripts/apply-rulesets.sh` refuses a ruleset whose `enforcement` is not `evaluate`.
+- `scripts/apply-rulesets.sh` refuses an advisory ruleset whose `enforcement` is not `evaluate`, and refuses the canonical CI ruleset in any state but `active`.
 - `ops/build-seed-payload.js` throws if asked for `on-org-update`.
 - An unparseable or unknown `.l9/org-birth-profile.yaml` is an error. It does not
   fall back to `default`.

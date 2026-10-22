@@ -61,7 +61,7 @@ birth-seed: ## Seed one newly created repo's applicable files (REPO=name [CLASS=
 		-f dry_run=false
 
 # ─── Rulesets ────────────────────────────────────────────────────────────────
-apply-rulesets: ## Apply org rulesets (evaluate mode only)
+apply-rulesets: ## Apply org rulesets (advisory: evaluate; canonical CI: active)
 	@bash scripts/apply-rulesets.sh
 
 # ─── Custom Properties ───────────────────────────────────────────────────────

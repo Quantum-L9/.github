@@ -3,7 +3,7 @@
 ## Architecture
 
 This organization uses a governed CI constellation. All CI pipelines are owned by
-`l9-ci-core` (thin control plane) and `l9-ci-sdk` (execution engine). Never write
+`l9-ci-core` (central CI orchestrator) and `l9-ci-sdk` (execution engine). Never write
 CI workflows at all — canonical CI is `Quantum-L9/l9-ci-core/.github/workflows/org-ci.yml`,
 enforced by an organization required-workflow ruleset.
 
@@ -17,7 +17,7 @@ The policy source of truth is `CANONICAL_LAW.md` in `Quantum-L9/Cursor-Governanc
 - **Test framework:** pytest with pytest-cov. Never use unittest directly.
 - **Package manager:** uv preferred, pip acceptable. Never use Poetry or Pipenv.
 - **Build system:** setuptools with `pyproject.toml`. Never use hatchling or flit.
-- **Dependency pins:** exact versions (`==`) in `requirements-consumer-ci.txt`.
+- **Dependency pins:** exact versions (`==`). CI tool versions (ruff, mypy, pytest) are Core-owned: install them via `Quantum-L9/l9-ci-core/.github/actions/install-consumer-ci@<full-sha>`; never copy a Core pin file into a consumer.
 
 ### TypeScript / JavaScript
 - **Formatter/linter:** Biome (format + lint + import organization). Never use Prettier.
@@ -34,7 +34,7 @@ The policy source of truth is `CANONICAL_LAW.md` in `Quantum-L9/Cursor-Governanc
   grant `write` scopes on the specific job that needs them.
 - Immutable checkout: use raw `git fetch --depth=1` of `github.sha`, not
   `actions/checkout` with default settings.
-- CI tool versions are pinned in `requirements-consumer-ci.txt` (Dependabot-tracked).
+- CI tool versions are pinned centrally in `l9-ci-core` `toolchain-lock.json` and installed through `install-consumer-ci`; a consumer carries no CI tool pin file.
 
 ## Repository Standards
 

@@ -27,7 +27,8 @@ command -v jq >/dev/null || { echo "❌ jq required" >&2; exit 1; }
 
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║  Quantum-L9 Governance Activation                           ║"
-echo "║  All controls are ADVISORY — nothing blocks until promoted  ║"
+echo "║  Advisory controls stay advisory; canonical CI ruleset is   ║"
+echo "║  active (merge-blocking) by design — see rulesets/README.md ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -62,37 +63,15 @@ else
 fi
 echo ""
 
-# ── 3. Org Rulesets (evaluate mode) ─────────────────────────────────────────
-echo "═══ 3/6: Org Rulesets (evaluate mode) ═══"
+# ── 3. Org Rulesets ─────────────────────────────────────────────────────────
+echo "═══ 3/6: Org Rulesets (advisory: evaluate; canonical CI: active) ═══"
 echo ""
-PLAN=$(gh api "orgs/$ORG" --jq '.plan.name // "unknown"' 2>/dev/null || echo "unknown")
-echo "  Org plan: $PLAN"
-
-# Team plan now supports org rulesets (June 2025+)
-if [[ "$PLAN" == "free" ]]; then
-  echo "  ⊘ Free plan does not support org rulesets — skipping"
+# One applier. scripts/apply-rulesets.sh applies the canonical CI ruleset
+# exactly as recorded (active) and the advisory rulesets in evaluate mode only.
+if DRY_RUN=0 bash "$SRC/scripts/apply-rulesets.sh"; then
+  echo "  ✓ Rulesets applied"
 else
-  for f in "$SRC"/rulesets/*.json; do
-    [[ -f "$f" ]] || continue
-    MODE=$(jq -r '.enforcement' "$f")
-    NAME=$(jq -r '.name' "$f")
-
-    if [[ "$MODE" != "evaluate" ]]; then
-      echo "  !! REFUSING $f — enforcement is '$MODE', expected 'evaluate'"
-      continue
-    fi
-
-    EXISTING=$(gh api "orgs/$ORG/rulesets" --jq ".[] | select(.name==\"$NAME\") | .id" 2>/dev/null || true)
-    if [[ -n "$EXISTING" ]]; then
-      gh api -X PUT "orgs/$ORG/rulesets/$EXISTING" --input "$f" --silent 2>/dev/null \
-        && echo "  ✓ Updated (evaluate): $NAME" \
-        || echo "  ⚠ Failed to update: $NAME"
-    else
-      gh api -X POST "orgs/$ORG/rulesets" --input "$f" --silent 2>/dev/null \
-        && echo "  ✓ Created (evaluate): $NAME" \
-        || echo "  ⚠ Failed to create: $NAME (may need Enterprise Cloud)"
-    fi
-  done
+  echo "  ⚠ Ruleset apply reported a failure (see output above)"
 fi
 echo ""
 
@@ -139,12 +118,12 @@ echo "║  Activation Complete                                        ║"
 echo "╠══════════════════════════════════════════════════════════════╣"
 echo "║  Secret scanning:  alerts enabled (advisory)                ║"
 echo "║  Dependency graph:  enabled                                 ║"
-echo "║  Org rulesets:      evaluate mode (advisory)                ║"
+echo "║  Org rulesets:      advisory=evaluate, canonical CI=active  ║"
 echo "║  Labels:            sync dispatched                         ║"
 echo "║  Auto-seed:         dry-run dispatched                      ║"
 echo "║  Preflight:         dispatched                              ║"
 echo "╠══════════════════════════════════════════════════════════════╣"
-echo "║  NOTHING IS BLOCKING. All controls are advisory.            ║"
+echo "║  Only the canonical CI ruleset blocks (required workflow).   ║"
 echo "║  See docs/ADVISORY.md for the promotion ladder.             ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
