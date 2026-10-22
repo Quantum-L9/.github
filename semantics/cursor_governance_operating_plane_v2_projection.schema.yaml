@@ -1,0 +1,91 @@
+# Candidate canonical payload schema for one independently projected source class.
+# Register through the existing generic_compiler_manifest.yaml after owner admission.
+schema: l9.schema-definition/v1
+artifact_id: l9.schema/cursor-governance-operating-plane-v2-projection@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_cursor_governance_operating_plane_v2_projection_payload_schema
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: cursor_governance_operating_plane_v2_projection.schema.yaml
+governed_by:
+  projection_profile_ref: l9.projection/cursor-governance-operating-plane@2
+purpose: >-
+  Validate the per-source projection payload emitted by the existing Semantic
+  Compiler for operating-plane@2. Each source class has its own projection,
+  so no individual payload must contain all eight source sections. Selectors,
+  source coordinates, and producer receipts establish origin and coverage.
+  The schema does not grant authority or validate host-specific behavior.
+type: object
+properties:
+  # The compiler resolves a profile's output.schema to the one registered
+  # artifact schema whose properties.schema.const equals it
+  # (CanonicalAuthority.schema_defining). Without this const the payload_schema
+  # criterion is unresolved and every receipt is `unknown`, never `pass`.
+  schema:
+    const: l9.projection.cursor-governance-operating-plane/v2
+  terms:
+    type: object
+  global_rules:
+    type: object
+  capability_entry_contract:
+    type: object
+  capability_state_dimensions:
+    type: object
+  invocability_contract:
+    type: object
+  capability_relations:
+    type: object
+  catalog_status:
+    type: object
+  capabilities:
+    type: array
+    items:
+      type: object
+      required: [id, semantic_owner, semantic_scope, purpose, effect_class, requires, authorization_requirements]
+  authority_classes:
+    type: object
+  agent_authority:
+    type: object
+  human_authority:
+    type: object
+  escalation_rules:
+    type: object
+  admission_rules:
+    type: object
+  global_admission_rules:
+    type: object
+  promotion_rules:
+    type: object
+  lifecycles:
+    type: object
+  state_semantics:
+    type: object
+  lifecycle_relations:
+    type: object
+  invariants:
+    type: array
+    items:
+      type: object
+      required: [id, statement, scope, owner]
+  outcome_semantics:
+    type: object
+  contracts:
+    type: array
+    items:
+      type: object
+      required: [id, purpose, scope, owner, source_invariants, applies_to, requires, guarantees, forbidden, outcomes]
+  errors:
+    type: object
+  result_domains:
+    type: object
+  receipts:
+    type: object
+  receipt_kernel:
+    type: object
+  specialization_contract:
+    type: object
+  receipt_relations:
+    type: object

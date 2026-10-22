@@ -22,7 +22,7 @@ global_rules:
   derivation_must_be_declared_separately_from_projection: true
   projection_engine_must_be_deterministic: true
   existing_profile_versions_are_immutable: true
-  profile_successor_declares_successor_of_and_preserves_every_predecessor_selection: true
+  profile_successor_preserves_selections_or_declares_exact_major_break: true
   stage_consumer_resolves_to_its_unique_profile_not_superseded_by_a_successor: true
   superseded_profile_versions_remain_valid_for_exact_historical_resolution: true
 profile_classes:
@@ -485,6 +485,130 @@ projection_profiles:
   - solver_implementation_details
   - rendering_internals
   - unrelated_ir_catalog_entries
+- id: l9.projection/cursor-governance-operating-plane@2
+  successor_of: l9.projection/cursor-governance-operating-plane@1
+  class: consumer
+  consumer: Cursor-Governance
+  breaking_changes:
+    consumer_migration: explicit
+    rationale: >-
+      The @1 consumer profile directly selected published conformance-profile
+      coordinates whose canonical source is owned by l9-conformance, not .github.
+      Preserve all eight .github-owned source classes and every predecessor
+      selector in those classes; consume independently verified conformance
+      publications from their owner when relevant. This major version retains
+      immutable, historically resolvable @1 semantics and requires opt-in
+      consumer migration.
+    removed_selections:
+      - source_class: conformance_profiles
+        selector: $.published_profiles[*].id
+      - source_class: conformance_profiles
+        selector: $.published_profiles[*].digest
+      - source_class: conformance_profiles
+        selector: $.published_profiles[*].status
+  purpose: >-
+    Supply the Cursor-Governance operating plane with provenance-bound,
+    decision-complete, read-only projections of .github-owned global semantic
+    governance. Include full global contract records, governing state and
+    result semantics, admission boundaries, receipt requirements, and capability
+    relations. Consumers request only the applicable verified source classes
+    and records through existing runtime and specialist mechanisms. This
+    profile does not perform skill selection, architectural judgment,
+    executable conformance, admission, authorization, publication, or merge.
+  sources:
+    vocabulary:
+      selectors:
+        # Exact @1 selections.
+        - $.terms.authority
+        - $.terms.capability
+        - $.terms.semantic_owner
+        - $.terms.provider
+        - $.terms.bounded_autonomy
+        - $.terms.state_change
+        - $.terms.receipt
+        - $.terms.packet
+        - $.terms.conformance
+        # Minimum extra vocabulary for decision-complete governance context.
+        - $.terms.invariant
+        - $.terms.contract
+        - $.terms.admission
+        - $.terms.provenance
+        - $.terms.resolution
+        - $.terms.requirement
+    capabilities:
+      selectors:
+        # Exact @1 selections.
+        - $.capability_entry_contract
+        - $.capability_state_dimensions
+        - $.invocability_contract
+        - $.capabilities[*].id
+        - $.capabilities[*].semantic_owner
+        - $.capabilities[*].effect_class
+        - $.capabilities[*].authorization_requirements
+        # Capability semantics remain distinct from runtime grants.
+        - $.global_rules
+        - $.capability_relations
+        - $.catalog_status
+        - $.capabilities
+    authority_model:
+      selectors:
+        # Exact @1 selections.
+        - $.authority_classes
+        - $.agent_authority
+        - $.human_authority
+        - $.escalation_rules
+        # Governing admission and promotion rules, not admission decisions.
+        - $.admission_rules
+        - $.global_admission_rules
+        - $.promotion_rules
+    lifecycle:
+      selectors:
+        # Exact @1 selection.
+        - $.lifecycles
+        # Interpret typed states and predecessor/currentness relations correctly.
+        - $.global_rules
+        - $.state_semantics
+        - $.lifecycle_relations
+    invariants:
+      selectors:
+        # Preserve whole global invariant records; no release-local scope.
+        - $.invariants[?(@.scope=="global")]
+    contracts:
+      selectors:
+        # Exact @1 selections preserved for versioned continuity.
+        - $.contracts[*].id
+        - $.contracts[*].purpose
+        - $.contracts[*].scope
+        - $.contracts[*].source_invariants
+        - $.contracts[*].requires
+        - $.contracts[*].guarantees
+        - $.contracts[*].forbidden
+        - $.contracts[*].outcomes
+        # Union selection: keep each complete atomic contract record,
+        # including owner, applicability, and additional canonical fields.
+        - $.contracts[*]
+        - $.outcome_semantics
+    error_taxonomy:
+      selectors:
+        # Exact @1 selection.
+        - $.errors
+        # Validation/resolution result domains are not error codes.
+        - $.result_domains
+    receipt_catalog:
+      selectors:
+        # Exact @1 selection.
+        - $.receipts
+        # Receipt validation is evidence, never a promotion to authority.
+        - $.global_rules
+        - $.receipt_kernel
+        - $.specialization_contract
+        - $.receipt_relations
+  output:
+    schema: l9.projection.cursor-governance-operating-plane/v2
+  forbidden:
+    - adapter_host_or_surface_specific_semantics
+    - repository_local_policy_as_global_law
+    - execution_publication_or_merge_authority_grant
 - id: l9.projection/cursor-governance-identity@1
   class: consumer
   consumer: Cursor-Governance
@@ -2001,7 +2125,7 @@ validation_rules:
 - id: PROJECTION-013
   rule: existing_profile_version_is_never_modified_in_place
 - id: PROJECTION-014
-  rule: successor_profile_names_an_existing_predecessor_of_the_same_class_and_consumer_and_selects_a_superset_of_it
+  rule: successor_profile_keeps_class_and_consumer_and_either_preserves_all_selections_or_declares_exact_major_version_removals_with_explicit_consumer_migration
 - id: PROJECTION-015
   rule: each_stage_consumer_resolves_to_exactly_one_unsuperseded_stage_profile
 - id: PROJECTION-016
