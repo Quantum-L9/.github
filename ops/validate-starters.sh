@@ -52,6 +52,14 @@ else
   echo "❌ ops/test-sync-org-files.sh"
   FAIL=$((FAIL+1))
 fi
+
+if bash ops/test-activate-all.sh; then
+  echo "✅ ops/test-activate-all.sh"
+  PASS=$((PASS+1))
+else
+  echo "❌ ops/test-activate-all.sh"
+  FAIL=$((FAIL+1))
+fi
 # The canonical PR template's machine contract. node is required here, not
 # optional: every governed PR body is composed from this one file.
 if node ops/test-pr-template.js; then

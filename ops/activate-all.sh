@@ -68,10 +68,13 @@ echo "═══ 3/6: Org Rulesets (advisory: evaluate; canonical CI: active) ═
 echo ""
 # One applier. scripts/apply-rulesets.sh applies the canonical CI ruleset
 # exactly as recorded (active) and the advisory rulesets in evaluate mode only.
+# A failed apply leaves the canonical CI ruleset unverified, so activation
+# stops here instead of dispatching the remaining steps and claiming success.
 if DRY_RUN=0 bash "$SRC/scripts/apply-rulesets.sh"; then
   echo "  ✓ Rulesets applied"
 else
-  echo "  ⚠ Ruleset apply reported a failure (see output above)"
+  echo "  ❌ Ruleset apply failed (see output above) — activation aborted" >&2
+  exit 1
 fi
 echo ""
 
