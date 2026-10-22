@@ -43,8 +43,9 @@ ProductTopology
 - ADR-020: Coding-agent execution projection payload schema and forbidden-constraint criteria
 - ADR-021: Producer-emitted projection contract and consumer-committed bundles
 - ADR-022: PR-audit projection, source-namespaced composition, payload schemas, and validator closure
+- ADR-023: Operating-plane @2 as a declared major-version successor, and PROJECTION-014 exact selection removal
 
-ADR-001 through ADR-022 are the global semantic decisions. They live in this
+ADR-001 through ADR-023 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions
