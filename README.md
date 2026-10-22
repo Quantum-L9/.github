@@ -92,7 +92,7 @@ Canonical CI is `Quantum-L9/l9-ci-core` (`org-ci.yml`).
 
 | Capability | Implementation | Mode |
 | --- | --- | --- |
-| Org rulesets | `rulesets/*.json` | `evaluate` |
+| Org rulesets | `rulesets/*.json` | advisory `evaluate`; canonical CI `active` (`rulesets/README.md`) |
 | Governance seeding | `auto-seed-new-repo.yml` | PR, class-aware |
 | Label sync | `sync-labels-all.yml` | additive |
 | Drift remediation (Manual Update) | `continuous-sync.yml` | manual dispatch: Preview, or Apply → PR |
@@ -112,7 +112,9 @@ class receives. An absent marker resolves to `default`. A FORBID hit throws.
 | `.l9/no-sync` | Drift remediation skips the repo |
 | `.l9/no-policy-enforcement` | Policy enforcement skips the repo |
 
-`ops/activate-all.sh` refuses to set anything above `evaluate`.
+`ops/activate-all.sh` applies rulesets through `scripts/apply-rulesets.sh`:
+advisory rulesets only ever in `evaluate`; the canonical CI ruleset
+(`rulesets/l9-canonical-ci-required.json`) exactly as recorded, `active`.
 
 ## Layout
 
@@ -121,7 +123,7 @@ semantics/          Semantic Foundation — the language this repo owns
 docs/adr/           accepted decision records (index: docs/adr/README.md)
 docs/semantic-foundation/<version>/   release records; the highest version is current
 policies/           repo classes, settings, mandatory files, consumer CODEOWNERS, governance caller
-rulesets/           org rulesets, evaluate only
+rulesets/           org rulesets: advisory (evaluate) + canonical CI (active)
 ops/                activation, seed payload, birth, pin audit
 .github/workflows/  organization-plane agents
 ```
