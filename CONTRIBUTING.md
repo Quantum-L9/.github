@@ -65,8 +65,12 @@ excludes append to `files.includes` only.
 - Blast-radius paths (`.github/`, `infra/`, `SECURITY.md`, `CODEOWNERS`)
   require the CODEOWNERS team plus the extra reviewer on those paths only.
 
-## Kernel authoring (l9-ci-core contributors only)
+## Organization CI (l9-ci-core)
 
-- Kernels must use `on: workflow_call` only.
-- Never reference `@main` from thin callers.
-- See [workflow-interface-registry.yml](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml).
+- Canonical CI is `Quantum-L9/l9-ci-core` `.github/workflows/org-ci.yml`,
+  required by the organization ruleset `L9 canonical CI required`
+  (`rulesets/l9-canonical-ci-required.json`). Consumers copy no caller and
+  pin no Core revision; the v1 reusable kernels were retired on 2026-10-22.
+- Never reference `Quantum-L9/l9-ci-core/...@main` from a workflow.
+- See [workflow-interface-registry.yml](https://github.com/Quantum-L9/.github/blob/main/workflow-interface-registry.yml)
+  for the historical record.

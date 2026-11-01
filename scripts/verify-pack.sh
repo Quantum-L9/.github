@@ -15,12 +15,32 @@ if grep -q 'core.setFailed' .github/workflows/governance-issue.yml; then
   bad "issue governance contains core.setFailed"
 else ok "issue governance cannot fail the run"; fi
 
+# Every advisory ruleset stays evaluate. The one exception is the canonical
+# CI ruleset (rulesets/l9-canonical-ci-required.json): it is the live,
+# active organization binding of every default branch to
+# Quantum-L9/l9-ci-core main org-ci.yml, recorded here as code so a change to
+# it is reviewable (rulesets/README.md).
 for f in rulesets/*.json; do
   mode=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["enforcement"])' "$f")
-  [[ "$mode" == evaluate ]] && ok "$(basename "$f") evaluate" || bad "$(basename "$f") is $mode"
+  if [[ "$(basename "$f")" == l9-canonical-ci-required.json ]]; then
+    [[ "$mode" == active ]] && ok "$(basename "$f") active (canonical CI)" || bad "$(basename "$f") must be active"
+    python3 - "$f" <<'PYJ' || fail=1
+import json, sys
+doc = json.load(open(sys.argv[1]))
+rules = {rule["type"]: rule["parameters"] for rule in doc["rules"]}
+wf = rules["workflows"]["workflows"][0]
+assert wf["path"] == ".github/workflows/org-ci.yml" and wf["ref"] == "refs/heads/main", "canonical workflow binding"
+assert rules["required_status_checks"]["strict_required_status_checks_policy"] is True, "strict required status checks"
+assert [c["context"] for c in rules["required_status_checks"]["required_status_checks"]] == ["Analyze (central Core)"], "required check context"
+assert doc["conditions"]["ref_name"]["include"] == ["~DEFAULT_BRANCH"], "default-branch target"
+print("OK  l9-canonical-ci-required.json binds org-ci.yml@main with strict Analyze (central Core)")
+PYJ
+  else
+    [[ "$mode" == evaluate ]] && ok "$(basename "$f") evaluate" || bad "$(basename "$f") is $mode"
+  fi
 done
 
-if grep -rEi '\b(pytest|ruff|pyright|semgrep|codeql|npm test|tox)\b' .github/workflows/; then
+if grep -rEi '\b(pytest|ruff|pyright|semgrep|codeql|npm test|tox)\b' .github/workflows/ | grep -vE '^[^:]+:[[:space:]]*#'; then
   bad "defaults workflow duplicates CI execution"
 else ok "no CI execution duplicated in defaults workflows"; fi
 
@@ -60,4 +80,4 @@ for p in pathlib.Path('rulesets').glob('*.json'):
 PY
 
 [[ "$fail" == 0 ]] || exit 1
-echo "PASS v3.1 pack is advisory and boundary-clean"
+echo "PASS v3.1 pack is advisory (canonical CI active) and boundary-clean"
