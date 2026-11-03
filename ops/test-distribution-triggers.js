@@ -143,6 +143,22 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   console.log(`ok: ${label} — birth chains repo_created to auto-seed after attestation; dry run does not`);
 }
 
+/**
+ * The argument text of every `createDispatchEvent({ … })` call, by index scan
+ * (no backtracking regex). A call whose closing `})` is missing fails loudly.
+ */
+function dispatchCallArgs(text) {
+  const out = [];
+  const open = 'createDispatchEvent({';
+  for (let at = text.indexOf('createDispatchEvent'); at !== -1; at = text.indexOf('createDispatchEvent', at + 1)) {
+    assert.ok(text.startsWith(open, at), 'createDispatchEvent must be called with an object literal');
+    const close = text.indexOf('})', at + open.length);
+    assert.ok(close !== -1, 'unterminated createDispatchEvent call');
+    out.push(text.slice(at + open.length, close));
+  }
+  return out;
+}
+
 // ── Retired: the push-driven org_template_updated fanout ────────────────────
 // dispatch-template-update.yml pushed `repository_dispatch(org_template_updated)`
 // to every seeded consumer on a template change. Drift is restored only by a
@@ -155,13 +171,11 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
     assert.doesNotMatch(text, /org_template_updated/, `${f}: the retired consumer sync event is back`);
     // The only dispatch allowed is to this repository itself (birth chaining
     // repo_created to auto-seed); any other target is a consumer fanout.
-    for (const m of text.matchAll(/createDispatchEvent\(\{([\s\S]*?)\}\)/g)) {
-      assert.match(m[1], /^\s*repo: context\.repo\.repo,\s*$/m, `${f}: a consumer event fanout is back`);
-      assert.match(m[1], /^\s*owner: context\.repo\.owner,\s*$/m, `${f}: a consumer event fanout is back`);
-      assert.match(m[1], /event_type: 'repo_created'/, `${f}: only repo_created may be self-dispatched`);
+    for (const args of dispatchCallArgs(text)) {
+      assert.match(args, /^\s*repo: context\.repo\.repo,\s*$/m, `${f}: a consumer event fanout is back`);
+      assert.match(args, /^\s*owner: context\.repo\.owner,\s*$/m, `${f}: a consumer event fanout is back`);
+      assert.match(args, /event_type: 'repo_created'/, `${f}: only repo_created may be self-dispatched`);
     }
-    assert.strictEqual((text.match(/createDispatchEvent/g) || []).length,
-      [...text.matchAll(/createDispatchEvent\(\{[\s\S]*?\}\)/g)].length, `${f}: an unchecked dispatch call`);
   }
   assert.doesNotMatch(read('Makefile'), /dispatch-template-update/, 'Makefile still runs the retired dispatcher');
   console.log('ok: org_template_updated fanout retired — no workflow emits a consumer dispatch event (self repo_created only)');

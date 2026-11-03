@@ -470,34 +470,38 @@ async function failClosedScenarios(wf, run, label) {
       assert.strictEqual(wrote(r), false);
     }
     console.log(`ok: ${label} — other 409s and 403s at the ref stage fail; never reported seeded`);
-
-    // V22 (ADR 0019): the weekly sweep restores a drifted managed dependabot.yml
-    // to the render, leaves every other existing file alone, and honours .l9/no-sync.
-    {
-      const base = withRenderedDependabot({ '.github/CODEOWNERS': 'x', 'SECURITY.md': 'local\n' });
-      const want = base['.github/dependabot.yml'];
-      const marker = 'profile: non_constellation_python\n';
-      r = await run({ branch: null, repos: one('drifted', { marker, files: { ...base, '.github/dependabot.yml': 'version: 2\nupdates: []\n' } }) });
-      const tree = r.calls.find((c) => c.name === 'git.createTree').args.tree.map((t) => t.path);
-      assert.ok(tree.includes('.github/dependabot.yml'), `${label}: drifted dependabot.yml not restored`);
-      assert.ok(!tree.includes('.github/CODEOWNERS') && !tree.includes('SECURITY.md'), `${label}: overwrote an unmanaged file`);
-      const blobs = r.calls.filter((c) => c.name === 'git.createBlob').map((c) => c.args.content);
-      assert.ok(blobs.some((b) => b === want || Buffer.from(b, 'base64').toString('utf8') === want), `${label}: restore is not the render`);
-      const body = r.calls.find((c) => c.name === 'pulls.create').args.body;
-      assert.deepStrictEqual(await gates(body), [], `${label}: restore PR body fails governance-pr gates`);
-      assert.match(body, /^restored \(1\):\n {2}\.github\/dependabot\.yml$/m);
-      assert.match(body, /- \[x\] Medium/, `${label}: a dependabot restore is Medium`);
-
-      r = await run({ branch: null, repos: one('opted-out', { marker, files: { ...base, '.github/dependabot.yml': 'version: 2\nupdates: []\n', '.l9/no-sync': '' } }) });
-      assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.tree.some((t) => t.path === '.github/dependabot.yml')),
-        `${label}: restored dependabot.yml despite .l9/no-sync`);
-
-      r = await run({ branch: null, repos: one('in-sync', { marker, files: base }) });
-      assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.tree.some((t) => t.path === '.github/dependabot.yml')),
-        `${label}: an in-sync managed file was rewritten`);
-    }
-    console.log(`ok: ${label} — drifted dependabot.yml restored to the render; unmanaged files and .l9/no-sync respected`);
   }
+}
+
+/**
+ * V22 (ADR 0019): the weekly sweep restores a drifted managed dependabot.yml
+ * to the render, leaves every other existing file alone, and honours .l9/no-sync.
+ */
+async function managedRestoreScenarios(run, label) {
+  {
+    const base = withRenderedDependabot({ '.github/CODEOWNERS': 'x', 'SECURITY.md': 'local\n' });
+    const want = base['.github/dependabot.yml'];
+    const marker = 'profile: non_constellation_python\n';
+    let r = await run({ branch: null, repos: one('drifted', { marker, files: { ...base, '.github/dependabot.yml': 'version: 2\nupdates: []\n' } }) });
+    const tree = new Set(r.calls.find((c) => c.name === 'git.createTree').args.tree.map((t) => t.path));
+    assert.ok(tree.has('.github/dependabot.yml'), `${label}: drifted dependabot.yml not restored`);
+    assert.ok(!tree.has('.github/CODEOWNERS') && !tree.has('SECURITY.md'), `${label}: overwrote an unmanaged file`);
+    const blobs = r.calls.filter((c) => c.name === 'git.createBlob').map((c) => c.args.content);
+    assert.ok(blobs.some((b) => b === want || Buffer.from(b, 'base64').toString('utf8') === want), `${label}: restore is not the render`);
+    const body = r.calls.find((c) => c.name === 'pulls.create').args.body;
+    assert.deepStrictEqual(await gates(body), [], `${label}: restore PR body fails governance-pr gates`);
+    assert.match(body, /^restored \(1\):\n {2}\.github\/dependabot\.yml$/m);
+    assert.match(body, /- \[x\] Medium/, `${label}: a dependabot restore is Medium`);
+
+    r = await run({ branch: null, repos: one('opted-out', { marker, files: { ...base, '.github/dependabot.yml': 'version: 2\nupdates: []\n', '.l9/no-sync': '' } }) });
+    assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.tree.some((t) => t.path === '.github/dependabot.yml')),
+      `${label}: restored dependabot.yml despite .l9/no-sync`);
+
+    r = await run({ branch: null, repos: one('in-sync', { marker, files: base }) });
+    assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.tree.some((t) => t.path === '.github/dependabot.yml')),
+      `${label}: an in-sync managed file was rewritten`);
+  }
+  console.log(`ok: ${label} — drifted dependabot.yml restored to the render; unmanaged files and .l9/no-sync respected`);
 }
 
 (async () => {
@@ -702,6 +706,7 @@ async function failClosedScenarios(wf, run, label) {
 
     await failClosedScenarios(wf, run, label);
     await dependabotSeedScenarios(run, label);
+    if (wf.autoSeed) await managedRestoreScenarios(run, label);
   }
 })().catch((e) => {
   console.error(e);

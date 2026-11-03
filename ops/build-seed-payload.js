@@ -189,7 +189,7 @@ function selectSeedWrites(payload, existingByPath = {}, { managed = [] } = {}) {
     }
     if (managed.includes(dest)) {
       if (typeof existing !== 'string') {
-        throw new Error(`${dest} is managed: its current text is required to compare against the render`);
+        throw new TypeError(`${dest} is managed: its current text is required to compare against the render`);
       }
       if (existing !== payload[dest]) {
         writes.push(dest);
