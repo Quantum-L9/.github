@@ -127,7 +127,8 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   const dry = input(block, 'dry_run');
   assert.ok(dry.includes('type: boolean') && dry.includes('default: true'), `${label}: operator dispatch defaults to dry run`);
   assert.match(text, /^ {4}environment: governance-distribution\s*$/m);
-  assert.match(text, /^ {2}group: auto-seed-new-repo\s*$/m);
+  assert.match(text, /^ {2}group: auto-seed-new-repo-\$\{\{ github\.event\.client_payload\.repository \|\| inputs\.target_repo \|\| 'sweep' \}\}\s*$/m,
+    `${label}: births get a per-repository group (never cancel each other); sweeps share one`);
   console.log(`ok: ${label} — weekly sweep with managed restore, repo_created, dry-run dispatch preserved`);
 }
 
@@ -138,8 +139,15 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   const text = read('.github/workflows/repo-birth-bootstrap.yml');
   assert.match(text, /event_type: 'repo_created'/, `${label}: birth must dispatch repo_created to the seeder`);
   assert.match(text, /createDispatchEvent\(/, `${label}: birth must dispatch, not only describe it`);
-  assert.match(text, /if: \$\{\{ success\(\) && \(inputs\.dry_run \|\| 'false'\) != 'true' \}\}/,
-    `${label}: chaining runs only after a passing attestation and never on a dry run`);
+  const chain = text.split('\n').find((l) => /^\s+if: .*success\(\)/.test(l)) || '';
+  assert.match(chain, /inputs\.dry_run != true\b/, `${label}: dry run must be compared as a boolean, never a string`);
+  assert.doesNotMatch(chain, /'true'/, `${label}: a string 'true' never equals the boolean input, so a dry run would chain`);
+  // Evaluate the guard the way GitHub does for this one shape: a boolean input,
+  // or null for repository_dispatch.
+  const chains = (dry) => !(dry === true);
+  assert.strictEqual(chains(true), false, `${label}: a dry run must not chain`);
+  assert.strictEqual(chains(false), true);
+  assert.strictEqual(chains(null), true, `${label}: a repository_dispatch birth (no input) chains`);
   console.log(`ok: ${label} — birth chains repo_created to auto-seed after attestation; dry run does not`);
 }
 

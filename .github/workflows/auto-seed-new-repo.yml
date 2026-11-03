@@ -57,7 +57,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: auto-seed-new-repo
+  # One pending run per group: a newer pending run cancels an older one. Births
+  # dispatch repo_created, so each targeted run gets its own group per
+  # repository and two births never cancel each other. Sweeps share one group
+  # so two never hold org-wide write at once; a birth that overlaps a sweep on
+  # the same repository is caught by the seed branch's compare-and-swap.
+  group: auto-seed-new-repo-${{ github.event.client_payload.repository || inputs.target_repo || 'sweep' }}
   cancel-in-progress: false
 
 jobs:
