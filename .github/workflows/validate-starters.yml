@@ -32,7 +32,23 @@ jobs:
       - name: Install the pinned YAML parser
         run: |
           python3 -m pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2"
+      # ops/test-seed-pr-body.js renders seed PR bodies with the real PR-body
+      # composer at the commit governance-pr.yml pins (the trigger suite keeps
+      # this ref equal to that pin).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          repository: Quantum-L9/Cursor-Governance
+          ref: 5039c379d8ba1263f504cfa527487386205e056c
+          path: .cache/composer
+          # compose_pr_body.py imports org_dotgithub at load; both are stdlib-only.
+          sparse-checkout: |
+            ops/scripts/compose_pr_body.py
+            ops/scripts/org_dotgithub.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
       - name: Run ops/validate-starters.sh
+        env:
+          SEED_COMPOSER_ROOT: .cache/composer
         run: |
           chmod +x ops/validate-starters.sh
           ops/validate-starters.sh

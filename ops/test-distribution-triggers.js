@@ -173,6 +173,38 @@ function dispatchCallArgs(text) {
   return out;
 }
 
+// ── One PR-body renderer, one pin ────────────────────────────────────────────
+// Seed and Manual Update PR bodies are composed by Cursor-Governance
+// compose_pr_body.py at the same commit governance-pr.yml's body job runs, and
+// the validate suite renders against it too. Every checkout must name it.
+{
+  const pinOf = (text) => [...text.matchAll(/repository: Quantum-L9\/Cursor-Governance\n\s+ref: ([0-9a-f]{40})/g)].map((m) => m[1]);
+  const gov = read('.github/workflows/governance-pr.yml');
+  const declared = (gov.match(/COMPOSER: Quantum-L9\/Cursor-Governance@([0-9a-f]{40})/) || [])[1];
+  assert.ok(declared, 'governance-pr.yml must declare COMPOSER: Quantum-L9/Cursor-Governance@<sha>');
+  assert.deepStrictEqual(pinOf(gov), [declared], 'governance-pr.yml checks the composer out at its declared pin');
+  for (const f of ['governance-pr.yml', 'auto-seed-new-repo.yml', 'seed-governance.yml', 'continuous-sync.yml', 'validate-starters.yml']) {
+    const text = read(`.github/workflows/${f}`);
+    if (f !== 'governance-pr.yml') {
+      assert.deepStrictEqual(pinOf(text), [declared], `${f}: the composer checkout must be the governance-pr.yml pin`);
+    }
+    // The composer imports org_dotgithub at load: a checkout without it fails
+    // at the first line, which is how a pin move broke it before.
+    const sparse = text.match(/repository: Quantum-L9\/Cursor-Governance[\s\S]*?sparse-checkout: \|\n((?:\s+ops\/scripts\/\S+\n)+)/);
+    assert.ok(sparse, `${f}: the composer checkout must list its files`);
+    const listed = new Set(sparse[1].trim().split(/\s+/));
+    for (const need of ['ops/scripts/compose_pr_body.py', 'ops/scripts/org_dotgithub.py']) {
+      assert.ok(listed.has(need), `${f}: the composer checkout misses ${need}`);
+    }
+  }
+  for (const f of ['auto-seed-new-repo.yml', 'seed-governance.yml', 'continuous-sync.yml']) {
+    const text = read(`.github/workflows/${f}`);
+    assert.match(text, /renderSeedPrBody\(\{/, `${f}: PR bodies are composed, not hand-built`);
+    assert.doesNotMatch(text, /'## (Problem|Fix|Risk|Evidence|Gates)'/, `${f}: a hand-built PR body section is back`);
+  }
+  console.log('ok: seeders, Manual Update and validate compose PR bodies with the governance-pr.yml composer pin');
+}
+
 // ── Retired: the push-driven org_template_updated fanout ────────────────────
 // dispatch-template-update.yml pushed `repository_dispatch(org_template_updated)`
 // to every seeded consumer on a template change. Drift is restored only by a

@@ -29,6 +29,7 @@ const {
   makeScopedRequire,
   makeScriptRunner,
   makeBranchStubs,
+  makeRenderRecorder,
   loadGovernanceGates,
 } = require('./workflow-script-harness.js');
 
@@ -231,6 +232,7 @@ const gates = loadGovernanceGates(root);
 
 async function runClass({ files = {}, dirs = {}, errors = {}, dry = false, branch = null, ...more }) {
   const { github, calls, state } = makeGithub({ files, dirs, errors, branch, ...more });
+  const recorder = makeRenderRecorder(root);
   const tables = [];
   const failures = [];
   const summary = { addHeading: () => summary, addRaw: () => summary, addTable: (t) => { tables.push(t); return summary; }, write: async () => summary };
@@ -240,7 +242,7 @@ async function runClass({ files = {}, dirs = {}, errors = {}, dry = false, branc
   process.chdir(root);
   Object.assign(process.env, { DRY_RUN: dry ? 'true' : 'false', FILTER: '', APP_SLUG, GITHUB_SHA: SOURCE_SHA });
   try {
-    await syncScript(github, core, {}, makeScopedRequire(root));
+    await syncScript(github, core, {}, makeScopedRequire(root, { './ops/seed-pr-body.js': recorder.module }));
   } finally {
     process.chdir(prev);
     for (const [k, v] of Object.entries(prevEnv)) {
@@ -256,7 +258,7 @@ async function runClass({ files = {}, dirs = {}, errors = {}, dry = false, branc
     args: { path: t.path, content: blobs[i] },
   }));
   const deletes = tree.filter((t) => t.sha === null).map((t) => ({ args: { path: t.path } }));
-  return { klass, status, detail, writes, deletes, failures, calls, state };
+  return { klass, status, detail, writes, deletes, failures, calls, state, renders: recorder.renders };
 }
 
 async function classScenarios() {
@@ -566,22 +568,27 @@ async function ownershipScenarios() {
   }
   console.log(`ok: ${label} — a base that moves before publication stops; no ref or PR`);
 
-  // V16 / V23: the Apply PR body passes the org validator and states facts only.
+  // V16 / V23: the Apply PR body is the org template composed by the one
+  // renderer against the published commit — never hand-built. The composed
+  // body itself is proven complete and gate-clean in ops/test-seed-pr-body.js.
   {
     const r = await runClass({ files: drifted });
-    const body = r.calls.find((c) => c.name === 'pulls.create').args.body;
-    assert.deepStrictEqual(await gates(body), [], `${label}: Manual Update PR body fails governance-pr gates`);
-    assert.match(body, new RegExp(`source: Quantum-L9/\\.github@${SOURCE_SHA}`));
-    assert.match(body, /base: {3}main@base-sha/);
-    assert.match(body, /^ {2}modify {2}\.github\/pull_request_template\.md$/m);
-    assert.match(body, /- \[x\] Medium/, 'overwriting consumer bytes is not Low');
-    assert.doesNotMatch(body, /- \[x\][^\n]*CI passes/i);
-    const add = await runClass({ files: { '.github/dependabot.yml': managedOk['.github/dependabot.yml'], [TEMPLATE]: canonicalTemplate } });
-    const addBody = add.calls.find((c) => c.name === 'pulls.create').args.body;
-    assert.deepStrictEqual(await gates(addBody), []);
-    assert.match(addBody, /- \[x\] Low/, 'restoring an absent managed file is additive');
+    const pr = r.calls.find((c) => c.name === 'pulls.create').args;
+    assert.strictEqual(r.renders.length, 1, `${label}: one render per Apply PR`);
+    const [render] = r.renders;
+    assert.strictEqual(pr.body, '<!-- composed seed body for new-commit-sha -->\n', `${label}: the PR body is the renderer's output verbatim`);
+    assert.strictEqual(render.headSha, 'new-commit-sha', `${label}: rendered against the commit just published`);
+    assert.strictEqual(render.baseSha, 'base-sha');
+    assert.strictEqual(render.branch, 'chore/governance-sync');
+    assert.strictEqual(render.composerRoot, 'composer');
+    assert.doesNotMatch(render.remoteUrl, /@/, `${label}: no credentials in the fetch URL`);
+    assert.strictEqual(render.template, canonicalTemplate, `${label}: the org template goes to the composer unchanged`);
+    const message = r.calls.find((c) => c.name === 'git.createCommit').args.message;
+    assert.match(message, new RegExp(`- Source: \`Quantum-L9/\\.github@${SOURCE_SHA}\``), `${label}: the commit's Fix details name the source`);
+    assert.match(message, /- \*\*restore\*\* `\.github\/pull_request_template\.md`/, `${label}: Fix details list each change`);
+    assert.match(message, /^ci\(governance\): sync \d+ org-managed file\(s\)\n\n\d+ governance file\(s\) managed by `Quantum-L9\/\.github` drifted/, `${label}: the commit carries the Problem paragraph`);
   }
-  console.log(`ok: ${label} — Apply PR body passes governance-pr gates (strict) with exact base, source and changes`);
+  console.log(`ok: ${label} — Apply PR body is the org template composed against the published commit`);
 
   // The plan is read at one pinned commit: every read, the opt-out probe
   // included, names the base sha, so a file changed on the default branch mid-plan is
@@ -600,9 +607,9 @@ async function ownershipScenarios() {
   {
     const r = await runClass({ repoName: 'l9-repo-template', files: divergent });
     assert.strictEqual(r.klass, 'non_constellation_python');
-    const body = r.calls.find((c) => c.name === 'pulls.create').args.body;
-    assert.match(body, /class: {2}non_constellation_python \(org override\)/);
-    assert.doesNotMatch(body, /\(marker\)/);
+    const message = r.calls.find((c) => c.name === 'git.createCommit').args.message;
+    assert.match(message, /class `non_constellation_python` \(org override\)/);
+    assert.doesNotMatch(message, /\(marker\)/);
   }
   console.log(`ok: ${label} — override-classified repo: PR body names the org override, not a marker`);
 

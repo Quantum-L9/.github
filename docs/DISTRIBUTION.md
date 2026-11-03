@@ -256,23 +256,33 @@ described an earlier head's path set is withdrawn as unverified rather than
 carried forward; a reviewer's own justification text is left as written. This
 repository's own PRs get the same job through `pr-files.yml`.
 
+Seed and Manual Update PRs are composed the same way, at creation, in every
+consumer class (with or without the governance caller): `auto-seed-new-repo.yml`,
+`seed-governance.yml` and `continuous-sync.yml` check the composer out at the
+`governance-pr.yml` pin, fetch the published seed commit and its base, and
+render the org template with `compose_pr_body.py --remote`
+(`ops/seed-pr-body.js`). Nothing is hand-built and nothing is edited after.
+The template goes to the composer unchanged: the seeder writes only the seed
+commit, whose body carries the Problem paragraph and the Fix details the
+composer reads, and every other section is measured from the commit range
+(Reviewer focus is a machine-owned region, refreshed on every push). Seed
+commits use `ci(governance): …`, which ticks "CI / governance change". When the composer still reports a field that
+needs an author, no PR opens and the repository is reported failed; its branch
+stays the seeder's own, so the next run rebuilds it.
+`ops/test-seed-pr-body.js` renders seed, restore and Manual Update bodies with
+the real pinned composer and requires them complete and gate-clean, and
+`ops/test-distribution-triggers.js` keeps every composer checkout on the one pin.
+
 The template's visible order puts the inventory first (Files touched, then
 Changes by intent) and Protected-root last; the `L9_PROTECTED_ROOT_PR` stamp
 stays the first line. It carries no placeholder the composer cannot honestly
 complete: no bare `Closes #`, no sample paths, no sample evidence. The
 composer marks each receipt `BOUND`, `STALE` or `UNVERIFIED` against the tree
-it describes, ticks a Gate box only from a bound receipt that measured it, and
-writes an explicit *unresolved* marker into fields that need the author's
-judgment (Reviewer focus, an applicable Semantic change, an unevidenced Type of
-Change). No PR needs a repository-wide manifest or per-file metadata header:
+it describes, ticks a Gate box only from a bound receipt or a diff measurement
+that established it, and derives every other field (Type of Change, Risk,
+Semantic change, Reviewer focus) from the measured range, saying so where a
+fact cannot be measured rather than leaving a field for an author. No PR needs a repository-wide manifest or per-file metadata header:
 the body's regions are the inventory.
-
-PRs the seeders and Manual Update open carry their own short body in the
-sections the `gates` job checks — Problem, Fix, Risk (exactly one), Evidence
-(source commit, exact base, class, and the changed paths), Gates — built from
-what the run did. Consumer CI is left unchecked as unverified; nothing claims a
-check the run did not observe. They are not a second composer: they have no
-machine-owned regions, so the `body` job leaves them as written.
 
 **Shipping a body or gate change to consumers.** Merge the
 `governance-pr.yml` change, set the merged commit as the pin in

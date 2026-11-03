@@ -72,8 +72,26 @@ jobs:
           private-key: ${{ secrets.GOVERNANCE_APP_PRIVATE_KEY }}
           owner: Quantum-L9
 
+      # The one PR-body renderer (Cursor-Governance ops/scripts/compose_pr_body.py)
+      # at the commit governance-pr.yml pins; ops/test-distribution-triggers.js
+      # keeps the pins equal. Update PR bodies are composed from the org
+      # template by it, never hand-built (ops/seed-pr-body.js).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          repository: Quantum-L9/Cursor-Governance
+          ref: 5039c379d8ba1263f504cfa527487386205e056c
+          path: composer
+          # compose_pr_body.py imports org_dotgithub at load; both are stdlib-only.
+          sparse-checkout: |
+            ops/scripts/compose_pr_body.py
+            ops/scripts/org_dotgithub.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         env:
+          # Fetches the update commit for the composer, as an HTTP header via env.
+          SEED_GIT_TOKEN: ${{ steps.token.outputs.token }}
           # Only an explicit Apply (dry_run=false) writes; anything else previews.
           DRY_RUN: ${{ inputs.dry_run }}
           FILTER: ${{ inputs.repo_filter || '' }}
@@ -91,6 +109,10 @@ jobs:
               SYNC_COMMIT_SUBJECT, assessSeedBranch, assessOpenPrOverlap, moveSeedBranch, isEmptyRepoError,
             } = require('./ops/seed-branch-safety.js');
             const { buildSeedPayload, seedNeedsRepoShape, probeRepoShape } = require('./ops/build-seed-payload.js');
+            const {
+              seedCommitMessage, syncNarrative, renderSeedPrBody,
+            } = require('./ops/seed-pr-body.js');
+            const { execFileSync } = require('child_process');
             const DRY = process.env.DRY_RUN !== 'false';
             const FILTER = process.env.FILTER;
             const BRANCH = 'chore/governance-sync';
@@ -344,13 +366,18 @@ jobs:
                 const tree = await github.rest.git.createTree({
                   owner: o, repo: n, base_tree: baseCommit.data.tree.sha, tree: treeItems,
                 });
+                const story = syncNarrative({
+                  plan, profile, branch: BRANCH, sourceSha: SOURCE_SHA, pins: canonicalPins,
+                  notChanged: notes.filter(t => /^BLOCKED_OWNERSHIP/.test(t)),
+                });
                 const commit = await github.rest.git.createCommit({
                   owner: o, repo: n,
-                  message: [
-                    `chore(governance): sync ${plan.length} org-managed file(s)`,
-                    '',
-                    ...plan.map(d => `${d.why} ${d.path}`),
-                  ].join('\n'),
+                  message: seedCommitMessage({
+                    subject: `ci(governance): sync ${plan.length} org-managed file(s)`,
+                    problem: story.problem,
+                    details: story.details,
+                    trailers: plan.map(d => `Sync-${d.why === 're-pin' ? 'Repin' : d.action === 'delete' ? 'Delete' : 'Restore'}: ${d.path}`),
+                  }),
                   tree: tree.data.sha,
                   parents: [baseSha],
                 });
@@ -371,52 +398,21 @@ jobs:
                 }
 
                 // No open-PR branch here: the guard above returned early for
-                // those, so this always opens a fresh PR.
-                // Update-specific body in the sections governance-pr.yml
-                // checks. Facts only: what changes, on which exact base, from
-                // which source; nothing claims a check this run did not make.
-                const additive = plan.every(d => d.action === 'write' && !d.existed);
+                // those, so this always opens a fresh PR. The body is the org PR
+                // template, composed by the one renderer; an incomplete body
+                // stops here and no PR opens (the next Apply rebuilds the branch).
+                const rendered = renderSeedPrBody({
+                  exec: execFileSync, fs,
+                  remoteUrl: `https://github.com/${o}/${n}.git`,
+                  branch: BRANCH, headSha: commit.data.sha, baseSha,
+                  template: canonicalTemplate,
+                  composerRoot: 'composer',
+                  token: process.env.SEED_GIT_TOKEN || '',
+                });
                 const pr = await github.rest.pulls.create({
                   owner: o, repo: n, head: BRANCH, base,
-                  title: 'chore(governance): restore drifted governance files',
-                  body: [
-                    '## Problem',
-                    '',
-                    `${plan.length} governance file(s) managed by ${ORG}/.github have drifted from the org standard for this repository's class \`${klass}\` (${profile.resolved_from}) — see \`policies/repo-classes.yml\`.`,
-                    '',
-                    '## Fix',
-                    '',
-                    ...plan.map(d => `- **${d.why}** \`${d.path}\`` + (
-                      d.action === 'delete' ? ` — this class inherits it live from ${ORG}/.github; this local copy is byte-identical to the org template and blocks that`
-                        : d.why === 're-pin' ? ` — \`uses:\` pins moved to \`governance-pr.yml@${canonicalPins.pr}\` / \`governance-issue.yml@${canonicalPins.issue}\`; the rest of the file is unchanged`
-                          : ' — replaced with the org bytes')),
-                    ...notes.filter(t => /^BLOCKED_OWNERSHIP/.test(t)).map(t => `- not changed: ${t}`),
-                    '',
-                    'Review and merge. To opt out of governance sync, create `.l9/no-sync` in your repo.',
-                    '',
-                    '## Risk',
-                    '',
-                    `- [${additive ? 'x' : ' '}] Low — additive, reversible, no data or contract change`,
-                    `- [${additive ? ' ' : 'x'}] Medium — touches shared code, config, or a public interface`,
-                    '- [ ] High — breaking change, migration, IAM/network, or irreversible',
-                    '',
-                    '## Evidence',
-                    '',
-                    '```text',
-                    `source: ${ORG}/.github@${SOURCE_SHA}`,
-                    `base:   ${base}@${baseSha}`,
-                    `class:  ${klass} (${profile.resolved_from})`,
-                    `changes (${plan.length}):`,
-                    ...plan.map(d => `  ${d.action === 'delete' ? 'delete' : d.existed ? 'modify' : 'add'}  ${d.path}`),
-                    '```',
-                    '',
-                    '## Gates',
-                    '',
-                    '- [x] No other open PR changed these paths when the update was planned (a PR opened later is not covered)',
-                    "- [ ] Consumer CI passes on this PR — unverified: Manual Update neither runs nor observes this repository's checks",
-                    '',
-                    '_Opened by a manual Apply of Quantum-L9/.github continuous-sync.yml._',
-                  ].join('\n'),
+                  title: 'ci(governance): restore drifted governance files',
+                  body: rendered.body,
                 });
                 row('UPDATE_PR_OPEN', `PR #${pr.data.number} (${summary})`);
               } catch (e) {

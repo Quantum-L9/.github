@@ -20,8 +20,13 @@ const {
 
 const root = path.resolve(__dirname, '..');
 
-const autoSeedSubject = 'chore(governance): auto-seed 28 org template file(s)';
-const seedSubject = 'chore(governance): seed 3 org template file(s)';
+// Seeders write `ci(governance)`; `chore(governance)` was written before and
+// must stay recognised so those leftover branches remain rebuildable.
+const autoSeedSubject = 'ci(governance): auto-seed 28 org template file(s)';
+const seedSubject = 'ci(governance): seed 3 org template file(s)';
+assert.strictEqual(isSeedCommitMessage('chore(governance): auto-seed 28 org template file(s)'), true, 'pre-ci seed subjects stay recognised');
+assert.strictEqual(isSeedCommitMessage('chore(governance): seed 3 org template file(s)'), true);
+assert.strictEqual(isSeedCommitMessage('feat(governance): seed 3 org template file(s)'), false, 'only ci/chore are seed subjects');
 
 const SEEDER = 'seeder-bot';
 const seedCommit = (message, over = {}) => ({
@@ -175,12 +180,13 @@ for (const [wf, subject] of [
   ['.github/workflows/seed-governance.yml', seedSubject],
 ]) {
   const text = fs.readFileSync(path.join(root, wf), 'utf8');
-  const m = text.match(/message: `(chore\(governance\): [^`]*)`/);
-  assert.ok(m, `${wf} must declare a seed commit message`);
-  // The template's first line is the subject; the body carries the trailer.
-  const [rendered, ...body] = m[1].replace(/\$\{[^}]*\}/g, '7').split('\\n');
-  assert.ok(body.join('\n').includes('7: 7'), `${wf} must write the Seed-Payload trailer into the body`);
-  assert.match(m[1], /\$\{PAYLOAD_TRAILER\}: \$\{payloadDigest\}/, `${wf} trailer must be PAYLOAD_TRAILER: payloadDigest`);
+  // Subject and trailer are passed to seedCommitMessage (ops/seed-pr-body.js),
+  // which puts the Problem paragraph between them for the PR-body composer.
+  const m = text.match(/subject: `(ci\(governance\): [^`]*)`/);
+  assert.ok(m, `${wf} must declare a seed commit subject`);
+  const rendered = m[1].replace(/\$\{[^}]*\}/g, '7');
+  assert.match(text, /seedCommitMessage\(\{[\s\S]{0,300}trailers: \[`\$\{PAYLOAD_TRAILER\}: \$\{payloadDigest\}`\]/,
+    `${wf} must write the Seed-Payload trailer into the commit message`);
   assert.ok(
     SEED_COMMIT_SUBJECT.test(rendered),
     `${wf} commit subject "${rendered}" is not recognized by the safety gate`,
