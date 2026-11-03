@@ -172,8 +172,9 @@ function dispatchCallArgs(text) {
     // The only dispatch allowed is to this repository itself (birth chaining
     // repo_created to auto-seed); any other target is a consumer fanout.
     for (const args of dispatchCallArgs(text)) {
-      assert.match(args, /^\s*repo: context\.repo\.repo,\s*$/m, `${f}: a consumer event fanout is back`);
-      assert.match(args, /^\s*owner: context\.repo\.owner,\s*$/m, `${f}: a consumer event fanout is back`);
+      const lines = args.split('\n').map((l) => l.trim());
+      assert.ok(lines.includes('repo: context.repo.repo,'), `${f}: a consumer event fanout is back`);
+      assert.ok(lines.includes('owner: context.repo.owner,'), `${f}: a consumer event fanout is back`);
       assert.match(args, /event_type: 'repo_created'/, `${f}: only repo_created may be self-dispatched`);
     }
   }
