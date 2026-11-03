@@ -1,0 +1,9 @@
+{
+  "names": [
+    "pyproject.toml",
+    "uv.lock",
+    "package.json",
+    "pnpm-lock.yaml"
+  ],
+  "pyproject": "[project]\nname = \"example\"\nversion = \"0.1.0\"\n"
+}

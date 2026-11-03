@@ -14,6 +14,7 @@ const {
   buildSeedPayload,
   parseCategories,
   selectSeedWrites,
+  MANAGED_SEED_PATHS,
   DEFAULT_CATEGORIES,
   OPT_IN_CATEGORIES,
   PYTHON_LINT_DEST,
@@ -180,6 +181,25 @@ try {
   assert.deepStrictEqual(keptPlan.kept, [ciCaller, 'biome.json']);
   const missingPlan = selectSeedWrites({ 'README.md': 'x' }, { 'README.md': null });
   assert.deepStrictEqual(missingPlan.writes, ['README.md']);
+
+  // Managed (ADR 0019): a drifted dependabot.yml is restored to the render; an
+  // equal one is kept; other files stay missing-only even when they differ.
+  const DEP = '.github/dependabot.yml';
+  assert.deepStrictEqual(MANAGED_SEED_PATHS, [DEP]);
+  const drift = selectSeedWrites(
+    { [DEP]: 'rendered\n', 'SECURITY.md': 'org\n' },
+    { [DEP]: 'hand-written\n', 'SECURITY.md': 'local\n' },
+    { managed: MANAGED_SEED_PATHS },
+  );
+  assert.deepStrictEqual(drift, { writes: [DEP], replaced: [DEP], kept: ['SECURITY.md'] });
+  const equal = selectSeedWrites({ [DEP]: 'rendered\n' }, { [DEP]: 'rendered\n' }, { managed: MANAGED_SEED_PATHS });
+  assert.deepStrictEqual(equal, { writes: [], replaced: [], kept: [DEP] });
+  const unmanaged = selectSeedWrites({ [DEP]: 'rendered\n' }, { [DEP]: 'hand-written\n' });
+  assert.deepStrictEqual(unmanaged.replaced, [], 'without managed paths the planner stays missing-only');
+  assert.throws(
+    () => selectSeedWrites({ [DEP]: 'rendered\n' }, { [DEP]: true }, { managed: MANAGED_SEED_PATHS }),
+    /current text is required/,
+  );
   assert.ok(
     !('.vscode/extensions.json' in defaultPayload),
     'editor recommendations are no longer seeded into consumer repositories',

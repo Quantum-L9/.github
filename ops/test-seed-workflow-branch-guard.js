@@ -212,6 +212,17 @@ const wrote = (r) => r.names.some((n) => WRITES.has(n));
 const one = (name, extra = {}) => [{ name, ...extra }];
 
 /**
+ * The fixture with `.github/dependabot.yml` already equal to the render for
+ * its root (ADR 0019). The weekly sweep restores a drifted managed file, so a
+ * placeholder there would read as drift rather than "already present".
+ */
+const withRenderedDependabot = (files) => {
+  const names = rootEntries({ ...files, '.github/dependabot.yml': '' }).filter((e) => e.type === 'file').map((e) => e.name);
+  const text = renderDependabot({ fs, shape: shapeFromRoot({ names, pyprojectText: files['pyproject.toml'] }) });
+  return { ...files, '.github/dependabot.yml': text };
+};
+
+/**
  * dependabot.yml is rendered for the repository's root (ADR 0019). A uv repo
  * is seeded with its uv render; a root that cannot be listed seeds nothing at
  * all rather than a github-actions-only dependabot.yml.
@@ -404,7 +415,7 @@ async function failClosedScenarios(wf, run, label) {
     assert.doesNotMatch(body, /- \[x\][^\n]*CI passes/i, `${label}: claims CI it did not observe`);
     assert.doesNotMatch(body, /Closes #\d/, `${label}: invents an issue number`);
     // An inherit-heavy class adds only SECURITY.md + labels via explicit ask: Low.
-    const low = await run({ branch: null, repos: one('ncp', { marker: 'profile: non_constellation_python\n', files: { '.github/CODEOWNERS': 'x', '.github/dependabot.yml': 'x' } }) });
+    const low = await run({ branch: null, repos: one('ncp', { marker: 'profile: non_constellation_python\n', files: withRenderedDependabot({ '.github/CODEOWNERS': 'x' }) }) });
     const lowBody = low.calls.find((c) => c.name === 'pulls.create').args.body;
     assert.deepStrictEqual(await gates(lowBody), []);
     assert.match(lowBody, /- \[x\] Low/);
@@ -419,7 +430,7 @@ async function failClosedScenarios(wf, run, label) {
       '.github/ISSUE_TEMPLATE/4-incident.yml', '.github/ISSUE_TEMPLATE/ci-failure.yml', '.github/ISSUE_TEMPLATE/gov-violation.yml',
       '.github/ISSUE_TEMPLATE/config.yml', '.github/pull_request_template.md', '.github/PULL_REQUEST_TEMPLATE/release.md',
     ].map((p) => [p, 'local\n']));
-    const r = await run({ branch: null, repos: one('consumer-repo', { files }) });
+    const r = await run({ branch: null, repos: one('consumer-repo', { files: withRenderedDependabot(files) }) });
     assert.strictEqual(wrote(r), false, `${label}: re-seed of a complete repo wrote`);
     assert.match(rowOf(r)[2], /already seeded/);
   }
@@ -435,6 +446,9 @@ async function failClosedScenarios(wf, run, label) {
       };
     };
     let r = await run({ branch: null, repos: [{ name: 'empty-repo' }, { name: 'plain-repo' }], mutateGithub: emptyRepo(409, 'Git Repository is empty.') });
+    assert.match(rowOf(r, 'empty-repo')[2], /^UNINITIALIZED_NOT_SEEDED/);
+    // Octokit appends the docs URL to GitHub's message; that is still the empty-repo answer.
+    r = await run({ branch: null, repos: [{ name: 'empty-repo' }, { name: 'plain-repo' }], mutateGithub: emptyRepo(409, 'Git Repository is empty. - https://docs.github.com/rest/git/refs#get-a-reference') });
     assert.match(rowOf(r, 'empty-repo')[2], /^UNINITIALIZED_NOT_SEEDED/);
     assert.ok(!r.calls.some((c) => c.args && c.args.repo === 'empty-repo' && WRITES.has(c.name)), `${label}: wrote to an empty repo`);
     assert.ok(r.calls.some((c) => c.name === 'pulls.create' && c.args.repo === 'plain-repo'), `${label}: sweep stopped at the empty repo`);
@@ -457,6 +471,37 @@ async function failClosedScenarios(wf, run, label) {
     }
     console.log(`ok: ${label} — other 409s and 403s at the ref stage fail; never reported seeded`);
   }
+}
+
+/**
+ * V22 (ADR 0019): the weekly sweep restores a drifted managed dependabot.yml
+ * to the render, leaves every other existing file alone, and honours .l9/no-sync.
+ */
+async function managedRestoreScenarios(run, label) {
+  {
+    const base = withRenderedDependabot({ '.github/CODEOWNERS': 'x', 'SECURITY.md': 'local\n' });
+    const want = base['.github/dependabot.yml'];
+    const marker = 'profile: non_constellation_python\n';
+    let r = await run({ branch: null, repos: one('drifted', { marker, files: { ...base, '.github/dependabot.yml': 'version: 2\nupdates: []\n' } }) });
+    const tree = new Set(r.calls.find((c) => c.name === 'git.createTree').args.tree.map((t) => t.path));
+    assert.ok(tree.has('.github/dependabot.yml'), `${label}: drifted dependabot.yml not restored`);
+    assert.ok(!tree.has('.github/CODEOWNERS') && !tree.has('SECURITY.md'), `${label}: overwrote an unmanaged file`);
+    const blobs = r.calls.filter((c) => c.name === 'git.createBlob').map((c) => c.args.content);
+    assert.ok(blobs.some((b) => b === want || Buffer.from(b, 'base64').toString('utf8') === want), `${label}: restore is not the render`);
+    const body = r.calls.find((c) => c.name === 'pulls.create').args.body;
+    assert.deepStrictEqual(await gates(body), [], `${label}: restore PR body fails governance-pr gates`);
+    assert.match(body, /^restored \(1\):\n {2}\.github\/dependabot\.yml$/m);
+    assert.match(body, /- \[x\] Medium/, `${label}: a dependabot restore is Medium`);
+
+    r = await run({ branch: null, repos: one('opted-out', { marker, files: { ...base, '.github/dependabot.yml': 'version: 2\nupdates: []\n', '.l9/no-sync': '' } }) });
+    assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.tree.some((t) => t.path === '.github/dependabot.yml')),
+      `${label}: restored dependabot.yml despite .l9/no-sync`);
+
+    r = await run({ branch: null, repos: one('in-sync', { marker, files: base }) });
+    assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.tree.some((t) => t.path === '.github/dependabot.yml')),
+      `${label}: an in-sync managed file was rewritten`);
+  }
+  console.log(`ok: ${label} — drifted dependabot.yml restored to the render; unmanaged files and .l9/no-sync respected`);
 }
 
 (async () => {
@@ -661,6 +706,7 @@ async function failClosedScenarios(wf, run, label) {
 
     await failClosedScenarios(wf, run, label);
     await dependabotSeedScenarios(run, label);
+    if (wf.autoSeed) await managedRestoreScenarios(run, label);
   }
 })().catch((e) => {
   console.error(e);

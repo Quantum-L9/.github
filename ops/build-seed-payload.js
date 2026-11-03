@@ -156,23 +156,46 @@ function applyRepoPlaceholders(text, repository) {
 
 
 /**
+ * Managed seed files: rendered for the repository and kept equal to that
+ * render. Every other seed file is missing-only. ADR
+ * docs/adr/0019-dependabot-managed-rendered.md (weekly automated restore).
+ */
+const MANAGED_SEED_PATHS = Object.freeze(['.github/dependabot.yml']);
+
+/**
  * Decide which payload dests to write.
  * @param {Record<string, string>} payload
  * @param {Record<string, string|null|true>} existingByPath
  *   null/absent = missing (write);
- *   anything else = present (keep).
+ *   anything else = present (keep), except a managed path (see `managed`)
+ *   whose current text is given and differs from the payload: replaced.
+ * @param {object} [o]
+ * @param {readonly string[]} [o.managed] managed paths to restore when they
+ *   drift. Their existing value must be the current text (a string); `true`
+ *   cannot be compared and fails closed. Omitted = missing-only for all.
  * CI callers are never overwritten. Canonical CI is
  * Quantum-L9/l9-ci-core `.github/workflows/org-ci.yml`.
  * @returns {{ writes: string[], replaced: string[], kept: string[] }}
  */
-function selectSeedWrites(payload, existingByPath = {}) {
+function selectSeedWrites(payload, existingByPath = {}, { managed = [] } = {}) {
   const writes = [];
   const replaced = [];
   const kept = [];
   for (const dest of Object.keys(payload)) {
-    if (!(dest in existingByPath) || existingByPath[dest] === null) {
+    const existing = existingByPath[dest];
+    if (!(dest in existingByPath) || existing === null) {
       writes.push(dest);
       continue;
+    }
+    if (managed.includes(dest)) {
+      if (typeof existing !== 'string') {
+        throw new TypeError(`${dest} is managed: its current text is required to compare against the render`);
+      }
+      if (existing !== payload[dest]) {
+        writes.push(dest);
+        replaced.push(dest);
+        continue;
+      }
     }
     kept.push(dest);
   }
@@ -417,6 +440,7 @@ module.exports = {
   shapeFromRoot,
   probeRepoShape,
   selectSeedWrites,
+  MANAGED_SEED_PATHS,
   applyRepoPlaceholders,
   planConsumerSeed,
 };

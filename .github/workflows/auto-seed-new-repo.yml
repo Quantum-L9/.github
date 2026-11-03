@@ -11,22 +11,31 @@
 # into an l9-repo-template repository, where
 # scripts/inventory_check.py fails closed on exactly those paths.
 #
-# Create-time path: an hourly cron lists org repos and seeds anything
+# Create-time path: a weekly cron lists org repos and seeds anything
 # missing (or still carrying the stock ESLint node caller). That does not
-# depend on an org webhook or App repository events.
+# depend on an org webhook or App repository events. Birth itself is
+# immediate through repo-birth-bootstrap.yml; this sweep is the backstop.
+#
+# Managed seed files (ADR docs/adr/0019-dependabot-managed-rendered.md):
+# `.github/dependabot.yml` is rendered per repository root and kept equal to
+# that render. The weekly sweep adds it when missing AND restores it when it
+# drifted, through the same advisory PR. A repository opts out of the restore
+# with `.l9/no-sync`; self_governed classes do not receive it at all.
 # repository_dispatch type repo_created remains as an optional fast path
 # if an App/webhook is installed later.
 #
 # Branch safety: the seed branch is rebuilt as "default branch + one seed
 # commit", so ops/seed-branch-safety.js gates every ref move. A branch with an
 # open PR, or carrying any commit the seeder did not author, is left alone.
-# A sweep takes ~10 minutes org-wide; hourly leaves headroom and the
-# concurrency group keeps two sweeps from holding org-wide write at once.
+# A sweep takes ~10 minutes org-wide; the concurrency group keeps two sweeps
+# from holding org-wide write at once.
 name: Auto-seed new repository
 
 on:
   schedule:
-    - cron: '20 * * * *'
+    # Weekly: Monday 08:00 America/New_York (DST-aware; GitHub applies the zone).
+    - cron: '0 8 * * 1'
+      timezone: 'America/New_York'
   repository_dispatch:
     types: [repo_created]
   workflow_dispatch:
@@ -48,7 +57,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: auto-seed-new-repo
+  # One pending run per group: a newer pending run cancels an older one. Births
+  # dispatch repo_created, so each targeted run gets its own group per
+  # repository and two births never cancel each other. Sweeps share one group
+  # so two never hold org-wide write at once; a birth that overlaps a sweep on
+  # the same repository is caught by the seed branch's compare-and-swap.
+  group: auto-seed-new-repo-${{ github.event.client_payload.repository || inputs.target_repo || 'sweep' }}
   cancel-in-progress: false
 
 jobs:
@@ -81,6 +95,7 @@ jobs:
             const {
               buildSeedPayload,
               selectSeedWrites,
+              MANAGED_SEED_PATHS,
               seedNeedsRepoShape,
               probeRepoShape,
             } = require('./ops/build-seed-payload.js');
@@ -155,7 +170,10 @@ jobs:
             const SOURCE_SHA = process.env.GITHUB_SHA || 'unknown';
             // GitHub's exact answer for a repository with no commits. Only this
             // 409 means "nothing to seed onto yet"; any other 409 is a failure.
-            const isEmptyRepo = (e) => e && e.status === 409 && /^Git Repository is empty\.?$/i.test(String(e.message || '').trim());
+            // Octokit appends the docs URL (" - https://docs.github.com/..."),
+            // which made every sweep fail on the org's empty repositories.
+            const isEmptyRepo = (e) => e && e.status === 409
+              && /^Git Repository is empty\.?(?:\s+-\s+https:\/\/\S+)?$/i.test(String(e.message || '').trim());
 
             let targets;
             if (TARGET) {
@@ -227,15 +245,21 @@ jobs:
                   continue;
                 }
 
+                // Managed paths are compared by text so a drifted render is
+                // restored; `.l9/no-sync` keeps them missing-only. Every other
+                // path stays missing-only.
+                const optedOut = await exists(o, n, '.l9/no-sync', baseSha);
+                const managed = optedOut ? [] : MANAGED_SEED_PATHS.filter((p) => p in payload);
                 const existingByPath = {};
                 for (const p of paths) {
-                  if (!(await exists(o, n, p, baseSha))) {
+                  const text = await readFile(o, n, p, baseSha);
+                  if (text === null) {
                     existingByPath[p] = null;
                     continue;
                   }
-                  existingByPath[p] = true;
+                  existingByPath[p] = managed.includes(p) ? text : true;
                 }
-                const { writes } = selectSeedWrites(payload, existingByPath);
+                const { writes, replaced } = selectSeedWrites(payload, existingByPath, { managed });
                 if (!writes.length) {
                   rows.push([n, profile.name, 'already seeded']);
                   continue;
@@ -273,14 +297,18 @@ jobs:
                     ? writes.join(', ')
                     : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
                   const onto = branchSha ? `; rebuild ${BRANCH}` : '';
-                  rows.push([n, profile.name, `would seed ${writes.length}: ${preview}${onto}`]);
+                  const restoring = replaced.length ? ` (restore ${replaced.join(', ')})` : '';
+                  rows.push([n, profile.name, `would seed ${writes.length}: ${preview}${restoring}${onto}`]);
                   continue;
                 }
                 const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
 
                 const treeItems = [];
+                // `writes` was planned from reads pinned at baseSha: missing
+                // paths plus drifted managed paths. Re-reading at the same
+                // commit cannot change that, and a moved base is refused below
+                // (BASE_MOVED), so no per-path re-check is needed here.
                 for (const path of writes) {
-                  if (await exists(o, n, path, baseSha)) continue;
                   const blob = await github.rest.git.createBlob({
                     owner: o, repo: n,
                     content: Buffer.from(payload[path]).toString('base64'),
@@ -326,8 +354,10 @@ jobs:
                 // Seed-specific body in the sections governance-pr.yml checks.
                 // Facts only: what was added, on which exact base, from which
                 // source. Nothing here claims a check this run did not make.
-                const added = treeItems.map(t => t.path);
-                const behavioral = added.some(p => p === '.github/CODEOWNERS'
+                const written = treeItems.map(t => t.path);
+                const restored = written.filter(p => replaced.includes(p));
+                const added = written.filter(p => !replaced.includes(p));
+                const behavioral = written.some(p => p === '.github/CODEOWNERS'
                   || p === '.github/dependabot.yml' || p.startsWith('.github/workflows/'));
                 const pr = await github.rest.pulls.create({
                   owner: o, repo: n, head: BRANCH, base,
@@ -335,14 +365,21 @@ jobs:
                   body: [
                     '## Problem',
                     '',
-                    `This repository is missing ${added.length} file(s) that its repo class \`${profile.name}\` (${profile.resolved_from}) materializes from \`Quantum-L9/.github\` — see \`policies/repo-classes.yml\`.`,
+                    added.length
+                      ? `This repository is missing ${added.length} file(s) that its repo class \`${profile.name}\` (${profile.resolved_from}) materializes from \`Quantum-L9/.github\` — see \`policies/repo-classes.yml\`.`
+                      : '',
+                    restored.length
+                      ? `${restored.map(p => `\`${p}\``).join(', ')} drifted from the org render for this repository root (ADR \`docs/adr/0019-dependabot-managed-rendered.md\`). Opt out with \`.l9/no-sync\`.`
+                      : '',
                     profile.inherit.length
                       ? `Inherited from the org \`.github\` repo and deliberately **not** copied here: ${profile.inherit.map(p => `\`${p}\``).join(', ')}.`
                       : '',
                     '',
                     '## Fix',
                     '',
-                    `Adds only the missing files listed under Evidence, in one commit on \`${BRANCH}\`. Existing files were left untouched (missing-only seed).`,
+                    restored.length
+                      ? `Adds the missing files and restores the managed files listed under Evidence, in one commit on \`${BRANCH}\`. No other existing file was touched.`
+                      : `Adds only the missing files listed under Evidence, in one commit on \`${BRANCH}\`. Existing files were left untouched (missing-only seed).`,
                     hasRootCodeowners
                       ? 'Root `CODEOWNERS` is present and is **not** overridden by `.github/CODEOWNERS`.'
                       : '',
@@ -363,6 +400,7 @@ jobs:
                     `class:  ${profile.name} (${profile.resolved_from})`,
                     `added (${added.length}):`,
                     ...added.map(p => `  ${p}`),
+                    ...(restored.length ? [`restored (${restored.length}):`, ...restored.map(p => `  ${p}`)] : []),
                     '```',
                     '',
                     '## Gates',
@@ -373,10 +411,10 @@ jobs:
                     '_Opened automatically by Quantum-L9/.github auto-seed._',
                   ].filter((line, idx, arr) => !(line === '' && arr[idx - 1] === '')).join('\n'),
                 });
-                rows.push([n, profile.name, `PR #${pr.data.number} (${treeItems.length} file(s))`]);
+                rows.push([n, profile.name, `PR #${pr.data.number} (${added.length} added, ${restored.length} restored)`]);
               } catch (e) {
                 // An empty repository has no default branch to seed onto. It is
-                // neither seeded nor failed; the next hourly sweep retries it.
+                // neither seeded nor failed; the next weekly sweep retries it.
                 if (isEmptyRepo(e)) {
                   uninitialized.push(n);
                   rows.push([n, '-', 'UNINITIALIZED_NOT_SEEDED: Git Repository is empty — nothing written; retried next sweep']);

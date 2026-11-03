@@ -305,8 +305,10 @@ jobs:
 
                 // Atomic single commit: all writes or none (no orphan partial branches).
                 const treeItems = [];
+                // `writes` was planned from reads pinned at baseSha; re-reading
+                // the same commit cannot change it, and a moved base is refused
+                // before the branch moves (BASE_MOVED).
                 for (const path of writes) {
-                  if (await exists(o, n, path, baseSha)) continue;
                   const blob = await github.rest.git.createBlob({
                     owner: o, repo: n,
                     content: Buffer.from(payload[path]).toString('base64'),
