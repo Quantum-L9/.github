@@ -148,6 +148,12 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   assert.strictEqual(chains(true), false, `${label}: a dry run must not chain`);
   assert.strictEqual(chains(false), true);
   assert.strictEqual(chains(null), true, `${label}: a repository_dispatch birth (no input) chains`);
+  // Reads fail closed: only a 404 is absent (a swallowed 403 once classified a
+  // repo `default` and passed FORBID on an unreadable path).
+  assert.doesNotMatch(text, /catch \{\s*(?:\/\*[^*]*\*\/\s*)?\}|catch \{\s*return (?:false|null);/,
+    `${label}: a read may not swallow every error as "absent"`);
+  assert.strictEqual((text.match(/if \(e\.status === 404\) return (?:false|null);/g) || []).length, 2,
+    `${label}: pathExists and readText treat only 404 as absent`);
   console.log(`ok: ${label} — birth chains repo_created to auto-seed after attestation; dry run does not`);
 }
 

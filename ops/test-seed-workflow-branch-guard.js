@@ -436,8 +436,9 @@ async function failClosedScenarios(wf, run, label) {
   }
   console.log(`ok: ${label} — a repo holding every eligible file gets no write`);
 
-  if (wf.autoSeed) {
-    // V19: an empty repository is UNINITIALIZED_NOT_SEEDED, and the sweep goes on.
+  {
+    // V19: an empty repository is UNINITIALIZED_NOT_SEEDED, and the run goes on
+    // (both seeders share isEmptyRepoError; seed-governance once failed the run).
     const emptyRepo = (status, message) => (github) => {
       const real = github.rest.git.getRef;
       github.rest.git.getRef = async (args) => {

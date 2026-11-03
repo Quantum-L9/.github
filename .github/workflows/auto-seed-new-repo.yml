@@ -103,6 +103,9 @@ jobs:
               assessSeedBranch,
               assessOpenPrOverlap,
               moveSeedBranch,
+              seedPayloadDigest,
+              PAYLOAD_TRAILER,
+              isEmptyRepoError,
             } = require('./ops/seed-branch-safety.js');
             const {
               loadRepoClasses,
@@ -168,12 +171,8 @@ jobs:
               readText: (p) => readFile(owner, repo, p, ref),
             });
             const SOURCE_SHA = process.env.GITHUB_SHA || 'unknown';
-            // GitHub's exact answer for a repository with no commits. Only this
-            // 409 means "nothing to seed onto yet"; any other 409 is a failure.
-            // Octokit appends the docs URL (" - https://docs.github.com/..."),
-            // which made every sweep fail on the org's empty repositories.
-            const isEmptyRepo = (e) => e && e.status === 409
-              && /^Git Repository is empty\.?(?:\s+-\s+https:\/\/\S+)?$/i.test(String(e.message || '').trim());
+            // An empty repository has nothing to seed onto (shared check).
+            const isEmptyRepo = isEmptyRepoError;
 
             let targets;
             if (TARGET) {
@@ -271,11 +270,16 @@ jobs:
                 // branch would be discarded by construction rather than by
                 // conflict. ops/seed-branch-safety.js decides, read-only,
                 // before any git write; both seeders share that one decision.
+                // allowedPaths: an unsigned seeder commit is proven by touching
+                // only seed paths. payloadDigest: a PR declining exactly these
+                // bytes is not re-proposed.
+                const payloadDigest = seedPayloadDigest(payload, writes);
                 const gate = await assessSeedBranch({
                   github, owner: o, repo: n, base, branch: BRANCH,
+                  allowedPaths: Object.keys(payload), payloadDigest,
                 });
                 if (gate.action === 'skip') {
-                  rows.push([n, profile.name, gate.reason]);
+                  rows.push([n, profile.name, gate.declined ? `DECLINED: ${gate.reason}` : gate.reason]);
                   continue;
                 }
                 const branchSha = gate.sha;
@@ -329,7 +333,7 @@ jobs:
                 });
                 const commit = await github.rest.git.createCommit({
                   owner: o, repo: n,
-                  message: `chore(governance): auto-seed ${treeItems.length} org template file(s)`,
+                  message: `chore(governance): auto-seed ${treeItems.length} org template file(s)\n\n${PAYLOAD_TRAILER}: ${payloadDigest}`,
                   tree: tree.data.sha,
                   parents: [baseSha],
                 });

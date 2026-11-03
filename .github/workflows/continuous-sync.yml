@@ -91,7 +91,7 @@ jobs:
               loadRepoClasses, classForRepo, resolveProfile, matchPattern,
             } = require('./ops/repo-class-profile.js');
             const {
-              SYNC_COMMIT_SUBJECT, assessSeedBranch, assessOpenPrOverlap, moveSeedBranch,
+              SYNC_COMMIT_SUBJECT, assessSeedBranch, assessOpenPrOverlap, moveSeedBranch, isEmptyRepoError,
             } = require('./ops/seed-branch-safety.js');
             const { buildSeedPayload, seedNeedsRepoShape, probeRepoShape } = require('./ops/build-seed-payload.js');
             const DRY = process.env.DRY_RUN !== 'false';
@@ -159,7 +159,7 @@ jobs:
                 try {
                   baseSha = (await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` })).data.object.sha;
                 } catch (e) {
-                  if (e.status === 409 && /^Git Repository is empty\.?(?:\s+-\s+https:\/\/\S+)?$/i.test(String(e.message || '').trim())) {
+                  if (isEmptyRepoError(e)) {
                     row('UNINITIALIZED', 'Git Repository is empty — nothing to sync');
                     continue;
                   }
