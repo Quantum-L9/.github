@@ -22,7 +22,7 @@ files. Consumer-only files live in `policies/`:
 
 - `policies/CODEOWNERS` → `.github/CODEOWNERS` (skipped when the consumer already has a root `CODEOWNERS`)
 - `policies/governance-caller.yml` → `.github/workflows/governance.yml`
-- `.github/dependabot.yml`, `.github/labels.yml` (opt-in)
+- `.github/dependabot.yml` (rendered per repository root by `ops/render-dependabot.js`, not copied), `.github/labels.yml` (opt-in)
 - `SECURITY.md` (`community-health`; advisory URLs rewritten to the consumer)
 - `.github/ISSUE_TEMPLATE/` — seven named forms (`1-bug.yml`, `2-feature.yml`, `3-task.yml`, `4-incident.yml`, `ci-failure.yml`, `gov-violation.yml`, `config.yml`), never a directory sweep; `config.yml` advisory URL rewritten to the consumer
 - `.github/pull_request_template.md` and `.github/PULL_REQUEST_TEMPLATE/release.md` (`pr-templates`, named files, never a directory copy)
@@ -61,8 +61,19 @@ and a branch that cannot be pinned plans nothing. The default branch is
 re-read before the seed branch moves; if it moved, the
 run stops for that repository (`BASE_MOVED`) and the next one replans. This
 narrows the race with other writers; it does not close it. An empty repository
-is reported `UNINITIALIZED_NOT_SEEDED` by the weekly sweep and retried; no
-other 409 is treated that way.
+is reported `UNINITIALIZED_NOT_SEEDED` by both seeders and retried; no other 409
+is treated that way.
+
+**Seed branch.** A leftover seed branch (`chore/auto-seed-governance` for the
+sweep, `chore/seed-governance` for the dispatch seeder) is rebuilt only
+when its single commit ahead of the default branch is the seeder's own: the
+seeder subject, the seeder's committer login, and either a verified signature
+or (for the personal-token seeder, whose API commits GitHub never signs) a diff
+that only adds or modifies seed paths. Anything else on the branch is left
+alone. Each seed commit carries a `Seed-Payload: sha256:…` trailer over the
+exact paths and bytes it writes; when the latest seed PR was closed without
+merging and carries the payload the run would propose again, the repository is
+reported `DECLINED` and skipped until the payload changes.
 
 `continuous-sync.yml` (Manual Update) is the on-demand exception to
 missing-only; the weekly sweep restores `.github/dependabot.yml` the same way

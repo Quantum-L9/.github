@@ -14,6 +14,8 @@ const {
   classifySeedBranch,
   assessSeedBranch,
   moveSeedBranch,
+  seedPayloadDigest,
+  payloadDigestOf,
 } = require('./seed-branch-safety.js');
 
 const root = path.resolve(__dirname, '..');
@@ -92,6 +94,53 @@ v = classifySeedBranch({
 assert.strictEqual(v.safeToReplace, false, 'unverified seed-subject commit must block');
 assert.match(v.reason, /verified/);
 
+// Unsigned proof (a personal-token seeder's API commits are never signed):
+// accepted only when every changed file is a seed path, added or modified.
+const SEED_PATHS = ['SECURITY.md', '.github/CODEOWNERS', '.github/ISSUE_TEMPLATE/ci-failure.yml'];
+const unsigned = (files, allowedPaths = SEED_PATHS, over = {}) => classifySeedBranch({
+  aheadBy: 1, commits: [seedCommit(autoSeedSubject, { verified: false, ...over })], seederLogin: SEEDER, files, allowedPaths,
+});
+v = unsigned([{ filename: 'SECURITY.md', status: 'added' }, { filename: '.github/CODEOWNERS', status: 'modified' }]);
+assert.strictEqual(v.safeToReplace, true, 'an unsigned commit touching only seed paths is the seeder\'s');
+assert.match(v.reason, /unsigned; 2 seed path/);
+v = unsigned([{ filename: 'SECURITY.md', status: 'added' }, { filename: 'src/app.py', status: 'modified' }]);
+assert.strictEqual(v.safeToReplace, false, 'an unsigned commit that also changes a non-seed path is human work');
+assert.match(v.reason, /src\/app\.py/);
+v = unsigned([{ filename: 'SECURITY.md', status: 'removed' }]);
+assert.strictEqual(v.safeToReplace, false, 'a seeder never deletes: removed blocks');
+v = unsigned([{ filename: 'SECURITY.md', status: 'renamed' }]);
+assert.strictEqual(v.safeToReplace, false, 'a seeder never renames: renamed blocks');
+{
+  const many = Array.from({ length: 300 }, (_, i) => ({ filename: `p${i}`, status: 'added' }));
+  v = unsigned(many, many.map((f) => f.filename));
+  assert.strictEqual(v.safeToReplace, false, 'a compare list at the 300-file cap is not proof');
+  assert.match(v.reason, /truncated/);
+}
+v = unsigned([], SEED_PATHS);
+assert.strictEqual(v.safeToReplace, false, 'no file list is no proof');
+v = unsigned([{ filename: 'SECURITY.md', status: 'added' }], null);
+assert.strictEqual(v.safeToReplace, false, 'no allowed paths is no proof');
+v = unsigned([{ filename: 'SECURITY.md', status: 'added' }], SEED_PATHS, { committerLogin: 'mallory' });
+assert.strictEqual(v.safeToReplace, false, 'file proof never overrides a foreign committer');
+v = classifySeedBranch({
+  aheadBy: 2, commits: [seedCommit(autoSeedSubject, { verified: false }), seedCommit(autoSeedSubject, { verified: false })],
+  seederLogin: SEEDER, files: [{ filename: 'SECURITY.md', status: 'added' }], allowedPaths: SEED_PATHS,
+});
+assert.strictEqual(v.safeToReplace, false, 'file proof never overrides a second commit');
+
+// Payload digest: stable over path order, sensitive to bytes and paths.
+{
+  const p = { a: 'x', b: 'y' };
+  assert.strictEqual(seedPayloadDigest(p, ['a', 'b']), seedPayloadDigest(p, ['b', 'a']));
+  assert.notStrictEqual(seedPayloadDigest(p, ['a']), seedPayloadDigest(p, ['a', 'b']));
+  assert.notStrictEqual(seedPayloadDigest(p, ['a']), seedPayloadDigest({ a: 'z' }, ['a']));
+  assert.match(seedPayloadDigest(p, ['a']), /^sha256:[0-9a-f]{64}$/);
+  assert.throws(() => seedPayloadDigest(p, ['missing']), TypeError);
+  const d = seedPayloadDigest(p, ['a']);
+  assert.strictEqual(payloadDigestOf(`${autoSeedSubject}\n\nSeed-Payload: ${d}`), d);
+  assert.strictEqual(payloadDigestOf(autoSeedSubject), null);
+}
+
 v = classifySeedBranch({
   aheadBy: 1, commits: [seedCommit(autoSeedSubject)], seederLogin: null,
 });
@@ -128,7 +177,10 @@ for (const [wf, subject] of [
   const text = fs.readFileSync(path.join(root, wf), 'utf8');
   const m = text.match(/message: `(chore\(governance\): [^`]*)`/);
   assert.ok(m, `${wf} must declare a seed commit message`);
-  const rendered = m[1].replace(/\$\{[^}]*\}/g, '7');
+  // The template's first line is the subject; the body carries the trailer.
+  const [rendered, ...body] = m[1].replace(/\$\{[^}]*\}/g, '7').split('\\n');
+  assert.ok(body.join('\n').includes('7: 7'), `${wf} must write the Seed-Payload trailer into the body`);
+  assert.match(m[1], /\$\{PAYLOAD_TRAILER\}: \$\{payloadDigest\}/, `${wf} trailer must be PAYLOAD_TRAILER: payloadDigest`);
   assert.ok(
     SEED_COMMIT_SUBJECT.test(rendered),
     `${wf} commit subject "${rendered}" is not recognized by the safety gate`,
@@ -151,7 +203,9 @@ for (const [wf, subject] of [
 // --- assessSeedBranch / moveSeedBranch over a stubbed client ----------------
 const notFound = (m) => Object.assign(new Error(m), { status: 404 });
 
-function stub({ openPRs = [], branchSha = null, aheadBy = 1, commits = [seedCommit(autoSeedSubject)] } = {}) {
+function stub({
+  openPRs = [], closedPRs = [], branchSha = null, aheadBy = 1, commits = [seedCommit(autoSeedSubject)], files = undefined, headMessages = {},
+} = {}) {
   const calls = [];
   const state = { sha: branchSha };
   const github = {
@@ -168,6 +222,7 @@ function stub({ openPRs = [], branchSha = null, aheadBy = 1, commits = [seedComm
             },
             committer: c.committerLogin ? { login: c.committerLogin } : null,
           })),
+          ...(files ? { files } : {}),
         },
       };
     },
@@ -193,8 +248,9 @@ function stub({ openPRs = [], branchSha = null, aheadBy = 1, commits = [seedComm
         },
       },
       pulls: {
-        list: async () => {
-          calls.push('pulls.list');
+        list: async (args) => {
+          calls.push(`pulls.list ${args.state}`);
+          if (args.state === 'closed') return { data: closedPRs };
           return { data: openPRs.map((number) => ({ number })) };
         },
       },
@@ -207,6 +263,10 @@ function stub({ openPRs = [], branchSha = null, aheadBy = 1, commits = [seedComm
         createRef: async () => {
           calls.push('git.createRef');
           return { data: {} };
+        },
+        getCommit: async ({ commit_sha }) => {
+          calls.push(`git.getCommit ${commit_sha}`);
+          return { data: { message: headMessages[commit_sha] ?? autoSeedSubject } };
         },
       },
     },
@@ -222,7 +282,7 @@ const where = { owner: 'Quantum-L9', repo: 'consumer', base: 'main', branch: 'ch
   let g = await assessSeedBranch({ github: s.github, ...where });
   assert.strictEqual(g.action, 'skip');
   assert.match(g.reason, /PR #7 already open/);
-  assert.deepStrictEqual(s.calls, ['pulls.list'], 'open PR must not trigger a git read');
+  assert.deepStrictEqual(s.calls, ['pulls.list open'], 'open PR must not trigger a git read');
 
   // Absent branch → create, no compare call.
   s = stub({ branchSha: null });
@@ -270,6 +330,54 @@ const where = { owner: 'Quantum-L9', repo: 'consumer', base: 'main', branch: 'ch
   };
   g = await assessSeedBranch({ github: s.github, ...where });
   assert.strictEqual(g.action, 'skip');
+
+  // Declined memory: the latest seed PR closed unmerged with this exact payload
+  // is not re-proposed, whether or not its branch still exists.
+  const D1 = seedPayloadDigest({ a: 'x' }, ['a']);
+  const D2 = seedPayloadDigest({ a: 'y' }, ['a']);
+  const declinedPR = { number: 42, merged_at: null, closed_at: '2026-10-20T00:00:00Z', head: { sha: 'h42' } };
+  for (const branchSha of [null, 'abc123']) {
+    s = stub({ branchSha, closedPRs: [declinedPR], headMessages: { h42: `${autoSeedSubject}\n\nSeed-Payload: ${D1}` } });
+    g = await assessSeedBranch({ github: s.github, ...where, payloadDigest: D1 });
+    assert.strictEqual(g.action, 'skip', 'a declined payload must not be re-proposed');
+    assert.strictEqual(g.declined, 42);
+    assert.ok(!s.calls.some((c) => c.startsWith('git.getRef')), 'declined short-circuits before any branch read');
+  }
+  // The latest *closed* PR decides, even when an older-created PR closed later.
+  {
+    const olderClosedLater = { number: 40, merged_at: null, closed_at: '2026-10-25T00:00:00Z', head: { sha: 'h40' } };
+    s = stub({ branchSha: null, closedPRs: [declinedPR, olderClosedLater], headMessages: { h40: `${autoSeedSubject}\n\nSeed-Payload: ${D1}`, h42: autoSeedSubject } });
+    g = await assessSeedBranch({ github: s.github, ...where, payloadDigest: D1 });
+    assert.strictEqual(g.declined, 40, 'the most recently closed seed PR decides');
+  }
+  // A changed payload is proposed again.
+  s = stub({ branchSha: null, closedPRs: [declinedPR], headMessages: { h42: `${autoSeedSubject}\n\nSeed-Payload: ${D1}` } });
+  g = await assessSeedBranch({ github: s.github, ...where, payloadDigest: D2 });
+  assert.strictEqual(g.action, 'create');
+  // A pre-trailer decline (no digest) is proposed once more.
+  s = stub({ branchSha: null, closedPRs: [declinedPR] });
+  g = await assessSeedBranch({ github: s.github, ...where, payloadDigest: D1 });
+  assert.strictEqual(g.action, 'create');
+  // A merged seed PR is not a decline.
+  s = stub({ branchSha: null, closedPRs: [{ ...declinedPR, merged_at: '2026-10-01T00:00:00Z' }], headMessages: { h42: `x\n\nSeed-Payload: ${D1}` } });
+  g = await assessSeedBranch({ github: s.github, ...where, payloadDigest: D1 });
+  assert.strictEqual(g.action, 'create');
+  // Without a digest (Manual Update) the declined check does not run.
+  s = stub({ branchSha: null, closedPRs: [declinedPR] });
+  g = await assessSeedBranch({ github: s.github, ...where });
+  assert.strictEqual(g.action, 'create');
+  assert.ok(!s.calls.includes('pulls.list closed'));
+
+  // Unsigned seeder branch with only seed files → rebuild (the 2026-11-03 blocker).
+  s = stub({
+    branchSha: 'abc123',
+    commits: [seedCommit(autoSeedSubject, { verified: false })],
+    files: [{ filename: 'SECURITY.md', status: 'added' }],
+  });
+  g = await assessSeedBranch({ github: s.github, ...where, allowedPaths: ['SECURITY.md'] });
+  assert.strictEqual(g.action, 'rebuild', 'an unsigned branch holding only seed files is rebuilt');
+  g = await assessSeedBranch({ github: s.github, ...where });
+  assert.strictEqual(g.action, 'skip', 'without allowedPaths an unsigned branch stays unprovable');
 
   // A non-404 getRef error must surface, not be swallowed into "create".
   s = stub({ branchSha: 'abc123' });
@@ -326,7 +434,9 @@ const where = { owner: 'Quantum-L9', repo: 'consumer', base: 'main', branch: 'ch
   console.log('ok: gate fails closed on unprovable comparisons and foreign provenance');
   console.log('ok: assessSeedBranch/moveSeedBranch own every seed ref move');
   console.log('ok: ref moves are a server-side compare-and-swap (beforeOid)');
-  console.log('ok: workflow seed commit subjects match the gate pattern');
+  console.log('ok: workflow seed commit subjects match the gate pattern and carry the Seed-Payload trailer');
+  console.log('ok: unsigned seeder commits are proven by touching only seed paths (added/modified)');
+  console.log('ok: a seed PR declined for the same payload is not re-proposed; a changed payload is');
 })().catch((e) => {
   console.error(e);
   process.exit(1);

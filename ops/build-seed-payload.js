@@ -421,7 +421,31 @@ if (require.main === module) {
   }
 }
 
+/**
+ * Every path the seeders may write for this class, whatever subset a single
+ * run requested. The branch gate proves an unsigned seed commit by its diff
+ * touching only these paths, so a narrower explicit run still recognises the
+ * branch a broader run built. dependabot.yml is named without rendering (its
+ * bytes depend on the root; its path does not), and CODEOWNERS is included
+ * even when a root CODEOWNERS now suppresses it.
+ */
+function classSeedPaths({ fs, profile, repository = '' } = {}) {
+  if (!profile) throw new TypeError('classSeedPaths requires a profile');
+  const cats = resolveCategories({ profile });
+  const rendered = buildSeedPayload({
+    fs, profile, repository, hasRootCodeowners: false,
+    categories: cats.filter((c) => c !== 'dependabot'),
+  });
+  const paths = new Set(Object.keys(rendered));
+  if (cats.includes('dependabot')) paths.add('.github/dependabot.yml');
+  return [...paths].sort((a, b) => {
+    if (a < b) return -1;
+    return a > b ? 1 : 0;
+  });
+}
+
 module.exports = {
+  classSeedPaths,
   ALL_CATEGORIES,
   DEFAULT_CATEGORIES,
   OPT_IN_CATEGORIES,
