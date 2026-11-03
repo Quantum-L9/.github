@@ -38,7 +38,8 @@ const SEEDER_FILE_STATUSES = new Set(['added', 'modified']);
  */
 function seedPayloadDigest(payload, paths) {
   const h = require('node:crypto').createHash('sha256');
-  for (const p of [...paths].sort()) {
+  // Code-unit order, explicitly: locale-independent, so the digest is stable.
+  for (const p of [...paths].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
     if (typeof payload[p] !== 'string') throw new TypeError(`seedPayloadDigest: no text for ${p}`);
     h.update(`${p}\0${Buffer.byteLength(payload[p])}\0`).update(payload[p]).update('\0');
   }

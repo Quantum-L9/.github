@@ -95,6 +95,7 @@ jobs:
             const {
               buildSeedPayload,
               selectSeedWrites,
+              classSeedPaths,
               MANAGED_SEED_PATHS,
               seedNeedsRepoShape,
               probeRepoShape,
@@ -276,7 +277,10 @@ jobs:
                 const payloadDigest = seedPayloadDigest(payload, writes);
                 const gate = await assessSeedBranch({
                   github, owner: o, repo: n, base, branch: BRANCH,
-                  allowedPaths: Object.keys(payload), payloadDigest,
+                  // Every class seed path, not just this run's: a narrower
+                  // explicit run must still recognise a broader run's branch.
+                  allowedPaths: [...new Set([...Object.keys(payload), ...classSeedPaths({ fs, profile, repository: `${o}/${n}` })])],
+                  payloadDigest,
                 });
                 if (gate.action === 'skip') {
                   rows.push([n, profile.name, gate.declined ? `DECLINED: ${gate.reason}` : gate.reason]);

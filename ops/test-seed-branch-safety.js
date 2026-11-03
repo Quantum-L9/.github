@@ -352,6 +352,7 @@ const where = { owner: 'Quantum-L9', repo: 'consumer', base: 'main', branch: 'ch
   // Without a digest (Manual Update) the declined check does not run.
   s = stub({ branchSha: null, closedPRs: [declinedPR] });
   g = await assessSeedBranch({ github: s.github, ...where });
+  assert.strictEqual(g.action, 'create');
   assert.ok(!s.calls.includes('pulls.list closed'));
 
   // Unsigned seeder branch with only seed files → rebuild (the 2026-11-03 blocker).

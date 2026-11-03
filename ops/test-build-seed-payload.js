@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const {
   buildSeedPayload,
+  classSeedPaths,
   parseCategories,
   selectSeedWrites,
   MANAGED_SEED_PATHS,
@@ -270,6 +271,23 @@ try {
     c, Object.keys(buildSeedPayload({ fs, profile: resolveProfile(classes, c), repoShape: ACTIONS_ONLY })).length,
   ]));
   assert.deepStrictEqual(sizes, { default: 13, non_constellation_python: 4, self_governed: 0 });
+
+  // classSeedPaths: every path a class may seed, independent of the run's
+  // subset and of the root shape (the branch gate's unsigned-commit proof).
+  for (const c of ['default', 'non_constellation_python', 'self_governed']) {
+    const profile = resolveProfile(classes, c);
+    const full = Object.keys(buildSeedPayload({ fs, profile, repoShape: ACTIONS_ONLY })).sort(byName);
+    assert.deepStrictEqual(classSeedPaths({ fs, profile }), full, `${c}: class seed paths equal the full class payload`);
+  }
+  {
+    const profile = resolveProfile(classes, 'default');
+    const narrow = Object.keys(buildSeedPayload({ fs, profile, categories: ['codeowners'] }));
+    const all = classSeedPaths({ fs, profile });
+    assert.ok(narrow.every((p) => all.includes(p)) && all.length > narrow.length,
+      'a narrower explicit run must still allow the paths a broader run seeded');
+    assert.ok(all.includes('.github/CODEOWNERS'), 'CODEOWNERS is a seed path even when a root CODEOWNERS suppresses it');
+    assert.throws(() => classSeedPaths({ fs }), TypeError);
+  }
 
   // V21: every eligible file already present → nothing to write.
   const present = Object.fromEntries(Object.keys(defaultPayload).map((p) => [p, true]));
