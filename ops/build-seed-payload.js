@@ -438,7 +438,10 @@ function classSeedPaths({ fs, profile, repository = '' } = {}) {
   });
   const paths = new Set(Object.keys(rendered));
   if (cats.includes('dependabot')) paths.add('.github/dependabot.yml');
-  return [...paths].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return [...paths].sort((a, b) => {
+    if (a < b) return -1;
+    return a > b ? 1 : 0;
+  });
 }
 
 module.exports = {

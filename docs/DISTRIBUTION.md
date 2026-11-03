@@ -64,7 +64,8 @@ narrows the race with other writers; it does not close it. An empty repository
 is reported `UNINITIALIZED_NOT_SEEDED` by both seeders and retried; no other 409
 is treated that way.
 
-**Seed branch.** A leftover `chore/auto-seed-governance` branch is rebuilt only
+**Seed branch.** A leftover seed branch (`chore/auto-seed-governance` for the
+sweep, `chore/seed-governance` for the dispatch seeder) is rebuilt only
 when its single commit ahead of the default branch is the seeder's own: the
 seeder subject, the seeder's committer login, and either a verified signature
 or (for the personal-token seeder, whose API commits GitHub never signs) a diff

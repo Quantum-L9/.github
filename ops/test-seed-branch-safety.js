@@ -110,6 +110,12 @@ v = unsigned([{ filename: 'SECURITY.md', status: 'removed' }]);
 assert.strictEqual(v.safeToReplace, false, 'a seeder never deletes: removed blocks');
 v = unsigned([{ filename: 'SECURITY.md', status: 'renamed' }]);
 assert.strictEqual(v.safeToReplace, false, 'a seeder never renames: renamed blocks');
+{
+  const many = Array.from({ length: 300 }, (_, i) => ({ filename: `p${i}`, status: 'added' }));
+  v = unsigned(many, many.map((f) => f.filename));
+  assert.strictEqual(v.safeToReplace, false, 'a compare list at the 300-file cap is not proof');
+  assert.match(v.reason, /truncated/);
+}
 v = unsigned([], SEED_PATHS);
 assert.strictEqual(v.safeToReplace, false, 'no file list is no proof');
 v = unsigned([{ filename: 'SECURITY.md', status: 'added' }], null);
@@ -329,13 +335,20 @@ const where = { owner: 'Quantum-L9', repo: 'consumer', base: 'main', branch: 'ch
   // is not re-proposed, whether or not its branch still exists.
   const D1 = seedPayloadDigest({ a: 'x' }, ['a']);
   const D2 = seedPayloadDigest({ a: 'y' }, ['a']);
-  const declinedPR = { number: 42, merged_at: null, head: { sha: 'h42' } };
+  const declinedPR = { number: 42, merged_at: null, closed_at: '2026-10-20T00:00:00Z', head: { sha: 'h42' } };
   for (const branchSha of [null, 'abc123']) {
     s = stub({ branchSha, closedPRs: [declinedPR], headMessages: { h42: `${autoSeedSubject}\n\nSeed-Payload: ${D1}` } });
     g = await assessSeedBranch({ github: s.github, ...where, payloadDigest: D1 });
     assert.strictEqual(g.action, 'skip', 'a declined payload must not be re-proposed');
     assert.strictEqual(g.declined, 42);
     assert.ok(!s.calls.some((c) => c.startsWith('git.getRef')), 'declined short-circuits before any branch read');
+  }
+  // The latest *closed* PR decides, even when an older-created PR closed later.
+  {
+    const olderClosedLater = { number: 40, merged_at: null, closed_at: '2026-10-25T00:00:00Z', head: { sha: 'h40' } };
+    s = stub({ branchSha: null, closedPRs: [declinedPR, olderClosedLater], headMessages: { h40: `${autoSeedSubject}\n\nSeed-Payload: ${D1}`, h42: autoSeedSubject } });
+    g = await assessSeedBranch({ github: s.github, ...where, payloadDigest: D1 });
+    assert.strictEqual(g.declined, 40, 'the most recently closed seed PR decides');
   }
   // A changed payload is proposed again.
   s = stub({ branchSha: null, closedPRs: [declinedPR], headMessages: { h42: `${autoSeedSubject}\n\nSeed-Payload: ${D1}` } });

@@ -26,7 +26,17 @@ const SYNC_COMMIT_SUBJECT = /^chore\(governance\): sync \d+ org-managed file\(s\
 // paths and bytes that commit writes. A closed-unmerged seed PR whose head
 // carries the same digest was declined for this payload (see assessSeedBranch).
 const PAYLOAD_TRAILER = 'Seed-Payload';
-const PAYLOAD_TRAILER_RE = /^Seed-Payload: (sha256:[0-9a-f]{64})$/m;
+const PAYLOAD_TRAILER_RE = new RegExp(`^${PAYLOAD_TRAILER}: (sha256:[0-9a-f]{64})$`, 'm');
+/** Locale-independent code-unit order. */
+function byCodeUnit(a, b) {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
+// GET /compare lists at most 300 changed files; at that length the list is
+// not proof of what the commit touched, so the unsigned proof fails closed.
+const COMPARE_FILES_CAP = 300;
 // Compare statuses a seeder-written commit can produce on top of its base.
 const SEEDER_FILE_STATUSES = new Set(['added', 'modified']);
 
@@ -39,7 +49,7 @@ const SEEDER_FILE_STATUSES = new Set(['added', 'modified']);
 function seedPayloadDigest(payload, paths) {
   const h = require('node:crypto').createHash('sha256');
   // Code-unit order, explicitly: locale-independent, so the digest is stable.
-  for (const p of [...paths].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
+  for (const p of [...paths].sort(byCodeUnit)) {
     if (typeof payload[p] !== 'string') throw new TypeError(`seedPayloadDigest: no text for ${p}`);
     h.update(`${p}\0${Buffer.byteLength(payload[p])}\0`).update(payload[p]).update('\0');
   }
@@ -148,6 +158,12 @@ function classifySeedBranch({
       reason: 'holds a seed-subject commit without a verified signature and no file proof — possibly amended',
     };
   }
+  if (files.length >= COMPARE_FILES_CAP) {
+    return {
+      safeToReplace: false,
+      reason: `holds an unsigned commit whose diff lists ${files.length}+ files — the compare list may be truncated, so it is not proof`,
+    };
+  }
   const allowed = new Set(allowedPaths);
   const foreign = files.filter((f) => !allowed.has(f?.filename) || !SEEDER_FILE_STATUSES.has(f?.status));
   if (foreign.length) {
@@ -225,10 +241,14 @@ async function assessSeedBranch({
   // up to 10 PRs per repository). A changed payload, or a seed PR from before
   // the trailer existed, is proposed once more.
   if (payloadDigest) {
+    // The latest *closed* PR, not the latest created: list by update time and
+    // pick the newest closed_at, since an older PR can close after a newer one.
     const closed = await github.rest.pulls.list({
-      owner, repo, head: `${owner}:${branch}`, state: 'closed', sort: 'created', direction: 'desc', per_page: 1,
+      owner, repo, head: `${owner}:${branch}`, state: 'closed', sort: 'updated', direction: 'desc', per_page: 30,
     });
-    const last = closed.data[0];
+    const last = [...closed.data]
+      .filter((p) => p.closed_at)
+      .sort((a, b) => byCodeUnit(b.closed_at, a.closed_at))[0];
     if (last && !last.merged_at && last.head?.sha) {
       const c = await github.rest.git.getCommit({ owner, repo, commit_sha: last.head.sha });
       if (payloadDigestOf(c.data.message) === payloadDigest) {
@@ -419,6 +439,7 @@ function isEmptyRepoError(e) {
 }
 
 module.exports = {
+  COMPARE_FILES_CAP,
   isEmptyRepoError,
   PAYLOAD_TRAILER,
   seedPayloadDigest,
