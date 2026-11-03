@@ -115,7 +115,9 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   const text = read('.github/workflows/auto-seed-new-repo.yml');
   const block = onBlock(text);
   assert.deepStrictEqual(events(block), ['schedule', 'repository_dispatch', 'workflow_dispatch'], `${label}: trigger set changed`);
-  assert.ok(block.some((l) => /^\s+- cron: '20 5 \* \* 1'\s*$/.test(l)), `${label}: weekly Monday sweep must stay`);
+  const cronAt = block.findIndex((l) => /^\s+- cron: '0 8 \* \* 1'\s*$/.test(l));
+  assert.ok(cronAt >= 0, `${label}: weekly Monday 08:00 sweep must stay`);
+  assert.match(block[cronAt + 1] || '', /^\s+timezone: 'America\/New_York'\s*$/, `${label}: the sweep runs in America/New_York`);
   assert.ok(!block.some((l) => /^\s+- cron: '\S+ \* \* \* \*'\s*$/.test(l)), `${label}: hourly sweep is retired`);
   // ADR-0019: the managed dependabot.yml is restored by the sweep, honouring .l9/no-sync.
   assert.match(text, /MANAGED_SEED_PATHS/, `${label}: managed seed paths must be restored`);

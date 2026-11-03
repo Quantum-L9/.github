@@ -146,7 +146,7 @@ the override and default path.
 
 ## Birth is immediate, not weekly
 
-`auto-seed-new-repo.yml` sweeps weekly (Monday 05:20 UTC) and opens a PR. That is the
+`auto-seed-new-repo.yml` sweeps weekly (Monday 08:00 America/New_York) and opens a PR. That is the
 repair path for repositories that drift or predate their class.
 
 A newborn does not wait for it. `make new-repo` dispatches

@@ -33,8 +33,9 @@ name: Auto-seed new repository
 
 on:
   schedule:
-    # Weekly: Monday 05:20 UTC, ahead of Dependabot's Monday runs.
-    - cron: '20 5 * * 1'
+    # Weekly: Monday 08:00 America/New_York (DST-aware; GitHub applies the zone).
+    - cron: '0 8 * * 1'
+      timezone: 'America/New_York'
   repository_dispatch:
     types: [repo_created]
   workflow_dispatch:

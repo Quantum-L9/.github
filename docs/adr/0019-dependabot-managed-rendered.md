@@ -95,8 +95,8 @@ versions through the existing single builder.
   `labels`.
 - **Mode:** MANAGED-RENDERED, automated. It is a seed file
   (`MANAGED_SEED_PATHS` in `ops/build-seed-payload.js`).
-  `auto-seed-new-repo.yml` runs weekly (Monday 05:20 UTC, ahead of
-  Dependabot's Monday runs). In one advisory PR per repository it adds the
+  `auto-seed-new-repo.yml` runs weekly (Monday 08:00 America/New_York,
+  operator decision 2026-11-03). In one advisory PR per repository it adds the
   file when missing and restores it when it differs from the render for the
   repository's shape. Every other seed path stays missing-only, and nothing
   merges without review. `continuous-sync.yml` remains the manual, on-demand
