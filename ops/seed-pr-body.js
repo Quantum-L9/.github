@@ -66,15 +66,21 @@ const code = (p) => `\`${p}\``;
  * @param {boolean} [o.hasRootCodeowners]
  * @returns {{problem: string, details: string[]}}
  */
+/** `name` (resolved_from) — the repo class as the narratives name it. */
+function classLabel(profile) {
+  const from = profile.resolved_from ? ` (${profile.resolved_from})` : '';
+  return code(profile.name) + from;
+}
+
 function seedNarrative({
   added = [], restored = [], profile, branch, sourceSha, seeder, hasRootCodeowners = false,
 } = {}) {
   if (!profile?.name) throw new TypeError('seedNarrative: profile is required');
-  if (!added.length && !restored.length) throw new Error('seedNarrative: a seed writes at least one path');
+  if (!added.length && !restored.length) throw new RangeError('seedNarrative: a seed writes at least one path');
   for (const [name, v] of Object.entries({ branch, sourceSha, seeder })) {
     if (typeof v !== 'string' || !v) throw new TypeError(`seedNarrative: ${name} is required`);
   }
-  const cls = `${code(profile.name)}${profile.resolved_from ? ` (${profile.resolved_from})` : ''}`;
+  const cls = classLabel(profile);
   const problem = [
     added.length
       ? `This repository is missing ${added.length} file(s) that its repo class ${cls} materializes from ${code('Quantum-L9/.github')} (${code('policies/repo-classes.yml')}).`
@@ -86,11 +92,17 @@ function seedNarrative({
       ? `Inherited from the org ${code('.github')} repository and deliberately not copied here: ${profile.inherit.map(code).join(', ')}.`
       : '',
   ].filter(Boolean).join(' ');
-  const summary = restored.length
-    ? `Adds the ${added.length} missing file(s) and restores ${restored.length} managed file(s) to the org render, in one commit on ${code(branch)}. No other existing file was touched.`
-    : `Adds only the ${added.length} missing file(s), in one commit on ${code(branch)}. Existing files were left untouched (missing-only seed).`;
+  const onBranch = `in one commit on ${code(branch)}`;
+  let summary;
+  if (!restored.length) {
+    summary = `Adds only the ${added.length} missing file(s), ${onBranch}. Existing files were left untouched (missing-only seed).`;
+  } else if (!added.length) {
+    summary = `Restores ${restored.length} managed file(s) to the org render, ${onBranch}. No file is added and no other existing file was touched.`;
+  } else {
+    summary = `Adds the ${added.length} missing file(s) and restores ${restored.length} managed file(s) to the org render, ${onBranch}. No other existing file was touched.`;
+  }
   const facts = [
-    `- Source: ${code(`Quantum-L9/.github@${sourceSha}`)}, class ${cls}.`,
+    `- Source: ${code('Quantum-L9/.github@' + sourceSha)}, class ${cls}.`,
     hasRootCodeowners ? `- Root ${code('CODEOWNERS')} is present and is not overridden by ${code('.github/CODEOWNERS')}.` : null,
     `- A governance caller, where added, is advisory (${code('strict')} defaults false). CI callers are not distributed from ${code('Quantum-L9/.github')}; see ${code('docs/BOUNDARIES.md')}.`,
     `- While this PR is open the seeder leaves ${code(branch)} alone, so review fixes can be committed onto it.`,
@@ -98,7 +110,7 @@ function seedNarrative({
   if (restored.length) {
     facts.push(`- To keep a local divergence instead, opt the repository out of restores with ${code('.l9/no-sync')}.`);
   }
-  const origin = `Opened by ${code(`Quantum-L9/.github ${seeder}`)}; the PR body is the org PR template composed by ${code('compose_pr_body.py')}.`;
+  const origin = `Opened by ${code('Quantum-L9/.github ' + seeder)}; the PR body is the org PR template composed by ${code('compose_pr_body.py')}.`;
   return { problem, details: [summary, facts.join('\n'), origin] };
 }
 
@@ -116,21 +128,24 @@ function seedNarrative({
  */
 function syncNarrative({ plan = [], profile, branch, sourceSha, pins = {}, notChanged = [] } = {}) {
   if (!profile?.name) throw new TypeError('syncNarrative: profile is required');
-  if (!plan.length) throw new Error('syncNarrative: a sync changes at least one path');
+  if (!plan.length) throw new RangeError('syncNarrative: a sync changes at least one path');
   for (const [name, v] of Object.entries({ branch, sourceSha })) {
     if (typeof v !== 'string' || !v) throw new TypeError(`syncNarrative: ${name} is required`);
   }
-  const cls = `${code(profile.name)}${profile.resolved_from ? ` (${profile.resolved_from})` : ''}`;
+  const cls = classLabel(profile);
   const problem = `${plan.length} governance file(s) managed by ${code('Quantum-L9/.github')} drifted from the org standard for this repository's class ${cls} (${code('policies/repo-classes.yml')}).`;
   const detail = (d) => {
     if (d.action === 'delete') return ` — this class inherits it live from ${code('Quantum-L9/.github')}; this local copy is byte-identical to the org file and blocks that`;
-    if (d.why === 're-pin') return ` — ${code('uses:')} pins moved to ${Object.entries(pins).map(([k, v]) => code(`governance-${k}.yml@${v}`)).join(' / ')}; the rest of the file is unchanged`;
+    if (d.why === 're-pin') {
+      const moved = Object.entries(pins).map(([k, v]) => code(`governance-${k}.yml@${v}`)).join(' / ');
+      return ` — ${code('uses:')} pins moved to ${moved}; the rest of the file is unchanged`;
+    }
     return ' — replaced with the org bytes';
   };
   const changes = [
     ...plan.map((d) => `- **${d.why}** ${code(d.path)}${detail(d)}`),
     ...notChanged.map((t) => `- not changed: ${t}`),
-    `- Source: ${code(`Quantum-L9/.github@${sourceSha}`)}, class ${cls}.`,
+    `- Source: ${code('Quantum-L9/.github@' + sourceSha)}, class ${cls}.`,
     `- To keep a local divergence instead, close this PR and add ${code('.l9/no-sync')}.`,
   ].join('\n');
   return {
@@ -170,6 +185,29 @@ function renderSeedPrBody({ workdir, fs, ...rest } = {}) {
     fs.rmSync(scratch, { recursive: true, force: true });
   }
 }
+
+/**
+ * The composer's environment, built from an allowlist rather than by removing
+ * known secrets. The composer runs the target repository's own
+ * validate_root_file_protection.py from the fetched branch, so it must not
+ * inherit SEED_GIT_TOKEN, the GIT_CONFIG_* auth header, actions/github-script's
+ * INPUT_* (which carries its github-token) or the runner's ACTIONS_* tokens.
+ * Only the git fetch above needs a credential.
+ *
+ * @param {Record<string, string|undefined>} source  usually process.env
+ * @returns {Record<string, string>}
+ */
+function composerEnv(source) {
+  const keep = (k) => COMPOSER_ENV_KEYS.has(k) || k.startsWith('LC_');
+  const env = Object.fromEntries(
+    Object.entries(source).filter(([k, v]) => keep(k) && typeof v === 'string'),
+  );
+  return { ...env, GIT_TERMINAL_PROMPT: '0' };
+}
+
+const COMPOSER_ENV_KEYS = new Set([
+  'PATH', 'HOME', 'LANG', 'TMPDIR', 'TEMP', 'TMP', 'LD_LIBRARY_PATH', 'pythonLocation',
+]);
 
 function composeIn({
   exec, fs, workdir, remoteUrl, branch, headSha, baseSha, template, composerRoot, token = '',
@@ -216,10 +254,10 @@ function composeIn({
   const body = String(exec('python3', [
     composer, '--workspace', workdir, '--pr-base', baseSha,
     '--template', templateFile, '--remote', '--handoff', handoffFile,
-  ], { encoding: 'utf8', env: { ...process.env }, maxBuffer: 16 * 1024 * 1024 }));
+  ], { encoding: 'utf8', env: composerEnv(process.env), maxBuffer: 16 * 1024 * 1024 }));
   const handoff = JSON.parse(fs.readFileSync(handoffFile, 'utf8'));
   if (!Array.isArray(handoff.needs_completion)) {
-    throw new Error('composer handoff carries no needs_completion list — cannot prove the body is complete');
+    throw new TypeError('composer handoff carries no needs_completion list — cannot prove the body is complete');
   }
   if (handoff.needs_completion.length) {
     throw new Error(`composed body is incomplete: ${handoff.needs_completion.join('; ')}`);
@@ -235,4 +273,5 @@ module.exports = {
   seedNarrative,
   syncNarrative,
   renderSeedPrBody,
+  composerEnv,
 };

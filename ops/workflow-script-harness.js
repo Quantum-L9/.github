@@ -105,10 +105,10 @@ function makeCore() {
  * github-script resolves relative `require()` against the workspace root.
  * Mirror that so a script body can pull in ops/ modules the way it does live.
  */
-const makeScopedRequire = (root, overrides = {}) => (m) =>
-  Object.prototype.hasOwnProperty.call(overrides, m)
-    ? overrides[m]
-    : require(m.startsWith('.') ? path.resolve(root, m) : m);
+const makeScopedRequire = (root, overrides = {}) => (m) => {
+  if (Object.hasOwn(overrides, m)) return overrides[m];
+  return require(m.startsWith('.') ? path.resolve(root, m) : m);
+};
 
 /**
  * A stand-in for `./ops/seed-pr-body.js` whose renderSeedPrBody records its

@@ -192,9 +192,9 @@ function dispatchCallArgs(text) {
     // at the first line, which is how a pin move broke it before.
     const sparse = text.match(/repository: Quantum-L9\/Cursor-Governance[\s\S]*?sparse-checkout: \|\n((?:\s+ops\/scripts\/\S+\n)+)/);
     assert.ok(sparse, `${f}: the composer checkout must list its files`);
-    const listed = sparse[1].trim().split(/\s+/);
+    const listed = new Set(sparse[1].trim().split(/\s+/));
     for (const need of ['ops/scripts/compose_pr_body.py', 'ops/scripts/org_dotgithub.py']) {
-      assert.ok(listed.includes(need), `${f}: the composer checkout misses ${need}`);
+      assert.ok(listed.has(need), `${f}: the composer checkout misses ${need}`);
     }
   }
   for (const f of ['auto-seed-new-repo.yml', 'seed-governance.yml', 'continuous-sync.yml']) {

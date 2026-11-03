@@ -27,6 +27,7 @@ const {
   seedNarrative,
   syncNarrative,
   renderSeedPrBody,
+  composerEnv,
 } = require('./seed-pr-body.js');
 const { loadGovernanceGates } = require('./workflow-script-harness.js');
 
@@ -40,7 +41,7 @@ const profile = { name: 'default', resolved_from: 'fallback', inherit: ['CODE_OF
   const story = seedNarrative({
     added: ['SECURITY.md'], profile, branch: 'chore/auto-seed-governance', sourceSha: SOURCE, seeder: 'auto-seed-new-repo.yml',
   });
-  assert.deepStrictEqual(Object.keys(story).sort(), ['details', 'problem'], 'the seeder writes only the commit message');
+  assert.deepStrictEqual(Object.keys(story).sort((a, b) => a.localeCompare(b)), ['details', 'problem'], 'the seeder writes only the commit message');
   const message = seedCommitMessage({
     subject: 'ci(governance): seed 1 org template file(s)', problem: story.problem, details: story.details, trailers: ['Seed-Payload: sha256:x'],
   });
@@ -54,7 +55,29 @@ const profile = { name: 'default', resolved_from: 'fallback', inherit: ['CODE_OF
   assert.throws(() => seedCommitMessage({ subject: 'a\nb', problem: 'p' }), TypeError);
   assert.throws(() => seedNarrative({ added: [], profile, branch: 'b', sourceSha: 's', seeder: 'x' }), /at least one path/);
   assert.throws(() => syncNarrative({ plan: [], profile, branch: 'b', sourceSha: 's' }), /at least one path/);
+  const restoreOnly = seedNarrative({
+    restored: ['.github/dependabot.yml'], profile, branch: 'b', sourceSha: SOURCE, seeder: 'x.yml',
+  });
+  assert.match(restoreOnly.details[0], /^Restores 1 managed file\(s\)/, 'a restore-only seed says so');
+  assert.doesNotMatch(restoreOnly.details[0], /Adds/, 'a restore-only seed claims no added file');
   console.log('ok: the seed commit message carries the Problem and Fix details; nothing else is written');
+}
+
+// The composer runs the target repository's own validator, so its environment
+// is an allowlist: no seed token, git auth header, github-script input or
+// runner token reaches it.
+{
+  const env = composerEnv({
+    PATH: '/usr/bin', HOME: '/home/runner', LC_ALL: 'C.UTF-8', pythonLocation: '/py',
+    SEED_GIT_TOKEN: 'tok', GH_TOKEN: 'tok', GITHUB_TOKEN: 'tok', 'INPUT_GITHUB-TOKEN': 'tok',
+    ACTIONS_RUNTIME_TOKEN: 'tok', ACTIONS_ID_TOKEN_REQUEST_TOKEN: 'tok',
+    GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'http.extraheader', GIT_CONFIG_VALUE_0: 'AUTHORIZATION: basic x',
+  });
+  assert.deepStrictEqual(env, {
+    PATH: '/usr/bin', HOME: '/home/runner', LC_ALL: 'C.UTF-8', pythonLocation: '/py', GIT_TERMINAL_PROMPT: '0',
+  });
+  assert.ok(!Object.values(env).includes('tok'), 'no credential survives');
+  console.log('ok: the composer environment is an allowlist that carries no credential');
 }
 
 // renderSeedPrBody against a scripted exec: what it runs, and when it refuses.
@@ -88,7 +111,9 @@ const profile = { name: 'default', resolved_from: 'fallback', inherit: ['CODE_OF
   assert.ok(fetch.args.includes('--depth=2'));
   const py = s.calls.find((c) => c.cmd === 'python3');
   assert.ok(py.args.includes('--remote') && py.args.includes('--template'), 'composed remotely from the prepared template');
-  assert.ok(!('GIT_CONFIG_VALUE_0' in py.env) || py.env.GIT_CONFIG_VALUE_0 === process.env.GIT_CONFIG_VALUE_0, 'the composer does not get the token');
+  for (const k of ['GIT_CONFIG_COUNT', 'GIT_CONFIG_KEY_0', 'GIT_CONFIG_VALUE_0']) {
+    assert.ok(!(k in py.env), `the composer does not get the git auth header (${k})`);
+  }
 
   assert.throws(() => renderSeedPrBody({ ...base, exec: scripted({ fetched: 'other' }).exec }), /not the seed commit/);
   assert.throws(() => renderSeedPrBody({ ...base, exec: scripted({ parent: 'elsewhere' }).exec }), /is not built on/);
@@ -106,7 +131,10 @@ if (!composerRoot) {
   process.exit(1);
 }
 
-const sh = (cwd, ...args) => execFileSync('git', ['-c', 'user.name=seeder', '-c', 'user.email=seeder@example.invalid', '-c', 'init.defaultBranch=main', ...args], { cwd, encoding: 'utf8' }).trim();
+// The fixture's git is the runner image's, the same binary the seed workflows
+// call; this test builds throwaway local repositories with it and never runs
+// with a credential in its environment.
+const sh = (cwd, ...args) => execFileSync('git', ['-c', 'user.name=seeder', '-c', 'user.email=seeder@example.invalid', '-c', 'init.defaultBranch=main', ...args], { cwd, encoding: 'utf8' }).trim(); // NOSONAR S4036: test fixture, runner PATH (see above)
 
 /** A bare "remote" with a default branch and a seed branch one commit ahead. */
 function seedRemote({ files, message, branch, existing = {} }) {

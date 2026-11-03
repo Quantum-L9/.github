@@ -12,7 +12,7 @@ set -euo pipefail
 dest="${1:?usage: ops/fetch-composer.sh <dest>}"
 wf=".github/workflows/governance-pr.yml"
 pin="$(sed -n 's/^ *COMPOSER: Quantum-L9\/Cursor-Governance@\([0-9a-f]\{40\}\) *$/\1/p' "$wf")"
-if [ -z "$pin" ] || [ "$(printf '%s\n' "$pin" | wc -l)" -ne 1 ]; then
+if [[ -z "$pin" || "$(printf '%s\n' "$pin" | wc -l)" -ne 1 ]]; then
   echo "❌ $wf: expected exactly one 'COMPOSER: Quantum-L9/Cursor-Governance@<40-hex sha>' line" >&2
   exit 1
 fi
@@ -20,14 +20,14 @@ fi
 # compose_pr_body.py imports org_dotgithub at load; both are stdlib-only.
 files=(ops/scripts/compose_pr_body.py ops/scripts/org_dotgithub.py)
 fresh=1
-for f in "${files[@]}"; do [ -f "$dest/$f" ] || fresh=0; done
-if [ "$fresh" = 1 ] && [ -f "$dest/.pin" ] && [ "$(cat "$dest/.pin")" = "$pin" ]; then
+for f in "${files[@]}"; do [[ -f "$dest/$f" ]] || fresh=0; done
+if [[ "$fresh" = 1 && -f "$dest/.pin" && "$(cat "$dest/.pin")" = "$pin" ]]; then
   exit 0
 fi
 
 mkdir -p "$dest"
 repo="$dest/.git-fetch"
-if [ ! -d "$repo/.git" ]; then
+if [[ ! -d "$repo/.git" ]]; then
   git init -q "$repo"
 fi
 git -C "$repo" fetch -q --depth=1 --filter=blob:none \
