@@ -22,7 +22,7 @@ files. Consumer-only files live in `policies/`:
 
 - `policies/CODEOWNERS` → `.github/CODEOWNERS` (skipped when the consumer already has a root `CODEOWNERS`)
 - `policies/governance-caller.yml` → `.github/workflows/governance.yml`
-- `.github/dependabot.yml`, `.github/labels.yml` (opt-in)
+- `.github/dependabot.yml` (rendered per repository root by `ops/render-dependabot.js`, not copied), `.github/labels.yml` (opt-in)
 - `SECURITY.md` (`community-health`; advisory URLs rewritten to the consumer)
 - `.github/ISSUE_TEMPLATE/` — seven named forms (`1-bug.yml`, `2-feature.yml`, `3-task.yml`, `4-incident.yml`, `ci-failure.yml`, `gov-violation.yml`, `config.yml`), never a directory sweep; `config.yml` advisory URL rewritten to the consumer
 - `.github/pull_request_template.md` and `.github/PULL_REQUEST_TEMPLATE/release.md` (`pr-templates`, named files, never a directory copy)

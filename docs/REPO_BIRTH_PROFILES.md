@@ -18,7 +18,7 @@ is the authority for which mode each class puts a surface in.
 | **INHERIT** | GitHub supplies an organization-owned default live from `Quantum-L9/.github`. The repository should not carry a duplicate unless local bytes are genuinely required; a local copy replaces inheritance for that file entirely. | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml` |
 | **MATERIALIZE** | The consumer requires repository-local bytes or consumer-specific content. Seeded missing-only; an existing file is never overwritten by a seed. | `.github/CODEOWNERS` (also restored by a manual continuous-sync, below), `SECURITY.md` (advisory URLs rewritten per consumer), `.github/ISSUE_TEMPLATE/*` (`config.yml` carries consumer routing), `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md` |
 | **REMOTE APPLY** | The realization is GitHub or API state rather than a repository file. | labels, repository settings |
-| **FORBID** | A local copy would create a second owner, violate architecture, or distribute a centrally owned capability. A payload that would write one throws. | application CI (`.github/workflows/l9-analysis.yml`, `.github/workflows/governance.yml` for governed classes), Semantic Foundation files, `AGENTS.md`, `Makefile`, `pyproject.toml`, IDE and tooling config |
+| **FORBID** | A local copy would create a second owner, violate architecture, or distribute a centrally owned capability. A payload that would write one throws. | application CI (`.github/workflows/l9-analysis.yml`, `.github/workflows/governance.yml` for governed classes) — the paths each class lists under `forbid` in `policies/repo-classes.yml`. `AGENTS.md`, `Makefile`, `pyproject.toml`, Semantic Foundation files and IDE config are not FORBID: no seed category carries them, so no payload can write them. |
 
 `.github/dependabot.yml` is **MANAGED-RENDERED**
 ([ADR 0019](adr/0019-dependabot-managed-rendered.md)). It is rendered per
@@ -32,7 +32,8 @@ the only opt-out.
 
 Three surfaces are MATERIALIZE only because their bytes differ per consumer:
 `SECURITY.md` and `.github/ISSUE_TEMPLATE/config.yml` carry the consumer's
-advisory URL, and `.github/workflows/governance.yml` pins a SHA per class. The
+advisory URL, and `.github/workflows/governance.yml` pins one org SHA
+(`policies/governance-caller.yml`) that a repository then owns. The
 remaining community-health surfaces are byte-identical everywhere, so they are
 INHERIT and never copied. `.github/labels.yml` is a REMOTE APPLY surface
 (`sync-labels-all.yml`); it is materialized only for the class whose template
