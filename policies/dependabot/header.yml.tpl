@@ -3,7 +3,8 @@
 #
 # Ecosystems follow this repository's root: github-actions always; uv when
 # uv.lock exists, else pip when a root requirements*.txt or a PEP 621
-# pyproject.toml exists; pre-commit when .pre-commit-config.yaml exists.
+# pyproject.toml exists; npm when package.json exists; pre-commit when
+# .pre-commit-config.yaml exists.
 # Tools Core selects (Quantum-L9/l9-ci-core core-owned-tools.json) and the
 # Core, SDK and .github action pins are ignored: they are not bumped here.
 # ADVISORY POSTURE: this opens PRs only. No auto-merge, no major groups.

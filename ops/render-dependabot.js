@@ -26,10 +26,11 @@ const IGNORE_TOKEN = '{{ignore}}';
 const UV_LOCK = 'uv.lock';
 const PYPROJECT = 'pyproject.toml';
 const PRE_COMMIT_CONFIG = '.pre-commit-config.yaml';
+const PACKAGE_JSON = 'package.json';
 const REQUIREMENTS_RE = /^requirements.*\.txt$/;
 const PEP621_RE = /^\[project\]\s*$/m;
 
-const SHAPE_BOOLEANS = Object.freeze(['uvLock', 'pep621', 'preCommit']);
+const SHAPE_BOOLEANS = Object.freeze(['uvLock', 'pep621', 'preCommit', 'npm']);
 
 // Code-unit order, not locale order: the render must be byte-identical on
 // every runner, whatever its locale.
@@ -66,6 +67,10 @@ function shapeFromRoot({ names, pyprojectText = null } = {}) {
     requirements: Object.freeze([...new Set(names.filter((n) => REQUIREMENTS_RE.test(n)))].sort(byCodeUnit)),
     pep621: hasPyproject && PEP621_RE.test(pyprojectText),
     preCommit: names.includes(PRE_COMMIT_CONFIG),
+    // Dependabot's npm ecosystem covers npm, yarn and pnpm: a root package.json
+    // is the manifest it reads. Without this a restore would delete the npm
+    // entry of every Node repository (ADR 0019).
+    npm: names.includes(PACKAGE_JSON),
   });
 }
 
@@ -180,6 +185,7 @@ function renderDependabot({ fs, shape } = {}) {
   } else if (shape.requirements.length || shape.pep621) {
     lines.push(...fragment(fs, 'pip', owned.pip || []));
   }
+  if (shape.npm) lines.push(...fragment(fs, 'npm', owned.npm || []));
   if (shape.preCommit) lines.push(...fragment(fs, 'pre-commit', owned['pre-commit'] || []));
   return `${lines.join('\n')}\n`;
 }
@@ -190,6 +196,7 @@ function renderedEcosystems(shape) {
   const out = ['github-actions'];
   if (shape.uvLock) out.push('uv');
   else if (shape.requirements.length || shape.pep621) out.push('pip');
+  if (shape.npm) out.push('npm');
   if (shape.preCommit) out.push('pre-commit');
   return out;
 }

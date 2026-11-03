@@ -4,7 +4,7 @@
 # repository, then dispatches this workflow and waits for it. That is the
 # difference between a repository that is created and a repository that is
 # born: labels, settings, and the org policy attestation happen now, not on
-# the next hourly sweep.
+# the next weekly sweep.
 #
 # Scope is deliberately narrow. This workflow applies the capabilities a class
 # marks REMOTE APPLY (GitHub API state, not files) and then attests. File

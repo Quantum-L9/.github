@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted (revised 2026-11-03: automated weekly seed and restore, npm)
 
 **Date:** 2026-10-15
 **Deciders:** Quantum-L9 platform owners (merge of the PR that adds this record)
@@ -50,8 +50,8 @@ problems follow:
 2. **Seed missing-only, never restore.** No convergence. The ignores for
    Core-owned tools reach only newly born repositories.
 3. **Managed and rendered (chosen).** Render from fragments, the repository's
-   root shape and the vendored Core list. Seed missing-only, and restore
-   through a manual continuous-sync.
+   root shape and the vendored Core list. Distribute it as a seed file like
+   the templates, and keep it in sync automatically through the weekly sweep.
 4. **Fetch Core's list live at render time.** This adds a network dependency
    to every seed and Preview, and an unpinned input. Rejected in favour of a
    digest-pinned vendored copy.
@@ -78,10 +78,11 @@ versions through the existing single builder.
   - Otherwise `pip`, when a root `requirements*.txt` or a PEP 621
     `pyproject.toml` (`[project]` table) exists.
   - `pre-commit` when `.pre-commit-config.yaml` exists.
+  - `npm` when a root `package.json` exists.
 
   Nested manifests are out of scope.
 - **Ignores:**
-  - The `uv`, `pip` and `pre-commit` entries ignore exactly the names Core
+  - The `uv`, `pip`, `npm` and `pre-commit` entries ignore exactly the names Core
     lists under that ecosystem in `core-owned-tools.json`. The list is
     vendored at `policies/vendor/l9-ci-core/core-owned-tools.json`. Its
     commit and sha256 are recorded in
@@ -92,11 +93,16 @@ versions through the existing single builder.
 - **Settings in every entry:** weekly on Monday, `open-pull-requests-limit: 2`,
   `chore(deps)` prefix, `cooldown.default-days: 7`, a minor/patch group, and no
   `labels`.
-- **Mode:** MANAGED-RENDERED. The seeders write it missing-only.
-  `continuous-sync.yml` restores it to the render for the repository's shape
-  when it drifts. That workflow is manual-only: Preview by default, Apply only
-  on an explicit `dry_run=false`.
-- **Opt-out:** `.l9/no-sync` is the only opt-out. Exceptions in
+- **Mode:** MANAGED-RENDERED, automated. It is a seed file
+  (`MANAGED_SEED_PATHS` in `ops/build-seed-payload.js`).
+  `auto-seed-new-repo.yml` runs weekly (Monday 05:20 UTC, ahead of
+  Dependabot's Monday runs). In one advisory PR per repository it adds the
+  file when missing and restores it when it differs from the render for the
+  repository's shape. Every other seed path stays missing-only, and nothing
+  merges without review. `continuous-sync.yml` remains the manual, on-demand
+  restore (Preview by default, Apply only on an explicit `dry_run=false`).
+- **Opt-out:** `.l9/no-sync` is the only opt-out. It keeps the weekly sweep
+  missing-only for the file and makes continuous-sync skip the repository. Exceptions in
   `policies/mandatory-files.yml` are not consulted by continuous-sync, as
   before.
 - **Self-config:** `.github` runs its own render.
@@ -106,13 +112,16 @@ versions through the existing single builder.
 ### Consequences
 
 - Good:
-  - A restore converges a repository on the render for its own shape, so
-    legitimate ecosystems survive.
+  - Every materializing repository converges on the render for its own shape
+    without an operator run, and legitimate ecosystems survive.
   - Core-owned tools and Core/SDK/`.github` pins are no longer scheduled for
     bumps anywhere the file is managed.
 - Bad:
-  - A consumer's hand-tuned entries are replaced on Apply. The remedies are
+  - A consumer's hand-tuned entries are proposed for replacement every week
+    until the restore PR merges or the repository opts out. The remedies are
     `.l9/no-sync` or a change to the fragments here.
+  - A weekly sweep is a slower backstop than the retired hourly one. Birth is
+    unaffected: `repo-birth-bootstrap.yml` seeds a newborn immediately.
   - Dependency names for `pre-commit` are the hook `repo:` URL exactly as
     written. A consumer writing a different URL spelling is not matched.
 - Neutral:

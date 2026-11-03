@@ -109,19 +109,24 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   console.log(`ok: ${label} — dispatch only; dry-run (default) and seed modes; governance-distribution`);
 }
 
-// ── auto-seed-new-repo.yml: hourly + repo_created + dispatch, dry run default ─
+// ── auto-seed-new-repo.yml: weekly + repo_created + dispatch, dry run default ─
 {
   const label = 'auto-seed-new-repo.yml';
   const text = read('.github/workflows/auto-seed-new-repo.yml');
   const block = onBlock(text);
   assert.deepStrictEqual(events(block), ['schedule', 'repository_dispatch', 'workflow_dispatch'], `${label}: trigger set changed`);
-  assert.ok(block.some((l) => /^\s+- cron: '20 \* \* \* \*'\s*$/.test(l)), `${label}: hourly sweep must stay`);
+  assert.ok(block.some((l) => /^\s+- cron: '20 5 \* \* 1'\s*$/.test(l)), `${label}: weekly Monday sweep must stay`);
+  assert.ok(!block.some((l) => /^\s+- cron: '\S+ \* \* \* \*'\s*$/.test(l)), `${label}: hourly sweep is retired`);
+  // ADR-0019: the managed dependabot.yml is restored by the sweep, honouring .l9/no-sync.
+  assert.match(text, /MANAGED_SEED_PATHS/, `${label}: managed seed paths must be restored`);
+  assert.match(text, /'\.l9\/no-sync'/, `${label}: .l9/no-sync must opt out of the restore`);
+  assert.match(text, /selectSeedWrites\(payload, existingByPath, \{ managed \}\)/, `${label}: restore goes through the shared planner`);
   assert.ok(block.some((l) => /types: \[repo_created\]/.test(l)), `${label}: repo_created fast path must stay`);
   const dry = input(block, 'dry_run');
   assert.ok(dry.includes('type: boolean') && dry.includes('default: true'), `${label}: operator dispatch defaults to dry run`);
   assert.match(text, /^ {4}environment: governance-distribution\s*$/m);
   assert.match(text, /^ {2}group: auto-seed-new-repo\s*$/m);
-  console.log(`ok: ${label} — hourly sweep, repo_created, dry-run dispatch preserved`);
+  console.log(`ok: ${label} — weekly sweep with managed restore, repo_created, dry-run dispatch preserved`);
 }
 
 // ── Retired: the push-driven org_template_updated fanout ────────────────────

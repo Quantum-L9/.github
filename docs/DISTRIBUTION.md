@@ -14,7 +14,7 @@ The mode names are `docs/REPO_BIRTH_PROFILES.md`.
 | --- | --- | --- | --- |
 | **Inheritance** | The passive community-health surfaces: `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml`. For `self_governed` repositories, `SECURITY.md` and the templates as well. | None | Live from `main`. These are never in the seed payload. One local copy blocks inheritance for that file. There is no merge. |
 | **Reference** | `governance-pr.yml` and `governance-issue.yml`, called from the consumer's `.github/workflows/governance.yml` | None for the callee | The caller pins a full commit SHA (`policies/governance-caller.yml`). Moving a tag does not retarget a caller that already pins a SHA. Missing-only seed does not overwrite an existing caller. |
-| **Physical copy** | `.github/CODEOWNERS`, `.github/dependabot.yml`, the governance caller where the class allows it, `SECURITY.md`, `.github/ISSUE_TEMPLATE/*`, `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md`. Default categories: `codeowners`, `dependabot`, `governance`, `community-health`, `issue-templates`, `pr-templates`. `labels` is opt-in. | Org secret `GH_TOKEN` | Missing-only pull request. An existing file is left as-is. |
+| **Physical copy** | `.github/CODEOWNERS`, `.github/dependabot.yml`, the governance caller where the class allows it, `SECURITY.md`, `.github/ISSUE_TEMPLATE/*`, `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md`. Default categories: `codeowners`, `dependabot`, `governance`, `community-health`, `issue-templates`, `pr-templates`. `labels` is opt-in. | Org secret `GH_TOKEN` | Missing-only pull request. An existing file is left as-is, except the managed `.github/dependabot.yml`, which the weekly sweep restores to its render. |
 | **Remote apply** | Labels and repository settings | Org secret / governance App | API state, not a file. `sync-labels-all.yml`, `enforce-policies.yml`, `repo-birth-bootstrap.yml`. |
 
 Seed sources that are also this repository's own files are read from those
@@ -34,13 +34,18 @@ seeded copy would create a second owner. CI is never in the payload; the
 `on-org-update` and `l9-ci-pack` categories throw.
 
 Physical copy has three entrypoints and one decision. `auto-seed-new-repo.yml`
-(hourly), `seed-governance.yml` (dispatch) and `ops/sync-org-files.sh`
+(weekly), `seed-governance.yml` (dispatch) and `ops/sync-org-files.sh`
 (manual, local checkout) all resolve the target's class through
 `ops/repo-class-profile.js` and build the payload through
 `ops/build-seed-payload.js`. `all` means the class's categories. An explicit
 category list is filtered by the class: INHERIT drops, FORBID is refused with
-the class and path named. Every entrypoint is missing-only; the shell path
-reports each existing file as kept and a second run is byte-identical.
+the class and path named. Every entrypoint is missing-only for unmanaged
+files; the shell path reports each existing file as kept and a second run is
+byte-identical. The weekly sweep also restores the one managed seed file,
+`.github/dependabot.yml` (`MANAGED_SEED_PATHS`, ADR
+`docs/adr/0019-dependabot-managed-rendered.md`), to the render for the
+repository root when it drifted, in the same advisory PR; `.l9/no-sync` keeps
+it missing-only.
 
 Every source a requested category names is required: a missing one fails the
 build before any consumer is touched, so the payload never shrinks silently.
@@ -56,11 +61,12 @@ and a branch that cannot be pinned plans nothing. The default branch is
 re-read before the seed branch moves; if it moved, the
 run stops for that repository (`BASE_MOVED`) and the next one replans. This
 narrows the race with other writers; it does not close it. An empty repository
-is reported `UNINITIALIZED_NOT_SEEDED` by the hourly sweep and retried; no
+is reported `UNINITIALIZED_NOT_SEEDED` by the weekly sweep and retried; no
 other 409 is treated that way.
 
-`continuous-sync.yml` (Manual Update) is the exception to missing-only. It
-restores `.github/CODEOWNERS` to the exact org bytes, and
+`continuous-sync.yml` (Manual Update) is the on-demand exception to
+missing-only; the weekly sweep restores `.github/dependabot.yml` the same way
+without being asked. Manual Update restores `.github/CODEOWNERS` to the exact org bytes, and
 `.github/dependabot.yml` to the render for the repository's root shape, when
 they drift. It skips a repository with `.l9/no-sync`, and acts only where the
 repository's class materializes the file: it resolves the class (and a root
@@ -83,6 +89,7 @@ renders it from:
   - `uv` when there is a `uv.lock`;
   - otherwise `pip` for a root `requirements*.txt` or a PEP 621 `pyproject.toml`;
   - `pre-commit` when there is a `.pre-commit-config.yaml`;
+  - `npm` when there is a root `package.json`;
 - Core's `core-owned-tools.json`, vendored at
   `policies/vendor/l9-ci-core/` and digest-checked.
 
@@ -91,13 +98,12 @@ action pins. Every entrypoint passes the shape to the one builder. A root that
 cannot be listed is `UNREACHABLE` (or `BLOCKED_PERMISSION`), never an
 actions-only render.
 
-**Rollout.** Do not run Apply until this renderer is merged. Before it, a
-restore wrote actions-only bytes over legitimate `uv` / `pip` / `pre-commit`
-entries. Until then, a repository with extra ecosystems opts out with
-`.l9/no-sync`. After merge, the operator Previews one repository at a time
-(`repo_filter` = `Cursor-Governance`, `l9-ci-sdk`, `gate_sdk`), reviews the
-planned `dependabot.yml` restore, and Applies per repository only on explicit
-approval.
+**Rollout.** Automated (ADR 0019, revised 2026-11-03). Every Monday the
+sweep opens, per repository, one advisory PR that adds or restores the render;
+nothing merges without review, and a repository that keeps its own file opts
+out with `.l9/no-sync`. The renderer covers `npm` (a root `package.json`) as
+well, so JavaScript repositories get a real entry instead of an actions-only
+file.
 
 The `.github` repository must be public. A private one disables inheritance,
 and cross-repo `workflow_call` needs the callee to be readable.
@@ -133,7 +139,7 @@ Those workflows, and `repo-birth-bootstrap.yml`, run in the
 | Security policy | Edit `SECURITY.md` and merge. `self_governed` repos inherit it. Repos that were seeded a copy keep the old file; seed will not overwrite it. |
 | PR or issue template | Edit and merge. The seed sources are `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md`, and `.github/ISSUE_TEMPLATE/*`. Seeded copies are not overwritten. |
 | Governance gate rule | Edit `governance-pr.yml` or `governance-issue.yml`, then re-pin the SHA in `policies/governance-caller.yml` and update consumers that already have a caller. |
-| CODEOWNERS or dependabot | Edit `policies/CODEOWNERS`, or the fragments in `policies/dependabot/` (then regenerate `.github/dependabot.yml` with `node ops/render-dependabot.js > .github/dependabot.yml`), and merge. A new Core list is vendored with its commit and sha256 in `policies/dependabot/core-owned-tools.source.json`. Then dispatch `continuous-sync.yml`: Preview to read the drift, Apply to open a restore PR where those files drifted. |
+| CODEOWNERS or dependabot | Edit `policies/CODEOWNERS`, or the fragments in `policies/dependabot/` (then regenerate `.github/dependabot.yml` with `node ops/render-dependabot.js > .github/dependabot.yml`), and merge. A new Core list is vendored with its commit and sha256 in `policies/dependabot/core-owned-tools.source.json`. The next weekly sweep opens a restore PR wherever `dependabot.yml` drifted; dispatch `continuous-sync.yml` for CODEOWNERS or to restore sooner. |
 | New repository | `auto-seed-new-repo.yml`, or `workflow_dispatch` on `seed-governance.yml`. `l9-repo-template` `make new-repo` dispatches `repo-birth-bootstrap.yml` for one repo. |
 
 ## Appendix A — secrets and called workflows

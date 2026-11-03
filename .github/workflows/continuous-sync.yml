@@ -159,7 +159,7 @@ jobs:
                 try {
                   baseSha = (await github.rest.git.getRef({ owner: o, repo: n, ref: `heads/${base}` })).data.object.sha;
                 } catch (e) {
-                  if (e.status === 409 && /^Git Repository is empty\.?$/i.test(String(e.message || '').trim())) {
+                  if (e.status === 409 && /^Git Repository is empty\.?(?:\s+-\s+https:\/\/\S+)?$/i.test(String(e.message || '').trim())) {
                     row('UNINITIALIZED', 'Git Repository is empty — nothing to sync');
                     continue;
                   }
