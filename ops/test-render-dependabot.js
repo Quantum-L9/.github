@@ -33,7 +33,8 @@ const { buildSeedPayload, renderDependabot: reexported } = require('./build-seed
 const root = path.resolve(__dirname, '..');
 const FIXTURES = 'ops/fixtures/dependabot';
 const ACTION_IGNORES = ['Quantum-L9/.github*', 'Quantum-L9/l9-ci-core*', 'Quantum-L9/l9-ci-sdk*'];
-const PYTHON_ECOSYSTEMS = ['uv', 'pip', 'pre-commit'];
+// Ecosystems whose Core-owned names are ignored in the render.
+const CORE_IGNORE_ECOSYSTEMS = ['uv', 'pip', 'npm', 'pre-commit'];
 // The renderer sorts in code-unit order; the assertions use the same order.
 const byCodeUnit = (a, b) => {
   if (a < b) return -1;
@@ -49,6 +50,9 @@ const EXPECTED_ECOSYSTEMS = {
   // still gets pip, or a restore would delete its pip entry.
   'pep621-only': ['github-actions', 'pip'],
   'uv-pre-commit': ['github-actions', 'uv', 'pre-commit'],
+  // Node repositories (npm, yarn, pnpm) keep their npm entry on restore.
+  'npm-only': ['github-actions', 'npm'],
+  'uv-npm': ['github-actions', 'uv', 'npm'],
 };
 
 /** Split a render into its `updates:` entries, keyed by package-ecosystem. */
@@ -94,7 +98,7 @@ process.chdir(root);
     assert.deepStrictEqual(Object.keys(byEcosystem), EXPECTED_ECOSYSTEMS[name], `${name}: ecosystem set`);
     assert.deepStrictEqual(renderedEcosystems(shape), EXPECTED_ECOSYSTEMS[name]);
     assert.deepStrictEqual(byEcosystem['github-actions'].ignores, ACTION_IGNORES, `${name}: Core/SDK/.github action pins are not Dependabot's`);
-    for (const ecosystem of PYTHON_ECOSYSTEMS) {
+    for (const ecosystem of CORE_IGNORE_ECOSYSTEMS) {
       if (!byEcosystem[ecosystem]) continue;
       const want = owned[ecosystem];
       assert.ok(want?.length, `${ecosystem}: Core lists no owned names`);
@@ -112,12 +116,12 @@ process.chdir(root);
   // The Core-owned names come straight from the vendored list: every name in
   // every rendered ecosystem, and nothing a non-dependency lock key names.
   const vendored = JSON.parse(fs.readFileSync('policies/vendor/l9-ci-core/core-owned-tools.json', 'utf8'));
-  for (const ecosystem of PYTHON_ECOSYSTEMS) {
+  for (const ecosystem of CORE_IGNORE_ECOSYSTEMS) {
     const fromCore = [...new Set(vendored.tools.flatMap((t) => t.ecosystems?.[ecosystem] || []))].sort(byCodeUnit);
     assert.deepStrictEqual(owned[ecosystem], fromCore, `${ecosystem}: derived names drift from the vendored list`);
   }
   for (const key of Object.keys(vendored.non_dependency_lock_keys)) {
-    for (const ecosystem of PYTHON_ECOSYSTEMS) {
+    for (const ecosystem of CORE_IGNORE_ECOSYSTEMS) {
       assert.ok(!owned[ecosystem].includes(key), `${key} is a lock key, not a ${ecosystem} dependency`);
     }
   }

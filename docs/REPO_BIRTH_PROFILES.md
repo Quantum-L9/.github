@@ -23,9 +23,11 @@ is the authority for which mode each class puts a surface in.
 `.github/dependabot.yml` is **MANAGED-RENDERED**
 ([ADR 0019](adr/0019-dependabot-managed-rendered.md)). It is rendered per
 repository root by `ops/render-dependabot.js`, from fragments, the root's
-shape and the vendored Core list of Core-owned tools. The seeders write it
-missing-only. A manual `continuous-sync.yml` Apply restores it, like
-`.github/CODEOWNERS`, wherever the class materializes it. `.l9/no-sync` is
+shape and the vendored Core list of Core-owned tools. It is a seed file like
+the templates, wherever the class materializes it, and it is kept in sync
+automatically: the weekly `auto-seed-new-repo.yml` sweep adds it when missing
+and restores it when it drifted from the render, through the same advisory PR.
+A manual `continuous-sync.yml` Apply does the same on demand. `.l9/no-sync` is
 the only opt-out.
 
 Three surfaces are MATERIALIZE only because their bytes differ per consumer:
@@ -67,7 +69,7 @@ resolves through `overrides`, then `default_class`. It never resolves to
 something wider than the repository asked for.
 
 Every distribution path makes this one decision through
-`ops/repo-class-profile.js`: the hourly auto-seed, the dispatch seeder, the
+`ops/repo-class-profile.js`: the weekly auto-seed, the dispatch seeder, the
 manual shell sync, and Manual Update (`continuous-sync.yml`), which plans only
 paths the class-filtered payload carries. None of them has a category list of its own; `all`
 means the class's `seed_categories`, and an explicit category still passes
@@ -142,14 +144,17 @@ the override and default path.
 | `.github/workflows/enforce-policies.yml` | honours `mandatory_files_waive` |
 | `l9-repo-template` `scripts/birth-runner/new_repo.py` | reads the same file to apply the profile locally, before creation |
 
-## Birth is immediate, not hourly
+## Birth is immediate, not weekly
 
-`auto-seed-new-repo.yml` still sweeps hourly and still opens a PR. That is the
+`auto-seed-new-repo.yml` sweeps weekly (Monday 08:00 America/New_York) and opens a PR. That is the
 repair path for repositories that drift or predate their class.
 
 A newborn does not wait for it. `make new-repo` dispatches
 `repo-birth-bootstrap.yml` for exactly one repository and waits: labels and
-settings are applied, then the remote is read back.
+settings are applied, then the remote is read back. Once that attestation
+passes, it dispatches `repo_created` for exactly that repository, so
+`auto-seed-new-repo.yml` opens the seed PR (including `dependabot.yml`) at
+birth instead of on the next weekly sweep. A dry run dispatches nothing.
 
 ## Adding a class
 

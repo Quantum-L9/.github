@@ -109,19 +109,62 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   console.log(`ok: ${label} — dispatch only; dry-run (default) and seed modes; governance-distribution`);
 }
 
-// ── auto-seed-new-repo.yml: hourly + repo_created + dispatch, dry run default ─
+// ── auto-seed-new-repo.yml: weekly + repo_created + dispatch, dry run default ─
 {
   const label = 'auto-seed-new-repo.yml';
   const text = read('.github/workflows/auto-seed-new-repo.yml');
   const block = onBlock(text);
   assert.deepStrictEqual(events(block), ['schedule', 'repository_dispatch', 'workflow_dispatch'], `${label}: trigger set changed`);
-  assert.ok(block.some((l) => /^\s+- cron: '20 \* \* \* \*'\s*$/.test(l)), `${label}: hourly sweep must stay`);
+  const cronAt = block.findIndex((l) => /^\s+- cron: '0 8 \* \* 1'\s*$/.test(l));
+  assert.ok(cronAt >= 0, `${label}: weekly Monday 08:00 sweep must stay`);
+  assert.match(block[cronAt + 1] || '', /^\s+timezone: 'America\/New_York'\s*$/, `${label}: the sweep runs in America/New_York`);
+  assert.ok(!block.some((l) => /^\s+- cron: '\S+ \* \* \* \*'\s*$/.test(l)), `${label}: hourly sweep is retired`);
+  // ADR-0019: the managed dependabot.yml is restored by the sweep, honouring .l9/no-sync.
+  assert.match(text, /MANAGED_SEED_PATHS/, `${label}: managed seed paths must be restored`);
+  assert.match(text, /'\.l9\/no-sync'/, `${label}: .l9/no-sync must opt out of the restore`);
+  assert.match(text, /selectSeedWrites\(payload, existingByPath, \{ managed \}\)/, `${label}: restore goes through the shared planner`);
   assert.ok(block.some((l) => /types: \[repo_created\]/.test(l)), `${label}: repo_created fast path must stay`);
   const dry = input(block, 'dry_run');
   assert.ok(dry.includes('type: boolean') && dry.includes('default: true'), `${label}: operator dispatch defaults to dry run`);
   assert.match(text, /^ {4}environment: governance-distribution\s*$/m);
-  assert.match(text, /^ {2}group: auto-seed-new-repo\s*$/m);
-  console.log(`ok: ${label} — hourly sweep, repo_created, dry-run dispatch preserved`);
+  assert.match(text, /^ {2}group: auto-seed-new-repo-\$\{\{ github\.event\.client_payload\.repository \|\| inputs\.target_repo \|\| 'sweep' \}\}\s*$/m,
+    `${label}: births get a per-repository group (never cancel each other); sweeps share one`);
+  console.log(`ok: ${label} — weekly sweep with managed restore, repo_created, dry-run dispatch preserved`);
+}
+
+// ── repo-birth-bootstrap.yml: birth chains file seeding (repo_created) ───────
+// The auto-seed sweep is weekly; birth must not wait for it (ADR 0019).
+{
+  const label = 'repo-birth-bootstrap.yml';
+  const text = read('.github/workflows/repo-birth-bootstrap.yml');
+  assert.match(text, /event_type: 'repo_created'/, `${label}: birth must dispatch repo_created to the seeder`);
+  assert.match(text, /createDispatchEvent\(/, `${label}: birth must dispatch, not only describe it`);
+  const chain = text.split('\n').find((l) => /^\s+if: .*success\(\)/.test(l)) || '';
+  assert.match(chain, /inputs\.dry_run != true\b/, `${label}: dry run must be compared as a boolean, never a string`);
+  assert.doesNotMatch(chain, /'true'/, `${label}: a string 'true' never equals the boolean input, so a dry run would chain`);
+  // Evaluate the guard the way GitHub does for this one shape: a boolean input,
+  // or null for repository_dispatch.
+  const chains = (dry) => !(dry === true);
+  assert.strictEqual(chains(true), false, `${label}: a dry run must not chain`);
+  assert.strictEqual(chains(false), true);
+  assert.strictEqual(chains(null), true, `${label}: a repository_dispatch birth (no input) chains`);
+  console.log(`ok: ${label} — birth chains repo_created to auto-seed after attestation; dry run does not`);
+}
+
+/**
+ * The argument text of every `createDispatchEvent({ … })` call, by index scan
+ * (no backtracking regex). A call whose closing `})` is missing fails loudly.
+ */
+function dispatchCallArgs(text) {
+  const out = [];
+  const open = 'createDispatchEvent({';
+  for (let at = text.indexOf('createDispatchEvent'); at !== -1; at = text.indexOf('createDispatchEvent', at + 1)) {
+    assert.ok(text.startsWith(open, at), 'createDispatchEvent must be called with an object literal');
+    const close = text.indexOf('})', at + open.length);
+    assert.ok(close !== -1, 'unterminated createDispatchEvent call');
+    out.push(text.slice(at + open.length, close));
+  }
+  return out;
 }
 
 // ── Retired: the push-driven org_template_updated fanout ────────────────────
@@ -134,10 +177,17 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   for (const f of fs.readdirSync(dir).filter((n) => /\.ya?ml$/.test(n))) {
     const text = read(`.github/workflows/${f}`);
     assert.doesNotMatch(text, /org_template_updated/, `${f}: the retired consumer sync event is back`);
-    assert.doesNotMatch(text, /createDispatchEvent/, `${f}: a consumer event fanout is back`);
+    // The only dispatch allowed is to this repository itself (birth chaining
+    // repo_created to auto-seed); any other target is a consumer fanout.
+    for (const args of dispatchCallArgs(text)) {
+      const lines = args.split('\n').map((l) => l.trim());
+      assert.ok(lines.includes('repo: context.repo.repo,'), `${f}: a consumer event fanout is back`);
+      assert.ok(lines.includes('owner: context.repo.owner,'), `${f}: a consumer event fanout is back`);
+      assert.match(args, /event_type: 'repo_created'/, `${f}: only repo_created may be self-dispatched`);
+    }
   }
   assert.doesNotMatch(read('Makefile'), /dispatch-template-update/, 'Makefile still runs the retired dispatcher');
-  console.log('ok: org_template_updated fanout retired — no workflow emits a consumer dispatch event');
+  console.log('ok: org_template_updated fanout retired — no workflow emits a consumer dispatch event (self repo_created only)');
 }
 
 // ── Canonical governance caller pin ─────────────────────────────────────────
