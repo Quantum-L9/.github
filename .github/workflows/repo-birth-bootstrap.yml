@@ -8,8 +8,10 @@
 #
 # Scope is deliberately narrow. This workflow applies the capabilities a class
 # marks REMOTE APPLY (GitHub API state, not files) and then attests. File
-# MATERIALIZE stays with auto-seed-new-repo.yml, which this workflow can chain
-# to via repository_dispatch — one owner per capability, never two.
+# MATERIALIZE stays with auto-seed-new-repo.yml: once the attestation passes,
+# this workflow dispatches `repo_created` for exactly this repository, so the
+# seed PR opens at birth rather than on the next weekly sweep — one owner per
+# capability, never two.
 #
 # Auth: org secret GH_TOKEN (AWS openclaw-igorbot/github#token), same as the
 # other org-write workflows.
@@ -276,3 +278,30 @@ jobs:
             if (failures) {
               core.setFailed(`${failures} birth attestation check(s) failed for ${ORG}/${TARGET}`);
             }
+
+      # MATERIALIZE at birth: hand exactly this repository to the seeder now.
+      # Runs only after a passing attestation and never on a dry run; the
+      # seeder resolves the class itself and stays missing-only.
+      - name: Chain file seeding (repo_created)
+        if: ${{ success() && (inputs.dry_run || 'false') != 'true' }}
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        env:
+          TARGET_REPO: ${{ inputs.target_repo || github.event.client_payload.repository || '' }}
+          REPO_CLASS: ${{ inputs.repo_class || github.event.client_payload.repo_class || '' }}
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const repository = process.env.TARGET_REPO.trim();
+            if (!/^[A-Za-z0-9._-]+$/.test(repository)) {
+              core.setFailed(`refusing to dispatch seeding for invalid repository name ${JSON.stringify(repository)}`);
+              return;
+            }
+            const client_payload = { repository };
+            if (process.env.REPO_CLASS.trim()) client_payload.repo_class = process.env.REPO_CLASS.trim();
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event_type: 'repo_created',
+              client_payload,
+            });
+            core.notice(`dispatched repo_created for ${context.repo.owner}/${repository} (auto-seed-new-repo.yml)`);

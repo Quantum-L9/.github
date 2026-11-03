@@ -121,7 +121,8 @@ versions through the existing single builder.
     until the restore PR merges or the repository opts out. The remedies are
     `.l9/no-sync` or a change to the fragments here.
   - A weekly sweep is a slower backstop than the retired hourly one. Birth is
-    unaffected: `repo-birth-bootstrap.yml` seeds a newborn immediately.
+    unaffected: after its attestation `repo-birth-bootstrap.yml` dispatches
+    `repo_created` for the newborn, so its seed PR opens immediately.
   - Dependency names for `pre-commit` are the hook `repo:` URL exactly as
     written. A consumer writing a different URL spelling is not matched.
 - Neutral:

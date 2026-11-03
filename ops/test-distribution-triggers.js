@@ -129,6 +129,18 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   console.log(`ok: ${label} — weekly sweep with managed restore, repo_created, dry-run dispatch preserved`);
 }
 
+// ── repo-birth-bootstrap.yml: birth chains file seeding (repo_created) ───────
+// The auto-seed sweep is weekly; birth must not wait for it (ADR 0019).
+{
+  const label = 'repo-birth-bootstrap.yml';
+  const text = read('.github/workflows/repo-birth-bootstrap.yml');
+  assert.match(text, /event_type: 'repo_created'/, `${label}: birth must dispatch repo_created to the seeder`);
+  assert.match(text, /createDispatchEvent\(/, `${label}: birth must dispatch, not only describe it`);
+  assert.match(text, /if: \$\{\{ success\(\) && \(inputs\.dry_run \|\| 'false'\) != 'true' \}\}/,
+    `${label}: chaining runs only after a passing attestation and never on a dry run`);
+  console.log(`ok: ${label} — birth chains repo_created to auto-seed after attestation; dry run does not`);
+}
+
 // ── Retired: the push-driven org_template_updated fanout ────────────────────
 // dispatch-template-update.yml pushed `repository_dispatch(org_template_updated)`
 // to every seeded consumer on a template change. Drift is restored only by a
@@ -139,10 +151,18 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   for (const f of fs.readdirSync(dir).filter((n) => /\.ya?ml$/.test(n))) {
     const text = read(`.github/workflows/${f}`);
     assert.doesNotMatch(text, /org_template_updated/, `${f}: the retired consumer sync event is back`);
-    assert.doesNotMatch(text, /createDispatchEvent/, `${f}: a consumer event fanout is back`);
+    // The only dispatch allowed is to this repository itself (birth chaining
+    // repo_created to auto-seed); any other target is a consumer fanout.
+    for (const m of text.matchAll(/createDispatchEvent\(\{([\s\S]*?)\}\)/g)) {
+      assert.match(m[1], /^\s*repo: context\.repo\.repo,\s*$/m, `${f}: a consumer event fanout is back`);
+      assert.match(m[1], /^\s*owner: context\.repo\.owner,\s*$/m, `${f}: a consumer event fanout is back`);
+      assert.match(m[1], /event_type: 'repo_created'/, `${f}: only repo_created may be self-dispatched`);
+    }
+    assert.strictEqual((text.match(/createDispatchEvent/g) || []).length,
+      [...text.matchAll(/createDispatchEvent\(\{[\s\S]*?\}\)/g)].length, `${f}: an unchecked dispatch call`);
   }
   assert.doesNotMatch(read('Makefile'), /dispatch-template-update/, 'Makefile still runs the retired dispatcher');
-  console.log('ok: org_template_updated fanout retired — no workflow emits a consumer dispatch event');
+  console.log('ok: org_template_updated fanout retired — no workflow emits a consumer dispatch event (self repo_created only)');
 }
 
 // ── Canonical governance caller pin ─────────────────────────────────────────

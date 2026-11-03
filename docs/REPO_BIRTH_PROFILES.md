@@ -151,7 +151,10 @@ repair path for repositories that drift or predate their class.
 
 A newborn does not wait for it. `make new-repo` dispatches
 `repo-birth-bootstrap.yml` for exactly one repository and waits: labels and
-settings are applied, then the remote is read back.
+settings are applied, then the remote is read back. Once that attestation
+passes, it dispatches `repo_created` for exactly that repository, so
+`auto-seed-new-repo.yml` opens the seed PR (including `dependabot.yml`) at
+birth instead of on the next weekly sweep. A dry run dispatches nothing.
 
 ## Adding a class
 
