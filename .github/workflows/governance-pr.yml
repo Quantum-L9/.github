@@ -73,7 +73,7 @@ jobs:
       cancel-in-progress: true
     env:
       # Re-pin together with the ref below; docs/DISTRIBUTION.md "PR body".
-      COMPOSER: Quantum-L9/Cursor-Governance@05264df39f6845d67401a70b72763056bf9ec085
+      COMPOSER: Quantum-L9/Cursor-Governance@5039c379d8ba1263f504cfa527487386205e056c
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -85,7 +85,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: Quantum-L9/Cursor-Governance
-          ref: 05264df39f6845d67401a70b72763056bf9ec085
+          ref: 5039c379d8ba1263f504cfa527487386205e056c
           path: composer
           # compose_pr_body.py imports org_dotgithub at load; both are stdlib-only.
           sparse-checkout: |
