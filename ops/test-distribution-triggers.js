@@ -173,6 +173,28 @@ function dispatchCallArgs(text) {
   return out;
 }
 
+// ── One PR-body renderer, one pin ────────────────────────────────────────────
+// Seed and Manual Update PR bodies are composed by Cursor-Governance
+// compose_pr_body.py at the same commit governance-pr.yml's body job runs, and
+// the validate suite renders against it too. Every checkout must name it.
+{
+  const pinOf = (text) => [...text.matchAll(/repository: Quantum-L9\/Cursor-Governance\n\s+ref: ([0-9a-f]{40})/g)].map((m) => m[1]);
+  const gov = read('.github/workflows/governance-pr.yml');
+  const declared = (gov.match(/COMPOSER: Quantum-L9\/Cursor-Governance@([0-9a-f]{40})/) || [])[1];
+  assert.ok(declared, 'governance-pr.yml must declare COMPOSER: Quantum-L9/Cursor-Governance@<sha>');
+  assert.deepStrictEqual(pinOf(gov), [declared], 'governance-pr.yml checks the composer out at its declared pin');
+  for (const f of ['auto-seed-new-repo.yml', 'seed-governance.yml', 'continuous-sync.yml', 'validate-starters.yml']) {
+    const text = read(`.github/workflows/${f}`);
+    assert.deepStrictEqual(pinOf(text), [declared], `${f}: the composer checkout must be the governance-pr.yml pin`);
+  }
+  for (const f of ['auto-seed-new-repo.yml', 'seed-governance.yml', 'continuous-sync.yml']) {
+    const text = read(`.github/workflows/${f}`);
+    assert.match(text, /renderSeedPrBody\(\{/, `${f}: PR bodies are composed, not hand-built`);
+    assert.doesNotMatch(text, /'## (Problem|Fix|Risk|Evidence|Gates)'/, `${f}: a hand-built PR body section is back`);
+  }
+  console.log('ok: seeders, Manual Update and validate compose PR bodies with the governance-pr.yml composer pin');
+}
+
 // ── Retired: the push-driven org_template_updated fanout ────────────────────
 // dispatch-template-update.yml pushed `repository_dispatch(org_template_updated)`
 // to every seeded consumer on a template change. Drift is restored only by a

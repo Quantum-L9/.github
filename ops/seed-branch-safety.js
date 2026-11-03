@@ -17,11 +17,15 @@
  */
 
 // Message written by auto-seed-new-repo.yml ("auto-seed") and
-// seed-governance.yml ("seed"). Keep in sync with both workflows.
-const SEED_COMMIT_SUBJECT = /^chore\(governance\): (?:auto-)?seed \d+ org template file\(s\)$/;
+// seed-governance.yml ("seed"). Keep in sync with both workflows. Seeders now
+// write `ci(governance)` (the composer ticks "CI / governance change" from it);
+// `chore(governance)` is still recognised so branches written before that
+// change stay rebuildable.
+const SEED_COMMIT_SUBJECT = /^(?:ci|chore)\(governance\): (?:auto-)?seed \d+ org template file\(s\)$/;
 // Message written by continuous-sync.yml, which rebuilds its own branch
 // through the same guarded path with this subject in place of the seed one.
-const SYNC_COMMIT_SUBJECT = /^chore\(governance\): sync \d+ org-managed file\(s\)$/;
+// `ci(governance)` now, `chore(governance)` for branches written before.
+const SYNC_COMMIT_SUBJECT = /^(?:ci|chore)\(governance\): sync \d+ org-managed file\(s\)$/;
 // Trailer the seeders write into their commit body: a digest of exactly the
 // paths and bytes that commit writes. A closed-unmerged seed PR whose head
 // carries the same digest was declined for this payload (see assessSeedBranch).

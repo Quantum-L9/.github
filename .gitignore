@@ -10,3 +10,6 @@
 .mcp.json
 # Created by make validate when the system python3 has no PyYAML.
 .venv/
+# The pinned PR-body composer, fetched by ops/fetch-composer.sh for
+# ops/test-seed-pr-body.js (CI checks it out to the same path).
+.cache/

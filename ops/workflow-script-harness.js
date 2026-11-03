@@ -105,8 +105,33 @@ function makeCore() {
  * github-script resolves relative `require()` against the workspace root.
  * Mirror that so a script body can pull in ops/ modules the way it does live.
  */
-const makeScopedRequire = (root) => (m) =>
-  require(m.startsWith('.') ? path.resolve(root, m) : m);
+const makeScopedRequire = (root, overrides = {}) => (m) =>
+  Object.prototype.hasOwnProperty.call(overrides, m)
+    ? overrides[m]
+    : require(m.startsWith('.') ? path.resolve(root, m) : m);
+
+/**
+ * A stand-in for `./ops/seed-pr-body.js` whose renderSeedPrBody records its
+ * inputs and returns a marked body instead of fetching the seed commit and
+ * running Cursor-Governance's composer. Every other export is the real one,
+ * so the commit message and the prepared template are produced as live.
+ *
+ * Branch-guard suites assert what the workflow hands the renderer and that the
+ * PR body is its output verbatim; ops/test-seed-pr-body.js runs the real
+ * composer and proves the rendered body complete.
+ */
+function makeRenderRecorder(root) {
+  const real = require(path.resolve(root, 'ops/seed-pr-body.js'));
+  const renders = [];
+  const module = {
+    ...real,
+    renderSeedPrBody: (args) => {
+      renders.push(args);
+      return { body: `<!-- composed seed body for ${args.headSha} -->\n`, handoff: { needs_completion: [] } };
+    },
+  };
+  return { module, renders };
+}
 
 
 /**
@@ -127,11 +152,16 @@ const makeScopedRequire = (root) => (m) =>
  * @param {Set<string>} opts.mutations  call names that count as a write
  * @returns {(o?: object) => Promise<{calls, names, state, failures, mutated}>}
  */
-function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations }) {
+function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations, modules = {} }) {
   const fn = loadScriptModule(file, tmpTag);
-  const scopedRequire = makeScopedRequire(root);
 
-  return async function run({ dry = false, mutateGithub, envExtra = {}, ...stubOpts } = {}) {
+  return async function run({ dry = false, mutateGithub, envExtra = {}, modules: runModules = {}, ...stubOpts } = {}) {
+    // A run without its own renderer gets a fresh recorder, so no suite can
+    // reach the network-bound composer by accident.
+    const recorder = makeRenderRecorder(root);
+    const scopedRequire = makeScopedRequire(root, {
+      './ops/seed-pr-body.js': recorder.module, ...modules, ...runModules,
+    });
     const prevCwd = process.cwd();
     const env = { ...envFor(dry), ...envExtra };
     const prevEnv = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
@@ -159,6 +189,7 @@ function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations })
       // Verdict rows of the last summary table, header row dropped.
       rows: core.tables.length ? core.tables[core.tables.length - 1].slice(1) : [],
       mutated: names.some((n) => mutations.has(n)),
+      renders: recorder.renders,
     };
   };
 }
@@ -271,6 +302,7 @@ function loadGovernanceGates(root) {
 }
 
 module.exports = {
+  makeRenderRecorder,
   extractScript,
   loadScriptModule,
   notFound,

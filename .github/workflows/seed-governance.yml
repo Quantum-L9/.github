@@ -72,8 +72,23 @@ jobs:
             exit 1
           fi
 
+      # The one PR-body renderer (Cursor-Governance ops/scripts/compose_pr_body.py)
+      # at the commit governance-pr.yml pins; ops/test-distribution-triggers.js
+      # keeps the pins equal. Seed PR bodies are composed from the org template
+      # by it, never hand-built (ops/seed-pr-body.js).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Quantum-L9/Cursor-Governance
+          ref: 1a57fe7bdcb0e4001feabfddfa28b787d9df2156
+          path: composer
+          sparse-checkout: ops/scripts/compose_pr_body.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
+          # Fetches the seed commit for the composer, as an HTTP header via env.
+          SEED_GIT_TOKEN: ${{ secrets.GH_TOKEN }}
           # Pass dispatch inputs via env — never interpolate into script: (CodeQL js/actions/code-injection)
           SEED_MODE: ${{ inputs.mode }}
           SEED_REPO_FILTER: ${{ inputs.repo_filter }}
@@ -105,6 +120,15 @@ jobs:
               classForRepo,
               resolveProfile,
             } = require('./ops/repo-class-profile.js');
+            const {
+              TEMPLATE_PATH,
+              prepareSeedTemplate,
+              seedCommitMessage,
+              seedNarrative,
+              renderSeedPrBody,
+            } = require('./ops/seed-pr-body.js');
+            const { execFileSync } = require('child_process');
+            const CANONICAL_TEMPLATE = fs.readFileSync(TEMPLATE_PATH, 'utf8');
 
             const MODE = process.env.SEED_MODE || 'dry-run';
             const FILTER = process.env.SEED_REPO_FILTER || '';
@@ -335,6 +359,13 @@ jobs:
                   continue;
                 }
 
+                // Missing-only: every path this commit writes is an addition.
+                const added = treeItems.map(t => t.path);
+                const story = seedNarrative({
+                  added, profile, branch: BRANCH, sourceSha: SOURCE_SHA,
+                  seeder: 'seed-governance.yml', hasRootCodeowners,
+                });
+
                 const tree = await github.rest.git.createTree({
                   owner: o, repo: n,
                   base_tree: baseCommit.data.tree.sha,
@@ -342,7 +373,11 @@ jobs:
                 });
                 const commit = await github.rest.git.createCommit({
                   owner: o, repo: n,
-                  message: `chore(governance): seed ${treeItems.length} org template file(s)\n\n${PAYLOAD_TRAILER}: ${payloadDigest}`,
+                  message: seedCommitMessage({
+                    subject: `ci(governance): seed ${treeItems.length} org template file(s)`,
+                    problem: story.problem,
+                    trailers: [`${PAYLOAD_TRAILER}: ${payloadDigest}`],
+                  }),
                   tree: tree.data.sha,
                   parents: [baseSha],
                 });
@@ -364,58 +399,24 @@ jobs:
                   continue;
                 }
 
-                // Seed-specific body in the sections governance-pr.yml checks.
-                // Facts only: what was added, on which exact base, from which
-                // source. Nothing here claims a check this run did not make.
-                const added = treeItems.map(t => t.path);
-                const behavioral = added.some(p => p === '.github/CODEOWNERS'
-                  || p === '.github/dependabot.yml' || p.startsWith('.github/workflows/'));
-                const bodyLines = [
-                  '## Problem',
-                  '',
-                  `This repository is missing ${added.length} file(s) that its repo class \`${profile.name}\` (${profile.resolved_from}) materializes from \`Quantum-L9/.github\` — see \`policies/repo-classes.yml\`.`,
-                  profile.inherit.length
-                    ? `Inherited from the org \`.github\` repo and deliberately **not** copied here: ${profile.inherit.map(p => `\`${p}\``).join(', ')}.`
-                    : '',
-                  '',
-                  '## Fix',
-                  '',
-                  `Adds only the missing files listed under Evidence, in one commit on \`${BRANCH}\`. Existing files were left untouched (missing-only seed). Categories: \`${categoriesLabel}\`.`,
-                  hasRootCodeowners
-                    ? 'Root `CODEOWNERS` is present and is **not** overridden by `.github/CODEOWNERS`.'
-                    : '',
-                  '`.github/workflows/governance.yml`, where added, is **advisory** (`strict` defaults false). CI callers are not distributed from this repository. See `docs/BOUNDARIES.md`.',
-                  'Source map: `policies/mandatory-files.yml` · sync twin: `ops/sync-org-files.sh`.',
-                  'While this PR is open the seeder leaves the branch alone — commit review fixes onto it freely.',
-                  '',
-                  '## Risk',
-                  '',
-                  `- [${behavioral ? ' ' : 'x'}] Low — additive, reversible, no data or contract change`,
-                  `- [${behavioral ? 'x' : ' '}] Medium — touches shared code, config, or a public interface`,
-                  '- [ ] High — breaking change, migration, IAM/network, or irreversible',
-                  '',
-                  '## Evidence',
-                  '',
-                  '```text',
-                  `source: Quantum-L9/.github@${SOURCE_SHA}`,
-                  `base:   ${base}@${baseSha}`,
-                  `class:  ${profile.name} (${profile.resolved_from})`,
-                  `added (${added.length}):`,
-                  ...added.map(p => `  ${p}`),
-                  '```',
-                  '',
-                  '## Gates',
-                  '',
-                  '- [x] No other open PR changed these paths when the seed was planned (a PR opened later is not covered)',
-                  "- [ ] Consumer CI passes on this PR — unverified: the seeder neither runs nor observes this repository's checks",
-                ].filter((line, idx, arr) => !(line === '' && arr[idx - 1] === ''));
+                // The body is the org PR template, composed by the one renderer
+                // against the seed commit just published; an incomplete body
+                // stops here and no PR opens (the next run rebuilds the branch).
+                const rendered = renderSeedPrBody({
+                  exec: execFileSync, fs,
+                  remoteUrl: `https://github.com/${o}/${n}.git`,
+                  branch: BRANCH, headSha: commit.data.sha, baseSha,
+                  template: prepareSeedTemplate(CANONICAL_TEMPLATE, story),
+                  composerRoot: 'composer',
+                  token: process.env.SEED_GIT_TOKEN || '',
+                });
 
                 let prNumber;
                 try {
                   const pr = await github.rest.pulls.create({
                     owner: o, repo: n, head: BRANCH, base,
-                    title: 'chore(governance): seed org templates from Quantum-L9/.github',
-                    body: bodyLines.join('\n'),
+                    title: 'ci(governance): seed org templates from Quantum-L9/.github',
+                    body: rendered.body,
                   });
                   prNumber = pr.data.number;
                 } catch (e) {

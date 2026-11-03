@@ -256,6 +256,22 @@ described an earlier head's path set is withdrawn as unverified rather than
 carried forward; a reviewer's own justification text is left as written. This
 repository's own PRs get the same job through `pr-files.yml`.
 
+Seed and Manual Update PRs are composed the same way, at creation, in every
+consumer class (with or without the governance caller): `auto-seed-new-repo.yml`,
+`seed-governance.yml` and `continuous-sync.yml` check the composer out at the
+`governance-pr.yml` pin, fetch the published seed commit and its base, and
+render the org template with `compose_pr_body.py --remote`
+(`ops/seed-pr-body.js`). Nothing is hand-built and nothing is edited after.
+The seed commit body carries the Problem paragraph the composer reads; the
+seeder writes Fix and Reviewer focus into its copy of the template, the two
+fields the composer cannot measure. Seed commits use `ci(governance): …`, which
+ticks "CI / governance change". When the composer still reports a field that
+needs an author, no PR opens and the repository is reported failed; its branch
+stays the seeder's own, so the next run rebuilds it.
+`ops/test-seed-pr-body.js` renders seed, restore and Manual Update bodies with
+the real pinned composer and requires them complete and gate-clean, and
+`ops/test-distribution-triggers.js` keeps every composer checkout on the one pin.
+
 The template's visible order puts the inventory first (Files touched, then
 Changes by intent) and Protected-root last; the `L9_PROTECTED_ROOT_PR` stamp
 stays the first line. It carries no placeholder the composer cannot honestly

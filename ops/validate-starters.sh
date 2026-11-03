@@ -23,12 +23,24 @@ if ! command -v node &>/dev/null; then
   echo "❌ node not found — the ops/test-*.js suites cannot run"
   FAIL=$((FAIL+1))
 else
+  # ops/test-seed-pr-body.js composes seed PR bodies with the real PR-body
+  # renderer at the governance-pr.yml pin. CI checks that pin out and sets
+  # SEED_COMPOSER_ROOT; a local run fetches it once into .cache/composer.
+  if [ -z "${SEED_COMPOSER_ROOT:-}" ]; then
+    if bash ops/fetch-composer.sh .cache/composer; then
+      export SEED_COMPOSER_ROOT=.cache/composer
+    else
+      echo "❌ could not fetch the pinned PR-body composer (ops/fetch-composer.sh)"
+      FAIL=$((FAIL+1))
+    fi
+  fi
   for t in \
     ops/test-build-seed-payload.js \
     ops/test-render-dependabot.js \
     ops/test-repo-class-profile.js \
     ops/test-label-taxonomy.js \
     ops/test-seed-branch-safety.js \
+    ops/test-seed-pr-body.js \
     ops/test-seed-workflow-branch-guard.js \
     ops/test-continuous-sync-branch-guard.js \
     ops/test-distribution-triggers.js \

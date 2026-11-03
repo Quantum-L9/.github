@@ -402,25 +402,39 @@ async function failClosedScenarios(wf, run, label) {
   }
   console.log(`ok: ${label} — a base that moves before publication stops the run; no ref or PR`);
 
-  // V16: the seed PR body passes the org validator, strictly, and is honest.
+  // V16: the seed PR body is the org template composed by the one renderer
+  // against the published seed commit — never hand-built. The composed body is
+  // proven complete and gate-clean against the real composer in
+  // ops/test-seed-pr-body.js; here, what the workflow hands it.
   {
     const r = await run({ branch: null });
-    const body = r.calls.find((c) => c.name === 'pulls.create').args.body;
-    assert.deepStrictEqual(await gates(body), [], `${label}: seed PR body fails governance-pr gates`);
-    assert.match(body, new RegExp(`source: Quantum-L9/\\.github@${SOURCE_SHA}`));
-    assert.match(body, /base: {3}main@base-sha/);
-    assert.match(body, /^ {2}SECURITY\.md$/m, `${label}: evidence lists the actual paths`);
-    assert.match(body, /- \[x\] Medium/, `${label}: a CODEOWNERS/workflow seed is Medium`);
-    assert.match(body, /- \[ \] Consumer CI passes on this PR — unverified/);
-    assert.doesNotMatch(body, /- \[x\][^\n]*CI passes/i, `${label}: claims CI it did not observe`);
-    assert.doesNotMatch(body, /Closes #\d/, `${label}: invents an issue number`);
-    // An inherit-heavy class adds only SECURITY.md + labels via explicit ask: Low.
-    const low = await run({ branch: null, repos: one('ncp', { marker: 'profile: non_constellation_python\n', files: withRenderedDependabot({ '.github/CODEOWNERS': 'x' }) }) });
-    const lowBody = low.calls.find((c) => c.name === 'pulls.create').args.body;
-    assert.deepStrictEqual(await gates(lowBody), []);
-    assert.match(lowBody, /- \[x\] Low/);
+    const pr = r.calls.find((c) => c.name === 'pulls.create').args;
+    assert.strictEqual(r.renders.length, 1, `${label}: one render per seed PR`);
+    const [render] = r.renders;
+    assert.strictEqual(pr.body, '<!-- composed seed body for new-commit-sha -->\n', `${label}: the PR body is the renderer's output verbatim`);
+    assert.strictEqual(render.headSha, 'new-commit-sha', `${label}: rendered against the commit just published`);
+    assert.strictEqual(render.baseSha, 'base-sha');
+    assert.strictEqual(render.branch, wf.branch);
+    assert.strictEqual(render.composerRoot, 'composer');
+    assert.doesNotMatch(render.remoteUrl, /@/, `${label}: no credentials in the fetch URL`);
+    assert.match(render.template, /^<!-- L9_PROTECTED_ROOT_PR -->/, `${label}: rendered from the org template`);
+    assert.match(render.template, new RegExp(`Quantum-L9/\\.github@${SOURCE_SHA}`), `${label}: Fix names the source commit`);
+    assert.doesNotMatch(render.template, /<!-- (What you changed|Where to look hardest)/, `${label}: Fix and Reviewer focus are filled`);
+    const message = r.calls.find((c) => c.name === 'git.createCommit').args.message;
+    const [subject, blank, problem] = message.split('\n');
+    assert.match(subject, /^ci\(governance\): (?:auto-)?seed \d+ org template file\(s\)$/, `${label}: ci type ticks "CI / governance change"`);
+    assert.strictEqual(blank, '');
+    assert.match(problem, /^This repository is missing \d+ file\(s\) that its repo class `default`/, `${label}: the commit carries the Problem paragraph`);
+    assert.match(message, /\nSeed-Payload: sha256:[0-9a-f]{64}$/, `${label}: the payload trailer stays last`);
+    // An incomplete render opens no PR: the failure is the repository's.
+    const bad = await run({
+      branch: null,
+      modules: { './ops/seed-pr-body.js': { ...require('./seed-pr-body.js'), renderSeedPrBody: () => { throw new Error('composed body is incomplete: type_of_change'); } } },
+    });
+    assert.ok(!bad.calls.some((c) => c.name === 'pulls.create'), `${label}: an incomplete body must not open a PR`);
+    assert.match(rowOf(bad)[2], /failed: .*incomplete/);
   }
-  console.log(`ok: ${label} — seed PR body passes governance-pr gates (strict) with real paths, base and source; no invented CI`);
+  console.log(`ok: ${label} — seed PR body is the org template composed against the published commit; incomplete → no PR`);
 
   // V21: everything eligible is present → no bytes, branch or PR.
   {
@@ -489,10 +503,10 @@ async function managedRestoreScenarios(run, label) {
     assert.ok(!tree.has('.github/CODEOWNERS') && !tree.has('SECURITY.md'), `${label}: overwrote an unmanaged file`);
     const blobs = r.calls.filter((c) => c.name === 'git.createBlob').map((c) => c.args.content);
     assert.ok(blobs.some((b) => b === want || Buffer.from(b, 'base64').toString('utf8') === want), `${label}: restore is not the render`);
-    const body = r.calls.find((c) => c.name === 'pulls.create').args.body;
-    assert.deepStrictEqual(await gates(body), [], `${label}: restore PR body fails governance-pr gates`);
-    assert.match(body, /^restored \(1\):\n {2}\.github\/dependabot\.yml$/m);
-    assert.match(body, /- \[x\] Medium/, `${label}: a dependabot restore is Medium`);
+    const { template } = r.renders[0];
+    assert.match(template, /restores 1 managed file\(s\) to the org render/, `${label}: Fix says what was restored`);
+    assert.match(template, /`\.github\/dependabot\.yml` replaces local edits with the org render/, `${label}: Reviewer focus names the restore`);
+    assert.match(r.calls.find((c) => c.name === 'git.createCommit').args.message, /`\.github\/dependabot\.yml` drifted from the org render/);
 
     r = await run({ branch: null, repos: one('opted-out', { marker, files: { ...base, '.github/dependabot.yml': 'version: 2\nupdates: []\n', '.l9/no-sync': '' } }) });
     assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.tree.some((t) => t.path === '.github/dependabot.yml')),
