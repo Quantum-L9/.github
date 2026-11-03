@@ -3,57 +3,34 @@
 /**
  * Render a seed PR body from the canonical PR template with the one PR-body
  * renderer, Cursor-Governance `ops/scripts/compose_pr_body.py`, at the commit
- * `governance-pr.yml` pins. No hand-built body and no manual edit afterwards.
+ * `governance-pr.yml` pins. No hand-built body, nothing written into the
+ * template, and no edit afterwards.
  *
- * The composer measures everything it can from git (Files touched, Changes by
- * intent, Problem, Type of Change, Risk, Evidence, Gates, Semantic change,
- * Protected-root). The two fields it cannot measure are written by the seeder
- * into its copy of the template before composing, so the composer keeps them:
- * Fix and Reviewer focus. The Problem paragraph travels in the seed commit's
- * body, where the composer reads it.
+ * The composer composes every section from git: Problem from the seed commit's
+ * first body paragraph, Fix from its subject and later paragraphs, and Files
+ * touched, Changes by intent, Type of Change, Risk, Evidence, Gates, Semantic
+ * change, Reviewer focus and Protected-root from the measured diff. The seeder
+ * only writes the seed commit message (seedCommitMessage).
  *
- * Fail closed: a template whose author placeholders moved, a fetched head that
- * is not the seed commit, a composer error, or any field the composer still
- * reports as needing an author stops the PR — an incomplete body never opens.
+ * Fail closed: a fetched head that is not the seed commit, a wrong base, a
+ * composer error, or any field the composer reports as needing an author stops
+ * the PR — an incomplete body never opens.
  */
 
 const os = require('node:os');
 const path = require('node:path');
 
 const TEMPLATE_PATH = '.github/pull_request_template.md';
-// Author-owned placeholders in the canonical template, replaced verbatim.
-const FIX_PLACEHOLDER =
-  '<!-- What you changed to make the problem above go away. Note alternatives you rejected and why. -->';
-const REVIEWER_PLACEHOLDER =
-  '<!-- Where to look hardest. Trade-offs accepted. Deferred follow-ups, with issue links. -->';
 const COMPOSER_PATH_IN_CHECKOUT = 'ops/scripts/compose_pr_body.py';
 
 /**
- * The canonical template with the seeder's Fix and Reviewer focus written in.
- * @param {string} template  canonical `.github/pull_request_template.md` text
- * @param {{fix: string, reviewerFocus: string}} fields
+ * The seed commit message: subject, the Problem paragraph (the composer's
+ * Problem), the detail paragraphs (the composer's Fix, after the subject), then
+ * trailers.
+ * @param {{subject: string, problem: string, details?: string[], trailers?: string[]}} parts
  * @returns {string}
  */
-function prepareSeedTemplate(template, { fix, reviewerFocus } = {}) {
-  if (typeof template !== 'string') throw new TypeError('prepareSeedTemplate: template text is required');
-  for (const [name, value] of [['fix', fix], ['reviewerFocus', reviewerFocus]]) {
-    if (typeof value !== 'string' || !value.trim()) throw new TypeError(`prepareSeedTemplate: ${name} is required`);
-  }
-  for (const [name, placeholder] of [['Fix', FIX_PLACEHOLDER], ['Reviewer focus', REVIEWER_PLACEHOLDER]]) {
-    if (template.split(placeholder).length !== 2) {
-      throw new Error(`${TEMPLATE_PATH}: the ${name} placeholder is missing or repeated — the seeder cannot fill it`);
-    }
-  }
-  return template.replace(FIX_PLACEHOLDER, fix.trim()).replace(REVIEWER_PLACEHOLDER, reviewerFocus.trim());
-}
-
-/**
- * The seed commit message: subject, the Problem paragraph the composer reads
- * from the commit body, then trailers.
- * @param {{subject: string, problem: string, trailers?: string[]}} parts
- * @returns {string}
- */
-function seedCommitMessage({ subject, problem, trailers = [] } = {}) {
+function seedCommitMessage({ subject, problem, details = [], trailers = [] } = {}) {
   if (typeof subject !== 'string' || !subject.trim() || subject.includes('\n')) {
     throw new TypeError('seedCommitMessage: a one-line subject is required');
   }
@@ -62,15 +39,22 @@ function seedCommitMessage({ subject, problem, trailers = [] } = {}) {
   // The composer skips "Word: value" lines as trailers; a paragraph that starts
   // like one would vanish from Problem.
   if (/^[A-Za-z-]+:\s/.test(para)) throw new Error('seedCommitMessage: the Problem paragraph must not read as a trailer');
-  return [subject.trim(), '', para, ...(trailers.length ? ['', ...trailers] : [])].join('\n');
+  for (const d of details) {
+    if (typeof d !== 'string' || !d.trim()) throw new TypeError('seedCommitMessage: empty detail paragraph');
+    if (d.split('\n').every((line) => /^[A-Za-z-]+:\s/.test(line.trim()))) {
+      throw new Error('seedCommitMessage: a detail paragraph must not read as trailers');
+    }
+  }
+  const blocks = [subject.trim(), para, ...details.map((d) => d.trim())];
+  return [...blocks, ...(trailers.length ? [trailers.join('\n')] : [])].join('\n\n');
 }
 
 const code = (p) => `\`${p}\``;
 
 /**
- * The seed facts in the three author-owned places: the Problem paragraph (seed
- * commit body), Fix and Reviewer focus (prepared template). Deterministic: the
- * same seed renders the same text.
+ * The seed facts the commit message carries: the Problem paragraph and the
+ * detail paragraphs the composer renders as Fix. Reviewer focus and every other
+ * section are the composer's own. Deterministic: the same seed, the same text.
  *
  * @param {object} o
  * @param {string[]} o.added      paths the commit adds
@@ -80,7 +64,7 @@ const code = (p) => `\`${p}\``;
  * @param {string} o.sourceSha    Quantum-L9/.github commit the payload came from
  * @param {string} o.seeder       workflow file that opened the PR
  * @param {boolean} [o.hasRootCodeowners]
- * @returns {{problem: string, fix: string, reviewerFocus: string}}
+ * @returns {{problem: string, details: string[]}}
  */
 function seedNarrative({
   added = [], restored = [], profile, branch, sourceSha, seeder, hasRootCodeowners = false,
@@ -111,16 +95,11 @@ function seedNarrative({
     `- A governance caller, where added, is advisory (${code('strict')} defaults false). CI callers are not distributed from ${code('Quantum-L9/.github')}; see ${code('docs/BOUNDARIES.md')}.`,
     `- While this PR is open the seeder leaves ${code(branch)} alone, so review fixes can be committed onto it.`,
   ].filter(Boolean);
-  const origin = `Opened by ${code(`Quantum-L9/.github ${seeder}`)}; this body was rendered from the org PR template by ${code('compose_pr_body.py')}.`;
-  const fix = [summary, '', ...facts, '', origin].join('\n');
-  const reviewerFocus = [
-    `- Each seeded file is listed under Files touched; check it against what this repository already does (routing in ${code('SECURITY.md')} and the issue forms, owners in ${code('.github/CODEOWNERS')}).`,
-    restored.length
-      ? `- ${restored.map(code).join(', ')} replaces local edits with the org render; opt the repository out of restores with ${code('.l9/no-sync')}.`
-      : `- Nothing existing is overwritten; a file you do not want can be deleted from this branch before merge.`,
-    "- Consumer CI on this PR is not observed by the seeder; merge only on this repository's own green checks.",
-  ].join('\n');
-  return { problem, fix, reviewerFocus };
+  if (restored.length) {
+    facts.push(`- To keep a local divergence instead, opt the repository out of restores with ${code('.l9/no-sync')}.`);
+  }
+  const origin = `Opened by ${code(`Quantum-L9/.github ${seeder}`)}; the PR body is the org PR template composed by ${code('compose_pr_body.py')}.`;
+  return { problem, details: [summary, facts.join('\n'), origin] };
 }
 
 /**
@@ -133,7 +112,7 @@ function seedNarrative({
  * @param {string} o.sourceSha
  * @param {Record<string,string>} [o.pins]   governance callee pins, for re-pin rows
  * @param {string[]} [o.notChanged]          paths reported but deliberately left
- * @returns {{problem: string, fix: string, reviewerFocus: string}}
+ * @returns {{problem: string, details: string[]}}
  */
 function syncNarrative({ plan = [], profile, branch, sourceSha, pins = {}, notChanged = [] } = {}) {
   if (!profile?.name) throw new TypeError('syncNarrative: profile is required');
@@ -148,22 +127,20 @@ function syncNarrative({ plan = [], profile, branch, sourceSha, pins = {}, notCh
     if (d.why === 're-pin') return ` — ${code('uses:')} pins moved to ${Object.entries(pins).map(([k, v]) => code(`governance-${k}.yml@${v}`)).join(' / ')}; the rest of the file is unchanged`;
     return ' — replaced with the org bytes';
   };
-  const fix = [
-    `Restores ${plan.length} file(s) in one commit on ${code(branch)}:`,
-    '',
+  const changes = [
     ...plan.map((d) => `- **${d.why}** ${code(d.path)}${detail(d)}`),
     ...notChanged.map((t) => `- not changed: ${t}`),
-    '',
     `- Source: ${code(`Quantum-L9/.github@${sourceSha}`)}, class ${cls}.`,
-    '',
-    `Opened by a manual Apply of ${code('Quantum-L9/.github continuous-sync.yml')}; this body was rendered from the org PR template by ${code('compose_pr_body.py')}.`,
+    `- To keep a local divergence instead, close this PR and add ${code('.l9/no-sync')}.`,
   ].join('\n');
-  const reviewerFocus = [
-    '- Each restored file replaces local edits with the org version; Files touched lists every path.',
-    `- To keep a local divergence, close this PR and add ${code('.l9/no-sync')} to opt the repository out of governance sync.`,
-    "- Consumer CI on this PR is not observed by Manual Update; merge only on this repository's own green checks.",
-  ].join('\n');
-  return { problem, fix, reviewerFocus };
+  return {
+    problem,
+    details: [
+      `Restores ${plan.length} file(s) in one commit on ${code(branch)}.`,
+      changes,
+      `Opened by a manual Apply of ${code('Quantum-L9/.github continuous-sync.yml')}; the PR body is the org PR template composed by ${code('compose_pr_body.py')}.`,
+    ],
+  };
 }
 
 /**
@@ -178,7 +155,7 @@ function syncNarrative({ plan = [], profile, branch, sourceSha, pins = {}, notCh
  * @param {string}   o.branch        seed branch to fetch
  * @param {string}   o.headSha       the seed commit the branch must point at
  * @param {string}   o.baseSha       the default-branch commit it was built on
- * @param {string}   o.template      prepared template text (prepareSeedTemplate)
+ * @param {string}   o.template      the canonical PR template text, unchanged
  * @param {string}   o.composerRoot  checkout of Cursor-Governance at the pinned commit
  * @param {string}   [o.token]       GitHub token; sent as an HTTP header via env, never argv
  * @returns {{body: string, handoff: object}}
@@ -253,10 +230,7 @@ function composeIn({
 
 module.exports = {
   TEMPLATE_PATH,
-  FIX_PLACEHOLDER,
-  REVIEWER_PLACEHOLDER,
   COMPOSER_PATH_IN_CHECKOUT,
-  prepareSeedTemplate,
   seedCommitMessage,
   seedNarrative,
   syncNarrative,

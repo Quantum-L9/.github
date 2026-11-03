@@ -582,11 +582,10 @@ async function ownershipScenarios() {
     assert.strictEqual(render.branch, 'chore/governance-sync');
     assert.strictEqual(render.composerRoot, 'composer');
     assert.doesNotMatch(render.remoteUrl, /@/, `${label}: no credentials in the fetch URL`);
-    assert.ok(render.template.startsWith(canonicalTemplate.slice(0, 40)), `${label}: rendered from the org template`);
-    assert.match(render.template, new RegExp(`Quantum-L9/\\.github@${SOURCE_SHA}`), `${label}: Fix names the source commit`);
-    assert.match(render.template, /\*\*restore\*\* `\.github\/pull_request_template\.md`/, `${label}: Fix lists each change`);
-    assert.doesNotMatch(render.template, /<!-- (What you changed|Where to look hardest)/, `${label}: Fix and Reviewer focus are filled`);
+    assert.strictEqual(render.template, canonicalTemplate, `${label}: the org template goes to the composer unchanged`);
     const message = r.calls.find((c) => c.name === 'git.createCommit').args.message;
+    assert.match(message, new RegExp(`- Source: \`Quantum-L9/\\.github@${SOURCE_SHA}\``), `${label}: the commit's Fix details name the source`);
+    assert.match(message, /- \*\*restore\*\* `\.github\/pull_request_template\.md`/, `${label}: Fix details list each change`);
     assert.match(message, /^ci\(governance\): sync \d+ org-managed file\(s\)\n\n\d+ governance file\(s\) managed by `Quantum-L9\/\.github` drifted/, `${label}: the commit carries the Problem paragraph`);
   }
   console.log(`ok: ${label} — Apply PR body is the org template composed against the published commit`);
@@ -608,9 +607,9 @@ async function ownershipScenarios() {
   {
     const r = await runClass({ repoName: 'l9-repo-template', files: divergent });
     assert.strictEqual(r.klass, 'non_constellation_python');
-    const { template } = r.renders[0];
-    assert.match(template, /class `non_constellation_python` \(org override\)/);
-    assert.doesNotMatch(template, /\(marker\)/);
+    const message = r.calls.find((c) => c.name === 'git.createCommit').args.message;
+    assert.match(message, /class `non_constellation_python` \(org override\)/);
+    assert.doesNotMatch(message, /\(marker\)/);
   }
   console.log(`ok: ${label} — override-classified repo: PR body names the org override, not a marker`);
 

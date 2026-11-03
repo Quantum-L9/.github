@@ -4,12 +4,13 @@
 // Seed and Manual Update PR bodies are the org PR template rendered by the one
 // renderer (Cursor-Governance ops/scripts/compose_pr_body.py, at the commit
 // governance-pr.yml pins). This suite proves it twice:
-//   1. ops/seed-pr-body.js in isolation: template preparation, the commit
-//      message, and renderSeedPrBody's fail-closed checks (fake exec).
+//   1. ops/seed-pr-body.js in isolation: the commit message the composer reads,
+//      and renderSeedPrBody's fail-closed checks (fake exec).
 //   2. End to end with the REAL pinned composer: a seed commit on a local
-//      repository is fetched, composed, and the body must be complete — no
-//      template placeholder, no field needing an author — and pass the org PR
-//      gates (governance-pr.yml) strictly, with no edit after composing.
+//      repository is fetched and composed from the UNCHANGED org template; the
+//      body must be complete — no template placeholder, no field needing an
+//      author, a measured Reviewer focus — and pass the org PR gates
+//      (governance-pr.yml) strictly, with nothing written in by the seeder.
 //
 // SEED_COMPOSER_ROOT names a checkout holding ops/scripts/compose_pr_body.py
 // at the pin; ops/validate-starters.sh provides it (CI: actions/checkout,
@@ -21,10 +22,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const {
-  FIX_PLACEHOLDER,
-  REVIEWER_PLACEHOLDER,
   TEMPLATE_PATH,
-  prepareSeedTemplate,
   seedCommitMessage,
   seedNarrative,
   syncNarrative,
@@ -42,20 +40,21 @@ const profile = { name: 'default', resolved_from: 'fallback', inherit: ['CODE_OF
   const story = seedNarrative({
     added: ['SECURITY.md'], profile, branch: 'chore/auto-seed-governance', sourceSha: SOURCE, seeder: 'auto-seed-new-repo.yml',
   });
-  const prepared = prepareSeedTemplate(template, story);
-  assert.ok(!prepared.includes(FIX_PLACEHOLDER) && !prepared.includes(REVIEWER_PLACEHOLDER));
-  assert.ok(prepared.includes(story.fix) && prepared.includes(story.reviewerFocus));
-  assert.throws(() => prepareSeedTemplate(template.replace(FIX_PLACEHOLDER, ''), story), /Fix placeholder is missing/);
-  assert.throws(() => prepareSeedTemplate(template + REVIEWER_PLACEHOLDER, story), /Reviewer focus placeholder is missing or repeated/);
-  assert.throws(() => prepareSeedTemplate(template, { fix: story.fix, reviewerFocus: ' ' }), TypeError);
-
-  const message = seedCommitMessage({ subject: 'ci(governance): seed 1 org template file(s)', problem: story.problem, trailers: ['Seed-Payload: sha256:x'] });
-  assert.deepStrictEqual(message.split('\n').slice(0, 3), ['ci(governance): seed 1 org template file(s)', '', story.problem]);
+  assert.deepStrictEqual(Object.keys(story).sort(), ['details', 'problem'], 'the seeder writes only the commit message');
+  const message = seedCommitMessage({
+    subject: 'ci(governance): seed 1 org template file(s)', problem: story.problem, details: story.details, trailers: ['Seed-Payload: sha256:x'],
+  });
+  const paras = message.split('\n\n');
+  assert.strictEqual(paras[0], 'ci(governance): seed 1 org template file(s)');
+  assert.strictEqual(paras[1], story.problem, 'the Problem paragraph comes first, where the composer reads it');
+  assert.deepStrictEqual(paras.slice(2, -1), story.details, 'the Fix details follow');
+  assert.strictEqual(paras.at(-1), 'Seed-Payload: sha256:x', 'trailers last');
   assert.throws(() => seedCommitMessage({ subject: 's', problem: 'Seed-Payload: x' }), /must not read as a trailer/);
+  assert.throws(() => seedCommitMessage({ subject: 's', problem: 'p', details: ['Key: v'] }), /must not read as trailers/);
   assert.throws(() => seedCommitMessage({ subject: 'a\nb', problem: 'p' }), TypeError);
   assert.throws(() => seedNarrative({ added: [], profile, branch: 'b', sourceSha: 's', seeder: 'x' }), /at least one path/);
   assert.throws(() => syncNarrative({ plan: [], profile, branch: 'b', sourceSha: 's' }), /at least one path/);
-  console.log('ok: template preparation and the seed commit message fail closed');
+  console.log('ok: the seed commit message carries the Problem and Fix details; nothing else is written');
 }
 
 // renderSeedPrBody against a scripted exec: what it runs, and when it refuses.
@@ -136,14 +135,19 @@ function seedRemote({ files, message, branch, existing = {} }) {
   return { dir, remoteUrl: `file://${bare}`, baseSha, headSha };
 }
 
+// Every placeholder the canonical template carries, and every marker by which
+// a composer once left a field to an author.
 const PLACEHOLDERS = [
   '_pending —',
   'paste the error / failing output here',
-  FIX_PLACEHOLDER,
-  REVIEWER_PLACEHOLDER,
+  '<!-- What you changed to make the problem above go away.',
+  '<!-- Where to look hardest.',
   '<!-- One-sentence description of what this PR does. -->',
   '_Unresolved —',
-  '_Composer note:',
+  '_unresolved —',
+  'Rewrite it before review',
+  'author ticks one',
+  'reviewer ticks it or states why not',
 ];
 
 async function assertComplete(label, rendered, paths) {
@@ -153,6 +157,10 @@ async function assertComplete(label, rendered, paths) {
   for (const p of paths) assert.ok(body.includes(path.basename(p)), `${label}: Files touched misses ${p}`);
   assert.match(body, /^- \[x\] CI \/ governance change$/m, `${label}: type ticked from the ci commit`);
   assert.match(body, /<!-- FILES-TOUCHED:START -->\n\*\*\d+ files?\*\*/, `${label}: Files touched is rendered`);
+  assert.match(body, /<!-- REVIEWER-FOCUS:START -->\n_Ranked from the measured diff/, `${label}: Reviewer focus is composed`);
+  for (const [field, entry] of Object.entries(handoff.fields)) {
+    assert.notStrictEqual(entry.status, 'needs_author', `${label}: ${field} is left for an author`);
+  }
   const gates = loadGovernanceGates(root);
   assert.deepStrictEqual(await gates(body), [], `${label}: the composed body fails the org PR gates`);
 }
@@ -163,15 +171,16 @@ async function assertComplete(label, rendered, paths) {
     const files = { 'SECURITY.md': '# Security\n', '.github/ISSUE_TEMPLATE/ci-failure.yml': 'name: CI\n' };
     const branch = 'chore/auto-seed-governance';
     const story = seedNarrative({ added: Object.keys(files), profile, branch, sourceSha: SOURCE, seeder: 'auto-seed-new-repo.yml' });
-    const message = seedCommitMessage({ subject: 'ci(governance): auto-seed 2 org template file(s)', problem: story.problem, trailers: [`Seed-Payload: sha256:${'0'.repeat(64)}`] });
+    const message = seedCommitMessage({ subject: 'ci(governance): auto-seed 2 org template file(s)', problem: story.problem, details: story.details, trailers: [`Seed-Payload: sha256:${'0'.repeat(64)}`] });
     const r = seedRemote({ files, message, branch });
     const rendered = renderSeedPrBody({
       exec: execFileSync, fs, remoteUrl: r.remoteUrl, branch, headSha: r.headSha, baseSha: r.baseSha,
-      template: prepareSeedTemplate(template, story), composerRoot,
+      template, composerRoot,
     });
     await assertComplete('auto-seed', rendered, Object.keys(files));
     assert.ok(rendered.body.includes(story.problem), 'auto-seed: Problem is the commit paragraph');
-    assert.ok(rendered.body.includes(`Quantum-L9/.github@${SOURCE}`), 'auto-seed: Fix names the source');
+    assert.ok(rendered.body.includes(`Quantum-L9/.github@${SOURCE}`), 'auto-seed: Fix carries the commit details');
+    assert.ok(rendered.body.includes(story.details[0]), 'auto-seed: Fix starts from the first detail paragraph');
     fs.rmSync(r.dir, { recursive: true });
     console.log('ok: auto-seed PR body composed by the pinned composer is complete and passes the org PR gates');
   }
@@ -181,11 +190,11 @@ async function assertComplete(label, rendered, paths) {
     const branch = 'chore/auto-seed-governance';
     const files = { '.github/dependabot.yml': 'version: 2\nupdates: []\n' };
     const story = seedNarrative({ added: [], restored: ['.github/dependabot.yml'], profile, branch, sourceSha: SOURCE, seeder: 'auto-seed-new-repo.yml' });
-    const message = seedCommitMessage({ subject: 'ci(governance): auto-seed 1 org template file(s)', problem: story.problem, trailers: [`Seed-Payload: sha256:${'1'.repeat(64)}`] });
+    const message = seedCommitMessage({ subject: 'ci(governance): auto-seed 1 org template file(s)', problem: story.problem, details: story.details, trailers: [`Seed-Payload: sha256:${'1'.repeat(64)}`] });
     const r = seedRemote({ files, message, branch, existing: { '.github/dependabot.yml': 'version: 2\n' } });
     const rendered = renderSeedPrBody({
       exec: execFileSync, fs, remoteUrl: r.remoteUrl, branch, headSha: r.headSha, baseSha: r.baseSha,
-      template: prepareSeedTemplate(template, story), composerRoot,
+      template, composerRoot,
     });
     await assertComplete('restore', rendered, Object.keys(files));
     fs.rmSync(r.dir, { recursive: true });
@@ -198,11 +207,11 @@ async function assertComplete(label, rendered, paths) {
     const files = { '.github/CODEOWNERS': '* @org/owners\n' };
     const plan = [{ path: '.github/CODEOWNERS', why: 'restore', action: 'write', existed: true }];
     const story = syncNarrative({ plan, profile, branch, sourceSha: SOURCE });
-    const message = seedCommitMessage({ subject: 'ci(governance): sync 1 org-managed file(s)', problem: story.problem, trailers: ['Sync-Restore: .github/CODEOWNERS'] });
+    const message = seedCommitMessage({ subject: 'ci(governance): sync 1 org-managed file(s)', problem: story.problem, details: story.details, trailers: ['Sync-Restore: .github/CODEOWNERS'] });
     const r = seedRemote({ files, message, branch, existing: { '.github/CODEOWNERS': '* @someone\n' } });
     const rendered = renderSeedPrBody({
       exec: execFileSync, fs, remoteUrl: r.remoteUrl, branch, headSha: r.headSha, baseSha: r.baseSha,
-      template: prepareSeedTemplate(template, story), composerRoot,
+      template, composerRoot,
     });
     await assertComplete('sync', rendered, Object.keys(files));
     fs.rmSync(r.dir, { recursive: true });

@@ -417,10 +417,15 @@ async function failClosedScenarios(wf, run, label) {
     assert.strictEqual(render.branch, wf.branch);
     assert.strictEqual(render.composerRoot, 'composer');
     assert.doesNotMatch(render.remoteUrl, /@/, `${label}: no credentials in the fetch URL`);
-    assert.match(render.template, /^<!-- L9_PROTECTED_ROOT_PR -->/, `${label}: rendered from the org template`);
-    assert.match(render.template, new RegExp(`Quantum-L9/\\.github@${SOURCE_SHA}`), `${label}: Fix names the source commit`);
-    assert.doesNotMatch(render.template, /<!-- (What you changed|Where to look hardest)/, `${label}: Fix and Reviewer focus are filled`);
+    // The org template goes to the composer unchanged: the seeder writes
+    // nothing into it. Every section is the composer's.
+    assert.strictEqual(
+      render.template,
+      require('node:fs').readFileSync(path.join(root, '.github/pull_request_template.md'), 'utf8'),
+      `${label}: the canonical template, byte for byte`,
+    );
     const message = r.calls.find((c) => c.name === 'git.createCommit').args.message;
+    assert.match(message, new RegExp(`\\n\\n- Source: \`Quantum-L9/\\.github@${SOURCE_SHA}\``), `${label}: the commit's Fix details name the source`);
     const [subject, blank, problem] = message.split('\n');
     assert.match(subject, /^ci\(governance\): (?:auto-)?seed \d+ org template file\(s\)$/, `${label}: ci type ticks "CI / governance change"`);
     assert.strictEqual(blank, '');
@@ -503,10 +508,10 @@ async function managedRestoreScenarios(run, label) {
     assert.ok(!tree.has('.github/CODEOWNERS') && !tree.has('SECURITY.md'), `${label}: overwrote an unmanaged file`);
     const blobs = r.calls.filter((c) => c.name === 'git.createBlob').map((c) => c.args.content);
     assert.ok(blobs.some((b) => b === want || Buffer.from(b, 'base64').toString('utf8') === want), `${label}: restore is not the render`);
-    const { template } = r.renders[0];
-    assert.match(template, /restores 1 managed file\(s\) to the org render/, `${label}: Fix says what was restored`);
-    assert.match(template, /`\.github\/dependabot\.yml` replaces local edits with the org render/, `${label}: Reviewer focus names the restore`);
-    assert.match(r.calls.find((c) => c.name === 'git.createCommit').args.message, /`\.github\/dependabot\.yml` drifted from the org render/);
+    const restoreMessage = r.calls.find((c) => c.name === 'git.createCommit').args.message;
+    assert.match(restoreMessage, /`\.github\/dependabot\.yml` drifted from the org render/, `${label}: Problem names the restore`);
+    assert.match(restoreMessage, /restores 1 managed file\(s\) to the org render/, `${label}: Fix says what was restored`);
+    assert.match(restoreMessage, /opt the repository out of restores with `\.l9\/no-sync`/, `${label}: the opt-out is stated`);
 
     r = await run({ branch: null, repos: one('opted-out', { marker, files: { ...base, '.github/dependabot.yml': 'version: 2\nupdates: []\n', '.l9/no-sync': '' } }) });
     assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.tree.some((t) => t.path === '.github/dependabot.yml')),

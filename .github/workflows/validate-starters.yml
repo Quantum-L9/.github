@@ -38,9 +38,12 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           repository: Quantum-L9/Cursor-Governance
-          ref: 1a57fe7bdcb0e4001feabfddfa28b787d9df2156
+          ref: 75880d81be68b0e91dc98b9318d0bb4cb2c89e92
           path: .cache/composer
-          sparse-checkout: ops/scripts/compose_pr_body.py
+          # compose_pr_body.py imports org_dotgithub at load; both are stdlib-only.
+          sparse-checkout: |
+            ops/scripts/compose_pr_body.py
+            ops/scripts/org_dotgithub.py
           sparse-checkout-cone-mode: false
           persist-credentials: false
       - name: Run ops/validate-starters.sh

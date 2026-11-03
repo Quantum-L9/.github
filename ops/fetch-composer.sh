@@ -2,8 +2,8 @@
 # ops/fetch-composer.sh <dest>
 #
 # Fetch Cursor-Governance ops/scripts/compose_pr_body.py — the one PR-body
-# renderer — at the commit .github/workflows/governance-pr.yml pins, into
-# <dest>/ops/scripts/compose_pr_body.py. The pin is read from that workflow,
+# renderer — and the module it imports (org_dotgithub.py) at the commit
+# .github/workflows/governance-pr.yml pins, into <dest>/ops/scripts/. The pin is read from that workflow,
 # so there is no second copy of it to drift. Used by ops/validate-starters.sh
 # when SEED_COMPOSER_ROOT is unset; CI checks the same pin out with
 # actions/checkout instead.
@@ -17,8 +17,11 @@ if [ -z "$pin" ] || [ "$(printf '%s\n' "$pin" | wc -l)" -ne 1 ]; then
   exit 1
 fi
 
-target="$dest/ops/scripts/compose_pr_body.py"
-if [ -f "$dest/.pin" ] && [ "$(cat "$dest/.pin")" = "$pin" ] && [ -f "$target" ]; then
+# compose_pr_body.py imports org_dotgithub at load; both are stdlib-only.
+files=(ops/scripts/compose_pr_body.py ops/scripts/org_dotgithub.py)
+fresh=1
+for f in "${files[@]}"; do [ -f "$dest/$f" ] || fresh=0; done
+if [ "$fresh" = 1 ] && [ -f "$dest/.pin" ] && [ "$(cat "$dest/.pin")" = "$pin" ]; then
   exit 0
 fi
 
@@ -29,7 +32,9 @@ if [ ! -d "$repo/.git" ]; then
 fi
 git -C "$repo" fetch -q --depth=1 --filter=blob:none \
   https://github.com/Quantum-L9/Cursor-Governance.git "$pin"
-mkdir -p "$(dirname "$target")"
-git -C "$repo" show "$pin:ops/scripts/compose_pr_body.py" > "$target.tmp"
-mv "$target.tmp" "$target"
+for f in "${files[@]}"; do
+  mkdir -p "$(dirname "$dest/$f")"
+  git -C "$repo" show "$pin:$f" > "$dest/$f.tmp"
+  mv "$dest/$f.tmp" "$dest/$f"
+done
 printf '%s\n' "$pin" > "$dest/.pin"

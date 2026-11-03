@@ -183,9 +183,19 @@ function dispatchCallArgs(text) {
   const declared = (gov.match(/COMPOSER: Quantum-L9\/Cursor-Governance@([0-9a-f]{40})/) || [])[1];
   assert.ok(declared, 'governance-pr.yml must declare COMPOSER: Quantum-L9/Cursor-Governance@<sha>');
   assert.deepStrictEqual(pinOf(gov), [declared], 'governance-pr.yml checks the composer out at its declared pin');
-  for (const f of ['auto-seed-new-repo.yml', 'seed-governance.yml', 'continuous-sync.yml', 'validate-starters.yml']) {
+  for (const f of ['governance-pr.yml', 'auto-seed-new-repo.yml', 'seed-governance.yml', 'continuous-sync.yml', 'validate-starters.yml']) {
     const text = read(`.github/workflows/${f}`);
-    assert.deepStrictEqual(pinOf(text), [declared], `${f}: the composer checkout must be the governance-pr.yml pin`);
+    if (f !== 'governance-pr.yml') {
+      assert.deepStrictEqual(pinOf(text), [declared], `${f}: the composer checkout must be the governance-pr.yml pin`);
+    }
+    // The composer imports org_dotgithub at load: a checkout without it fails
+    // at the first line, which is how a pin move broke it before.
+    const sparse = text.match(/repository: Quantum-L9\/Cursor-Governance[\s\S]*?sparse-checkout: \|\n((?:\s+ops\/scripts\/\S+\n)+)/);
+    assert.ok(sparse, `${f}: the composer checkout must list its files`);
+    const listed = sparse[1].trim().split(/\s+/);
+    for (const need of ['ops/scripts/compose_pr_body.py', 'ops/scripts/org_dotgithub.py']) {
+      assert.ok(listed.includes(need), `${f}: the composer checkout misses ${need}`);
+    }
   }
   for (const f of ['auto-seed-new-repo.yml', 'seed-governance.yml', 'continuous-sync.yml']) {
     const text = read(`.github/workflows/${f}`);
