@@ -52,7 +52,7 @@ function readRequired(fs, path) {
  * @param {object} o
  * @param {string[]} o.names  root file names (directories excluded)
  * @param {string|null} [o.pyprojectText]  required when names lists pyproject.toml
- * @returns {{uvLock: boolean, requirements: string[], pep621: boolean, preCommit: boolean}}
+ * @returns {{uvLock: boolean, requirements: string[], pep621: boolean, preCommit: boolean, npm: boolean}}
  */
 function shapeFromRoot({ names, pyprojectText = null } = {}) {
   if (!Array.isArray(names) || names.some((n) => typeof n !== 'string')) {

@@ -299,10 +299,11 @@ jobs:
                 const baseCommit = await github.rest.git.getCommit({ owner: o, repo: n, commit_sha: baseSha });
 
                 const treeItems = [];
+                // `writes` was planned from reads pinned at baseSha: missing
+                // paths plus drifted managed paths. Re-reading at the same
+                // commit cannot change that, and a moved base is refused below
+                // (BASE_MOVED), so no per-path re-check is needed here.
                 for (const path of writes) {
-                  // A managed restore overwrites on purpose; everything else
-                  // that appeared since planning is left alone.
-                  if (!replaced.includes(path) && await exists(o, n, path, baseSha)) continue;
                   const blob = await github.rest.git.createBlob({
                     owner: o, repo: n,
                     content: Buffer.from(payload[path]).toString('base64'),

@@ -217,7 +217,7 @@ const one = (name, extra = {}) => [{ name, ...extra }];
  * placeholder there would read as drift rather than "already present".
  */
 const withRenderedDependabot = (files) => {
-  const names = rootEntries({ ...files, '.github/dependabot.yml': '' }).map((e) => e.name);
+  const names = rootEntries({ ...files, '.github/dependabot.yml': '' }).filter((e) => e.type === 'file').map((e) => e.name);
   const text = renderDependabot({ fs, shape: shapeFromRoot({ names, pyprojectText: files['pyproject.toml'] }) });
   return { ...files, '.github/dependabot.yml': text };
 };
