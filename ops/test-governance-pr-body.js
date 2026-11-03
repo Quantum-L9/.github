@@ -83,8 +83,10 @@ function makeGithub(reads, { updateStatus } = {}) {
 function makeProcess({ checkedOut = HEAD, status = 'updated', next = 'NEW BODY', composeError, checkError }) {
   const runs = [];
   const rendered = [];
-  const execFileSync = (cmd, args) => {
+  const envs = [];
+  const execFileSync = (cmd, args, opts = {}) => {
     runs.push([cmd, ...args]);
+    if (cmd === 'python3') envs.push(opts.env);
     if (cmd === 'git') return `${checkedOut}\n`;
     if (args.includes('--refresh-body')) {
       rendered.push(fs.readFileSync('body.md', 'utf8'));
@@ -98,7 +100,7 @@ function makeProcess({ checkedOut = HEAD, status = 'updated', next = 'NEW BODY',
     }
     throw new Error(`unexpected ${cmd} ${args.join(' ')}`);
   };
-  return { runs, rendered, execFileSync };
+  return { runs, rendered, envs, execFileSync };
 }
 
 const pr = (over = {}) => ({ state: 'open', head: { sha: HEAD }, base: { sha: BASE }, body: 'OLD', ...over });
@@ -106,9 +108,11 @@ const pr = (over = {}) => ({ state: 'open', head: { sha: HEAD }, base: { sha: BA
 async function run({ reads = [pr()], updateStatus, strict = 'false', proc = {} } = {}) {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'pr-body-job-'));
   const prev = process.cwd();
+  const planted = { 'INPUT_GITHUB-TOKEN': 'tok-write', ACTIONS_RUNTIME_TOKEN: 'tok-runtime', GH_TOKEN: 'tok-gh' };
   const prevEnv = { STRICT: process.env.STRICT, COMPOSER: process.env.COMPOSER };
+  for (const k of Object.keys(planted)) prevEnv[k] = process.env[k];
   process.chdir(cwd);
-  Object.assign(process.env, { STRICT: strict, COMPOSER: 'Quantum-L9/Cursor-Governance@test' });
+  Object.assign(process.env, { STRICT: strict, COMPOSER: 'Quantum-L9/Cursor-Governance@test', ...planted });
   const { github, calls } = makeGithub(reads, { updateStatus });
   const fake = makeProcess(proc);
   const core = makeCore();
@@ -126,7 +130,7 @@ async function run({ reads = [pr()], updateStatus, strict = 'false', proc = {} }
   }
   const updates = calls.filter((c) => c.name === 'pulls.update');
   const status = core.tables.length ? core.tables.at(-1)[1][0] : null;
-  return { calls, updates, core, status, runs: fake.runs, rendered: fake.rendered };
+  return { calls, updates, core, status, runs: fake.runs, rendered: fake.rendered, envs: fake.envs };
 }
 
 const scenarios = [];
@@ -142,6 +146,17 @@ scenario('a changed region is written once, then the inventory is checked', asyn
   assert.ok(refresh.includes('--remote'), 'the event refresh never claims local receipts');
   assert.deepStrictEqual(refresh.slice(refresh.indexOf('--pr-base'), refresh.indexOf('--pr-base') + 2), ['--pr-base', BASE]);
   assert.ok(r.runs.some((a) => a.includes('--check-body')));
+  // The derived sections are recomposed from the org template on a new head.
+  const at = refresh.indexOf('--org-owner');
+  assert.deepStrictEqual(refresh.slice(at, at + 4), ['--org-owner', 'Quantum-L9', '--repo-name', 'consumer']);
+  // The composer runs the PR's own validator: no token reaches it.
+  assert.ok(r.envs.length >= 2, 'every composer run gets an explicit environment');
+  for (const env of r.envs) {
+    assert.ok(env && env.PATH === process.env.PATH, 'PATH is kept');
+    for (const k of ['INPUT_GITHUB-TOKEN', 'ACTIONS_RUNTIME_TOKEN', 'GH_TOKEN', 'STRICT', 'COMPOSER']) {
+      assert.ok(!(k in env), `${k} does not reach the composer`);
+    }
+  }
   assert.deepStrictEqual(r.core.failures, []);
 });
 

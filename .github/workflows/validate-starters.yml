@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           repository: Quantum-L9/Cursor-Governance
-          ref: 75880d81be68b0e91dc98b9318d0bb4cb2c89e92
+          ref: 05264df39f6845d67401a70b72763056bf9ec085
           path: .cache/composer
           # compose_pr_body.py imports org_dotgithub at load; both are stdlib-only.
           sparse-checkout: |
