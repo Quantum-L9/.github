@@ -15,12 +15,11 @@ body:
     attributes:
       label: Violation Type
       options:
-        - Symlink drift (§2 — symlinks missing or broken)
+        - IDE adapter / symlink drift (§2 — links missing or broken)
+        - Repository wiring failure (§6 — workspace config broken)
         - Anti-pattern detected (§7 — forbidden patterns present)
-        - Trio separation breach (§3 — model/service/interface cross-import)
-        - Policy gate failure (CI gate not enforcing policy)
-        - Workspace wiring failure (§8 — workspace config broken)
-        - Kernel ref violation (@main used instead of @v1)
+        - Policy gate failure (§10 / §12 — gate not enforcing policy)
+        - Floating workflow or action ref (@main, a moving tag, @latest instead of a full SHA)
         - Other (describe below)
     validations:
       required: true
@@ -30,15 +29,21 @@ body:
     attributes:
       label: CANONICAL_LAW.md Section Violated
       options:
-        - "§1 — Unknown/General"
-        - "§2 — Symlink Contract"
-        - "§3 — Trio Separation"
-        - "§4 — Unknown"
-        - "§5 — Unknown"
-        - "§6 — Unknown"
+        - "§1 — Single Source of Truth"
+        - "§2 — IDE Adapter Model"
+        - "§3 — User-Level Configuration"
+        - "§4 — Naming Conventions"
+        - "§5 — GitHub SSOT"
+        - "§6 — Repository Wiring (incl. §6.1 / §6.2 autonomy)"
         - "§7 — Anti-Patterns"
-        - "§8 — Workspace Wiring"
-        - "§9 — Unknown"
+        - "§8 — Memory Layer"
+        - "§9 — Intelligence & Signal Mining"
+        - "§10 — Governance Enforcement"
+        - "§11 — Diagnose-First Execution Discipline"
+        - "§12 — Mandatory Pre-PR Local Gate"
+        - "§13 — Integration Branch & Local Runtime Discipline"
+        - "§14 — GitHub PAT Authority"
+        - "A dated amendment (name it under Evidence)"
     validations:
       required: true
 

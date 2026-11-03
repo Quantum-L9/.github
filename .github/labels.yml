@@ -1,6 +1,6 @@
 # Apply with: gh label create --file (or github-label-sync). Names are load-bearing:
 # workflows in .github/workflows/issue-triage.yml write sev:*, priority:*, scope:*.
-# Flow maps stay one-line so ops/sync-labels-all.yml can regex-parse them.
+# Flow maps stay one-line so .github/workflows/sync-labels-all.yml can regex-parse them.
 # Exactly one space after each comma — yamllint commas rule.
 - { name: "type:bug", color: "d73a4a", description: "Incorrect behavior with evidence" }
 - { name: "type:feature", color: "0e8a16", description: "New capability" }

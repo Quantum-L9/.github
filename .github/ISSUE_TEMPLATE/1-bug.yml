@@ -6,9 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        CI pipeline failures go to
-        [l9-ci-debt-resolver](https://github.com/Quantum-L9/l9-ci-debt-resolver/issues/new)
-        instead — that component owns failure diagnosis.
+        CI pipeline failures use the **CI Pipeline Failure** form
+        (`ci-failure.yml`) in this repository instead, as `SECURITY.md` routes them.
 
   - type: textarea
     id: problem
