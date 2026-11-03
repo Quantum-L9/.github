@@ -12,7 +12,7 @@
 # scripts/inventory_check.py fails closed on exactly those paths.
 #
 # Create-time path: a weekly cron lists org repos and seeds anything
-# missing (or still carrying the stock ESLint node caller). That does not
+# missing. That does not
 # depend on an org webhook or App repository events. Birth itself is
 # immediate through repo-birth-bootstrap.yml; this sweep is the backstop.
 #
