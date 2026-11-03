@@ -70,17 +70,22 @@ body:
   - type: dropdown
     id: affected-kernel
     attributes:
-      label: Affected Kernel
+      label: Affected Core workflow
+      description: >-
+        The Quantum-L9/l9-ci-core workflow that failed. Organization CI (Core)
+        runs org-ci.yml on every repository through the org ruleset.
       options:
-        - pr-pipeline.yml
-        - release-publish.yml
-        - nightly.yml
-        - pre-commit-ci.yml
-        - trio-governance.yml
+        - org-ci.yml (Organization CI / Analyze (central Core))
+        - analyze-semgrep.yml
         - security.yml
-        - scorecard.yml
-        - sbom.yml
-        - l9-self-ci.yml (inline only)
-        - Not a kernel call (repo-local workflow)
+        - governance-ci.yml
+        - sdk-contract-check.yml
+        - release-validation.yml
+        - control-plane-attestation.yml
+        - publish-analysis.yml
+        - publish-sarif.yml
+        - normalize-semgrep-report.yml
+        - profile-normalize-semgrep.yml
+        - Not a Core workflow (repo-local)
     validations:
       required: true

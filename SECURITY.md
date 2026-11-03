@@ -64,7 +64,7 @@ All repositories use:
 
 - **gitleaks** — secret scanning on every commit
 - **Semgrep** — SAST inside `Quantum-L9/l9-ci-core` `.github/workflows/org-ci.yml`
-- **Dependabot** — github-actions SHA-pin freshness (no pip/npm unless added)
+- **Dependabot** — rendered per repository root (ADR 0019): github-actions SHA pins always; uv, pip, npm and pre-commit when the root declares them; Core-owned tool versions are ignored
 - **OpenSSF Scorecard** — supply-chain security posture scoring where enabled
 
 ## Disclosure Policy

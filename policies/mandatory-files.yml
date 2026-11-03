@@ -1,6 +1,7 @@
 # Mandatory files policy.
-# Defines files that must exist in every repo. Enforced by enforce-policies.yml.
-# If a file is missing, a remediation PR is opened.
+# Defines files that must exist in every repo. enforce-policies.yml reports a
+# missing file (job summary); it opens no PR. The seeders open the PR that adds
+# it (auto-seed-new-repo.yml, seed-governance.yml).
 #
 # Class-aware: a repository's class (policies/repo-classes.yml, declared in the
 # repo's `.l9/org-birth-profile.yaml`) may waive an entry via
