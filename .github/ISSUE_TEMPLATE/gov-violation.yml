@@ -62,6 +62,7 @@ body:
       label: Affected Repository
       multiple: true
       options:
+        - This repository (where this issue is filed)
         - l9-ci-core
         - Cursor-Governance
         - l9-assurance

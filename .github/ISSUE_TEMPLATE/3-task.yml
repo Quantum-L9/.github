@@ -33,4 +33,4 @@ body:
     id: blocks
     attributes:
       label: Blocks / blocked by
-      placeholder: "blocked by #12, blocks #34"
+      description: "Example: blocked by #12, blocks #34"

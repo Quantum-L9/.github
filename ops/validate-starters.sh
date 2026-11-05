@@ -44,6 +44,7 @@ else
   fi
   for t in \
     ops/test-build-seed-payload.js \
+    ops/test-seed-payload-consumer-gates.js \
     ops/test-render-dependabot.js \
     ops/test-repo-class-profile.js \
     ops/test-label-taxonomy.js \
