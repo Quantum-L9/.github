@@ -25,9 +25,9 @@
  * Run from the Quantum-L9/.github repo root:
  *   node ops/test-seed-payload-consumer-gates.js
  */
-const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
+const assert = require('node:assert');
+const fs = require('node:fs');
+const path = require('node:path');
 const { buildSeedPayload, ALL_CATEGORIES, RETIRED_CATEGORIES } = require('./build-seed-payload.js');
 const { shapeFromRoot } = require('./render-dependabot.js');
 
@@ -47,7 +47,7 @@ function check(name, fn) {
     console.log(`  ok   ${name}`);
   } catch (err) {
     failures += 1;
-    console.log(`  FAIL ${name}\n       ${err.message.split('\n').join('\n       ')}`);
+    console.log(`  FAIL ${name}\n       ${err.message.replaceAll('\n', '\n       ')}`);
   }
 }
 
@@ -59,7 +59,7 @@ try {
     repository: 'Quantum-L9/example-consumer',
     repoShape: shapeFromRoot({ names: [] }),
   });
-  const dests = Object.keys(payload).sort();
+  const dests = Object.keys(payload).sort((a, b) => a.localeCompare(b));
 
   check('the full seed payload is non-empty and includes the issue forms', () => {
     assert.ok(dests.length > 0, 'seed payload is empty');
@@ -91,7 +91,10 @@ try {
   check('issue-triage still derives priority from incident Severity', () => {
     const triage = fs.readFileSync('.github/workflows/issue-triage.yml', 'utf8');
     assert.match(triage, /S1: 'P0', S2: 'P1', S3: 'P2', S4: 'P3'/, 'severity -> priority map moved; re-check the incident form');
-    assert.match(incident, /^\s+label: Severity\s*$/m, 'incident form lost its Severity dropdown');
+    assert.ok(
+      incident.split('\n').some((line) => line.trim() === 'label: Severity'),
+      'incident form lost its Severity dropdown',
+    );
   });
 
   check('the governance-violation form offers the repository it is filed in', () => {
