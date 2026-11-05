@@ -8,6 +8,14 @@ organization required-workflow ruleset.
 Which files a repository actually receives is `policies/repo-classes.yml`.
 The mode names are `docs/REPO_BIRTH_PROFILES.md`.
 
+`l9-meta-injector` and `l9-constellation-topology` are explicitly assigned
+`org_seeded_self_governed`: ownership, rendered Dependabot, SECURITY.md and
+issue/PR templates materialize, while repository CI remains self-governed.
+The org governance caller and copied CI workflows remain forbidden. This
+assignment does not change the zero-file `self_governed` class used by
+`l9-ci-core`, or override an explicit consumer class marker. Manual seeding
+adds missing files only and opens one PR per target; it never merges one.
+
 ## Mechanisms
 
 | Mechanism | What moves | Credential | How an edit propagates |
