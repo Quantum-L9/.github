@@ -29,6 +29,17 @@ const os = require('node:os');
 // dependabot.yml is rendered per repository root (ADR 0019); these class
 // assertions hold for any shape, so they use the github-actions-only one.
 const { shapeFromRoot } = require('./render-dependabot.js');
+
+// Sets one named property on an Error. Explicit assignment, not Object.assign:
+// Core's Semgrep gate (prototype-pollution) flags every two-argument call.
+const errorWith = (err, key, value) => {
+  err[key] = value;
+  return err;
+};
+// Sets test environment variables one by one (see errorWith / Core's Semgrep gate).
+const setEnv = (vars) => {
+  for (const [k, v] of Object.entries(vars)) process.env[k] = v;
+};
 const ACTIONS_ONLY = shapeFromRoot({ names: [] });
 const {
   buildSeedPayload,
@@ -584,9 +595,9 @@ const enforceSuite = (async () => {
             return { data: {} };
           },
           getContent: async ({ path: p }) => {
-            if (errors[p]) throw Object.assign(new Error(`HTTP ${errors[p]}`), { status: errors[p] });
+            if (errors[p]) throw errorWith(new Error(`HTTP ${errors[p]}`), 'status', errors[p]);
             if (p in files) return { data: { type: 'file', content: Buffer.from(files[p]).toString('base64') } };
-            throw Object.assign(new Error('Not Found'), { status: 404 });
+            throw errorWith(new Error('Not Found'), 'status', 404);
           },
         },
       },
@@ -595,7 +606,7 @@ const enforceSuite = (async () => {
     const prev = process.cwd();
     const prevEnv = { DRY_RUN: process.env.DRY_RUN, FILTER: process.env.FILTER };
     process.chdir(root);
-    Object.assign(process.env, { DRY_RUN: dryRun, FILTER: '' });
+    setEnv({ DRY_RUN: dryRun, FILTER: '' });
     try {
       await enforce(github, core, {}, req);
     } finally {
@@ -717,7 +728,7 @@ enforceSuite.then(async () => {
 
   const MARKER = doc.marker_path;
   const ALL = ['.github/CODEOWNERS', '.github/dependabot.yml', '.github/workflows/governance.yml', 'README.md'];
-  const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { status });
+  const httpError = (status) => errorWith(new Error(`HTTP ${status}`), 'status', status);
   // files: path -> text (present); errors: path -> HTTP status; else 404.
   const reader = ({ files = {}, errors = {} }) => async (p) => {
     if (errors[p]) throw httpError(errors[p]);

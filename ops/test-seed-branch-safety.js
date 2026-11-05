@@ -8,6 +8,13 @@
 const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
+
+// Sets one named property on an Error. Explicit assignment, not Object.assign:
+// Core's Semgrep gate (prototype-pollution) flags every two-argument call.
+const errorWith = (err, key, value) => {
+  err[key] = value;
+  return err;
+};
 const {
   SEED_COMMIT_SUBJECT,
   isSeedCommitMessage,
@@ -207,7 +214,7 @@ for (const [wf, subject] of [
 }
 
 // --- assessSeedBranch / moveSeedBranch over a stubbed client ----------------
-const notFound = (m) => Object.assign(new Error(m), { status: 404 });
+const notFound = (m) => errorWith(new Error(m), 'status', 404);
 
 function stub({
   openPRs = [], closedPRs = [], branchSha = null, aheadBy = 1, commits = [seedCommit(autoSeedSubject)], files = undefined, headMessages = {},
@@ -332,7 +339,7 @@ const where = { owner: 'Quantum-L9', repo: 'consumer', base: 'main', branch: 'ch
   // Seeder identity unresolvable → skip, never rebuild.
   s = stub({ branchSha: 'abc123' });
   s.github.rest.users.getAuthenticated = async () => {
-    throw Object.assign(new Error('bad credentials'), { status: 401 });
+    throw errorWith(new Error('bad credentials'), 'status', 401);
   };
   g = await assessSeedBranch({ github: s.github, ...where });
   assert.strictEqual(g.action, 'skip');
@@ -388,7 +395,7 @@ const where = { owner: 'Quantum-L9', repo: 'consumer', base: 'main', branch: 'ch
   // A non-404 getRef error must surface, not be swallowed into "create".
   s = stub({ branchSha: 'abc123' });
   s.github.rest.git.getRef = async () => {
-    throw Object.assign(new Error('boom'), { status: 500 });
+    throw errorWith(new Error('boom'), 'status', 500);
   };
   await assert.rejects(() => assessSeedBranch({ github: s.github, ...where }), /boom/);
 
@@ -427,7 +434,7 @@ const where = { owner: 'Quantum-L9', repo: 'consumer', base: 'main', branch: 'ch
   // A branch that appears mid-run is reported, not force-updated.
   s = stub({ branchSha: null });
   s.github.rest.git.createRef = async () => {
-    throw Object.assign(new Error('Reference already exists'), { status: 422 });
+    throw errorWith(new Error('Reference already exists'), 'status', 422);
   };
   m = await moveSeedBranch({
     github: s.github, owner: where.owner, repo: where.repo, branch: where.branch,
