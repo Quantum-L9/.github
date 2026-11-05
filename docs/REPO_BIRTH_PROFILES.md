@@ -16,7 +16,7 @@ is the authority for which mode each class puts a surface in.
 | Mode | Rule | Example |
 | --- | --- | --- |
 | **INHERIT** | GitHub supplies an organization-owned default live from `Quantum-L9/.github`. The repository should not carry a duplicate unless local bytes are genuinely required; a local copy replaces inheritance for that file entirely. | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml` |
-| **MATERIALIZE** | The consumer requires repository-local bytes or consumer-specific content. Seeded missing-only; an existing file is never overwritten by a seed. | `.github/CODEOWNERS` (also restored by a manual continuous-sync, below), `SECURITY.md` (advisory URLs rewritten per consumer), `.github/ISSUE_TEMPLATE/*` (`config.yml` carries consumer routing), `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md` |
+| **MATERIALIZE** | The consumer requires repository-local bytes or consumer-specific content. Seeded missing-only, except the managed files (`.github/CODEOWNERS`, `.github/dependabot.yml`), which every seed replaces with the current org version. | `.github/CODEOWNERS` (managed; every class, root `CODEOWNERS` or not), `SECURITY.md` (advisory URLs rewritten per consumer), `.github/ISSUE_TEMPLATE/*` (`config.yml` carries consumer routing), `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md` |
 | **REMOTE APPLY** | The realization is GitHub or API state rather than a repository file. | labels, repository settings |
 | **FORBID** | A local copy would create a second owner, violate architecture, or distribute a centrally owned capability. A payload that would write one throws. | application CI (`.github/workflows/l9-analysis.yml`, `.github/workflows/governance.yml` for governed classes) — the paths each class lists under `forbid` in `policies/repo-classes.yml`. `AGENTS.md`, `Makefile`, `pyproject.toml`, Semantic Foundation files and IDE config are not FORBID: no seed category carries them, so no payload can write them. |
 
@@ -25,10 +25,11 @@ is the authority for which mode each class puts a surface in.
 repository root by `ops/render-dependabot.js`, from fragments, the root's
 shape and the vendored Core list of Core-owned tools. It is a seed file like
 the templates, wherever the class materializes it, and it is kept in sync
-automatically: the weekly `auto-seed-new-repo.yml` sweep adds it when missing
-and restores it when it drifted from the render, through the same advisory PR.
-A manual `continuous-sync.yml` Apply does the same on demand. `.l9/no-sync` is
-the only opt-out.
+by every seed: `seed-governance.yml` and an `auto-seed-new-repo.yml` sweep add
+it when missing and restore it when it drifted from the render, through the
+same advisory PR. A manual `continuous-sync.yml` Apply does the same on demand.
+`.l9/no-sync` is the only opt-out. (The sweep's weekly cron is disabled until
+seeding is proven; it runs on dispatch.)
 
 Three surfaces are MATERIALIZE only because their bytes differ per consumer:
 `SECURITY.md` and `.github/ISSUE_TEMPLATE/config.yml` carry the consumer's
@@ -86,7 +87,7 @@ labels and repository settings.
 | --- | --- | --- | --- | --- |
 | `default` | No marker and no override | `codeowners`, `dependabot`, `governance`, `community-health` (`SECURITY.md` only), `issue-templates`, `pr-templates` (default + `release.md`) | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml` | nothing |
 | `non_constellation_python` | `l9-repo-template` offspring | `codeowners`, `dependabot`, `labels`, `community-health` (`SECURITY.md` only) | the passive community-health surfaces above, issue templates, PR templates | org CI distribution paths, the governance caller, retired CI pin files |
-| `self_governed` | `l9-ci-core`, or an explicit marker | nothing | every community-health surface including `SECURITY.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml`, issue templates, PR templates | org CI distribution paths and the governance caller |
+| `self_governed` | `l9-ci-core`, or an explicit marker | `codeowners` | every community-health surface including `SECURITY.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml`, issue templates, PR templates | org CI distribution paths and the governance caller |
 | `org_seeded_self_governed` | `l9-meta-injector`, `l9-constellation-topology` | `codeowners`, `dependabot`, `community-health` (`SECURITY.md` only), `issue-templates`, `pr-templates` | the passive community-health surfaces | org CI distribution paths and the governance caller |
 
 `default` reproduces `DEFAULT_CATEGORIES` in `ops/build-seed-payload.js` and
@@ -104,14 +105,13 @@ passive surfaces are INHERIT in every class.
 `l9-repo-template` and not part of the org-wide default seed. The class
 decides.
 
-`org_seeded_self_governed` enables reviewable, missing-only organization file
-delivery without transferring repository CI ownership. Its twelve destinations
-are ownership, rendered Dependabot, SECURITY.md, seven named issue forms and
-the two PR templates. No workflow is seeded. Existing consumer files and a root
-CODEOWNERS remain preserved. The existing weekly sweep can restore a drifted
-Dependabot render unless `.l9/no-sync` opts out; manual `seed-governance.yml`
-remains missing-only. The repository marker still outranks these two explicit
-organization overrides, and `self_governed` remains unchanged for other users.
+`org_seeded_self_governed` enables reviewable organization file delivery
+without transferring repository CI ownership. Its twelve destinations are
+ownership, rendered Dependabot, SECURITY.md, seven named issue forms and the
+two PR templates. No workflow is seeded. Existing consumer files are kept,
+except the managed `.github/CODEOWNERS` and Dependabot render, which a seed
+replaces with the org version unless `.l9/no-sync` opts out. The repository marker still outranks these two explicit
+organization overrides, and `self_governed` receives only `.github/CODEOWNERS`.
 
 ### Assigning a class without a commit in the repo
 
@@ -157,8 +157,9 @@ the override and default path.
 
 ## Birth is immediate, not weekly
 
-`auto-seed-new-repo.yml` sweeps weekly (Monday 08:00 America/New_York) and opens a PR. That is the
-repair path for repositories that drift or predate their class.
+`auto-seed-new-repo.yml` sweeps on dispatch and opens a PR; its weekly cron
+(Monday 08:00 America/New_York) is disabled until seeding is proven. That is
+the repair path for repositories that drift or predate their class.
 
 A newborn does not wait for it. `make new-repo` dispatches
 `repo-birth-bootstrap.yml` for exactly one repository and waits: labels and

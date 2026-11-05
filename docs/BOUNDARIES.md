@@ -15,8 +15,9 @@ It does not execute, lint, test, scan, or remediate code.
 | Passive community-health files (`CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `FUNDING.yml`, `VULNERABILITY_REPORT.yml`) | **this repo** | INHERIT: GitHub serves them live; never seeded |
 | `SECURITY.md` | **this repo** | MATERIALIZE: seeded missing-only because it carries consumer-specific advisory routing |
 | Issue templates, default PR template, release PR template | **this repo** | MATERIALIZE: seeded missing-only; `ISSUE_TEMPLATE/config.yml` carries consumer-specific routing |
-| CODEOWNERS, governance caller | **this repo** | MATERIALIZE: `policies/CODEOWNERS`, `policies/governance-caller.yml` |
-| dependabot | **this repo** (renderer); tool versions stay Core-owned | MANAGED-RENDERED ([ADR 0019](adr/0019-dependabot-managed-rendered.md)): `ops/render-dependabot.js` per repository root, seeded and restored weekly by `auto-seed-new-repo.yml`; ignores Core-owned tools and Core/SDK/`.github` pins |
+| CODEOWNERS | **this repo** | MANAGED: `policies/CODEOWNERS`, seeded as `.github/CODEOWNERS` into every class and restored when it differs, root `CODEOWNERS` or not ([ADR 0019](adr/0019-dependabot-managed-rendered.md), revision 2026-11-05) |
+| Governance caller | **this repo** | MATERIALIZE: `policies/governance-caller.yml` |
+| dependabot | **this repo** (renderer); tool versions stay Core-owned | MANAGED-RENDERED ([ADR 0019](adr/0019-dependabot-managed-rendered.md)): `ops/render-dependabot.js` per repository root, seeded and restored by every seed (the weekly `auto-seed-new-repo.yml` sweep is paused; seeding runs on dispatch); ignores Core-owned tools and Core/SDK/`.github` pins |
 | Labels, repository settings | **this repo** | REMOTE APPLY: API state, never a seeded file |
 | Semantic Foundation (`semantics/`) | **this repo** | owned here, never in the seed payload |
 | Which capabilities a class receives | **this repo** | `policies/repo-classes.yml` |

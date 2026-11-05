@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted (revised 2026-11-03: automated weekly seed and restore, npm)
+Accepted (revised 2026-11-03: automated weekly seed and restore, npm;
+revised 2026-11-05: weekly sweep paused, every manual seed restores, and
+`.github/CODEOWNERS` joins the managed seed paths)
 
 **Date:** 2026-10-15
 **Deciders:** Quantum-L9 platform owners (merge of the PR that adds this record)
@@ -93,16 +95,30 @@ versions through the existing single builder.
 - **Settings in every entry:** weekly on Monday, `open-pull-requests-limit: 2`,
   `chore(deps)` prefix, `cooldown.default-days: 7`, a minor/patch group, and no
   `labels`.
-- **Mode:** MANAGED-RENDERED, automated. It is a seed file
-  (`MANAGED_SEED_PATHS` in `ops/build-seed-payload.js`).
-  `auto-seed-new-repo.yml` runs weekly (Monday 08:00 America/New_York,
-  operator decision 2026-11-03). In one advisory PR per repository it adds the
-  file when missing and restores it when it differs from the render for the
-  repository's shape. Every other seed path stays missing-only, and nothing
-  merges without review. `continuous-sync.yml` remains the manual, on-demand
-  restore (Preview by default, Apply only on an explicit `dry_run=false`).
-- **Opt-out:** `.l9/no-sync` is the only opt-out. It keeps the weekly sweep
-  missing-only for the file and makes continuous-sync skip the repository. Exceptions in
+- **Mode:** MANAGED-RENDERED. It is a seed file (`MANAGED_SEED_PATHS` in
+  `ops/build-seed-payload.js`). Every seed entrypoint (`seed-governance.yml`,
+  `auto-seed-new-repo.yml`, `ops/sync-org-files.sh`) adds the file when
+  missing and restores it when it differs from the render for the repository's
+  shape, in one advisory PR per repository. Every other seed path stays
+  missing-only, except `.github/CODEOWNERS`, the other managed seed path, and
+  nothing merges without review. `continuous-sync.yml` remains the manual,
+  on-demand restore (Preview by default, Apply only on an explicit
+  `dry_run=false`).
+- **Schedule (revision 2026-11-05):** the weekly `auto-seed-new-repo.yml`
+  sweep (Monday 08:00 America/New_York, operator decision 2026-11-03) is
+  paused by operator decision 2026-11-05. Seeding, and so restoration, runs
+  only when dispatched until a seed PR is proven green and complete; the
+  `schedule:` block stays in the workflow, commented, to re-enable. Until then
+  a drifted render is restored by dispatching `seed-governance.yml`,
+  `auto-seed-new-repo.yml` or `continuous-sync.yml`, never automatically.
+- **CODEOWNERS (revision 2026-11-05):** `.github/CODEOWNERS` is the second
+  managed seed path: the exact `policies/CODEOWNERS` bytes, seeded into every
+  class, `self_governed` included, and restored when it differs, whether or
+  not the repository carries a root `CODEOWNERS` (GitHub reads
+  `.github/CODEOWNERS` first). The root file is never written.
+- **Opt-out:** `.l9/no-sync` is the only opt-out. It keeps every seed
+  missing-only for the managed files and makes continuous-sync skip the
+  repository. Exceptions in
   `policies/mandatory-files.yml` are not consulted by continuous-sync, as
   before.
 - **Self-config:** `.github` runs its own render.

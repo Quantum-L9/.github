@@ -33,7 +33,6 @@ const {
  * @param {object} opts
  * @param {typeof import('fs')} opts.fs
  * @param {string[]} [opts.categories]  subset of ALL_CATEGORIES; default DEFAULT
- * @param {boolean} [opts.hasRootCodeowners]  skip .github/CODEOWNERS when root CODEOWNERS exists
  * @param {string} [opts.repository]  owner/name — rewrite SECURITY / contact_links
  * @param {object} [opts.profile]  resolved repo-class profile (ops/repo-class-profile.js).
  *   When given and `categories` is not explicitly passed, the profile's
@@ -156,11 +155,16 @@ function applyRepoPlaceholders(text, repository) {
 
 
 /**
- * Managed seed files: rendered for the repository and kept equal to that
- * render. Every other seed file is missing-only. ADR
- * docs/adr/0019-dependabot-managed-rendered.md (weekly automated restore).
+ * Managed seed files: kept equal to the org version on every seed, so a drifted
+ * or older copy is replaced rather than left as it is. Every other seed file is
+ * missing-only. `.github/CODEOWNERS` is the org's `policies/CODEOWNERS` and is
+ * seeded whether or not the repository also carries a root `CODEOWNERS` (GitHub
+ * reads `.github/CODEOWNERS` first, so the org file is the one that applies).
+ * `.github/dependabot.yml` is rendered per repository root, ADR
+ * docs/adr/0019-dependabot-managed-rendered.md. A repository opts out of the
+ * restore with `.l9/no-sync`.
  */
-const MANAGED_SEED_PATHS = Object.freeze(['.github/dependabot.yml']);
+const MANAGED_SEED_PATHS = Object.freeze(['.github/CODEOWNERS', '.github/dependabot.yml']);
 
 /**
  * Decide which payload dests to write.
@@ -223,7 +227,6 @@ function seedNeedsRepoShape({ categories, profile = null } = {}) {
 function buildSeedPayload({
   fs,
   categories,
-  hasRootCodeowners = false,
   repository = '',
   profile = null,
   repoShape = null,
@@ -245,7 +248,6 @@ function buildSeedPayload({
     }
     switch (cat) {
       case 'codeowners': {
-        if (hasRootCodeowners) break;
         payload['.github/CODEOWNERS'] = readRequired(fs, 'policies/CODEOWNERS');
         break;
       }
@@ -316,7 +318,7 @@ function buildSeedPayload({
  * @param {string} [o.repository]  owner/name; '' when the consumer has no remote
  * @param {string|string[]|null} [o.categories]  explicit categories; null/'all'
  *   lets the class decide. An explicit category the class forbids throws.
- * @returns {{profile: object, writes: string[], kept: string[],
+ * @returns {{profile: object, writes: string[], kept: string[], replaced: string[],
  *   inherited: string[], payload: Record<string,string>}}
  */
 function planConsumerSeed({ fs, path, consumerRoot, repository = '', categories = null }) {
@@ -345,7 +347,6 @@ function planConsumerSeed({ fs, path, consumerRoot, repository = '', categories 
   const payload = buildSeedPayload({
     fs,
     categories: categoriesForClass,
-    hasRootCodeowners: fs.existsSync(path.join(consumerRoot, 'CODEOWNERS')),
     repository,
     repoShape: seedNeedsRepoShape({ categories: categoriesForClass })
       ? shapeOfDirectory({ fs, path, dir: consumerRoot })
@@ -355,18 +356,29 @@ function planConsumerSeed({ fs, path, consumerRoot, repository = '', categories 
   // reportable. FORBID still throws, exactly as it does in the seeders.
   const { inherited } = applyProfile(payload, profile);
 
+  // Managed paths are compared by text (replaced when they differ from the org
+  // version), exactly as in the seeders; `.l9/no-sync` keeps them missing-only.
+  const optedOut = fs.existsSync(path.join(consumerRoot, '.l9/no-sync'));
+  const managed = optedOut ? [] : MANAGED_SEED_PATHS.filter((p) => p in payload);
   const existingByPath = {};
   for (const dest of Object.keys(payload)) {
-    existingByPath[dest] = fs.existsSync(path.join(consumerRoot, dest)) ? true : null;
+    const target = path.join(consumerRoot, dest);
+    if (!fs.existsSync(target)) {
+      existingByPath[dest] = null;
+      continue;
+    }
+    existingByPath[dest] = managed.includes(dest) ? fs.readFileSync(target, 'utf8') : true;
   }
-  const { writes, kept } = selectSeedWrites(payload, existingByPath);
-  return { profile, writes, kept, inherited, payload };
+  const { writes, kept, replaced } = selectSeedWrites(payload, existingByPath, { managed });
+  return { profile, writes, kept, replaced, inherited, payload };
 }
 
 /**
  * CLI: `node ops/build-seed-payload.js --consumer <dir> [--repository o/n]
  *   [--categories all|a,b,...] [--dry-run]`
- * Writes missing destinations only; an existing file is reported and kept.
+ * Writes missing destinations, and replaces a managed destination
+ * (MANAGED_SEED_PATHS) that differs from the org version; any other existing
+ * file is reported and kept.
  * Exit 2 on a refused target (malformed marker, FORBID hit, retired or
  * unknown category) so a wrapper cannot mistake a refusal for a clean run.
  */
@@ -407,7 +419,11 @@ function main(argv) {
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.writeFileSync(target, plan.payload[dest]);
     }
-    console.log(`  ${args.dryRun ? '+' : '✓'} ${dest}${args.dryRun ? ' (would write)' : ''}`);
+    const replacing = plan.replaced.includes(dest);
+    let note = '';
+    if (args.dryRun) note = replacing ? ' (would replace)' : ' (would write)';
+    else if (replacing) note = ' (replaced with the org version)';
+    console.log(`  ${args.dryRun ? '+' : '✓'} ${dest}${note}`);
   }
   if (!plan.writes.length && !plan.kept.length) console.log('  (nothing to materialize for this class)');
 }
@@ -426,14 +442,13 @@ if (require.main === module) {
  * run requested. The branch gate proves an unsigned seed commit by its diff
  * touching only these paths, so a narrower explicit run still recognises the
  * branch a broader run built. dependabot.yml is named without rendering (its
- * bytes depend on the root; its path does not), and CODEOWNERS is included
- * even when a root CODEOWNERS now suppresses it.
+ * bytes depend on the root; its path does not).
  */
 function classSeedPaths({ fs, profile, repository = '' } = {}) {
   if (!profile) throw new TypeError('classSeedPaths requires a profile');
   const cats = resolveCategories({ profile });
   const rendered = buildSeedPayload({
-    fs, profile, repository, hasRootCodeowners: false,
+    fs, profile, repository,
     categories: cats.filter((c) => c !== 'dependabot'),
   });
   const paths = new Set(Object.keys(rendered));

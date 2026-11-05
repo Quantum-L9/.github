@@ -20,6 +20,9 @@
   "schema": "l9.org-birth-profile/v1",
   "default_class": "default",
   "marker_path": ".l9/org-birth-profile.yaml",
+  "extra_targets": [
+    "cryptoxdog/IB-Odoo_19"
+  ],
   "overrides": {
     "l9-repo-template": "non_constellation_python",
     "l9-ci-core": "self_governed",
@@ -52,8 +55,10 @@
       "mandatory_files_waive": []
     },
     "self_governed": {
-      "description": "Materialize nothing. Inherit every community-health surface, including SECURITY.md. Apply labels and repository settings. Forbid the org CI distribution paths and the governance caller.",
-      "seed_categories": [],
+      "description": "Materialize only the org CODEOWNERS (seeded into every org repository). Inherit every community-health surface, including SECURITY.md. Apply labels and repository settings. Forbid the org CI distribution paths and the governance caller.",
+      "seed_categories": [
+        "codeowners"
+      ],
       "inherit": [
         "CODE_OF_CONDUCT.md",
         "CONTRIBUTING.md",
@@ -79,7 +84,6 @@
       },
       "mandatory_files_waive": [
         ".github/workflows/governance.yml",
-        ".github/CODEOWNERS",
         ".github/dependabot.yml"
       ]
     },

@@ -487,15 +487,19 @@ async function ownershipScenarios() {
   const divergent = { '.github/CODEOWNERS': '* @someone-else\n', '.github/dependabot.yml': 'version: 2\nupdates: []\n' };
   const mutatedAny = (r) => writesOf(r.calls).length > 0;
 
-  // V06: self_governed never plans CODEOWNERS / dependabot, however divergent.
-  for (const dry of [true, false]) {
-    const r = await runClass({ files: { ...divergent, ...marker('self_governed') }, dry });
-    assert.strictEqual(r.klass, 'self_governed');
-    assert.strictEqual(r.status, 'INHERITED', `${label}: self_governed planned a write (${r.detail})`);
-    assert.strictEqual(mutatedAny(r), false);
+  // V06: self_governed is managed for the org CODEOWNERS only: a divergent
+  // .github/CODEOWNERS is restored, a divergent dependabot.yml never is.
+  {
+    const preview = await runClass({ files: { ...divergent, ...marker('self_governed') }, dry: true });
+    assert.strictEqual(preview.klass, 'self_governed');
+    assert.strictEqual(preview.status, 'DRIFT', preview.detail);
+    assert.match(preview.detail, /restore \.github\/CODEOWNERS/);
+    assert.doesNotMatch(preview.detail, /dependabot/, `${label}: self_governed planned dependabot.yml`);
+    assert.strictEqual(mutatedAny(preview), false);
+    const apply = await runClass({ files: { ...divergent, ...marker('self_governed') } });
+    assert.deepStrictEqual(apply.writes.map((w) => w.args.path), ['.github/CODEOWNERS'], `${label}: self_governed wrote more than CODEOWNERS`);
   }
-  // l9-ci-core is self_governed by org override: same answer with no marker.
-  console.log(`ok: ${label} — self_governed: CODEOWNERS/dependabot never planned or written`);
+  console.log(`ok: ${label} — self_governed: only the org CODEOWNERS is restored; dependabot.yml never`);
 
   // A malformed or unknown marker plans nothing — not even CODEOWNERS.
   for (const text of ['profile: no_such_class\n', 'garbage\n']) {
@@ -512,15 +516,16 @@ async function ownershipScenarios() {
   }
   console.log(`ok: ${label} — malformed/unknown/unreadable marker: no writes at all`);
 
-  // V07: a root CODEOWNERS means .github/CODEOWNERS is not managed.
+  // V07: a root CODEOWNERS does not stop .github/CODEOWNERS from being
+  // managed (GitHub reads .github/CODEOWNERS first); the root file is never written.
   {
     const r = await runClass({ files: { ...managedOk, [TEMPLATE]: canonicalTemplate, CODEOWNERS: '* @owner\n' } });
     assert.strictEqual(r.status, 'CANONICAL_COPY', r.detail);
     const r2 = await runClass({ files: { 'CODEOWNERS': '* @owner\n', '.github/dependabot.yml': managedOk['.github/dependabot.yml'], [TEMPLATE]: canonicalTemplate } });
-    assert.ok(!r2.writes.some((w) => w.args.path === '.github/CODEOWNERS'), `${label}: wrote .github/CODEOWNERS over a root CODEOWNERS`);
-    assert.strictEqual(r2.status, 'CANONICAL_COPY');
+    assert.deepStrictEqual(r2.writes.map((w) => w.args.path), ['.github/CODEOWNERS'], `${label}: .github/CODEOWNERS not seeded beside a root CODEOWNERS`);
+    assert.strictEqual(Buffer.from(r2.writes[0].args.content, 'base64').toString(), managedOk['.github/CODEOWNERS']);
   }
-  console.log(`ok: ${label} — root CODEOWNERS present: .github/CODEOWNERS never written`);
+  console.log(`ok: ${label} — root CODEOWNERS present: .github/CODEOWNERS still managed; root file untouched`);
 
   // V08: whitespace-only difference in a fully managed file is drift.
   {

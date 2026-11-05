@@ -106,19 +106,24 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
   assert.ok(mode.includes('default: dry-run'), `${label}: dispatch must default to dry-run`);
   assert.match(text, /^ {4}environment: governance-distribution\s*$/m);
   assert.match(text, /SEED_MODE: \$\{\{ inputs\.mode \}\}/);
-  console.log(`ok: ${label} — dispatch only; dry-run (default) and seed modes; governance-distribution`);
+  // Managed files (CODEOWNERS, rendered dependabot.yml) are replaced with the
+  // org version through the shared planner, honouring .l9/no-sync.
+  assert.match(text, /MANAGED_SEED_PATHS/, `${label}: managed seed paths must be replaced`);
+  assert.match(text, /'\.l9\/no-sync'/, `${label}: .l9/no-sync must opt out of the replacement`);
+  assert.match(text, /selectSeedWrites\(payload, existingByPath, \{ managed \}\)/, `${label}: replacement goes through the shared planner`);
+  assert.match(text, /classes\.extra_targets/, `${label}: extra_targets outside the org are seeded`);
+  console.log(`ok: ${label} — dispatch only; dry-run (default) and seed modes; managed replacement; governance-distribution`);
 }
 
-// ── auto-seed-new-repo.yml: weekly + repo_created + dispatch, dry run default ─
+// ── auto-seed-new-repo.yml: repo_created + dispatch (weekly cron disabled) ────
 {
   const label = 'auto-seed-new-repo.yml';
   const text = read('.github/workflows/auto-seed-new-repo.yml');
   const block = onBlock(text);
-  assert.deepStrictEqual(events(block), ['schedule', 'repository_dispatch', 'workflow_dispatch'], `${label}: trigger set changed`);
-  const cronAt = block.findIndex((l) => /^\s+- cron: '0 8 \* \* 1'\s*$/.test(l));
-  assert.ok(cronAt >= 0, `${label}: weekly Monday 08:00 sweep must stay`);
-  assert.match(block[cronAt + 1] || '', /^\s+timezone: 'America\/New_York'\s*$/, `${label}: the sweep runs in America/New_York`);
-  assert.ok(!block.some((l) => /^\s+- cron: '\S+ \* \* \* \*'\s*$/.test(l)), `${label}: hourly sweep is retired`);
+  // Seeding stays behind a manual gate until a seed PR is proven green and
+  // complete (operator decision 2026-11-05): the weekly sweep is disabled.
+  assert.deepStrictEqual(events(block), ['repository_dispatch', 'workflow_dispatch'], `${label}: trigger set changed`);
+  assert.ok(!block.some((l) => /^\s+schedule:\s*$/.test(l) || /^\s+- cron:/.test(l)), `${label}: the weekly sweep stays disabled`);
   // ADR-0019: the managed dependabot.yml is restored by the sweep, honouring .l9/no-sync.
   assert.match(text, /MANAGED_SEED_PATHS/, `${label}: managed seed paths must be restored`);
   assert.match(text, /'\.l9\/no-sync'/, `${label}: .l9/no-sync must opt out of the restore`);

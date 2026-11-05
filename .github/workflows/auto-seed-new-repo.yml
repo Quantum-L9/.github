@@ -11,16 +11,19 @@
 # into an l9-repo-template repository, where
 # scripts/inventory_check.py fails closed on exactly those paths.
 #
-# Create-time path: a weekly cron lists org repos and seeds anything
-# missing. That does not
-# depend on an org webhook or App repository events. Birth itself is
-# immediate through repo-birth-bootstrap.yml; this sweep is the backstop.
+# Create-time path: a sweep lists org repos and seeds anything missing. Its
+# weekly cron is DISABLED for now (operator decision 2026-11-05): seeding stays
+# manual (workflow_dispatch here, or seed-governance.yml) until a seed PR is
+# proven green and complete. Restore the `schedule:` block below to re-enable.
+# Birth itself is immediate through repo-birth-bootstrap.yml.
 #
-# Managed seed files (ADR docs/adr/0019-dependabot-managed-rendered.md):
-# `.github/dependabot.yml` is rendered per repository root and kept equal to
-# that render. The weekly sweep adds it when missing AND restores it when it
-# drifted, through the same advisory PR. A repository opts out of the restore
-# with `.l9/no-sync`; self_governed classes do not receive it at all.
+# Managed seed files (MANAGED_SEED_PATHS in ops/build-seed-payload.js):
+# `.github/CODEOWNERS` (the org policies/CODEOWNERS, seeded into every class,
+# whether or not a root CODEOWNERS exists) and `.github/dependabot.yml`
+# (rendered per repository root, ADR docs/adr/0019-dependabot-managed-rendered.md).
+# A sweep adds each when missing AND replaces it when it differs from the org
+# version, through the same advisory PR. A repository opts out of the
+# replacement with `.l9/no-sync`.
 # repository_dispatch type repo_created remains as an optional fast path
 # if an App/webhook is installed later.
 #
@@ -32,10 +35,11 @@
 name: Auto-seed new repository
 
 on:
-  schedule:
-    # Weekly: Monday 08:00 America/New_York (DST-aware; GitHub applies the zone).
-    - cron: '0 8 * * 1'
-      timezone: 'America/New_York'
+  # Weekly sweep disabled until seeding is proven (see header). To re-enable:
+  # schedule:
+  #   # Weekly: Monday 08:00 America/New_York (DST-aware; GitHub applies the zone).
+  #   - cron: '0 8 * * 1'
+  #     timezone: 'America/New_York'
   repository_dispatch:
     types: [repo_created]
   workflow_dispatch:
@@ -261,7 +265,6 @@ jobs:
                 const payload = buildSeedPayload({
                   fs,
                   profile,
-                  hasRootCodeowners,
                   repository: `${o}/${n}`,
                   repoShape: seedNeedsRepoShape({ profile }) ? await shapeOf(o, n, baseSha) : null,
                 });

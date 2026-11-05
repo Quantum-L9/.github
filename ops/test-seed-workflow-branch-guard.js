@@ -44,9 +44,12 @@ const WORKFLOWS = [
       SEED_MODE: dry ? 'dry-run' : 'seed',
       SEED_REPO_FILTER: '',
       SEED_CATEGORIES: 'all',
+      // The org fixtures below are the subject; extra_targets get their own scenario.
+      SEED_EXTRA_TARGETS: 'false',
       GITHUB_SHA: SOURCE_SHA,
     }),
     explicitCategoriesEnv: (list) => ({ SEED_CATEGORIES: list }),
+    extraTargetsEnv: { SEED_EXTRA_TARGETS: 'true' },
   },
 ];
 
@@ -456,6 +459,8 @@ async function failClosedScenarios(wf, run, label) {
       '.github/ISSUE_TEMPLATE/4-incident.yml', '.github/ISSUE_TEMPLATE/ci-failure.yml', '.github/ISSUE_TEMPLATE/gov-violation.yml',
       '.github/ISSUE_TEMPLATE/config.yml', '.github/pull_request_template.md', '.github/PULL_REQUEST_TEMPLATE/release.md',
     ].map((p) => [p, 'local\n']));
+    // Managed files are complete only when they equal the org version.
+    files['.github/CODEOWNERS'] = ORG_CODEOWNERS;
     const r = await run({ branch: null, repos: one('consumer-repo', { files: withRenderedDependabot(files) }) });
     assert.strictEqual(wrote(r), false, `${label}: re-seed of a complete repo wrote`);
     assert.match(rowOf(r)[2], /already seeded/);
@@ -501,12 +506,15 @@ async function failClosedScenarios(wf, run, label) {
 }
 
 /**
- * V22 (ADR 0019): the weekly sweep restores a drifted managed dependabot.yml
- * to the render, leaves every other existing file alone, and honours .l9/no-sync.
+ * V22: both seeders replace a managed file (the rendered dependabot.yml, ADR
+ * 0019, and the org .github/CODEOWNERS) that differs from the org version,
+ * leave every other existing file alone, and honour .l9/no-sync. A root
+ * CODEOWNERS no longer stops .github/CODEOWNERS from being seeded or replaced.
  */
+const ORG_CODEOWNERS = fs.readFileSync(path.join(__dirname, '..', 'policies', 'CODEOWNERS'), 'utf8');
 async function managedRestoreScenarios(run, label) {
   {
-    const base = withRenderedDependabot({ '.github/CODEOWNERS': 'x', 'SECURITY.md': 'local\n' });
+    const base = withRenderedDependabot({ '.github/CODEOWNERS': ORG_CODEOWNERS, 'SECURITY.md': 'local\n' });
     const want = base['.github/dependabot.yml'];
     const marker = 'profile: non_constellation_python\n';
     let r = await run({ branch: null, repos: one('drifted', { marker, files: { ...base, '.github/dependabot.yml': 'version: 2\nupdates: []\n' } }) });
@@ -516,8 +524,8 @@ async function managedRestoreScenarios(run, label) {
     const blobs = r.calls.filter((c) => c.name === 'git.createBlob').map((c) => c.args.content);
     assert.ok(blobs.some((b) => b === want || Buffer.from(b, 'base64').toString('utf8') === want), `${label}: restore is not the render`);
     const restoreMessage = r.calls.find((c) => c.name === 'git.createCommit').args.message;
-    assert.match(restoreMessage, /`\.github\/dependabot\.yml` drifted from the org render/, `${label}: Problem names the restore`);
-    assert.match(restoreMessage, /restores 1 managed file\(s\) to the org render/, `${label}: Fix says what was restored`);
+    assert.match(restoreMessage, /`\.github\/dependabot\.yml` differs from the current org version/, `${label}: Problem names the restore`);
+    assert.match(restoreMessage, /estores 1 managed file\(s\) to the current org version/, `${label}: Fix says what was restored`);
     assert.match(restoreMessage, /opt the repository out of restores with `\.l9\/no-sync`/, `${label}: the opt-out is stated`);
 
     r = await run({ branch: null, repos: one('opted-out', { marker, files: { ...base, '.github/dependabot.yml': 'version: 2\nupdates: []\n', '.l9/no-sync': '' } }) });
@@ -527,8 +535,25 @@ async function managedRestoreScenarios(run, label) {
     r = await run({ branch: null, repos: one('in-sync', { marker, files: base }) });
     assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.tree.some((t) => t.path === '.github/dependabot.yml')),
       `${label}: an in-sync managed file was rewritten`);
+
+    // An older .github/CODEOWNERS is replaced with the org version, even
+    // beside a root CODEOWNERS; the root file itself is never touched.
+    r = await run({ branch: null, repos: one('old-owners', { marker, files: { ...base, '.github/CODEOWNERS': '* @old-owner\n', CODEOWNERS: '* @root-owner\n' } }) });
+    const ownTree = r.calls.find((c) => c.name === 'git.createTree');
+    assert.ok(ownTree, `${label}: an older .github/CODEOWNERS was not replaced`);
+    const ownPaths = ownTree.args.tree.map((t) => t.path);
+    assert.ok(ownPaths.includes('.github/CODEOWNERS'), `${label}: the older .github/CODEOWNERS is replaced`);
+    assert.ok(!ownPaths.includes('CODEOWNERS') && !ownPaths.includes('SECURITY.md'), `${label}: root CODEOWNERS / unmanaged files are never written`);
+    const ownIdx = ownPaths.indexOf('.github/CODEOWNERS');
+    const ownBlob = r.calls.filter((c) => c.name === 'git.createBlob')[ownIdx].args.content;
+    assert.strictEqual(Buffer.from(ownBlob, 'base64').toString('utf8'), ORG_CODEOWNERS, `${label}: replacement is the org CODEOWNERS`);
+    assert.match(r.calls.find((c) => c.name === 'git.createCommit').args.message, /GitHub reads `\.github\/CODEOWNERS` first/,
+      `${label}: the seed says the root CODEOWNERS is shadowed`);
+    r = await run({ branch: null, repos: one('old-owners-opted-out', { marker, files: { ...base, '.github/CODEOWNERS': '* @old-owner\n', '.l9/no-sync': '' } }) });
+    assert.ok(!r.calls.some((c) => c.name === 'git.createTree' && c.args.tree.some((t) => t.path === '.github/CODEOWNERS')),
+      `${label}: replaced .github/CODEOWNERS despite .l9/no-sync`);
   }
-  console.log(`ok: ${label} — drifted dependabot.yml restored to the render; unmanaged files and .l9/no-sync respected`);
+  console.log(`ok: ${label} — managed dependabot.yml / CODEOWNERS replaced with the org version; unmanaged files and .l9/no-sync respected`);
 }
 
 (async () => {
@@ -679,12 +704,12 @@ async function managedRestoreScenarios(run, label) {
     for (const denied of FORBIDDEN_FOR_GOVERNED) {
       assert.ok(!treesByRepo['ncp-repo'].includes(denied), `${label}: wrote forbidden ${denied} to ncp-repo`);
     }
-    assert.strictEqual(treesByRepo['self-repo'], undefined, `${label}: self_governed must get no tree`);
-    assert.strictEqual(treesByRepo['l9-ci-core'], undefined, `${label}: override-classified self_governed repo must get no tree`);
+    assert.deepStrictEqual(treesByRepo['self-repo'], ['.github/CODEOWNERS'], `${label}: self_governed gets only the org CODEOWNERS`);
+    assert.deepStrictEqual(treesByRepo['l9-ci-core'], ['.github/CODEOWNERS'], `${label}: override-classified self_governed repo gets only the org CODEOWNERS`);
     assert.strictEqual(treesByRepo['typo-repo'], undefined, `${label}: malformed marker must not be seeded`);
     assert.match(rowFor(r, 'typo-repo')[2], /skipped: .*unknown class non_constelation_python/, `${label}: malformed marker is reported`);
     assert.strictEqual(rowFor(r, 'typo-repo')[1], 'unresolved');
-    assert.match(rowFor(r, 'self-repo')[2], /nothing safe to seed/);
+    assert.match(rowFor(r, 'self-repo')[2], /PR #\d+ \((1 file\(s\)|1 added, 0 restored)\)/);
     assert.strictEqual(rowFor(r, 'ncp-repo')[1], 'non_constellation_python');
     assert.strictEqual(rowFor(r, 'plain-repo')[1], 'default');
     assert.deepStrictEqual(r.failures, [], `${label}: class skips are not run failures`);
@@ -700,7 +725,7 @@ async function managedRestoreScenarios(run, label) {
     for (const denied of FORBIDDEN_FOR_GOVERNED) {
       assert.ok(!ncpPreview.includes(denied), `${label}: dry-run preview names forbidden ${denied}`);
     }
-    assert.match(rowFor(r, 'self-repo')[2], /nothing safe to seed/);
+    assert.match(rowFor(r, 'self-repo')[2], /would seed 1( file\(s\))?: \.github\/CODEOWNERS/);
     assert.match(rowFor(r, 'typo-repo')[2], /skipped: .*unknown class/);
     assert.match(rowFor(r, 'plain-repo')[2], /would seed 13/);
     console.log(`ok: ${label} — dry run previews the class payload and never a forbidden path`);
@@ -733,7 +758,18 @@ async function managedRestoreScenarios(run, label) {
 
     await failClosedScenarios(wf, run, label);
     await dependabotSeedScenarios(run, label);
-    if (wf.autoSeed) await managedRestoreScenarios(run, label);
+    await managedRestoreScenarios(run, label);
+
+    // extra_targets (repositories outside the org): one GH_TOKEN cannot read
+    // is a named failure row, never silently dropped, and the org still seeds.
+    if (wf.extraTargetsEnv) {
+      const r = await run({ branch: null, envExtra: wf.extraTargetsEnv });
+      const extraRow = r.rows.find((row) => row[0] === 'cryptoxdog/IB-Odoo_19');
+      assert.ok(extraRow, `${label}: extra target cryptoxdog/IB-Odoo_19 not reported`);
+      assert.match(extraRow[2], /failed: extra target unreadable with GH_TOKEN \(404\)/, `${label}: unreadable extra target is a failure row`);
+      assert.ok(r.calls.some((c) => c.name === 'repos.get' || c.name === 'git.createTree'), `${label}: the run still proceeds`);
+      console.log(`ok: ${label} — an unreadable extra target is a named failure row`);
+    }
   }
 })().catch((e) => {
   console.error(e);

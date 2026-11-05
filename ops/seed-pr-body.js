@@ -72,6 +72,15 @@ function classLabel(profile) {
   return code(profile.name) + from;
 }
 
+/** The Problem sentence for managed paths that differ from the org version. */
+function restoredProblem(restored) {
+  if (!restored.length) return '';
+  const one = restored.length === 1;
+  const verb = one ? 'differs' : 'differ';
+  const noun = one ? 'managed seed path' : 'managed seed paths';
+  return `${restored.map(code).join(', ')} ${verb} from the current org version (${noun}; ${code('MANAGED_SEED_PATHS')} in ${code('ops/build-seed-payload.js')}).`;
+}
+
 function seedNarrative({
   added = [], restored = [], profile, branch, sourceSha, seeder, hasRootCodeowners = false,
 } = {}) {
@@ -85,9 +94,7 @@ function seedNarrative({
     added.length
       ? `This repository is missing ${added.length} file(s) that its repo class ${cls} materializes from ${code('Quantum-L9/.github')} (${code('policies/repo-classes.yml')}).`
       : '',
-    restored.length
-      ? `${restored.map(code).join(', ')} drifted from the org render for this repository root (ADR ${code('docs/adr/0019-dependabot-managed-rendered.md')}).`
-      : '',
+    restoredProblem(restored),
     profile.inherit?.length
       ? `Inherited from the org ${code('.github')} repository and deliberately not copied here: ${profile.inherit.map(code).join(', ')}.`
       : '',
@@ -97,13 +104,13 @@ function seedNarrative({
   if (!restored.length) {
     summary = `Adds only the ${added.length} missing file(s), ${onBranch}. Existing files were left untouched (missing-only seed).`;
   } else if (!added.length) {
-    summary = `Restores ${restored.length} managed file(s) to the org render, ${onBranch}. No file is added and no other existing file was touched.`;
+    summary = `Restores ${restored.length} managed file(s) to the current org version, ${onBranch}. No file is added and no other existing file was touched.`;
   } else {
-    summary = `Adds the ${added.length} missing file(s) and restores ${restored.length} managed file(s) to the org render, ${onBranch}. No other existing file was touched.`;
+    summary = `Adds the ${added.length} missing file(s) and restores ${restored.length} managed file(s) to the current org version, ${onBranch}. No other existing file was touched.`;
   }
   const facts = [
     `- Source: ${code('Quantum-L9/.github@' + sourceSha)}, class ${cls}.`,
-    hasRootCodeowners ? `- Root ${code('CODEOWNERS')} is present and is not overridden by ${code('.github/CODEOWNERS')}.` : null,
+    hasRootCodeowners ? `- A root ${code('CODEOWNERS')} is present. GitHub reads ${code('.github/CODEOWNERS')} first, so the org file seeded here is the one that applies and the root file no longer does; move any repository-specific owners into a reviewed change of the org file or delete the root copy.` : null,
     `- A governance caller, where added, is advisory (${code('strict')} defaults false). CI callers are not distributed from ${code('Quantum-L9/.github')}; see ${code('docs/BOUNDARIES.md')}.`,
     `- While this PR is open the seeder leaves ${code(branch)} alone, so review fixes can be committed onto it.`,
   ].filter(Boolean);

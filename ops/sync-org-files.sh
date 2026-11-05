@@ -8,7 +8,8 @@
 # override > default; a malformed or unknown explicit marker fails closed).
 # INHERIT destinations are never copied, a FORBID destination refuses the
 # run, and MATERIALIZE is missing-only: an existing consumer file is kept
-# byte-for-byte and reported. CI is NOT seeded from this repository.
+# byte-for-byte and reported, except the managed files (.github/CODEOWNERS,
+# .github/dependabot.yml), replaced with the org version unless .l9/no-sync. CI is NOT seeded from this repository.
 # The on-org-update / l9-ci-pack categories are RETIRED and fail closed.
 # Canonical CI is l9-ci-core.
 #
@@ -17,7 +18,7 @@
 #
 # Categories (`all` / no flag = the consumer's class decides; labels is opt-in
 # for the default class and materialized for non_constellation_python):
-#   codeowners        .github/CODEOWNERS (path-scoped; skip if root CODEOWNERS)
+#   codeowners        .github/CODEOWNERS (path-scoped; managed, root CODEOWNERS or not)
 #   dependabot        .github/dependabot.yml, rendered for the consumer root
 #                     (ops/render-dependabot.js, ADR 0019)
 #   governance        .github/workflows/governance.yml (FORBID for governed classes)
