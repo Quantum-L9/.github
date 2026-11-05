@@ -14,8 +14,7 @@ body:
     id: workflow-run-url
     attributes:
       label: Workflow Run URL
-      description: Paste the full URL of the failed GitHub Actions run.
-      placeholder: "https://github.com/Quantum-L9/l9-ci-core/actions/runs/XXXXXXXXX"
+      description: "Paste the full URL of the failed GitHub Actions run. Example: https://github.com/Quantum-L9/l9-ci-core/actions/runs/12345678901"
     validations:
       required: true
 
@@ -23,7 +22,7 @@ body:
     id: failed-job
     attributes:
       label: Failed Job Name
-      placeholder: "pr-pipeline / security-scan / scorecard"
+      description: "Workflow / job / step as shown in the run. Example: pr-pipeline / security-scan / scorecard"
     validations:
       required: true
 
@@ -65,7 +64,7 @@ body:
     id: bisect-sha
     attributes:
       label: Bisect SHA (if applicable)
-      placeholder: "2b330a5aab90cd7781bef08f14c5e7904b61bc56"
+      description: "Full 40-character commit SHA. Example: 2b330a5aab90cd7781bef08f14c5e7904b61bc56"
 
   - type: dropdown
     id: affected-kernel
