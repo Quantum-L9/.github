@@ -18,7 +18,9 @@
 # (ops/build-seed-payload.js) carries it. A malformed marker plans nothing.
 # Managed (overwrite, not missing-only — docs/DISTRIBUTION.md):
 #   .github/CODEOWNERS, .github/dependabot.yml   exact bytes, where the class
-#     materializes them (self_governed does not; a root CODEOWNERS wins).
+#     materializes them. Every class materializes CODEOWNERS, and a root
+#     CODEOWNERS does not stop it (GitHub reads .github/CODEOWNERS first);
+#     self_governed does not receive dependabot.yml.
 #     dependabot.yml is RENDERED per repository root by
 #     ops/render-dependabot.js (ADR docs/adr/0019-dependabot-managed-rendered.md):
 #     github-actions, plus uv / pip / pre-commit by what the root holds. The
@@ -108,7 +110,7 @@ jobs:
             const {
               SYNC_COMMIT_SUBJECT, assessSeedBranch, assessOpenPrOverlap, moveSeedBranch, isEmptyRepoError,
             } = require('./ops/seed-branch-safety.js');
-            const { buildSeedPayload, seedNeedsRepoShape, probeRepoShape } = require('./ops/build-seed-payload.js');
+            const { buildSeedPayload, seedNeedsRepoShape, probeRepoShape, MANAGED_SEED_PATHS } = require('./ops/build-seed-payload.js');
             const {
               seedCommitMessage, syncNarrative, renderSeedPrBody,
             } = require('./ops/seed-pr-body.js');
@@ -141,7 +143,7 @@ jobs:
               return;
             }
             // Fully managed, exact bytes, where the class payload carries them.
-            const MANAGED = ['.github/CODEOWNERS', '.github/dependabot.yml'];
+            const MANAGED = [...MANAGED_SEED_PATHS];
 
             // 404 is an answer ("absent"). Anything else is not, and must not
             // be read as "in sync" — that used to report unreadable repos as clean.
@@ -215,7 +217,7 @@ jobs:
                 if (decided.name) profile.resolved_from = decided.source;
                 klass = profile.name;
                 const rootOwners = await read(o, n, 'CODEOWNERS', baseSha);
-                if (rootOwners.state === 'present') notes.push('root CODEOWNERS present; .github/CODEOWNERS not managed');
+                if (rootOwners.state === 'present') notes.push('root CODEOWNERS present; shadowed by the managed .github/CODEOWNERS');
                 // The root listing, at the pin. It decides the rendered
                 // dependabot ecosystems and is reused for the alternate-template
                 // report below. Not a readable directory = not an answer.
@@ -240,7 +242,7 @@ jobs:
                 }
                 // What this class materializes, from the one shared builder.
                 const eligible = buildSeedPayload({
-                  fs, profile, hasRootCodeowners: rootOwners.state === 'present', repository: `${o}/${n}`, repoShape,
+                  fs, profile, repository: `${o}/${n}`, repoShape,
                 });
 
                 // What this repository should carry: path -> {action, content, why, existed}.

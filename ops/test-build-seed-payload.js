@@ -190,10 +190,19 @@ try {
   const missingPlan = selectSeedWrites({ 'README.md': 'x' }, { 'README.md': null });
   assert.deepStrictEqual(missingPlan.writes, ['README.md']);
 
-  // Managed (ADR 0019): a drifted dependabot.yml is restored to the render; an
-  // equal one is kept; other files stay missing-only even when they differ.
+  // Managed: CODEOWNERS (org bytes) and the rendered dependabot.yml (ADR 0019)
+  // are replaced when they differ; an equal one is kept; other files stay
+  // missing-only even when they differ.
   const DEP = '.github/dependabot.yml';
-  assert.deepStrictEqual(MANAGED_SEED_PATHS, [DEP]);
+  const OWN = '.github/CODEOWNERS';
+  assert.deepStrictEqual(MANAGED_SEED_PATHS, [OWN, DEP]);
+  const ownDrift = selectSeedWrites(
+    { [OWN]: 'org owners\n', 'SECURITY.md': 'org\n' },
+    { [OWN]: '* @old-owner\n', 'SECURITY.md': 'local\n' },
+    { managed: MANAGED_SEED_PATHS },
+  );
+  assert.deepStrictEqual(ownDrift, { writes: [OWN], replaced: [OWN], kept: ['SECURITY.md'] },
+    'an older .github/CODEOWNERS is replaced with the org version');
   const drift = selectSeedWrites(
     { [DEP]: 'rendered\n', 'SECURITY.md': 'org\n' },
     { [DEP]: 'hand-written\n', 'SECURITY.md': 'local\n' },
@@ -272,12 +281,12 @@ try {
   assert.deepStrictEqual(Object.keys(withNewForm).sort(byName), [...ISSUE_TEMPLATES_MATERIALIZED].sort(byName));
   assert.strictEqual(ISSUE_TEMPLATES_MATERIALIZED.length, 7);
 
-  // Exact class payload sizes (13 / 4 / 0).
+  // Exact class payload sizes (13 / 4 / 1: self_governed carries only CODEOWNERS).
   const classes = loadRepoClasses(fs);
   const sizes = Object.fromEntries(['default', 'non_constellation_python', 'self_governed'].map((c) => [
     c, Object.keys(buildSeedPayload({ fs, profile: resolveProfile(classes, c), repoShape: ACTIONS_ONLY })).length,
   ]));
-  assert.deepStrictEqual(sizes, { default: 13, non_constellation_python: 4, self_governed: 0 });
+  assert.deepStrictEqual(sizes, { default: 13, non_constellation_python: 4, self_governed: 1 });
 
   // classSeedPaths: every path a class may seed, independent of the run's
   // subset and of the root shape (the branch gate's unsigned-commit proof).
@@ -292,7 +301,7 @@ try {
     const all = classSeedPaths({ fs, profile });
     assert.ok(narrow.every((p) => all.includes(p)) && all.length > narrow.length,
       'a narrower explicit run must still allow the paths a broader run seeded');
-    assert.ok(all.includes('.github/CODEOWNERS'), 'CODEOWNERS is a seed path even when a root CODEOWNERS suppresses it');
+    assert.ok(all.includes('.github/CODEOWNERS'), 'CODEOWNERS is a seed path of the default class');
     assert.throws(() => classSeedPaths({ fs }), TypeError);
   }
 

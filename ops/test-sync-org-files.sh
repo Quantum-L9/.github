@@ -5,7 +5,8 @@
 # manually synced consumer gets the same decisions as the Actions seeders:
 # repo class (marker > override > default, malformed fails closed), FORBID
 # refused, INHERIT dropped, MATERIALIZE missing-only, advisory links rewritten
-# to the consumer, root CODEOWNERS left authoritative.
+# to the consumer, managed .github/CODEOWNERS seeded and kept equal to the org
+# version even beside a root CODEOWNERS (GitHub reads .github/ first).
 # Run from the root of the Quantum-L9/.github repo:
 #   bash ops/test-sync-org-files.sh
 set -euo pipefail
@@ -35,12 +36,11 @@ printf '* @Quantum-L9/example-owners\n' > "$WITH_ROOT/CODEOWNERS"
 
 (cd "$ORG_ROOT" && bash ops/sync-org-files.sh "$WITH_ROOT" "${CATEGORIES[@]}") > /dev/null
 
-if [[ -f "$WITH_ROOT/.github/CODEOWNERS" ]]; then
-  fail "root CODEOWNERS was overridden by .github/CODEOWNERS"
-fi
+cmp -s "$ORG_ROOT/policies/CODEOWNERS" "$WITH_ROOT/.github/CODEOWNERS" || \
+  fail ".github/CODEOWNERS not seeded with the org bytes beside a root CODEOWNERS"
 grep -q '@Quantum-L9/example-owners' "$WITH_ROOT/CODEOWNERS" || \
   fail "root CODEOWNERS was modified"
-echo "✅ root CODEOWNERS preserved (no .github/CODEOWNERS written)"
+echo "✅ .github/CODEOWNERS seeded beside a root CODEOWNERS (root file untouched)"
 
 grep -q 'https://github.com/Quantum-L9/example/security/advisories/new' \
   "$WITH_ROOT/SECURITY.md" || fail "SECURITY.md advisory link not rewritten"
@@ -86,6 +86,19 @@ make_consumer "$NO_ROOT"
 [[ -f "$NO_ROOT/.github/CODEOWNERS" ]] || \
   fail ".github/CODEOWNERS not seeded when no root CODEOWNERS exists"
 echo "✅ .github/CODEOWNERS still seeded when the consumer has no root file"
+
+# ── 2b. managed: an older .github/CODEOWNERS is replaced; .l9/no-sync keeps it ─
+printf '* @someone-old\n' > "$NO_ROOT/.github/CODEOWNERS"
+(cd "$ORG_ROOT" && bash ops/sync-org-files.sh "$NO_ROOT" --include codeowners) > /dev/null
+cmp -s "$ORG_ROOT/policies/CODEOWNERS" "$NO_ROOT/.github/CODEOWNERS" || \
+  fail "a drifted .github/CODEOWNERS was not replaced with the org version"
+echo "✅ a drifted .github/CODEOWNERS is replaced with the org version"
+mkdir -p "$NO_ROOT/.l9" && : > "$NO_ROOT/.l9/no-sync"
+printf '* @someone-local\n' > "$NO_ROOT/.github/CODEOWNERS"
+(cd "$ORG_ROOT" && bash ops/sync-org-files.sh "$NO_ROOT" --include codeowners) > /dev/null
+grep -q '@someone-local' "$NO_ROOT/.github/CODEOWNERS" || \
+  fail ".l9/no-sync did not keep the local .github/CODEOWNERS"
+echo "✅ .l9/no-sync keeps a local .github/CODEOWNERS (missing-only)"
 
 # ── 3. consumer with no git remote falls back to a verbatim copy ──────────────
 NO_REMOTE="$WORK/no-remote"
@@ -160,7 +173,7 @@ grep -q '~ .github/pull_request_template.md (inherited' <<< "$NCP2_OUT" || fail 
 [[ -e "$NCP2/.github/ISSUE_TEMPLATE" ]] && fail "ncp copied inherited issue templates"
 echo "✅ explicit inherited categories drop for non_constellation_python; only SECURITY.md written"
 
-# ── 6. self_governed materializes nothing ────────────────────────────────────
+# ── 6. self_governed materializes only the org CODEOWNERS ────────────────────
 SG="$WORK/self-governed"
 make_consumer "$SG"
 mkdir -p "$SG/.l9"
@@ -168,9 +181,9 @@ printf 'profile: self_governed\n' > "$SG/.l9/org-birth-profile.yaml"
 SG_OUT="$(cd "$ORG_ROOT" && bash ops/sync-org-files.sh "$SG" --include-all)"
 grep -q 'class: self_governed (marker)' <<< "$SG_OUT" || fail "self_governed class not reported"
 SG_FILES="$(cd "$SG" && find . -type f -not -path './.git/*' -not -path './.l9/*')"
-[[ -z "$SG_FILES" ]] || fail "self_governed received files:
+[[ "$SG_FILES" == "./.github/CODEOWNERS" ]] || fail "self_governed should receive only .github/CODEOWNERS, got:
 $SG_FILES"
-echo "✅ self_governed receives zero files"
+echo "✅ self_governed receives only the org .github/CODEOWNERS"
 
 # ── 7. a malformed explicit marker fails closed ───────────────────────────────
 BAD="$WORK/bad-marker"
@@ -193,8 +206,8 @@ git -C "$OVR" remote add origin "https://github.com/Quantum-L9/l9-ci-core.git"
 OVR_OUT="$(cd "$ORG_ROOT" && bash ops/sync-org-files.sh "$OVR" --include-all)"
 grep -q 'class: self_governed (org override)' <<< "$OVR_OUT" || fail "org override not applied to l9-ci-core"
 OVR_FILES="$(cd "$OVR" && find . -type f -not -path './.git/*')"
-[[ -z "$OVR_FILES" ]] || fail "override-classified repo received files"
-echo "✅ org override classifies an unmarked repo; self_governed override writes nothing"
+[[ "$OVR_FILES" == "./.github/CODEOWNERS" ]] || fail "override-classified repo should receive only .github/CODEOWNERS"
+echo "✅ org override classifies an unmarked repo; self_governed override writes only .github/CODEOWNERS"
 
 # ── 9. dry run writes nothing ─────────────────────────────────────────────────
 DRY="$WORK/dry"

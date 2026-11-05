@@ -23,8 +23,20 @@ name: Seed org templates into consumers
 # only gains that scope after a browser "Accept new permissions" — there is no
 # REST accept endpoint. Prefer the PAT so seed is not blocked on that click.
 #
-# Default behavior: add missing files only (never overwrite existing content).
-# Root CODEOWNERS takes precedence — .github/CODEOWNERS is not seeded over it.
+# Default behavior: add missing files, and replace a managed file
+# (MANAGED_SEED_PATHS in ops/build-seed-payload.js: .github/CODEOWNERS and the
+# rendered .github/dependabot.yml) whose text differs from the current org
+# version. Every other existing file is left as it is. `.github/CODEOWNERS` is
+# seeded whether or not the repository carries a root CODEOWNERS: GitHub reads
+# `.github/CODEOWNERS` first, so the org file is the one that applies. A
+# repository opts out of managed replacement with `.l9/no-sync`.
+#
+# Targets: every active Quantum-L9 repository, plus `extra_targets` in
+# policies/repo-classes.yml (repositories outside the org, seeded with the same
+# GH_TOKEN; one it cannot read is reported, not skipped silently).
+#
+# Manual only (workflow_dispatch). It stays manual until a seed PR is proven
+# green and complete.
 #
 # Branch safety: the seed branch is rebuilt as "default branch + one seed
 # commit", so ops/seed-branch-safety.js gates every ref move. A branch with an
@@ -51,6 +63,12 @@ on:
           closed): on-org-update.
         type: string
         default: all
+      extra_targets:
+        description: >-
+          Also seed the repositories outside the org listed in
+          policies/repo-classes.yml `extra_targets` (e.g. cryptoxdog/IB-Odoo_19).
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -96,6 +114,7 @@ jobs:
           SEED_MODE: ${{ inputs.mode }}
           SEED_REPO_FILTER: ${{ inputs.repo_filter }}
           SEED_CATEGORIES: ${{ inputs.categories }}
+          SEED_EXTRA_TARGETS: ${{ inputs.extra_targets }}
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
@@ -107,6 +126,7 @@ jobs:
               DEFAULT_CATEGORIES,
               selectSeedWrites,
               classSeedPaths,
+              MANAGED_SEED_PATHS,
               seedNeedsRepoShape,
               probeRepoShape,
             } = require('./ops/build-seed-payload.js');
@@ -216,6 +236,31 @@ jobs:
             const conflicts = [];
             let failures = 0;
 
+            // Repositories outside the org, named in policies/repo-classes.yml
+            // `extra_targets`. Each must be readable with this GH_TOKEN; one
+            // that is not is a failure row, never silently dropped.
+            const EXTRA = process.env.SEED_EXTRA_TARGETS !== 'false' ? (classes.extra_targets || []) : [];
+            for (const full of EXTRA) {
+              const [eo, en] = String(full).split('/');
+              if (!eo || !en) {
+                failures += 1;
+                rows.push([full, '-', 'failed: extra target is not owner/name']);
+                continue;
+              }
+              if (FILTER && !en.includes(FILTER)) continue;
+              try {
+                const r = (await github.rest.repos.get({ owner: eo, repo: en })).data;
+                if (r.archived) {
+                  rows.push([full, '-', 'skipped (archived)']);
+                  continue;
+                }
+                targets.push(r);
+              } catch (e) {
+                failures += 1;
+                rows.push([full, '-', `failed: extra target unreadable with GH_TOKEN (${e.status || 'error'})`]);
+              }
+            }
+
             core.info(`categories=${categoriesLabel} (default class ${DEFAULT_CATEGORIES.join(',')}; all known ${ALL_CATEGORIES.join(',')})`);
 
             for (const repo of targets) {
@@ -260,7 +305,6 @@ jobs:
                     // on a FORBID hit.
                     categories,
                     profile,
-                    hasRootCodeowners,
                     repository: `${o}/${n}`,
                     repoShape,
                   });
@@ -280,19 +324,23 @@ jobs:
                   continue;
                 }
 
+                // Managed paths are compared by text, so an older or edited copy
+                // is replaced with the current org version; `.l9/no-sync` keeps
+                // them missing-only. Every other path stays missing-only.
+                const optedOut = await exists(o, n, '.l9/no-sync', baseSha);
+                const managed = optedOut ? [] : MANAGED_SEED_PATHS.filter((p) => p in payload);
                 const existingByPath = {};
                 for (const p of paths) {
-                  if (!(await exists(o, n, p, baseSha))) {
+                  const text = await readFile(o, n, p, baseSha);
+                  if (text === null) {
                     existingByPath[p] = null;
                     continue;
                   }
-                  existingByPath[p] = true;
+                  existingByPath[p] = managed.includes(p) ? text : true;
                 }
-                const { writes } = selectSeedWrites(payload, existingByPath);
+                const { writes, replaced } = selectSeedWrites(payload, existingByPath, { managed });
                 if (!writes.length) {
-                  rows.push([n, profile.name, hasRootCodeowners
-                    ? 'already seeded (root CODEOWNERS preserved)'
-                    : 'already seeded']);
+                  rows.push([n, profile.name, optedOut ? 'already seeded (.l9/no-sync: managed files not replaced)' : 'already seeded']);
                   continue;
                 }
 
@@ -332,7 +380,10 @@ jobs:
                 }
 
                 if (MODE === 'dry-run') {
-                  const note = hasRootCodeowners ? '; preserve root CODEOWNERS' : '';
+                  const note = [
+                    replaced.length ? `; replace ${replaced.join(', ')}` : '',
+                    hasRootCodeowners && writes.includes('.github/CODEOWNERS') ? '; root CODEOWNERS is shadowed by .github/CODEOWNERS' : '',
+                  ].join('');
                   const preview = writes.length <= 6
                     ? writes.join(', ')
                     : `${writes.slice(0, 6).join(', ')} (+${writes.length - 6} more)`;
@@ -361,10 +412,11 @@ jobs:
                   continue;
                 }
 
-                // Missing-only: every path this commit writes is an addition.
-                const added = treeItems.map(t => t.path);
+                // Additions, plus managed files replaced with the org version.
+                const restored = treeItems.map(t => t.path).filter((p) => replaced.includes(p));
+                const added = treeItems.map(t => t.path).filter((p) => !replaced.includes(p));
                 const story = seedNarrative({
-                  added, profile, branch: BRANCH, sourceSha: SOURCE_SHA,
+                  added, restored, profile, branch: BRANCH, sourceSha: SOURCE_SHA,
                   seeder: 'seed-governance.yml', hasRootCodeowners,
                 });
 

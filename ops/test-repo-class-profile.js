@@ -364,17 +364,17 @@ try {
     /override x names undefined class nope/,
   );
 
-  // ── self_governed writes no files at all ───────────────────────────────
+  // ── self_governed writes the org CODEOWNERS and nothing else ───────────
   const selfGoverned = resolveProfile(doc, 'self_governed');
-  assert.deepStrictEqual(selfGoverned.seed_categories, [], 'self_governed materializes nothing');
+  assert.deepStrictEqual(selfGoverned.seed_categories, ['codeowners'], 'self_governed materializes only CODEOWNERS');
   for (const hasPython of [true, false]) {
     const payload = buildSeedPayload({
       fs,
       repoShape: ACTIONS_ONLY, profile: selfGoverned, hasPython, repository: 'Quantum-L9/l9-ci-core',
     });
     assert.deepStrictEqual(
-      Object.keys(payload), [],
-      'a self-governed repo receives capabilities through the API, never files',
+      Object.keys(payload), ['.github/CODEOWNERS'],
+      'a self-governed repo receives the org CODEOWNERS and every other capability through the API',
     );
   }
   assert.ok(selfGoverned.remote_apply.labels, 'labels still apply remotely');
@@ -406,7 +406,7 @@ try {
   }
   // Mandatory-file reporting must not nag a repo for files it may not carry.
   assert.ok(waivesMandatoryFile(selfGoverned, '.github/workflows/governance.yml'));
-  assert.ok(waivesMandatoryFile(selfGoverned, '.github/CODEOWNERS'));
+  assert.ok(!waivesMandatoryFile(selfGoverned, '.github/CODEOWNERS'), 'self_governed is seeded CODEOWNERS, so it is held to it');
 
   // Explicitly requested seed enablement does not transfer repository CI ownership.
   const seededSelfGoverned = resolveProfile(doc, 'org_seeded_self_governed');
@@ -496,20 +496,20 @@ try {
     const seededPlan = planConsumerSeed({ fs, path, consumerRoot: seeded, repository: 'Quantum-L9/seeded' });
     assert.deepStrictEqual(seededPlan.kept.sort(byName), ['.github/pull_request_template.md', 'SECURITY.md']);
     assert.ok(!seededPlan.writes.includes('SECURITY.md'));
-    assert.ok(!('.github/CODEOWNERS' in seededPlan.payload), 'root CODEOWNERS suppresses the path-scoped template');
+    assert.ok(seededPlan.writes.includes('.github/CODEOWNERS'), 'a root CODEOWNERS no longer suppresses the org .github/CODEOWNERS');
     assert.ok(seededPlan.writes.includes('.github/PULL_REQUEST_TEMPLATE/release.md'));
 
-    // self_governed: zero writes, everything inherited.
+    // self_governed: only the org CODEOWNERS, everything else inherited.
     const sgPlan = planConsumerSeed({ fs, path, consumerRoot: consumer('sg', 'profile: self_governed\n'), repository: 'Quantum-L9/sg' });
-    assert.deepStrictEqual(sgPlan.writes, []);
+    assert.deepStrictEqual(sgPlan.writes, ['.github/CODEOWNERS']);
     assert.deepStrictEqual(sgPlan.kept, []);
-    assert.deepStrictEqual(Object.keys(sgPlan.payload), []);
+    assert.deepStrictEqual(Object.keys(sgPlan.payload), ['.github/CODEOWNERS']);
 
     // org override classifies an unmarked repo by name.
     const ovrPlan = planConsumerSeed({ fs, path, consumerRoot: consumer('l9-ci-core', null), repository: 'Quantum-L9/l9-ci-core' });
     assert.strictEqual(ovrPlan.profile.name, 'self_governed');
     assert.strictEqual(ovrPlan.profile.resolved_from, 'org override');
-    assert.deepStrictEqual(ovrPlan.writes, []);
+    assert.deepStrictEqual(ovrPlan.writes, ['.github/CODEOWNERS']);
 
     for (const repo of ['l9-meta-injector', 'l9-constellation-topology']) {
       const seedPlan = planConsumerSeed({
@@ -551,7 +551,7 @@ try {
   console.log('ok: org overrides classify undeclared repos; a marker still outranks them');
   console.log('ok: a malformed or unknown EXPLICIT class fails closed, never widens to default');
   console.log('ok: LICENSE is neither mandatory nor seeded by any class');
-  console.log('ok: self_governed seeds zero files, inherits every community-health surface, applies labels + settings remotely');
+  console.log('ok: self_governed seeds only the org CODEOWNERS, inherits every community-health surface, applies labels + settings remotely');
   console.log('ok: resolveProfile is strict at birth and defensive on a null (absent) class');
   console.log('ok: default class materializes SECURITY.md + templates and inherits the passive community-health surfaces');
   console.log('ok: non_constellation_python materializes SECURITY.md and no template-denied CI distribution path');
@@ -756,13 +756,12 @@ enforceSuite.then(async () => {
   assert.strictEqual(verdicts(a)['.github/workflows/governance.yml'], VERDICTS.WAIVED);
   assert.deepStrictEqual(summarizeMandatoryCoverage([a]).compliant, ['py-repo']);
 
-  // self_governed (org override l9-ci-core): CODEOWNERS, dependabot and the
-  // caller are waived; README.md is still required. Raw two-file presence
-  // would have called this repo "unseeded".
-  a = await assess('l9-ci-core', { files: present(['README.md']) });
+  // self_governed (org override l9-ci-core): dependabot and the caller are
+  // waived; the seeded .github/CODEOWNERS and README.md are required.
+  a = await assess('l9-ci-core', { files: present(['README.md', '.github/CODEOWNERS']) });
   assert.strictEqual(a.className, 'self_governed');
   assert.deepStrictEqual(verdicts(a), {
-    '.github/CODEOWNERS': VERDICTS.WAIVED,
+    '.github/CODEOWNERS': VERDICTS.PRESENT,
     '.github/dependabot.yml': VERDICTS.WAIVED,
     '.github/workflows/governance.yml': VERDICTS.WAIVED,
     'README.md': VERDICTS.PRESENT,
@@ -770,7 +769,7 @@ enforceSuite.then(async () => {
   assert.deepStrictEqual(summarizeMandatoryCoverage([a]).compliant, ['l9-ci-core']);
   // A class that waives every listed path is not applicable, not compliant.
   const narrow = await assessMandatoryFiles({
-    doc, filesPolicy: { files: [{ path: '.github/CODEOWNERS' }] }, repoName: 'l9-ci-core', readText: reader({}),
+    doc, filesPolicy: { files: [{ path: '.github/dependabot.yml' }] }, repoName: 'l9-ci-core', readText: reader({}),
   });
   const naSummary = summarizeMandatoryCoverage([narrow]);
   assert.strictEqual(naSummary.notApplicable.length, 1);
@@ -836,7 +835,7 @@ enforceSuite.then(async () => {
     await assess('consumer-ok', { files: present(ALL) }),
     await assess('consumer-missing', { files: present(ALL.filter((p) => p !== 'README.md')) }),
     await assess('consumer-403', { files: present(ALL.slice(1)), errors: { '.github/CODEOWNERS': 403 } }),
-    await assess('l9-ci-core', { files: present(['README.md']) }),
+    await assess('l9-ci-core', { files: present(['README.md', '.github/CODEOWNERS']) }),
     exemptOnly,
   ];
   s = summarizeMandatoryCoverage(mixed);
@@ -961,7 +960,7 @@ enforceSuite.then(async () => {
   };
   let run = await runPreflight({
     'Cursor-Governance': {},
-    'l9-ci-core': { files: { 'README.md': '# x' } },
+    'l9-ci-core': { files: { 'README.md': '# x', '.github/CODEOWNERS': '# org' } },
     'consumer-ok': { files: present(ALL) },
     'consumer-403': { files: present(ALL.slice(1)), errors: { '.github/CODEOWNERS': 403 } },
   });

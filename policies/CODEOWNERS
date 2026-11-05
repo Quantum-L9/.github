@@ -7,7 +7,8 @@
 # cannot resolve. Team slugs verified against the live org
 # (gh api orgs/Quantum-L9/teams): only `platform` exists.
 #
-# Skip this dest when a root CODEOWNERS already exists.
+# Seeded as .github/CODEOWNERS into every repository the seeders reach,
+# replacing an older copy; GitHub reads .github/CODEOWNERS before a root file.
 
 /.github/                 @Quantum-L9/platform @cryptoxdog
 /.github/workflows/       @Quantum-L9/platform @cryptoxdog
