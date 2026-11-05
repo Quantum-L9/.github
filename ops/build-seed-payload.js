@@ -419,8 +419,11 @@ function main(argv) {
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.writeFileSync(target, plan.payload[dest]);
     }
-    const how = plan.replaced.includes(dest) ? 'replace' : 'write';
-    console.log(`  ${args.dryRun ? '+' : '✓'} ${dest}${args.dryRun ? ` (would ${how})` : (how === 'replace' ? ' (replaced with the org version)' : '')}`);
+    const replacing = plan.replaced.includes(dest);
+    let note = '';
+    if (args.dryRun) note = replacing ? ' (would replace)' : ' (would write)';
+    else if (replacing) note = ' (replaced with the org version)';
+    console.log(`  ${args.dryRun ? '+' : '✓'} ${dest}${note}`);
   }
   if (!plan.writes.length && !plan.kept.length) console.log('  (nothing to materialize for this class)');
 }

@@ -72,6 +72,15 @@ function classLabel(profile) {
   return code(profile.name) + from;
 }
 
+/** The Problem sentence for managed paths that differ from the org version. */
+function restoredProblem(restored) {
+  if (!restored.length) return '';
+  const one = restored.length === 1;
+  const verb = one ? 'differs' : 'differ';
+  const noun = one ? 'managed seed path' : 'managed seed paths';
+  return `${restored.map(code).join(', ')} ${verb} from the current org version (${noun}; ${code('MANAGED_SEED_PATHS')} in ${code('ops/build-seed-payload.js')}).`;
+}
+
 function seedNarrative({
   added = [], restored = [], profile, branch, sourceSha, seeder, hasRootCodeowners = false,
 } = {}) {
@@ -85,9 +94,7 @@ function seedNarrative({
     added.length
       ? `This repository is missing ${added.length} file(s) that its repo class ${cls} materializes from ${code('Quantum-L9/.github')} (${code('policies/repo-classes.yml')}).`
       : '',
-    restored.length
-      ? `${restored.map(code).join(', ')} differ${restored.length === 1 ? 's' : ''} from the current org version (managed seed path${restored.length === 1 ? '' : 's'}; ${code('MANAGED_SEED_PATHS')} in ${code('ops/build-seed-payload.js')}).`
-      : '',
+    restoredProblem(restored),
     profile.inherit?.length
       ? `Inherited from the org ${code('.github')} repository and deliberately not copied here: ${profile.inherit.map(code).join(', ')}.`
       : '',
