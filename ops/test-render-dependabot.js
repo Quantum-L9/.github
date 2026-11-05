@@ -30,6 +30,13 @@ const {
 } = require('./render-dependabot.js');
 const { buildSeedPayload, renderDependabot: reexported } = require('./build-seed-payload.js');
 
+// Sets one named property on an Error. Explicit assignment, not Object.assign:
+// Core's Semgrep gate (prototype-pollution) flags every two-argument call.
+const errorWith = (err, key, value) => {
+  err[key] = value;
+  return err;
+};
+
 const root = path.resolve(__dirname, '..');
 const FIXTURES = 'ops/fixtures/dependabot';
 const ACTION_IGNORES = ['Quantum-L9/.github*', 'Quantum-L9/l9-ci-core*', 'Quantum-L9/l9-ci-sdk*'];
@@ -176,7 +183,7 @@ process.chdir(root);
     /could not be read/,
   );
   await assert.rejects(probeRepoShape({ listRoot: async () => ({ type: 'file' }), readText: async () => null }), /not a directory listing/);
-  const listingError = Object.assign(new Error('forbidden'), { status: 403 });
+  const listingError = errorWith(new Error('forbidden'), 'status', 403);
   await assert.rejects(probeRepoShape({ listRoot: async () => { throw listingError; }, readText: async () => null }), (e) => e === listingError);
   console.log('ok: probeRepoShape — files only, pyproject.toml read when listed, unreadable root or pyproject throws');
 

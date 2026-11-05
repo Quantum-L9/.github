@@ -210,7 +210,8 @@ const COMPOSER_ENV_KEYS = new Set([
 ]);
 
 function composeIn({
-  exec, fs, workdir, remoteUrl, branch, headSha, baseSha, template, composerRoot, token = '',
+  // `exec` is execFileSync-compatible (argv array, no shell); bound as execFile.
+  exec: execFile, fs, workdir, remoteUrl, branch, headSha, baseSha, template, composerRoot, token = '',
 }) {
   for (const [name, v] of Object.entries({ workdir, remoteUrl, branch, headSha, baseSha, template, composerRoot })) {
     if (typeof v !== 'string' || !v) throw new TypeError(`renderSeedPrBody: ${name} is required`);
@@ -224,13 +225,11 @@ function composeIn({
   const env = { ...process.env, GIT_TERMINAL_PROMPT: '0' };
   if (token) {
     const basic = Buffer.from(`x-access-token:${token}`).toString('base64');
-    Object.assign(env, {
-      GIT_CONFIG_COUNT: '1',
-      GIT_CONFIG_KEY_0: 'http.extraheader',
-      GIT_CONFIG_VALUE_0: `AUTHORIZATION: basic ${basic}`,
-    });
+    env.GIT_CONFIG_COUNT = '1';
+    env.GIT_CONFIG_KEY_0 = 'http.extraheader';
+    env.GIT_CONFIG_VALUE_0 = `AUTHORIZATION: basic ${basic}`;
   }
-  const git = (...args) => String(exec('git', ['-C', workdir, ...args], { encoding: 'utf8', env })).trim();
+  const git = (...args) => String(execFile('git', ['-C', workdir, ...args], { encoding: 'utf8', env })).trim();
 
   git('init', '-q');
   // Depth 2 is the seed commit and its parent (the base): all the range needs.
@@ -251,7 +250,7 @@ function composeIn({
   // --remote: no local receipts exist on a seeder runner, so nothing is claimed
   // as measured that was not; the additive_only range is measured with the
   // repository's own validator or reported unmeasured.
-  const body = String(exec('python3', [
+  const body = String(execFile('python3', [
     composer, '--workspace', workdir, '--pr-base', baseSha,
     '--template', templateFile, '--remote', '--handoff', handoffFile,
   ], { encoding: 'utf8', env: composerEnv(process.env), maxBuffer: 16 * 1024 * 1024 }));

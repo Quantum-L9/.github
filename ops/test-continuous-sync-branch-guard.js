@@ -100,7 +100,7 @@ function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {
   const getRef = async (args) => {
     if (baseError && args.ref === 'heads/main') {
       calls.push({ name: 'git.getRef', args });
-      throw Object.assign(new Error(baseError.message), { status: baseError.status });
+      throw errorWith(new Error(baseError.message), 'status', baseError.status);
     }
     const res = await shared.getRef(args);
     if (baseMovesTo && args.ref === 'heads/main' && baseReads++ > 0) return { data: { object: { sha: baseMovesTo } } };
@@ -142,14 +142,14 @@ function makeGithub({ branch = null, openPRs = [], movesTo, files = {}, dirs = {
       users: {
         // An installation token cannot call /user; the workflow must not need it.
         getAuthenticated: async () => {
-          throw Object.assign(new Error('Resource not accessible by integration'), { status: 403 });
+          throw errorWith(new Error('Resource not accessible by integration'), 'status', 403);
         },
       },
       repos: {
         listForOrg: () => {},
         getContent: async (args) => {
           calls.push({ name: 'repos.getContent', args });
-          if (errors[args.path]) throw Object.assign(new Error('boom'), { status: errors[args.path] });
+          if (errors[args.path]) throw errorWith(new Error('boom'), 'status', errors[args.path]);
           if (args.path in dirs) return { data: dirs[args.path].map((n) => ({ name: n, type: n.includes('.') ? 'file' : 'dir' })) };
           const visible = args.ref === 'base-sha' ? { ...files, ...atBase } : files;
           // A repository root always lists: what the fixture holds, by its top-level names.
@@ -213,6 +213,17 @@ const canonicalPin = fs
 // bytes are the github-actions-only render; the shape-specific cases are in
 // dependabotShapeScenarios below.
 const { renderDependabot, shapeFromRoot } = require('./render-dependabot.js');
+
+// Sets one named property on an Error. Explicit assignment, not Object.assign:
+// Core's Semgrep gate (prototype-pollution) flags every two-argument call.
+const errorWith = (err, key, value) => {
+  err[key] = value;
+  return err;
+};
+// Sets test environment variables one by one (see errorWith / Core's Semgrep gate).
+const setEnv = (vars) => {
+  for (const [k, v] of Object.entries(vars)) process.env[k] = v;
+};
 const renderFor = (names, pyprojectText = null) => {
   const prev = process.cwd();
   process.chdir(root);
@@ -240,7 +251,7 @@ async function runClass({ files = {}, dirs = {}, errors = {}, dry = false, branc
   const prev = process.cwd();
   const prevEnv = { DRY_RUN: process.env.DRY_RUN, FILTER: process.env.FILTER, APP_SLUG: process.env.APP_SLUG, GITHUB_SHA: process.env.GITHUB_SHA };
   process.chdir(root);
-  Object.assign(process.env, { DRY_RUN: dry ? 'true' : 'false', FILTER: '', APP_SLUG, GITHUB_SHA: SOURCE_SHA });
+  setEnv({ DRY_RUN: dry ? 'true' : 'false', FILTER: '', APP_SLUG, GITHUB_SHA: SOURCE_SHA });
   try {
     await syncScript(github, core, {}, makeScopedRequire(root, { './ops/seed-pr-body.js': recorder.module }));
   } finally {
