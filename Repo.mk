@@ -20,12 +20,19 @@
         clean
 
 # ─── Core Repository Execution V2 phases ─────────────────────────────────────
+# PyYAML for every python3 a gate runs: the system python3 when it has PyYAML,
+# otherwise the .venv repo-setup creates. Recipes that reach python3 (directly,
+# or through the ops/*.js suites that shell out to `python3`) start with
+# $(USE_VENV), so a runner whose python3 lacks PyYAML (Core) sees the same one.
+USE_VENV = if [ -x .venv/bin/python3 ]; then export PATH="$(CURDIR)/.venv/bin:$$PATH"; fi;
+
 repo-setup: ## Check node and git; provide a PyYAML interpreter (.venv if needed)
 	@set -euo pipefail; \
 	for tool in node git python3; do \
 	  command -v "$$tool" >/dev/null 2>&1 || { echo "❌ $$tool not found — make validate cannot run" >&2; exit 1; }; \
 	done; \
-	if ! python3 -c 'import yaml' >/dev/null 2>&1; then \
+	if ! python3 -c 'import yaml' >/dev/null 2>&1 \
+	   && ! { [ -x .venv/bin/python3 ] && .venv/bin/python3 -c 'import yaml' >/dev/null 2>&1; }; then \
 	  python3 -m venv .venv; \
 	  .venv/bin/pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2"; \
 	fi
@@ -33,8 +40,8 @@ repo-setup: ## Check node and git; provide a PyYAML interpreter (.venv if needed
 repo-check: ## Static check: audit this repo for floating action refs
 	@bash ops/audit-sha-pins.sh
 
-repo-test: ## Test suites: seed payload, birth profiles, workflow and PR-body contracts
-	@bash ops/validate-starters.sh
+repo-test: repo-setup ## Test suites: seed payload, birth profiles, workflow and PR-body contracts
+	@$(USE_VENV) bash ops/validate-starters.sh
 
 # ─── One-Shot Activation ─────────────────────────────────────────────────────
 activate: ## Run full activation (secret scanning, rulesets, labels, seed, preflight)
@@ -44,8 +51,8 @@ activate: ## Run full activation (secret scanning, rulesets, labels, seed, prefl
 preflight: ## Run preflight health check (read-only)
 	@bash scripts/preflight.sh
 
-repo-validate: ## Validate seed payload, birth profiles, SHA pins, and semantic-foundation closure
-	@set -euo pipefail; \
+repo-validate: repo-setup ## Validate seed payload, birth profiles, SHA pins, and semantic-foundation closure
+	@set -euo pipefail; $(USE_VENV) \
 	bash ops/validate-starters.sh; \
 	bash ops/audit-sha-pins.sh; \
 	if python3 -c 'import yaml' >/dev/null 2>&1; then \
