@@ -23,7 +23,8 @@
   "overrides": {
     "l9-repo-template": "non_constellation_python",
     "l9-ci-core": "self_governed",
-    "l9-meta-injector": "self_governed"
+    "l9-meta-injector": "org_seeded_self_governed",
+    "l9-constellation-topology": "org_seeded_self_governed"
   },
   "classes": {
     "default": {
@@ -80,6 +81,38 @@
         ".github/workflows/governance.yml",
         ".github/CODEOWNERS",
         ".github/dependabot.yml"
+      ]
+    },
+    "org_seeded_self_governed": {
+      "description": "Materialize ownership, rendered Dependabot, SECURITY.md and issue/PR templates while keeping repository CI self-governed. Inherit passive community-health surfaces. Never seed the org governance caller or CI distribution paths.",
+      "seed_categories": [
+        "codeowners",
+        "dependabot",
+        "community-health",
+        "issue-templates",
+        "pr-templates"
+      ],
+      "inherit": [
+        "CODE_OF_CONDUCT.md",
+        "CONTRIBUTING.md",
+        "SUPPORT.md",
+        ".github/FUNDING.yml",
+        ".github/VULNERABILITY_REPORT.yml"
+      ],
+      "forbid": [
+        ".github/workflows/l9-analysis.yml",
+        ".github/workflows/l9-lint-test.yml",
+        ".github/workflows/l9-lint-test-node.yml",
+        ".github/workflows/governance.yml",
+        ".github/workflows/on-org-update.yml",
+        ".github/governance/**"
+      ],
+      "remote_apply": {
+        "labels": true,
+        "repo_settings": true
+      },
+      "mandatory_files_waive": [
+        ".github/workflows/governance.yml"
       ]
     },
     "non_constellation_python": {

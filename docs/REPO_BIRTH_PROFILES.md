@@ -86,7 +86,8 @@ labels and repository settings.
 | --- | --- | --- | --- | --- |
 | `default` | No marker and no override | `codeowners`, `dependabot`, `governance`, `community-health` (`SECURITY.md` only), `issue-templates`, `pr-templates` (default + `release.md`) | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml` | nothing |
 | `non_constellation_python` | `l9-repo-template` offspring | `codeowners`, `dependabot`, `labels`, `community-health` (`SECURITY.md` only) | the passive community-health surfaces above, issue templates, PR templates | org CI distribution paths, the governance caller, retired CI pin files |
-| `self_governed` | `l9-ci-core`, `l9-meta-injector` | nothing | every community-health surface including `SECURITY.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml`, issue templates, PR templates | org CI distribution paths and the governance caller |
+| `self_governed` | `l9-ci-core`, or an explicit marker | nothing | every community-health surface including `SECURITY.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml`, issue templates, PR templates | org CI distribution paths and the governance caller |
+| `org_seeded_self_governed` | `l9-meta-injector`, `l9-constellation-topology` | `codeowners`, `dependabot`, `community-health` (`SECURITY.md` only), `issue-templates`, `pr-templates` | the passive community-health surfaces | org CI distribution paths and the governance caller |
 
 `default` reproduces `DEFAULT_CATEGORIES` in `ops/build-seed-payload.js` and
 inherits the passive community-health surfaces. `ops/test-repo-class-profile.js`
@@ -102,6 +103,15 @@ passive surfaces are INHERIT in every class.
 `non_constellation_python`. `.github/labels.yml` is required by
 `l9-repo-template` and not part of the org-wide default seed. The class
 decides.
+
+`org_seeded_self_governed` enables reviewable, missing-only organization file
+delivery without transferring repository CI ownership. Its twelve destinations
+are ownership, rendered Dependabot, SECURITY.md, seven named issue forms and
+the two PR templates. No workflow is seeded. Existing consumer files and a root
+CODEOWNERS remain preserved. The existing weekly sweep can restore a drifted
+Dependabot render unless `.l9/no-sync` opts out; manual `seed-governance.yml`
+remains missing-only. The repository marker still outranks these two explicit
+organization overrides, and `self_governed` remains unchanged for other users.
 
 ### Assigning a class without a commit in the repo
 

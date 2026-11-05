@@ -279,7 +279,8 @@ try {
   const OVERRIDE_EXPECTATIONS = {
     'l9-repo-template': 'non_constellation_python',
     'l9-ci-core': 'self_governed',
-    'l9-meta-injector': 'self_governed',
+    'l9-meta-injector': 'org_seeded_self_governed',
+    'l9-constellation-topology': 'org_seeded_self_governed',
   };
   for (const [repo, expected] of Object.entries(OVERRIDE_EXPECTATIONS)) {
     const decided = classForRepo(doc, repo, null);
@@ -407,6 +408,32 @@ try {
   assert.ok(waivesMandatoryFile(selfGoverned, '.github/workflows/governance.yml'));
   assert.ok(waivesMandatoryFile(selfGoverned, '.github/CODEOWNERS'));
 
+  // Explicitly requested seed enablement does not transfer repository CI ownership.
+  const seededSelfGoverned = resolveProfile(doc, 'org_seeded_self_governed');
+  assert.deepStrictEqual(seededSelfGoverned.seed_categories, [
+    'codeowners', 'dependabot', 'community-health', 'issue-templates', 'pr-templates',
+  ]);
+  assert.deepStrictEqual(seededSelfGoverned.forbid, selfGoverned.forbid);
+  assert.deepStrictEqual(seededSelfGoverned.inherit, def.inherit);
+  assert.deepStrictEqual(seededSelfGoverned.mandatory_files_waive, ['.github/workflows/governance.yml']);
+  for (const repo of ['l9-meta-injector', 'l9-constellation-topology']) {
+    const payload = buildSeedPayload({
+      fs, profile: seededSelfGoverned, repoShape: ACTIONS_ONLY, repository: `Quantum-L9/${repo}`,
+    });
+    assert.strictEqual(Object.keys(payload).length, 12, `${repo}: exactly twelve non-CI seed destinations`);
+    assert.ok(payload['.github/CODEOWNERS']);
+    assert.ok(payload['.github/dependabot.yml']);
+    assert.ok(payload['.github/PULL_REQUEST_TEMPLATE/release.md']);
+    assert.match(payload['SECURITY.md'], new RegExp(`Quantum-L9/${repo}/security/advisories/new`));
+    assert.ok(!Object.keys(payload).some((dest) => dest.startsWith('.github/workflows/')));
+    assert.throws(
+      () => buildSeedPayload({ fs, profile: seededSelfGoverned, repoShape: ACTIONS_ONLY, categories: ['governance'] }),
+      /violates repo class org_seeded_self_governed.*governance\.yml/,
+    );
+    assert.strictEqual(classForRepo(doc, repo, 'profile: self_governed\n').name, 'self_governed');
+    assert.ok(classForRepo(doc, repo, 'profile: broken-profile\n').error);
+  }
+
   // ── planConsumerSeed: the manual (shell) path binds to the same class law ──
   // ops/sync-org-files.sh writes nothing itself; this is the whole decision.
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'plan-consumer-seed-'));
@@ -483,6 +510,21 @@ try {
     assert.strictEqual(ovrPlan.profile.name, 'self_governed');
     assert.strictEqual(ovrPlan.profile.resolved_from, 'org override');
     assert.deepStrictEqual(ovrPlan.writes, []);
+
+    for (const repo of ['l9-meta-injector', 'l9-constellation-topology']) {
+      const seedPlan = planConsumerSeed({
+        fs, path, consumerRoot: consumer(repo, null, {
+          'SECURITY.md': 'consumer-owned security policy\n',
+          '.github/workflows/governance.yml': 'consumer-owned workflow\n',
+        }), repository: `Quantum-L9/${repo}`,
+      });
+      assert.strictEqual(seedPlan.profile.name, 'org_seeded_self_governed');
+      assert.strictEqual(seedPlan.profile.resolved_from, 'org override');
+      assert.deepStrictEqual(seedPlan.kept, ['SECURITY.md']);
+      assert.ok(seedPlan.writes.includes('.github/PULL_REQUEST_TEMPLATE/release.md'));
+      assert.ok(!seedPlan.writes.some((dest) => dest.startsWith('.github/workflows/')));
+      assert.ok(!seedPlan.writes.includes('SECURITY.md'));
+    }
 
     // a malformed or unknown explicit marker fails closed, never default.
     for (const [label, marker] of [
