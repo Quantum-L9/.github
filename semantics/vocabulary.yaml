@@ -898,6 +898,17 @@ terms:
       '
     authority_rule:
       canonical_by_default: false
+  artifact_header:
+    semantic_class: semantic_concept
+    definition: A bounded block at the head of a file in which the file declares facts about itself. Its fields are
+      source declarations, never observations or authority.
+    detailed_model: artifact_header_model.yaml
+  header_declaration:
+    semantic_class: evidence
+    definition: One field value an artifact header declares about the file that carries it, held with evidence class
+      declared and authority source. It establishes no identity, ownership, canonical status, dependency, relation, or
+      admission.
+    detailed_model: artifact_header_model.yaml
   profile:
     semantic_class: configuration
     definition: 'Versioned canonical configuration selecting a bounded composition of semantics, transformations,

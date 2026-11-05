@@ -44,8 +44,9 @@ ProductTopology
 - ADR-021: Producer-emitted projection contract and consumer-committed bundles
 - ADR-022: PR-audit projection, source-namespaced composition, payload schemas, and validator closure
 - ADR-023: Operating-plane @2 as a declared major-version successor, and PROJECTION-014 exact selection removal
+- ADR-024: Artifact header field semantics as source declarations
 
-ADR-001 through ADR-023 are the global semantic decisions. They live in this
+ADR-001 through ADR-024 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions
