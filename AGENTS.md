@@ -145,3 +145,15 @@ Exactly one formatter owns each language. Do not reformat a file with a tool oth
 Generated from `environment/ide/policy.json` in the governance clone by `ops/scripts/adapters/agentdocs.sh`. Edit the policy, not this block.
 
 <!-- END L9 FORMATTER OWNERSHIP -->
+
+## Repository execution
+
+Central Core runs this repository in required mode, so it carries the exact
+`l9.repo-execution/v2` contract in `.l9/repo-workflow.json`. The root
+`Makefile` is the Core-owned `make-v1` facade, byte-for-byte; do not edit it.
+Everything this repository runs lives in `Repo.mk`: `make setup` checks node
+and git and provides a PyYAML interpreter, `make validate` is the complete
+local gate as before (seed-payload suites, SHA pins, semantic closure),
+`make check` is its SHA-pin audit, and `make test` is its
+`ops/validate-starters.sh` suites. `make validate` stays the one gate to run
+before a change; Core runs all four phases in order.

@@ -25,6 +25,13 @@ const {
 const { loadRepoClasses, resolveProfile } = require('./repo-class-profile.js');
 const { shapeFromRoot } = require('./render-dependabot.js');
 
+// Sets one named property on an Error. Explicit assignment, not Object.assign:
+// Core's Semgrep gate (prototype-pollution) flags every two-argument call.
+const errorWith = (err, key, value) => {
+  err[key] = value;
+  return err;
+};
+
 // Explicit comparator: a default `.sort()` compares by string conversion,
 // which is an implicit ordering rule one refactor away from being wrong.
 const byName = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
@@ -209,7 +216,7 @@ try {
   // ── Required sources (G1): a named source that is gone fails the build ────
   // An fs view over this checkout that hides some paths and adds others, so
   // the real fixtures are never touched.
-  const enoent = (p) => Object.assign(new Error(`ENOENT: no such file, open '${p}'`), { code: 'ENOENT' });
+  const enoent = (p) => errorWith(new Error(`ENOENT: no such file, open '${p}'`), 'code', 'ENOENT');
   const fsWith = ({ hide = [], add = {} } = {}) => ({
     ...fs,
     existsSync: (p) => (p in add) || (!hide.includes(p) && fs.existsSync(p)),

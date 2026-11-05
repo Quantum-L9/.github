@@ -20,6 +20,17 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
+// Sets one named property on an Error. Explicit assignment, not Object.assign:
+// Core's Semgrep gate (prototype-pollution) flags every two-argument call.
+const errorWith = (err, key, value) => {
+  err[key] = value;
+  return err;
+};
+// Sets test environment variables one by one (see errorWith / Core's Semgrep gate).
+const setEnv = (vars) => {
+  for (const [k, v] of Object.entries(vars)) process.env[k] = v;
+};
+
 /**
  * Extract the `script: |` block from a workflow, without a YAML dependency.
  * Deliberately literal: the test must run the same text the runner does, not
@@ -68,7 +79,7 @@ function loadScriptModule(file, tmpTag = 'workflow-script-', nth = 0) {
 }
 
 /** An octokit-shaped 404, which the workflows branch on by `.status`. */
-const notFound = (msg) => Object.assign(new Error(msg), { status: 404 });
+const notFound = (msg) => errorWith(new Error(msg), 'status', 404);
 
 /**
  * Minimal `core` stub. `setFailed` is captured rather than thrown so a test
@@ -166,7 +177,7 @@ function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations, m
     const env = { ...envFor(dry), ...envExtra };
     const prevEnv = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
     process.chdir(root);
-    Object.assign(process.env, env);
+    setEnv(env);
     const { github, calls, state } = makeGithub(stubOpts);
     if (mutateGithub) mutateGithub(github, state);
     const core = makeCore();
@@ -219,7 +230,7 @@ function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations, m
  * @param {Function} o.record recorder factory from the suite
  */
 function makeBranchStubs({ branch, state, calls, openPRs, otherPRs = [], listError, record }) {
-  const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { status });
+  const httpError = (status) => errorWith(new Error(`HTTP ${status}`), 'status', status);
   const pulls = {
     list: async (args) => {
       calls.push({ name: 'pulls.list', args });

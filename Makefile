@@ -1,88 +1,33 @@
+# GENERATED repository execution facade: make-v1. DO NOT EDIT.
+#
+# This file is owned by the central repository-execution tooling and is
+# reproduced byte-for-byte into each consumer's root Makefile. It defines only
+# the portable four-phase ABI and routes every phase to a repository-owned
+# leaf in Repo.mk. Repository implementation, product logic, CI orchestration,
+# and organization governance never live here.
+#
+# Regenerate from the versioned facade template with the repository-execution
+# reconcile command; make-v1 behavior is immutable once released.
 .DEFAULT_GOAL := help
-SHELL := /bin/bash
-.PHONY: help activate preflight validate sync-labels sync-labels-all \
-        seed-dry seed-apply birth-bootstrap birth-seed \
-        apply-rulesets set-properties pin-actions audit-pins enforce-dry enforce-apply \
-        clean
+SHELL := /usr/bin/env bash
+.SHELLFLAGS := -eu -o pipefail -c
 
-# ─── Info ────────────────────────────────────────────────────────────────────
-help: ## Show all targets
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+# Composition, not isolation: the repository-owned implementation is included
+# and must exist. A repository without Repo.mk has no execution implementation
+# and fails here rather than passing silently.
+include Repo.mk
 
-# ─── One-Shot Activation ─────────────────────────────────────────────────────
-activate: ## Run full activation (secret scanning, rulesets, labels, seed, preflight)
-	@bash ops/activate-all.sh
+.PHONY: help setup validate check test
 
-# ─── Validation ──────────────────────────────────────────────────────────────
-preflight: ## Run preflight health check (read-only)
-	@bash scripts/preflight.sh
+help: ## Show the portable repository-execution phases
+	@awk '\
+		BEGIN { FS = ":.*## "; } \
+		/^[A-Za-z0-9_.-]+:.*## / { \
+			printf "  %-24s %s\n", $$1, $$2; \
+		}' $(MAKEFILE_LIST)
 
-validate: ## Validate seed payload, birth profiles, SHA pins, and semantic-foundation closure
-	@set -euo pipefail; \
-	bash ops/validate-starters.sh; \
-	bash ops/audit-sha-pins.sh; \
-	if python3 -c 'import yaml' >/dev/null 2>&1; then \
-	  PY=python3; \
-	else \
-	  python3 -m venv .venv; \
-	  .venv/bin/pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2"; \
-	  PY=.venv/bin/python; \
-	fi; \
-	"$$PY" scripts/validate-semantics.py
-
-# ─── Fan-out Operations ──────────────────────────────────────────────────────
-sync-labels: ## Sync org label taxonomy to one repo (REPO=owner/name)
-	@test -n "$(REPO)" || (echo "usage: make sync-labels REPO=owner/name (org-wide: make sync-labels-all)" >&2; exit 2)
-	@bash scripts/sync-labels.sh "$(REPO)"
-
-sync-labels-all: ## Sync org label taxonomy to every active repo (weekly sweep, on demand)
-	@gh workflow run sync-labels-all.yml
-
-seed-dry: ## Dry-run: show which repos would be seeded
-	@gh workflow run auto-seed-new-repo.yml -f dry_run=true
-
-seed-apply: ## Seed governance files into all unseeded repos
-	@gh workflow run auto-seed-new-repo.yml -f dry_run=false
-
-# ─── Repo Birth ──────────────────────────────────────────────────────────────
-birth-bootstrap: ## REMOTE APPLY + attest one newly created repo (REPO=name [CLASS=...])
-	@test -n "$(REPO)" || (echo "usage: make birth-bootstrap REPO=<repo-name> [CLASS=<repo-class>]" >&2; exit 2)
-	@gh workflow run repo-birth-bootstrap.yml \
-		-f target_repo="$(REPO)" \
-		-f repo_class="$(CLASS)" \
-		-f dry_run=false
-
-birth-seed: ## Seed one newly created repo's applicable files (REPO=name [CLASS=...])
-	@test -n "$(REPO)" || (echo "usage: make birth-seed REPO=<repo-name> [CLASS=<repo-class>]" >&2; exit 2)
-	@gh workflow run auto-seed-new-repo.yml \
-		-f target_repo="$(REPO)" \
-		-f repo_class="$(CLASS)" \
-		-f dry_run=false
-
-# ─── Rulesets ────────────────────────────────────────────────────────────────
-apply-rulesets: ## Apply org rulesets (advisory: evaluate; canonical CI: active)
-	@bash scripts/apply-rulesets.sh
-
-# ─── Custom Properties ───────────────────────────────────────────────────────
-set-properties: ## Auto-detect and set custom properties on all repos
-	@bash ops/set-repo-properties.sh --apply
-
-# ─── SHA Pinning ─────────────────────────────────────────────────────────────
-pin-actions: ## Pin floating action refs to current SHA
-	@bash ops/pin-actions-sha.sh
-
-audit-pins: ## Audit this repo for floating action refs
-	@bash ops/audit-sha-pins.sh
-
-# ─── Policy Enforcement ──────────────────────────────────────────────────────
-enforce-dry: ## Dry-run: show policy drift without fixing
-	@gh workflow run enforce-policies.yml -f dry_run=true
-
-enforce-apply: ## Enforce policies (auto-correct settings, report missing files)
-	@gh workflow run enforce-policies.yml -f dry_run=false
-
-# ─── Cleanup ─────────────────────────────────────────────────────────────────
-clean: ## Remove generated artifacts
-	@rm -f /tmp/requirements-consumer-ci.txt
-	@echo "clean"
+# Portable make-v1 ABI. Each phase is exactly one repository-owned leaf.
+setup: repo-setup ## Establish repository dependencies
+validate: repo-validate ## Run repository validation
+check: repo-check ## Run repository static and quality checks
+test: repo-test ## Run repository tests

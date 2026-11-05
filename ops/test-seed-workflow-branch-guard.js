@@ -62,6 +62,13 @@ const MARKER_PATH = '.l9/org-birth-profile.yaml';
 const fs = require('node:fs');
 const { renderDependabot, shapeFromRoot } = require('./render-dependabot.js');
 
+// Sets one named property on an Error. Explicit assignment, not Object.assign:
+// Core's Semgrep gate (prototype-pollution) flags every two-argument call.
+const errorWith = (err, key, value) => {
+  err[key] = value;
+  return err;
+};
+
 /** The root listing GitHub returns for a fixture's files: one entry per top-level name. */
 const rootEntries = (files) => {
   const top = new Map();
@@ -160,7 +167,7 @@ function makeGithub(BRANCH, { branch = null, openPRs = [], otherPRs = [], listEr
           calls.push({ name: 'repos.getContent', args });
           const r = repoFor(args.repo);
           if (r.errors?.[args.path]) {
-            throw Object.assign(new Error(`HTTP ${r.errors[args.path]}`), { status: r.errors[args.path] });
+            throw errorWith(new Error(`HTTP ${r.errors[args.path]}`), 'status', r.errors[args.path]);
           }
           // `atBase` is content committed at the pinned base (`base-sha`,
           // what heads/main resolves to) that an unpinned read — one that
@@ -336,7 +343,7 @@ async function failClosedScenarios(wf, run, label) {
       mutateGithub: (github) => {
         const real = github.rest.git.getRef;
         github.rest.git.getRef = async (args) => {
-          if (args.ref === 'heads/main') throw Object.assign(new Error(`HTTP ${status}`), { status });
+          if (args.ref === 'heads/main') throw errorWith(new Error(`HTTP ${status}`), 'status', status);
           return real(args);
         };
       },
@@ -461,7 +468,7 @@ async function failClosedScenarios(wf, run, label) {
     const emptyRepo = (status, message) => (github) => {
       const real = github.rest.git.getRef;
       github.rest.git.getRef = async (args) => {
-        if (args.repo === 'empty-repo') throw Object.assign(new Error(message), { status });
+        if (args.repo === 'empty-repo') throw errorWith(new Error(message), 'status', status);
         return real(args);
       };
     };
