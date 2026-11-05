@@ -23,6 +23,7 @@ requires:
   - binding_catalog.yaml
   - authority_model.yaml
   - artifact_model.yaml
+  - artifact_header_model.yaml
   - lifecycle.yaml
   - packet_catalog.yaml
   - error_taxonomy.yaml

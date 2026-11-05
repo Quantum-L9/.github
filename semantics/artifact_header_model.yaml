@@ -1,0 +1,259 @@
+schema: l9.artifact-header-model/v1
+artifact_id: l9.artifact-header-model/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_artifact_header_semantics
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: artifact_header_model.yaml
+governed_by:
+  invariants:
+  - L9-AUTH-001
+  - L9-OWNER-001
+  - L9-SEM-001
+  - L9-PROMOTION-001
+  - L9-EVIDENCE-001
+  - L9-UNKNOWN-001
+  - L9-IDENTITY-001
+  - L9-PROJECTION-001
+  contracts:
+  - l9.contract/authority-boundary@1
+  - l9.contract/semantic-ownership@1
+  - l9.contract/evidence-and-receipt@1
+  - l9.contract/unknown-and-degradation@1
+purpose: Define the global meaning of the native L9_META artifact header and of each field it declares, so that every
+  producer and consumer reads a header the same way. A header is what a file declares about itself. This ledger defines
+  what each declaration means and, as importantly, what it does not establish. It does not define carrier syntax,
+  parsing, field order, a schema for any packet, a predicate grammar, projection rules, a relation type, an identity
+  binding, or a controlled vocabulary for any field this ledger leaves open; each of those remains with the domain that
+  owns it.
+subject:
+  concept: artifact_header
+  definition: A bounded block at the head of a file in which the file declares facts about itself, in one of the carrier
+    forms its producing domain recognizes.
+global_rules:
+  header_field_is_a_source_declaration_not_an_observation: true
+  header_declaration_grants_no_authority: true
+  header_declaration_admits_nothing: true
+  header_declaration_registers_no_canonical_source: true
+  header_declaration_creates_no_identity_binding: true
+  header_owner_does_not_resolve_to_actor_identity: true
+  header_reference_is_not_a_dependency: true
+  header_declaration_creates_no_canonical_relation: true
+  header_status_is_not_lifecycle_or_admission_state: true
+  field_meaning_requires_a_recognized_declared_schema: true
+  field_outside_the_declared_schema_carries_no_meaning: true
+  unresolved_or_empty_value_remains_unknown: true
+  declared_values_are_not_normalized_by_this_ledger: true
+  conflicting_declarations_remain_conflicts: true
+  carrier_syntax_is_owned_by_the_producing_domain: true
+declaration_semantics:
+  evidence_class: declared
+  authority: source
+  meaning: A header field records a claim the file makes about itself. Its truth is not established by the header, by a
+    successful parse, by repetition across files, or by agreement with another header. A consumer may hold it as a
+    claim, cite it, and compare it with observed evidence; it must not treat it as observed evidence or as authority.
+  conflicts: Two declarations of one single-valued field about one subject, or a declaration that contradicts observed
+    evidence, are a conflict to be preserved and reported, never resolved by choosing a side.
+declared_schemas:
+  rule: The `l9_schema` field names the field vocabulary a header is written in. Field meanings below apply only under a
+    recognized declared schema; under an absent or unrecognized schema a field key may be preserved, but no meaning is
+    assigned to it.
+  recognized:
+    '1':
+      field_vocabulary: native
+    '2':
+      field_vocabulary: native
+field_categories:
+  identity: What the file declares itself to be, or to derive from.
+  classification: How the file declares itself to be grouped or what state it declares itself in.
+  governance: Who or what the file declares itself to be stewarded by, or what it declares itself canonical for.
+  retrieval: When, why, and with what cost the file declares it should be loaded, and what it declares it refers to.
+value_kinds:
+  label: One declared word or token, compared exactly as written.
+  label_list: An ordered list of declared labels; order carries no meaning this ledger defines.
+  path: A declared repository-relative path, which is not proven to exist by being declared.
+  reference_list: An ordered list of declared names or paths of other artifacts, which are not proven to resolve.
+  url: A declared absolute locator, which is not fetched or proven to resolve by being declared.
+  count: A declared non-negative whole number.
+  text: Declared free text, carried verbatim.
+fields:
+  id:
+    category: identity
+    value_kind: label
+    definition: The identifier the file declares for itself within its producing domain.
+    does_not_establish: Product, repository, actor, surface, or any identity dimension in identity_model.yaml.
+  origin:
+    category: identity
+    value_kind: label
+    definition: The provenance class the file declares it came from, such as a template or a specific engine.
+    does_not_establish: Provenance in the sense of L9-PROV-001, which requires resolvable authoritative inputs.
+  engine:
+    category: identity
+    value_kind: label
+    definition: The engine the file declares it belongs to.
+    does_not_establish: Product, product kind, node, or deployment identity. Distinct labels are distinct claims even
+      where they appear synonymous.
+  namespace:
+    category: identity
+    value_kind: label
+    definition: The namespace the file declares it is named in.
+    does_not_establish: Any registered namespace or identity coordinate.
+  component:
+    category: identity
+    value_kind: label
+    definition: The component name the file declares for itself.
+    does_not_establish: An architecture element, port, or node.
+  canonical_path:
+    category: identity
+    value_kind: path
+    definition: The path at which the file declares its authoritative copy lives.
+    does_not_establish: That the path exists, that the file is or is not that copy, or any canonical source.
+  version:
+    category: identity
+    value_kind: label
+    definition: The version the file declares for itself.
+    does_not_establish: A release, revision, or compatibility claim.
+  title:
+    category: identity
+    value_kind: text
+    definition: The human title the file declares for itself.
+    does_not_establish: Any identity.
+  source_repo:
+    category: identity
+    value_kind: text
+    definition: The repository the file declares it was taken from.
+    does_not_establish: A resolvable repository coordinate or provenance.
+  source_file:
+    category: identity
+    value_kind: text
+    definition: The file the file declares it was taken from.
+    does_not_establish: A resolvable artifact coordinate or provenance.
+  source_adr:
+    category: identity
+    value_kind: label
+    definition: The decision record the file declares it implements or derives from.
+    does_not_establish: That the decision exists, is accepted, or governs the file.
+  layer:
+    category: classification
+    value_kind: label_list
+    definition: The layers the file declares it belongs to.
+    does_not_establish: Architecture layering or a dependency rule. The value set is open and owned by the declaring
+      domain.
+  tags:
+    category: classification
+    value_kind: label_list
+    definition: Free classification labels the file declares for itself.
+    does_not_establish: Any classification this Foundation defines.
+  artifact_type:
+    category: classification
+    value_kind: label
+    definition: The kind of artifact the file declares itself to be.
+    does_not_establish: An artifact kind in artifact_model.yaml or its authority class. The value set is open and owned
+      by the declaring domain.
+  status:
+    category: classification
+    value_kind: label
+    definition: The maintenance state the file declares itself in.
+    does_not_establish: A lifecycle state, an admission state, or a capability state. A declared `candidate` is not a
+      lifecycle candidate.
+    declared_values:
+      active: The file declares itself in current use.
+      deprecated: The file declares that its use should cease; it remains present.
+      candidate: The file declares itself proposed and not yet relied upon.
+      stub: The file declares itself an incomplete placeholder.
+    other_values: A value outside these four is preserved as declared and carries no meaning this ledger defines.
+  ring:
+    category: classification
+    value_kind: label
+    definition: The ring the file declares it is placed in within its producing domain.
+    does_not_establish: Any ordering, trust level, or authority.
+  category:
+    category: classification
+    value_kind: label
+    definition: The category the file declares itself to be in.
+    does_not_establish: Any classification this Foundation defines.
+  owner:
+    category: governance
+    value_kind: label
+    definition: The steward label the file declares, naming who the file says maintains it.
+    does_not_establish: ActorIdentity, SurfaceIdentity, product ownership, semantic ownership, or any authority. No
+      header owner resolves to an identity registry entry by this ledger, and none is an OWNED_BY relation.
+  ssot_for:
+    category: governance
+    value_kind: label_list
+    definition: The topics the file declares it is the single source of truth for.
+    does_not_establish: A canonical source, a semantic owner, or precedence over any other source. A declared scope is a
+      claim; competing canonical sources stay forbidden by l9.contract/semantic-ownership@1.
+  canonical:
+    category: governance
+    value_kind: label
+    definition: Whether the file declares itself canonical.
+    does_not_establish: Canonical status, which only registration or admission confers.
+  canonical_source:
+    category: governance
+    value_kind: url
+    definition: The locator the file declares for the source it is a copy of.
+    does_not_establish: Registration, resolution, or provenance.
+  single_source_rule:
+    category: governance
+    value_kind: text
+    definition: A usage instruction the file declares about how it may be copied or referenced.
+    does_not_establish: A rule binding on any consumer.
+  retrieval:
+    category: retrieval
+    value_kind: label
+    definition: The retrieval mode the file declares for itself, such as loading on demand.
+    does_not_establish: Any loading behavior of a consumer.
+  load_when:
+    category: retrieval
+    value_kind: label_list
+    definition: The situations in which the file declares it should be loaded.
+    does_not_establish: Topology, routing, or a requirement on any consumer.
+  load_condition:
+    category: retrieval
+    value_kind: text
+    definition: A condition expression the file declares for when it should be loaded, carried verbatim.
+    does_not_establish: An evaluable rule, topology, or routing.
+  references:
+    category: retrieval
+    value_kind: reference_list
+    definition: The other artifacts the file declares it refers to.
+    does_not_establish: That they exist, a dependency, or a DEPENDS_ON relation.
+  requires:
+    category: retrieval
+    value_kind: reference_list
+    definition: The other artifacts the file declares should be loaded with it.
+    does_not_establish: A dependency, a contract obligation in contracts.yaml, or a DEPENDS_ON relation.
+  amplifies:
+    category: retrieval
+    value_kind: reference_list
+    definition: The other artifacts whose application the file declares it strengthens when loaded alongside them.
+    does_not_establish: Any relation, dependency, or precedence.
+  retrieval_keys:
+    category: retrieval
+    value_kind: text
+    definition: Search keys the file declares for itself, carried verbatim.
+    does_not_establish: Any index or capability.
+  token_estimate:
+    category: retrieval
+    value_kind: count
+    definition: The size, in model tokens, the file declares it occupies when loaded.
+    does_not_establish: A measured size or a budget.
+projection_boundary:
+  canonical_relations: none
+  rule: No header field projects a canonical relation, an identity binding, a capability, or an ownership fact. A
+    consumer that records header declarations records them as source claims about the declaring file, preserves their
+    conflicts and unknowns, and creates no canonical edge from them. Any future projection from a header field into a
+    canonical relation requires a separate admitted decision naming that relation's owner.
+does_not_own:
+- carrier_syntax
+- header_parsing
+- predicate_names_in_any_packet
+- projection_or_reconciliation_policy
+- controlled_vocabularies_for_open_fields
+- identity_resolution
+- ownership_resolution
+- relation_types

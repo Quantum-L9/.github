@@ -90,6 +90,12 @@ sources:
   canonical: true
   projection_allowed: true
   derivation_allowed: false
+- id: l9.source/artifact-header-model@1
+  path: semantics/artifact_header_model.yaml
+  format: yaml
+  canonical: true
+  projection_allowed: true
+  derivation_allowed: false
 - id: l9.source/packet-catalog@1
   path: semantics/packet_catalog.yaml
   format: yaml
