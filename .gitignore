@@ -13,3 +13,6 @@
 # The pinned PR-body composer, fetched by ops/fetch-composer.sh for
 # ops/test-seed-pr-body.js (CI checks it out to the same path).
 .cache/
+# Central Core stages its SDK and verification evidence here before invoking
+# repository verification (Core Repository Execution V2). Not source.
+.l9/runtime/
