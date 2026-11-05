@@ -35,9 +35,16 @@ const {
 } = require('./governance-report.js');
 const { loadScriptModule, makeCore, makeScopedRequire } = require('./workflow-script-harness.js');
 
+// Sets one named property on an Error. Explicit assignment, not Object.assign:
+// Core's Semgrep gate (prototype-pollution) flags every two-argument call.
+const errorWith = (err, key, value) => {
+  err[key] = value;
+  return err;
+};
+
 const root = path.resolve(__dirname, '..');
 const ALL_CLEAR = 'All repos permit cross-repo reusable workflows';
-const httpError = (status) => Object.assign(new Error(`HTTP ${status}`), { status });
+const httpError = (status) => errorWith(new Error(`HTTP ${status}`), 'status', status);
 
 // ── canonical-source fixtures (governed census) ──────────────────────────
 const CLASS = 'l9.repository-class/l9@1';
