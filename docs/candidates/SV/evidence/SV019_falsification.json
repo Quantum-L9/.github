@@ -1,0 +1,15 @@
+{
+  "schema": "l9.strategic-value-falsification-result/v1",
+  "assurance": "LOCAL_CONTRACT_FALSIFICATION_ONLY_NOT_NUMERICAL_VALIDATION",
+  "result": "PASS",
+  "cases": [
+    {
+      "case_id": "SV019",
+      "source_invariant": "L9-SV-019",
+      "negative_result": "UNSUPPORTED_PRECISE_WINNER",
+      "expected_failure": "UNSUPPORTED_PRECISE_WINNER",
+      "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+      "pass": true
+    }
+  ]
+}

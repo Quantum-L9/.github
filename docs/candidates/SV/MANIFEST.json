@@ -1,0 +1,215 @@
+{
+  "schema": "l9.strategic-value-dotgithub-qualification-candidate/v2",
+  "status": "SCHEMA_HARDENED_LOCAL_PASS_NATIVE_COMPILER_BLOCKED_NOT_ADMITTED",
+  "base_repo": "Quantum-L9/.github",
+  "base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
+  "donor": "Quantum-L9/l9-wip#6",
+  "native_compiler_source_repo": "Quantum-L9/l9-semantic-compiler-engine",
+  "native_compiler_source_sha": "943db9a462d35ba66771a700ece77c746295f591",
+  "proposed_global_invariants": 8,
+  "meaning_retained_in_model_and_contract": 12,
+  "local_tests": 39,
+  "local_test_pass": true,
+  "independently_runnable_purpose_built_falsifiers": 6,
+  "schema_fix_counts": {
+    "boolean_true_const_each": 21,
+    "typed_array_min_each": 31
+  },
+  "native_schema_qualification": "BLOCKED_NOT_RUN_REAL_MODULE_ABSENT",
+  "five_source_compilation": "NOT_RUN",
+  "canonical_admission": "NOT_PERFORMED",
+  "remote_mutation": false,
+  "files": [
+    {
+      "path": "ADMISSION_INVARIANT_REVIEW.md",
+      "bytes": 4039,
+      "sha256": "d9a1f395dfd8297f5d02ad1e3018f258f7b1be565401f449036bada089ff21ef"
+    },
+    {
+      "path": "IRREDUCIBILITY_DISPOSITION.md",
+      "bytes": 5007,
+      "sha256": "70020bd86a8d19aeb5bb5b26d2e83ae5d8fb8212070b6dcb38e6e118e26c865a"
+    },
+    {
+      "path": "IRREDUCIBILITY_OWNER_REVIEW.md",
+      "bytes": 3089,
+      "sha256": "6b541d6a1c8a0141321642f3b86b9afe892e506eed2b623567dbb505b38e8ca3"
+    },
+    {
+      "path": "PR6_MATHEMATICAL_ALIGNMENT.md",
+      "bytes": 2723,
+      "sha256": "2ebcb7dbdc240e7e873ea5c75ce080cc482c8ac8e1c7859a4d056f8496020fcf"
+    },
+    {
+      "path": "README.md",
+      "bytes": 7209,
+      "sha256": "473eb6751bf0a0cd385ed67f61a97779d39ccbade1c02ec389a6bf7e35e96687"
+    },
+    {
+      "path": "SCHEMA_QUALIFICATION_REVIEW.md",
+      "bytes": 5504,
+      "sha256": "9be41d90be9bbaa74f33533db5e68ac8bb6e2f140666238dddebb8e891a7f9ca"
+    },
+    {
+      "path": "apply_to_pinned_checkout.py",
+      "bytes": 8828,
+      "sha256": "a8f4815c0d192bcdb8851a71024dfb369009d7df60a9cc71aec735c8666ca674"
+    },
+    {
+      "path": "evidence/SV015_falsification.json",
+      "bytes": 447,
+      "sha256": "e0223ef5327ce1668286ad102f587fcac4138314a3bcc9cc5e341ca046cd6afe"
+    },
+    {
+      "path": "evidence/SV016_falsification.json",
+      "bytes": 453,
+      "sha256": "3147f52face017f7d5cdf7b08dda3709e83f0a140f9f04c33f1341203608db61"
+    },
+    {
+      "path": "evidence/SV017_falsification.json",
+      "bytes": 439,
+      "sha256": "35c877a381692545633e6963428e8f02fd827d1648441ce51a0467dade5b906b"
+    },
+    {
+      "path": "evidence/SV018_falsification.json",
+      "bytes": 449,
+      "sha256": "faf90ee66e14a368ee937b04c27e6f83b99f0f5f9f9ae959588929ed6e619029"
+    },
+    {
+      "path": "evidence/SV019_falsification.json",
+      "bytes": 445,
+      "sha256": "d780d8d964119a91fb81f68a723bc874d44225be2c554e8a396c0bb12388f075"
+    },
+    {
+      "path": "evidence/SV020_falsification.json",
+      "bytes": 459,
+      "sha256": "c8ca5315945eebc017cf594bb1203a2b244188383f2258f664471c98776e3e16"
+    },
+    {
+      "path": "evidence/VALIDATION.json",
+      "bytes": 3681,
+      "sha256": "487f252a311559a507a3dcb90b13cab13c62c2db9c33631f5b09eabe578b986a"
+    },
+    {
+      "path": "evidence/native_schema_gate.json",
+      "bytes": 162,
+      "sha256": "243fb90813e5b107c68bb1ce987554f5d863bd364bb6dc8dc51dcc52ec0224ab"
+    },
+    {
+      "path": "evidence/qualification_existing_tests.log",
+      "bytes": 5609,
+      "sha256": "3ed8b838b55de779ce79f1964069842c4ef4a4bcaff9d920e22a5f04db30686e"
+    },
+    {
+      "path": "evidence/qualification_final_local_tests.log",
+      "bytes": 6425,
+      "sha256": "7e5313a648e7a457b0dc96c2b1ebafb9ee7f7efa5778d52a7d3924bd4c9b7181"
+    },
+    {
+      "path": "evidence/qualification_regression_tests.log",
+      "bytes": 6425,
+      "sha256": "d7e9980c278fc6771fe628681e93733088b213af9faeda4f9882e2e24a310b21"
+    },
+    {
+      "path": "evidence/six_falsification_cases.json",
+      "bytes": 1817,
+      "sha256": "e3ae81af6b808f9c2046ca5933b3befe0378f12541d684729a150e1aec7babf1"
+    },
+    {
+      "path": "overlays/composition_profile_additions.yaml",
+      "bytes": 985,
+      "sha256": "789826d08b1489d2b999f6974e6b28591c177f0897c52b93678edcf3b10df106"
+    },
+    {
+      "path": "overlays/contracts_additions.yaml",
+      "bytes": 6082,
+      "sha256": "b2aa7ac2f93b2cfe689d851fddc9adfdc6f618d95150f7cd5a69774d377c2f72"
+    },
+    {
+      "path": "overlays/invariants_additions.yaml",
+      "bytes": 3789,
+      "sha256": "b259540393a1e30573e09317760ea9919ccc049f87a461a10c62c9bd26aa48f3"
+    },
+    {
+      "path": "overlays/projection_profile_additions.yaml",
+      "bytes": 2962,
+      "sha256": "ee3722c3178ab41c98f65ef76b11f6b268dd59eef59d2e2a5fe75b655a9e21c5"
+    },
+    {
+      "path": "overlays/vocabulary_additions.yaml",
+      "bytes": 3246,
+      "sha256": "05ec0d782e8e7591418dea2bbc1515fcc44cfd81f9eed8a8fad4e85cc424e89c"
+    },
+    {
+      "path": "semantics/strategic_planner_value_composition.schema.yaml",
+      "bytes": 33036,
+      "sha256": "79643fb3c5031074d5b3153173329bcc10d3cffdf54050861f179fc714ea48dc"
+    },
+    {
+      "path": "semantics/strategic_planner_value_projection.schema.yaml",
+      "bytes": 27653,
+      "sha256": "10323a7b8bf729db1ef811e511ebd9c434477090d957a95178ae1a2fc4813730"
+    },
+    {
+      "path": "semantics/strategic_value_model.yaml",
+      "bytes": 23792,
+      "sha256": "189e44474315ed5c5770a6d1246264297a0dddaf7d704f45d5a1611d7e237088"
+    },
+    {
+      "path": "tests/falsification_cases.json",
+      "bytes": 3352,
+      "sha256": "ee597f3f8d8254254db787587f4ef01beb3dac20f69e67e5ff57601bb54fa819"
+    },
+    {
+      "path": "tests/run_native_schema_qualification.py",
+      "bytes": 3225,
+      "sha256": "97da2bc9faf8e31a894200d0809802a8e2296b9a442b0003780d1d49873e1457"
+    },
+    {
+      "path": "tests/run_strategic_value_falsifiers.py",
+      "bytes": 4137,
+      "sha256": "0b1e5dd7136ed3fb74f8c20b68600e20dc19afe18f44b5ed2d3891077faf340c"
+    },
+    {
+      "path": "tests/test_alignment.py",
+      "bytes": 3917,
+      "sha256": "99bfe74e777781d9c48d099e823c80fbacbe5287585fd017792b1afc4dd50657"
+    },
+    {
+      "path": "tests/test_candidate.py",
+      "bytes": 5831,
+      "sha256": "ca45b40142ac0fc6fc4815bb9ca3ab4413ca82d908bc27d8f22681e4da5a4774"
+    },
+    {
+      "path": "tests/test_irreducibility.py",
+      "bytes": 3261,
+      "sha256": "44f2aa1300a0bd63c6eb87333515d457cbdfe48ba9ef5252a69d9487f060c9a6"
+    },
+    {
+      "path": "tests/test_new_invariants.py",
+      "bytes": 1769,
+      "sha256": "458a14f846ace06599b2444fd596a430b1b05cc4b7c839a6e4d1326cbae9bd61"
+    },
+    {
+      "path": "tests/test_partition_method_alignment.py",
+      "bytes": 6486,
+      "sha256": "bcd03bb6cd26388673178599d65de2decebcfb566955ac533bc50bcb67095ca4"
+    },
+    {
+      "path": "tests/test_projection_composition_schema.py",
+      "bytes": 6879,
+      "sha256": "4dc8b33bfc5c6baa428bdb818d3d3ec37cc83ed48d2b89cdd33fc3d8f269b161"
+    },
+    {
+      "path": "tests/test_schema_hardening.py",
+      "bytes": 3970,
+      "sha256": "f57b93ff5923f475839453a63f69e34446f73dd3677446124c0aab075cae2add"
+    },
+    {
+      "path": "tests/test_six_falsifications.py",
+      "bytes": 1704,
+      "sha256": "88f9da8f6992c829ef6ac2baa478c44682c64bc73b65da02044d131b1fdd0169"
+    }
+  ],
+  "no_skill_files": true
+}
