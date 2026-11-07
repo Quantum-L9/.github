@@ -83,6 +83,6 @@ test_sv019_sensitivity_preference_flip (test_six_falsifications.IndependentlyExe
 test_sv020_false_numerical_assurance (test_six_falsifications.IndependentlyExecutableFalsifiers.test_sv020_false_numerical_assurance) ... ok
 
 ----------------------------------------------------------------------
-Ran 82 tests in 8.834s
+Ran 82 tests in 8.586s
 
 OK

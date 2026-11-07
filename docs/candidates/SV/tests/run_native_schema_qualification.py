@@ -36,8 +36,19 @@ def compiler_revision(module):
         text=True,
         check=False,
     )
+    # Pathspecs are relative to the -C directory, so resolve the repository
+    # root first; checking "src" from the package directory would look at a
+    # nonexistent nested path and report a modified compiler as clean.
+    root = subprocess.run(
+        ["git", "-C", str(src.parent), "rev-parse", "--show-toplevel"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if out.returncode != 0 or root.returncode != 0:
+        return {"module_path": str(src), "git_head": "UNKNOWN", "src_dirty": "UNKNOWN"}
     dirty = subprocess.run(
-        ["git", "-C", str(src.parent), "status", "--porcelain", "--", "src"],
+        ["git", "-C", root.stdout.strip(), "status", "--porcelain", "--", "src"],
         capture_output=True,
         text=True,
         check=False,
@@ -45,7 +56,7 @@ def compiler_revision(module):
     return {
         "module_path": str(src),
         "git_head": out.stdout.strip() or "UNKNOWN",
-        "src_dirty": bool(dirty.stdout.strip()) if out.returncode == 0 else "UNKNOWN",
+        "src_dirty": bool(dirty.stdout.strip()) if dirty.returncode == 0 else "UNKNOWN",
     }
 
 

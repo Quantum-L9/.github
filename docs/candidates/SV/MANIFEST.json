@@ -145,12 +145,12 @@
 		{
 			"path": "evidence/reduction-v1/candidate-tests-summary.json",
 			"bytes": 381,
-			"sha256": "12f6c15f1bb55930b074d7e79bd32f02822f3d4340795a5464d31acfada8ee0b"
+			"sha256": "2283866cfb9f1af3f6742df9d876805dd3202ea3db273b72d713e2503b57a206"
 		},
 		{
 			"path": "evidence/reduction-v1/candidate-tests.log",
 			"bytes": 12890,
-			"sha256": "a9d2745f71ca8d4f8ade54155b91ece8cc51490b456865dc3aeef51aa0d62965"
+			"sha256": "780a52402cbbd55aec2c3b3fab037d549ce3bc4026170bb42f2bae6c7eceb221"
 		},
 		{
 			"path": "evidence/reduction-v1/determinism-comparison.json",
@@ -314,8 +314,8 @@
 		},
 		{
 			"path": "tests/run_native_schema_qualification.py",
-			"bytes": 7776,
-			"sha256": "8315f529025ed4f605e1191a83c3160ea12f739fa41feebec05705e0dab28ecc"
+			"bytes": 8319,
+			"sha256": "6ab8dd86a0f62f50bf736bcd35c259124d38b17213d14bac885e3399ab33f9f5"
 		},
 		{
 			"path": "tests/run_strategic_value_falsifiers.py",
