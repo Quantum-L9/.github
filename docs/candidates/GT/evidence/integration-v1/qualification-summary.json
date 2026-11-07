@@ -1,0 +1,179 @@
+{
+  "authority_revision": "0827f9192b77c541ef5c446be262dba57c729e85",
+  "authority_tree": "58d1118a3f12ecaa98c510d6398bdd0502465532",
+  "byte_identical_outputs": true,
+  "compiler_revision": "3bf1a8241452332637ba0daffeee55c433f93e05",
+  "run1": {
+    "gt:compose": {
+      "artifacts": [
+        {
+          "digest": "sha256:5005f9bc4d6025447dfd502fd1b84a69bfb1564c05315b200c808255f0b96f7f",
+          "ref": "l9.compose/strategic-planner-interaction@1#l9.projection/strategic-planner-interaction@1",
+          "result": "pass",
+          "unresolved_criteria": []
+        }
+      ],
+      "component_count": 3,
+      "exit_code": 0,
+      "result": "pass",
+      "status": "succeeded",
+      "stderr_tail": ""
+    },
+    "gt:contracts": {
+      "artifacts": [
+        {
+          "digest": "sha256:b636965f62417e55ced51258fca538b1bcb7fd2c58e19cf24ee6aebb02d011eb",
+          "ref": "l9.projection/strategic-planner-interaction@1#l9.source/contracts@1",
+          "result": "pass",
+          "unresolved_criteria": []
+        }
+      ],
+      "exit_code": 0,
+      "result": "pass",
+      "status": "succeeded",
+      "stderr_tail": ""
+    },
+    "gt:invariants": {
+      "artifacts": [
+        {
+          "digest": "sha256:5a832289934f44a3970688244c876010714dc7180c0165996418de9a20abad4f",
+          "ref": "l9.projection/strategic-planner-interaction@1#l9.source/invariants@1",
+          "result": "pass",
+          "unresolved_criteria": []
+        }
+      ],
+      "exit_code": 0,
+      "result": "pass",
+      "status": "succeeded",
+      "stderr_tail": ""
+    },
+    "gt:vocabulary": {
+      "artifacts": [
+        {
+          "digest": "sha256:1008ecc1f933574e55e77db09a946996591ba517cf43f225b48809e9c09751ed",
+          "ref": "l9.projection/strategic-planner-interaction@1#l9.source/vocabulary@1",
+          "result": "pass",
+          "unresolved_criteria": []
+        }
+      ],
+      "exit_code": 0,
+      "result": "pass",
+      "status": "succeeded",
+      "stderr_tail": ""
+    },
+    "sv:authority_model": {
+      "artifacts": [
+        {
+          "digest": "sha256:9de2c2f140c2a709cee4eb098cd9f8f8fa42544d507ee1a35fd28cdf1082070e",
+          "ref": "l9.projection/strategic-planner-value@1#l9.source/authority-model@1",
+          "result": "pass",
+          "unresolved_criteria": []
+        }
+      ],
+      "exit_code": 0,
+      "result": "pass",
+      "status": "succeeded",
+      "stderr_tail": ""
+    },
+    "sv:compose": {
+      "artifacts": [
+        {
+          "digest": "sha256:e387a1b38764d246e1a45bd9041c630c0518b43faf93539c6b9a0deb59a20573",
+          "ref": "l9.compose/strategic-planner-value@1#l9.projection/strategic-planner-value@1",
+          "result": "unknown",
+          "unresolved_criteria": [
+            "declared_constraint:required_provenance:composition_profile_digest",
+            "declared_constraint:required_provenance:composition_profile_ref",
+            "declared_constraint:required_provenance:source_projection_digests",
+            "declared_constraint:required_provenance:source_projection_refs"
+          ]
+        }
+      ],
+      "component_count": 5,
+      "exit_code": 3,
+      "result": "unknown",
+      "status": "succeeded",
+      "stderr_tail": ""
+    },
+    "sv:contracts": {
+      "artifacts": [
+        {
+          "digest": "sha256:1f8eff293d91b1c6ca8662671561b6d3aef668c6d5c02375a1dc54ce8a9f4e9b",
+          "ref": "l9.projection/strategic-planner-value@1#l9.source/contracts@1",
+          "result": "pass",
+          "unresolved_criteria": []
+        }
+      ],
+      "exit_code": 0,
+      "result": "pass",
+      "status": "succeeded",
+      "stderr_tail": ""
+    },
+    "sv:invariants": {
+      "artifacts": [
+        {
+          "digest": "sha256:4636189b0e0079b00179fbff55de91c3eb0e00f2b1cbafe13c7a97ea946d6d14",
+          "ref": "l9.projection/strategic-planner-value@1#l9.source/invariants@1",
+          "result": "pass",
+          "unresolved_criteria": []
+        }
+      ],
+      "exit_code": 0,
+      "result": "pass",
+      "status": "succeeded",
+      "stderr_tail": ""
+    },
+    "sv:strategic_value_model": {
+      "artifacts": [
+        {
+          "digest": "sha256:19562c93cb676476929d49560cd0a0f1ea36c57ebbc125e6a605fa629a55f3f4",
+          "ref": "l9.projection/strategic-planner-value@1#l9.source/strategic-value-model@1",
+          "result": "pass",
+          "unresolved_criteria": []
+        }
+      ],
+      "exit_code": 0,
+      "result": "pass",
+      "status": "succeeded",
+      "stderr_tail": ""
+    },
+    "sv:vocabulary": {
+      "artifacts": [
+        {
+          "digest": "sha256:c8ffdaf2a640ce711b95f3fcae848d83fd56ff35a47f333073417a992621b082",
+          "ref": "l9.projection/strategic-planner-value@1#l9.source/vocabulary@1",
+          "result": "pass",
+          "unresolved_criteria": []
+        }
+      ],
+      "exit_code": 0,
+      "result": "pass",
+      "status": "succeeded",
+      "stderr_tail": ""
+    }
+  },
+  "run1_output_digests": {
+    "composed/l9.compose_strategic-planner-interaction_1_l9.projection_strategic-planner-interaction_1.composed.json": "f918908f881121997943737b8927c948d8ed899a15b2b241aa51024fc19f3688",
+    "composed/l9.compose_strategic-planner-value_1_l9.projection_strategic-planner-value_1.composed.json": "468a35a8ed8053a45f01f15e7cdb7578f595d5e64ca661584cdeaf16a184d820",
+    "l9.projection_strategic-planner-interaction_1/l9.source_contracts_1.projection.json": "a108f52514a2c43fab74b506204b70e6304ad3a7ce7de4a06a18070184b924c8",
+    "l9.projection_strategic-planner-interaction_1/l9.source_invariants_1.projection.json": "16990f5c007cfa23bb88916824b21a685bf1b41ecaa19e9e11178e8d08b6dd98",
+    "l9.projection_strategic-planner-interaction_1/l9.source_vocabulary_1.projection.json": "8db2ed2d6a06f487c816a26c73e93317ceb95aa5152db12088859d0726eac240",
+    "l9.projection_strategic-planner-value_1/l9.source_authority-model_1.projection.json": "d4d8df85c5733a960f0e8a01f26e261c052f6fd4352682a19341c885852dd725",
+    "l9.projection_strategic-planner-value_1/l9.source_contracts_1.projection.json": "6605decce629acdd4db77f89eefe2ba69d74dfb18cd823ef1ed48c37fc355c06",
+    "l9.projection_strategic-planner-value_1/l9.source_invariants_1.projection.json": "d97ad5eb9f18760beb4dd9703401a70f6d7cad0ddf3d39d7067ee764c6dc42d0",
+    "l9.projection_strategic-planner-value_1/l9.source_strategic-value-model_1.projection.json": "2460f1dd1860c72d6c9a11d5400543209c5283b887d00216bd886a501c29c8b6",
+    "l9.projection_strategic-planner-value_1/l9.source_vocabulary_1.projection.json": "a3c71725d77df89244dd2f97781665bbba479e597840fbb7b886adc33342f65c",
+    "receipts/2538395ab9690e323ab21513a874119ff29f3a9af302e72f85d16c90bde52a95.json": "a571294958ee8fe123a734abc2e65bbcb13b8f50d099cfa3fedd7efc3d58e6a4",
+    "receipts/46703fc66aaaa7612b4986a44c16e284496232fc6e1ebb90e66db53e32d048d9.json": "862b336b1431155288f94e7ea729e245441fff567924c78cde13767ffc9948df",
+    "receipts/471368634e311b969284014369e2df0be3dfaaa9d1af7922472172c2e2bc218e.json": "0baf58589de03d245c9bd731a47b3fbf440421a8598b995e7683e4f472df1582",
+    "receipts/5561798bdb41519704125e05ffa1897548124547490a2c59dbfc0782d01d5e30.json": "fde0b06fae45680c46ceaab4095926e33c85843fe9acb02153be3c054ae36ed5",
+    "receipts/5a4aa91cef68c83ffbbc6e1dfa85659a835632248bd3ea925c4e65931b638d71.json": "4f82ce0f0b5ad23581a65d8bdca1d4f2a0c60d72afdc29cd38c70995601b04ca",
+    "receipts/92bd75ee58f94c2d8288e89cf005ade2543ae0f25c5d2b35d24c3ba1151f102c.json": "b3199111761fa1cb3c9491802e8d5d5ec1abf43649ce2871962c6b10aa6aa377",
+    "receipts/a752e462782b1c736c908b2e216e51632cc80547ef138cfcc065ede6459d557d.json": "3563061ab23ef6bc7f93f7612fc8e407a9dbd407f193dc9fbadbdc6b29aba090",
+    "receipts/af2477e8b64316414942f1a7e3ffb2c6a5465639858924b9ca42265997867beb.json": "c0aae94ee8a09c385b65f36e986a30521a931f721972b0677a881655c9011fc0",
+    "receipts/e22c30d603ce82903cc5ae6d29b8cbbf00d23e9fc0d886f4767d4e1f529fa700.json": "424b709893681e92ad6ad52ce93c3c0bbcb4de2f391c7771f85ff1f765b456d8",
+    "receipts/ef5a9c71d6e2a2b24189f7858814ec62c120ac8e19176fe8cdb8879f63e79ef6.json": "773fb43b9c84a2b3f12c7ba1d75a17840687bd48991b2bca5a48237dfc0ec650"
+  },
+  "run2_equal_results": true,
+  "schema": "l9.gt.integrated-qualification/v1"
+}

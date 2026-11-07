@@ -1,181 +1,768 @@
 #!/usr/bin/env python3
-"""GT-core candidate preparation at exact PR #212 head only; fail closed on drift.
+"""Prepare the GT canonical candidate files on top of the exact SV #215 candidate.
 
-This script edits ONLY a local, clean, pinned .github checkout when --apply is
-explicit. The GT+SV dependent overlay is NOT applied: SV is staged in PR 212
-as documentation, not admitted as canonical semantics. No commit, push, PR, or admission occurs here.
+Two stages, never combined:
+
+* ``--stage core`` (default; successor release A). The target is a disposable
+  clone at ``canonical_target`` on which the SV candidate applier from PR #215
+  at its pinned head has already been run. Every SV-applied file must match the
+  digest recorded in ``evidence/sv_alignment_binding.json``; nothing else may be
+  dirty. GT core is then layered on: L9-GT-001, the GT core contract, twelve GT
+  terms, the GT projection profile and its forbidden-constraint definition, the
+  GT composition profile, both payload schemas and their manifest registration.
+  The GT+SV dependent contract is NOT applied in this stage.
+
+* ``--stage dependent`` (successor release B). Refuses unless the binding file
+  records ``admitted_foundation_revision`` (set only by a reviewed commit after
+  SV and GT core are admitted at one canonical revision), the checkout is clean
+  at exactly that revision, and that revision carries the admitted SV model,
+  SV contract, both SV invariants and the GT core. No flag bypasses this.
+
+Dry-run by default. ``--apply --disposable`` writes local files only and refuses
+the checkout that carries this pack. Every check runs on the fully assembled
+candidate before any byte is written; writes are staged then renamed. The script
+never commits, pushes, opens PRs, runs release gates or admits semantics.
 """
+
 import argparse
 import hashlib
-from pathlib import Path
+import json
+import os
 import re
 import subprocess
 import sys
-import textwrap
+from pathlib import Path
+
 import yaml
 
-BASE_SHA = '85531616cee2da94bbb7154418a78537549a4d76'
-CANONICAL_MAIN_SHA = '020a94bea86e7c5c5e4107da7014ec259508f397'
-SV_PR_NUMBER = 212
-SV_REVIEW_BLOBS = {'docs/candidates/SV/README.md': '4b1aa9496b2490d591b40e508dc4243877efb65d', 'docs/candidates/SV/overlays/projection_profile_additions.yaml': '82e063cf2e1349fc03813a060b65fe6fc75fe30b', 'docs/candidates/SV/overlays/composition_profile_additions.yaml': 'c14c27b842ef02e0abe965d4d2bbf1095629e9f8', 'docs/candidates/SV/overlays/contracts_additions.yaml': 'dec12362ec14fd06de17791d759e227a3adfbf04', 'docs/candidates/SV/overlays/invariants_additions.yaml': 'c5bdd3418bb9cc993573a87eebf29e9c405ecfb1', 'docs/candidates/SV/overlays/vocabulary_additions.yaml': 'c5f19da2b80e9f4991a158b6f1171851192429fa', 'docs/candidates/SV/semantics/strategic_value_model.yaml': '5f4ffbc1b6e4add5881f76ae3b176d4a82bbbcf6', 'docs/candidates/SV/semantics/strategic_planner_value_projection.schema.yaml': 'e702ec7f3cb26322c986eb26e917564eba5048f8', 'docs/candidates/SV/semantics/strategic_planner_value_composition.schema.yaml': '4bb57229d3ba7719a057c635b9976f80e7c3513e'}
 ROOT = Path(__file__).resolve().parent
-SOURCE_BLOBS = {
-    'semantics/invariants.yaml': 'e864570545765a29a0af5cfcca35d3ac64841f0a',
-    'semantics/contracts.yaml': '8a0d0513fcb28036682041ca8e759e31d7620f48',
-    'semantics/vocabulary.yaml': '8f5d25f45b13f6bd0d40d0984dc5b311e68d8b48',
-    'semantics/projection_profiles.yaml': 'c05b57cb5c725484e2214ee4b2f9069225186b0c',
-    'semantics/composition_profiles.yaml': '6ee238e33e82e84d7cd6bab9f623b7670d34bcad',
-    'semantics/generic_compiler_manifest.yaml': '17e99242728b2591c1dd705107cdf25ceed8e8d7',
-}
+BINDING = json.loads(
+    (ROOT / "evidence/sv_alignment_binding.json").read_text(encoding="utf-8")
+)
+
+CANONICAL_TARGET = BINDING["canonical_target"]
+SV_CANDIDATE_HEAD = BINDING["sv_candidate"]["head"]
+SV_APPLIED_SHA256 = BINDING["sv_applied_target_sha256"]
+ADMITTED_FOUNDATION_REVISION = BINDING["admitted_foundation_revision"]
+
+SV_NEW_INVARIANTS = frozenset(BINDING["sv_new_invariants"])
+SV_LINEAGE_ONLY = frozenset(BINDING["sv_lineage_only_ids"])
+SV_TERMS = tuple(BINDING["sv_vocabulary_terms"])
+SV_MODEL_ID = BINDING["sv_model"]
+SV_CONTRACT_ID = BINDING["sv_contract"]
+SV_PROFILE_ID = BINDING["sv_projection"]
+SV_COMPOSITION_ID = BINDING["sv_composition"]
+
+GT_INVARIANT = "L9-GT-001"
+GT_CORE_CONTRACT_ID = "l9.contract/strategic-interaction-assessment@1"
+GT_DEPENDENT_CONTRACT_ID = "l9.contract/strategic-value-interaction-composition@1"
+GT_PROFILE_ID = "l9.projection/strategic-planner-interaction@1"
+GT_COMPOSITION_ID = "l9.compose/strategic-planner-interaction@1"
+GT_OUTPUT = "l9.projection.strategic-planner-interaction/v1"
+GT_COMPOSED_OUTPUT = "l9.composed-projection.strategic-planner-interaction/v1"
+GT_FORBIDDEN = "sv_semantic_records_excluded_from_gt_projection"
+GT_SOURCE_CLASSES = ("vocabulary", "invariants", "contracts")
+GT_GOVERNING = (
+    "L9-GT-001",
+    "L9-AUTH-002",
+    "L9-HARD-001",
+    "L9-UNKNOWN-001",
+    "L9-EVIDENCE-001",
+    "L9-ASSURANCE-001",
+)
+GT_SCHEMA_FILES = (
+    "strategic_interaction_projection.schema.yaml",
+    "strategic_interaction_composition.schema.yaml",
+)
+INVARIANT_SELECTOR = re.compile(r'^\$\.invariants\[\?\(@\.id=="([^"]+)"\)\]$')
+CONTRACT_SELECTOR = re.compile(r'^\$\.contracts\[\?\(@\.id=="([^"]+)"\)\]$')
 
 
-def data(rel):
-    return yaml.safe_load((ROOT / rel).read_text(encoding='utf-8'))
+def raw(name):
+    return (ROOT / name).read_text(encoding="utf-8")
 
 
-def txt(rel):
-    return (ROOT / rel).read_text(encoding='utf-8')
+def overlay(name):
+    return yaml.safe_load(raw(name))
 
 
-def one(s, old, new, path):
-    if s.count(old) != 1:
-        raise ValueError(f'{path}: expected one exact anchor {old!r}, found {s.count(old)}')
-    return s.replace(old, new, 1)
+def sha256_text(text):
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def append_top_list(s, rel, key):
-    obj = yaml.safe_load(s)
-    rows = data(rel)[key]
-    if not isinstance(obj, dict) or not isinstance(obj.get(key), list):
-        raise ValueError('invalid canonical list: '+key)
-    existing = {v['id'] for v in obj[key]}
-    if any(v['id'] in existing for v in rows):
-        raise ValueError('identity collision in '+key)
-    new = txt(rel).split(key+':\n', 1)[1]
-    # The pinned file stores this top-level list as its final section.
-    return s.rstrip()+'\n'+new.lstrip('\n').rstrip()+'\n'
+def one(text, anchor, replacement, path):
+    if text.count(anchor) != 1:
+        raise ValueError(
+            f"{path}: expected one anchor {anchor!r}, found {text.count(anchor)}"
+        )
+    return text.replace(anchor, replacement, 1)
 
 
-def prepare(checkout):
-    def original(path):
-        return (checkout/path).read_text(encoding='utf-8')
+def unique_ids(rows, label):
+    ids = [row["id"] for row in rows]
+    dupes = sorted({i for i in ids if ids.count(i) > 1})
+    if dupes:
+        raise ValueError(f"{label} duplicate IDs: {dupes}")
+    return ids
+
+
+def merge_list(base, extra, list_name):
+    """Append an overlay's top-level list; reject duplicates inside and across."""
+    old_ids = unique_ids(yaml.safe_load(base)[list_name], f"canonical {list_name}")
+    new_ids = unique_ids(yaml.safe_load(extra)[list_name], f"overlay {list_name}")
+    collisions = sorted(set(old_ids) & set(new_ids))
+    if collisions:
+        raise ValueError(f"overlay {list_name} collides with canonical: {collisions}")
+    if not re.search(rf"^{list_name}:\n(?:- |  )", base, flags=re.MULTILINE):
+        raise ValueError(f"canonical {list_name} is not a top-level block list")
+    tail = list(yaml.safe_load(base))[-1]
+    if tail != list_name:
+        raise ValueError(f"canonical {list_name} is not the final section ({tail})")
+    return (
+        base.rstrip()
+        + "\n"
+        + extra.split(list_name + ":", 1)[1].lstrip("\n").rstrip()
+        + "\n"
+    )
+
+
+def update_contract_derivation(text, old_inv, new_inv, old_count, new_count):
+    """Rebind contracts.yaml#derivation, verifying the old binding first."""
+    old_digest, new_digest = sha256_text(old_inv), sha256_text(new_inv)
+    derivation = yaml.safe_load(text)["derivation"]
+    if derivation["source_digest_sha256"] != old_digest:
+        raise ValueError(
+            "stale contracts derivation digest "
+            f"{derivation['source_digest_sha256']} != current invariants {old_digest}"
+        )
+    if derivation["source_invariant_count"] != old_count:
+        raise ValueError(
+            "contracts derivation count "
+            f"{derivation['source_invariant_count']} != current invariants {old_count}"
+        )
+    text, n1 = re.subn(
+        r"^(  source_digest_sha256: )[a-f0-9]{64}$",
+        r"\g<1>" + new_digest,
+        text,
+        flags=re.MULTILINE,
+    )
+    text, n2 = re.subn(
+        r"^(  source_invariant_count: )[0-9]+$",
+        r"\g<1>" + str(new_count),
+        text,
+        flags=re.MULTILINE,
+    )
+    if (n1, n2) != (1, 1):
+        raise ValueError("contracts derivation anchors not replaced exactly once")
+    after = yaml.safe_load(text)["derivation"]
+    if (after["source_digest_sha256"], after["source_invariant_count"]) != (
+        new_digest,
+        new_count,
+    ):
+        raise ValueError("contracts derivation not rebound to candidate invariants")
+    return text
+
+
+def rebind_source_artifacts(text, path, old, new):
+    """Rebind ``derivation.source_artifacts`` entries naming a changed artifact.
+
+    Same procedure as the SV #215 applier and Semantic Foundation v3.8.0
+    (2ae5dfa): each recorded digest/item_count must equal the CURRENT canonical
+    value before replacement; anything stale fails closed. Whether a derived
+    ledger's content must change is an owner decision this does not make.
+    """
+    derivation = yaml.safe_load(text).get("derivation") or {}
+    entries = [
+        e for e in derivation.get("source_artifacts") or [] if e.get("artifact") in new
+    ]
+    if not entries:
+        return text, []
+    lines = text.split("\n")
+    rebound = []
+    for entry in entries:
+        name = entry["artifact"]
+        if entry.get("sha256") != old[name][0]:
+            raise ValueError(f"{path}: stale derivation digest for {name}")
+        if "item_count" in entry and entry["item_count"] != old[name][1]:
+            raise ValueError(f"{path}: stale derivation item_count for {name}")
+        starts = [
+            i for i, line in enumerate(lines) if line.strip() == f"- artifact: {name}"
+        ]
+        if len(starts) != 1:
+            raise ValueError(f"{path}: expected one derivation entry for {name}")
+        i = starts[0] + 1
+        indent = len(lines[starts[0]]) - len(lines[starts[0]].lstrip()) + 2
+        replaced = set()
+        while (
+            i < len(lines)
+            and len(lines[i]) - len(lines[i].lstrip()) >= indent
+            and not lines[i].strip().startswith("- ")
+        ):
+            key = lines[i].strip().split(":", 1)[0]
+            if key == "sha256":
+                lines[i] = " " * indent + "sha256: " + new[name][0]
+                replaced.add(key)
+            elif key == "item_count":
+                lines[i] = " " * indent + "item_count: " + str(new[name][1])
+                replaced.add(key)
+            i += 1
+        expected = {"sha256"} | ({"item_count"} if "item_count" in entry else set())
+        if replaced != expected:
+            raise ValueError(f"{path}: derivation entry for {name} not rebound once")
+        rebound.append(name)
+    out = "\n".join(lines)
+    check = {
+        e["artifact"]: e for e in yaml.safe_load(out)["derivation"]["source_artifacts"]
+    }
+    for name in rebound:
+        if check[name]["sha256"] != new[name][0]:
+            raise ValueError(f"{path}: derivation rebind of {name} did not take effect")
+    return out, rebound
+
+
+def rebind_derived_ledgers(checkout, changed):
+    """Propagate digest changes through every registered derivation record."""
+
+    def stats(text, rel):
+        key = {"invariants.yaml": "invariants", "contracts.yaml": "contracts"}.get(
+            Path(rel).name
+        )
+        return sha256_text(text), (len(yaml.safe_load(text)[key]) if key else None)
+
+    report, derived = {}, set()
+    for _ in range(8):
+        old, new = {}, {}
+        for rel, text in changed.items():
+            if (checkout / rel).exists():
+                name = Path(rel).name
+                old[name] = stats((checkout / rel).read_text(encoding="utf-8"), rel)
+                new[name] = stats(text, rel)
+        progressed = False
+        for path in sorted((checkout / "semantics").glob("*.yaml")):
+            rel = "semantics/" + path.name
+            original = path.read_text(encoding="utf-8")
+            base = changed.get(rel, original)
+            moved = {k: v for k, v in new.items() if v != old[k]}
+            _, names = rebind_source_artifacts(original, rel, old, moved)
+            if not names:
+                continue
+            current = {
+                e["artifact"]: e["sha256"]
+                for e in yaml.safe_load(base)["derivation"]["source_artifacts"]
+            }
+            if all(current[n] == new[n][0] for n in names):
+                continue
+            if rel in changed and rel not in derived and changed[rel] != original:
+                raise ValueError(f"{rel}: derived ledger is also a content destination")
+            changed[rel], _ = rebind_source_artifacts(
+                original, rel, old, {n: new[n] for n in names}
+            )
+            derived.add(rel)
+            report[rel] = names
+            progressed = True
+        if not progressed:
+            return report
+    raise ValueError("derivation rebinding did not reach a fixpoint")
+
+
+def git(checkout, *cmd):
+    return subprocess.run(
+        ["git", "-C", str(checkout), *cmd], capture_output=True, text=True, check=True
+    ).stdout
+
+
+def dirty_paths(checkout):
+    out = git(checkout, "status", "--porcelain", "--untracked-files=all")
+    return {line[3:] for line in out.splitlines() if line.strip()}
+
+
+def verify_sv_applied_target(checkout):
+    """The checkout must be canonical_target plus exactly the pinned SV application."""
+    head = git(checkout, "rev-parse", "HEAD").strip()
+    if head != CANONICAL_TARGET:
+        raise ValueError(f"wrong target HEAD {head}; expected {CANONICAL_TARGET}")
+    dirty = dirty_paths(checkout)
+    if dirty != set(SV_APPLIED_SHA256):
+        raise ValueError(
+            "dirty paths are not exactly the SV #215 application: "
+            f"missing={sorted(set(SV_APPLIED_SHA256) - dirty)} "
+            f"extra={sorted(dirty - set(SV_APPLIED_SHA256))}"
+        )
+    for rel, expected in SV_APPLIED_SHA256.items():
+        actual = hashlib.sha256((checkout / rel).read_bytes()).hexdigest()
+        if actual != expected:
+            raise ValueError(f"{rel}: SV-applied digest {actual} != pinned {expected}")
+
+
+def verify_sv_core_present(docs):
+    """Assert the SV candidate semantics GT depends on are present and reduced."""
+    inv_ids = {r["id"] for r in docs["invariants"]["invariants"]}
+    sv_ids = {i for i in inv_ids if i.startswith("L9-SV-")}
+    if sv_ids != SV_NEW_INVARIANTS:
+        raise ValueError(f"SV invariants must be exactly {sorted(SV_NEW_INVARIANTS)}")
+    if SV_LINEAGE_ONLY & inv_ids:
+        raise ValueError("lineage-only SV IDs present as invariants")
+    if [c["id"] for c in docs["contracts"]["contracts"]].count(SV_CONTRACT_ID) != 1:
+        raise ValueError("SV assessment contract must be present exactly once")
+    missing = [t for t in SV_TERMS if t not in docs["vocabulary"]["terms"]]
+    if missing or len(SV_TERMS) != 11:
+        raise ValueError(f"SV vocabulary not exactly eleven present terms: {missing}")
+    if docs["model"].get("artifact_id") != SV_MODEL_ID:
+        raise ValueError("SV value model missing")
+    profiles = docs["projection_profiles"]["projection_profiles"]
+    sv_profile = [p for p in profiles if p["id"] == SV_PROFILE_ID]
+    if len(sv_profile) != 1 or list(sv_profile[0]["sources"]) != list(
+        BINDING["sv_source_classes"]
+    ):
+        raise ValueError("SV projection profile missing or not the five source classes")
+    if [p["id"] for p in docs["composition_profiles"]["profiles"]].count(
+        SV_COMPOSITION_ID
+    ) != 1:
+        raise ValueError("SV composition profile missing")
+
+
+def _gt_profile(doc):
+    rows = [p for p in doc["projection_profiles"] if p["id"] == GT_PROFILE_ID]
+    if len(rows) != 1:
+        raise ValueError("GT projection profile must exist exactly once")
+    return rows[0]
+
+
+def verify_assembled(checkout, changed):
+    for path, content in changed.items():
+        if not isinstance(yaml.safe_load(content), dict):
+            raise TypeError(f"bad YAML: {path}")
+
+    def assembled(rel):
+        if rel in changed:
+            return changed[rel]
+        return (checkout / rel).read_text(encoding="utf-8")
+
+    changed = {
+        rel: assembled(rel)
+        for rel in set(changed)
+        | {
+            "semantics/strategic_value_model.yaml",
+            "semantics/strategic_planner_value_projection.schema.yaml",
+            "semantics/strategic_planner_value_composition.schema.yaml",
+        }
+    }
+    docs = {
+        "invariants": yaml.safe_load(changed["semantics/invariants.yaml"]),
+        "contracts": yaml.safe_load(changed["semantics/contracts.yaml"]),
+        "vocabulary": yaml.safe_load(changed["semantics/vocabulary.yaml"]),
+        "projection_profiles": yaml.safe_load(
+            changed["semantics/projection_profiles.yaml"]
+        ),
+        "composition_profiles": yaml.safe_load(
+            changed["semantics/composition_profiles.yaml"]
+        ),
+        "model": yaml.safe_load(changed["semantics/strategic_value_model.yaml"]),
+    }
+    verify_sv_core_present(docs)
+
+    inv_ids = set(unique_ids(docs["invariants"]["invariants"], "invariants"))
+    gt_new = {
+        r["id"] for r in overlay("overlays/invariants_additions.yaml")["invariants"]
+    }
+    if gt_new != {GT_INVARIANT}:
+        raise ValueError(f"GT must add exactly one invariant, got {sorted(gt_new)}")
+    if not set(GT_GOVERNING) <= inv_ids:
+        raise ValueError("GT governing invariants do not all resolve")
+
+    contracts = docs["contracts"]["contracts"]
+    contract_ids = unique_ids(contracts, "contracts")
+    if GT_DEPENDENT_CONTRACT_ID in contract_ids:
+        raise ValueError(
+            "the GT+SV dependent contract must not be applied in stage core"
+        )
+    core = [c for c in contracts if c["id"] == GT_CORE_CONTRACT_ID]
+    if len(core) != 1:
+        raise ValueError("GT core contract must exist exactly once")
+    core_sources = list(core[0]["source_invariants"])
+    if len(core_sources) != len(set(core_sources)) or set(core_sources) != set(
+        GT_GOVERNING
+    ):
+        raise ValueError(
+            "GT core source_invariants must be exactly the six governing IDs"
+        )
+
+    gt_terms = list(overlay("overlays/vocabulary_additions.yaml")["terms"])
+    if len(gt_terms) != 12 or set(gt_terms) & set(SV_TERMS):
+        raise ValueError("GT must add twelve terms disjoint from SV terms")
+
+    pdoc = docs["projection_profiles"]
+    profile = _gt_profile(pdoc)
+    if tuple(profile["sources"]) != GT_SOURCE_CLASSES:
+        raise ValueError(
+            "GT profile must select exactly vocabulary, invariants, contracts"
+        )
+    selected = []
+    for selector in profile["sources"]["invariants"]["selectors"]:
+        match = INVARIANT_SELECTOR.match(selector)
+        if not match:
+            raise ValueError(f"unsupported invariant selector {selector!r}")
+        selected.append(match.group(1))
+    if (
+        len(selected) != 6
+        or len(set(selected)) != 6
+        or set(selected) != set(core_sources)
+    ):
+        raise ValueError(
+            "GT invariant selection must equal the core contract's six IDs"
+        )
+    selected_contracts = {
+        CONTRACT_SELECTOR.match(s).group(1)
+        for s in profile["sources"]["contracts"]["selectors"]
+    }
+    if selected_contracts != {GT_CORE_CONTRACT_ID}:
+        raise ValueError("GT profile must select only the GT core contract")
+    if profile["sources"]["vocabulary"]["selectors"] != [
+        "$.terms." + t for t in gt_terms
+    ]:
+        raise ValueError("GT vocabulary selection must be exactly the twelve GT terms")
+    if profile["forbidden"] != [GT_FORBIDDEN]:
+        raise ValueError(
+            "GT profile must declare exactly the registered forbidden token"
+        )
+    definitions = pdoc["forbidden_constraints"]["definitions"]
+    for token in profile["forbidden"]:
+        if token not in definitions:
+            raise ValueError(f"forbidden token {token} has no registered criterion")
+    expected_def = overlay("overlays/projection_forbidden_constraint_additions.yaml")[
+        "forbidden_constraint_definitions"
+    ][GT_FORBIDDEN]
+    if definitions[GT_FORBIDDEN] != expected_def:
+        raise ValueError("registered forbidden definition differs from overlay")
+    excluded = {
+        (e["source_class"], e["selector"]) for e in expected_def["excluded_selections"]
+    }
+    want = (
+        {("vocabulary", "$.terms." + t) for t in SV_TERMS}
+        | {
+            ("invariants", f'$.invariants[?(@.id=="{i}")]')
+            for i in sorted(SV_NEW_INVARIANTS)
+        }
+        | {("contracts", f'$.contracts[?(@.id=="{SV_CONTRACT_ID}")]')}
+    )
+    if excluded != want or len(expected_def["excluded_selections"]) != len(want):
+        raise ValueError(
+            "forbidden criterion must exclude exactly the SV-owned records"
+        )
+    if profile["output"]["schema"] != GT_OUTPUT:
+        raise ValueError("GT profile output schema mismatch")
+
+    comp = [
+        p
+        for p in docs["composition_profiles"]["profiles"]
+        if p["id"] == GT_COMPOSITION_ID
+    ]
+    if len(comp) != 1 or comp[0]["composes"]["projection_profile"] != GT_PROFILE_ID:
+        raise ValueError("GT composition profile missing or unbound")
+    if comp[0]["output"]["schema"] != GT_COMPOSED_OUTPUT:
+        raise ValueError("GT composition output schema mismatch")
+
+    manifest = yaml.safe_load(changed["semantics/generic_compiler_manifest.yaml"])
+    registered = manifest["requires"]["artifact_schemas"]
+    if len(registered) != len(set(registered)):
+        raise ValueError("duplicate artifact schema registration")
+    for name in GT_SCHEMA_FILES + (
+        "strategic_planner_value_projection.schema.yaml",
+        "strategic_planner_value_composition.schema.yaml",
+    ):
+        if registered.count(name) != 1:
+            raise ValueError(f"schema must be registered exactly once: {name}")
+    resolved = {}
+    for output_id in (GT_OUTPUT, GT_COMPOSED_OUTPUT):
+        hits = [
+            name
+            for name in registered
+            if (
+                (yaml.safe_load(assembled("semantics/" + name)) or {})
+                .get("properties", {})
+                .get("schema", {})
+                .get("const")
+            )
+            == output_id
+        ]
+        if len(hits) != 1:
+            raise ValueError(f"{output_id} must resolve to exactly one schema: {hits}")
+        resolved[output_id] = hits[0]
+    for label, descriptor in (
+        (
+            "projection",
+            yaml.safe_load(changed["semantics/" + GT_SCHEMA_FILES[0]])["properties"][
+                "invariants"
+            ],
+        ),
+        (
+            "composition",
+            yaml.safe_load(changed["semantics/" + GT_SCHEMA_FILES[1]])["properties"][
+                "invariants"
+            ]["properties"]["invariants"],
+        ),
+    ):
+        enum = descriptor["items"]["properties"]["id"]["enum"]
+        if descriptor["min_items"] != 6 or sorted(enum) != sorted(GT_GOVERNING):
+            raise ValueError(f"{label} schema must pin the six governing IDs")
+    return resolved
+
+
+def generate_core(checkout):
+    def current(rel):
+        return (checkout / rel).read_text(encoding="utf-8")
 
     changed = {}
-    for p in ('semantics/strategic_interaction_projection.schema.yaml',
-              'semantics/strategic_interaction_composition.schema.yaml'):
-        if (checkout/p).exists():
-            raise ValueError(p+' already exists: re-resolve owner and target')
-        changed[p] = txt(p)
+    for name in GT_SCHEMA_FILES:
+        dest = "semantics/" + name
+        if (checkout / dest).exists():
+            raise ValueError(f"{dest} already exists: re-resolve owner and target")
+        changed[dest] = raw("semantics/" + name)
 
-    p = 'semantics/invariants.yaml'
-    inv = append_top_list(original(p), 'overlays/invariants_additions.yaml', 'invariants')
+    p = "semantics/invariants.yaml"
+    old_inv = current(p)
+    old_count = len(unique_ids(yaml.safe_load(old_inv)["invariants"], "invariants"))
+    inv = merge_list(old_inv, raw("overlays/invariants_additions.yaml"), "invariants")
+    inv_count = len(yaml.safe_load(inv)["invariants"])
+    if inv_count != old_count + 1:
+        raise ValueError(f"invariant count {inv_count} != {old_count} + 1")
     changed[p] = inv
-    inv_count = len(yaml.safe_load(inv)['invariants'])
-    inv_sha = hashlib.sha256(inv.encode('utf-8')).hexdigest()
 
-    p = 'semantics/contracts.yaml'
-    c = original(p)
-    if not re.search(r'^  source_digest_sha256: [a-f0-9]{64}$', c, flags=re.M):
-        raise ValueError('missing canonical contract source digest contract')
-    c = re.sub(r'(^  source_digest_sha256: )[a-f0-9]{64}$',
-               lambda m:m.group(1)+inv_sha,c,count=1,flags=re.M)
-    c = re.sub(r'(^  source_invariant_count: )\d+$',
-               lambda m:m.group(1)+str(inv_count),c,count=1,flags=re.M)
-    changed[p] = append_top_list(c, 'overlays/contracts_gt_core.yaml', 'contracts')
+    p = "semantics/contracts.yaml"
+    old_contracts = current(p)
+    c = update_contract_derivation(old_contracts, old_inv, inv, old_count, inv_count)
+    changed[p] = merge_list(c, raw("overlays/contracts_gt_core.yaml"), "contracts")
+    if len(yaml.safe_load(changed[p])["contracts"]) != (
+        len(yaml.safe_load(old_contracts)["contracts"]) + 1
+    ):
+        raise ValueError("contract count did not increase by exactly one")
 
-    p = 'semantics/vocabulary.yaml'
-    v = original(p)
-    existing = set(yaml.safe_load(v)['terms'])
-    incoming = set(data('overlays/vocabulary_additions.yaml')['terms'])
-    if incoming & existing:
-        raise ValueError('term identity collision: '+str(sorted(incoming & existing)))
-    ins = txt('overlays/vocabulary_additions.yaml').split('terms:\n',1)[1]
-    changed[p] = one(v,'\nrelationships:\n','\n'+ins.rstrip()+'\nrelationships:\n',p)
+    p = "semantics/vocabulary.yaml"
+    v = current(p)
+    incoming = overlay("overlays/vocabulary_additions.yaml")["terms"]
+    clash = set(yaml.safe_load(v)["terms"]) & set(incoming)
+    if clash:
+        raise ValueError(f"vocabulary term collision: {sorted(clash)}")
+    block = raw("overlays/vocabulary_additions.yaml").split("terms:\n", 1)[1]
+    changed[p] = one(
+        v, "\nrelationships:\n", "\n" + block.rstrip() + "\nrelationships:\n", p
+    )
+    if len(yaml.safe_load(changed[p])["terms"]) != len(
+        yaml.safe_load(v)["terms"]
+    ) + len(incoming):
+        raise ValueError("vocabulary term count did not increase by exactly twelve")
 
-    p = 'semantics/projection_profiles.yaml'
-    pr = original(p)
-    obj = yaml.safe_load(pr)
-    extras = data('overlays/projection_profile_additions.yaml')['projection_profiles']
-    for x in extras:
-        if x['id'] in {z['id'] for z in obj['projection_profiles']}:
-            raise ValueError('profile collision: '+x['id'])
-        if any(s not in obj['source_classes'] for s in x['sources']):
-            raise ValueError('undeclared source class')
-    pr_lines = txt('overlays/projection_profile_additions.yaml').split('projection_profiles:\n',1)[1]
-    changed[p] = one(pr, '\nprojection_engine_contract_ref:\n',
-                     '\n'+pr_lines.rstrip()+'\nprojection_engine_contract_ref:\n',p)
+    p = "semantics/projection_profiles.yaml"
+    s = current(p)
+    pdoc = yaml.safe_load(s)
+    unique_ids(pdoc["projection_profiles"], "projection profiles")
+    rows = overlay("overlays/projection_profile_additions.yaml")["projection_profiles"]
+    unique_ids(rows, "overlay projection profiles")
+    for row in rows:
+        if row["id"] in {x["id"] for x in pdoc["projection_profiles"]}:
+            raise ValueError("profile collision: " + row["id"])
+        for source_class in row["sources"]:
+            if source_class not in pdoc["source_classes"]:
+                raise ValueError("undeclared source class " + source_class)
+    definitions = pdoc["forbidden_constraints"]["definitions"]
+    new_defs = overlay("overlays/projection_forbidden_constraint_additions.yaml")[
+        "forbidden_constraint_definitions"
+    ]
+    if set(new_defs) & set(definitions):
+        raise ValueError("forbidden-constraint definition collision")
+    if list(pdoc)[list(pdoc).index("forbidden_constraints") + 1] != "validation_rules":
+        raise ValueError("forbidden_constraints is not followed by validation_rules")
+    def_block = (
+        raw("overlays/projection_forbidden_constraint_additions.yaml")
+        .split("forbidden_constraint_definitions:\n", 1)[1]
+        .rstrip()
+    )
+    def_block = "\n".join(
+        "  " + line if line else line for line in def_block.splitlines()
+    )
+    s = one(s, "\nvalidation_rules:\n", "\n" + def_block + "\nvalidation_rules:\n", p)
+    profile_block = raw("overlays/projection_profile_additions.yaml").split(
+        "projection_profiles:\n", 1
+    )[1]
+    changed[p] = one(
+        s,
+        "\nprojection_engine_contract_ref:\n",
+        "\n" + profile_block.rstrip() + "\nprojection_engine_contract_ref:\n",
+        p,
+    )
 
-    p = 'semantics/composition_profiles.yaml'
-    cp = original(p)
-    cp_rows = data('overlays/composition_profile_additions.yaml')['profiles']
-    cp_obj = yaml.safe_load(cp)
-    if any(x['id'] in {z['id'] for z in cp_obj['profiles']} for x in cp_rows):
-        raise ValueError('composition profile collision')
-    # Canonical composition_profiles.yaml ends in the `profiles` list.
-    if 'profiles:\n' not in cp:
-        raise ValueError('missing composition list')
-    new_rows = textwrap.indent(txt('overlays/composition_profile_additions.yaml').split('profiles:\n',1)[1].rstrip(), '  ')
-    changed[p] = cp.rstrip()+'\n'+new_rows+'\n'
+    p = "semantics/composition_profiles.yaml"
+    cp = current(p)
+    cdoc = yaml.safe_load(cp)
+    unique_ids(cdoc["profiles"], "composition profiles")
+    adds = overlay("overlays/composition_profile_additions.yaml")["profiles"]
+    if len(adds) != 1 or adds[0]["id"] in {x["id"] for x in cdoc["profiles"]}:
+        raise ValueError("composition profile collision or invalid overlay")
+    if list(cdoc)[-1] != "profiles":
+        raise ValueError("composition catalog does not end in its profiles list")
+    comp_block = (
+        raw("overlays/composition_profile_additions.yaml")
+        .split("profiles:\n", 1)[1]
+        .rstrip()
+    )
+    changed[p] = (
+        cp.rstrip()
+        + "\n"
+        + "\n".join("  " + line if line else line for line in comp_block.splitlines())
+        + "\n"
+    )
 
-    p = 'semantics/generic_compiler_manifest.yaml'
-    manifest = original(p)
-    anchor = '  - pr_audit_composition.schema.yaml\n'
-    lines = ('  - strategic_interaction_projection.schema.yaml\n'
-             '  - strategic_interaction_composition.schema.yaml\n')
-    changed[p] = one(manifest, anchor, anchor+lines, p)
+    p = "semantics/generic_compiler_manifest.yaml"
+    m = current(p)
+    schemas = yaml.safe_load(m)["requires"]["artifact_schemas"]
+    if any(name in schemas for name in GT_SCHEMA_FILES):
+        raise ValueError("GT schema already registered")
+    last = "  - " + schemas[-1] + "\n"
+    changed[p] = one(m, last, last + "".join(f"  - {n}\n" for n in GT_SCHEMA_FILES), p)
+    after = yaml.safe_load(changed[p])["requires"]["artifact_schemas"]
+    if after != schemas + list(GT_SCHEMA_FILES):
+        raise ValueError("manifest registration did not append exactly the GT schemas")
 
-    for path, value in changed.items():
-        doc = yaml.safe_load(value)
-        if not isinstance(doc, dict):
-            raise ValueError('invalid resulting YAML: '+path)
-    final_inv = {v['id'] for v in yaml.safe_load(changed['semantics/invariants.yaml'])['invariants']}
-    for cc in yaml.safe_load(changed['semantics/contracts.yaml'])['contracts']:
-        if cc['id']=='l9.contract/strategic-interaction-assessment@1':
-            if not set(cc['source_invariants']) <= final_inv:
-                raise ValueError('GT core contract references absent invariants')
-    pdoc = yaml.safe_load(changed['semantics/projection_profiles.yaml'])
-    for profile in pdoc['projection_profiles']:
-        if profile['id']=='l9.projection/strategic-planner-interaction@1':
-            for key in profile['sources']:
-                if key not in pdoc['source_classes']:
-                    raise ValueError('undeclared source class '+key)
-    return changed, inv_count
+    rebound = rebind_derived_ledgers(checkout, changed)
+    resolved = verify_assembled(checkout, changed)
+    return changed, inv_count, rebound, resolved
 
 
-def main():
-    parser=argparse.ArgumentParser()
-    parser.add_argument('--checkout',required=True)
-    parser.add_argument('--apply',action='store_true')
-    args=parser.parse_args()
-    checkout=Path(args.checkout).resolve()
-    def git(*sub):
-        return subprocess.run(['git','-C',str(checkout),*sub],
-                              check=True,capture_output=True,text=True).stdout.strip()
+def generate_dependent(checkout):
+    if ADMITTED_FOUNDATION_REVISION is None:
+        raise ValueError(
+            "no admitted SV + GT-core foundation revision is recorded in "
+            "evidence/sv_alignment_binding.json; the dependent contract cannot be prepared"
+        )
+    head = git(checkout, "rev-parse", "HEAD").strip()
+    if head != ADMITTED_FOUNDATION_REVISION:
+        raise ValueError(
+            f"HEAD {head} != admitted foundation {ADMITTED_FOUNDATION_REVISION}"
+        )
+    if dirty_paths(checkout):
+        raise ValueError("checkout not clean")
+
+    def current(rel):
+        return (checkout / rel).read_text(encoding="utf-8")
+
+    docs = {
+        "invariants": yaml.safe_load(current("semantics/invariants.yaml")),
+        "contracts": yaml.safe_load(current("semantics/contracts.yaml")),
+        "vocabulary": yaml.safe_load(current("semantics/vocabulary.yaml")),
+        "projection_profiles": yaml.safe_load(
+            current("semantics/projection_profiles.yaml")
+        ),
+        "composition_profiles": yaml.safe_load(
+            current("semantics/composition_profiles.yaml")
+        ),
+        "model": yaml.safe_load(current("semantics/strategic_value_model.yaml")),
+    }
+    verify_sv_core_present(docs)
+    inv_ids = {r["id"] for r in docs["invariants"]["invariants"]}
+    contract_ids = [c["id"] for c in docs["contracts"]["contracts"]]
+    if GT_INVARIANT not in inv_ids or contract_ids.count(GT_CORE_CONTRACT_ID) != 1:
+        raise ValueError("GT core is not present at the admitted foundation")
+    _gt_profile(docs["projection_profiles"])
+    dependent = overlay("overlays/contracts_sv_dependent.yaml")["contracts"]
+    if len(dependent) != 1 or dependent[0]["id"] != GT_DEPENDENT_CONTRACT_ID:
+        raise ValueError("dependent overlay must carry exactly the GT+SV contract")
+    unresolved = set(dependent[0]["source_invariants"]) - inv_ids
+    if unresolved:
+        raise ValueError(
+            f"dependent contract cites absent invariants {sorted(unresolved)}"
+        )
+    if SV_LINEAGE_ONLY & set(dependent[0]["source_invariants"]):
+        raise ValueError("dependent contract cites lineage-only SV IDs")
+    p = "semantics/contracts.yaml"
+    changed = {
+        p: merge_list(
+            current(p), raw("overlays/contracts_sv_dependent.yaml"), "contracts"
+        )
+    }
+    rebound = rebind_derived_ledgers(checkout, changed)
+    return changed, len(inv_ids), rebound, {}
+
+
+def write_staged(checkout, proposed):
+    target = Path(git(checkout, "rev-parse", "--show-toplevel").strip()).resolve()
+    own = subprocess.run(
+        ["git", "-C", str(ROOT), "rev-parse", "--show-toplevel"],
+        capture_output=True,
+        text=True,
+        check=False,
+    ).stdout.strip()
+    if own and target == Path(own).resolve():
+        raise ValueError("refusing --apply into the checkout that carries this pack")
+    staged = []
     try:
-        if git('rev-parse','HEAD') != BASE_SHA:
-            raise ValueError('checkout HEAD does not match pinned .github SHA '+BASE_SHA)
-        if git('status','--porcelain'):
-            raise ValueError('checkout not clean')
-        for p, expected in {**SOURCE_BLOBS, **SV_REVIEW_BLOBS}.items():
-            if git('hash-object',p) != expected:
-                raise ValueError('source blob differs from pinned repository: '+p)
-        changes, count = prepare(checkout)
+        for rel, content in proposed.items():
+            dst = checkout / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            tmp = dst.with_name("." + dst.name + ".gt-staged")
+            tmp.write_text(content, encoding="utf-8")
+            staged.append((tmp, dst))
+    except OSError:
+        for tmp, _ in staged:
+            tmp.unlink(missing_ok=True)
+        raise
+    for tmp, dst in staged:
+        os.replace(tmp, dst)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--checkout", required=True)
+    parser.add_argument("--stage", choices=("core", "dependent"), default="core")
+    parser.add_argument("--apply", action="store_true")
+    parser.add_argument(
+        "--disposable",
+        action="store_true",
+        help="acknowledge that --checkout is a throwaway clone (self-declared)",
+    )
+    args = parser.parse_args(argv)
+    checkout = Path(args.checkout).resolve()
+    try:
+        if args.stage == "core":
+            verify_sv_applied_target(checkout)
+            proposed, count, rebound, resolved = generate_core(checkout)
+        else:
+            proposed, count, rebound, resolved = generate_dependent(checkout)
         if args.apply:
-            for p, content in changes.items():
-                dst=checkout/p
-                dst.parent.mkdir(parents=True,exist_ok=True)
-                dst.write_text(content,encoding='utf-8')
-        print('STATUS='+('LOCAL_GT_CORE_WRITTEN_NOT_ADMITTED' if args.apply else 'DRY_RUN_GT_CORE_ONLY'))
-        print('REVIEW_PR212_SHA='+BASE_SHA)
-        print('CANONICAL_MAIN_BASE_SHA='+CANONICAL_MAIN_SHA)
-        print('INVARIANT_COUNT='+str(count))
-        for p in sorted(changes): print('CANDIDATE_PATH='+p)
-        print('DEPENDENT_GT_SV_CONTRACT=BLOCKED_PR212_SV_IS_DOCUMENTATION_ONLY_NOT_ADMITTED')
-        print('NATIVE_COMPILER_RECEIPTS=NOT_RUN')
+            if not args.disposable:
+                raise ValueError("--apply requires --disposable")
+            write_staged(checkout, proposed)
+        print(
+            "STATUS="
+            + ("LOCAL_FILES_WRITTEN_NOT_ADMITTED" if args.apply else "DRY_RUN_ONLY")
+        )
+        print("STAGE=" + args.stage)
+        print("CANONICAL_TARGET=" + CANONICAL_TARGET)
+        print("SV_CANDIDATE_HEAD=" + SV_CANDIDATE_HEAD)
+        print("INVARIANT_COUNT=" + str(count))
+        for path in sorted(proposed):
+            print("PATH=" + path)
+        for path, names in sorted(rebound.items()):
+            print(f"DERIVATION_REBOUND={path}:{','.join(names)}")
+        for output_id, name in sorted(resolved.items()):
+            print(f"SCHEMA_RESOLVED={output_id}:{name}")
+        if args.stage == "core":
+            print(
+                "DEPENDENT_GT_SV_CONTRACT=NOT_APPLIED_STAGE_B_REQUIRES_ADMITTED_FOUNDATION"
+            )
+        print("NATIVE_COMPILER_RECEIPTS=NOT_PRODUCED_BY_THIS_SCRIPT")
         return 0
-    except (ValueError, OSError, KeyError, yaml.YAMLError, subprocess.CalledProcessError) as exc:
-        print('BLOCKED='+str(exc),file=sys.stderr)
+    except (
+        ValueError,
+        TypeError,
+        OSError,
+        KeyError,
+        AttributeError,
+        yaml.YAMLError,
+        subprocess.CalledProcessError,
+    ) as exc:
+        print("BLOCKED=" + str(exc), file=sys.stderr)
         return 2
 
-if __name__=='__main__':
+
+if __name__ == "__main__":
     sys.exit(main())
