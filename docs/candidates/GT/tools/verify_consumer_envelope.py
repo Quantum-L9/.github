@@ -108,10 +108,14 @@ def main(argv=None):
             print(f"BLOCKED={arg!r} resolves outside the working directory {base}")
             return 2
         paths.append(Path(resolved))
-    envelope = json.loads(paths[0].read_text())
+    envelope = json.loads(
+        paths[0].read_text()
+    )  # NOSONAR S8707: operator CLI path, realpath-confined to the working directory above
     receipts = {}
     for path in paths[1:]:
-        receipt = json.loads(path.read_text())
+        receipt = json.loads(
+            path.read_text()
+        )  # NOSONAR S8707: operator CLI path, realpath-confined to the working directory above
         receipts[(receipt.get("output") or {}).get("digest")] = receipt
     verdict, failures = verify(envelope, receipts)
     print("VERDICT=" + verdict)

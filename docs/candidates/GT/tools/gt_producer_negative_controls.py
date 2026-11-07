@@ -538,7 +538,9 @@ def main(argv=None):
         "all_matched": all(x["mechanism_matched"] for x in r.results),
         "count": len(r.results),
     }
-    out_path.write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+    out_path.write_text(
+        json.dumps(out, indent=2) + "\n", encoding="utf-8"
+    )  # NOSONAR S8707: operator CLI path, realpath-confined to the working directory by confined()
     for x in r.results:
         print(
             ("MATCH " if x["mechanism_matched"] else "MISMATCH "),
