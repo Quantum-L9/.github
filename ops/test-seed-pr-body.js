@@ -282,7 +282,7 @@ if (!composerRoot) {
 // with a credential in its environment.
 const sh = (cwd, ...args) =>
 	execFileSync(
-		"git",
+		"git", // NOSONAR S4036: test fixture, runner PATH (see above)
 		[
 			"-c",
 			"user.name=seeder",
@@ -293,7 +293,7 @@ const sh = (cwd, ...args) =>
 			...args,
 		],
 		{ cwd, encoding: "utf8" },
-	).trim(); // NOSONAR S4036: test fixture, runner PATH (see above)
+	).trim();
 
 /** A bare "remote" with a default branch and a seed branch one commit ahead. */
 function seedRemote({ files, message, branch, existing = {} }) {

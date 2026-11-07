@@ -16,12 +16,41 @@ import argparse
 import copy
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 import yaml
+
+_FULL_SHA = re.compile(r"[0-9a-f]{40}")
+
+
+def checked_revision(value):
+    """A revision argument must be one full commit SHA, never an option or a ref expression."""
+    match = _FULL_SHA.fullmatch(value or "")
+    if match is None:
+        raise ValueError(f"revision must be a 40-hex commit SHA, got {value!r}")
+    return match.group(0)
+
+
+def checked_directory(value, *, required=()):
+    """An existing directory, symlinks resolved, holding every ``required`` entry."""
+    path = Path(os.path.realpath(value))
+    if not path.is_dir() or any(not (path / name).exists() for name in required):
+        raise ValueError(f"{value!r} is not a directory holding {list(required)}")
+    return path
+
+
+def confined(value):
+    """A file path that resolves inside the current working directory."""
+    base = os.path.realpath(os.getcwd())
+    path = os.path.realpath(value)
+    if os.path.commonpath([base, path]) != base:
+        raise ValueError(f"{value!r} resolves outside the working directory {base}")
+    return Path(path)
+
 
 GT_PROFILE = "l9.projection/strategic-planner-interaction@1"
 GT_COMPOSITION = "l9.compose/strategic-planner-interaction@1"
@@ -281,8 +310,18 @@ def main(argv=None):
     parser.add_argument("--run1", required=True)
     parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
-    r = Runner(args.authority_root, args.revision, args.compiler_src)
-    run1 = Path(args.run1).resolve()
+    try:
+        revision = checked_revision(args.revision)
+        root = checked_directory(args.authority_root, required=(".git", "semantics"))
+        compiler_src = checked_directory(
+            args.compiler_src, required=("l9_semantic_compiler",)
+        )
+        run1 = checked_directory(args.run1, required=("requests",))
+        out_path = confined(args.out)
+    except ValueError as exc:
+        print("BLOCKED=" + str(exc), file=sys.stderr)
+        return 2
+    r = Runner(root, revision, compiler_src)
     pp = "semantics/projection_profiles.yaml"
     sel = '      - $.invariants[?(@.id=="L9-ASSURANCE-001")]\n'
     # The SV profile selects L9-ASSURANCE-001 too; anchor on the GT contract
@@ -494,12 +533,12 @@ def main(argv=None):
 
     out = {
         "schema": "l9.gt.producer-negative-controls/v1",
-        "authority_revision": args.revision,
+        "authority_revision": revision,
         "controls": r.results,
         "all_matched": all(x["mechanism_matched"] for x in r.results),
         "count": len(r.results),
     }
-    Path(args.out).write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+    out_path.write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
     for x in r.results:
         print(
             ("MATCH " if x["mechanism_matched"] else "MISMATCH "),

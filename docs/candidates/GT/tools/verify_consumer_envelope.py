@@ -20,6 +20,7 @@ contract, and grants no authority.
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -99,10 +100,18 @@ def main(argv=None):
     if len(args) < 1:
         print("usage: verify_consumer_envelope.py ENVELOPE.json RECEIPT.json...")
         return 2
-    envelope = json.loads(Path(args[0]).read_text())
+    base = os.path.realpath(os.getcwd())
+    paths = []
+    for arg in args:
+        resolved = os.path.realpath(arg)
+        if os.path.commonpath([base, resolved]) != base:
+            print(f"BLOCKED={arg!r} resolves outside the working directory {base}")
+            return 2
+        paths.append(Path(resolved))
+    envelope = json.loads(paths[0].read_text())
     receipts = {}
-    for path in args[1:]:
-        receipt = json.loads(Path(path).read_text())
+    for path in paths[1:]:
+        receipt = json.loads(path.read_text())
         receipts[(receipt.get("output") or {}).get("digest")] = receipt
     verdict, failures = verify(envelope, receipts)
     print("VERDICT=" + verdict)

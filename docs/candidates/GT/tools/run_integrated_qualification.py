@@ -17,11 +17,40 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 import yaml
+
+_FULL_SHA = re.compile(r"[0-9a-f]{40}")
+
+
+def checked_revision(value):
+    """A revision argument must be one full commit SHA, never an option or a ref expression."""
+    match = _FULL_SHA.fullmatch(value or "")
+    if match is None:
+        raise ValueError(f"revision must be a 40-hex commit SHA, got {value!r}")
+    return match.group(0)
+
+
+def checked_directory(value, *, required=()):
+    """An existing directory, symlinks resolved, holding every ``required`` entry."""
+    path = Path(os.path.realpath(value))
+    if not path.is_dir() or any(not (path / name).exists() for name in required):
+        raise ValueError(f"{value!r} is not a directory holding {list(required)}")
+    return path
+
+
+def confined(value):
+    """A file path that resolves inside the current working directory."""
+    base = os.path.realpath(os.getcwd())
+    path = os.path.realpath(value)
+    if os.path.commonpath([base, path]) != base:
+        raise ValueError(f"{value!r} resolves outside the working directory {base}")
+    return Path(path)
+
 
 PROFILES = {
     "gt": {
@@ -190,16 +219,24 @@ def main(argv=None):
     parser.add_argument("--compiler-src", required=True)
     parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
-    root = Path(args.authority_root).resolve()
-    out = Path(args.out).resolve()
+    try:
+        revision = checked_revision(args.revision)
+        root = checked_directory(args.authority_root, required=(".git", "semantics"))
+        compiler_src = checked_directory(
+            args.compiler_src, required=("l9_semantic_compiler",)
+        )
+        out = confined(args.out)
+    except ValueError as exc:
+        print("BLOCKED=" + str(exc), file=sys.stderr)
+        return 2
     if out.exists() and any(out.iterdir()):
         print("BLOCKED=--out must be a new or empty directory", file=sys.stderr)
         return 2
-    env = dict(os.environ, PYTHONPATH=str(Path(args.compiler_src).resolve()))
+    env = dict(os.environ, PYTHONPATH=str(compiler_src))
     sys.path.insert(0, env["PYTHONPATH"])
     try:
-        run1 = run_once(env, root, args.revision, out / "run1")
-        run2 = run_once(env, root, args.revision, out / "run2")
+        run1 = run_once(env, root, revision, out / "run1")
+        run2 = run_once(env, root, revision, out / "run2")
     except (RuntimeError, ImportError, subprocess.SubprocessError) as exc:
         print("BLOCKED=" + str(exc), file=sys.stderr)
         return 2
@@ -208,7 +245,7 @@ def main(argv=None):
         [
             "git",
             "-C",
-            str(Path(args.compiler_src).resolve().parent),
+            str(compiler_src.parent),
             "rev-parse",
             "HEAD",
         ],
@@ -218,9 +255,9 @@ def main(argv=None):
     ).stdout.strip()
     summary = {
         "schema": "l9.gt.integrated-qualification/v1",
-        "authority_revision": args.revision,
+        "authority_revision": revision,
         "authority_tree": subprocess.run(
-            ["git", "-C", str(root), "rev-parse", args.revision + "^{tree}"],
+            ["git", "-C", str(root), "rev-parse", revision + "^{tree}"],
             capture_output=True,
             text=True,
             check=False,
