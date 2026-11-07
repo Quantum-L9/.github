@@ -23,6 +23,6 @@ The bounded `Q/V` belief-state recurrence from PR #6 is a **supported method** f
 | `docs/NUMERICAL_REASONING.md` | `model.evaluation_integrity`, assessment method evidence | Independent numerical owner; no Planner-owned solver |
 | `implementation/SYSTEMIC_FUTURE_VALUE_COMPONENTS.md` | effect/accounting ledger and model semantics | Functional obligations, not six new services |
 
-The 14 original candidate IDs are reduced to **two proposed global invariants plus twelve model/contract semantic placements**; see `IRREDUCIBILITY_DISPOSITION.md`. The six new candidates each have an independent executable falsifier; see `ADMISSION_INVARIANT_REVIEW.md`.
+The 20 candidate meanings are reduced to **two proposed global invariants (`L9-SV-001`, amended, and `L9-SV-002`) plus eighteen model/contract semantic placements** (twelve retained-former, six relocated); see `IRREDUCIBILITY_DISPOSITION.md`. The six relocated safeguards each keep an independent executable falsifier; see `ADMISSION_INVARIANT_REVIEW.md`. The accounting identity, the SFV expression and the Q/V recurrence above are unchanged by the reduction.
 
 **No official source/schema compiler replay, numerical validation, or canonical admission occurred.**
