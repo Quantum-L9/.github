@@ -25,7 +25,7 @@
 	},
 	"remote_mutation": false,
 	"no_skills": true,
-	"candidate_revision": "sha256:48e0ec0004f9af06cc778e1b6ce4a30d6f6a6bc684b9eb1b6a04dd1e66187f8e",
+	"candidate_revision": "sha256:d92025969c2431aabe1b4a6fe79b3c402af156a2e4fec13808aec488ce8fdbf4",
 	"files": [
 		{
 			"path": "ADMISSION_HANDOFF.md",
@@ -79,8 +79,8 @@
 		},
 		{
 			"path": "evidence/authority_binding.json",
-			"bytes": 3587,
-			"sha256": "f32c9bc01f7935242ca1e411b508cef33291e8054304de1dd7f3ce6bba61cc56"
+			"bytes": 3506,
+			"sha256": "0ee8ff949bf035f2deda117c65e12e0a16a93286c8c14fdb1c78ada7c6c5bf2d"
 		},
 		{
 			"path": "evidence/break_test_counterexamples.md",
@@ -124,13 +124,13 @@
 		},
 		{
 			"path": "evidence/pr212_break_test.json",
-			"bytes": 4581,
-			"sha256": "bab691e41a4f23a973d888e91e41d5da5808f51c9bc280b63f44096ea06f13fa"
+			"bytes": 4330,
+			"sha256": "cf1cf87dbefe8e00c292f7856a7e26c97fea95594cf37484d47aacaed4f8c1e0"
 		},
 		{
 			"path": "evidence/prior_break_test_final.json",
-			"bytes": 10487,
-			"sha256": "30d7a656a31923f1c3e095ba35d9a5d2bce204230d73032424ad3a7b8ef4dd50"
+			"bytes": 9922,
+			"sha256": "c85fdc38267379b6a10cd20b938f64e7881707cceb96cff57c0ac0f3e02fb292"
 		},
 		{
 			"path": "evidence/prior_break_validator.log",
@@ -149,8 +149,8 @@
 		},
 		{
 			"path": "evidence/sv_collision_report.json",
-			"bytes": 1148,
-			"sha256": "1e95936e7f6f7e23451fd91d1fba8a07589b2bfe74b90fad80a054bb980c8760"
+			"bytes": 1103,
+			"sha256": "89f7c8fef0a95b32e4acfaba3137f2d9482f544c81db99d174d8420364d8b11e"
 		},
 		{
 			"path": "overlays/composition_profile_additions.yaml",
@@ -189,8 +189,8 @@
 		},
 		{
 			"path": "schemas/gt_sv_consumer_assessment.candidate.schema.json",
-			"bytes": 5513,
-			"sha256": "82767e6b06fb1c1342f77221e84e5d3c84a6ffe12b78502661880c447214b45b"
+			"bytes": 4343,
+			"sha256": "12b654a6f81c9e077c9c03bba1560a4e86409fcdc044267e792bbe5afe1b3306"
 		},
 		{
 			"path": "schemas/strategic_interaction_composed_payload.candidate.schema.json",

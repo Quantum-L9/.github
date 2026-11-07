@@ -1,5 +1,5 @@
 {
-	"sha256": "48e0ec0004f9af06cc778e1b6ce4a30d6f6a6bc684b9eb1b6a04dd1e66187f8e",
+	"sha256": "d92025969c2431aabe1b4a6fe79b3c402af156a2e4fec13808aec488ce8fdbf4",
 	"paths": [
 		"overlays/vocabulary_additions.yaml",
 		"overlays/invariants_additions.yaml",
