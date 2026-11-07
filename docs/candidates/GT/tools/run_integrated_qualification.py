@@ -73,7 +73,9 @@ PROFILES = {
 
 
 def cli(env, *args):
-    proc = subprocess.run(  # NOSONAR S8705: revision is checked_revision() 40-hex, paths are checked_directory(); argv list, no shell
+    # S8705: argv list, no shell; revision passes checked_revision() (40-hex SHA)
+    # and directories pass checked_directory().
+    proc = subprocess.run(  # NOSONAR
         [sys.executable, "-m", "l9_semantic_compiler", *args],
         capture_output=True,
         text=True,
@@ -109,9 +111,8 @@ def coordinates(env, root, revision, profile, source_class):
 
 
 def run_once(env, root, revision, out):
-    out.mkdir(
-        parents=True
-    )  # NOSONAR S8707: operator CLI path, realpath-confined to the working directory by confined()
+    # S8707: operator CLI path, realpath-confined to the working directory.
+    out.mkdir(parents=True)  # NOSONAR
     requests = out / "requests"
     requests.mkdir()
     results = {}
@@ -186,7 +187,9 @@ def composition_digest(root, revision, ref):
     """Digest of one composition profile record, computed by the producer's own function."""
     from l9_semantic_compiler.engine.registry import profile_digest
 
-    text = subprocess.run(  # NOSONAR S8705: revision is checked_revision() 40-hex, paths are checked_directory(); argv list, no shell
+    # S8705: argv list, no shell; revision passes checked_revision() (40-hex SHA)
+    # and directories pass checked_directory().
+    text = subprocess.run(  # NOSONAR
         [
             "git",
             "-C",
@@ -300,7 +303,9 @@ def main(argv=None):
     summary = {
         "schema": "l9.gt.integrated-qualification/v2",
         "authority_revision": revision,
-        "authority_tree": subprocess.run(  # NOSONAR S8705: revision is checked_revision() 40-hex, paths are checked_directory(); argv list, no shell
+        # S8705: argv list, no shell; revision passes checked_revision() (40-hex SHA)
+        # and directories pass checked_directory().
+        "authority_tree": subprocess.run(  # NOSONAR
             ["git", "-C", str(root), "rev-parse", revision + "^{tree}"],
             capture_output=True,
             text=True,
@@ -313,9 +318,8 @@ def main(argv=None):
         "run1_output_digests": d1,
         "byte_identical_outputs": d1 == d2 and bool(d1),
     }
-    (
-        out / "summary.json"
-    ).write_text(  # NOSONAR S8707: operator CLI path, realpath-confined to the working directory by confined()
+    # S8707: operator CLI path, realpath-confined to the working directory.
+    (out / "summary.json").write_text(  # NOSONAR
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     print(

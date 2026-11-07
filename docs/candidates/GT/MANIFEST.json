@@ -239,8 +239,8 @@
 		},
 		{
 			"path": "tools/gt_producer_negative_controls.py",
-			"bytes": 19682,
-			"sha256": "af8199d1dddc5066f51389911dc156fbad6aab3251fa790551c9b0301e97a535"
+			"bytes": 19661,
+			"sha256": "5c1d9904bfe07fcb3764e664566c0930857b7caa1a39ef171226d75551c3d6bf"
 		},
 		{
 			"path": "tools/refresh_pack_inventory.py",
@@ -249,13 +249,13 @@
 		},
 		{
 			"path": "tools/run_integrated_qualification.py",
-			"bytes": 12418,
-			"sha256": "533c67736ab1cc134d015a7b77b401ef24f67e786d1f44a60d8c1e6104195820"
+			"bytes": 12483,
+			"sha256": "b22bf1a01753cffcf0e4d2c7b23c6b864463d6fe11cd7edf6fb2cb07ec5b5765"
 		},
 		{
 			"path": "tools/verify_consumer_envelope.py",
-			"bytes": 5333,
-			"sha256": "c84da0e2157cbfa11ebc826d3c335aa733156f0b35eba58c90c15ba2c60a456c"
+			"bytes": 5303,
+			"sha256": "ca208a5541a1a4e0daff947c26f8fb2d285c025369706c074adf7f36e8b8db96"
 		}
 	]
 }
