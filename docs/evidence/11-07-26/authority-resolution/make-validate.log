@@ -1,0 +1,298 @@
+Collecting pyyaml==6.0.2
+  Using cached PyYAML-6.0.2-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (2.1 kB)
+Using cached PyYAML-6.0.2-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (739 kB)
+Installing collected packages: pyyaml
+Successfully installed pyyaml-6.0.2
+=== Quantum-L9 Workflow Starter Validation ===
+ok: default payload materializes SECURITY.md, ownership, governance caller, issue + PR templates
+ok: default payload omits INHERIT surfaces (CoC/CONTRIBUTING/SUPPORT/FUNDING/VULNERABILITY_REPORT), LICENSE, labels, retired CI, infra.md
+ok: community-health is SECURITY.md alone; release.md is materialized by pr-templates
+ok: Python lint dest is not seeded
+ok: existing files are left untouched
+✅ ops/test-build-seed-payload.js
+  ok   the full seed payload is non-empty and includes the issue forms
+  ok   no seeded file carries a consumer no-stub marker
+  ok   the incident form hard-codes no priority label
+  ok   issue-triage still derives priority from incident Severity
+  ok   the governance-violation form offers the repository it is filed in
+
+seed payload consumer gates: PASS
+✅ ops/test-seed-payload-consumer-gates.js
+ok: actions-only — golden bytes, idempotent, ecosystems github-actions
+ok: npm-only — golden bytes, idempotent, ecosystems github-actions+npm
+ok: pep621-only — golden bytes, idempotent, ecosystems github-actions+pip
+ok: pip-only — golden bytes, idempotent, ecosystems github-actions+pip
+ok: uv — golden bytes, idempotent, ecosystems github-actions+uv
+ok: uv-npm — golden bytes, idempotent, ecosystems github-actions+uv+npm
+ok: uv-pre-commit — golden bytes, idempotent, ecosystems github-actions+uv+pre-commit
+ok: sha-mismatch-throws — a vendored list that does not match its recorded digest is refused
+ok: no-shape-throws — a missing or malformed shape is refused, never defaulted to github-actions only
+ok: shape rules — [project] table, root requirements*.txt, uv over pip
+ok: probeRepoShape — files only, pyproject.toml read when listed, unreadable root or pyproject throws
+ok: self-config — .github/dependabot.yml is this repository's own render; the seed payload carries the render
+
+all dependabot render scenarios passed
+✅ ops/test-render-dependabot.js
+ok: repo-classes policy is JSON-in-YAML and PyYAML-readable
+ok: planConsumerSeed (shell path) classifies, refuses FORBID, drops INHERIT, keeps existing files, fails closed on a bad marker
+ok: org overrides classify undeclared repos; a marker still outranks them
+ok: a malformed or unknown EXPLICIT class fails closed, never widens to default
+ok: LICENSE is neither mandatory nor seeded by any class
+ok: self_governed seeds only the org CODEOWNERS, inherits every community-health surface, applies labels + settings remotely
+ok: resolveProfile is strict at birth and defensive on a null (absent) class
+ok: default class materializes SECURITY.md + templates and inherits the passive community-health surfaces
+ok: non_constellation_python materializes SECURITY.md and no template-denied CI distribution path
+ok: labels.yml is MATERIALIZE per class while staying out of the global default
+ok: a forbidden dest throws; an inherited dest drops
+ok: enforce-policies — unreadable/malformed marker is unresolved, never assessed as default; unreadable files are unverified, not missing
+ok: enforce-policies — opt-out probe 403/5xx blocks the repo (no repos.update, run fails); 404 enforces; a present marker opts out
+ok: preflight coverage — 95% with one unobserved repo warns and lists it; opt-out present skips, 404 assesses, 403/5xx unobserved
+ok: preflight coverage — default / non_constellation_python / self_governed / Cursor-Governance exception resolve via the shared class profile
+ok: preflight coverage — 404 is missing, 403/500 unobserved; malformed/unknown/unreadable marker unresolved; zero eligible is not 100%
+ok: preflight-scheduled.yml — real script reports class-aware compliance, raw presence separately, unobserved repos listed, zero-eligible not scored; issue identity unchanged
+✅ ops/test-repo-class-profile.js
+ok: org taxonomy parses (35 labels, all three fields, hex colors)
+ok: partial, commented, and duplicate label lines are skipped, not half-applied
+ok: label closure — 39 literal references across forms, stale, dependabot, labeler and workflow scripts resolve to exactly one taxonomy entry
+ok: closure witnesses — a missing reference and a duplicated declaration are detected; a valid reference resolves
+✅ ops/test-label-taxonomy.js
+ok: seed branch gate rebuilds only pristine seeder branches
+ok: gate fails closed on unprovable comparisons and foreign provenance
+ok: assessSeedBranch/moveSeedBranch own every seed ref move
+ok: ref moves are a server-side compare-and-swap (beforeOid)
+ok: workflow seed commit subjects match the gate pattern and carry the Seed-Payload trailer
+ok: unsigned seeder commits are proven by touching only seed paths (added/modified)
+ok: a seed PR declined for the same payload is not re-proposed; a changed payload is
+✅ ops/test-seed-branch-safety.js
+ok: the seed commit message carries the Problem and Fix details; nothing else is written
+ok: the composer environment is an allowlist that carries no credential
+ok: renderSeedPrBody fetches by header, checks the head and its base, and refuses an incomplete body
+ok: auto-seed PR body composed by the pinned composer is complete and passes the org PR gates
+ok: a managed-file restore renders complete
+ok: a Manual Update PR body renders complete
+✅ ops/test-seed-pr-body.js
+ok: auto-seed-new-repo.yml — branch carrying non-seeder commits is left alone
+ok: auto-seed-new-repo.yml — repo with an open seed PR is skipped
+ok: auto-seed-new-repo.yml — fresh repo is seeded with a created ref and a PR
+ok: auto-seed-new-repo.yml — pristine seeder branch is refreshed via compare-and-swap
+ok: auto-seed-new-repo.yml — seed-subject commit with foreign provenance is left alone
+ok: auto-seed-new-repo.yml — branch that moves mid-run is left alone
+ok: auto-seed-new-repo.yml — dry run performs no writes
+ok: auto-seed-new-repo.yml — seed mode writes exactly each class's payload; forbidden paths never, malformed markers skipped
+ok: auto-seed-new-repo.yml — dry run previews the class payload and never a forbidden path
+ok: auto-seed-new-repo.yml — 403/409/5xx and non-file reads fail closed: no default class, no write
+ok: auto-seed-new-repo.yml — base pinned before planning; every read names it; no stale-class write; unpinnable base fails closed
+ok: auto-seed-new-repo.yml — a pending PR on a planned path (incl. rename) blocks the seed: BLOCKED_CONFLICT, no write
+ok: auto-seed-new-repo.yml — an unrelated open PR does not block
+ok: auto-seed-new-repo.yml — unreadable PR listings block with BLOCKED_PERMISSION / UNREACHABLE
+ok: auto-seed-new-repo.yml — a base that moves before publication stops the run; no ref or PR
+ok: auto-seed-new-repo.yml — seed PR body is the org template composed against the published commit; incomplete → no PR
+ok: auto-seed-new-repo.yml — a repo holding every eligible file gets no write
+ok: auto-seed-new-repo.yml — empty repository reported UNINITIALIZED_NOT_SEEDED; sweep continues
+ok: auto-seed-new-repo.yml — other 409s and 403s at the ref stage fail; never reported seeded
+ok: auto-seed-new-repo.yml — dependabot.yml seeded as the root's render; an unlistable root seeds nothing
+ok: auto-seed-new-repo.yml — managed dependabot.yml / CODEOWNERS replaced with the org version; unmanaged files and .l9/no-sync respected
+ok: seed-governance.yml — branch carrying non-seeder commits is left alone
+ok: seed-governance.yml — repo with an open seed PR is skipped
+ok: seed-governance.yml — fresh repo is seeded with a created ref and a PR
+ok: seed-governance.yml — pristine seeder branch is refreshed via compare-and-swap
+ok: seed-governance.yml — seed-subject commit with foreign provenance is left alone
+ok: seed-governance.yml — branch that moves mid-run is left alone
+ok: seed-governance.yml — dry run performs no writes
+ok: seed-governance.yml — seed mode writes exactly each class's payload; forbidden paths never, malformed markers skipped
+ok: seed-governance.yml — dry run previews the class payload and never a forbidden path
+ok: seed-governance.yml — explicit categories pass through the class: FORBID skips with reason, INHERIT drops
+ok: seed-governance.yml — 403/409/5xx and non-file reads fail closed: no default class, no write
+ok: seed-governance.yml — base pinned before planning; every read names it; no stale-class write; unpinnable base fails closed
+ok: seed-governance.yml — a pending PR on a planned path (incl. rename) blocks the seed: BLOCKED_CONFLICT, no write
+ok: seed-governance.yml — an unrelated open PR does not block
+ok: seed-governance.yml — unreadable PR listings block with BLOCKED_PERMISSION / UNREACHABLE
+ok: seed-governance.yml — a base that moves before publication stops the run; no ref or PR
+ok: seed-governance.yml — seed PR body is the org template composed against the published commit; incomplete → no PR
+ok: seed-governance.yml — a repo holding every eligible file gets no write
+ok: seed-governance.yml — empty repository reported UNINITIALIZED_NOT_SEEDED; sweep continues
+ok: seed-governance.yml — other 409s and 403s at the ref stage fail; never reported seeded
+ok: seed-governance.yml — dependabot.yml seeded as the root's render; an unlistable root seeds nothing
+ok: seed-governance.yml — managed dependabot.yml / CODEOWNERS replaced with the org version; unmanaged files and .l9/no-sync respected
+ok: seed-governance.yml — an unreadable extra target is a named failure row
+✅ ops/test-seed-workflow-branch-guard.js
+ok: continuous-sync.yml — open sync PR leaves the branch untouched
+ok: continuous-sync.yml — open-PR probe runs before any ref read or write
+ok: continuous-sync.yml — repo with no open PR is still synced
+ok: continuous-sync.yml — own stale branch is rebuilt via compare-and-swap, one commit
+ok: continuous-sync.yml — branch with unproven provenance is never rebuilt
+ok: continuous-sync.yml — a push landing mid-run is never overwritten
+ok: continuous-sync.yml — dry run performs no writes
+ok: continuous-sync (class-aware) — default class: divergent template replaced with canonical bytes
+ok: continuous-sync (class-aware) — canonical copy is a no-op (idempotent)
+ok: continuous-sync (class-aware) — inherit classes: local copy removed; absence reported INHERITED
+ok: continuous-sync (class-aware) — unresolved class: template left alone, BLOCKED_POLICY
+ok: continuous-sync (class-aware) — caller pins follow governance-caller.yml (any ref form); consumer settings kept
+ok: continuous-sync (class-aware) — alternate templates reported, not edited
+ok: continuous-sync (class-aware) — unreadable repos fail the run instead of reading as in sync
+ok: continuous-sync (class-aware) — dry run reports drift only
+ok: continuous-sync (manual modes) — Preview reports every drifted path and makes only read calls
+ok: continuous-sync (manual modes) — any DRY_RUN other than "false" previews
+ok: continuous-sync (manual modes) — Apply opens one PR into the default branch; only the sync branch and managed paths move
+ok: continuous-sync (manual modes) — .l9/no-sync repos are left untouched in Preview and Apply
+ok: continuous-sync (manual modes) — a .l9/no-sync directory fails closed in Preview and Apply
+ok: continuous-sync (manual modes) — opt-out read at the pinned base; one landing after the snapshot is BASE_MOVED; 403/5xx blocks with no write
+ok: continuous-sync (class, ownership, overlap) — self_governed: only the org CODEOWNERS is restored; dependabot.yml never
+ok: continuous-sync (class, ownership, overlap) — malformed/unknown/unreadable marker: no writes at all
+ok: continuous-sync (class, ownership, overlap) — root CODEOWNERS present: .github/CODEOWNERS still managed; root file untouched
+ok: continuous-sync (class, ownership, overlap) — exact-byte comparison: trailing whitespace is drift
+ok: continuous-sync (class, ownership, overlap) — divergent template under an INHERIT class: BLOCKED_OWNERSHIP, never deleted
+ok: continuous-sync (class, ownership, overlap) — overlapping pending PR: BLOCKED_CONFLICT; unreadable listing: named blocker; no write
+ok: continuous-sync (class, ownership, overlap) — a base that moves before publication stops; no ref or PR
+ok: continuous-sync (class, ownership, overlap) — Apply PR body is the org template composed against the published commit
+ok: continuous-sync (class, ownership, overlap) — every planning read is pinned to the base sha
+ok: continuous-sync (class, ownership, overlap) — override-classified repo: PR body names the org override, not a marker
+ok: continuous-sync (class, ownership, overlap) — empty repo reported UNINITIALIZED; other base-ref errors fail
+ok: continuous-sync (rendered dependabot) — uv repo holding its uv render: CANONICAL_COPY, no write
+ok: continuous-sync (rendered dependabot) — legacy or actions-only bytes in a uv repo restore to the uv render
+ok: continuous-sync (rendered dependabot) — unlistable root or unreadable pyproject.toml: no actions-only fallback, no write
+ok: continuous-sync (rendered dependabot) — root listing and pyproject.toml read at the pinned base
+
+all continuous-sync branch-guard scenarios passed
+✅ ops/test-continuous-sync-branch-guard.js
+ok: continuous-sync.yml — workflow_dispatch is the only trigger (no schedule, no push)
+ok: continuous-sync.yml — Preview is the default and the fail-closed state; Apply needs dry_run=false
+ok: continuous-sync.yml — governance App credential read inside governance-distribution; provenance identity unchanged
+ok: continuous-sync.yml — one writer at a time; workflow token read-only
+ok: seed-governance.yml — dispatch only; dry-run (default) and seed modes; managed replacement; governance-distribution
+ok: auto-seed-new-repo.yml — weekly sweep with managed restore, repo_created, dry-run dispatch preserved
+ok: repo-birth-bootstrap.yml — birth chains repo_created to auto-seed after attestation; dry run does not
+ok: seeders, Manual Update and validate compose PR bodies with the governance-pr.yml composer pin
+ok: org_template_updated fanout retired — no workflow emits a consumer dispatch event (self repo_created only)
+ok: governance caller and pin record both pin exactly 02ea092a; a mismatch or moving tag fails; permissions unchanged
+
+all distribution trigger scenarios passed
+✅ ops/test-distribution-triggers.js
+ok - a changed region is written once, then the inventory is checked
+ok - an unchanged body is not PATCHed (no edited-event churn)
+ok - a body without regions that make pr did not compose is left alone
+ok - a stale event never describes a head it did not check out
+ok - a closed PR is not edited
+ok - a PR whose head moved during the refresh is not overwritten
+ok - a PR whose base moved during the refresh is not overwritten
+ok - a reviewer edit during the refresh is re-rendered from, not overwritten
+ok - a body that keeps changing is left for the next event
+ok - a read-only token is a reported block, not a pass or a failure
+ok - any other API error is not swallowed
+ok - a composer failure fails the job and writes nothing
+ok - an inventory mismatch fails a strict caller and notifies an advisory one
+ok - pr-files.yml delegates to the body job and runs no renderer of its own
+governance-pr body job: 14 scenarios passed
+✅ ops/test-governance-pr-body.js
+ok: Actions policy — unreadable/unverifiable is UNKNOWN; disabled, local_only and selected-denied are blocked; only all, or a selected policy that admits the caller and every action it runs, is allowed; `!` patterns block
+ok: posture report — all-unreadable and mixed never print the all-clear; verified-all-allowed does; presence is labelled presence
+ok: governance-report.yml — real script: all-unreadable is UNKNOWN with no all-clear, verified-all-allowed earns it, weekly issue identity and advisory posture kept
+ok: governed census — registry admits, discovery observes: one row per member, missing/archived/fork/retired kept, unregistered and l9- prefixed repos outside the denominator
+ok: governed census — invalid or unadmitted class, conflicting identity, malformed/unreadable source or revision: no census, nothing probed, no all-clear
+ok: governed census — deterministic projection; .github is a member; the real registry projects 33 current members at 0b8d3df4da54
+ok: governance-report.yml — registry membership changes reporting only: no enrollment, ruleset or Actions-policy write
+✅ ops/test-governance-report.js
+
+✅ .github/CODEOWNERS seeded beside a root CODEOWNERS (root file untouched)
+✅ SECURITY.md advisory link rewritten to the consumer
+✅ community-health copies only SECURITY.md (CoC/CONTRIBUTING/SUPPORT inherited)
+✅ pr-templates copies the default + release templates and never infra.md
+✅ issue-template config.yml advisory link rewritten to the consumer
+✅ .github/CODEOWNERS still seeded when the consumer has no root file
+✅ a drifted .github/CODEOWNERS is replaced with the org version
+✅ .l9/no-sync keeps a local .github/CODEOWNERS (missing-only)
+✅ no-remote consumer still syncs (verbatim, no invented repository)
+✅ second sync is byte-identical; existing files reported as kept
+✅ non_constellation_python gets exactly CODEOWNERS, dependabot, labels, SECURITY.md — no CI, no inherited files
+✅ explicit forbidden category is refused with class and path named; nothing written
+✅ explicit inherited categories drop for non_constellation_python; only SECURITY.md written
+✅ self_governed receives only the org .github/CODEOWNERS
+✅ malformed explicit marker is refused; nothing written (never widened to default)
+✅ org override classifies an unmarked repo; self_governed override writes only .github/CODEOWNERS
+✅ dry run previews the class payload and writes nothing
+ok: shell seeder is class-bound (marker > override > default, FORBID refuses, INHERIT drops, malformed fails closed), missing-only, rewrites advisory links, preserves root CODEOWNERS
+✅ ops/test-sync-org-files.sh
+✅ activate-all.sh exits nonzero when scripts/apply-rulesets.sh fails
+✅ ops/test-activate-all.sh
+ok - the protected-root stamp is the first line
+ok - sections follow the canonical order, inventory first
+ok - every machine-owned region is declared exactly once, START before END
+ok - each region sits under its own section
+ok - no placeholder the composer cannot honestly complete
+ok - fill comments older composers replace are byte-identical
+ok - HTML comments never nest and every delimiter is balanced
+pr template: all checks passed
+✅ ops/test-pr-template.js
+
+================================
+Results: 15 passed, 0 failed
+================================
+✅ All starters validated successfully
+---
+Checked 45 uses: references.
+All references pinned by SHA or a documented frozen Core tag (@v1/@v2/@v2.0.0).
+PASS SC-001 64 canonical semantic sources parse as YAML mappings
+PASS SC-002 44 registered canonical sources resolve to existing files with unique ids and paths
+PASS RC-007 every registered path resolves to a canonical ledger (RC-008 uniqueness is SC-002)
+PASS SC-003 64 artifact_id values are present and unique
+PASS SC-004 contracts.yaml derivation matches semantics/invariants.yaml (artifact_id=l9.invariants/global@1, sha256=771e3509703e…, invariants=31)
+PASS SC-005 capability model closed: 0 admitted capabilities, typed capability references resolve, traits are not resolved as capabilities
+PASS SC-006 4 binding technology targets resolve to registered technologies
+PASS SC-007 4 binding identifiers present and unique; no registered ledger declares a canonical binding-ID grammar, so grammar conformance is not enforced
+PASS RC-001 semantics/capabilities.yaml derivation matches the bytes of its 2 declared sources
+PASS RC-002 semantics/lifecycle.yaml derivation matches the bytes of its 3 declared sources
+PASS RC-011 semantics/receipt_catalog.yaml derivation matches the bytes of its 3 declared sources
+PASS RC-003 41 projection profile classes resolve to the 6 declared profile_classes
+PASS RC-004 268 projection source references across 41 profiles resolve to source_classes
+PASS RC-005 identity projection uses source-local selectors; 16 stage profiles bind to declared semantic_build_stages
+PASS RC-006 registry equals the 44 semantic catalogs of the generic compiler manifest; the other 63 ledgers are classified exactly once (the manifest itself is exempt)
+PASS RC-009 ProductManifest declares 16 required fields with no duplicates
+PASS RC-012 12 architecture obligations typed as architecture_obligations; 4 profiles select them; no required_capabilities field or selector remains
+PASS RC-013 vocabulary.semantic_build_stages equals the 15-stage canonical profile l9.compilation/product-build@1: ids, order, ordinals, consumes, operations, and produces agree
+PASS RC-014 identity registries closed: 6 actors with 2 typed aliases, 11 surfaces with 5 typed aliases; no cross-dimension ownership field, no runtime-resolution structure; 2 strings legally shared across dimensions ['claude-code-desktop', 'claude-code-mobile']
+PASS RC-015 repository operations IR, Python pyproject binding, Makefile v1 binding, target technologies, and consumer projection are structurally closed
+PASS RC-015-NEG 7 repository-operations negative cases fail closed
+PASS RC-016 Strategic Cognition ledger, invariant, Plan Keeper / Strategic Plan Metacognitive Reasoner authority separation, Current Meta View projection reuse, and Reasoning Plane boundary are structurally closed
+PASS RC-016-NEG 9 Strategic Cognition negative cases fail closed for their intended reason
+PASS RC-017 validation-and-correctness contract binds satisfied to complete evaluation of every applicable required criterion, routes unavailable, unreadable, unexecuted, or unresolved required criteria to unresolved, forbids silent skip, default success, and partial coverage reported as complete, and the Cursor-Governance operating-plane projection carries operative contract semantics with the global invariants, and every declared invariant a contract cites is inside that global selection
+PASS RC-017-NEG 23 validation-completeness negative cases fail closed for their intended reason
+PASS RC-018 Strategic Plan ledger declares exactly four Plan-owned primitives, five strategic relations with supersession reused from lifecycle, and Affected Strategic Closure; it anchors to the existing Strategic Plan concept and Plan Keeper authority, reuses objective and Strategic Intent without owning them, and carries no representation
+PASS RC-018-NEG 20 Strategic Plan negative cases fail closed for their intended reason
+PASS RC-019 l9.projection/cursor-governance-identity@1 exists once as a Cursor-Governance consumer profile, projects the canonical actor and surface entries and typed aliases from the two canonical registries only, emits l9.projection.cursor-governance-identity/v1, and declares its ownership boundaries
+PASS RC-019-NEG 12 identity projection negative cases fail closed for their intended reason
+PASS RC-020 graphiti-mcp and zep are each registered exactly once with every pinned registration field, a class and target roles admitted before this registration, the admitted class datastore, capability claims and target roles that retain the admitted facts, and semantic_ownership exactly {implied: false}
+PASS RC-020-NEG 20 Graphiti/Zep technology admission negative cases fail closed at their intended field with their intended reason
+PASS RC-021 l9.authority/product-admission resolves exactly once to semantics/authority_model.yaml#product_admission_authority and is otherwise only referenced exactly; the declaration, the admission and escalation law it inherits, the product_admission term, and the admission receipt owner match their pinned bytes: decided by applicable_target_class_authority, no self-admission, and no implied publication, runtime admission, runtime availability, capability invocation, implementation conformance, or consumer compatibility; l9.projection/stage-product-topology@1 projects the declaration and the law it inherits
+PASS RC-021-NEG 49 product admission authority negative cases fail closed at their intended field
+PASS RC-022 l9.contract/admission-and-promotion@1 exists exactly once and its base requires equals semantics/authority_model.yaml#admission_rules.global_requirements as an exact sequence; the stale reusing_a_prior_decision spelling and the unconditional cross-domain witness are absent; the recurrence guarantees, recurrence prohibitions, and L9-GLOBALIZATION-001 citation that keep cross-domain evidence conditional stay declared
+PASS RC-022-NEG 27 admission contract requirement-closure negative cases fail closed at their intended field
+PASS RC-023 l9.repository-class/l9@1 is the single admitted repository class and its whole declaration matches the pinned bytes (current, memory namespace l9, membership required from the resolved class, projection obligation naming no profile or compiler receipt); l9.repository-view/memory-namespace-l9@1 selects it over current/superseded/retired and derives namespace l9 preserving id, coordinate, lifecycle, class_ref with no consumer membership expansion or removal; the registry holds exactly the 33 admitted repositories with unique ids and unique case-sensitive github/Quantum-L9 coordinates, every one current and assigned that class
+PASS RC-023-NEG 57 repository class / registry closure negative cases fail closed at their intended field
+PASS RC-024 Strategy is a non-circular semantic root and Intent, Plan, Authority, Plan content, and vocabulary resolve through it without strategic-direction ghosts
+PASS RC-024-NEG 5 Strategy semantic-root negative cases fail closed for their intended reason
+PASS RC-025 federated authority graphs preserve independent ownership and Strategic Plan Graph v1 admits only the minimal 4-node / 5-relation representation with authority, reference, causal-attribution, revision, and compiler-registration closure
+PASS RC-025-NEG 16 federation / Strategic Plan Graph negative cases fail closed for their intended reason
+PASS RC-026 Planner / Meta-Planner cognitive interfaces preserve exact source coordinates, workspace/Strategy separation, candidate admission binding, Meta-Planner advisory authority, semantic-owner anchors, and compiler/registry closure
+PASS RC-026-NEG 20 Strategic Planning cognition negative cases fail closed for their intended reason
+PASS RC-027 223 typed cross-ledger references resolve: every contracts[*].source_invariants entry names a declared invariant and every governed_by.contracts / governed_by.invariants entry names a declared contract or invariant
+PASS RC-027-NEG 8 cross-ledger reference negative cases fail closed at their intended field
+PASS RC-028 l9.projection/coding-agent-execution@1 exists once as a Cursor-Governance runtime profile, selects exactly 19 global invariants, 10 global contracts closed over their source_invariants, and 4 authority_model sections by exact id from registered projectable ledgers, emits l9.projection.coding-agent-execution/v1, declares its boundaries, and names no skill
+PASS RC-028-NEG 34 coding-agent execution projection negative cases fail closed at their intended field, ledger-side and closure cases for their stated reason
+PASS RC-029 l9.product-kind-exception/memory-hosted-service@1 is the single admitted product-kind exception, pinned field by field and by canonical digest, bound to l9-graphiti-memory:product/l9-graphite-memory at Quantum-L9/l9-graphiti-memory; its 20 departures resolve to unprotected Dependency law, every ledger stating kind law carries the exact-product qualifier, and the ordinary Node, ordinary Dependency, and exact Memory hosted-service witnesses resolve under l9.contract/product-kind@1
+PASS RC-029-NEG 87 product-kind exception negative cases fail closed at their intended field; malformed or unauthorized exceptions unbind Memory while ordinary witnesses keep their outcome
+PASS RC-030 l9.projection/architecture-intelligence@1 and l9.compose/architecture-intelligence@1 exist once at their pinned digests; l9.projection.architecture-intelligence/v1 and l9.composed-projection.architecture-intelligence/v1 are each defined by one registered schema at its pinned digest; the composed schema names exactly one namespace per declared source class with exactly its selected sections; every forbidden category has a declared criterion; every composition profile selects exactly one declared placement strategy
+PASS RC-030-NEG 20 architecture-intelligence negative cases fail closed at their intended field
+PASS RC-032 l9.projection/pr-audit@1 exists once as the l9-pr-audit consumer profile at its pinned digest, selects 24 global invariants, 16 global contracts closed over their source_invariants, and whole sections from 11 further registered projectable ledgers, overlaps no forbidden exclusion, names no skill; l9.compose/pr-audit@1 composes it under source_class_namespace at its pinned digest; l9.projection.pr-audit/v1 and l9.composed-projection.pr-audit/v1 are each defined by one registered schema at its pinned digest, and the composed schema names exactly one namespace per declared source class with exactly its selected sections
+PASS RC-032-NEG 36 pr-audit projection negative cases fail closed at their intended field
+PASS SC-009 validation was observational: 190 candidate files under semantics/ and docs/ are byte-identical before and after
+FAIL SC-008 docs/semantic-foundation/v3.27.0/MANIFEST.md install surface='semantics/authority_resolution_composition.schema.yaml': canonical source is not listed in the manifest
+FAIL SC-008 docs/semantic-foundation/v3.27.0/MANIFEST.md install surface='semantics/authority_resolution_projection.schema.yaml': canonical source is not listed in the manifest
+FAIL SC-008 docs/semantic-foundation/v3.27.0/MANIFEST.md install surface count=62: semantics/ holds 64 canonical YAML files
+FAIL SC-008 docs/semantic-foundation/v3.27.0/HASHES.sha256 inventory='./semantics/authority_resolution_composition.schema.yaml': release hash inventory omits this file
+FAIL SC-008 docs/semantic-foundation/v3.27.0/HASHES.sha256 inventory='./semantics/authority_resolution_projection.schema.yaml': release hash inventory omits this file
+FAIL SC-008 docs/semantic-foundation/v3.27.0/HASHES.sha256 ./semantics/composition_profiles.yaml='22e3ca06f885c613b3f21f4bcd833f6b8de44db11b89a04bbeb4512657deb72f': delivered bytes hash to 0bb8d91822f5315b87b30e88619539d1da36e5bf6810b08b392f0ff69eb4e807
+FAIL SC-008 docs/semantic-foundation/v3.27.0/HASHES.sha256 ./semantics/generic_compiler_manifest.yaml='1e818252a4d19bcdcb50cb7b5d1a03fd1a646aee9e6c0805213ac5289e8097f1': delivered bytes hash to 82f017aa3c077620ac12cde981fb56638c4937d8e85179312848d25188f6ad27
+FAIL SC-008 docs/semantic-foundation/v3.27.0/HASHES.sha256 ./semantics/projection_profiles.yaml='60a2114286fa9718b24c3be0e29942db16e5ecb79bc773fbbbdca1950ce9ea09': delivered bytes hash to 18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd
+FAIL semantic-foundation closure: 8 unresolved (SC-010 fail-closed)
+make: *** [Repo.mk:55: repo-validate] Error 1
+Full validation exit: 2

@@ -1,0 +1,569 @@
+diff --git a/semantics/composition_profiles.yaml b/semantics/composition_profiles.yaml
+index 6ee238e..0f18d62 100644
+--- a/semantics/composition_profiles.yaml
++++ b/semantics/composition_profiles.yaml
+@@ -80,3 +80,143 @@ profiles:
+     conflict_result: invalid
+     output:
+       schema: l9.composed-projection.pr-audit/v1
++  - id: l9.compose/authority-resolution@1
++    purpose: Compose exact source projections for l9.projection/authority-resolution@1.
++    accepts:
++    - projection_artifact
++    composes:
++      projection_profile: l9.projection/authority-resolution@1
++    merge_strategy:
++      placement: source_class_namespace
++      source_coverage: exact
++      duplicate_source: conflict
++      semantic_identity_collision: require_equivalence
++    conflict_result: invalid
++    output:
++      schema: l9.composed-projection.authority-resolution/v1
++  - id: l9.compose/evidence-assessment@1
++    purpose: Compose exact source projections for l9.projection/evidence-assessment@1.
++    accepts:
++    - projection_artifact
++    composes:
++      projection_profile: l9.projection/evidence-assessment@1
++    merge_strategy:
++      placement: source_class_namespace
++      source_coverage: exact
++      duplicate_source: conflict
++      semantic_identity_collision: require_equivalence
++    conflict_result: invalid
++    output:
++      schema: l9.composed-projection.evidence-assessment/v1
++  - id: l9.compose/semantic-change-context@1
++    purpose: Compose exact source projections for l9.projection/semantic-change-context@1.
++    accepts:
++    - projection_artifact
++    composes:
++      projection_profile: l9.projection/semantic-change-context@1
++    merge_strategy:
++      placement: source_class_namespace
++      source_coverage: exact
++      duplicate_source: conflict
++      semantic_identity_collision: require_equivalence
++    conflict_result: invalid
++    output:
++      schema: l9.composed-projection.semantic-change-context/v1
++  - id: l9.compose/architecture-break-test@1
++    purpose: Compose exact source projections for l9.projection/architecture-break-test@1.
++    accepts:
++    - projection_artifact
++    composes:
++      projection_profile: l9.projection/architecture-break-test@1
++    merge_strategy:
++      placement: source_class_namespace
++      source_coverage: exact
++      duplicate_source: conflict
++      semantic_identity_collision: require_equivalence
++    conflict_result: invalid
++    output:
++      schema: l9.composed-projection.architecture-break-test/v1
++  - id: l9.compose/globalization-assessment@1
++    purpose: Compose exact source projections for l9.projection/globalization-assessment@1.
++    accepts:
++    - projection_artifact
++    composes:
++      projection_profile: l9.projection/globalization-assessment@1
++    merge_strategy:
++      placement: source_class_namespace
++      source_coverage: exact
++      duplicate_source: conflict
++      semantic_identity_collision: require_equivalence
++    conflict_result: invalid
++    output:
++      schema: l9.composed-projection.globalization-assessment/v1
++  - id: l9.compose/work-state-continuity@1
++    purpose: Compose exact source projections for l9.projection/work-state-continuity@1.
++    accepts:
++    - projection_artifact
++    composes:
++      projection_profile: l9.projection/work-state-continuity@1
++    merge_strategy:
++      placement: source_class_namespace
++      source_coverage: exact
++      duplicate_source: conflict
++      semantic_identity_collision: require_equivalence
++    conflict_result: invalid
++    output:
++      schema: l9.composed-projection.work-state-continuity/v1
++  - id: l9.compose/strategic-planning-context@1
++    purpose: Compose exact source projections for l9.projection/strategic-planning-context@1.
++    accepts:
++    - projection_artifact
++    composes:
++      projection_profile: l9.projection/strategic-planning-context@1
++    merge_strategy:
++      placement: source_class_namespace
++      source_coverage: exact
++      duplicate_source: conflict
++      semantic_identity_collision: require_equivalence
++    conflict_result: invalid
++    output:
++      schema: l9.composed-projection.strategic-planning-context/v1
++  - id: l9.compose/strategic-metacognition@1
++    purpose: Compose exact source projections for l9.projection/strategic-metacognition@1.
++    accepts:
++    - projection_artifact
++    composes:
++      projection_profile: l9.projection/strategic-metacognition@1
++    merge_strategy:
++      placement: source_class_namespace
++      source_coverage: exact
++      duplicate_source: conflict
++      semantic_identity_collision: require_equivalence
++    conflict_result: invalid
++    output:
++      schema: l9.composed-projection.strategic-metacognition/v1
++  - id: l9.compose/identity-assurance@1
++    purpose: Compose exact source projections for l9.projection/identity-assurance@1.
++    accepts:
++    - projection_artifact
++    composes:
++      projection_profile: l9.projection/identity-assurance@1
++    merge_strategy:
++      placement: source_class_namespace
++      source_coverage: exact
++      duplicate_source: conflict
++      semantic_identity_collision: require_equivalence
++    conflict_result: invalid
++    output:
++      schema: l9.composed-projection.identity-assurance/v1
++  - id: l9.compose/hard-constraint-context@1
++    purpose: Compose exact source projections for l9.projection/hard-constraint-context@1.
++    accepts:
++    - projection_artifact
++    composes:
++      projection_profile: l9.projection/hard-constraint-context@1
++    merge_strategy:
++      placement: source_class_namespace
++      source_coverage: exact
++      duplicate_source: conflict
++      semantic_identity_collision: require_equivalence
++    conflict_result: invalid
++    output:
++      schema: l9.composed-projection.hard-constraint-context/v1
+diff --git a/semantics/projection_profiles.yaml b/semantics/projection_profiles.yaml
+index c05b57c..e932cd1 100644
+--- a/semantics/projection_profiles.yaml
++++ b/semantics/projection_profiles.yaml
+@@ -133,6 +133,20 @@ source_classes:
+     canonical_artifact: repository_registry.yaml
+   repository_classes:
+     canonical_artifact: repository_classes.yaml
++  strategic_cognition_model:
++    canonical_artifact: strategic_cognition_model.yaml
++  strategic_plan_model:
++    canonical_artifact: strategic_plan_model.yaml
++  strategic_plan_graph_schema:
++    canonical_artifact: strategic_plan_graph.schema.yaml
++  affected_strategic_closure_schema:
++    canonical_artifact: affected_strategic_closure.schema.yaml
++  strategic_planning_episode_schema:
++    canonical_artifact: strategic_planning_episode.schema.yaml
++  strategic_plan_revision_candidate_schema:
++    canonical_artifact: strategic_plan_revision_candidate.schema.yaml
++  strategic_plan_metacognitive_analysis_schema:
++    canonical_artifact: strategic_plan_metacognitive_analysis.schema.yaml
+ projection_profiles:
+ - id: l9.projection/gar-architecture-observer@1
+   class: consumer
+@@ -1996,6 +2010,395 @@ projection_profiles:
+     - repository_local_policy_as_global_law
+     - execution_publication_or_merge_authority_grant
+ 
++- id: l9.projection/authority-resolution@1
++  class: consumer
++  consumer: l9-authority-resolver
++  purpose: Read-only authority, ownership, admission and Unknown context; does not grant or resolve authority by
++    projection alone.
++  sources:
++    invariants:
++      selectors:
++      - $.invariants[?(@.id=="L9-AUTH-001")]
++      - $.invariants[?(@.id=="L9-AUTH-002")]
++      - $.invariants[?(@.id=="L9-OWNER-001")]
++      - $.invariants[?(@.id=="L9-PROMOTION-001")]
++      - $.invariants[?(@.id=="L9-ADMISSION-001")]
++      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
++    contracts:
++      selectors:
++      - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
++      - $.contracts[?(@.id=="l9.contract/semantic-ownership@1")]
++      - $.contracts[?(@.id=="l9.contract/admission-and-promotion@1")]
++      - $.contracts[?(@.id=="l9.contract/unknown-and-degradation@1")]
++    authority_model:
++      selectors:
++      - $.authority_classes
++      - $.admission_rules
++      - $.global_admission_rules
++      - $.agent_authority
++      - $.human_authority
++      - $.escalation_rules
++    artifact_model:
++      selectors:
++      - $.authority_classes
++  output:
++    schema: l9.projection.authority-resolution/v1
++  forbidden:
++  - obligation_not_admitted_in_a_selected_source
++  - repository_local_policy_as_global_law
++- id: l9.projection/evidence-assessment@1
++  class: consumer
++  consumer: evidence-review-engine
++  purpose: Independent evidence, receipt, assurance and validation context; does not establish correctness merely
++    from a recorded verdict.
++  sources:
++    invariants:
++      selectors:
++      - $.invariants[?(@.id=="L9-EVIDENCE-001")]
++      - $.invariants[?(@.id=="L9-ASSURANCE-001")]
++      - $.invariants[?(@.id=="L9-VALIDATION-001")]
++      - $.invariants[?(@.id=="L9-CORRECTNESS-001")]
++      - $.invariants[?(@.id=="L9-COORD-001")]
++      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
++    contracts:
++      selectors:
++      - $.contracts[?(@.id=="l9.contract/evidence-and-receipt@1")]
++      - $.contracts[?(@.id=="l9.contract/assurance-and-verification@1")]
++      - $.contracts[?(@.id=="l9.contract/validation-and-correctness@1")]
++      - $.contracts[?(@.id=="l9.contract/provenance-and-coordinate@1")]
++    receipt_catalog:
++      selectors:
++      - $.global_rules
++      - $.receipt_kernel
++      - $.receipts
++    conformance_model:
++      selectors:
++      - $.ownership_boundary
++      - $.global_rules
++      - $.conformance_requirement_shape
++  output:
++    schema: l9.projection.evidence-assessment/v1
++  forbidden:
++  - obligation_not_admitted_in_a_selected_source
++  - repository_local_policy_as_global_law
++- id: l9.projection/semantic-change-context@1
++  class: consumer
++  consumer: l9-work-state-router
++  purpose: Read-only provenance, dependency, invalidation and revision context; actual affected closure is resolved
++    separately.
++  sources:
++    invariants:
++      selectors:
++      - $.invariants[?(@.id=="L9-COORD-001")]
++      - $.invariants[?(@.id=="L9-REVISION-001")]
++      - $.invariants[?(@.id=="L9-PROV-001")]
++      - $.invariants[?(@.id=="L9-DERIVED-001")]
++      - $.invariants[?(@.id=="L9-PROJECTION-001")]
++      - $.invariants[?(@.id=="L9-COMPAT-001")]
++    contracts:
++      selectors:
++      - $.contracts[?(@.id=="l9.contract/provenance-and-coordinate@1")]
++      - $.contracts[?(@.id=="l9.contract/revision-and-supersession@1")]
++      - $.contracts[?(@.id=="l9.contract/derived-artifact@1")]
++      - $.contracts[?(@.id=="l9.contract/projection@1")]
++    semantic_dependency_model:
++      selectors:
++      - $.dependency_rules
++      - $.invalidation_rules
++    lifecycle:
++      selectors:
++      - $.global_rules
++      - $.state_semantics
++      - $.lifecycle_relations
++  output:
++    schema: l9.projection.semantic-change-context/v1
++  forbidden:
++  - obligation_not_admitted_in_a_selected_source
++  - repository_local_policy_as_global_law
++- id: l9.projection/architecture-break-test@1
++  class: consumer
++  consumer: l9-architecture-break-tester
++  purpose: Hard constraints, structural obligations and independent correctness context for adversarial architecture
++    review.
++  sources:
++    invariants:
++      selectors:
++      - $.invariants[?(@.id=="L9-HARD-001")]
++      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
++      - $.invariants[?(@.id=="L9-COMPAT-001")]
++      - $.invariants[?(@.id=="L9-DEGRADE-001")]
++      - $.invariants[?(@.id=="L9-CORRECTNESS-001")]
++    contracts:
++      selectors:
++      - $.contracts[?(@.id=="l9.contract/hard-constraint@1")]
++      - $.contracts[?(@.id=="l9.contract/unknown-and-degradation@1")]
++      - $.contracts[?(@.id=="l9.contract/semantic-identity-and-compatibility@1")]
++      - $.contracts[?(@.id=="l9.contract/validation-and-correctness@1")]
++    requirement_model:
++      selectors:
++      - $.global_rules
++      - $.requirement_classes
++      - $.requirement_entry_contract
++      - $.closure_rules
++    resolution_model:
++      selectors:
++      - $.global_rules
++      - $.result_domain
++      - $.selection_rules
++    architecture_rules:
++      selectors:
++      - $.global_rules
++      - $.rules
++      - $.resolution_rule
++  output:
++    schema: l9.projection.architecture-break-test/v1
++  forbidden:
++  - obligation_not_admitted_in_a_selected_source
++  - repository_local_policy_as_global_law
++- id: l9.projection/globalization-assessment@1
++  class: consumer
++  consumer: l9-intelligence-harvest
++  purpose: Cross-domain evidence and globalization-admission boundaries; pattern recurrence never creates global
++    law.
++  sources:
++    invariants:
++      selectors:
++      - $.invariants[?(@.id=="L9-GLOBALIZATION-001")]
++      - $.invariants[?(@.id=="L9-SCOPE-001")]
++      - $.invariants[?(@.id=="L9-PROMOTION-001")]
++      - $.invariants[?(@.id=="L9-ADMISSION-001")]
++      - $.invariants[?(@.id=="L9-OWNER-001")]
++    contracts:
++      selectors:
++      - $.contracts[?(@.id=="l9.contract/admission-and-promotion@1")]
++      - $.contracts[?(@.id=="l9.contract/semantic-ownership@1")]
++      - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
++    authority_model:
++      selectors:
++      - $.promotion_rules
++      - $.global_promotion
++      - $.global_admission_rules
++    lifecycle:
++      selectors:
++      - $.lifecycles.globalization_candidate
++      - $.lifecycles.harvest_packet
++      - $.lifecycles.architecture_pattern
++    packet_catalog:
++      selectors:
++      - $.packets.fixture_harvest
++  output:
++    schema: l9.projection.globalization-assessment/v1
++  forbidden:
++  - obligation_not_admitted_in_a_selected_source
++  - repository_local_policy_as_global_law
++- id: l9.projection/work-state-continuity@1
++  class: consumer
++  consumer: l9-work-state-router
++  purpose: Revision-bound state, dependency, packet and receipt context; does not independently authorize transitions.
++  sources:
++    invariants:
++      selectors:
++      - $.invariants[?(@.id=="L9-COORD-001")]
++      - $.invariants[?(@.id=="L9-REVISION-001")]
++      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
++      - $.invariants[?(@.id=="L9-EVIDENCE-001")]
++      - $.invariants[?(@.id=="L9-ADMISSION-001")]
++    contracts:
++      selectors:
++      - $.contracts[?(@.id=="l9.contract/provenance-and-coordinate@1")]
++      - $.contracts[?(@.id=="l9.contract/revision-and-supersession@1")]
++      - $.contracts[?(@.id=="l9.contract/unknown-and-degradation@1")]
++      - $.contracts[?(@.id=="l9.contract/evidence-and-receipt@1")]
++    packet_catalog:
++      selectors:
++      - $.global_rules
++      - $.packets.state_change
++    receipt_catalog:
++      selectors:
++      - $.global_rules
++      - $.receipt_kernel
++    lifecycle:
++      selectors:
++      - $.global_rules
++      - $.state_semantics
++      - $.lifecycle_relations
++    semantic_dependency_model:
++      selectors:
++      - $.invalidation_rules
++  output:
++    schema: l9.projection.work-state-continuity/v1
++  forbidden:
++  - obligation_not_admitted_in_a_selected_source
++  - repository_local_policy_as_global_law
++- id: l9.projection/strategic-planning-context@1
++  class: consumer
++  consumer: plan_keeper
++  purpose: Planning semantics for the Plan Keeper under granted Strategic Authority; separates external truth from
++    Plan-owned strategy.
++  sources:
++    invariants:
++      selectors:
++      - $.invariants[?(@.id=="L9-STRATEGY-001")]
++      - $.invariants[?(@.id=="L9-AUTH-001")]
++      - $.invariants[?(@.id=="L9-OWNER-001")]
++      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
++      - $.invariants[?(@.id=="L9-PROJECTION-001")]
++    contracts:
++      selectors:
++      - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
++      - $.contracts[?(@.id=="l9.contract/semantic-ownership@1")]
++      - $.contracts[?(@.id=="l9.contract/projection@1")]
++    authority_model:
++      selectors:
++      - $.strategic_authority
++      - $.strategic_cognition_authority
++    strategic_cognition_model:
++      selectors:
++      - $.global_rules
++      - $.concepts
++      - $.roles.plan_keeper
++      - $.reasoning_artifacts.strategic_planning_episode
++      - $.reasoning_artifacts.strategic_plan_revision_candidate
++      - $.authority_separation
++    strategic_plan_model:
++      selectors:
++      - $.global_rules
++      - $.primitives
++      - $.relations
++      - $.relation_rules
++      - $.reasoning_concepts
++    strategic_plan_graph_schema:
++      selectors:
++      - $
++    affected_strategic_closure_schema:
++      selectors:
++      - $
++    strategic_planning_episode_schema:
++      selectors:
++      - $
++    strategic_plan_revision_candidate_schema:
++      selectors:
++      - $
++  output:
++    schema: l9.projection.strategic-planning-context/v1
++  forbidden:
++  - obligation_not_admitted_in_a_selected_source
++  - repository_local_policy_as_global_law
++- id: l9.projection/strategic-metacognition@1
++  class: consumer
++  consumer: strategic_plan_metacognitive_reasoner
++  purpose: Advisory analysis of Plan Keeper reasoning; cannot modify Strategy, supersede Plan Keeper or acquire
++    Strategic Authority.
++  sources:
++    invariants:
++      selectors:
++      - $.invariants[?(@.id=="L9-STRATEGY-001")]
++      - $.invariants[?(@.id=="L9-AUTH-001")]
++      - $.invariants[?(@.id=="L9-OWNER-001")]
++      - $.invariants[?(@.id=="L9-PROJECTION-001")]
++    contracts:
++      selectors:
++      - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
++      - $.contracts[?(@.id=="l9.contract/semantic-ownership@1")]
++      - $.contracts[?(@.id=="l9.contract/projection@1")]
++    authority_model:
++      selectors:
++      - $.strategic_authority
++      - $.strategic_cognition_authority
++    strategic_cognition_model:
++      selectors:
++      - $.global_rules
++      - $.authority_separation
++      - $.roles.strategic_plan_metacognitive_reasoner
++      - $.reasoning_artifacts.strategic_plan_metacognitive_analysis
++    strategic_plan_model:
++      selectors:
++      - $.global_rules
++      - $.reasoning_concepts
++    strategic_plan_metacognitive_analysis_schema:
++      selectors:
++      - $
++  output:
++    schema: l9.projection.strategic-metacognition/v1
++  forbidden:
++  - obligation_not_admitted_in_a_selected_source
++  - repository_local_policy_as_global_law
++- id: l9.projection/identity-assurance@1
++  class: consumer
++  consumer: l9-identity-assurance
++  purpose: Evidence-bound identity resolution and assertion verification; does not confuse actor, surface or governance
++    profile identities.
++  sources:
++    invariants:
++      selectors:
++      - $.invariants[?(@.id=="L9-IDENTITY-002")]
++      - $.invariants[?(@.id=="L9-IDENTITY-003")]
++      - $.invariants[?(@.id=="L9-IDENTITY-004")]
++      - $.invariants[?(@.id=="L9-IDENTITY-005")]
++      - $.invariants[?(@.id=="L9-IDENTITY-006")]
++      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
++      - $.invariants[?(@.id=="L9-PROV-001")]
++    contracts:
++      selectors:
++      - $.contracts[?(@.id=="l9.contract/identity-topology@1")]
++      - $.contracts[?(@.id=="l9.contract/identity-resolution@1")]
++      - $.contracts[?(@.id=="l9.contract/identity-assertion@1")]
++      - $.contracts[?(@.id=="l9.contract/provenance-and-coordinate@1")]
++    identity_model:
++      selectors:
++      - $.global_rules
++      - $.identity_dimensions
++      - $.non_identity_dimensions
++      - $.identity_binding
++      - $.identity_resolution
++      - $.identity_assertion
++      - $.consumer_rules
++    authority_model:
++      selectors:
++      - $.identity_authority
++    actor_registry:
++      selectors:
++      - $
++    surface_registry:
++      selectors:
++      - $
++  output:
++    schema: l9.projection.identity-assurance/v1
++  forbidden:
++  - obligation_not_admitted_in_a_selected_source
++  - repository_local_policy_as_global_law
++- id: l9.projection/hard-constraint-context@1
++  class: consumer
++  consumer: l9-architecture-break-tester
++  purpose: Focused hard feasibility, non-compensation, compatibility and explicit unsatisfiability semantics.
++  sources:
++    invariants:
++      selectors:
++      - $.invariants[?(@.id=="L9-HARD-001")]
++      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
++      - $.invariants[?(@.id=="L9-COMPAT-001")]
++      - $.invariants[?(@.id=="L9-DEGRADE-001")]
++    contracts:
++      selectors:
++      - $.contracts[?(@.id=="l9.contract/hard-constraint@1")]
++      - $.contracts[?(@.id=="l9.contract/unknown-and-degradation@1")]
++      - $.contracts[?(@.id=="l9.contract/semantic-identity-and-compatibility@1")]
++    requirement_model:
++      selectors:
++      - $.global_rules
++      - $.requirement_classes
++      - $.requirement_entry_contract
++      - $.closure_rules
++    resolution_model:
++      selectors:
++      - $.global_rules
++      - $.result_domain
++      - $.selection_rules
++  output:
++    schema: l9.projection.hard-constraint-context/v1
++  forbidden:
++  - obligation_not_admitted_in_a_selected_source
++  - repository_local_policy_as_global_law
+ projection_engine_contract_ref:
+   artifact: projection_engine_contract.yaml
+   artifact_id: l9.compiler/projection-engine@1

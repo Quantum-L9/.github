@@ -1,0 +1,54 @@
+Staged paths:
+semantics/authority_resolution_composition.schema.yaml
+semantics/authority_resolution_projection.schema.yaml
+semantics/composition_profiles.yaml
+semantics/generic_compiler_manifest.yaml
+semantics/projection_profiles.yaml
+
+Staged diff statistics:
+ .../authority_resolution_composition.schema.yaml   | 290 +++++++++++++
+ .../authority_resolution_projection.schema.yaml    | 189 +++++++++
+ semantics/composition_profiles.yaml                | 140 +++++++
+ semantics/generic_compiler_manifest.yaml           |   2 +
+ semantics/projection_profiles.yaml                 | 447 +++++++++++++++++++++
+ 5 files changed, 1068 insertions(+)
+
+Whitespace check:
+PASS
+
+Schema metadata headers:
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_authority_resolution_projection_payload_schema
+artifact_id: l9.schema/authority-resolution-projection@1
+canonical_source:
+  format: yaml
+  artifact: authority_resolution_projection.schema.yaml
+governed_by:
+  projection_profile_ref: l9.projection/authority-resolution@1
+purpose: Typed single-source authority-resolution projection payload. Exact selected membership is independently
+  governed by selector equivalence; the schema adds no authority.
+type: object
+properties:
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_authority_resolution_composed_payload_schema
+artifact_id: l9.schema/authority-resolution-composition@1
+canonical_source:
+  format: yaml
+  artifact: authority_resolution_composition.schema.yaml
+governed_by:
+  composition_profile_ref: l9.compose/authority-resolution@1
+  projection_profile_ref: l9.projection/authority-resolution@1
+purpose: Exact four-source authority-resolution composition. Each required namespace preserves its source-class
+  identity and source-specific semantic constraints.
+type: object
+
+Historical release modifications:
+none
