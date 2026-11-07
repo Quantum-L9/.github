@@ -74,6 +74,26 @@ GT_SCHEMA_FILES = (
     "strategic_interaction_projection.schema.yaml",
     "strategic_interaction_composition.schema.yaml",
 )
+SV_SCHEMA_FILES = (
+    "strategic_planner_value_projection.schema.yaml",
+    "strategic_planner_value_composition.schema.yaml",
+)
+INVARIANTS = "semantics/invariants.yaml"
+CONTRACTS = "semantics/contracts.yaml"
+VOCABULARY = "semantics/vocabulary.yaml"
+PROJECTION_PROFILES = "semantics/projection_profiles.yaml"
+COMPOSITION_PROFILES = "semantics/composition_profiles.yaml"
+MANIFEST = "semantics/generic_compiler_manifest.yaml"
+VALUE_MODEL = "semantics/strategic_value_model.yaml"
+LEDGERS = {
+    "invariants": INVARIANTS,
+    "contracts": CONTRACTS,
+    "vocabulary": VOCABULARY,
+    "projection_profiles": PROJECTION_PROFILES,
+    "composition_profiles": COMPOSITION_PROFILES,
+    "model": VALUE_MODEL,
+}
+FORBIDDEN_OVERLAY = "overlays/projection_forbidden_constraint_additions.yaml"
 INVARIANT_SELECTOR = re.compile(r'^\$\.invariants\[\?\(@\.id=="([^"]+)"\)\]$')
 CONTRACT_SELECTOR = re.compile(r'^\$\.contracts\[\?\(@\.id=="([^"]+)"\)\]$')
 
@@ -113,7 +133,7 @@ def merge_list(base, extra, list_name):
     collisions = sorted(set(old_ids) & set(new_ids))
     if collisions:
         raise ValueError(f"overlay {list_name} collides with canonical: {collisions}")
-    if not re.search(rf"^{list_name}:\n(?:- |  )", base, flags=re.MULTILINE):
+    if not re.search(rf"^{list_name}:\n(?:- | {{2}})", base, flags=re.MULTILINE):
         raise ValueError(f"canonical {list_name} is not a top-level block list")
     tail = list(yaml.safe_load(base))[-1]
     if tail != list_name:
@@ -141,13 +161,13 @@ def update_contract_derivation(text, old_inv, new_inv, old_count, new_count):
             f"{derivation['source_invariant_count']} != current invariants {old_count}"
         )
     text, n1 = re.subn(
-        r"^(  source_digest_sha256: )[a-f0-9]{64}$",
+        r"^( {2}source_digest_sha256: )[a-f0-9]{64}$",
         r"\g<1>" + new_digest,
         text,
         flags=re.MULTILINE,
     )
     text, n2 = re.subn(
-        r"^(  source_invariant_count: )[0-9]+$",
+        r"^( {2}source_invariant_count: )[0-9]+$",
         r"\g<1>" + str(new_count),
         text,
         flags=re.MULTILINE,
@@ -328,39 +348,8 @@ def _gt_profile(doc):
     return rows[0]
 
 
-def verify_assembled(checkout, changed):
-    for path, content in changed.items():
-        if not isinstance(yaml.safe_load(content), dict):
-            raise TypeError(f"bad YAML: {path}")
-
-    def assembled(rel):
-        if rel in changed:
-            return changed[rel]
-        return (checkout / rel).read_text(encoding="utf-8")
-
-    changed = {
-        rel: assembled(rel)
-        for rel in set(changed)
-        | {
-            "semantics/strategic_value_model.yaml",
-            "semantics/strategic_planner_value_projection.schema.yaml",
-            "semantics/strategic_planner_value_composition.schema.yaml",
-        }
-    }
-    docs = {
-        "invariants": yaml.safe_load(changed["semantics/invariants.yaml"]),
-        "contracts": yaml.safe_load(changed["semantics/contracts.yaml"]),
-        "vocabulary": yaml.safe_load(changed["semantics/vocabulary.yaml"]),
-        "projection_profiles": yaml.safe_load(
-            changed["semantics/projection_profiles.yaml"]
-        ),
-        "composition_profiles": yaml.safe_load(
-            changed["semantics/composition_profiles.yaml"]
-        ),
-        "model": yaml.safe_load(changed["semantics/strategic_value_model.yaml"]),
-    }
-    verify_sv_core_present(docs)
-
+def _verify_gt_law(docs):
+    """One new invariant, the core contract over exactly the six governing IDs, no stage-B contract."""
     inv_ids = set(unique_ids(docs["invariants"]["invariants"], "invariants"))
     gt_new = {
         r["id"] for r in overlay("overlays/invariants_additions.yaml")["invariants"]
@@ -369,58 +358,37 @@ def verify_assembled(checkout, changed):
         raise ValueError(f"GT must add exactly one invariant, got {sorted(gt_new)}")
     if not set(GT_GOVERNING) <= inv_ids:
         raise ValueError("GT governing invariants do not all resolve")
-
     contracts = docs["contracts"]["contracts"]
-    contract_ids = unique_ids(contracts, "contracts")
-    if GT_DEPENDENT_CONTRACT_ID in contract_ids:
+    if GT_DEPENDENT_CONTRACT_ID in unique_ids(contracts, "contracts"):
         raise ValueError(
             "the GT+SV dependent contract must not be applied in stage core"
         )
     core = [c for c in contracts if c["id"] == GT_CORE_CONTRACT_ID]
     if len(core) != 1:
         raise ValueError("GT core contract must exist exactly once")
-    core_sources = list(core[0]["source_invariants"])
-    if len(core_sources) != len(set(core_sources)) or set(core_sources) != set(
-        GT_GOVERNING
-    ):
+    sources = list(core[0]["source_invariants"])
+    if len(sources) != len(set(sources)) or set(sources) != set(GT_GOVERNING):
         raise ValueError(
             "GT core source_invariants must be exactly the six governing IDs"
         )
-
     gt_terms = list(overlay("overlays/vocabulary_additions.yaml")["terms"])
     if len(gt_terms) != 12 or set(gt_terms) & set(SV_TERMS):
         raise ValueError("GT must add twelve terms disjoint from SV terms")
+    return sources, gt_terms
 
-    pdoc = docs["projection_profiles"]
-    profile = _gt_profile(pdoc)
-    if tuple(profile["sources"]) != GT_SOURCE_CLASSES:
-        raise ValueError(
-            "GT profile must select exactly vocabulary, invariants, contracts"
-        )
+
+def _selected_invariants(profile):
     selected = []
     for selector in profile["sources"]["invariants"]["selectors"]:
         match = INVARIANT_SELECTOR.match(selector)
         if not match:
             raise ValueError(f"unsupported invariant selector {selector!r}")
         selected.append(match.group(1))
-    if (
-        len(selected) != 6
-        or len(set(selected)) != 6
-        or set(selected) != set(core_sources)
-    ):
-        raise ValueError(
-            "GT invariant selection must equal the core contract's six IDs"
-        )
-    selected_contracts = {
-        CONTRACT_SELECTOR.match(s).group(1)
-        for s in profile["sources"]["contracts"]["selectors"]
-    }
-    if selected_contracts != {GT_CORE_CONTRACT_ID}:
-        raise ValueError("GT profile must select only the GT core contract")
-    if profile["sources"]["vocabulary"]["selectors"] != [
-        "$.terms." + t for t in gt_terms
-    ]:
-        raise ValueError("GT vocabulary selection must be exactly the twelve GT terms")
+    return selected
+
+
+def _verify_forbidden(pdoc, profile):
+    """Every declared token has a registered criterion excluding exactly SV records."""
     if profile["forbidden"] != [GT_FORBIDDEN]:
         raise ValueError(
             "GT profile must declare exactly the registered forbidden token"
@@ -429,29 +397,55 @@ def verify_assembled(checkout, changed):
     for token in profile["forbidden"]:
         if token not in definitions:
             raise ValueError(f"forbidden token {token} has no registered criterion")
-    expected_def = overlay("overlays/projection_forbidden_constraint_additions.yaml")[
-        "forbidden_constraint_definitions"
-    ][GT_FORBIDDEN]
-    if definitions[GT_FORBIDDEN] != expected_def:
+    expected = overlay(FORBIDDEN_OVERLAY)["forbidden_constraint_definitions"][
+        GT_FORBIDDEN
+    ]
+    if definitions[GT_FORBIDDEN] != expected:
         raise ValueError("registered forbidden definition differs from overlay")
-    excluded = {
-        (e["source_class"], e["selector"]) for e in expected_def["excluded_selections"]
-    }
+    rows = expected["excluded_selections"]
+    excluded = {(e["source_class"], e["selector"]) for e in rows}
     want = (
         {("vocabulary", "$.terms." + t) for t in SV_TERMS}
-        | {
-            ("invariants", f'$.invariants[?(@.id=="{i}")]')
-            for i in sorted(SV_NEW_INVARIANTS)
-        }
+        | {("invariants", f'$.invariants[?(@.id=="{i}")]') for i in SV_NEW_INVARIANTS}
         | {("contracts", f'$.contracts[?(@.id=="{SV_CONTRACT_ID}")]')}
     )
-    if excluded != want or len(expected_def["excluded_selections"]) != len(want):
+    if excluded != want or len(rows) != len(want):
         raise ValueError(
             "forbidden criterion must exclude exactly the SV-owned records"
         )
+
+
+def _verify_gt_profiles(docs, core_sources, gt_terms):
+    pdoc = docs["projection_profiles"]
+    profile = _gt_profile(pdoc)
+    if tuple(profile["sources"]) != GT_SOURCE_CLASSES:
+        raise ValueError(
+            "GT profile must select exactly vocabulary, invariants, contracts"
+        )
+    selected = _selected_invariants(profile)
+    if (
+        len(selected) != 6
+        or len(set(selected)) != 6
+        or set(selected) != set(core_sources)
+    ):
+        raise ValueError(
+            "GT invariant selection must equal the core contract's six IDs"
+        )
+    contracts = set()
+    for selector in profile["sources"]["contracts"]["selectors"]:
+        match = CONTRACT_SELECTOR.match(selector)
+        if not match:
+            raise ValueError(f"unsupported contract selector {selector!r}")
+        contracts.add(match.group(1))
+    if contracts != {GT_CORE_CONTRACT_ID}:
+        raise ValueError("GT profile must select only the GT core contract")
+    if profile["sources"]["vocabulary"]["selectors"] != [
+        "$.terms." + t for t in gt_terms
+    ]:
+        raise ValueError("GT vocabulary selection must be exactly the twelve GT terms")
+    _verify_forbidden(pdoc, profile)
     if profile["output"]["schema"] != GT_OUTPUT:
         raise ValueError("GT profile output schema mismatch")
-
     comp = [
         p
         for p in docs["composition_profiles"]["profiles"]
@@ -462,50 +456,63 @@ def verify_assembled(checkout, changed):
     if comp[0]["output"]["schema"] != GT_COMPOSED_OUTPUT:
         raise ValueError("GT composition output schema mismatch")
 
-    manifest = yaml.safe_load(changed["semantics/generic_compiler_manifest.yaml"])
-    registered = manifest["requires"]["artifact_schemas"]
+
+def _schema_output_id(text):
+    return (
+        ((yaml.safe_load(text) or {}).get("properties") or {})
+        .get("schema", {})
+        .get("const")
+    )
+
+
+def _verify_schemas(assembled):
+    """Registration once each, unique output-ID discovery, six-ID invariant closure."""
+    registered = yaml.safe_load(assembled(MANIFEST))["requires"]["artifact_schemas"]
     if len(registered) != len(set(registered)):
         raise ValueError("duplicate artifact schema registration")
-    for name in GT_SCHEMA_FILES + (
-        "strategic_planner_value_projection.schema.yaml",
-        "strategic_planner_value_composition.schema.yaml",
-    ):
+    for name in GT_SCHEMA_FILES + SV_SCHEMA_FILES:
         if registered.count(name) != 1:
             raise ValueError(f"schema must be registered exactly once: {name}")
     resolved = {}
     for output_id in (GT_OUTPUT, GT_COMPOSED_OUTPUT):
         hits = [
-            name
-            for name in registered
-            if (
-                (yaml.safe_load(assembled("semantics/" + name)) or {})
-                .get("properties", {})
-                .get("schema", {})
-                .get("const")
-            )
-            == output_id
+            n
+            for n in registered
+            if _schema_output_id(assembled("semantics/" + n)) == output_id
         ]
         if len(hits) != 1:
             raise ValueError(f"{output_id} must resolve to exactly one schema: {hits}")
         resolved[output_id] = hits[0]
+    projection = yaml.safe_load(assembled("semantics/" + GT_SCHEMA_FILES[0]))
+    composition = yaml.safe_load(assembled("semantics/" + GT_SCHEMA_FILES[1]))
     for label, descriptor in (
-        (
-            "projection",
-            yaml.safe_load(changed["semantics/" + GT_SCHEMA_FILES[0]])["properties"][
-                "invariants"
-            ],
-        ),
+        ("projection", projection["properties"]["invariants"]),
         (
             "composition",
-            yaml.safe_load(changed["semantics/" + GT_SCHEMA_FILES[1]])["properties"][
-                "invariants"
-            ]["properties"]["invariants"],
+            composition["properties"]["invariants"]["properties"]["invariants"],
         ),
     ):
         enum = descriptor["items"]["properties"]["id"]["enum"]
         if descriptor["min_items"] != 6 or sorted(enum) != sorted(GT_GOVERNING):
             raise ValueError(f"{label} schema must pin the six governing IDs")
     return resolved
+
+
+def verify_assembled(checkout, changed):
+    for path, content in changed.items():
+        if not isinstance(yaml.safe_load(content), dict):
+            raise TypeError(f"bad YAML: {path}")
+
+    def assembled(rel):
+        if rel in changed:
+            return changed[rel]
+        return (checkout / rel).read_text(encoding="utf-8")
+
+    docs = {key: yaml.safe_load(assembled(rel)) for key, rel in LEDGERS.items()}
+    verify_sv_core_present(docs)
+    core_sources, gt_terms = _verify_gt_law(docs)
+    _verify_gt_profiles(docs, core_sources, gt_terms)
+    return _verify_schemas(assembled)
 
 
 def generate_core(checkout):
@@ -519,7 +526,7 @@ def generate_core(checkout):
             raise ValueError(f"{dest} already exists: re-resolve owner and target")
         changed[dest] = raw("semantics/" + name)
 
-    p = "semantics/invariants.yaml"
+    p = INVARIANTS
     old_inv = current(p)
     old_count = len(unique_ids(yaml.safe_load(old_inv)["invariants"], "invariants"))
     inv = merge_list(old_inv, raw("overlays/invariants_additions.yaml"), "invariants")
@@ -528,7 +535,7 @@ def generate_core(checkout):
         raise ValueError(f"invariant count {inv_count} != {old_count} + 1")
     changed[p] = inv
 
-    p = "semantics/contracts.yaml"
+    p = CONTRACTS
     old_contracts = current(p)
     c = update_contract_derivation(old_contracts, old_inv, inv, old_count, inv_count)
     changed[p] = merge_list(c, raw("overlays/contracts_gt_core.yaml"), "contracts")
@@ -537,7 +544,7 @@ def generate_core(checkout):
     ):
         raise ValueError("contract count did not increase by exactly one")
 
-    p = "semantics/vocabulary.yaml"
+    p = VOCABULARY
     v = current(p)
     incoming = overlay("overlays/vocabulary_additions.yaml")["terms"]
     clash = set(yaml.safe_load(v)["terms"]) & set(incoming)
@@ -552,7 +559,7 @@ def generate_core(checkout):
     ) + len(incoming):
         raise ValueError("vocabulary term count did not increase by exactly twelve")
 
-    p = "semantics/projection_profiles.yaml"
+    p = PROJECTION_PROFILES
     s = current(p)
     pdoc = yaml.safe_load(s)
     unique_ids(pdoc["projection_profiles"], "projection profiles")
@@ -565,15 +572,13 @@ def generate_core(checkout):
             if source_class not in pdoc["source_classes"]:
                 raise ValueError("undeclared source class " + source_class)
     definitions = pdoc["forbidden_constraints"]["definitions"]
-    new_defs = overlay("overlays/projection_forbidden_constraint_additions.yaml")[
-        "forbidden_constraint_definitions"
-    ]
+    new_defs = overlay(FORBIDDEN_OVERLAY)["forbidden_constraint_definitions"]
     if set(new_defs) & set(definitions):
         raise ValueError("forbidden-constraint definition collision")
     if list(pdoc)[list(pdoc).index("forbidden_constraints") + 1] != "validation_rules":
         raise ValueError("forbidden_constraints is not followed by validation_rules")
     def_block = (
-        raw("overlays/projection_forbidden_constraint_additions.yaml")
+        raw(FORBIDDEN_OVERLAY)
         .split("forbidden_constraint_definitions:\n", 1)[1]
         .rstrip()
     )
@@ -591,7 +596,7 @@ def generate_core(checkout):
         p,
     )
 
-    p = "semantics/composition_profiles.yaml"
+    p = COMPOSITION_PROFILES
     cp = current(p)
     cdoc = yaml.safe_load(cp)
     unique_ids(cdoc["profiles"], "composition profiles")
@@ -612,7 +617,7 @@ def generate_core(checkout):
         + "\n"
     )
 
-    p = "semantics/generic_compiler_manifest.yaml"
+    p = MANIFEST
     m = current(p)
     schemas = yaml.safe_load(m)["requires"]["artifact_schemas"]
     if any(name in schemas for name in GT_SCHEMA_FILES):
@@ -645,18 +650,7 @@ def generate_dependent(checkout):
     def current(rel):
         return (checkout / rel).read_text(encoding="utf-8")
 
-    docs = {
-        "invariants": yaml.safe_load(current("semantics/invariants.yaml")),
-        "contracts": yaml.safe_load(current("semantics/contracts.yaml")),
-        "vocabulary": yaml.safe_load(current("semantics/vocabulary.yaml")),
-        "projection_profiles": yaml.safe_load(
-            current("semantics/projection_profiles.yaml")
-        ),
-        "composition_profiles": yaml.safe_load(
-            current("semantics/composition_profiles.yaml")
-        ),
-        "model": yaml.safe_load(current("semantics/strategic_value_model.yaml")),
-    }
+    docs = {key: yaml.safe_load(current(rel)) for key, rel in LEDGERS.items()}
     verify_sv_core_present(docs)
     inv_ids = {r["id"] for r in docs["invariants"]["invariants"]}
     contract_ids = [c["id"] for c in docs["contracts"]["contracts"]]
@@ -673,7 +667,7 @@ def generate_dependent(checkout):
         )
     if SV_LINEAGE_ONLY & set(dependent[0]["source_invariants"]):
         raise ValueError("dependent contract cites lineage-only SV IDs")
-    p = "semantics/contracts.yaml"
+    p = CONTRACTS
     changed = {
         p: merge_list(
             current(p), raw("overlays/contracts_sv_dependent.yaml"), "contracts"
