@@ -1,7 +1,16 @@
-"""Producer negative controls against the REAL compiler (scratch only)."""
+"""Producer negative controls against the REAL compiler.
+
+Inputs are explicit; nothing defaults to a shared or world-writable path:
+
+  SV_AUTH          disposable .github rehearsal checkout (applied candidate, committed)
+  SV_RUN1          output directory of a completed projection + composition run
+  SV_COMPILER_SRC  l9-semantic-compiler-engine checkout (its ``src`` is imported)
+
+Every artifact this script reads is resolved and confined to SV_RUN1.
+Usage: SV_AUTH=... SV_RUN1=... SV_COMPILER_SRC=... python producer_negative_controls.py
+"""
 
 import copy
-import glob
 import json
 import os
 import subprocess
@@ -11,10 +20,30 @@ from pathlib import Path
 
 import yaml
 
-SP = Path("/tmp/claude-0/-home-user/a2b6f907-ae31-5599-8c24-cf3342c0b873/scratchpad")
-AUTH = Path(os.environ.get("SV_AUTH", SP / "dotgithub-base2"))
-RUN1 = Path(os.environ.get("SV_RUN1", SP / "sv-run1"))
-ENV = dict(os.environ, PYTHONPATH="/home/user/l9-semantic-compiler-engine/src")
+
+def _required_dir(name):
+    value = os.environ.get(name)
+    if not value:
+        sys.exit(f"BLOCKED: set {name} (see module docstring)")
+    path = Path(os.path.realpath(value))
+    if not path.is_dir():
+        sys.exit(f"BLOCKED: {name}={value} is not a directory")
+    return path
+
+
+def _confined(base, *parts):
+    """Resolve a path under ``base``; refuse anything that escapes it."""
+    root = os.path.realpath(base)
+    candidate = os.path.realpath(os.path.join(root, *parts))
+    if not candidate.startswith(root + os.sep):
+        sys.exit(f"BLOCKED: {candidate} escapes {root}")
+    return Path(candidate)
+
+
+AUTH = _required_dir("SV_AUTH")
+RUN1 = _required_dir("SV_RUN1")
+COMPILER = _required_dir("SV_COMPILER_SRC")
+ENV = dict(os.environ, PYTHONPATH=str(COMPILER / "src"))
 REV = subprocess.run(
     ["git", "-C", str(AUTH), "rev-parse", "HEAD"], capture_output=True, text=True
 ).stdout.strip()
@@ -167,7 +196,7 @@ def record(name, mechanism, rc, summary, err, expect_nonpass=True):
 
 
 base = {
-    c: yaml.safe_load((RUN1 / "requests" / f"{c}.request.yaml").read_text())
+    c: yaml.safe_load(_confined(RUN1, "requests", f"{c}.request.yaml").read_text())
     for c in (
         "strategic_value_model",
         "vocabulary",
@@ -345,7 +374,7 @@ record(
     *(project(req, "x") if req else (99, {}, err)),
 )
 
-comp = yaml.safe_load((RUN1 / "requests" / "compose.request.yaml").read_text())
+comp = yaml.safe_load(_confined(RUN1, "requests", "compose.request.yaml").read_text())
 c = copy.deepcopy(comp)
 c["components"] = [x for x in c["components"] if "authority-model" not in x]
 record(
@@ -368,7 +397,7 @@ with tempfile.TemporaryDirectory() as t:
     rc, out, err = cli("compose", str(f))
     d = yaml.safe_load(out) or {}
     rev_digest = [a.get("digest") for a in d.get("artifacts") or []]
-canon = yaml.safe_load((RUN1 / "requests" / "compose.result.yaml").read_text())
+canon = yaml.safe_load(_confined(RUN1, "requests", "compose.result.yaml").read_text())
 canon_digest = [a.get("digest") for a in canon.get("artifacts") or []]
 results.append(
     {
@@ -385,16 +414,12 @@ results.append(
 )
 
 # Tampered artifact bytes: verify-projection must fail.
-art = sorted(
-    glob.glob(
-        str(
-            RUN1
-            / "l9.projection_strategic-planner-value_1"
-            / "l9.source_invariants_1.projection.json"
-        )
-    )
-)[0]
-d = json.loads(Path(art).read_text())
+art = _confined(
+    RUN1,
+    "l9.projection_strategic-planner-value_1",
+    "l9.source_invariants_1.projection.json",
+)
+d = json.loads(art.read_text())
 d["payload"]["invariants"] = d["payload"]["invariants"][:-1]
 with tempfile.TemporaryDirectory() as t:
     f = Path(t) / "tampered.projection.json"
@@ -417,7 +442,7 @@ with tempfile.TemporaryDirectory() as t:
         summarize(out),
         err[-300:],
     )
-    d2 = json.loads(Path(art).read_text())
+    d2 = json.loads(art.read_text())
     d2["source_digest"] = "sha256:" + "3" * 64
     f.write_text(json.dumps(d2, indent=2))
     rc, out, err = cli(
@@ -467,7 +492,7 @@ print(
                 [
                     "git",
                     "-C",
-                    "/home/user/l9-semantic-compiler-engine",
+                    str(COMPILER),
                     "rev-parse",
                     "HEAD",
                 ],
