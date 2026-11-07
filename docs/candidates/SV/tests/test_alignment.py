@@ -106,7 +106,10 @@ class AlignmentClosure(unittest.TestCase):
 
     def test_no_undeclared_mutation_or_bypass(self):
         script = (ROOT / "apply_to_pinned_checkout.py").read_text()
-        self.assertRegex(script, r"(?m)^BASE_SHA = ['\"]020a94bea86e7c5c5e4107da7014ec259508f397['\"]$")
+        self.assertRegex(
+            script,
+            r"(?m)^BASE_SHA = ['\"]020a94bea86e7c5c5e4107da7014ec259508f397['\"]$",
+        )
         self.assertNotIn("--expected-sha", script)
         self.assertIn("if actual != BASE_SHA:", script)
         self.assertNotIn("git push", script)
