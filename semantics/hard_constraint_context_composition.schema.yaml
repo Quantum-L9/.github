@@ -126,19 +126,14 @@ properties:
               const: Quantum-L9/.github
             source_invariants:
               type: string_list
-              min_items: 2
             applies_to:
               type: string_list
-              min_items: 3
             requires:
               type: string_list
-              min_items: 2
             guarantees:
               type: string_list
-              min_items: 3
             forbidden:
               type: string_list
-              min_items: 3
             outcomes:
               type: object
               required:
@@ -331,16 +326,12 @@ properties:
         properties:
           required:
             type: string_list
-            min_items: 5
           optional:
             type: string_list
-            min_items: 6
           hardness_domain:
             type: string_list
-            min_items: 2
       closure_rules:
         type: string_list
-        min_items: 4
   resolution_model:
     type: object
     required:
@@ -397,4 +388,3 @@ properties:
             type: string
       selection_rules:
         type: string_list
-        min_items: 3

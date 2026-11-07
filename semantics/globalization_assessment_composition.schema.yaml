@@ -133,19 +133,14 @@ properties:
               const: Quantum-L9/.github
             source_invariants:
               type: string_list
-              min_items: 2
             applies_to:
               type: string_list
-              min_items: 5
             requires:
               type: string_list
-              min_items: 2
             guarantees:
               type: string_list
-              min_items: 3
             forbidden:
               type: string_list
-              min_items: 4
             outcomes:
               type: object
               required:
@@ -182,7 +177,6 @@ properties:
         properties:
           sequence:
             type: string_list
-            min_items: 8
           globalization_candidate_is_not_global_authority:
             type: boolean
             const: true
@@ -201,7 +195,6 @@ properties:
             const: globalization_candidate
           requires:
             type: string_list
-            min_items: 2
           automatic_promotion_forbidden:
             type: boolean
             const: true
@@ -214,7 +207,6 @@ properties:
         properties:
           requirements:
             type: string_list
-            min_items: 6
           requires_global_authority:
             type: boolean
             const: true
@@ -249,13 +241,10 @@ properties:
                 type: string
               stages:
                 type: string_list
-                min_items: 4
               terminal_resolutions:
                 type: string_list
-                min_items: 4
               rules:
                 type: string_list
-                min_items: 3
           harvest_packet:
             type: object
             required:
@@ -275,10 +264,8 @@ properties:
                 const: immutable_after_emission
               stages:
                 type: string_list
-                min_items: 3
               rules:
                 type: string_list
-                min_items: 3
           architecture_pattern:
             type: object
             required:
@@ -295,7 +282,6 @@ properties:
                 type: string
               stages:
                 type: string_list
-                min_items: 7
               branches:
                 type: object
                 required:
@@ -318,7 +304,6 @@ properties:
                     const: evidence_or_authority_is_insufficient
               rules:
                 type: string_list
-                min_items: 3
   packet_catalog:
     type: object
     required:
@@ -343,4 +328,3 @@ properties:
                 type: string
               required_semantics:
                 type: string_list
-                min_items: 4

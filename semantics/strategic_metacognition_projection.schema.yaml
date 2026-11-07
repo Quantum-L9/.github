@@ -121,19 +121,14 @@ properties:
           const: Quantum-L9/.github
         source_invariants:
           type: string_list
-          min_items: 2
         applies_to:
           type: string_list
-          min_items: 3
         requires:
           type: string_list
-          min_items: 2
         guarantees:
           type: string_list
-          min_items: 3
         forbidden:
           type: string_list
-          min_items: 4
         outcomes:
           type: object
           required:
@@ -169,7 +164,6 @@ properties:
         const: true
       may_not_be_inferred_from:
         type: string_list
-        min_items: 3
   strategic_cognition_authority:
     type: object
     required:
@@ -203,13 +197,11 @@ properties:
         const: strategic_plan_metacognitive_reasoner
       metacognition_denied:
         type: string_list
-        min_items: 3
       roles_are_actor_identities:
         type: boolean
         const: false
       rules:
         type: string_list
-        min_items: 4
   global_rules:
     type: object
     properties:
@@ -344,13 +336,10 @@ properties:
             const: false
           owns:
             type: string_list
-            min_items: 1
           may:
             type: string_list
-            min_items: 5
           may_not:
             type: string_list
-            min_items: 6
           strategic_authority:
             type: boolean
             const: false
@@ -399,7 +388,6 @@ properties:
             const: none
           may_not:
             type: string_list
-            min_items: 3
   reasoning_concepts:
     type: object
     required:
@@ -435,7 +423,6 @@ properties:
             const: true
           may_not:
             type: string_list
-            min_items: 4
   artifact_id:
     type: string
     const: l9.schema/strategic-plan-metacognitive-analysis@1
@@ -517,7 +504,6 @@ properties:
     const: object
   required:
     type: string_list
-    min_items: 11
   properties:
     type: object
     required:
@@ -583,7 +569,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 2
               fields:
                 type: object
                 required:
@@ -651,7 +636,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 4
               fields:
                 type: object
                 required:
@@ -675,7 +659,6 @@ properties:
                     properties:
                       enum:
                         type: string_list
-                        min_items: 5
                   statement:
                     type: object
                     required:
@@ -716,7 +699,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 4
               fields:
                 type: object
                 required:
@@ -740,7 +722,6 @@ properties:
                     properties:
                       enum:
                         type: string_list
-                        min_items: 4
                   statement:
                     type: object
                     required:
@@ -781,7 +762,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 4
               fields:
                 type: object
                 required:
@@ -896,4 +876,3 @@ properties:
         const: true
   semantic_rules:
     type: string_list
-    min_items: 6

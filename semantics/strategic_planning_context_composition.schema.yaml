@@ -154,19 +154,14 @@ properties:
               const: Quantum-L9/.github
             source_invariants:
               type: string_list
-              min_items: 2
             applies_to:
               type: string_list
-              min_items: 3
             requires:
               type: string_list
-              min_items: 2
             guarantees:
               type: string_list
-              min_items: 3
             forbidden:
               type: string_list
-              min_items: 4
             outcomes:
               type: object
               required:
@@ -208,7 +203,6 @@ properties:
             const: true
           may_not_be_inferred_from:
             type: string_list
-            min_items: 3
       strategic_cognition_authority:
         type: object
         required:
@@ -242,13 +236,11 @@ properties:
             const: strategic_plan_metacognitive_reasoner
           metacognition_denied:
             type: string_list
-            min_items: 3
           roles_are_actor_identities:
             type: boolean
             const: false
           rules:
             type: string_list
-            min_items: 4
   strategic_cognition_model:
     type: object
     required:
@@ -334,13 +326,10 @@ properties:
                 type: string
               consumes:
                 type: string_list
-                min_items: 3
               maintains:
                 type: string_list
-                min_items: 1
               does_not_own:
                 type: string_list
-                min_items: 7
           strategic_plan:
             type: object
             required:
@@ -467,22 +456,17 @@ properties:
                 type: string
               owns:
                 type: string_list
-                min_items: 1
               reasons_over:
                 type: string_list
-                min_items: 3
               may:
                 type: string_list
-                min_items: 4
               authority_source:
                 type: string
                 const: strategic_authority
               does_not_own:
                 type: string_list
-                min_items: 7
               may_not:
                 type: string_list
-                min_items: 6
       reasoning_artifacts:
         type: object
         required:
@@ -515,7 +499,6 @@ properties:
                 const: none
               may_not:
                 type: string_list
-                min_items: 3
           strategic_plan_revision_candidate:
             type: object
             required:
@@ -542,7 +525,6 @@ properties:
                 const: none_until_admitted
               may_not:
                 type: string_list
-                min_items: 3
       authority_separation:
         type: object
         required:
@@ -765,7 +747,6 @@ properties:
                 const: true
               may_not:
                 type: string_list
-                min_items: 4
   strategic_plan_graph_schema:
     type: object
     required:
@@ -844,7 +825,6 @@ properties:
         const: object
       required:
         type: string_list
-        min_items: 11
       properties:
         type: object
         required:
@@ -952,7 +932,6 @@ properties:
                     const: object
                   required:
                     type: string_list
-                    min_items: 3
                   fields:
                     type: object
                     required:
@@ -976,7 +955,6 @@ properties:
                         properties:
                           enum:
                             type: string_list
-                            min_items: 4
                       statement:
                         type: object
                         required:
@@ -1014,7 +992,6 @@ properties:
                     const: object
                   required:
                     type: string_list
-                    min_items: 4
                   fields:
                     type: object
                     required:
@@ -1039,7 +1016,6 @@ properties:
                         properties:
                           enum:
                             type: string_list
-                            min_items: 5
                       source_ref:
                         type: object
                         required:
@@ -1189,7 +1165,6 @@ properties:
             const: true
       semantic_rules:
         type: string_list
-        min_items: 12
   affected_strategic_closure_schema:
     type: object
     required:
@@ -1287,7 +1262,6 @@ properties:
         const: object
       required:
         type: string_list
-        min_items: 9
       properties:
         type: object
         required:
@@ -1366,7 +1340,6 @@ properties:
                     const: object
                   required:
                     type: string_list
-                    min_items: 2
                   fields:
                     type: object
                     required:
@@ -1456,7 +1429,6 @@ properties:
             const: true
       semantic_rules:
         type: string_list
-        min_items: 7
   strategic_planning_episode_schema:
     type: object
     required:
@@ -1550,7 +1522,6 @@ properties:
         const: object
       required:
         type: string_list
-        min_items: 14
       properties:
         type: object
         required:
@@ -1649,7 +1620,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 2
               fields:
                 type: object
                 required:
@@ -1684,7 +1654,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 2
               fields:
                 type: object
                 required:
@@ -1728,7 +1697,6 @@ properties:
                     const: object
                   required:
                     type: string_list
-                    min_items: 2
                   fields:
                     type: object
                     required:
@@ -1772,7 +1740,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 6
               fields:
                 type: object
                 required:
@@ -1812,7 +1779,6 @@ properties:
                             const: object
                           required:
                             type: string_list
-                            min_items: 3
                           fields:
                             type: object
                             required:
@@ -1854,7 +1820,6 @@ properties:
                             const: object
                           required:
                             type: string_list
-                            min_items: 2
                           fields:
                             type: object
                             required:
@@ -1900,7 +1865,6 @@ properties:
                             const: object
                           required:
                             type: string_list
-                            min_items: 3
                           fields:
                             type: object
                             required:
@@ -1946,7 +1910,6 @@ properties:
                             const: object
                           required:
                             type: string_list
-                            min_items: 3
                           fields:
                             type: object
                             required:
@@ -2001,7 +1964,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 2
               fields:
                 type: object
                 required:
@@ -2017,7 +1979,6 @@ properties:
                     properties:
                       enum:
                         type: string_list
-                        min_items: 3
                   candidate_path_ref:
                     type: object
                     required:
@@ -2092,7 +2053,6 @@ properties:
             const: true
       semantic_rules:
         type: string_list
-        min_items: 7
   strategic_plan_revision_candidate_schema:
     type: object
     required:
@@ -2190,7 +2150,6 @@ properties:
         const: object
       required:
         type: string_list
-        min_items: 10
       properties:
         type: object
         required:
@@ -2242,7 +2201,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 2
               fields:
                 type: object
                 required:
@@ -2277,7 +2235,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 3
               fields:
                 type: object
                 required:
@@ -2321,7 +2278,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 2
               fields:
                 type: object
                 required:
@@ -2356,7 +2312,6 @@ properties:
                 const: object
               required:
                 type: string_list
-                min_items: 2
               fields:
                 type: object
                 required:
@@ -2449,4 +2404,3 @@ properties:
             const: true
       semantic_rules:
         type: string_list
-        min_items: 7

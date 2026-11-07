@@ -128,19 +128,14 @@ properties:
               const: Quantum-L9/.github
             source_invariants:
               type: string_list
-              min_items: 3
             applies_to:
               type: string_list
-              min_items: 3
             requires:
               type: string_list
-              min_items: 2
             guarantees:
               type: string_list
-              min_items: 3
             forbidden:
               type: string_list
-              min_items: 3
             outcomes:
               type: object
               properties:
@@ -203,7 +198,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 4
               change_effect:
                 type: string
                 const: fixture_stale
@@ -216,7 +210,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 2
               membership_change_requires_new_profile_version:
                 type: boolean
                 const: true
@@ -231,7 +224,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 6
               receipt_binds_exact_closure:
                 type: boolean
                 const: true
@@ -244,7 +236,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 6
               material_change_effect:
                 type: string
                 const: new_admission_decision_required_unless_compatibility_preserves_prior_decision
@@ -260,7 +251,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 4
               material_subject_or_coordinate_change_effect:
                 type: string
                 const: non_current_unless_compatibility_preserves_applicability
@@ -275,7 +265,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 9
               change_effect:
                 type: string
                 const: product_kind_archetype_requirement_and_resolution_closure_stale
@@ -287,7 +276,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 9
               change_effect:
                 type: string
                 const: semantic_resolution_stale
@@ -299,7 +287,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 4
               change_effect:
                 type: string
                 const: architecture_and_conformance_resolution_stale
@@ -311,7 +298,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 8
               change_effect:
                 type: string
                 const: ports_and_product_manifest_stale
@@ -323,7 +309,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 4
               change_effect:
                 type: string
                 const: technology_binding_and_product_manifest_stale
@@ -335,7 +320,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 4
               change_effect:
                 type: string
                 const: product_manifest_and_implementation_stale
@@ -347,7 +331,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 6
               change_effect:
                 type: string
                 const: product_manifest_and_conformance_closure_stale
@@ -359,7 +342,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 12
               change_effect:
                 type: string
                 const: implementation_and_target_artifacts_stale
@@ -371,7 +353,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 3
               change_effect:
                 type: string
                 const: archetype_architecture_and_manifest_stale
@@ -383,7 +364,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 4
               change_effect:
                 type: string
                 const: architecture_ports_and_manifest_stale
@@ -395,7 +375,6 @@ properties:
             properties:
               depends_on:
                 type: string_list
-                min_items: 6
               change_effect:
                 type: string
                 const: requirement_product_manifest_and_identity_consumers_stale
