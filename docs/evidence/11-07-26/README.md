@@ -17,3 +17,7 @@ The later [`authority-resolution/`](authority-resolution/) evidence records a se
 `campaign-logs/candidate-profile-changes.patch` is an earlier local output and does **not** exactly match the later local-only candidate fixture. It is historical evidence, not an instruction to apply or admit a profile. `additional-test-output.zip` preserves the earlier negative-control pilot and baseline test copies omitted from the qualification ZIP. Some copies were intentionally tampered with for negative tests and must not be treated as authentic bundles.
 
 Absolute paths in logs and harnesses describe the original sandbox and are not portable. A local-only candidate commit is not a protected-main revision, a published release, or an admission decision.
+
+## Schema patch closeout (appended)
+
+[`schema-patch-closeout/`](schema-patch-closeout/) records the in-place patch of the 20 registered payload schemas (#211, #214) and their re-qualification with the same pinned compiler `943db9a`. Ten of ten profile pairs pass and 461 of 461 negative cases behave as intended. The capability FAIL recorded under `authority-resolution/` remains accurate for the bytes it tested. The patch removes the unenforced `string_list` minimums instead of claiming enforcement. That directory adds evidence and does not rewrite any result above.
