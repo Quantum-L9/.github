@@ -1,6 +1,8 @@
 """Admission-candidate schema closure checks, not genuine compiler receipts."""
-from pathlib import Path
+
 import unittest
+from pathlib import Path
+
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,9 +15,9 @@ def load(name):
 class SchemaHardeningTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = load('semantics/strategic_value_model.yaml')
-        cls.pro = load('semantics/strategic_planner_value_projection.schema.yaml')
-        cls.com = load('semantics/strategic_planner_value_composition.schema.yaml')
+        cls.model = load("semantics/strategic_value_model.yaml")
+        cls.pro = load("semantics/strategic_planner_value_projection.schema.yaml")
+        cls.com = load("semantics/strategic_planner_value_composition.schema.yaml")
 
     def walk(self, obj, path=()):
         if isinstance(obj, dict):
@@ -30,19 +32,19 @@ class SchemaHardeningTests(unittest.TestCase):
         for schema in (self.pro, self.com):
             found = 0
             for path, node in self.walk(schema):
-                if node.get('type') != 'boolean':
+                if node.get("type") != "boolean":
                     continue
                 modelpath = path
-                if modelpath[:2] == ('properties', 'strategic_value_model'):
+                if modelpath[:2] == ("properties", "strategic_value_model"):
                     modelpath = modelpath[2:]
-                if modelpath[:1] == ('properties',):
+                if modelpath[:1] == ("properties",):
                     modelpath = modelpath[1:]
                 value = self.model
                 for key in modelpath:
-                    if key != 'properties':
+                    if key != "properties":
                         value = value[key]
                 self.assertIs(type(value), bool)
-                self.assertIs(node.get('const'), value)
+                self.assertIs(node.get("const"), value)
                 found += 1
             self.assertEqual(found, 21)
 
@@ -50,62 +52,102 @@ class SchemaHardeningTests(unittest.TestCase):
         for schema in (self.pro, self.com):
             converted = 0
             for _, node in self.walk(schema):
-                if 'min_items' in node:
-                    self.assertEqual(node.get('type'), 'array')
-                    self.assertIn('items', node)
-                    self.assertEqual(node['items'].get('type'), 'string') if node['items'].get('type') == 'string' else None
-                    converted += node['items'].get('type') == 'string'
+                if "min_items" in node:
+                    self.assertEqual(node.get("type"), "array")
+                    self.assertIn("items", node)
+                    self.assertEqual(node["items"].get("type"), "string") if node[
+                        "items"
+                    ].get("type") == "string" else None
+                    converted += node["items"].get("type") == "string"
             # 31 original string lists + six relocated-lineage governing_invariants arrays.
             self.assertEqual(converted, 37)
 
     def test_nested_vocabulary_definitions_are_typed_and_required(self):
-        vocab = self.pro['properties']['terms']
-        self.assertEqual(vocab['type'], 'object')
-        self.assertEqual(len(vocab['required']), 11)
-        for name in vocab['required']:
-            term = vocab['fields'][name]
-            self.assertEqual(term['type'], 'object')
-            self.assertIn('definition', term['required'])
-            self.assertEqual(term['properties']['definition']['type'], 'string')
-        composed = self.com['properties']['vocabulary']['properties']['terms']
-        self.assertEqual(set(composed['required']), set(vocab['required']))
+        vocab = self.pro["properties"]["terms"]
+        self.assertEqual(vocab["type"], "object")
+        self.assertEqual(len(vocab["required"]), 11)
+        for name in vocab["required"]:
+            term = vocab["fields"][name]
+            self.assertEqual(term["type"], "object")
+            self.assertIn("definition", term["required"])
+            self.assertEqual(term["properties"]["definition"]["type"], "string")
+        composed = self.com["properties"]["vocabulary"]["properties"]["terms"]
+        self.assertEqual(set(composed["required"]), set(vocab["required"]))
 
     def test_relocated_lineage_descriptors_are_typed_and_pinned(self):
-        model = self.model['relocated_additional_candidate_semantics']
-        for schema in (self.pro['properties'],
-                       self.com['properties']['strategic_value_model']['properties']):
-            lineage = schema['relocated_additional_candidate_semantics']
-            self.assertEqual(lineage['type'], 'object')
-            self.assertEqual(set(lineage['required']), set(model))
+        model = self.model["relocated_additional_candidate_semantics"]
+        for schema in (
+            self.pro["properties"],
+            self.com["properties"]["strategic_value_model"]["properties"],
+        ):
+            lineage = schema["relocated_additional_candidate_semantics"]
+            self.assertEqual(lineage["type"], "object")
+            self.assertEqual(set(lineage["required"]), set(model))
             for cid, record in model.items():
-                entry = lineage['properties'][cid]
-                self.assertEqual(entry['type'], 'object')
-                self.assertEqual(entry['required'], ['source_candidate_id', 'meaning', 'disposition',
-                                                     'governing_invariants', 'model_section',
-                                                     'contract_obligation', 'when', 'authority_status'])
-                props = entry['properties']
-                self.assertEqual(props['source_candidate_id'], {'const': cid})
-                self.assertEqual(props['disposition'], {'const': record['disposition']})
-                self.assertEqual(props['authority_status'], {'const': 'not_admitted_as_independent_invariant'})
-                gi = props['governing_invariants']
-                self.assertEqual((gi['type'], gi['min_items'], gi['items']['type']), ('array', 1, 'string'))
-                self.assertNotIn('L9-SV-015', gi['items']['enum'])
-                for field in ('meaning', 'model_section', 'contract_obligation', 'when'):
-                    self.assertEqual(props[field], {'type': 'string'})
+                entry = lineage["properties"][cid]
+                self.assertEqual(entry["type"], "object")
+                self.assertEqual(
+                    entry["required"],
+                    [
+                        "source_candidate_id",
+                        "meaning",
+                        "disposition",
+                        "governing_invariants",
+                        "model_section",
+                        "contract_obligation",
+                        "when",
+                        "authority_status",
+                    ],
+                )
+                props = entry["properties"]
+                self.assertEqual(props["source_candidate_id"], {"const": cid})
+                self.assertEqual(props["disposition"], {"const": record["disposition"]})
+                self.assertEqual(
+                    props["authority_status"],
+                    {"const": "not_admitted_as_independent_invariant"},
+                )
+                gi = props["governing_invariants"]
+                self.assertEqual(
+                    (gi["type"], gi["min_items"], gi["items"]["type"]),
+                    ("array", 1, "string"),
+                )
+                self.assertNotIn("L9-SV-015", gi["items"]["enum"])
+                for field in (
+                    "meaning",
+                    "model_section",
+                    "contract_obligation",
+                    "when",
+                ):
+                    self.assertEqual(props[field], {"type": "string"})
 
     def test_derived_profile_and_composition_version_unmodified(self):
-        profile = load('overlays/projection_profile_additions.yaml')['projection_profiles'][0]
-        composition = load('overlays/composition_profile_additions.yaml')['profiles'][0]
-        self.assertEqual(self.pro['properties']['schema']['const'], profile['output']['schema'])
-        self.assertEqual(self.com['properties']['schema']['const'], composition['output']['schema'])
-        self.assertEqual(composition['merge_strategy']['source_coverage'], 'exact')
+        profile = load("overlays/projection_profile_additions.yaml")[
+            "projection_profiles"
+        ][0]
+        composition = load("overlays/composition_profile_additions.yaml")["profiles"][0]
+        self.assertEqual(
+            self.pro["properties"]["schema"]["const"], profile["output"]["schema"]
+        )
+        self.assertEqual(
+            self.com["properties"]["schema"]["const"], composition["output"]["schema"]
+        )
+        self.assertEqual(composition["merge_strategy"]["source_coverage"], "exact")
 
     def test_projection_stays_source_class_polymorphic(self):
-        self.assertNotIn('required', self.pro,
-                         'per-source schema is heterogeneous; coverage is a separate producer obligation')
-        self.assertEqual(set(self.com['required']),
-                         set(load('overlays/projection_profile_additions.yaml')['projection_profiles'][0]['sources']))
+        self.assertNotIn(
+            "required",
+            self.pro,
+            "per-source schema is heterogeneous; coverage is a separate producer obligation",
+        )
+        self.assertEqual(
+            set(self.com["required"]),
+            set(
+                load("overlays/projection_profile_additions.yaml")[
+                    "projection_profiles"
+                ][0]["sources"]
+            ),
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

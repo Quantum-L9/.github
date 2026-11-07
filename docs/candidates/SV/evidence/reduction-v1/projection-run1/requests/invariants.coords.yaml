@@ -9,4 +9,3 @@ source_classes:
 sources:
 - digest: sha256:c17b57886f36fd5b1454618fb1f5d84ca5d76e4668079be67e75308f55bc343c
   ref: l9.source/invariants@1
-

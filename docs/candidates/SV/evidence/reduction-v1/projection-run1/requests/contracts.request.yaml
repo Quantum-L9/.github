@@ -12,4 +12,3 @@ source_classes:
 sources:
 - digest: sha256:99b4d35d02ca978b381b363a330e5721a458eeb97eab492f0596f6f0a8b42459
   ref: l9.source/contracts@1
-

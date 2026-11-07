@@ -13,4 +13,3 @@ composition_profile:
   ref: l9.compose/strategic-planner-value@1
 output_root: /tmp/claude-0/-home-user/a2b6f907-ae31-5599-8c24-cf3342c0b873/scratchpad/sv-projection-run1
 schema: l9.semantic-composition-request/v1
-

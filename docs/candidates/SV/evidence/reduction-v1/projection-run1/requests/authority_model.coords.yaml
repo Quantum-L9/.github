@@ -9,4 +9,3 @@ source_classes:
 sources:
 - digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
   ref: l9.source/authority-model@1
-

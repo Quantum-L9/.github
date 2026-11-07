@@ -5,6 +5,6 @@
   "pyyaml": "6.0.3",
   "exit_code": 0,
   "tests_run": 78,
-  "candidate_parent_commit": "e3394c958d3f87e024dd77fcfbe928b8dba44e8f",
+  "candidate_parent_commit": "ff38d1f7acc560f11ff0b0e508bc23c09653db10",
   "note": "Run on the working tree whose parent is candidate_parent_commit; SHA256SUMS then regenerated to cover this log."
 }
