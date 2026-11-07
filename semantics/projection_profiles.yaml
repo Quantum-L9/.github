@@ -2300,16 +2300,61 @@ projection_profiles:
       - $.reasoning_concepts
     strategic_plan_graph_schema:
       selectors:
-      - $
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.type
+      - $.required
+      - $.properties
+      - $.reference_rules
+      - $.relation_constraints
+      - $.revision_rules
+      - $.semantic_rules
     affected_strategic_closure_schema:
       selectors:
-      - $
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.instance_semantics
+      - $.type
+      - $.required
+      - $.properties
+      - $.closure_rules
+      - $.semantic_rules
     strategic_planning_episode_schema:
       selectors:
-      - $
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.instance_semantics
+      - $.type
+      - $.required
+      - $.properties
+      - $.workspace_rules
+      - $.semantic_rules
     strategic_plan_revision_candidate_schema:
       selectors:
-      - $
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.instance_semantics
+      - $.type
+      - $.required
+      - $.properties
+      - $.candidate_rules
+      - $.semantic_rules
   output:
     schema: l9.projection.strategic-planning-context/v1
   forbidden:
@@ -2353,7 +2398,18 @@ projection_profiles:
       - $.reasoning_concepts
     strategic_plan_metacognitive_analysis_schema:
       selectors:
-      - $
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.instance_semantics
+      - $.type
+      - $.required
+      - $.properties
+      - $.analysis_rules
+      - $.semantic_rules
   output:
     schema: l9.projection.strategic-metacognition/v1
   forbidden:
@@ -2399,10 +2455,39 @@ projection_profiles:
       - $.identity_authority
     actor_registry:
       selectors:
-      - $
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.identity_dimension
+      - $.detailed_model
+      - $.global_rules
+      - $.does_not_own
+      - $.actor_kinds
+      - $.actor_statuses
+      - $.actors
+      - $.aliases
+      - $.alias_rules
+      - $.downstream_obligations
     surface_registry:
       selectors:
-      - $
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.identity_dimension
+      - $.detailed_model
+      - $.global_rules
+      - $.does_not_own
+      - $.surface_statuses
+      - $.surfaces
+      - $.aliases
+      - $.alias_rules
+      - $.downstream_obligations
   output:
     schema: l9.projection.identity-assurance/v1
   forbidden:

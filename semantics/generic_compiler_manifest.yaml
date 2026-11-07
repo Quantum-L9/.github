@@ -74,6 +74,24 @@ requires:
   - pr_audit_composition.schema.yaml
   - authority_resolution_projection.schema.yaml
   - authority_resolution_composition.schema.yaml
+  - architecture_break_test_composition.schema.yaml
+  - architecture_break_test_projection.schema.yaml
+  - evidence_assessment_composition.schema.yaml
+  - evidence_assessment_projection.schema.yaml
+  - globalization_assessment_composition.schema.yaml
+  - globalization_assessment_projection.schema.yaml
+  - hard_constraint_context_composition.schema.yaml
+  - hard_constraint_context_projection.schema.yaml
+  - identity_assurance_composition.schema.yaml
+  - semantic_change_context_composition.schema.yaml
+  - semantic_change_context_projection.schema.yaml
+  - strategic_metacognition_composition.schema.yaml
+  - strategic_planning_context_composition.schema.yaml
+  - work_state_continuity_composition.schema.yaml
+  - work_state_continuity_projection.schema.yaml
+  - identity_assurance_projection.schema.yaml
+  - strategic_metacognition_projection.schema.yaml
+  - strategic_planning_context_projection.schema.yaml
 capabilities:
 - canonical_source_resolution
 - profile_resolution
