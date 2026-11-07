@@ -1,0 +1,271 @@
+schema: l9.schema-definition/v1
+artifact_id: l9.schema/strategic-interaction-composition@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_strategic_interaction_composed_payload_schema
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: strategic_interaction_composition.schema.yaml
+governed_by:
+  composition_profile_ref: l9.compose/strategic-planner-interaction@1
+  projection_profile_ref: l9.projection/strategic-planner-interaction@1
+purpose: Constrain exactly three independent GT source-class namespaces after source_class_namespace composition.
+  Preserve selected meanings byte-for-byte; composition is non-numeric, noncanonical and cannot merge with
+  the SV five-source view or create another valuation.
+type: object
+required:
+- vocabulary
+- invariants
+- contracts
+properties:
+  vocabulary:
+    type: object
+    required:
+    - terms
+    properties:
+      terms:
+        type: object
+        required:
+        - strategic_interaction
+        - strategic_game_model
+        - actor_response_model
+        - strategy_profile
+        - conditional_best_response
+        - equilibrium_assessment
+        - deviation_gain
+        - incentive_bearing_commitment
+        - information_disclosure_decision
+        - policy_exploitability
+        - incentive_compatibility
+        - strategic_interaction_assessment
+        properties:
+          strategic_interaction:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          strategic_game_model:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          actor_response_model:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          strategy_profile:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          conditional_best_response:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          equilibrium_assessment:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          deviation_gain:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          incentive_bearing_commitment:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          information_disclosure_decision:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          policy_exploitability:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          incentive_compatibility:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          strategic_interaction_assessment:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+  invariants:
+    type: object
+    required:
+    - invariants
+    properties:
+      invariants:
+        type: array
+        min_items: 1
+        items:
+          type: object
+          required:
+          - id
+          - statement
+          - scope
+          - owner
+          properties:
+            id:
+              const: L9-GT-001
+            statement:
+              type: string
+            scope:
+              const: global
+            owner:
+              const: Quantum-L9/.github
+  contracts:
+    type: object
+    required:
+    - contracts
+    properties:
+      contracts:
+        type: array
+        min_items: 1
+        items:
+          type: object
+          required:
+          - id
+          - purpose
+          - scope
+          - owner
+          - source_invariants
+          - applies_to
+          - requires
+          - guarantees
+          - forbidden
+          - outcomes
+          properties:
+            id:
+              const: l9.contract/strategic-interaction-assessment@1
+            purpose:
+              type: string
+            scope:
+              const: global
+            owner:
+              const: Quantum-L9/.github
+            source_invariants:
+              type: array
+              min_items: 1
+              items:
+                type: string
+            applies_to:
+              type: array
+              min_items: 1
+              items:
+                type: string
+            requires:
+              type: array
+              min_items: 1
+              items:
+                type: string
+            guarantees:
+              type: array
+              min_items: 1
+              items:
+                type: string
+            forbidden:
+              type: array
+              min_items: 1
+              items:
+                type: string
+            outcomes:
+              type: object
+              required:
+              - satisfied
+              - violated
+              - unresolved
+              properties:
+                satisfied:
+                  type: string
+                violated:
+                  type: string
+                unresolved:
+                  type: string
+            applicability:
+              type: object
+              required:
+              - trigger
+              - does_not_apply_to
+              - sv_dependency
+              properties:
+                trigger:
+                  type: string
+                does_not_apply_to:
+                  type: array
+                  min_items: 1
+                  items:
+                    type: string
+                sv_dependency:
+                  type: string

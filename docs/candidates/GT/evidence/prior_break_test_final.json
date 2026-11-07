@@ -1,0 +1,206 @@
+{
+  "schema_version": "1.0",
+  "candidate": {
+    "id": "l9.gt-sv.semantic-contract-candidate@1",
+    "revision": "sha256:2cec259a2708f5293b011cd08e427a46876859e6a6757d038700eb45254b4eee",
+    "authority_ref": "Quantum-L9/.github@020a94bea86e7c5c5e4107da7014ec259508f397"
+  },
+  "scope": {
+    "included": [
+      "GT-only semantic contract",
+      "GT+SV conditional composition contract",
+      "minimal GT vocabulary/invariant source projection",
+      "strict candidate payload shapes",
+      "one consumer strategic-planner",
+      "synthetic adverse cases"
+    ],
+    "excluded": [
+      "independent global semantic-integrity certification",
+      "native compiler replay and receipt attestation",
+      "canonical SV admission",
+      "production numerical/GT solver conformance",
+      "real actor model calibration",
+      "repo mutation"
+    ]
+  },
+  "attacks": [
+    {
+      "id": "GTBT-01",
+      "attack_class": "A1",
+      "subject": "global GT invariant necessity",
+      "claim": "Minimal GT plus GT+SV contracts preserve global GT invariant necessity without duplicating SV or moving authority.",
+      "counterexample": "Standalone GT response assessment without any SV valuation would still need to distinguish an actor adapting to our action from a passive world.",
+      "result": "SURVIVED",
+      "evidence": [
+        "overlays/invariants_additions.yaml",
+        "tests/test_candidate.py::test_gt_only_independent_of_sv"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    },
+    {
+      "id": "GTBT-02",
+      "attack_class": "A2",
+      "subject": "no new relation type",
+      "claim": "Minimal GT plus GT+SV contracts preserve no new relation type without duplicating SV or moving authority.",
+      "counterexample": "Remove a proposed strategic-value-uplift edge: existing model-conditioned response refs and one SV assessment preserve all meaning.",
+      "result": "SURVIVED",
+      "evidence": [
+        "overlays/contracts_sv_dependent.yaml",
+        "CONCEPT_DECISIONS.md"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    },
+    {
+      "id": "GTBT-03",
+      "attack_class": "A3",
+      "subject": "semantic roots",
+      "claim": "Minimal GT plus GT+SV contracts preserve semantic roots without duplicating SV or moving authority.",
+      "counterexample": "Pretend equilibrium follows from stable softmax iteration; the contract requires game model, solution concept and deviation diagnostics.",
+      "result": "SURVIVED",
+      "evidence": [
+        "overlays/vocabulary_additions.yaml",
+        "tests/test_candidate.py::test_softmax_fixed_point_is_not_nash_proof"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    },
+    {
+      "id": "GTBT-04",
+      "attack_class": "A4",
+      "subject": "authority separation",
+      "claim": "Minimal GT plus GT+SV contracts preserve authority separation without duplicating SV or moving authority.",
+      "counterexample": "High predicted value or Nash status cannot authorize an action, plan mutation, information disclosure or create fact ownership.",
+      "result": "SURVIVED",
+      "evidence": [
+        "overlays/contracts_gt_core.yaml",
+        "overlays/contracts_sv_dependent.yaml",
+        "tests/test_candidate.py::test_no_new_valuer_or_permission"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    },
+    {
+      "id": "GTBT-05",
+      "attack_class": "A5",
+      "subject": "representation pressure",
+      "claim": "Minimal GT plus GT+SV contracts preserve representation pressure without duplicating SV or moving authority.",
+      "counterexample": "Eliminate GameTheoryNode, SV copy, provider algorithm, new global ledger and custom GT-SV numerical engine: the existing source classes and owner separation suffice.",
+      "result": "SURVIVED",
+      "evidence": [
+        "overlays/projection_profile_additions.yaml",
+        "CONCEPT_DECISIONS.md"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    },
+    {
+      "id": "GTBT-06",
+      "attack_class": "A6",
+      "subject": "joint actor causality",
+      "claim": "Minimal GT plus GT+SV contracts preserve joint actor causality without duplicating SV or moving authority.",
+      "counterexample": "Buyer and seller responses share a hidden market shock: independent marginal multiplication is wrong; joint dependence or Unknown is mandatory.",
+      "result": "SURVIVED",
+      "evidence": [
+        "overlays/contracts_gt_core.yaml",
+        "tests/test_candidate.py::test_joint_correlation_is_not_independent_product_without_evidence"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    },
+    {
+      "id": "GTBT-07",
+      "attack_class": "A7",
+      "subject": "effect attribution",
+      "claim": "Minimal GT plus GT+SV contracts preserve effect attribution without duplicating SV or moving authority.",
+      "counterexample": "Reputation gain already booked inside SV future effects is incorrectly added as a GT uplift; composition contract rejects additive double counting.",
+      "result": "SURVIVED",
+      "evidence": [
+        "overlays/contracts_sv_dependent.yaml",
+        "tests/test_candidate.py::test_one_future_effect_must_not_be_added_twice"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    },
+    {
+      "id": "GTBT-08",
+      "attack_class": "A8",
+      "subject": "selective invalidation",
+      "claim": "Minimal GT plus GT+SV contracts preserve selective invalidation without duplicating SV or moving authority.",
+      "counterexample": "A changed actor model invalidates a dependent value assessment but cannot mutate unrelated objective or strategic-plan authority.",
+      "result": "SURVIVED",
+      "evidence": [
+        "overlays/contracts_sv_dependent.yaml",
+        "ADMISSION_HANDOFF.md"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    },
+    {
+      "id": "GTBT-09",
+      "attack_class": "A9",
+      "subject": "competing options",
+      "claim": "Minimal GT plus GT+SV contracts preserve competing options without duplicating SV or moving authority.",
+      "counterexample": "Static SV makes A worth 1000 vs B 800; GT response makes A expected 760, reversing the preferred candidate without committing the plan.",
+      "result": "SURVIVED",
+      "evidence": [
+        "tests/test_candidate.py::test_gt_response_can_reverse_plan_ranking",
+        "overlays/contracts_sv_dependent.yaml"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    },
+    {
+      "id": "GTBT-10",
+      "attack_class": "A10",
+      "subject": "bounded horizons and altitude",
+      "claim": "Minimal GT plus GT+SV contracts preserve bounded horizons and altitude without duplicating SV or moving authority.",
+      "counterexample": "Recursive actor beliefs and repeated interactions must remain bounded by existing time/resource controls, not a new ontology for each depth.",
+      "result": "SURVIVED",
+      "evidence": [
+        "overlays/contracts_gt_core.yaml",
+        "overlays/contracts_sv_dependent.yaml"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    },
+    {
+      "id": "GTBT-11",
+      "attack_class": "A11",
+      "subject": "flywheel effects",
+      "claim": "Minimal GT plus GT+SV contracts preserve flywheel effects without duplicating SV or moving authority.",
+      "counterexample": "Repeated reputation compounding appears in future state deltas but cannot generate a second value bucket or repeated booking in the same SV trajectory.",
+      "result": "SURVIVED",
+      "evidence": [
+        "overlays/contracts_sv_dependent.yaml",
+        "tests/test_candidate.py::test_one_future_effect_must_not_be_added_twice"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    },
+    {
+      "id": "GTBT-12",
+      "attack_class": "A12",
+      "subject": "delegation without authority expansion",
+      "claim": "Minimal GT plus GT+SV contracts preserve delegation without authority expansion without duplicating SV or moving authority.",
+      "counterexample": "Strategic Planner may consume both projections but owns selection and only the authority holder may admit/execute a plan.",
+      "result": "SURVIVED",
+      "evidence": [
+        "overlays/contracts_gt_core.yaml",
+        "overlays/contracts_sv_dependent.yaml",
+        "tests/test_candidate.py::test_no_value_ranking_trumps_hard_infeasibility"
+      ],
+      "implication": "The final candidate encodes the guard; local tests exercise selected synthetic cases, not live production behavior."
+    }
+  ],
+  "findings": [],
+  "unknowns": [
+    "The GT+SV dependent contract cannot be admitted at pinned main because SV has not been admitted. Final target identity requires re-resolution after SV admission.",
+    "A producer-validated AuthorityResolution receipt and independently rehashed canonical source bytes were not obtained; the inspected GitHub connector files remain revision-pinned evidence only.",
+    "Native semantic-compiler projection/composition replay, schema registration and consumer runtime verification are pending."
+  ],
+  "preserved_decisions": [
+    "One canonical SV valuation model; no GT uplift bucket",
+    "GT only, SV only, GT plus SV supported",
+    "No fourth reasoning sibling",
+    "No action authority in projected assessments",
+    "Strategic Planner first consumer, not GT semantic owner",
+    "SV admission is a separate prerequisite for dependent contract"
+  ],
+  "summary": {
+    "attacks_run": 12,
+    "broken_count": 0,
+    "inconclusive_count": 0
+  },
+  "verdict": "BLOCKED"
+}

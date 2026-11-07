@@ -1,0 +1,57 @@
+{
+  "repository": "Quantum-L9/.github",
+  "pr": 212,
+  "pr_head": "85531616cee2da94bbb7154418a78537549a4d76",
+  "main_base": "020a94bea86e7c5c5e4107da7014ec259508f397",
+  "pr_state_when_inspected": "open_not_merged",
+  "pr_scope": "docs/candidates/SV only; canonical semantics unchanged",
+  "source_blobs_observed_via_github_connector": {
+    "docs/candidates/SV/README.md": "4b1aa9496b2490d591b40e508dc4243877efb65d",
+    "docs/candidates/SV/overlays/projection_profile_additions.yaml": "82e063cf2e1349fc03813a060b65fe6fc75fe30b",
+    "docs/candidates/SV/overlays/composition_profile_additions.yaml": "c14c27b842ef02e0abe965d4d2bbf1095629e9f8",
+    "docs/candidates/SV/overlays/contracts_additions.yaml": "dec12362ec14fd06de17791d759e227a3adfbf04",
+    "docs/candidates/SV/overlays/invariants_additions.yaml": "c5bdd3418bb9cc993573a87eebf29e9c405ecfb1",
+    "docs/candidates/SV/overlays/vocabulary_additions.yaml": "c5f19da2b80e9f4991a158b6f1171851192429fa",
+    "docs/candidates/SV/semantics/strategic_value_model.yaml": "5f4ffbc1b6e4add5881f76ae3b176d4a82bbbcf6",
+    "docs/candidates/SV/semantics/strategic_planner_value_projection.schema.yaml": "e702ec7f3cb26322c986eb26e917564eba5048f8",
+    "docs/candidates/SV/semantics/strategic_planner_value_composition.schema.yaml": "4bb57229d3ba7719a057c635b9976f80e7c3513e"
+  },
+  "sv_invariants_proposed": [
+    "L9-SV-001",
+    "L9-SV-002",
+    "L9-SV-015",
+    "L9-SV-016",
+    "L9-SV-017",
+    "L9-SV-018",
+    "L9-SV-019",
+    "L9-SV-020"
+  ],
+  "sv_terms_proposed": [
+    "strategic_value",
+    "systemic_future_value",
+    "strategic_value_assessment",
+    "counterfactual_baseline",
+    "future_effect_identity",
+    "bidirectional_value_propagation",
+    "value_propagation_mesh",
+    "future_work_elimination",
+    "capability_unlock",
+    "decision_relevant_information_value",
+    "decision_boundary"
+  ],
+  "sv_contract": "l9.contract/strategic-value-assessment@1",
+  "sv_model": "l9.strategic.value@1",
+  "sv_projection": "l9.projection/strategic-planner-value@1",
+  "sv_composition": "l9.compose/strategic-planner-value@1",
+  "sv_source_classes": [
+    "strategic_value_model",
+    "vocabulary",
+    "invariants",
+    "contracts",
+    "authority_model"
+  ],
+  "dependency_status": "SV_DOCUMENTATION_ONLY_UNADMITTED",
+  "compiler_evidence": "NOT_RUN",
+  "authority_receipt": "NO_PRODUCER_VALIDATED_AUTHORITY_RESOLUTION_RECEIPT",
+  "exact_remote_blob_rehash": "NOT_DONE"
+}

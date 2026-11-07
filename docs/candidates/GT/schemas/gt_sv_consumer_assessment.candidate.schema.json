@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Planner-owned GT+SV assessment references exact three-source GT and five-source SV semantic views, not another valuation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "authority_effect"
+  ],
+  "properties": {
+    "schema": {
+      "const": "l9.assessment.gt-sv-composed/v1"
+    },
+    "status": {
+      "enum": [
+        "evaluated",
+        "unresolved",
+        "blocked"
+      ]
+    },
+    "gt_assessment": {
+      "type": "object",
+      "required": [
+        "ref",
+        "digest"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sv_assessment": {
+      "type": "object",
+      "required": [
+        "ref",
+        "digest"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compatibility_status"
+      ],
+      "properties": {
+        "objective_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "beneficiary_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state_revision_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "time_basis_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "horizon_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "utility_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "compatibility_status": {
+          "enum": [
+            "compatible",
+            "unresolved",
+            "incompatible"
+          ]
+        },
+        "welfare_basis_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "causal_identification_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "numerical_result": {
+      "type": "object",
+      "required": [
+        "ref",
+        "digest"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "authority_effect": {
+      "const": "none"
+    },
+    "material_unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "gt_semantic_view": {
+      "type": "object",
+      "required": [
+        "ref",
+        "digest"
+      ],
+      "properties": {
+        "ref": {
+          "const": "l9.compose/strategic-planner-interaction@1#l9.projection/strategic-planner-interaction@1"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sv_semantic_view": {
+      "type": "object",
+      "required": [
+        "ref",
+        "digest"
+      ],
+      "properties": {
+        "ref": {
+          "const": "l9.compose/strategic-planner-value@1#l9.projection/strategic-planner-value@1"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sv_accounting_receipt": {
+      "type": "object",
+      "required": [
+        "ref",
+        "digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "evaluated"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "gt_semantic_view",
+          "gt_assessment",
+          "sv_semantic_view",
+          "sv_assessment",
+          "numerical_result",
+          "comparison",
+          "sv_accounting_receipt"
+        ],
+        "properties": {
+          "comparison": {
+            "required": [
+              "compatibility_status",
+              "objective_ref",
+              "beneficiary_ref",
+              "baseline_ref",
+              "state_revision_ref",
+              "time_basis_ref",
+              "horizon_ref",
+              "utility_unit"
+            ],
+            "properties": {
+              "compatibility_status": {
+                "const": "compatible"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "unresolved",
+              "blocked"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "material_unknowns"
+        ],
+        "not": {
+          "required": [
+            "numerical_result"
+          ]
+        }
+      }
+    }
+  ]
+}

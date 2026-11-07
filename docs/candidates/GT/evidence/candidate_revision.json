@@ -1,0 +1,16 @@
+{
+  "sha256": "d5cf5b50668a2d6388e20ee0385ba9f9e27d7252ab5263d4f9c9e706b6c0e0cb",
+  "paths": [
+    "overlays/vocabulary_additions.yaml",
+    "overlays/invariants_additions.yaml",
+    "overlays/contracts_gt_core.yaml",
+    "overlays/contracts_sv_dependent.yaml",
+    "overlays/projection_profile_additions.yaml",
+    "overlays/composition_profile_additions.yaml",
+    "semantics/strategic_interaction_projection.schema.yaml",
+    "semantics/strategic_interaction_composition.schema.yaml",
+    "schemas/gt_sv_consumer_assessment.candidate.schema.json"
+  ],
+  "notes": "locally computed digest over ordered path\\0bytes\\0; not canonical git/admission or compiler digest",
+  "pr212_head": "85531616cee2da94bbb7154418a78537549a4d76"
+}

@@ -1,0 +1,49 @@
+terms:
+  strategic_interaction:
+    semantic_class: decision_model
+    definition: Decision context in which the focal action can change another actor's information, incentives
+      or responses, and thereby alter subsequent outcomes.
+  strategic_game_model:
+    semantic_class: decision_model
+    definition: Declared actors, admissible action and information sets, move order, modeled incentives and
+      response assumptions for a bounded interaction; a model, not world truth.
+  actor_response_model:
+    semantic_class: probabilistic_model
+    definition: Explicit conditional model of other-actor actions given the focal strategy, evidence-conditioned
+      beliefs, information state, incentives and time; Unknown mass remains explicit.
+  strategy_profile:
+    semantic_class: decision_model
+    definition: Assignment of an admissible pure action or probability distribution over actions to each modeled
+      actor, conditioned on the declared game and information state.
+  conditional_best_response:
+    semantic_class: mathematical_result
+    definition: Action or strategy maximizing a declared actor's modeled payoff against an exact, specified
+      model of other actors' strategies, subject to applicable constraints.
+  equilibrium_assessment:
+    semantic_class: mathematical_result
+    definition: Model-relative assessment of a declared solution concept and error tolerance, supported by
+      solution-specific diagnostics; does not establish actual behavior, truth or authority.
+  deviation_gain:
+    semantic_class: mathematical_diagnostic
+    definition: Largest unilateral modeled payoff improvement available to an actor over the reported strategy
+      profile, within its admissible action set; assessed under an exact payoff model.
+  incentive_bearing_commitment:
+    semantic_class: interaction_structure
+    definition: Credible and admissible limitation or obligation affecting future available actions or counterpart
+      incentives; not merely a stated intention or fabricated restriction.
+  information_disclosure_decision:
+    semantic_class: decision_alternative
+    definition: Candidate choice whether, when and how to reveal particular truthful, authorized information
+      to an actor, assessed for behavioral effects; distinct from acquiring information or permission to disclose.
+  policy_exploitability:
+    semantic_class: mathematical_diagnostic
+    definition: Conditional payoff advantage a modeled counterparty could obtain by responding to a specified
+      focal policy relative to an explicit benchmark, not evidence of actual exploitation.
+  incentive_compatibility:
+    semantic_class: mechanism_property
+    definition: Property of a proposed rule under which the modeled participant strategy is optimal or satisfies
+      declared incentive constraints, with truthful participation or reporting only where separately assumed.
+  strategic_interaction_assessment:
+    semantic_class: derived_assessment
+    definition: Evidence- and model-bound advisory assessment of actor responses, strategy profiles, selected
+      solution concepts and uncertainty, without independent valuation or execution authority.

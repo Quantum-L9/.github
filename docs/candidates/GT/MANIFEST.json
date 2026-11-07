@@ -1,0 +1,179 @@
+{
+  "schema": "l9.gt.dotgithub-pr212-candidate-local/v2",
+  "status": "CANDIDATE_ONLY_PR212_REVIEW_NOT_CANONICAL",
+  "target": "Quantum-L9/.github",
+  "review_pr": 212,
+  "review_head": "85531616cee2da94bbb7154418a78537549a4d76",
+  "canonical_base": "020a94bea86e7c5c5e4107da7014ec259508f397",
+  "gt_core": "LOCAL_CHECKED_NOT_ADMITTED",
+  "gt_sv_dependent": "BLOCKED_UNTIL_SV_ADMITTED",
+  "semantic_invariant_candidates": 1,
+  "gt_vocabulary_terms": 12,
+  "gt_source_projection_classes": 3,
+  "sv_proposed_source_projection_classes": 5,
+  "local_tests": 32,
+  "local_test_status": "PASS",
+  "native_compiler_status": "NOT_EXECUTED",
+  "producer_receipts": "NOT_OBTAINED",
+  "authority_resolution_producer_receipt": "NOT_OBTAINED",
+  "remote_mutation": false,
+  "no_skills": true,
+  "candidate_revision": "sha256:d5cf5b50668a2d6388e20ee0385ba9f9e27d7252ab5263d4f9c9e706b6c0e0cb",
+  "files": [
+    {
+      "path": "ADMISSION_HANDOFF.md",
+      "bytes": 3468,
+      "sha256": "5cb435b7e32381f1056582bc5806bb42811fd4bd0214a88f6c5a05657b87fa37"
+    },
+    {
+      "path": "COMPOSITION_MATH_AND_CASES.md",
+      "bytes": 6416,
+      "sha256": "eb99f55a1fa594043a8941abeaad6fd392b945cc3d584c84e189e8addb29ac76"
+    },
+    {
+      "path": "CONCEPT_DECISIONS.md",
+      "bytes": 2931,
+      "sha256": "30da9976daa7d4c6f24cf1415de24538dd9a086f587caef25107600ec293d7b3"
+    },
+    {
+      "path": "PR212_ALIGNMENT.md",
+      "bytes": 4570,
+      "sha256": "80e5a5a57186423090c4b853f3473ab699ccba355511bfe9c28d1f5cca750743"
+    },
+    {
+      "path": "PR212_BREAK_TEST.md",
+      "bytes": 3161,
+      "sha256": "102381c0af718731784c1102f1c3d77253c7cf34d55313d382f20313708a6390"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2440,
+      "sha256": "839cbe38e96f59af45b6733df1c0574b46512dc6cf69d3601dfdab24d9c4631c"
+    },
+    {
+      "path": "SOURCE_AND_PLACEMENT.md",
+      "bytes": 2891,
+      "sha256": "989a5c8dfff50de6dd592695b3d6a7d86420bf21b1f1c72c59a562d6aca7be35"
+    },
+    {
+      "path": "apply_to_pinned_checkout.py",
+      "bytes": 9135,
+      "sha256": "94dea3d91126883e8f59dbaf266405a8fc08e1635d96596c5caabfcb69d67b41"
+    },
+    {
+      "path": "evidence/authority_binding.json",
+      "bytes": 3587,
+      "sha256": "f32c9bc01f7935242ca1e411b508cef33291e8054304de1dd7f3ce6bba61cc56"
+    },
+    {
+      "path": "evidence/break_test_counterexamples.md",
+      "bytes": 2164,
+      "sha256": "55e57af5ec7fd031bbe055f340b021474322ffcdabebc5041b4b9574fe0ef9aa"
+    },
+    {
+      "path": "evidence/candidate_revision.json",
+      "bytes": 731,
+      "sha256": "0136344dd8b760302f5b04aa6e19dc7f02a14b5f91324daaa25e1eb28ac44c98"
+    },
+    {
+      "path": "evidence/pr212_alignment_binding.json",
+      "bytes": 2433,
+      "sha256": "cc7523e75fb4ccca702031ac264c3c321d7dd345c2ace671ec739c6d8fb773c5"
+    },
+    {
+      "path": "evidence/pr212_alignment_tests.log",
+      "bytes": 4895,
+      "sha256": "8094c53e990c423906f56d6ff51e018e7e31a5864abf5b49433a6457d982ace8"
+    },
+    {
+      "path": "evidence/pr212_break_test.json",
+      "bytes": 4581,
+      "sha256": "bab691e41a4f23a973d888e91e41d5da5808f51c9bc280b63f44096ea06f13fa"
+    },
+    {
+      "path": "evidence/prior_break_test_final.json",
+      "bytes": 10487,
+      "sha256": "30d7a656a31923f1c3e095ba35d9a5d2bce204230d73032424ad3a7b8ef4dd50"
+    },
+    {
+      "path": "evidence/prior_break_validator.log",
+      "bytes": 55,
+      "sha256": "6c214a50051be96d72e4e93711252a588610a45b8ae5f728d4a543c70bdb0970"
+    },
+    {
+      "path": "evidence/prior_local_tests.log",
+      "bytes": 3021,
+      "sha256": "7950c014074dbb8f861a69af2471c601b855badad8b7de27162539ed6285c45e"
+    },
+    {
+      "path": "evidence/sv_collision_report.json",
+      "bytes": 1148,
+      "sha256": "1e95936e7f6f7e23451fd91d1fba8a07589b2bfe74b90fad80a054bb980c8760"
+    },
+    {
+      "path": "overlays/composition_profile_additions.yaml",
+      "bytes": 608,
+      "sha256": "5e0e762b8376c6f21f5c9c704e3b61b629782664cc9b2a3437cd058060fcbc0a"
+    },
+    {
+      "path": "overlays/contracts_gt_core.yaml",
+      "bytes": 3032,
+      "sha256": "8a4884a353ef288f4642bfaa539b1b52afef346901782ed278bb33a4182d8620"
+    },
+    {
+      "path": "overlays/contracts_sv_dependent.yaml",
+      "bytes": 4643,
+      "sha256": "3daae6479bc91dfc0d63715b1c4e9091e72db48dc8cbd2acb5becf8ca9637378"
+    },
+    {
+      "path": "overlays/invariants_additions.yaml",
+      "bytes": 585,
+      "sha256": "3e60c893d8a4bece48d0a7af37526bce408979252b197c9c175ad61f5f711246"
+    },
+    {
+      "path": "overlays/projection_profile_additions.yaml",
+      "bytes": 1314,
+      "sha256": "269cbbf56a137ef835a196415db25c7c346a76058ed7aad465b652f06afe7bae"
+    },
+    {
+      "path": "overlays/vocabulary_additions.yaml",
+      "bytes": 3165,
+      "sha256": "a52ad250653a0c8b87a5ec186772704133057072c9491e7966b3c227f295da70"
+    },
+    {
+      "path": "schemas/gt_sv_consumer_assessment.candidate.schema.json",
+      "bytes": 5513,
+      "sha256": "82767e6b06fb1c1342f77221e84e5d3c84a6ffe12b78502661880c447214b45b"
+    },
+    {
+      "path": "schemas/strategic_interaction_composed_payload.candidate.schema.json",
+      "bytes": 12006,
+      "sha256": "f833986688fc5088402004560ed4932b2e98f28eb3c10c06c65d2649cdd72713"
+    },
+    {
+      "path": "schemas/strategic_interaction_selected_payload.candidate.schema.json",
+      "bytes": 11822,
+      "sha256": "cef7f68dcd1a7bc5ef453d09a0668d88d2a39b3ff9e5f3ae839ed2e2a8742a67"
+    },
+    {
+      "path": "semantics/strategic_interaction_composition.schema.yaml",
+      "bytes": 7280,
+      "sha256": "ce876fbf09fbbc02b6ed9ceff4ee78f941e151ad626f11b46255249e4098eaa1"
+    },
+    {
+      "path": "semantics/strategic_interaction_projection.schema.yaml",
+      "bytes": 6009,
+      "sha256": "c2efa56a61b6910e43972f6b9b04191dfc8884e89bb6d3c4dea2cb92bf72c777"
+    },
+    {
+      "path": "tests/test_candidate.py",
+      "bytes": 15859,
+      "sha256": "99aea17074b52f64b4a0da4cfe63c9d3040da86a6b2ea995695625ade8b858b1"
+    },
+    {
+      "path": "tests/test_pr212_alignment.py",
+      "bytes": 10451,
+      "sha256": "64b29d67c8c779b7f89a8406f76ca11e8db2b7bb75cacbedee20a2a6518ce03c"
+    }
+  ]
+}
