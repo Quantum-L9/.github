@@ -1,0 +1,899 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_strategic_metacognition_projection_payload_schema
+artifact_id: l9.schema/strategic-metacognition-projection@1
+canonical_source:
+  format: yaml
+  artifact: strategic_metacognition_projection.schema.yaml
+governed_by:
+  projection_profile_ref: l9.projection/strategic-metacognition@1
+purpose: Typed per-source payload of l9.projection/strategic-metacognition@1, derived from the payloads
+  its selectors produce at the recorded authority revision. Exact selected membership is independently
+  governed by selector equivalence; the schema adds no authority.
+derivation:
+  method: l9.schema-derivation/selected-payload@1
+  basis: selected_payload_observation_at_authority_revision
+  authority_repository: Quantum-L9/.github
+  authority_revision: 2349a90b86b2d90ad5b1aa5a026fee58dbec75f3
+  projection_profile:
+    ref: l9.projection/strategic-metacognition@1
+    digest: sha256:209b6329843a1f6261e4cb6e037e65e4ffa3163e1688f4be4e3ac37a2c9f2c1d
+  composition_profile:
+    ref: l9.compose/strategic-metacognition@1
+    digest: sha256:20b1f5b9cec2ea8b300774a2656b9de833965d1ab6e1beb0be216508ba5ec971
+  selector_model:
+    ref: l9.selector-model/global@1
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+  sources:
+  - source_class: invariants
+    source_ref: l9.source/invariants@1
+    source_path: semantics/invariants.yaml
+    source_digest: sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a
+  - source_class: contracts
+    source_ref: l9.source/contracts@1
+    source_path: semantics/contracts.yaml
+    source_digest: sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79
+  - source_class: authority_model
+    source_ref: l9.source/authority-model@1
+    source_path: semantics/authority_model.yaml
+    source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
+  - source_class: strategic_cognition_model
+    source_ref: l9.source/strategic-cognition-model@1
+    source_path: semantics/strategic_cognition_model.yaml
+    source_digest: sha256:af540e9607915878b66cb7632fd3ca63f57f80707b1c605fc21536d06ec81a7d
+  - source_class: strategic_plan_model
+    source_ref: l9.source/strategic-plan-model@1
+    source_path: semantics/strategic_plan_model.yaml
+    source_digest: sha256:4fffeb59d95fa05158c718b3637288c20bad41243b58b9ed3be50121acae840a
+  - source_class: strategic_plan_metacognitive_analysis_schema
+    source_ref: l9.source/strategic-plan-metacognitive-analysis-schema@1
+    source_path: semantics/strategic_plan_metacognitive_analysis.schema.yaml
+    source_digest: sha256:ae0f69362f82548968dab60b999ddd074c244ad9e6c78520ea9d653cfa1dc349
+type: object
+properties:
+  schema:
+    const: l9.projection.strategic-metacognition/v1
+  invariants:
+    type: array
+    min_items: 9
+    items:
+      type: object
+      required:
+      - id
+      - statement
+      - scope
+      - owner
+      properties:
+        id:
+          type: string
+          enum:
+          - L9-AUTH-001
+          - L9-AUTH-002
+          - L9-OWNER-001
+          - L9-SEM-001
+          - L9-SCOPE-001
+          - L9-DERIVED-001
+          - L9-PROV-001
+          - L9-PROJECTION-001
+          - L9-STRATEGY-001
+        statement:
+          type: string
+        scope:
+          type: string
+          const: global
+        owner:
+          type: string
+          const: Quantum-L9/.github
+  contracts:
+    type: array
+    min_items: 3
+    items:
+      type: object
+      required:
+      - id
+      - purpose
+      - scope
+      - owner
+      - source_invariants
+      - applies_to
+      - requires
+      - guarantees
+      - forbidden
+      - outcomes
+      properties:
+        id:
+          type: string
+          enum:
+          - l9.contract/authority-boundary@1
+          - l9.contract/semantic-ownership@1
+          - l9.contract/projection@1
+        purpose:
+          type: string
+        scope:
+          type: string
+          const: global
+        owner:
+          type: string
+          const: Quantum-L9/.github
+        source_invariants:
+          type: string_list
+          min_items: 2
+        applies_to:
+          type: string_list
+          min_items: 3
+        requires:
+          type: string_list
+          min_items: 2
+        guarantees:
+          type: string_list
+          min_items: 3
+        forbidden:
+          type: string_list
+          min_items: 4
+        outcomes:
+          type: object
+          required:
+          - unresolved
+          properties:
+            satisfied:
+              type: string
+            violated:
+              type: string
+            unresolved:
+              type: string
+            valid_projection:
+              type: string
+              const: output_is_a_bounded_semantics_preserving_view
+            invalid_projection:
+              type: string
+              const: output_invents_reinterprets_reconciles_or_expands_source_semantics
+  strategic_authority:
+    type: object
+    required:
+    - definition
+    - strategy_concept_ref
+    - grant_must_be_explicit
+    - may_not_be_inferred_from
+    properties:
+      definition:
+        type: string
+      strategy_concept_ref:
+        type: string
+        const: strategic_cognition_model.yaml#concepts.strategy
+      grant_must_be_explicit:
+        type: boolean
+        const: true
+      may_not_be_inferred_from:
+        type: string_list
+        min_items: 3
+  strategic_cognition_authority:
+    type: object
+    required:
+    - global_semantics_owner
+    - detailed_model
+    - invariant_ref
+    - strategic_plan_owner
+    - strategic_plan_authority_source
+    - strategic_plan_reasoning_analysis_owner
+    - metacognition_denied
+    - roles_are_actor_identities
+    - rules
+    properties:
+      global_semantics_owner:
+        type: string
+        const: Quantum-L9/.github
+      detailed_model:
+        type: string
+        const: strategic_cognition_model.yaml
+      invariant_ref:
+        type: string
+        const: L9-STRATEGY-001
+      strategic_plan_owner:
+        type: string
+        const: plan_keeper
+      strategic_plan_authority_source:
+        type: string
+        const: strategic_authority
+      strategic_plan_reasoning_analysis_owner:
+        type: string
+        const: strategic_plan_metacognitive_reasoner
+      metacognition_denied:
+        type: string_list
+        min_items: 3
+      roles_are_actor_identities:
+        type: boolean
+        const: false
+      rules:
+        type: string_list
+        min_items: 4
+  global_rules:
+    type: object
+    properties:
+      strategic_cognition_does_not_own_underlying_truth_sources:
+        type: boolean
+        const: true
+      strategic_cognition_does_not_own_runtime_execution:
+        type: boolean
+        const: true
+      reasoning_capability_does_not_confer_strategic_authority:
+        type: boolean
+        const: true
+      projection_consumption_does_not_transfer_truth_source_ownership:
+        type: boolean
+        const: true
+      strategic_roles_are_semantic_roles_not_actor_identities:
+        type: boolean
+        const: true
+      strategic_label_does_not_create_authority_or_ownership:
+        type: boolean
+        const: true
+      metacognition_is_advisory_to_strategic_authority:
+        type: boolean
+        const: true
+      semantic_compiler_remains_independent_of_reasoning_plane:
+        type: boolean
+        const: true
+      planning_episode_is_non_authoritative_reasoning_record:
+        type: boolean
+        const: true
+      plan_revision_candidate_is_not_strategy_until_admitted_under_strategic_authority:
+        type: boolean
+        const: true
+      metacognitive_analysis_is_advisory_and_cannot_mutate_strategy:
+        type: boolean
+        const: true
+      strategic_plan_represents_strategy_without_absorbing_external_truth_ownership:
+        type: boolean
+        const: true
+      strategic_hypothesis_is_plan_owned_belief_not_authoritative_truth:
+        type: boolean
+        const: true
+      reality_change_may_require_reconsideration_but_never_directly_modifies_or_invalidates_strategic_plan:
+        type: boolean
+        const: true
+      reasoning_workspace_content_is_not_strategic_plan_content_without_authorized_decision:
+        type: boolean
+        const: true
+      planning_horizon_does_not_create_primitive_types:
+        type: boolean
+        const: true
+      compound_causal_claims_are_expressible_by_one_strategic_hypothesis:
+        type: boolean
+        const: true
+      outcome_of_one_primitive_does_not_establish_correctness_of_another:
+        type: boolean
+        const: true
+  authority_separation:
+    type: object
+    required:
+    - invariant_ref
+    - resolution_ref
+    - strategic_plan_owner
+    - strategic_plan_reasoning_analysis_owner
+    - teaching_relation
+    properties:
+      invariant_ref:
+        type: string
+        const: L9-STRATEGY-001
+      resolution_ref:
+        type: string
+        const: authority_model.yaml#strategic_cognition_authority
+      strategic_plan_owner:
+        type: string
+        const: plan_keeper
+      strategic_plan_reasoning_analysis_owner:
+        type: string
+        const: strategic_plan_metacognitive_reasoner
+      teaching_relation:
+        type: object
+        required:
+        - from
+        - to
+        - carries
+        - authority_effect
+        properties:
+          from:
+            type: string
+            const: strategic_plan_metacognitive_reasoner
+          to:
+            type: string
+            const: plan_keeper
+          carries:
+            type: string
+            const: planning_cognition_lessons
+          authority_effect:
+            type: string
+            const: none
+  roles:
+    type: object
+    required:
+    - strategic_plan_metacognitive_reasoner
+    properties:
+      strategic_plan_metacognitive_reasoner:
+        type: object
+        required:
+        - role_kind
+        - actor_identity_binding
+        - definition
+        - subject
+        - universal_metacognitive_authority
+        - owns
+        - may
+        - may_not
+        - strategic_authority
+        - output_authority
+        - output_consumer
+        properties:
+          role_kind:
+            type: string
+            const: semantic_role
+          actor_identity_binding:
+            type: string
+            const: none
+          definition:
+            type: string
+          subject:
+            type: string
+            const: reasoning_processes_that_produce_and_revise_the_strategic_plan
+          universal_metacognitive_authority:
+            type: boolean
+            const: false
+          owns:
+            type: string_list
+            min_items: 1
+          may:
+            type: string_list
+            min_items: 5
+          may_not:
+            type: string_list
+            min_items: 6
+          strategic_authority:
+            type: boolean
+            const: false
+          output_authority:
+            type: string
+            const: advisory
+          output_consumer:
+            type: string
+            const: plan_keeper
+  reasoning_artifacts:
+    type: object
+    required:
+    - strategic_plan_metacognitive_analysis
+    properties:
+      strategic_plan_metacognitive_analysis:
+        type: object
+        required:
+        - definition
+        - producer_role
+        - owner_role
+        - authority_class
+        - schema_ref
+        - output_authority
+        - authority_effect
+        - may_not
+        properties:
+          definition:
+            type: string
+          producer_role:
+            type: string
+            const: strategic_plan_metacognitive_reasoner
+          owner_role:
+            type: string
+            const: strategic_plan_metacognitive_reasoner
+          authority_class:
+            type: string
+            const: derived
+          schema_ref:
+            type: string
+            const: l9.schema/strategic-plan-metacognitive-analysis@1
+          output_authority:
+            type: string
+            const: advisory
+          authority_effect:
+            type: string
+            const: none
+          may_not:
+            type: string_list
+            min_items: 3
+  reasoning_concepts:
+    type: object
+    required:
+    - affected_strategic_closure
+    properties:
+      affected_strategic_closure:
+        type: object
+        required:
+        - definition
+        - purpose
+        - representation_schema_ref
+        - authority_class
+        - authoritative
+        - representation_does_not_define_closure_algorithm
+        - may_not
+        properties:
+          definition:
+            type: string
+          purpose:
+            type: string
+            const: selective_plan_reconsideration
+          representation_schema_ref:
+            type: string
+            const: l9.schema/affected-strategic-closure@1
+          authority_class:
+            type: string
+            const: derived
+          authoritative:
+            type: boolean
+            const: false
+          representation_does_not_define_closure_algorithm:
+            type: boolean
+            const: true
+          may_not:
+            type: string_list
+            min_items: 4
+  artifact_id:
+    type: string
+    const: l9.schema/strategic-plan-metacognitive-analysis@1
+  canonical:
+    type: boolean
+    const: true
+  authority:
+    type: object
+    required:
+    - owner
+    - scope
+    - authority_class
+    properties:
+      owner:
+        type: string
+        const: Quantum-L9/.github
+      scope:
+        type: string
+        const: l9_global_strategic_plan_metacognitive_analysis_schema
+      authority_class:
+        type: string
+        const: canonical
+  canonical_source:
+    type: object
+    required:
+    - format
+    - artifact
+    properties:
+      format:
+        type: string
+        const: yaml
+      artifact:
+        type: string
+        const: strategic_plan_metacognitive_analysis.schema.yaml
+  governed_by:
+    type: object
+    required:
+    - semantic_model_ref
+    - role_ref
+    - authority_ref
+    properties:
+      semantic_model_ref:
+        type: string
+        const: strategic_cognition_model.yaml#reasoning_artifacts.strategic_plan_metacognitive_analysis
+      role_ref:
+        type: string
+        const: strategic_cognition_model.yaml#roles.strategic_plan_metacognitive_reasoner
+      authority_ref:
+        type: string
+        const: authority_model.yaml#strategic_cognition_authority
+  purpose:
+    type: string
+  instance_semantics:
+    type: object
+    required:
+    - authority_class
+    - authoritative
+    - output_authority
+    - authority_effect
+    - producer_role
+    properties:
+      authority_class:
+        type: string
+        const: derived
+      authoritative:
+        type: boolean
+        const: false
+      output_authority:
+        type: string
+        const: advisory
+      authority_effect:
+        type: string
+        const: none
+      producer_role:
+        type: string
+        const: strategic_plan_metacognitive_reasoner
+  type:
+    type: string
+    const: object
+  required:
+    type: string_list
+    min_items: 11
+  properties:
+    type: object
+    required:
+    - schema
+    - analysis_ref
+    - plan_ref
+    - subject_episodes
+    - plan_revision_refs
+    - outcome_evidence_refs
+    - prior_analysis_refs
+    - findings
+    - patterns
+    - lessons
+    - unresolved
+    - provenance
+    - analysis_digest
+    properties:
+      schema:
+        type: object
+        required:
+        - const
+        properties:
+          const:
+            type: string
+            const: l9.strategic-plan-metacognitive-analysis/v1
+      analysis_ref:
+        type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            const: semantic_ref
+      plan_ref:
+        type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            const: semantic_ref
+      subject_episodes:
+        type: object
+        required:
+        - type
+        - min_items
+        - items
+        properties:
+          type:
+            type: string
+            const: array
+          min_items:
+            const: 1
+          items:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+                min_items: 2
+              fields:
+                type: object
+                required:
+                - ref
+                - digest
+                properties:
+                  ref:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref
+                  digest:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_digest
+      plan_revision_refs:
+        type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            const: semantic_ref_list
+      outcome_evidence_refs:
+        type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            const: semantic_ref_list
+      prior_analysis_refs:
+        type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            const: semantic_ref_list
+      findings:
+        type: object
+        required:
+        - type
+        - items
+        properties:
+          type:
+            type: string
+            const: array
+          items:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+                min_items: 4
+              fields:
+                type: object
+                required:
+                - ref
+                - kind
+                - statement
+                - basis_refs
+                properties:
+                  ref:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref
+                  kind:
+                    type: object
+                    required:
+                    - enum
+                    properties:
+                      enum:
+                        type: string_list
+                        min_items: 5
+                  statement:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: string
+                  basis_refs:
+                    type: object
+                    required:
+                    - type
+                    - min_items
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref_list
+                      min_items:
+                        const: 1
+      patterns:
+        type: object
+        required:
+        - type
+        - items
+        properties:
+          type:
+            type: string
+            const: array
+          items:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+                min_items: 4
+              fields:
+                type: object
+                required:
+                - ref
+                - kind
+                - statement
+                - occurrence_refs
+                properties:
+                  ref:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref
+                  kind:
+                    type: object
+                    required:
+                    - enum
+                    properties:
+                      enum:
+                        type: string_list
+                        min_items: 4
+                  statement:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: string
+                  occurrence_refs:
+                    type: object
+                    required:
+                    - type
+                    - min_items
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref_list
+                      min_items:
+                        const: 2
+      lessons:
+        type: object
+        required:
+        - type
+        - items
+        properties:
+          type:
+            type: string
+            const: array
+          items:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+                min_items: 4
+              fields:
+                type: object
+                required:
+                - ref
+                - statement
+                - basis_refs
+                - applicability_scope_refs
+                - authority_effect
+                properties:
+                  ref:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref
+                  statement:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: string
+                  basis_refs:
+                    type: object
+                    required:
+                    - type
+                    - min_items
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref_list
+                      min_items:
+                        const: 1
+                  applicability_scope_refs:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref_list
+                  authority_effect:
+                    type: object
+                    required:
+                    - const
+                    properties:
+                      const:
+                        type: string
+                        const: none
+      unresolved:
+        type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            const: unknown_list
+      provenance:
+        type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            const: object
+      analysis_digest:
+        type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            const: semantic_digest
+  analysis_rules:
+    type: object
+    required:
+    - findings_must_trace_to_exact_episode_revision_or_evidence_refs
+    - recurring_pattern_requires_multiple_occurrence_refs
+    - lessons_must_trace_to_findings_patterns_or_exact_source_refs
+    - lesson_is_advisory_input_to_plan_keeper_only
+    - metacognitive_analysis_cannot_modify_or_supersede_strategic_plan
+    - metacognitive_analysis_cannot_grant_strategic_authority
+    - metacognitive_analysis_cannot_reinterpret_external_evidence_as_owned_truth
+    - metacognitive_analysis_is_not_universal_metacognitive_authority
+    properties:
+      findings_must_trace_to_exact_episode_revision_or_evidence_refs:
+        type: boolean
+        const: true
+      recurring_pattern_requires_multiple_occurrence_refs:
+        type: boolean
+        const: true
+      lessons_must_trace_to_findings_patterns_or_exact_source_refs:
+        type: boolean
+        const: true
+      lesson_is_advisory_input_to_plan_keeper_only:
+        type: boolean
+        const: true
+      metacognitive_analysis_cannot_modify_or_supersede_strategic_plan:
+        type: boolean
+        const: true
+      metacognitive_analysis_cannot_grant_strategic_authority:
+        type: boolean
+        const: true
+      metacognitive_analysis_cannot_reinterpret_external_evidence_as_owned_truth:
+        type: boolean
+        const: true
+      metacognitive_analysis_is_not_universal_metacognitive_authority:
+        type: boolean
+        const: true
+  semantic_rules:
+    type: string_list
+    min_items: 6

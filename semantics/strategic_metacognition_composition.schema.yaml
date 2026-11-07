@@ -17,10 +17,10 @@ derivation:
   method: l9.schema-derivation/selected-payload@1
   basis: selected_payload_observation_at_authority_revision
   authority_repository: Quantum-L9/.github
-  authority_revision: 290bcd90378577392640cea9c6053c178423f0da
+  authority_revision: 2349a90b86b2d90ad5b1aa5a026fee58dbec75f3
   projection_profile:
     ref: l9.projection/strategic-metacognition@1
-    digest: sha256:2e88b98746b1fdb333264b81e8c95a748a85468944a4e054064dde77ffe9cb60
+    digest: sha256:209b6329843a1f6261e4cb6e037e65e4ffa3163e1688f4be4e3ac37a2c9f2c1d
   composition_profile:
     ref: l9.compose/strategic-metacognition@1
     digest: sha256:20b1f5b9cec2ea8b300774a2656b9de833965d1ab6e1beb0be216508ba5ec971
@@ -499,7 +499,6 @@ properties:
   strategic_plan_metacognitive_analysis_schema:
     type: object
     required:
-    - schema
     - artifact_id
     - canonical
     - authority
@@ -513,9 +512,6 @@ properties:
     - analysis_rules
     - semantic_rules
     properties:
-      schema:
-        type: string
-        const: l9.schema-definition/v1
       artifact_id:
         type: string
         const: l9.schema/strategic-plan-metacognitive-analysis@1

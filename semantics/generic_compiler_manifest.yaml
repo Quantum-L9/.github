@@ -89,6 +89,9 @@ requires:
   - strategic_planning_context_composition.schema.yaml
   - work_state_continuity_composition.schema.yaml
   - work_state_continuity_projection.schema.yaml
+  - identity_assurance_projection.schema.yaml
+  - strategic_metacognition_projection.schema.yaml
+  - strategic_planning_context_projection.schema.yaml
 capabilities:
 - canonical_source_resolution
 - profile_resolution

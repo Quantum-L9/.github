@@ -17,10 +17,10 @@ derivation:
   method: l9.schema-derivation/selected-payload@1
   basis: selected_payload_observation_at_authority_revision
   authority_repository: Quantum-L9/.github
-  authority_revision: 290bcd90378577392640cea9c6053c178423f0da
+  authority_revision: 2349a90b86b2d90ad5b1aa5a026fee58dbec75f3
   projection_profile:
     ref: l9.projection/identity-assurance@1
-    digest: sha256:c5396defe07e5da8adedf2fd67c68067c29123dad8127e9c80ccf17aa75de376
+    digest: sha256:e5b099a569fbdd49e75d715ed982460b6f30d9bd805cc17264d91aa2b865a32d
   composition_profile:
     ref: l9.compose/identity-assurance@1
     digest: sha256:9e8e52f72d1efcddfada3517be61a035f2ef8d84e698e45e52c603cd80d55b1b
@@ -499,7 +499,6 @@ properties:
   actor_registry:
     type: object
     required:
-    - schema
     - artifact_id
     - canonical
     - authority
@@ -517,9 +516,6 @@ properties:
     - alias_rules
     - downstream_obligations
     properties:
-      schema:
-        type: string
-        const: l9.actor-registry/v1
       artifact_id:
         type: string
         const: l9.actor-registry/global@1
@@ -739,7 +735,6 @@ properties:
   surface_registry:
     type: object
     required:
-    - schema
     - artifact_id
     - canonical
     - authority
@@ -756,9 +751,6 @@ properties:
     - alias_rules
     - downstream_obligations
     properties:
-      schema:
-        type: string
-        const: l9.surface-registry/v1
       artifact_id:
         type: string
         const: l9.surface-registry/global@1

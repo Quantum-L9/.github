@@ -17,10 +17,10 @@ derivation:
   method: l9.schema-derivation/selected-payload@1
   basis: selected_payload_observation_at_authority_revision
   authority_repository: Quantum-L9/.github
-  authority_revision: 290bcd90378577392640cea9c6053c178423f0da
+  authority_revision: 2349a90b86b2d90ad5b1aa5a026fee58dbec75f3
   projection_profile:
     ref: l9.projection/strategic-planning-context@1
-    digest: sha256:3a27a4390e1270be29635495255ae291a92abbbeaae8e2060a450ec0bcdcfc52
+    digest: sha256:3966f5be950e8fdce0f7c896b292ebdc03a6bf715f684edfc1c3ddfdce6a9b58
   composition_profile:
     ref: l9.compose/strategic-planning-context@1
     digest: sha256:d91dd43a7e069711d5851f894cf1433ae17d472b6f536d9b9ab515d6e2c2011a
@@ -769,7 +769,6 @@ properties:
   strategic_plan_graph_schema:
     type: object
     required:
-    - schema
     - artifact_id
     - canonical
     - authority
@@ -784,9 +783,6 @@ properties:
     - revision_rules
     - semantic_rules
     properties:
-      schema:
-        type: string
-        const: l9.schema-definition/v1
       artifact_id:
         type: string
         const: l9.schema/strategic-plan-graph@1
@@ -1197,7 +1193,6 @@ properties:
   affected_strategic_closure_schema:
     type: object
     required:
-    - schema
     - artifact_id
     - canonical
     - authority
@@ -1211,9 +1206,6 @@ properties:
     - closure_rules
     - semantic_rules
     properties:
-      schema:
-        type: string
-        const: l9.schema-definition/v1
       artifact_id:
         type: string
         const: l9.schema/affected-strategic-closure@1
@@ -1468,7 +1460,6 @@ properties:
   strategic_planning_episode_schema:
     type: object
     required:
-    - schema
     - artifact_id
     - canonical
     - authority
@@ -1482,9 +1473,6 @@ properties:
     - workspace_rules
     - semantic_rules
     properties:
-      schema:
-        type: string
-        const: l9.schema-definition/v1
       artifact_id:
         type: string
         const: l9.schema/strategic-planning-episode@1
@@ -2108,7 +2096,6 @@ properties:
   strategic_plan_revision_candidate_schema:
     type: object
     required:
-    - schema
     - artifact_id
     - canonical
     - authority
@@ -2122,9 +2109,6 @@ properties:
     - candidate_rules
     - semantic_rules
     properties:
-      schema:
-        type: string
-        const: l9.schema-definition/v1
       artifact_id:
         type: string
         const: l9.schema/strategic-plan-revision-candidate@1
