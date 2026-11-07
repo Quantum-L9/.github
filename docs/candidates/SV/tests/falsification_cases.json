@@ -1,12 +1,164 @@
 {
-  "schema": "l9.strategic-value-falsification-fixtures/v1",
-  "description": "Six independently executable contract falsifiers for the safeguards formerly proposed as L9-SV-015..020. Those IDs are historical candidate lineage, not admitted invariants; each case is bound to its governing invariants and assessment-contract obligation. Successful positive controls are declarations, not external numerical, calibration, or causal proof.",
-  "cases": [
-    {"case_id":"SV015","origin_candidate_id":"L9-SV-015","disposition":"MERGE","governing_invariants":["L9-SV-001"],"contract_obligation":"counterfactual_worlds_share_defensible_initial_conditions_time_basis_and_identification_assumptions","failure_mode":"confounded_baseline","expected_failure":"UNIDENTIFIED_COUNTERFACTUAL","negative":{"intervention_initial":"plant-A/2027","baseline_initial":"plant-B/2026","intervention_context":"energy-grid-2027","baseline_context":"energy-grid-2025","reviewed_adjustment_ref":null},"positive":{"intervention_initial":"plant-A/2027","baseline_initial":"plant-A/2027","intervention_context":"energy-grid-2027","baseline_context":"energy-grid-2027","reviewed_adjustment_ref":null}},
-    {"case_id":"SV016","origin_candidate_id":"L9-SV-016","disposition":"CONTRACT","governing_invariants":["L9-SV-001","L9-SV-002","L9-AUTH-001"],"contract_obligation":"beneficiary_scope_and_welfare_aggregation_when_cross_actor_effects_material","failure_mode":"cross_actor_double_credit","expected_failure":"UNAUTHORIZED_ACTOR_AGGREGATION","negative":{"objective_scope":"focal:A","allowed_actor_refs":["A"],"utility_entries":[{"actor":"A","delta":-100},{"actor":"B","delta":100}],"reported_total":0,"authorized_aggregation_ref":null},"positive":{"objective_scope":"focal:A","allowed_actor_refs":["A"],"utility_entries":[{"actor":"A","delta":-100}],"reported_total":-100,"authorized_aggregation_ref":null}},
-    {"case_id":"SV017","origin_candidate_id":"L9-SV-017","disposition":"CONTRACT","governing_invariants":["L9-SV-001","L9-PROV-001"],"contract_obligation":"nonanticipative_conditional_policies_when_sequential_actions_are_evaluated","failure_mode":"hindsight_policy","expected_failure":"FUTURE_OBSERVATION_LEAK","negative":{"decisions":[{"action_time":0,"observation_ref":"signal_at_t1","observation_available_time":1}]},"positive":{"decisions":[{"action_time":1,"observation_ref":"signal_at_t1","observation_available_time":1}]}},
-    {"case_id":"SV018","origin_candidate_id":"L9-SV-018","disposition":"CONTRACT","governing_invariants":["L9-SV-002","L9-HARD-001"],"contract_obligation":"joint_portfolio_counterfactual_and_resource_interactions_for_nonadditive_actions","failure_mode":"portfolio_cannibalization","expected_failure":"UNJUSTIFIED_JOINT_ADDITIVITY","negative":{"actions":[{"id":"A","standalone_value":70,"capacity_required":1},{"id":"B","standalone_value":60,"capacity_required":1}],"joint_capacity":1,"reported_joint_value":130,"independence_validation_ref":null},"positive":{"actions":[{"id":"A","standalone_value":70,"capacity_required":1},{"id":"B","standalone_value":60,"capacity_required":1}],"joint_capacity":2,"reported_joint_value":130,"independence_validation_ref":"reviewed:independence/example"}},
-    {"case_id":"SV019","origin_candidate_id":"L9-SV-019","disposition":"REUSE","governing_invariants":["L9-UNKNOWN-001","L9-SV-001"],"contract_obligation":"uncertainty_sensitivity_or_conditional_frontier_when_preference_can_flip","failure_mode":"sensitivity_preference_flip","expected_failure":"UNSUPPORTED_PRECISE_WINNER","negative":{"admissible_scenarios":[{"scenario":"base","A":20,"B":15},{"scenario":"stress","A":-10,"B":15}],"result_shape":"unique_winner","preferred_action":"A"},"positive":{"admissible_scenarios":[{"scenario":"base","A":20,"B":15},{"scenario":"stress","A":-10,"B":15}],"result_shape":"conditional_frontier","preferred_action":null}},
-    {"case_id":"SV020","origin_candidate_id":"L9-SV-020","disposition":"REUSE","governing_invariants":["L9-EVIDENCE-001","L9-ASSURANCE-001","L9-PROV-001","L9-COORD-001"],"contract_obligation":"method_identity_input_lineage_executed_method_evidence_and_applicable_independently_reviewable_model_validation_evidence_for_strong_numerical_claims","failure_mode":"false_numerical_assurance","expected_failure":"UNSUPPORTED_VERIFIED_METHOD_CLAIM","negative":{"assurance_level":"independently_verified","projection_receipt_ref":"valid:projection","arithmetic_result_ref":"local:arithmetic","executed_method_ref":null,"model_validation_evidence_ref":null,"independent_review_ref":null},"positive":{"assurance_level":"declared_arithmetic","projection_receipt_ref":"valid:projection","arithmetic_result_ref":"local:arithmetic","executed_method_ref":null,"model_validation_evidence_ref":null,"independent_review_ref":null}}
-  ]
+	"schema": "l9.strategic-value-falsification-fixtures/v1",
+	"description": "Six independently executable contract falsifiers for the safeguards formerly proposed as L9-SV-015..020. Those IDs are historical candidate lineage, not admitted invariants; each case is bound to its governing invariants and assessment-contract obligation. Successful positive controls are declarations, not external numerical, calibration, or causal proof.",
+	"cases": [
+		{
+			"case_id": "SV015",
+			"origin_candidate_id": "L9-SV-015",
+			"disposition": "MERGE",
+			"governing_invariants": ["L9-SV-001"],
+			"contract_obligation": "counterfactual_worlds_share_defensible_initial_conditions_time_basis_and_identification_assumptions",
+			"failure_mode": "confounded_baseline",
+			"expected_failure": "UNIDENTIFIED_COUNTERFACTUAL",
+			"negative": {
+				"intervention_initial": "plant-A/2027",
+				"baseline_initial": "plant-B/2026",
+				"intervention_context": "energy-grid-2027",
+				"baseline_context": "energy-grid-2025",
+				"reviewed_adjustment_ref": null
+			},
+			"positive": {
+				"intervention_initial": "plant-A/2027",
+				"baseline_initial": "plant-A/2027",
+				"intervention_context": "energy-grid-2027",
+				"baseline_context": "energy-grid-2027",
+				"reviewed_adjustment_ref": null
+			}
+		},
+		{
+			"case_id": "SV016",
+			"origin_candidate_id": "L9-SV-016",
+			"disposition": "CONTRACT",
+			"governing_invariants": ["L9-SV-001", "L9-SV-002", "L9-AUTH-001"],
+			"contract_obligation": "beneficiary_scope_and_welfare_aggregation_when_cross_actor_effects_material",
+			"failure_mode": "cross_actor_double_credit",
+			"expected_failure": "UNAUTHORIZED_ACTOR_AGGREGATION",
+			"negative": {
+				"objective_scope": "focal:A",
+				"allowed_actor_refs": ["A"],
+				"utility_entries": [
+					{ "actor": "A", "delta": -100 },
+					{ "actor": "B", "delta": 100 }
+				],
+				"reported_total": 0,
+				"authorized_aggregation_ref": null
+			},
+			"positive": {
+				"objective_scope": "focal:A",
+				"allowed_actor_refs": ["A"],
+				"utility_entries": [{ "actor": "A", "delta": -100 }],
+				"reported_total": -100,
+				"authorized_aggregation_ref": null
+			}
+		},
+		{
+			"case_id": "SV017",
+			"origin_candidate_id": "L9-SV-017",
+			"disposition": "CONTRACT",
+			"governing_invariants": ["L9-SV-001", "L9-PROV-001"],
+			"contract_obligation": "nonanticipative_conditional_policies_when_sequential_actions_are_evaluated",
+			"failure_mode": "hindsight_policy",
+			"expected_failure": "FUTURE_OBSERVATION_LEAK",
+			"negative": {
+				"decisions": [
+					{
+						"action_time": 0,
+						"observation_ref": "signal_at_t1",
+						"observation_available_time": 1
+					}
+				]
+			},
+			"positive": {
+				"decisions": [
+					{
+						"action_time": 1,
+						"observation_ref": "signal_at_t1",
+						"observation_available_time": 1
+					}
+				]
+			}
+		},
+		{
+			"case_id": "SV018",
+			"origin_candidate_id": "L9-SV-018",
+			"disposition": "CONTRACT",
+			"governing_invariants": ["L9-SV-002", "L9-HARD-001"],
+			"contract_obligation": "joint_portfolio_counterfactual_and_resource_interactions_for_nonadditive_actions",
+			"failure_mode": "portfolio_cannibalization",
+			"expected_failure": "UNJUSTIFIED_JOINT_ADDITIVITY",
+			"negative": {
+				"actions": [
+					{ "id": "A", "standalone_value": 70, "capacity_required": 1 },
+					{ "id": "B", "standalone_value": 60, "capacity_required": 1 }
+				],
+				"joint_capacity": 1,
+				"reported_joint_value": 130,
+				"independence_validation_ref": null
+			},
+			"positive": {
+				"actions": [
+					{ "id": "A", "standalone_value": 70, "capacity_required": 1 },
+					{ "id": "B", "standalone_value": 60, "capacity_required": 1 }
+				],
+				"joint_capacity": 2,
+				"reported_joint_value": 130,
+				"independence_validation_ref": "reviewed:independence/example"
+			}
+		},
+		{
+			"case_id": "SV019",
+			"origin_candidate_id": "L9-SV-019",
+			"disposition": "REUSE",
+			"governing_invariants": ["L9-UNKNOWN-001", "L9-SV-001"],
+			"contract_obligation": "uncertainty_sensitivity_or_conditional_frontier_when_preference_can_flip",
+			"failure_mode": "sensitivity_preference_flip",
+			"expected_failure": "UNSUPPORTED_PRECISE_WINNER",
+			"negative": {
+				"admissible_scenarios": [
+					{ "scenario": "base", "A": 20, "B": 15 },
+					{ "scenario": "stress", "A": -10, "B": 15 }
+				],
+				"result_shape": "unique_winner",
+				"preferred_action": "A"
+			},
+			"positive": {
+				"admissible_scenarios": [
+					{ "scenario": "base", "A": 20, "B": 15 },
+					{ "scenario": "stress", "A": -10, "B": 15 }
+				],
+				"result_shape": "conditional_frontier",
+				"preferred_action": null
+			}
+		},
+		{
+			"case_id": "SV020",
+			"origin_candidate_id": "L9-SV-020",
+			"disposition": "REUSE",
+			"governing_invariants": [
+				"L9-EVIDENCE-001",
+				"L9-ASSURANCE-001",
+				"L9-PROV-001",
+				"L9-COORD-001"
+			],
+			"contract_obligation": "method_identity_input_lineage_executed_method_evidence_and_applicable_independently_reviewable_model_validation_evidence_for_strong_numerical_claims",
+			"failure_mode": "false_numerical_assurance",
+			"expected_failure": "UNSUPPORTED_VERIFIED_METHOD_CLAIM",
+			"negative": {
+				"assurance_level": "independently_verified",
+				"projection_receipt_ref": "valid:projection",
+				"arithmetic_result_ref": "local:arithmetic",
+				"executed_method_ref": null,
+				"model_validation_evidence_ref": null,
+				"independent_review_ref": null
+			},
+			"positive": {
+				"assurance_level": "declared_arithmetic",
+				"projection_receipt_ref": "valid:projection",
+				"arithmetic_result_ref": "local:arithmetic",
+				"executed_method_ref": null,
+				"model_validation_evidence_ref": null,
+				"independent_review_ref": null
+			}
+		}
+	]
 }

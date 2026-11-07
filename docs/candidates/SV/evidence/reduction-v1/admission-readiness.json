@@ -1,64 +1,64 @@
 {
-  "schema": "l9.sv-reduction-admission-readiness/v1",
-  "status": "DEVELOPMENT_COMPLETE_NOT_ADMISSION_READY",
-  "not_claimed": [
-    "ADMITTED",
-    "CANONICAL_BOUND",
-    "TRUSTED_REPLAY_PASS",
-    "canonical producer PASS receipts",
-    "owner decisions",
-    "independent human review"
-  ],
-  "semantic_integrity": {
-    "exactly_two_new_invariants": "MET",
-    "sv001_includes_counterfactual_identification": "MET (amended text; owner review required)",
-    "sv002_retains_exhaustive_exclusive_accounting": "MET (statement unchanged)",
-    "sv003_014_twelve_meanings_retained": "MET",
-    "sv015_020_six_meanings_retained_verbatim": "MET",
-    "relocated_ids_not_invariant_references": "MET (mechanically enforced in tests and applier)",
-    "existing_law_dependencies_resolve": "MET at 020a94b",
-    "no_numerical_or_strategic_authority_transfer": "MET (contract and model non-ownership text unchanged)"
-  },
-  "contract_and_projection_integrity": {
-    "twelve_unique_governing_ids": "MET",
-    "eleven_vocabulary_terms": "MET",
-    "four_selected_contracts": "MET",
-    "five_source_classes": "MET",
-    "one_matching_composition_profile": "MET",
-    "both_schema_identities_registered": "MET in rehearsal (generic_compiler_manifest.yaml, once each)",
-    "model_contract_selectors_schema_enums_agree": "MET (source-reference-closure.json)",
-    "normative_constants_enforced": "MET (21 boolean const pins per schema; native rejection of false and 1)",
-    "required_array_cardinalities_enforced": "MET (native rejection of empty and 11-item arrays)",
-    "selection_equivalence_and_exact_composition_coverage": "MET for five projections; composition coverage criterion passes, overall composition result UNKNOWN"
-  },
-  "runtime_and_evidence_integrity": {
-    "local_tests_pass": "MET (candidate-tests-summary.json)",
-    "six_falsifier_pairs_pass": "MET (falsification-results.json)",
-    "native_schema_interpreter_pass_with_revision": "MET (3bf1a8241452332637ba0daffeee55c433f93e05, 24 checks)",
-    "native_semantic_checks_no_unresolved_semantic_defects": "MET for ordinary checks; UNMET overall: SC-008/SC-010 need a successor release inventory",
-    "five_real_source_projections_pass": "MET against local rehearsal revision d723fe9, not a canonical revision",
-    "real_composition_pass": "UNMET: result unknown; four declared required_provenance criteria lack a mechanical criterion in compiler 0.9.3",
-    "six_real_producer_receipts_verified": "PARTIAL: 6 receipts produced; 5 pass, 1 unknown; bound to the rehearsal revision",
-    "two_generations_deterministic": "MET (12 files byte-identical)",
-    "corrupted_artifacts_fail_closed": "MET (16 producer negative controls, intended mechanisms)",
-    "independent_review_bound_to_revision": "PARTIAL: agent review only (independent-evidence-review.md); no human or owner review"
-  },
-  "admission_integrity": {
-    "authorized_eight_way_disposition": "UNMET: owner_decision_ref null for all eight",
-    "exact_target_authority_resolved": "MET for development (authority-resolution.json); main == 020a94b at resolution",
-    "pr211_overlap_reconciled": "MET for generation (applier compatible with PR #211 tree); merge order still an owner decision",
-    "successor_release_inventory_prepared": "UNMET (version not invented)",
-    "historical_release_unchanged": "MET (no file under docs/semantic-foundation/ touched)",
-    "governed_pr_and_required_checks": "PENDING (publication via the governed PR path)",
-    "canonical_admission": "UNMET",
-    "trusted_consumer_replay": "UNMET"
-  },
-  "open_owner_decisions": [
-    "Approve or revise amended L9-SV-001: narrowed final clause ('causally attributed') and 'identified and justified' versus SV-015's 'quantify'.",
-    "Approve the six MERGE/CONTRACT/REUSE relocations.",
-    "Keep or drop required_provenance on l9.compose/strategic-planner-value@1 (composition stays unknown under compiler 0.9.3 while it is kept).",
-    "Confirm capabilities.yaml, lifecycle.yaml and receipt_catalog.yaml need only derivation-digest rebinding.",
-    "Choose the successor semantic-foundation release version and prepare its MANIFEST.md and HASHES.sha256."
-  ],
-  "recommendation": "Ready for owner review of the eight dispositions and the amended L9-SV-001 text. Not ready for admission until the owner decisions, a successor release record and a canonical-revision projection and composition replay exist."
+	"schema": "l9.sv-reduction-admission-readiness/v1",
+	"status": "DEVELOPMENT_COMPLETE_NOT_ADMISSION_READY",
+	"not_claimed": [
+		"ADMITTED",
+		"CANONICAL_BOUND",
+		"TRUSTED_REPLAY_PASS",
+		"canonical producer PASS receipts",
+		"owner decisions",
+		"independent human review"
+	],
+	"semantic_integrity": {
+		"exactly_two_new_invariants": "MET",
+		"sv001_includes_counterfactual_identification": "MET with weakening: amended text narrows the SV-001 consequence clause and the SV-015 scope/wording (independent-evidence-review.md findings 1-2); owner decision required",
+		"sv002_retains_exhaustive_exclusive_accounting": "MET (statement unchanged)",
+		"sv003_014_twelve_meanings_retained": "MET",
+		"sv015_020_six_meanings_retained_verbatim": "MET as verbatim lineage text; normative force for SV-016..020 via unchanged contract obligations; SV-015 merged with weakening",
+		"relocated_ids_not_invariant_references": "MET (mechanically enforced in tests and applier)",
+		"existing_law_dependencies_resolve": "MET at 020a94b",
+		"no_numerical_or_strategic_authority_transfer": "MET (contract and model non-ownership text unchanged)"
+	},
+	"contract_and_projection_integrity": {
+		"twelve_unique_governing_ids": "MET",
+		"eleven_vocabulary_terms": "MET",
+		"four_selected_contracts": "MET",
+		"five_source_classes": "MET",
+		"one_matching_composition_profile": "MET",
+		"both_schema_identities_registered": "MET in rehearsal (generic_compiler_manifest.yaml, once each)",
+		"model_contract_selectors_schema_enums_agree": "MET: model, contract, profile, both invariant enums, both governed_by enums and all lineage enums are exactly the twelve IDs (source-reference-closure.json); contract-record source_invariants intentionally unrestricted because other projected contracts cite other invariants",
+		"normative_constants_enforced": "MET (21 boolean const pins per schema; lineage meaning/model_section/contract_obligation/when const-pinned; native rejection verified)",
+		"required_array_cardinalities_enforced": "MET (native rejection of empty and 11-item arrays)",
+		"selection_equivalence_and_exact_composition_coverage": "MET for five projections; composition coverage criterion passes, overall composition result UNKNOWN"
+	},
+	"runtime_and_evidence_integrity": {
+		"local_tests_pass": "MET (candidate-tests-summary.json)",
+		"six_falsifier_pairs_pass": "MET (falsification-results.json)",
+		"native_schema_interpreter_pass_with_revision": "MET (3bf1a8241452332637ba0daffeee55c433f93e05, 26 checks)",
+		"native_semantic_checks_no_unresolved_semantic_defects": "MET for ordinary checks; UNMET overall: SC-008/SC-010 need a successor release inventory",
+		"five_real_source_projections_pass": "MET against local rehearsal revision 0b50cf7 (tree bb07371), not a canonical revision",
+		"real_composition_pass": "UNMET: result unknown; four declared required_provenance criteria lack a mechanical criterion in compiler 0.9.3",
+		"six_real_producer_receipts_verified": "PARTIAL: 6 receipts produced; 5 pass, 1 unknown; bound to the rehearsal revision",
+		"two_generations_deterministic": "MET (12 artifact/receipt files byte-identical; both runs committed in deterministic tar archives)",
+		"corrupted_artifacts_fail_closed": "MET (16 negatives and 2 positives each match their asserted exit code, typed failure and criterion; plus an order-invariance check)",
+		"independent_review_bound_to_revision": "PARTIAL: separate-agent review of f4cc0d0..ff38d1f with dispositions (independent-evidence-review.md); no human or owner review"
+	},
+	"admission_integrity": {
+		"authorized_eight_way_disposition": "UNMET: owner_decision_ref null for all eight",
+		"exact_target_authority_resolved": "MET for development (authority-resolution.json); main == 020a94b at resolution",
+		"pr211_overlap_reconciled": "MET for generation (applier compatible with PR #211 tree); merge order still an owner decision",
+		"successor_release_inventory_prepared": "UNMET (version not invented)",
+		"historical_release_unchanged": "MET (no file under docs/semantic-foundation/ touched)",
+		"governed_pr_and_required_checks": "PENDING (publication via the governed PR path)",
+		"canonical_admission": "UNMET",
+		"trusted_consumer_replay": "UNMET"
+	},
+	"open_owner_decisions": [
+		"Approve or revise amended L9-SV-001: narrowed final clause ('causally attributed') and 'identified and justified' versus SV-015's 'quantify'.",
+		"Approve the six MERGE/CONTRACT/REUSE relocations.",
+		"Keep or drop required_provenance on l9.compose/strategic-planner-value@1 (composition stays unknown under compiler 0.9.3 while it is kept).",
+		"Confirm capabilities.yaml, lifecycle.yaml and receipt_catalog.yaml need only derivation-digest rebinding.",
+		"Choose the successor semantic-foundation release version and prepare its MANIFEST.md and HASHES.sha256."
+	],
+	"recommendation": "Ready for owner review of the eight dispositions and the amended L9-SV-001 text. Not ready for admission until the owner decisions, a successor release record and a canonical-revision projection and composition replay exist."
 }

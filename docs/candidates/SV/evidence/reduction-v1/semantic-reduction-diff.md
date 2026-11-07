@@ -8,7 +8,7 @@ Generated deterministically by `tools/reduce_to_two_invariants.py` from `donor/`
 | `overlays/contracts_additions.yaml` | `source_invariants`: 8 candidate IDs → the 12 governing IDs | every `requires`, `guarantees`, `forbidden`, `outcomes`, `applies_to` and `applicability` entry, and `id`, `purpose`, `scope`, `owner` |
 | `semantics/strategic_value_model.yaml` | `governed_by.invariants`: 15 → 12 (adds EVIDENCE-001, ASSURANCE-001, COORD-001; removes SV-015..020); new top-level `relocated_additional_candidate_semantics` (6 records) | all other sections, including the six `evaluation_integrity` subsections and `retained_former_candidate_semantics` |
 | `overlays/projection_profile_additions.yaml` | invariant selectors 15 → 12; model selector `$.relocated_additional_candidate_semantics` added after `$.retained_former_candidate_semantics` | profile id, consumer, purpose, output schema, vocabulary/contract/authority selectors, forbidden list |
-| `semantics/strategic_planner_value_projection.schema.yaml` | invariant `min_items` 15 → 12 and enum → 12 IDs; `governed_by.invariants.min_items` 15 → 12; lineage descriptor added | everything else, including the 21 boolean `const` pins |
+| `semantics/strategic_planner_value_projection.schema.yaml` | invariant `min_items` 15 → 12 and enum → 12 IDs; `governed_by.invariants` `min_items` 15 → 12 plus a 12-value item enum; const-pinned lineage descriptor added | everything else, including the 21 boolean `const` pins |
 | `semantics/strategic_planner_value_composition.schema.yaml` | same three changes inside the composed namespaces; lineage added to `strategic_value_model.required` and `properties` | everything else |
 | `tests/falsification_cases.json` | `invariant_ref` → `origin_candidate_id`, `disposition`, `governing_invariants`, `contract_obligation`; description reworded | every negative/positive witness and expected failure code |
 
@@ -39,4 +39,6 @@ L9-SV-0NN:
 1. **Destination paths: 10 → 13.** Native validation of the pack-as-written failed RC-001/RC-002/RC-011 (`native-semantic-validation-before-derivation-rebind.log`). The three extra paths are digest-only rebinds, following the v3.8.0 precedent `2ae5dfa`.
 2. **Synthetic fixture count: 3 → 12.** The section 10.4 single-invariant fixture cannot satisfy the section 10.1 requirement that every selected invariant resolve. The positive fixture carries the ten existing IDs. The single-invariant fixture is kept as a negative test (`test_unresolvable_governing_invariant_fails_closed`).
 3. **Disposable target: linked worktree → throwaway clone accepted.** Governance denies a raw `git worktree add` on this surface. The applier guard is therefore "explicit `--disposable` and not the pack's own checkout".
-4. **`projection-run2/`** holds a SHA-256 inventory, not duplicate bytes; every hash equals the committed run-1 file.
+4. **Raw compiler outputs are tar archives** (`projection-run1.tar`, `projection-run2.tar`): the CI formatter would otherwise rewrite delivered JSON bytes.
+5. **Donor `falsification_cases.json` is stored as `falsification_cases.json.pr212`**, for the same reason; its bytes and SHA-256 are unchanged.
+6. **The SV-001 amendment is not lossless.** Independent review classifies it as a weakening (see `independent-evidence-review.md`). The mandated text is kept and the owner decides.

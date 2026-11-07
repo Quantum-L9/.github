@@ -175,6 +175,12 @@ def closure_violations(src):
     ):
         if gov["properties"]["invariants"].get("min_items") != 12:
             v.append(f"{label} schema governed_by.invariants min_items != 12")
+        _exact(
+            v,
+            f"{label} schema governed_by.invariants enum",
+            list(gov["properties"]["invariants"].get("items", {}).get("enum", [])),
+            exp["selected_ids"],
+        )
 
     # Lineage ledgers: exact coverage, verbatim meaning, live destinations.
     if set(src["model"].get(RETAINED, {})) != exp["retained_former"]:
@@ -289,11 +295,22 @@ def closure_violations(src):
                 != exp["relocated"][cid]["disposition"]
             ):
                 v.append(f"{label} schema lineage {cid} constants drifted")
+            for field in ("meaning", "model_section", "contract_obligation", "when"):
+                if entry[field].get("const") != lineage[cid].get(field):
+                    v.append(
+                        f"{label} schema lineage {cid}.{field} not pinned to model"
+                    )
             gi = entry["governing_invariants"]
             if gi.get("type") != "array" or gi.get("min_items", 0) < 1:
                 v.append(
                     f"{label} schema lineage {cid} governing_invariants accepts empty array"
                 )
+            _exact(
+                v,
+                f"{label} schema lineage {cid} governing_invariants enum",
+                list(gi.get("items", {}).get("enum", [])),
+                exp["selected_ids"],
+            )
 
     # Normative booleans must be pinned to their source truth.
     for label, schema, prefix in (
@@ -381,3 +398,15 @@ def producer_receipt_problems(receipt):
 
 def sha256_file(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def checksum_mismatches(root):
+    """The package checksum gate: every SHA256SUMS.txt entry must hash to its bytes."""
+    root = Path(root)
+    bad = []
+    for line in (root / "SHA256SUMS.txt").read_text().splitlines():
+        digest, rel = line.split("  ", 1)
+        path = root / rel
+        if not path.exists() or sha256_file(path) != digest:
+            bad.append(rel)
+    return bad

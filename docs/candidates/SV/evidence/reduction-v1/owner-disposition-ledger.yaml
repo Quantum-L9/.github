@@ -65,6 +65,13 @@ dispositions:
   - The merged SV-015 safeguard says divergence must be "explicitly identified and justified under the selected
     method" where SV-015 said "explicitly quantify their divergence"; the original wording is preserved verbatim in
     the relocation ledger and the contract obligation is unchanged.
+  - The merged safeguard applies only "When causal intervention effects are claimed" and only to quantified
+    Strategic Value assessments; the original SV-015 applied to every counterfactual comparison in any Strategic
+    Value claim. The broader scope now survives only in the unchanged contract obligation and the lineage text.
+  - Independent review (independent-evidence-review.md, findings 1-2) classifies this amendment as a normative
+    weakening of SV-001 and SV-015. A non-weakening alternative is to keep the original SV-001 consequence clause
+    verbatim and append the SV-015 safeguard as separate sentences with "explicitly quantify their divergence".
+    This pack applies the development-pack text as mandated and leaves that choice to the owner.
   owner_decision_status: pending
   owner_decision_ref: null
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
@@ -95,6 +102,7 @@ dispositions:
   when: causal_intervention_effect_is_claimed
   falsifier_case_ref: SV015
   expected_negative_result: UNIDENTIFIED_COUNTERFACTUAL
+  meaning_preservation: MERGE_WITH_WEAKENING_REQUIRES_OWNER_DECISION
   owner_decision_status: pending
   owner_decision_ref: null
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
@@ -112,6 +120,7 @@ dispositions:
   when: material_cross_actor_valuation
   falsifier_case_ref: SV016
   expected_negative_result: UNAUTHORIZED_ACTOR_AGGREGATION
+  meaning_preservation: VERBATIM_LINEAGE_NORMATIVE_FORCE_VIA_UNCHANGED_CONTRACT_OBLIGATION
   owner_decision_status: pending
   owner_decision_ref: null
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
@@ -128,6 +137,7 @@ dispositions:
   when: sequential_policy_value_claimed
   falsifier_case_ref: SV017
   expected_negative_result: FUTURE_OBSERVATION_LEAK
+  meaning_preservation: VERBATIM_LINEAGE_NORMATIVE_FORCE_VIA_UNCHANGED_CONTRACT_OBLIGATION
   owner_decision_status: pending
   owner_decision_ref: null
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
@@ -144,6 +154,7 @@ dispositions:
   when: joint_or_portfolio_value_claimed
   falsifier_case_ref: SV018
   expected_negative_result: UNJUSTIFIED_JOINT_ADDITIVITY
+  meaning_preservation: VERBATIM_LINEAGE_NORMATIVE_FORCE_VIA_UNCHANGED_CONTRACT_OBLIGATION
   owner_decision_status: pending
   owner_decision_ref: null
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
@@ -160,6 +171,7 @@ dispositions:
   when: material_preference_sensitive_uncertainty
   falsifier_case_ref: SV019
   expected_negative_result: UNSUPPORTED_PRECISE_WINNER
+  meaning_preservation: VERBATIM_LINEAGE_NORMATIVE_FORCE_VIA_UNCHANGED_CONTRACT_OBLIGATION
   owner_decision_status: pending
   owner_decision_ref: null
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
@@ -178,6 +190,7 @@ dispositions:
   when: model_derived_or_independently_verified_claim
   falsifier_case_ref: SV020
   expected_negative_result: UNSUPPORTED_VERIFIED_METHOD_CLAIM
+  meaning_preservation: VERBATIM_LINEAGE_NORMATIVE_FORCE_VIA_UNCHANGED_CONTRACT_OBLIGATION
   owner_decision_status: pending
   owner_decision_ref: null
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76

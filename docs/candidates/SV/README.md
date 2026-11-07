@@ -4,14 +4,14 @@
 
 ## Decision realized in this package
 
-The proposal now carries **two** new global Strategic Value invariants: `L9-SV-001` (amended to absorb the counterfactual identification safeguard formerly proposed as `L9-SV-015`) and `L9-SV-002` (unchanged). Every other candidate meaning is preserved:
+The proposal now carries **two** new global Strategic Value invariants: `L9-SV-001` (amended to absorb the counterfactual identification safeguard formerly proposed as `L9-SV-015`) and `L9-SV-002` (unchanged). Every other candidate meaning is kept as traceable text:
 
 - `L9-SV-003..014` (twelve meanings) stay in `strategic_value_model.yaml#retained_former_candidate_semantics`, unchanged.
 - `L9-SV-015..020` (six meanings) move to `strategic_value_model.yaml#relocated_additional_candidate_semantics`. Each record keeps the original PR #212 statement verbatim, its disposition (MERGE, CONTRACT or REUSE), its model section, its unchanged assessment-contract obligation, its applicability condition and the existing global invariants that now govern it.
 
 `L9-SV-015..020` are **historical candidate identifiers and falsifier-case lineage, not admitted or proposed invariants.** They appear in no invariant selector, `source_invariants`, `governed_by` list or schema enum; the tests and the applier enforce that mechanically. The six relocated meanings are governed by existing law: `L9-UNKNOWN-001` (SV-019), and `L9-EVIDENCE-001`, `L9-ASSURANCE-001`, `L9-PROV-001`, `L9-COORD-001` (SV-020), plus the two new invariants. See `IRREDUCIBILITY_DISPOSITION.md` and `evidence/reduction-v1/owner-disposition-ledger.yaml`.
 
-The amended `L9-SV-001` wording is a **material semantic change that needs explicit owner review**; the ledger records two specific points (a narrowed final consequence clause and "identified and justified" replacing "quantify").
+The amended `L9-SV-001` wording is a **material semantic change that needs explicit owner review**. Independent review classifies it as a weakening of both the original SV-001 consequence clause and the SV-015 safeguard. It narrows the clause to "causally attributed" rankings and to claimed causal effects, and replaces "quantify" with "identified and justified". The ledger records each point and a non-weakening alternative, and keeps the mandated text until the owner decides. The other five relocations keep their meaning verbatim, with normative force through unchanged contract obligations.
 
 The contract `l9.contract/strategic-value-assessment@1` still applies **only** to an assessment making a material, applicable, objective-relative quantitative Strategic Value claim. Its `source_invariants` now name the twelve governing invariants; every `requires`, `guarantees`, `forbidden`, `outcomes` and `applicability` entry is byte-for-byte the PR #212 text (tested against the frozen donor).
 
@@ -63,7 +63,7 @@ The last row is new in this reduction. Those three ledgers record the digests of
 ## Runnable checks
 
 ```bash
-python -m unittest discover -s tests -v                 # 78 local tests
+python -m unittest discover -s tests -v                 # 82 local tests
 python tests/run_strategic_value_falsifiers.py          # six bad/control pairs
 python tests/run_strategic_value_falsifiers.py --case SV015   # ... through SV020
 python tools/reduce_to_two_invariants.py --check        # committed files == declared reduction
@@ -88,10 +88,10 @@ The script requires the exact frozen `BASE_SHA` and a clean tree. It refuses `--
 Evidence lives in `evidence/reduction-v1/`; `admission-readiness.json` lists every criterion as met, unmet or Unknown. In summary:
 
 - Local tests, falsifiers and the reduction `--check` pass.
-- Native schema qualification passes 24 checks against compiler `3bf1a82`.
+- Native schema qualification passes 26 checks against compiler `3bf1a82`.
 - In a disposable rehearsal of the applied candidate, the native `.github` validator passes every ordinary semantic check. It fails only SC-008/SC-010, because the v3.27.0 release inventory does not list the new or changed files. That needs a successor release record, which this pack must not invent.
 - The real compiler projected all five source classes (**pass**). The composition result is **unknown**: compiler 0.9.3 has no mechanical criterion for the composition profile's four declared `required_provenance` entries. The profile has carried those entries unchanged since PR #212. Two runs were byte-identical.
-- 16 producer negative controls each failed through their intended compiler mechanism, and both positive controls passed.
+- 16 producer negative controls each failed with their asserted exit code, typed failure and criterion; both positive controls passed; reversing component order leaves the composed digest unchanged. Raw compiler bytes are archived in `projection-run1.tar` / `projection-run2.tar`.
 
 `historical` evidence (`evidence/*.json`, `evidence/*.log`) is the PR #212 record and is deliberately left unchanged.
 

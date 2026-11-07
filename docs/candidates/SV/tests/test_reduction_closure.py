@@ -8,8 +8,10 @@ obligation is enforced rather than merely asserted.
 
 import copy
 import json
+import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
@@ -102,6 +104,29 @@ class LosslessAgainstDonor(unittest.TestCase):
                 rec["authority_status"], "not_admitted_as_independent_invariant"
             )
 
+    def test_sv001_amendment_is_ledgered_with_its_weakening_points(self):
+        """The amended SV-001 is NOT lossless; the ledger must say so explicitly."""
+        led = yaml.safe_load(
+            (REDUCTION_EVIDENCE / "owner-disposition-ledger.yaml").read_text()
+        )
+        rows = {r["candidate_id"]: r for r in led["dispositions"]}
+        points = " ".join(rows["L9-SV-001"]["owner_review_points"])
+        for phrase in (
+            "causally attributed",
+            "quantify",
+            "When causal intervention effects are claimed",
+            "quantified",
+        ):
+            self.assertIn(phrase, points)
+        self.assertEqual(
+            rows["L9-SV-015"]["meaning_preservation"],
+            "MERGE_WITH_WEAKENING_REQUIRES_OWNER_DECISION",
+        )
+        original = donor_statements()["L9-SV-001"]
+        amended = {r["id"]: r["statement"] for r in self.src["invariants"]}["L9-SV-001"]
+        self.assertIn("cannot establish a complete Strategic Value ranking", original)
+        self.assertNotIn("cannot establish a complete Strategic Value ranking", amended)
+
     def test_sv002_statement_unchanged_and_sv001_amendment_is_the_ledgered_text(self):
         statements = donor_statements()
         overlay = {r["id"]: r["statement"] for r in self.src["invariants"]}
@@ -150,19 +175,30 @@ class LosslessAgainstDonor(unittest.TestCase):
             donor = read_yaml(name, DONOR)
             reduced = read_yaml("semantics/" + name)
             props = reduced["properties"]
+            # Mask exactly the declared changes; every other byte of meaning
+            # (e.g. the invariant record's required fields) must equal the donor.
             if "strategic_value_model" in props:
                 svm = props["strategic_value_model"]
                 svm["properties"].pop(LINEAGE)
                 svm["required"].remove(LINEAGE)
                 gov = svm["properties"]["governed_by"]["properties"]["invariants"]
-                props["invariants"]["properties"]["invariants"] = donor["properties"][
+                inv = props["invariants"]["properties"]["invariants"]
+                donor_inv = donor["properties"]["invariants"]["properties"][
                     "invariants"
-                ]["properties"]["invariants"]
+                ]
             else:
                 props.pop(LINEAGE)
                 gov = props["governed_by"]["properties"]["invariants"]
-                props["invariants"] = donor["properties"]["invariants"]
+                inv = props["invariants"]
+                donor_inv = donor["properties"]["invariants"]
+            self.assertEqual(gov["min_items"], 12)
             gov["min_items"] = 15
+            self.assertEqual(len(gov["items"].pop("enum")), 12)
+            self.assertEqual(inv["min_items"], 12)
+            inv["min_items"] = donor_inv["min_items"]
+            inv["items"]["properties"]["id"]["enum"] = donor_inv["items"]["properties"][
+                "id"
+            ]["enum"]
             self.assertEqual(reduced, donor, name)
 
     def test_profile_changes_only_invariant_selectors_and_lineage_selector(self):
@@ -313,6 +349,32 @@ class NegativeControls(unittest.TestCase):
             "removed candidate ID in normative context",
         )
 
+    def test_removed_id_in_lineage_schema_enum(self):
+        def widen(s):
+            s["projection_schema"]["properties"][LINEAGE]["properties"]["L9-SV-015"][
+                "properties"
+            ]["governing_invariants"]["items"]["enum"].append("L9-SV-015")
+
+        self.assertCaught(widen, "governing_invariants enum")
+
+    def test_governed_by_schema_enum_widened(self):
+        self.assertCaught(
+            lambda s: s["composition_schema"]["properties"]["strategic_value_model"][
+                "properties"
+            ]["governed_by"]["properties"]["invariants"]["items"]["enum"].append(
+                "L9-SV-016"
+            ),
+            "governed_by.invariants enum",
+        )
+
+    def test_lineage_meaning_unpinned_in_schema(self):
+        self.assertCaught(
+            lambda s: s["projection_schema"]["properties"][LINEAGE]["properties"][
+                "L9-SV-020"
+            ]["properties"]["meaning"].__setitem__("const", "rewritten"),
+            "L9-SV-020.meaning not pinned",
+        )
+
     def test_fixture_claiming_source_invariant(self):
         self.assertCaught(
             lambda s: s["fixtures"]["cases"][0].__setitem__(
@@ -324,19 +386,17 @@ class NegativeControls(unittest.TestCase):
 
 class DigestAndProvenanceGates(unittest.TestCase):
     def test_package_checksums_match_and_detect_tampering(self):
-        lines = (ROOT / "SHA256SUMS.txt").read_text().splitlines()
-        self.assertTrue(lines)
-        from reduction_closure import sha256_file
+        from reduction_closure import checksum_mismatches
 
-        for line in lines:
-            digest, rel = line.split("  ", 1)
-            self.assertEqual(sha256_file(ROOT / rel), digest, rel)
-        digest, rel = lines[0].split("  ", 1)
+        self.assertTrue((ROOT / "SHA256SUMS.txt").read_text().strip())
+        self.assertEqual(checksum_mismatches(ROOT), [])
         with tempfile.TemporaryDirectory() as tmp:
-            copy_path = Path(tmp) / Path(rel).name
-            copy_path.write_bytes((ROOT / rel).read_bytes() + b"\n")
-            self.assertNotEqual(
-                sha256_file(copy_path), digest, "tampered bytes must not verify"
+            tree = Path(tmp) / "SV"
+            shutil.copytree(ROOT, tree, ignore=shutil.ignore_patterns("__pycache__"))
+            target = tree / "overlays" / "contracts_additions.yaml"
+            target.write_text(target.read_text().replace("L9-SV-002", "L9-SV-019", 1))
+            self.assertEqual(
+                checksum_mismatches(tree), ["overlays/contracts_additions.yaml"]
             )
 
     def test_frozen_donor_matches_source_candidate_hashes(self):
@@ -361,17 +421,19 @@ class DigestAndProvenanceGates(unittest.TestCase):
             self.assertTrue(producer_receipt_problems(case))
 
     def test_real_producer_receipts_are_bound_to_rehearsal_revision_not_canonical(self):
-        receipts = sorted(
-            (REDUCTION_EVIDENCE / "projection-run1" / "receipts").glob("*.json")
-        )
+        with tarfile.open(REDUCTION_EVIDENCE / "projection-run1.tar") as tar:
+            receipts = {
+                m.name: json.loads(tar.extractfile(m).read())
+                for m in tar.getmembers()
+                if m.isfile() and m.name.startswith("receipts/")
+            }
         self.assertEqual(len(receipts), 6)
         summary = json.loads(
             (REDUCTION_EVIDENCE / "determinism-comparison.json").read_text()
         )
         rehearsal = summary["rehearsal_authority_revision"]
-        for path in receipts:
-            receipt = json.loads(path.read_text())
-            self.assertEqual(producer_receipt_problems(receipt), [], path.name)
+        for name, receipt in sorted(receipts.items()):
+            self.assertEqual(producer_receipt_problems(receipt), [], name)
             self.assertEqual(receipt["governing_coordinates"]["revision"], rehearsal)
             stale = copy.deepcopy(receipt)
             stale["producer_identity"]["compiler"] = "local-falsifier"

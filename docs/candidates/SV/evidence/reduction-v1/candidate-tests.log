@@ -47,15 +47,20 @@ test_model_changes_only_governance_and_lineage (test_reduction_closure.LosslessA
 test_profile_changes_only_invariant_selectors_and_lineage_selector (test_reduction_closure.LosslessAgainstDonor.test_profile_changes_only_invariant_selectors_and_lineage_selector) ... ok
 test_schemas_change_only_invariants_and_lineage (test_reduction_closure.LosslessAgainstDonor.test_schemas_change_only_invariants_and_lineage) ... ok
 test_six_relocated_meanings_are_verbatim_donor_statements (test_reduction_closure.LosslessAgainstDonor.test_six_relocated_meanings_are_verbatim_donor_statements) ... ok
+test_sv001_amendment_is_ledgered_with_its_weakening_points (test_reduction_closure.LosslessAgainstDonor.test_sv001_amendment_is_ledgered_with_its_weakening_points)
+The amended SV-001 is NOT lossless; the ledger must say so explicitly. ... ok
 test_sv002_statement_unchanged_and_sv001_amendment_is_the_ledgered_text (test_reduction_closure.LosslessAgainstDonor.test_sv002_statement_unchanged_and_sv001_amendment_is_the_ledgered_text) ... ok
 test_composition_missing_namespace (test_reduction_closure.NegativeControls.test_composition_missing_namespace) ... ok
 test_duplicate_selected_invariant (test_reduction_closure.NegativeControls.test_duplicate_selected_invariant) ... ok
 test_fixture_claiming_source_invariant (test_reduction_closure.NegativeControls.test_fixture_claiming_source_invariant) ... ok
+test_governed_by_schema_enum_widened (test_reduction_closure.NegativeControls.test_governed_by_schema_enum_widened) ... ok
 test_lineage_meaning_drift_and_authority_promotion (test_reduction_closure.NegativeControls.test_lineage_meaning_drift_and_authority_promotion) ... ok
+test_lineage_meaning_unpinned_in_schema (test_reduction_closure.NegativeControls.test_lineage_meaning_unpinned_in_schema) ... ok
 test_missing_evidence_or_assurance_governance (test_reduction_closure.NegativeControls.test_missing_evidence_or_assurance_governance) ... ok
 test_missing_selected_invariant (test_reduction_closure.NegativeControls.test_missing_selected_invariant) ... ok
 test_model_change_not_reflected_in_schema (test_reduction_closure.NegativeControls.test_model_change_not_reflected_in_schema) ... ok
 test_reintroduced_sv015_selector (test_reduction_closure.NegativeControls.test_reintroduced_sv015_selector) ... ok
+test_removed_id_in_lineage_schema_enum (test_reduction_closure.NegativeControls.test_removed_id_in_lineage_schema_enum) ... ok
 test_removed_id_leaking_into_normative_context (test_reduction_closure.NegativeControls.test_removed_id_leaking_into_normative_context) ... ok
 test_removed_sv015_counterfactual_obligation (test_reduction_closure.NegativeControls.test_removed_sv015_counterfactual_obligation) ... ok
 test_removed_sv020_model_assurance_obligation (test_reduction_closure.NegativeControls.test_removed_sv020_model_assurance_obligation) ... ok
@@ -78,6 +83,6 @@ test_sv019_sensitivity_preference_flip (test_six_falsifications.IndependentlyExe
 test_sv020_false_numerical_assurance (test_six_falsifications.IndependentlyExecutableFalsifiers.test_sv020_false_numerical_assurance) ... ok
 
 ----------------------------------------------------------------------
-Ran 78 tests in 7.782s
+Ran 82 tests in 9.054s
 
 OK

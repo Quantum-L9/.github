@@ -53,6 +53,19 @@ properties:
         min_items: 12
         items:
           type: string
+          enum:
+          - L9-SV-001
+          - L9-SV-002
+          - L9-AUTH-001
+          - L9-AUTH-002
+          - L9-HARD-001
+          - L9-UNKNOWN-001
+          - L9-STRATEGY-001
+          - L9-PROJECTION-001
+          - L9-PROV-001
+          - L9-EVIDENCE-001
+          - L9-ASSURANCE-001
+          - L9-COORD-001
       contracts:
         type: array
         min_items: 3
@@ -806,7 +819,10 @@ properties:
           source_candidate_id:
             const: L9-SV-015
           meaning:
-            type: string
+            const: For a Strategic Value claim, a counterfactual comparison must identify the same decision-relevant
+              initial conditions, utility measure, exogenous context and time basis across intervention and baseline
+              worlds, or explicitly quantify their divergence. A convenient scenario pairing or historical correlation
+              is not evidence of an identifiable causal intervention effect.
           disposition:
             const: MERGE
           governing_invariants:
@@ -828,11 +844,11 @@ properties:
               - L9-ASSURANCE-001
               - L9-COORD-001
           model_section:
-            type: string
+            const: evaluation_integrity.counterfactual_identification
           contract_obligation:
-            type: string
+            const: counterfactual_worlds_share_defensible_initial_conditions_time_basis_and_identification_assumptions
           when:
-            type: string
+            const: causal_intervention_effect_is_claimed
           authority_status:
             const: not_admitted_as_independent_invariant
       L9-SV-016:
@@ -850,7 +866,10 @@ properties:
           source_candidate_id:
             const: L9-SV-016
           meaning:
-            type: string
+            const: For a Strategic Value claim, the assessment must declare the focal beneficiary or authorized
+              social-welfare aggregation before combining outcomes across actors. Benefits to counterparties,
+              externalities, transfers and costs cannot be credited to the focal objective twice or silently converted
+              between actors with incompatible utilities.
           disposition:
             const: CONTRACT
           governing_invariants:
@@ -872,11 +891,11 @@ properties:
               - L9-ASSURANCE-001
               - L9-COORD-001
           model_section:
-            type: string
+            const: evaluation_integrity.beneficiary_scope
           contract_obligation:
-            type: string
+            const: beneficiary_scope_and_welfare_aggregation_when_cross_actor_effects_material
           when:
-            type: string
+            const: material_cross_actor_valuation
           authority_status:
             const: not_admitted_as_independent_invariant
       L9-SV-017:
@@ -894,7 +913,10 @@ properties:
           source_candidate_id:
             const: L9-SV-017
           meaning:
-            type: string
+            const: When a Strategic Value claim evaluates a sequential decision policy, the policy may condition
+              each action only on observations and information available at the time of that action. A lookahead
+              ranking must not exploit hindsight, future responses or post-action evidence as if they were known
+              at decision time; posterior updates must preserve observation provenance.
           disposition:
             const: CONTRACT
           governing_invariants:
@@ -916,11 +938,11 @@ properties:
               - L9-ASSURANCE-001
               - L9-COORD-001
           model_section:
-            type: string
+            const: evaluation_integrity.nonanticipativity
           contract_obligation:
-            type: string
+            const: nonanticipative_conditional_policies_when_sequential_actions_are_evaluated
           when:
-            type: string
+            const: sequential_policy_value_claimed
           authority_status:
             const: not_admitted_as_independent_invariant
       L9-SV-018:
@@ -938,7 +960,10 @@ properties:
           source_candidate_id:
             const: L9-SV-018
           meaning:
-            type: string
+            const: For a Strategic Value claim about a portfolio or joint intervention, its value is evaluated
+              against the joint feasible counterfactual and shared resource constraints. Standalone action values
+              may be summed only with evidence of additive independence; shared dependencies, synergies, substitution,
+              resource collision and cannibalization must be represented or remain unresolved.
           disposition:
             const: CONTRACT
           governing_invariants:
@@ -960,11 +985,11 @@ properties:
               - L9-ASSURANCE-001
               - L9-COORD-001
           model_section:
-            type: string
+            const: evaluation_integrity.joint_portfolio_valuation
           contract_obligation:
-            type: string
+            const: joint_portfolio_counterfactual_and_resource_interactions_for_nonadditive_actions
           when:
-            type: string
+            const: joint_or_portfolio_value_claimed
           authority_status:
             const: not_admitted_as_independent_invariant
       L9-SV-019:
@@ -982,7 +1007,10 @@ properties:
           source_candidate_id:
             const: L9-SV-019
           meaning:
-            type: string
+            const: When uncertainty can change preference in a Strategic Value comparison, the evaluation must
+              expose a bounded sensitivity or uncertainty result and conditional decision boundary, not an unjustified
+              precise winner. A robustness claim requires declared uncertainty sets, bounds or probability models
+              and an applicable comparison method.
           disposition:
             const: REUSE
           governing_invariants:
@@ -1004,11 +1032,11 @@ properties:
               - L9-ASSURANCE-001
               - L9-COORD-001
           model_section:
-            type: string
+            const: evaluation_integrity.uncertainty_aware_selection
           contract_obligation:
-            type: string
+            const: uncertainty_sensitivity_or_conditional_frontier_when_preference_can_flip
           when:
-            type: string
+            const: material_preference_sensitive_uncertainty
           authority_status:
             const: not_admitted_as_independent_invariant
       L9-SV-020:
@@ -1026,7 +1054,12 @@ properties:
           source_candidate_id:
             const: L9-SV-020
           meaning:
-            type: string
+            const: Claims of model-derived or independently verified Strategic Value require version-bound numerical
+              method identity, input/assumption lineage, execution provenance and applicable, independently reviewable
+              model-validation evidence appropriate to the claim. Empirical forecast validity may be supported
+              by calibration, backtesting, sensitivity or out-of-sample evaluation where applicable, not presumed
+              mathematical proof of general real-world adequacy. Arithmetic, projection receipts and model-validation
+              evidence establish different things and cannot substitute for one another.
           disposition:
             const: REUSE
           governing_invariants:
@@ -1048,11 +1081,11 @@ properties:
               - L9-ASSURANCE-001
               - L9-COORD-001
           model_section:
-            type: string
+            const: evaluation_integrity.independent_method_assurance
           contract_obligation:
-            type: string
+            const: method_identity_input_lineage_executed_method_evidence_and_applicable_independently_reviewable_model_validation_evidence_for_strong_numerical_claims
           when:
-            type: string
+            const: model_derived_or_independently_verified_claim
           authority_status:
             const: not_admitted_as_independent_invariant
   terms:

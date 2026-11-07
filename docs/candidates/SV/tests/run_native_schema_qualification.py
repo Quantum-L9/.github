@@ -139,6 +139,19 @@ def main():
             lambda p: p[lineage]["L9-SV-018"].__setitem__("meaning", 18),
         ),
         (
+            "lineage_meaning_rewritten",
+            lambda p: p[lineage]["L9-SV-015"].__setitem__(
+                "meaning",
+                p[lineage]["L9-SV-015"]["meaning"].replace("quantify", "describe"),
+            ),
+        ),
+        (
+            "lineage_contract_obligation_rewritten",
+            lambda p: p[lineage]["L9-SV-019"].__setitem__(
+                "contract_obligation", "none"
+            ),
+        ),
+        (
             "lineage_source_id_swapped",
             lambda p: p[lineage]["L9-SV-015"].__setitem__(
                 "source_candidate_id", "L9-SV-016"

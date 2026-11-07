@@ -5,11 +5,14 @@ Dry-run by default. ``--apply --disposable`` writes local files only, into a
 throwaway clone or worktree pinned at BASE_SHA, and refuses the checkout that
 carries this candidate pack. It NEVER commits, pushes, opens PRs,
 runs release gates, or admits semantics. Every check runs on the fully
-assembled candidate before any byte is written; any failure writes nothing.
+assembled candidate before any byte is written; a failed check writes nothing,
+and writes are staged then renamed so an I/O failure while staging leaves the
+checkout untouched (a failure during the final renames is reported, not hidden).
 """
 
 import argparse
 import hashlib
+import os
 import re
 import subprocess
 import sys
@@ -449,6 +452,26 @@ def verify_assembled(changed):
     ):
         raise ValueError("projection and composition invariant descriptors differ")
     lineage = "relocated_additional_candidate_semantics"
+    for label, props in (
+        ("projection", pro["properties"]),
+        ("composition", com["properties"]["strategic_value_model"]["properties"]),
+    ):
+        exact_selection(
+            list(props["governed_by"]["properties"]["invariants"]["items"]["enum"]),
+            f"{label} schema governed_by enum",
+        )
+        for cid, entry in props[lineage]["properties"].items():
+            exact_selection(
+                list(entry["properties"]["governing_invariants"]["items"]["enum"]),
+                f"{label} schema lineage {cid} enum",
+            )
+            if (
+                entry["properties"]["meaning"].get("const")
+                != model[lineage][cid]["meaning"]
+            ):
+                raise ValueError(
+                    f"{label} schema lineage {cid} meaning not pinned to model"
+                )
     check_removed_ids_are_lineage_only(
         "projection schema", pro, [("properties", lineage)]
     )
@@ -497,6 +520,10 @@ def generate(checkout):
         current(p), old_inv_bytes, inv.encode("utf-8"), old_count, inv_count
     )
     changed[p] = merge_list(c, raw("overlays/contracts_additions.yaml"), "contracts")
+    old_contracts = len(yaml.safe_load(current(p))["contracts"])
+    new_contracts = len(yaml.safe_load(changed[p])["contracts"])
+    if new_contracts != old_contracts + 1:
+        raise ValueError(f"contract count {new_contracts} != {old_contracts} + 1")
 
     p = "semantics/vocabulary.yaml"
     v = current(p)
@@ -646,10 +673,23 @@ def main():
                 raise ValueError(
                     "refusing --apply into the checkout that carries this candidate pack"
                 )
-            for rel, content in proposed.items():
-                dst = checkout / rel
-                dst.parent.mkdir(parents=True, exist_ok=True)
-                dst.write_text(content, encoding="utf-8")
+            # Stage every file first; only after all staged writes succeed is
+            # each one moved into place with an atomic rename. A staging failure
+            # removes the staged files and leaves the checkout untouched.
+            staged = []
+            try:
+                for rel, content in proposed.items():
+                    dst = checkout / rel
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    tmp = dst.with_name("." + dst.name + ".sv-staged")
+                    tmp.write_text(content, encoding="utf-8")
+                    staged.append((tmp, dst))
+            except OSError:
+                for tmp, _ in staged:
+                    tmp.unlink(missing_ok=True)
+                raise
+            for tmp, dst in staged:
+                os.replace(tmp, dst)
         print(
             "STATUS="
             + ("LOCAL_FILES_WRITTEN_NOT_ADMITTED" if args.apply else "DRY_RUN_ONLY")

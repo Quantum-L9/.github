@@ -42,7 +42,7 @@ DONOR_SHA256 = {
     "strategic_value_model.yaml": "189e44474315ed5c5770a6d1246264297a0dddaf7d704f45d5a1611d7e237088",
     "strategic_planner_value_projection.schema.yaml": "10323a7b8bf729db1ef811e511ebd9c434477090d957a95178ae1a2fc4813730",
     "strategic_planner_value_composition.schema.yaml": "79643fb3c5031074d5b3153173329bcc10d3cffdf54050861f179fc714ea48dc",
-    "falsification_cases.json": "ee597f3f8d8254254db787587f4ef01beb3dac20f69e67e5ff57601bb54fa819",
+    "falsification_cases.json.pr212": "ee597f3f8d8254254db787587f4ef01beb3dac20f69e67e5ff57601bb54fa819",
 }
 
 # Line widths at which each donor file round-trips byte-for-byte through
@@ -166,16 +166,16 @@ def lineage_descriptor(records, selected):
             "required": list(LINEAGE_FIELDS),
             "properties": {
                 "source_candidate_id": {"const": cid},
-                "meaning": {"type": "string"},
+                "meaning": {"const": rec["meaning"]},
                 "disposition": {"const": rec["disposition"]},
                 "governing_invariants": {
                     "type": "array",
                     "min_items": 1,
                     "items": {"type": "string", "enum": list(selected)},
                 },
-                "model_section": {"type": "string"},
-                "contract_obligation": {"type": "string"},
-                "when": {"type": "string"},
+                "model_section": {"const": rec["model_section"]},
+                "contract_obligation": {"const": rec["contract_obligation"]},
+                "when": {"const": rec["when"]},
                 "authority_status": {"const": rec["authority_status"]},
             },
         }
@@ -243,6 +243,9 @@ def reduce(donor, ledger):
     ps["properties"]["governed_by"]["properties"]["invariants"]["min_items"] = len(
         selected
     )
+    ps["properties"]["governed_by"]["properties"]["invariants"]["items"]["enum"] = list(
+        selected
+    )
     ps["properties"]["invariants"]["min_items"] = len(selected)
     ps["properties"]["invariants"]["items"]["properties"]["id"]["enum"] = list(selected)
     ps["properties"] = insert_after(
@@ -257,6 +260,9 @@ def reduce(donor, ledger):
     svm["properties"]["governed_by"]["properties"]["invariants"]["min_items"] = len(
         selected
     )
+    svm["properties"]["governed_by"]["properties"]["invariants"]["items"]["enum"] = (
+        list(selected)
+    )
     req = svm["required"]
     req.insert(req.index(RETAINED_KEY) + 1, LINEAGE_KEY)
     svm["properties"] = insert_after(
@@ -270,7 +276,7 @@ def reduce(donor, ledger):
     )
 
     # 6. Falsifier fixtures: candidate lineage, never a canonical invariant claim.
-    fx = json.loads(donor["falsification_cases.json"])
+    fx = json.loads(donor["falsification_cases.json.pr212"])
     fx["description"] = (
         "Six independently executable contract falsifiers for the safeguards formerly proposed as "
         "L9-SV-015..020. Those IDs are historical candidate lineage, not admitted invariants; each "
@@ -331,10 +337,17 @@ def main():
     drift = []
     for rel, text in produced.items():
         path = ROOT / rel
+        # JSON outputs are owned by the Biome formatter in CI, so they are compared
+        # by parsed content; YAML outputs are compared byte for byte.
+        same = path.exists() and (
+            json.loads(path.read_text(encoding="utf-8")) == json.loads(text)
+            if rel.endswith(".json")
+            else path.read_text(encoding="utf-8") == text
+        )
         if args.check:
-            if not path.exists() or path.read_text(encoding="utf-8") != text:
+            if not same:
                 drift.append(rel)
-        else:
+        elif not same:
             path.write_text(text, encoding="utf-8")
         print(
             ("CHECK " if args.check else "WROTE ")

@@ -1,19 +1,12 @@
 """Producer negative controls against the REAL compiler (scratch only)."""
 
-import copy
-import glob
-import json
-import os
-import subprocess
-import sys
-import tempfile
+import copy, json, os, subprocess, sys, tempfile, glob
 from pathlib import Path
-
 import yaml
 
 SP = Path("/tmp/claude-0/-home-user/a2b6f907-ae31-5599-8c24-cf3342c0b873/scratchpad")
-AUTH = SP / "dotgithub-base"
-RUN1 = SP / "sv-projection-run1"
+AUTH = Path(os.environ.get("SV_AUTH", SP / "dotgithub-base2"))
+RUN1 = Path(os.environ.get("SV_RUN1", SP / "sv-run1"))
 ENV = dict(os.environ, PYTHONPATH="/home/user/l9-semantic-compiler-engine/src")
 REV = subprocess.run(
     ["git", "-C", str(AUTH), "rev-parse", "HEAD"], capture_output=True, text=True
@@ -78,10 +71,77 @@ def compose(req):
 
 
 results = []
+# Expected (exit code, typed_failure suffix, criterion or message fragment) per control.
+EXPECT = {
+    "positive_control_invariants_projection": (0, None, None),
+    "profile_digest_mutated": (2, "REVISION_MISMATCH", "profile_digest"),
+    "source_digest_mutated": (2, "REVISION_MISMATCH", "source_digest"),
+    "source_identity_swapped": (2, "INVALID_REQUEST", "profile-declared sources"),
+    "revision_without_candidate_profile": (
+        2,
+        "UNRESOLVED_REFERENCE",
+        "profile not admitted",
+    ),
+    "model_normative_boolean_false": (
+        2,
+        "STRUCTURAL_VALIDATION_FAILED",
+        "payload_schema",
+    ),
+    "model_required_array_emptied": (
+        2,
+        "STRUCTURAL_VALIDATION_FAILED",
+        "payload_schema",
+    ),
+    "model_lineage_reintroduces_removed_id": (
+        2,
+        "STRUCTURAL_VALIDATION_FAILED",
+        "payload_schema",
+    ),
+    "vocabulary_definition_removed": (
+        2,
+        "STRUCTURAL_VALIDATION_FAILED",
+        "payload_schema",
+    ),
+    "selected_invariant_id_renamed": (
+        2,
+        "INVALID_PROFILE",
+        "missing required selector result",
+    ),
+    "selected_contract_id_renamed": (
+        2,
+        "INVALID_PROFILE",
+        "missing required selector result",
+    ),
+    "composition_missing_namespace": (2, "INVALID_REQUEST", "source_coverage"),
+    "composition_duplicate_source": (2, "AMBIGUOUS_SEMANTICS", "duplicate_source"),
+    "composition_profile_digest_mutated": (
+        2,
+        "REVISION_MISMATCH",
+        "composition_profile_digest",
+    ),
+    "artifact_payload_tampered": (2, "REVISION_MISMATCH", "projection_digest"),
+    "artifact_receipt_binding_wrong_source_coordinate": (
+        2,
+        "REVISION_MISMATCH",
+        "projection_digest",
+    ),
+    "positive_control_verify_untampered_artifact": (0, None, None),
+}
 
 
 def record(name, mechanism, rc, summary, err, expect_nonpass=True):
-    ok = rc != 0 if expect_nonpass else rc == 0
+    want_rc, want_failure, want_fragment = EXPECT[name]
+    observed = " ".join(
+        str(summary.get(k) or "") for k in ("criterion", "message", "typed_failure")
+    )
+    ok = (
+        rc == want_rc
+        and (
+            want_failure is None
+            or str(summary.get("typed_failure", "")).endswith(want_failure)
+        )
+        and (want_fragment is None or want_fragment in observed)
+    )
     results.append(
         {
             "control": name,
@@ -89,8 +149,12 @@ def record(name, mechanism, rc, summary, err, expect_nonpass=True):
             "exit_code": rc,
             "summary": summary,
             "stderr_tail": err,
-            "expected": "non-pass" if expect_nonpass else "pass",
-            "detected": ok,
+            "expected": {
+                "exit_code": want_rc,
+                "typed_failure": want_failure,
+                "criterion_or_message": want_fragment,
+            },
+            "mechanism_matched": ok,
         }
     )
 
@@ -117,7 +181,11 @@ r["sources"][0]["digest"] = "sha256:" + "1" * 64
 record("source_digest_mutated", "source_currentness", *project(r, "x"))
 r = copy.deepcopy(base["invariants"])
 r["sources"][0]["ref"] = "l9.source/contracts@1"
-record("source_identity_swapped", "source_identity", *project(r, "x"))
+record(
+    "source_identity_swapped",
+    "request validation: source pins must match profile-declared sources",
+    *project(r, "x"),
+)
 r = copy.deepcopy(base["invariants"])
 r["authority"]["revision"] = "020a94bea86e7c5c5e4107da7014ec259508f397"
 record("revision_without_candidate_profile", "profile_resolution", *project(r, "x"))
@@ -255,7 +323,7 @@ rev = commit_with("semantics/invariants.yaml", inv_mut, "NEG invariant id")
 req, err = coords(rev, "invariants")
 record(
     "selected_invariant_id_renamed",
-    "selection_equivalence",
+    "profile selector resolution (required selector result missing)",
     *(project(req, "x") if req else (99, {}, err)),
 )
 
@@ -266,7 +334,7 @@ rev = commit_with("semantics/contracts.yaml", con_mut, "NEG contract id")
 req, err = coords(rev, "contracts")
 record(
     "selected_contract_id_renamed",
-    "selection_equivalence",
+    "profile selector resolution (required selector result missing)",
     *(project(req, "x") if req else (99, {}, err)),
 )
 
@@ -286,16 +354,26 @@ record(
 )
 c = copy.deepcopy(comp)
 c["components"] = list(reversed(c["components"]))
-rc, s, e = compose(c)
+with tempfile.TemporaryDirectory() as t:
+    c["output_root"] = t
+    f = Path(t) / "req.yaml"
+    f.write_text(yaml.safe_dump(c))
+    rc, out, err = cli("compose", str(f))
+    d = yaml.safe_load(out) or {}
+    rev_digest = [a.get("digest") for a in d.get("artifacts") or []]
+canon = yaml.safe_load((RUN1 / "requests" / "compose.result.yaml").read_text())
+canon_digest = [a.get("digest") for a in canon.get("artifacts") or []]
 results.append(
     {
         "control": "composition_component_order_reversed",
-        "intended_mechanism": "order independence",
+        "intended_mechanism": "order invariance (not a negative)",
         "exit_code": rc,
-        "summary": s,
-        "stderr_tail": e,
-        "expected": "same result as canonical order (3/unknown)",
-        "detected": rc == 3,
+        "composed_digest": rev_digest,
+        "canonical_order_composed_digest": canon_digest,
+        "expected": "identical composed digest and the same exit code 3 (unknown) as canonical order",
+        "mechanism_matched": rc == 3
+        and rev_digest == canon_digest
+        and bool(canon_digest),
     }
 )
 
@@ -389,7 +467,7 @@ print(
                 capture_output=True,
                 text=True,
             ).stdout.strip(),
-            "all_detected": all(r["detected"] for r in results),
+            "all_mechanisms_matched": all(r["mechanism_matched"] for r in results),
             "controls": results,
         },
         indent=2,

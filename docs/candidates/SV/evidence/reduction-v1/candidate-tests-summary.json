@@ -1,10 +1,10 @@
 {
-  "schema": "l9.sv-reduction-candidate-tests/v1",
-  "command": "python3 -m unittest discover -s tests -v",
-  "python": "3.13.18",
-  "pyyaml": "6.0.3",
-  "exit_code": 0,
-  "tests_run": 78,
-  "candidate_parent_commit": "ff38d1f7acc560f11ff0b0e508bc23c09653db10",
-  "note": "Run on the working tree whose parent is candidate_parent_commit; SHA256SUMS then regenerated to cover this log."
+	"schema": "l9.sv-reduction-candidate-tests/v1",
+	"command": "python3 -m unittest discover -s tests -v",
+	"python": "3.13.18",
+	"pyyaml": "6.0.3",
+	"exit_code": 0,
+	"tests_run": 82,
+	"candidate_parent_commit": "4062e480b9ec69786bd5e952dc277b00fcdeabbb",
+	"note": "Run on the working tree whose parent is candidate_parent_commit; SHA256SUMS then regenerated to cover this log."
 }

@@ -1,508 +1,377 @@
 {
-  "schema": "l9.strategic-value-dotgithub-qualification-candidate/v3",
-  "status": "TWO_INVARIANT_REDUCTION_LOCAL_PASS_COMPOSITION_UNKNOWN_NOT_ADMITTED",
-  "pack_id": "SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1",
-  "base_repo": "Quantum-L9/.github",
-  "base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
-  "source_pr": 212,
-  "source_candidate_sha": "85531616cee2da94bbb7154418a78537549a4d76",
-  "donor": "Quantum-L9/l9-wip#6",
-  "native_compiler_source_repo": "Quantum-L9/l9-semantic-compiler-engine",
-  "native_compiler_source_sha": "3bf1a8241452332637ba0daffeee55c433f93e05",
-  "proposed_global_invariants": 2,
-  "original_fourteen_total_meanings": 14,
-  "original_fourteen_relocated_to_model_contract": 12,
-  "additional_candidate_meanings_relocated": 6,
-  "total_preserved_candidate_meanings": 20,
-  "selected_governing_invariants": 12,
-  "source_classes": 5,
-  "composition_profiles": 1,
-  "canonical_destination_paths": 13,
-  "local_tests": 78,
-  "local_test_exit_code": 0,
-  "local_test_pass": true,
-  "independently_runnable_purpose_built_falsifiers": 6,
-  "schema_fix_counts": {
-    "boolean_true_const_each": 21,
-    "typed_array_min_each": 37
-  },
-  "native_schema_qualification": "PASS_24_CHECKS_COMPILER_3bf1a82",
-  "five_source_compilation": "PASS_AGAINST_LOCAL_REHEARSAL_REVISION_d723fe9",
-  "composition": "UNKNOWN_REQUIRED_PROVENANCE_DECLARED_CONSTRAINTS_UNRESOLVED",
-  "native_semantic_validation": "ORDINARY_CHECKS_PASS_SC008_SC010_FAIL_SUCCESSOR_RELEASE_INVENTORY_REQUIRED",
-  "canonical_admission": "NOT_PERFORMED",
-  "remote_mutation": "candidate-pack PR only; no canonical semantics, release, merge or admission",
-  "historical_evidence_preserved": [
-    "evidence/VALIDATION.json",
-    "evidence/SV015_falsification.json..SV020",
-    "evidence/qualification_*.log"
-  ],
-  "files": [
-    {
-      "path": "ADMISSION_INVARIANT_REVIEW.md",
-      "bytes": 4454,
-      "sha256": "99cf4d56de176d9782ba01306668cf331d6820674597c03a5b456975c3b092e7"
-    },
-    {
-      "path": "IRREDUCIBILITY_DISPOSITION.md",
-      "bytes": 7249,
-      "sha256": "f3a14d085fc86a07b48708ec6b9073928e048ea02f9069a398cafaa10c087a5d"
-    },
-    {
-      "path": "IRREDUCIBILITY_OWNER_REVIEW.md",
-      "bytes": 3618,
-      "sha256": "dc01297d3199b8cdcc344a57703e062ca5b766fd4b0e5dc28feb00e5b4e8888d"
-    },
-    {
-      "path": "PR6_MATHEMATICAL_ALIGNMENT.md",
-      "bytes": 2912,
-      "sha256": "83aadaadef60fe8a49d87df74f9285140f7ff4f203b51c915d0cde8e03496f57"
-    },
-    {
-      "path": "README.md",
-      "bytes": 9757,
-      "sha256": "d13a73c52e9f6636ef31d7611454d42c7d1fa8d17e44b0d7e1a045a0f8623de3"
-    },
-    {
-      "path": "SCHEMA_QUALIFICATION_REVIEW.md",
-      "bytes": 8599,
-      "sha256": "517fe025b0362dd0fd1161379af8515aa3a75be8040f5fee013fbce12c7be796"
-    },
-    {
-      "path": "apply_to_pinned_checkout.py",
-      "bytes": 25805,
-      "sha256": "b551a616b099242eb117cbf808faeeed996f00f177089d1ecd7e139b3cdab4b7"
-    },
-    {
-      "path": "evidence/SV015_falsification.json",
-      "bytes": 447,
-      "sha256": "e0223ef5327ce1668286ad102f587fcac4138314a3bcc9cc5e341ca046cd6afe"
-    },
-    {
-      "path": "evidence/SV016_falsification.json",
-      "bytes": 453,
-      "sha256": "3147f52face017f7d5cdf7b08dda3709e83f0a140f9f04c33f1341203608db61"
-    },
-    {
-      "path": "evidence/SV017_falsification.json",
-      "bytes": 439,
-      "sha256": "35c877a381692545633e6963428e8f02fd827d1648441ce51a0467dade5b906b"
-    },
-    {
-      "path": "evidence/SV018_falsification.json",
-      "bytes": 449,
-      "sha256": "faf90ee66e14a368ee937b04c27e6f83b99f0f5f9f9ae959588929ed6e619029"
-    },
-    {
-      "path": "evidence/SV019_falsification.json",
-      "bytes": 445,
-      "sha256": "d780d8d964119a91fb81f68a723bc874d44225be2c554e8a396c0bb12388f075"
-    },
-    {
-      "path": "evidence/SV020_falsification.json",
-      "bytes": 459,
-      "sha256": "c8ca5315945eebc017cf594bb1203a2b244188383f2258f664471c98776e3e16"
-    },
-    {
-      "path": "evidence/VALIDATION.json",
-      "bytes": 3681,
-      "sha256": "487f252a311559a507a3dcb90b13cab13c62c2db9c33631f5b09eabe578b986a"
-    },
-    {
-      "path": "evidence/native_schema_gate.json",
-      "bytes": 162,
-      "sha256": "243fb90813e5b107c68bb1ce987554f5d863bd364bb6dc8dc51dcc52ec0224ab"
-    },
-    {
-      "path": "evidence/qualification_existing_tests.log",
-      "bytes": 5609,
-      "sha256": "3ed8b838b55de779ce79f1964069842c4ef4a4bcaff9d920e22a5f04db30686e"
-    },
-    {
-      "path": "evidence/qualification_final_local_tests.log",
-      "bytes": 6425,
-      "sha256": "7e5313a648e7a457b0dc96c2b1ebafb9ee7f7efa5778d52a7d3924bd4c9b7181"
-    },
-    {
-      "path": "evidence/qualification_regression_tests.log",
-      "bytes": 6425,
-      "sha256": "d7e9980c278fc6771fe628681e93733088b213af9faeda4f9882e2e24a310b21"
-    },
-    {
-      "path": "evidence/reduction-v1/admission-readiness.json",
-      "bytes": 4416,
-      "sha256": "aca7a431ef7b909b4d585f8009e743554d1cd10920f9f8389c4039ecb64e8b5d"
-    },
-    {
-      "path": "evidence/reduction-v1/authority-resolution.json",
-      "bytes": 2532,
-      "sha256": "1b44bf762b9ee6720d78064163590544a6295bf99a09764291d3942107295d75"
-    },
-    {
-      "path": "evidence/reduction-v1/candidate-tests-summary.json",
-      "bytes": 389,
-      "sha256": "09b5a66b1a8d8557cf35a75a43506344623bac0b99bda817d7e3a008d3e4c313"
-    },
-    {
-      "path": "evidence/reduction-v1/candidate-tests.log",
-      "bytes": 12269,
-      "sha256": "1c199f734ffa99316a78b0079611a9c1811bfcf41a9fba7b8afe8f6da8bfff8e"
-    },
-    {
-      "path": "evidence/reduction-v1/determinism-comparison.json",
-      "bytes": 4094,
-      "sha256": "5ba4329af3e5ebb44e9e9b0f19807f7e8637530d7a23f03bf9ea3a6fe7703f0b"
-    },
-    {
-      "path": "evidence/reduction-v1/donor/contracts_additions.yaml",
-      "bytes": 6082,
-      "sha256": "b2aa7ac2f93b2cfe689d851fddc9adfdc6f618d95150f7cd5a69774d377c2f72"
-    },
-    {
-      "path": "evidence/reduction-v1/donor/falsification_cases.json",
-      "bytes": 3352,
-      "sha256": "ee597f3f8d8254254db787587f4ef01beb3dac20f69e67e5ff57601bb54fa819"
-    },
-    {
-      "path": "evidence/reduction-v1/donor/invariants_additions.yaml",
-      "bytes": 3789,
-      "sha256": "b259540393a1e30573e09317760ea9919ccc049f87a461a10c62c9bd26aa48f3"
-    },
-    {
-      "path": "evidence/reduction-v1/donor/projection_profile_additions.yaml",
-      "bytes": 2962,
-      "sha256": "ee3722c3178ab41c98f65ef76b11f6b268dd59eef59d2e2a5fe75b655a9e21c5"
-    },
-    {
-      "path": "evidence/reduction-v1/donor/strategic_planner_value_composition.schema.yaml",
-      "bytes": 33036,
-      "sha256": "79643fb3c5031074d5b3153173329bcc10d3cffdf54050861f179fc714ea48dc"
-    },
-    {
-      "path": "evidence/reduction-v1/donor/strategic_planner_value_projection.schema.yaml",
-      "bytes": 27653,
-      "sha256": "10323a7b8bf729db1ef811e511ebd9c434477090d957a95178ae1a2fc4813730"
-    },
-    {
-      "path": "evidence/reduction-v1/donor/strategic_value_model.yaml",
-      "bytes": 23792,
-      "sha256": "189e44474315ed5c5770a6d1246264297a0dddaf7d704f45d5a1611d7e237088"
-    },
-    {
-      "path": "evidence/reduction-v1/falsification-results.json",
-      "bytes": 7297,
-      "sha256": "20c88d629eb1dff7386154d769d5031fb176b262628b6b049f89352ab158bcf5"
-    },
-    {
-      "path": "evidence/reduction-v1/native-schema-results.json",
-      "bytes": 5104,
-      "sha256": "9a06741af1dd9b3fc89637f402507cad4f8894356e484dbc8cb952129bc3c1c9"
-    },
-    {
-      "path": "evidence/reduction-v1/native-semantic-validation-before-derivation-rebind.log",
-      "bytes": 15043,
-      "sha256": "63a30569b27e81f737c7226e28e25b8dd864330f69ed96e4ab6542270eaffe09"
-    },
-    {
-      "path": "evidence/reduction-v1/native-semantic-validation.log",
-      "bytes": 14285,
-      "sha256": "8df2569b8b4e8f4e96f3d7b54cc4c9fac313c3196c91458449bd09570c04d22c"
-    },
-    {
-      "path": "evidence/reduction-v1/owner-disposition-ledger.yaml",
-      "bytes": 8697,
-      "sha256": "cff7e0eaf7aae517b066edc8eb40c9f60bcce6dff23e9f137c658ba2ced39e7f"
-    },
-    {
-      "path": "evidence/reduction-v1/producer-negative-controls.json",
-      "bytes": 12101,
-      "sha256": "d328364484083741ccafc365585779177937abe35759161346def9ddf50a591c"
-    },
-    {
-      "path": "evidence/reduction-v1/producer_negative_controls.py",
-      "bytes": 11625,
-      "sha256": "923a06bad1bef3009e1b58f3339b2b9fd6b7db0a3952760e4ebe9cd305144898"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/composed/l9.compose_strategic-planner-value_1_l9.projection_strategic-planner-value_1.composed.json",
-      "bytes": 59820,
-      "sha256": "89da142dd91b220b5d1f11919c4296b1b15d3c0a4d279e9faaed621b815e6940"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/l9.projection_strategic-planner-value_1/l9.source_authority-model_1.projection.json",
-      "bytes": 3898,
-      "sha256": "d4d8df85c5733a960f0e8a01f26e261c052f6fd4352682a19341c885852dd725"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/l9.projection_strategic-planner-value_1/l9.source_contracts_1.projection.json",
-      "bytes": 12286,
-      "sha256": "cc27e9d9f6dc075f4676e4658564f453a554b2042a7f18981a4436a7a13ce5af"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/l9.projection_strategic-planner-value_1/l9.source_invariants_1.projection.json",
-      "bytes": 5563,
-      "sha256": "a58d5efcd8d1fa103fdd32364482e98b6d0fcbd0712db7c14d2c42e479102aee"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/l9.projection_strategic-planner-value_1/l9.source_strategic-value-model_1.projection.json",
-      "bytes": 32380,
-      "sha256": "2460f1dd1860c72d6c9a11d5400543209c5283b887d00216bd886a501c29c8b6"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/l9.projection_strategic-planner-value_1/l9.source_vocabulary_1.projection.json",
-      "bytes": 4223,
-      "sha256": "51b78f79ea8f74aff2c6033edc5a18b87d16ad8cf5fa57bcc43c0d095ab54167"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/receipts/1beb8a0bcebf24542e65080e02a46ac786bdfcbe7b6c280d3d8fb72a8715847b.json",
-      "bytes": 6290,
-      "sha256": "b96ad146c0aa8b230c56c35cf3b5146d22c53a41e967d79e647008fb3825754a"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/receipts/2896cdea3cafe55f12675a5b041b8a0ac26589cae5de24af17f2ab584dd2c124.json",
-      "bytes": 8057,
-      "sha256": "35c17d93d8a5efc54716d1b5ba9b2eec22199cb275a95ca344e7c76e3f7dd6d5"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/receipts/313a7e7723ee0ab4e05fc671de0d7834794073d44d2c97fbb276cebae216466b.json",
-      "bytes": 20131,
-      "sha256": "b34c4b254ff9e9eb531c2146b8df85ab3f22ec8320b8b27c627eb30453d3ce01"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/receipts/33f0ec5ba8aa3b94dfc979d4e7e0b75b98930ffa26edc838310826cee461bdbb.json",
-      "bytes": 7398,
-      "sha256": "891e104d6329d0a0e7592fedd2b497a4bb57b07f92f691f2af674920e9385e51"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/receipts/98f5b161a7b69aa233780690eac111e63120297993f93d9aaa126ac22ce419e9.json",
-      "bytes": 7152,
-      "sha256": "1f3c59494eef2d601fec3ec8b4488b789966c874456a48c66d18997383b8257e"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/receipts/c131edbe8f255ddb80bc16709267bcc327a60811a8e7d7502533f0f4d069701e.json",
-      "bytes": 6255,
-      "sha256": "baa8869d29596d1eac0a1e0e20b6ba6cf699dd17f008f5ee2af17165b545c444"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/authority_model.coords.yaml",
-      "bytes": 406,
-      "sha256": "cce1b1f5f65e2f7a3c815546281a6a58b46b6469eb76aadea4511a9fc529088c"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/authority_model.request.yaml",
-      "bytes": 649,
-      "sha256": "3383c7782f7e38190873a9ee9d3bcd9e8749699294f2dc57dfe8263588fbaf32"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/authority_model.result.yaml",
-      "bytes": 2453,
-      "sha256": "08abc4b1b44602baa174ef6d4f5d96c3a773e7f40a2787dfb7ec1620fe86c236"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/compose.request.yaml",
-      "bytes": 1380,
-      "sha256": "fef2db44be7c96a82af92983e0af308ca35445cbcb19ad476e95b3685c3b2269"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/compose.result.yaml",
-      "bytes": 2577,
-      "sha256": "dd5b90ffa05cf6c5e27cd2d49f46e3c328f57df10616c0406eb61e3552a3580b"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/contracts.coords.yaml",
-      "bytes": 394,
-      "sha256": "46951e003b952717da810d32a9337a60acd1732dfee8508235b2d2228f40f5d9"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/contracts.request.yaml",
-      "bytes": 637,
-      "sha256": "3ac17d9752f9542e2c386947b696de326f8d0ffb653af4790bb52d071b9c0c93"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/contracts.result.yaml",
-      "bytes": 2441,
-      "sha256": "fab2665f60ce168488d8d537101c0ca96a96fef26ea3cdbf97ed757964c90b1e"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/invariants.coords.yaml",
-      "bytes": 396,
-      "sha256": "779a6fde3bbbb1cfb945ab6705a333bb882e4814a38cb44f5fd1efb15a0c94dd"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/invariants.request.yaml",
-      "bytes": 639,
-      "sha256": "a25b9cf7378d01ff4e3c4afd360d74e6ef02417500eac6d949d0f5ec8f3459a9"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/invariants.result.yaml",
-      "bytes": 2443,
-      "sha256": "a4946d015e6c736fa2b87eb6be4f5c6fc091e386d8631dc22357350a72f4f77d"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/strategic_value_model.coords.yaml",
-      "bytes": 418,
-      "sha256": "d79e1b7e86d63c94ed6b6738852693446202d68c4a8b46e02474169ce8dbc43b"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/strategic_value_model.request.yaml",
-      "bytes": 661,
-      "sha256": "33a152b5ddfb31e136b161ea4e54420a911aa88ff85ac24ffeb722303053fb1f"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/strategic_value_model.result.yaml",
-      "bytes": 2465,
-      "sha256": "89d9b77a3cfd942caf72c6283acd6e2ef6cdcee780c2d5341649db03fe54a68b"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/vocabulary.coords.yaml",
-      "bytes": 396,
-      "sha256": "c63a00967831858d577727251b721f530a5193cb23929fffdc2ec6a62eb764fa"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/vocabulary.request.yaml",
-      "bytes": 639,
-      "sha256": "fca012604aef3bef79dc32ba9884d2a59e00cf737210bfb122901f07804ba5db"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run1/requests/vocabulary.result.yaml",
-      "bytes": 2443,
-      "sha256": "1fa1e4cc6b255040e7e4eb0675e1a9e3ac3dc9d0f09a663fa99e43538d6d4f53"
-    },
-    {
-      "path": "evidence/reduction-v1/projection-run2/SHA256SUMS",
-      "bytes": 1800,
-      "sha256": "7b6c52c683ebed5f27e5cba992c8c618376b16732b01542fac218eddfce1533a"
-    },
-    {
-      "path": "evidence/reduction-v1/semantic-reduction-diff.md",
-      "bytes": 4735,
-      "sha256": "d630ffdcf7971735d014334eeeae56e5b72f9125a2f9aec814c024d124faa984"
-    },
-    {
-      "path": "evidence/reduction-v1/source-digest-lock.json",
-      "bytes": 4374,
-      "sha256": "0ae63854082b0f1da704bd43474becb6c74b3da5331d4dd1fceaa8886842a2d0"
-    },
-    {
-      "path": "evidence/reduction-v1/source-reference-closure.json",
-      "bytes": 3920,
-      "sha256": "3871b4e8d0f78fbaa6a065cb18cfc1935ded64b8c587a677876a95dcaebc9485"
-    },
-    {
-      "path": "evidence/six_falsification_cases.json",
-      "bytes": 1817,
-      "sha256": "e3ae81af6b808f9c2046ca5933b3befe0378f12541d684729a150e1aec7babf1"
-    },
-    {
-      "path": "overlays/composition_profile_additions.yaml",
-      "bytes": 985,
-      "sha256": "789826d08b1489d2b999f6974e6b28591c177f0897c52b93678edcf3b10df106"
-    },
-    {
-      "path": "overlays/contracts_additions.yaml",
-      "bytes": 6181,
-      "sha256": "dcae0ce039f4277a44442436da0907a41ec8bace98f9aaa4fa594c57dcc41e8f"
-    },
-    {
-      "path": "overlays/invariants_additions.yaml",
-      "bytes": 1415,
-      "sha256": "d649596ab3f0649446e4e6d825d0f842b40ef29a7f2b2f85fbd8ac5060481ef6"
-    },
-    {
-      "path": "overlays/projection_profile_additions.yaml",
-      "bytes": 2900,
-      "sha256": "c264f75c392bde4e3addcd77bc49a2b13d2497a1a091a5b5ab71ea35f6357cfc"
-    },
-    {
-      "path": "overlays/vocabulary_additions.yaml",
-      "bytes": 3246,
-      "sha256": "05ec0d782e8e7591418dea2bbc1515fcc44cfd81f9eed8a8fad4e85cc424e89c"
-    },
-    {
-      "path": "semantics/strategic_planner_value_composition.schema.yaml",
-      "bytes": 41267,
-      "sha256": "24dd5ff14e792332288bae02034491b021ca2682206f23b89db15d129aeb8d8a"
-    },
-    {
-      "path": "semantics/strategic_planner_value_projection.schema.yaml",
-      "bytes": 34753,
-      "sha256": "605c3ab3f74cf74f2c25bc1818d205722ceaef9258f2d0c1ce7bf54f18ef1516"
-    },
-    {
-      "path": "semantics/strategic_value_model.yaml",
-      "bytes": 28913,
-      "sha256": "28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69"
-    },
-    {
-      "path": "tests/falsification_cases.json",
-      "bytes": 4781,
-      "sha256": "1166cd95770029ba49948c3f1dd25887b532c0d1c38ad131264d1a017b7177d8"
-    },
-    {
-      "path": "tests/reduction_closure.py",
-      "bytes": 14176,
-      "sha256": "be4a38367299b1774b480fe10ef4e7d1d5c00fdcc6c8249c6a1ceefad1619cf4"
-    },
-    {
-      "path": "tests/run_native_schema_qualification.py",
-      "bytes": 7335,
-      "sha256": "6f1f606d84f78df1ea39733cf5305e39bac28331bdaa443adbfcfa7d84b50fd7"
-    },
-    {
-      "path": "tests/run_strategic_value_falsifiers.py",
-      "bytes": 5284,
-      "sha256": "0c54ef258976a1c25adcdffb7738a0406c4c8c964993ee19c824e682cb1d9063"
-    },
-    {
-      "path": "tests/test_alignment.py",
-      "bytes": 4636,
-      "sha256": "ca42c4f49ffbf7c957daa28e469a1f88ca14e4352ec0a1f13970dea3bf74d01e"
-    },
-    {
-      "path": "tests/test_candidate.py",
-      "bytes": 13353,
-      "sha256": "81c880c1f19583a3a86ed5754d87cac027ac764850c5684ab91263cdb70f2e92"
-    },
-    {
-      "path": "tests/test_irreducibility.py",
-      "bytes": 5858,
-      "sha256": "b7f4019973d04bf8b359474575ce7dd04e9bc09b4dbedcc85fc42886eb8d758c"
-    },
-    {
-      "path": "tests/test_new_invariants.py",
-      "bytes": 2691,
-      "sha256": "9ed1b028062cf6db77992f7b27da58fe814cc19927f9a015df0e24861c21fe53"
-    },
-    {
-      "path": "tests/test_partition_method_alignment.py",
-      "bytes": 7633,
-      "sha256": "59b4d5e8fe233e4e429842798ae1fdd36d442e145fe609d7d60490096f7be64e"
-    },
-    {
-      "path": "tests/test_projection_composition_schema.py",
-      "bytes": 8920,
-      "sha256": "93a3f802caaa8a7d904059d29dc2d5b7381cdb9bceb72a6db95bf99d8b53e6a2"
-    },
-    {
-      "path": "tests/test_reduction_closure.py",
-      "bytes": 14827,
-      "sha256": "cce2133e57559d24e3a71259d79dd23113965ab00c424f41ee0b90521a81c34b"
-    },
-    {
-      "path": "tests/test_schema_hardening.py",
-      "bytes": 6307,
-      "sha256": "3162c8c407d8c36297abd88d132d51eb8c49a6ccb0091ba9a36b8145da5aa743"
-    },
-    {
-      "path": "tests/test_six_falsifications.py",
-      "bytes": 3124,
-      "sha256": "b3b95c575f503a9b73bbca0f9c9dbf5e00ffaa1226a4e0133b0ca5d88e6846da"
-    },
-    {
-      "path": "tools/reduce_to_two_invariants.py",
-      "bytes": 13654,
-      "sha256": "e1b0549fc773bb89d863e45024cdef471543deb91180a3dbd06bf35c160f11f0"
-    }
-  ],
-  "no_skill_files": true
+	"schema": "l9.strategic-value-dotgithub-qualification-candidate/v3",
+	"status": "TWO_INVARIANT_REDUCTION_LOCAL_PASS_COMPOSITION_UNKNOWN_NOT_ADMITTED",
+	"pack_id": "SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1",
+	"base_repo": "Quantum-L9/.github",
+	"base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"source_pr": 212,
+	"source_candidate_sha": "85531616cee2da94bbb7154418a78537549a4d76",
+	"donor": "Quantum-L9/l9-wip#6",
+	"native_compiler_source_repo": "Quantum-L9/l9-semantic-compiler-engine",
+	"native_compiler_source_sha": "3bf1a8241452332637ba0daffeee55c433f93e05",
+	"proposed_global_invariants": 2,
+	"original_fourteen_total_meanings": 14,
+	"original_fourteen_relocated_to_model_contract": 12,
+	"additional_candidate_meanings_relocated": 6,
+	"total_preserved_candidate_meanings": 20,
+	"selected_governing_invariants": 12,
+	"source_classes": 5,
+	"composition_profiles": 1,
+	"canonical_destination_paths": 13,
+	"local_tests": 82,
+	"local_test_exit_code": 0,
+	"local_test_pass": true,
+	"independently_runnable_purpose_built_falsifiers": 6,
+	"schema_fix_counts": {
+		"boolean_true_const_each": 21,
+		"typed_array_min_each": 37,
+		"lineage_const_pins_each": 42,
+		"governing_enum_pins_each": 8
+	},
+	"producer_negative_controls": "16_NEGATIVES_2_POSITIVES_ALL_MECHANISMS_MATCHED",
+	"independent_review": "SEPARATE_AGENT_REVIEW_NOT_HUMAN_OR_OWNER",
+	"native_schema_qualification": "PASS_26_CHECKS_COMPILER_3bf1a82",
+	"five_source_compilation": "PASS_AGAINST_LOCAL_REHEARSAL_REVISION_0b50cf7_TREE_bb07371",
+	"composition": "UNKNOWN_REQUIRED_PROVENANCE_DECLARED_CONSTRAINTS_UNRESOLVED",
+	"native_semantic_validation": "ORDINARY_CHECKS_PASS_SC008_SC010_FAIL_SUCCESSOR_RELEASE_INVENTORY_REQUIRED",
+	"canonical_admission": "NOT_PERFORMED",
+	"remote_mutation": "candidate-pack PR only; no canonical semantics, release, merge or admission",
+	"historical_evidence_preserved": [
+		"evidence/VALIDATION.json",
+		"evidence/SV015_falsification.json..SV020",
+		"evidence/qualification_*.log"
+	],
+	"files": [
+		{
+			"path": "ADMISSION_INVARIANT_REVIEW.md",
+			"bytes": 4454,
+			"sha256": "99cf4d56de176d9782ba01306668cf331d6820674597c03a5b456975c3b092e7"
+		},
+		{
+			"path": "IRREDUCIBILITY_DISPOSITION.md",
+			"bytes": 7249,
+			"sha256": "f3a14d085fc86a07b48708ec6b9073928e048ea02f9069a398cafaa10c087a5d"
+		},
+		{
+			"path": "IRREDUCIBILITY_OWNER_REVIEW.md",
+			"bytes": 3618,
+			"sha256": "dc01297d3199b8cdcc344a57703e062ca5b766fd4b0e5dc28feb00e5b4e8888d"
+		},
+		{
+			"path": "PR6_MATHEMATICAL_ALIGNMENT.md",
+			"bytes": 2912,
+			"sha256": "83aadaadef60fe8a49d87df74f9285140f7ff4f203b51c915d0cde8e03496f57"
+		},
+		{
+			"path": "README.md",
+			"bytes": 10297,
+			"sha256": "c95cc8fd33838a252b8b2c27fb0b6f5113d2dd9b0c604a03fd30637783ca8d5f"
+		},
+		{
+			"path": "SCHEMA_QUALIFICATION_REVIEW.md",
+			"bytes": 8901,
+			"sha256": "3b6d793ca7859c1239b5221d55902ea0db6a44401ef1ed3cadead6c42f251042"
+		},
+		{
+			"path": "apply_to_pinned_checkout.py",
+			"bytes": 27695,
+			"sha256": "7208096e14f670746caa8945a93534367458efab10c0ca668e4f923fcd5ded04"
+		},
+		{
+			"path": "evidence/SV015_falsification.json",
+			"bytes": 447,
+			"sha256": "e0223ef5327ce1668286ad102f587fcac4138314a3bcc9cc5e341ca046cd6afe"
+		},
+		{
+			"path": "evidence/SV016_falsification.json",
+			"bytes": 453,
+			"sha256": "3147f52face017f7d5cdf7b08dda3709e83f0a140f9f04c33f1341203608db61"
+		},
+		{
+			"path": "evidence/SV017_falsification.json",
+			"bytes": 439,
+			"sha256": "35c877a381692545633e6963428e8f02fd827d1648441ce51a0467dade5b906b"
+		},
+		{
+			"path": "evidence/SV018_falsification.json",
+			"bytes": 449,
+			"sha256": "faf90ee66e14a368ee937b04c27e6f83b99f0f5f9f9ae959588929ed6e619029"
+		},
+		{
+			"path": "evidence/SV019_falsification.json",
+			"bytes": 445,
+			"sha256": "d780d8d964119a91fb81f68a723bc874d44225be2c554e8a396c0bb12388f075"
+		},
+		{
+			"path": "evidence/SV020_falsification.json",
+			"bytes": 459,
+			"sha256": "c8ca5315945eebc017cf594bb1203a2b244188383f2258f664471c98776e3e16"
+		},
+		{
+			"path": "evidence/VALIDATION.json",
+			"bytes": 3681,
+			"sha256": "487f252a311559a507a3dcb90b13cab13c62c2db9c33631f5b09eabe578b986a"
+		},
+		{
+			"path": "evidence/native_schema_gate.json",
+			"bytes": 162,
+			"sha256": "243fb90813e5b107c68bb1ce987554f5d863bd364bb6dc8dc51dcc52ec0224ab"
+		},
+		{
+			"path": "evidence/qualification_existing_tests.log",
+			"bytes": 5609,
+			"sha256": "3ed8b838b55de779ce79f1964069842c4ef4a4bcaff9d920e22a5f04db30686e"
+		},
+		{
+			"path": "evidence/qualification_final_local_tests.log",
+			"bytes": 6425,
+			"sha256": "7e5313a648e7a457b0dc96c2b1ebafb9ee7f7efa5778d52a7d3924bd4c9b7181"
+		},
+		{
+			"path": "evidence/qualification_regression_tests.log",
+			"bytes": 6425,
+			"sha256": "d7e9980c278fc6771fe628681e93733088b213af9faeda4f9882e2e24a310b21"
+		},
+		{
+			"path": "evidence/reduction-v1/admission-readiness.json",
+			"bytes": 5061,
+			"sha256": "c8009959b9956e2dbea97adcee1a52ae8ca2ced1d6ddbc3891ef69a8436c4ca6"
+		},
+		{
+			"path": "evidence/reduction-v1/authority-resolution.json",
+			"bytes": 2416,
+			"sha256": "7952740439f96d0cd7a1b1dabaa56f6d6229607644aa3ab251cfc2d4caeba5c7"
+		},
+		{
+			"path": "evidence/reduction-v1/candidate-tests-summary.json",
+			"bytes": 381,
+			"sha256": "ae4611dae5e27d9300152702c0dc7fa59d0d45849d456fc3d81464e20a49777a"
+		},
+		{
+			"path": "evidence/reduction-v1/candidate-tests.log",
+			"bytes": 12890,
+			"sha256": "dcce9dce22591e951cdbaa973ce1afb440f692c2c56fe478769014e3260f39f6"
+		},
+		{
+			"path": "evidence/reduction-v1/determinism-comparison.json",
+			"bytes": 7697,
+			"sha256": "3e6a1d5c921254bc50dda657d223497372a6474d4fab36dc93100b589eb39d15"
+		},
+		{
+			"path": "evidence/reduction-v1/donor/contracts_additions.yaml",
+			"bytes": 6082,
+			"sha256": "b2aa7ac2f93b2cfe689d851fddc9adfdc6f618d95150f7cd5a69774d377c2f72"
+		},
+		{
+			"path": "evidence/reduction-v1/donor/falsification_cases.json.pr212",
+			"bytes": 3352,
+			"sha256": "ee597f3f8d8254254db787587f4ef01beb3dac20f69e67e5ff57601bb54fa819"
+		},
+		{
+			"path": "evidence/reduction-v1/donor/invariants_additions.yaml",
+			"bytes": 3789,
+			"sha256": "b259540393a1e30573e09317760ea9919ccc049f87a461a10c62c9bd26aa48f3"
+		},
+		{
+			"path": "evidence/reduction-v1/donor/projection_profile_additions.yaml",
+			"bytes": 2962,
+			"sha256": "ee3722c3178ab41c98f65ef76b11f6b268dd59eef59d2e2a5fe75b655a9e21c5"
+		},
+		{
+			"path": "evidence/reduction-v1/donor/strategic_planner_value_composition.schema.yaml",
+			"bytes": 33036,
+			"sha256": "79643fb3c5031074d5b3153173329bcc10d3cffdf54050861f179fc714ea48dc"
+		},
+		{
+			"path": "evidence/reduction-v1/donor/strategic_planner_value_projection.schema.yaml",
+			"bytes": 27653,
+			"sha256": "10323a7b8bf729db1ef811e511ebd9c434477090d957a95178ae1a2fc4813730"
+		},
+		{
+			"path": "evidence/reduction-v1/donor/strategic_value_model.yaml",
+			"bytes": 23792,
+			"sha256": "189e44474315ed5c5770a6d1246264297a0dddaf7d704f45d5a1611d7e237088"
+		},
+		{
+			"path": "evidence/reduction-v1/falsification-results.json",
+			"bytes": 6478,
+			"sha256": "913dab3f6ff89b46a8a91eb19cfe9c94c18dd94490e8c3b577358e95491be0a3"
+		},
+		{
+			"path": "evidence/reduction-v1/independent-evidence-review.md",
+			"bytes": 4979,
+			"sha256": "60f82b4bb0a3b12fe317f12d993b9ee3f5acc57872045c6e85bc18490852a438"
+		},
+		{
+			"path": "evidence/reduction-v1/native-schema-results.json",
+			"bytes": 5745,
+			"sha256": "6304a5ce330c644302081cc0bc32c7b1556b68c7b38d592590b4d96ec956065d"
+		},
+		{
+			"path": "evidence/reduction-v1/native-semantic-validation-before-derivation-rebind.log",
+			"bytes": 15043,
+			"sha256": "63a30569b27e81f737c7226e28e25b8dd864330f69ed96e4ab6542270eaffe09"
+		},
+		{
+			"path": "evidence/reduction-v1/native-semantic-validation.log",
+			"bytes": 14285,
+			"sha256": "8df2569b8b4e8f4e96f3d7b54cc4c9fac313c3196c91458449bd09570c04d22c"
+		},
+		{
+			"path": "evidence/reduction-v1/owner-disposition-ledger.yaml",
+			"bytes": 9988,
+			"sha256": "705ddf50502058c059f44cebdb4c39f2b3973c09aa1e0175ca3b2cd32051e762"
+		},
+		{
+			"path": "evidence/reduction-v1/producer-negative-controls.json",
+			"bytes": 12680,
+			"sha256": "4e7e93d690c3225d3a11698ff25099093c0affcbd2e6a733bbba8e443a08b47f"
+		},
+		{
+			"path": "evidence/reduction-v1/producer_negative_controls.py",
+			"bytes": 14730,
+			"sha256": "6f11d9530af5b26d02953fecb0e512a02fc203486b762ca9659ee2f35b5214ad"
+		},
+		{
+			"path": "evidence/reduction-v1/projection-run1.tar",
+			"bytes": 225280,
+			"sha256": "32f62fd7c84ccd300bd8467b2c91de3edbac349b42d99ddaef235b948f25bfd6"
+		},
+		{
+			"path": "evidence/reduction-v1/projection-run2.tar",
+			"bytes": 225280,
+			"sha256": "1b9c7fe508fd33969a6c13615b1543b00cad8a9168c149fe1c98e5ee82707a83"
+		},
+		{
+			"path": "evidence/reduction-v1/semantic-reduction-diff.md",
+			"bytes": 5141,
+			"sha256": "c9c43d5ae7288876b9d85db56f21f60b1f730ffef725a27eb5749353446a480a"
+		},
+		{
+			"path": "evidence/reduction-v1/source-digest-lock.json",
+			"bytes": 4190,
+			"sha256": "00db83b7d12af5d693b718766cbed4fd1d5948332d5d72a325d9ca64d7b7a4af"
+		},
+		{
+			"path": "evidence/reduction-v1/source-reference-closure.json",
+			"bytes": 4271,
+			"sha256": "cb989f68211c95f40a2c4eee61b4e4d213dae95562f9c7f5035c4b4e4830bf5c"
+		},
+		{
+			"path": "evidence/six_falsification_cases.json",
+			"bytes": 1817,
+			"sha256": "e3ae81af6b808f9c2046ca5933b3befe0378f12541d684729a150e1aec7babf1"
+		},
+		{
+			"path": "overlays/composition_profile_additions.yaml",
+			"bytes": 985,
+			"sha256": "789826d08b1489d2b999f6974e6b28591c177f0897c52b93678edcf3b10df106"
+		},
+		{
+			"path": "overlays/contracts_additions.yaml",
+			"bytes": 6181,
+			"sha256": "dcae0ce039f4277a44442436da0907a41ec8bace98f9aaa4fa594c57dcc41e8f"
+		},
+		{
+			"path": "overlays/invariants_additions.yaml",
+			"bytes": 1415,
+			"sha256": "d649596ab3f0649446e4e6d825d0f842b40ef29a7f2b2f85fbd8ac5060481ef6"
+		},
+		{
+			"path": "overlays/projection_profile_additions.yaml",
+			"bytes": 2900,
+			"sha256": "c264f75c392bde4e3addcd77bc49a2b13d2497a1a091a5b5ab71ea35f6357cfc"
+		},
+		{
+			"path": "overlays/vocabulary_additions.yaml",
+			"bytes": 3246,
+			"sha256": "05ec0d782e8e7591418dea2bbc1515fcc44cfd81f9eed8a8fad4e85cc424e89c"
+		},
+		{
+			"path": "semantics/strategic_planner_value_composition.schema.yaml",
+			"bytes": 45273,
+			"sha256": "70d95c34f9979c82b41baee44a2658905a467995cb9c246b2a3dd6afbe00d61f"
+		},
+		{
+			"path": "semantics/strategic_planner_value_projection.schema.yaml",
+			"bytes": 38627,
+			"sha256": "f5181c76411adfbb24a034678e5fa305017ca039e6dc9f69e7fbe0f7752c7b3a"
+		},
+		{
+			"path": "semantics/strategic_value_model.yaml",
+			"bytes": 28913,
+			"sha256": "28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69"
+		},
+		{
+			"path": "tests/falsification_cases.json",
+			"bytes": 5656,
+			"sha256": "6c0335c6fbb6e602ef0cb5234ca1df4a117ced91b0bfe5700bc285d38a204316"
+		},
+		{
+			"path": "tests/reduction_closure.py",
+			"bytes": 15308,
+			"sha256": "c1c7f4b0c5b53a873ddb7273d00f5d66886eb755ce995b1ec6fa322125b7b055"
+		},
+		{
+			"path": "tests/run_native_schema_qualification.py",
+			"bytes": 7776,
+			"sha256": "8315f529025ed4f605e1191a83c3160ea12f739fa41feebec05705e0dab28ecc"
+		},
+		{
+			"path": "tests/run_strategic_value_falsifiers.py",
+			"bytes": 5284,
+			"sha256": "0c54ef258976a1c25adcdffb7738a0406c4c8c964993ee19c824e682cb1d9063"
+		},
+		{
+			"path": "tests/test_alignment.py",
+			"bytes": 4671,
+			"sha256": "514fbb52efcac3289d31eb357c545770d58c3df406301356c8a134b69c013003"
+		},
+		{
+			"path": "tests/test_candidate.py",
+			"bytes": 13353,
+			"sha256": "81c880c1f19583a3a86ed5754d87cac027ac764850c5684ab91263cdb70f2e92"
+		},
+		{
+			"path": "tests/test_irreducibility.py",
+			"bytes": 5858,
+			"sha256": "b7f4019973d04bf8b359474575ce7dd04e9bc09b4dbedcc85fc42886eb8d758c"
+		},
+		{
+			"path": "tests/test_new_invariants.py",
+			"bytes": 2691,
+			"sha256": "9ed1b028062cf6db77992f7b27da58fe814cc19927f9a015df0e24861c21fe53"
+		},
+		{
+			"path": "tests/test_partition_method_alignment.py",
+			"bytes": 7633,
+			"sha256": "59b4d5e8fe233e4e429842798ae1fdd36d442e145fe609d7d60490096f7be64e"
+		},
+		{
+			"path": "tests/test_projection_composition_schema.py",
+			"bytes": 8920,
+			"sha256": "93a3f802caaa8a7d904059d29dc2d5b7381cdb9bceb72a6db95bf99d8b53e6a2"
+		},
+		{
+			"path": "tests/test_reduction_closure.py",
+			"bytes": 17701,
+			"sha256": "34a7f9df1318b73f16900f622f739226d39f5e14c97896b92bc1a97663cdef8e"
+		},
+		{
+			"path": "tests/test_schema_hardening.py",
+			"bytes": 6313,
+			"sha256": "ea5ee47e279e7b923bdcacc98467d6d8edd3151ff9bf8cea3c6bfdf1b2010e48"
+		},
+		{
+			"path": "tests/test_six_falsifications.py",
+			"bytes": 3124,
+			"sha256": "b3b95c575f503a9b73bbca0f9c9dbf5e00ffaa1226a4e0133b0ca5d88e6846da"
+		},
+		{
+			"path": "tools/reduce_to_two_invariants.py",
+			"bytes": 14263,
+			"sha256": "332b850688119691ca99d5ede0c253f978720b9230bf629a7537700f7448b8c8"
+		}
+	],
+	"no_skill_files": true
 }

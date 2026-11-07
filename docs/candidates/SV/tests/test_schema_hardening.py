@@ -118,7 +118,7 @@ class SchemaHardeningTests(unittest.TestCase):
                     "contract_obligation",
                     "when",
                 ):
-                    self.assertEqual(props[field], {"type": "string"})
+                    self.assertEqual(props[field], {"const": record[field]})
 
     def test_derived_profile_and_composition_version_unmodified(self):
         profile = load("overlays/projection_profile_additions.yaml")[
