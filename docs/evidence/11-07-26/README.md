@@ -8,6 +8,8 @@ This directory records local diagnostic evidence only. It does not change canoni
 
 The baseline consumer verifier returned `BUNDLE_VERIFIED` at the named revision; the actual local `--check` exited 0. All ten candidate projections and compositions returned `unknown` because output schema criteria were unresolved. Their raw outputs were deterministic across two runs, but the candidates were not qualified and no consumer bundle replay was established for them.
 
+The later [`authority-resolution/`](authority-resolution/) evidence records a separate producer qualification at a different candidate revision, including a passing producer path and an unresolved schema-interpreter limitation. It does not retroactively change the earlier results.
+
 ## Earlier campaign evidence
 
 `campaign-logs/` preserves the earlier generator, validation, discovery, and replay logs, plus the candidate invariant observations. These logs record different points in the investigation; for example, the candidate validation logs record the two SC-008 release-inventory failures, while the untouched baseline validation passed. The existing release record was not rewritten.
