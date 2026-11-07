@@ -93,15 +93,12 @@ properties:
               const: Quantum-L9/.github
             source_invariants:
               type: string_list
-              min_items: 1
             requires:
               type: string_list
             guarantees:
               type: string_list
-              min_items: 1
             forbidden:
               type: string_list
-              min_items: 1
             outcomes:
               type: object
   authority_model:
@@ -134,10 +131,8 @@ properties:
                 const: Quantum-L9/.github
               roles:
                 type: string_list
-                min_items: 1
               does_not_own:
                 type: string_list
-                min_items: 1
           canonical:
             type: object
             required:
@@ -176,7 +171,6 @@ properties:
         properties:
           global_requirements:
             type: string_list
-            min_items: 1
           candidate_generation_is_not_admission:
             const: true
           self_admission_without_target_class_authority_forbidden:
@@ -192,7 +186,6 @@ properties:
         properties:
           requirements:
             type: string_list
-            min_items: 1
           requires_global_authority:
             const: true
           candidate_generation_is_not_admission:
@@ -204,7 +197,6 @@ properties:
         properties:
           rules:
             type: string_list
-            min_items: 1
       human_authority:
         type: object
         required:
@@ -212,7 +204,6 @@ properties:
         properties:
           rules:
             type: string_list
-            min_items: 1
       escalation_rules:
         type: object
         required:
