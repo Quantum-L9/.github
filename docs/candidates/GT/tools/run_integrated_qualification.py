@@ -202,6 +202,48 @@ def composition_digest(root, revision, ref):
     return profile_digest(rows[0])
 
 
+EXPECTED_SV_COMPOSITION_UNRESOLVED = frozenset(
+    "declared_constraint:required_provenance:" + name
+    for name in (
+        "composition_profile_digest",
+        "composition_profile_ref",
+        "source_projection_digests",
+        "source_projection_refs",
+    )
+)
+
+
+def acceptance(results):
+    """Every projection and the GT composition must pass with exit 0.
+
+    The one admitted deviation is the SV composition returning ``unknown``
+    (exit 3) on exactly its four ``required_provenance`` declarations, an open
+    owner decision in PR #215. Anything else is a qualification failure.
+    """
+    failures = []
+    for key, row in sorted(results.items()):
+        artifacts = row["artifacts"]
+        unresolved = {c for a in artifacts for c in (a["unresolved_criteria"] or [])}
+        if key == "sv:compose" and (row["exit_code"], row["result"]) == (3, "unknown"):
+            if unresolved != EXPECTED_SV_COMPOSITION_UNRESOLVED:
+                failures.append(
+                    f"{key}: unknown on unexpected criteria {sorted(unresolved)}"
+                )
+            continue
+        if (row["exit_code"], row["status"], row["result"]) != (0, "succeeded", "pass"):
+            failures.append(
+                f"{key}: exit={row['exit_code']} status={row['status']} result={row['result']}"
+            )
+        elif len(artifacts) != 1 or artifacts[0]["result"] != "pass" or unresolved:
+            failures.append(f"{key}: artifact not a single unconditional pass")
+    expected = {f"gt:{c}" for c in (*PROFILES["gt"]["classes"], "compose")} | {
+        f"sv:{c}" for c in (*PROFILES["sv"]["classes"], "compose")
+    }
+    if set(results) != expected:
+        failures.append(f"result keys {sorted(results)} != expected {sorted(expected)}")
+    return failures
+
+
 def tree_digests(base):
     digests = {}
     for path in sorted(p for p in base.rglob("*") if p.is_file()):
@@ -254,7 +296,7 @@ def main(argv=None):
         check=False,
     ).stdout.strip()
     summary = {
-        "schema": "l9.gt.integrated-qualification/v1",
+        "schema": "l9.gt.integrated-qualification/v2",
         "authority_revision": revision,
         "authority_tree": subprocess.run(
             ["git", "-C", str(root), "rev-parse", revision + "^{tree}"],
@@ -263,6 +305,7 @@ def main(argv=None):
             check=False,
         ).stdout.strip(),
         "compiler_revision": compiler_rev,
+        "acceptance_failures": acceptance(run1),
         "run1": run1,
         "run2_equal_results": run1 == run2,
         "run1_output_digests": d1,
@@ -276,7 +319,13 @@ def main(argv=None):
             {k: v for k, v in summary.items() if k != "run1_output_digests"}, indent=2
         )
     )
-    return 0
+    accepted = (
+        not summary["acceptance_failures"]
+        and summary["run2_equal_results"]
+        and summary["byte_identical_outputs"]
+    )
+    print("QUALIFICATION=" + ("ACCEPTED" if accepted else "REJECTED"), file=sys.stderr)
+    return 0 if accepted else 1
 
 
 if __name__ == "__main__":

@@ -55,7 +55,7 @@
 		{
 			"path": "README.md",
 			"bytes": 4682,
-			"sha256": "02947031ac7bafe255ce565b6a8b55bedab3b11caba3567c6d7146b7aba4088b"
+			"sha256": "b69951210fda031dce2b6ad5d954d2f10b8d1650166d56d1c1092687b1980c3b"
 		},
 		{
 			"path": "REMEDIATION_LEDGER.md",
@@ -74,8 +74,8 @@
 		},
 		{
 			"path": "apply_to_pinned_checkout.py",
-			"bytes": 31259,
-			"sha256": "3224d5e117cd4eee273287cb9b3b5536111f806610ac97cd0cdfdc9585a5e1d6"
+			"bytes": 31622,
+			"sha256": "bf7c4270308e7c93fd8af7ab1b335b2db7ecf53c10291486750a6bbf7b10401c"
 		},
 		{
 			"path": "evidence/authority_binding.json",
@@ -109,8 +109,8 @@
 		},
 		{
 			"path": "evidence/integration-v1/qualification-summary.json",
-			"bytes": 7625,
-			"sha256": "452a7656def2e482bd36f0711e72d9d5fc50b3bbbdc4a0b7ea8c6dd068c2218f"
+			"bytes": 7653,
+			"sha256": "085df41ca723cb25b98164da3bd35cff72ab194761d816cca2116d561e16f8f5"
 		},
 		{
 			"path": "evidence/integration-v1/rehearsal.json",
@@ -219,8 +219,8 @@
 		},
 		{
 			"path": "tests/test_applier.py",
-			"bytes": 14460,
-			"sha256": "c536ae4b107d39e349906026b48d597153474b8b816894a832595da1c198053e"
+			"bytes": 15989,
+			"sha256": "c80e240383cd36c74728d7c253565d21ad885742298bd63577d99c579a35223d"
 		},
 		{
 			"path": "tests/test_candidate.py",
@@ -234,8 +234,8 @@
 		},
 		{
 			"path": "tests/test_sv_alignment.py",
-			"bytes": 10634,
-			"sha256": "6a9e09540e69708b935232ed90a1e920f2bec1589f9064e6ee8ff3326bba2d2f"
+			"bytes": 11614,
+			"sha256": "58244cc20dd80909b14ad48c318a48a810dcce98d1113e1f0e690264a461a1c8"
 		},
 		{
 			"path": "tools/gt_producer_negative_controls.py",
@@ -249,8 +249,8 @@
 		},
 		{
 			"path": "tools/run_integrated_qualification.py",
-			"bytes": 9781,
-			"sha256": "4917775db3b50207afbbeb6538653541541ff163d51cdcb645e8f3e64aefdbe5"
+			"bytes": 11878,
+			"sha256": "7b79e80b03d93abdb38eb2cbc0350439cf4155907b089e924752b912f58e9d15"
 		},
 		{
 			"path": "tools/verify_consumer_envelope.py",

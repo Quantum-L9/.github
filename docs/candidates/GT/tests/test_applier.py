@@ -303,6 +303,39 @@ class DependentStage(unittest.TestCase):
             ):
                 applier.generate_dependent(root)
 
+    def test_refuses_incomplete_release_a_foundation(self):
+        cases = {
+            "composition profile missing": (
+                "semantics/composition_profiles.yaml",
+                "l9.compose/strategic-planner-interaction@1",
+                "l9.compose/other@1",
+            ),
+            "forbidden criterion missing": (
+                "semantics/projection_profiles.yaml",
+                "    sv_semantic_records_excluded_from_gt_projection:\n",
+                "    renamed_criterion:\n",
+            ),
+            "schema registration missing": (
+                "semantics/generic_compiler_manifest.yaml",
+                "  - strategic_interaction_composition.schema.yaml\n",
+                "",
+            ),
+        }
+        for label, (rel, old, new) in cases.items():
+            with self.subTest(label), tempfile.TemporaryDirectory() as tmp:
+                root = synthetic_sv_applied(Path(tmp) / "repo")
+                changed, *_ = applier.generate_core(root)
+                self.assertEqual(changed[rel].count(old), 1)
+                changed[rel] = changed[rel].replace(old, new)
+                for path, text in changed.items():
+                    (root / path).write_text(text)
+                head = init_repo(root)
+                with (
+                    mock.patch.object(applier, "ADMITTED_FOUNDATION_REVISION", head),
+                    self.assertRaisesRegex(ValueError, "not the complete release A"),
+                ):
+                    applier.generate_dependent(root)
+
     def test_refuses_foundation_without_gt_core(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = synthetic_sv_applied(Path(tmp) / "repo")

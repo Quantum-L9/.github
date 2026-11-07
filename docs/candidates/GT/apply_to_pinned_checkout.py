@@ -651,12 +651,19 @@ def generate_dependent(checkout):
         return (checkout / rel).read_text(encoding="utf-8")
 
     docs = {key: yaml.safe_load(current(rel)) for key, rel in LEDGERS.items()}
-    verify_sv_core_present(docs)
     inv_ids = {r["id"] for r in docs["invariants"]["invariants"]}
     contract_ids = [c["id"] for c in docs["contracts"]["contracts"]]
     if GT_INVARIANT not in inv_ids or contract_ids.count(GT_CORE_CONTRACT_ID) != 1:
         raise ValueError("GT core is not present at the admitted foundation")
-    _gt_profile(docs["projection_profiles"])
+    # The whole release-A foundation, not just the profile's presence: the SV
+    # core, GT law, both GT profiles and their selections, the registered
+    # forbidden criterion, and both schemas registered and resolvable.
+    try:
+        verify_assembled(checkout, {})
+    except (ValueError, KeyError, TypeError) as exc:
+        raise ValueError(
+            f"admitted foundation is not the complete release A: {exc}"
+        ) from exc
     dependent = overlay("overlays/contracts_sv_dependent.yaml")["contracts"]
     if len(dependent) != 1 or dependent[0]["id"] != GT_DEPENDENT_CONTRACT_ID:
         raise ValueError("dependent overlay must carry exactly the GT+SV contract")

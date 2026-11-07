@@ -170,6 +170,29 @@ class IntegratedQualificationEvidence(unittest.TestCase):
             self.summary["compiler_revision"], self.rehearsal["compiler_revision"]
         )
 
+    def test_qualification_acceptance_policy(self):
+        sys.path.insert(0, str(ROOT / "tools"))
+        import copy
+
+        from run_integrated_qualification import acceptance
+
+        run = self.summary["run1"]
+        self.assertEqual(self.summary["acceptance_failures"], [])
+        self.assertEqual(acceptance(run), [])
+        broken = copy.deepcopy(run)
+        broken["gt:invariants"].update(exit_code=2, status="failed", result=None)
+        self.assertTrue(acceptance(broken))
+        gt_unknown = copy.deepcopy(run)
+        gt_unknown["gt:compose"].update(exit_code=3, result="unknown")
+        self.assertTrue(acceptance(gt_unknown))
+        sv_extra = copy.deepcopy(run)
+        sv_extra["sv:compose"]["artifacts"][0]["unresolved_criteria"].append(
+            "declared_constraint:other"
+        )
+        self.assertTrue(acceptance(sv_extra))
+        missing = {k: v for k, v in run.items() if k != "gt:contracts"}
+        self.assertTrue(acceptance(missing))
+
     def test_archived_outputs_match_recorded_digests(self):
         import hashlib
 

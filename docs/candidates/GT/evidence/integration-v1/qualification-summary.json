@@ -1,4 +1,5 @@
 {
+	"acceptance_failures": [],
 	"authority_revision": "0827f9192b77c541ef5c446be262dba57c729e85",
 	"authority_tree": "58d1118a3f12ecaa98c510d6398bdd0502465532",
 	"byte_identical_outputs": true,
@@ -175,5 +176,5 @@
 		"receipts/ef5a9c71d6e2a2b24189f7858814ec62c120ac8e19176fe8cdb8879f63e79ef6.json": "773fb43b9c84a2b3f12c7ba1d75a17840687bd48991b2bca5a48237dfc0ec650"
 	},
 	"run2_equal_results": true,
-	"schema": "l9.gt.integrated-qualification/v1"
+	"schema": "l9.gt.integrated-qualification/v2"
 }
