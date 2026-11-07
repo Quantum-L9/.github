@@ -26,7 +26,7 @@ The compiler revision is unchanged from #210/#211. It was not modified, and `sch
 | `constraint-classification.json` | Every retained `required`/`const`/`enum`/array `min_items` constraint with its basis class |
 | `exclusion-ledger.json` | The seven source-field exclusions, with artifact and receipt coordinates |
 | `make-validate.log`, `make-check.log` | Gates at `530fe93` (PR #214 head) |
-| `harness/` | `qualify.py`, `patch01.py`, `classify.py`, `scan.py`, as run |
+| `harness.zip` | `qualify.py`, `patch01.py`, `classify.py`, `scan.py`, byte-exact as run. Archived like the earlier harnesses in this directory, because they are diagnostic tools and not repository source |
 
 Absolute paths inside the JSON files are the original sandbox paths. They are not repository paths.
 
