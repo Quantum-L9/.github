@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Regenerate (or ``--check``) MANIFEST.json, SHA256SUMS.txt and the candidate revision.
 
-Inputs are the pack's own files; MANIFEST.json, SHA256SUMS.txt and
+JSON outputs are compared by parsed content, because Biome owns JSON layout in
+this repository: regenerate, then run ``biome format --write`` on them. Inputs
+are the pack's own files; MANIFEST.json, SHA256SUMS.txt and
 evidence/candidate_revision.json are derived and excluded from the inventory.
 The candidate revision is sha256 over ``path NUL bytes NUL`` for the normative
 candidate files in a fixed order. It is a local digest, not an admission or
@@ -109,16 +111,22 @@ def render():
     }
 
 
+def _current(rel, text):
+    """JSON outputs compare by content (Biome owns their layout); text by bytes."""
+    path = ROOT / rel
+    if not path.exists():
+        return False
+    if rel.endswith(".json"):
+        return json.loads(path.read_text()) == json.loads(text)
+    return path.read_text() == text
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
     outputs = render()
-    stale = [
-        rel
-        for rel, text in outputs.items()
-        if not (ROOT / rel).exists() or (ROOT / rel).read_text() != text
-    ]
+    stale = [rel for rel, text in outputs.items() if not _current(rel, text)]
     if args.check:
         for rel in stale:
             print("STALE=" + rel)

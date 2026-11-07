@@ -1,18 +1,18 @@
 {
-  "sha256": "48e0ec0004f9af06cc778e1b6ce4a30d6f6a6bc684b9eb1b6a04dd1e66187f8e",
-  "paths": [
-    "overlays/vocabulary_additions.yaml",
-    "overlays/invariants_additions.yaml",
-    "overlays/contracts_gt_core.yaml",
-    "overlays/contracts_sv_dependent.yaml",
-    "overlays/projection_profile_additions.yaml",
-    "overlays/projection_forbidden_constraint_additions.yaml",
-    "overlays/composition_profile_additions.yaml",
-    "semantics/strategic_interaction_projection.schema.yaml",
-    "semantics/strategic_interaction_composition.schema.yaml",
-    "schemas/gt_sv_consumer_assessment.candidate.schema.json"
-  ],
-  "notes": "locally computed digest over ordered path\\0bytes\\0; not canonical git/admission or compiler digest",
-  "sv_candidate_head": "a64d05a152b5920dad577cead26618a6f05fef09",
-  "canonical_target": "020a94bea86e7c5c5e4107da7014ec259508f397"
+	"sha256": "48e0ec0004f9af06cc778e1b6ce4a30d6f6a6bc684b9eb1b6a04dd1e66187f8e",
+	"paths": [
+		"overlays/vocabulary_additions.yaml",
+		"overlays/invariants_additions.yaml",
+		"overlays/contracts_gt_core.yaml",
+		"overlays/contracts_sv_dependent.yaml",
+		"overlays/projection_profile_additions.yaml",
+		"overlays/projection_forbidden_constraint_additions.yaml",
+		"overlays/composition_profile_additions.yaml",
+		"semantics/strategic_interaction_projection.schema.yaml",
+		"semantics/strategic_interaction_composition.schema.yaml",
+		"schemas/gt_sv_consumer_assessment.candidate.schema.json"
+	],
+	"notes": "locally computed digest over ordered path\\0bytes\\0; not canonical git/admission or compiler digest",
+	"sv_candidate_head": "a64d05a152b5920dad577cead26618a6f05fef09",
+	"canonical_target": "020a94bea86e7c5c5e4107da7014ec259508f397"
 }

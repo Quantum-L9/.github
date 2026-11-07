@@ -1,393 +1,391 @@
 {
-  "schema": "l9.gt.producer-negative-controls/v1",
-  "authority_revision": "0827f9192b77c541ef5c446be262dba57c729e85",
-  "controls": [
-    {
-      "control": "positive_control_invariants_projection",
-      "intended_mechanism": "none",
-      "exit_code": 0,
-      "summary": {
-        "status": "succeeded",
-        "result": "pass",
-        "typed_failure": null,
-        "criterion": null,
-        "message": null,
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 0,
-        "typed_failure": null,
-        "criterion_or_message": null
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "profile_selects_sv_invariant",
-      "intended_mechanism": "forbidden payload_excludes (invariants)",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
-        "criterion": "payload_schema",
-        "message": "projected payload violates its declared output schema",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "STRUCTURAL_VALIDATION_FAILED",
-        "criterion_or_message": "payload_schema"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "profile_selects_sv_vocabulary_term",
-      "intended_mechanism": "forbidden payload_excludes (vocabulary)",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
-        "criterion": "declared_constraint:forbidden:sv_semantic_records_excluded_from_gt_projection",
-        "message": "projected payload carries content its profile forbids",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "STRUCTURAL_VALIDATION_FAILED",
-        "criterion_or_message": "sv_semantic_records_excluded_from_gt_projection"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "profile_selects_sv_contract",
-      "intended_mechanism": "forbidden payload_excludes (contracts)",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
-        "criterion": "payload_schema",
-        "message": "projected payload violates its declared output schema",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "STRUCTURAL_VALIDATION_FAILED",
-        "criterion_or_message": "payload_schema"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "profile_selects_sv_invariant_with_schema_widened",
-      "intended_mechanism": "forbidden payload_excludes (invariants), schema layer bypassed",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
-        "criterion": "declared_constraint:forbidden:sv_semantic_records_excluded_from_gt_projection",
-        "message": "projected payload carries content its profile forbids",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "STRUCTURAL_VALIDATION_FAILED",
-        "criterion_or_message": "sv_semantic_records_excluded_from_gt_projection"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "profile_selects_sv_contract_with_schema_widened",
-      "intended_mechanism": "forbidden payload_excludes (contracts), schema layer bypassed",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
-        "criterion": "declared_constraint:forbidden:sv_semantic_records_excluded_from_gt_projection",
-        "message": "projected payload carries content its profile forbids",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "STRUCTURAL_VALIDATION_FAILED",
-        "criterion_or_message": "sv_semantic_records_excluded_from_gt_projection"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "profile_reverts_to_unregistered_forbidden_tokens",
-      "intended_mechanism": "PROJECTION-016: undeclared criterion stays unresolved",
-      "exit_code": 3,
-      "summary": {
-        "status": "succeeded",
-        "result": "unknown",
-        "typed_failure": null,
-        "criterion": null,
-        "message": null,
-        "unresolved_criteria": [
-          "declared_constraint:forbidden:claiming_unverified_actor_intent_as_fact",
-          "declared_constraint:forbidden:projection_ranking_or_executing"
-        ]
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 3,
-        "typed_failure": null,
-        "criterion_or_message": "declared_constraint:forbidden:projection_ranking_or_executing"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "profile_drops_one_governing_invariant",
-      "intended_mechanism": "native payload schema min_items 6",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
-        "criterion": "payload_schema",
-        "message": "projected payload violates its declared output schema",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "STRUCTURAL_VALIDATION_FAILED",
-        "criterion_or_message": "payload_schema"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "governing_invariant_id_renamed",
-      "intended_mechanism": "profile selector resolution",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/INVALID_PROFILE",
-        "criterion": null,
-        "message": "missing required selector result: $.invariants[?(@.id==\"L9-EVIDENCE-001\")]",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "INVALID_PROFILE",
-        "criterion_or_message": "missing required selector result"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "gt_core_contract_id_renamed",
-      "intended_mechanism": "profile selector resolution",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/INVALID_PROFILE",
-        "criterion": null,
-        "message": "missing required selector result: $.contracts[?(@.id==\"l9.contract/strategic-interaction-assessment@1\")]",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "INVALID_PROFILE",
-        "criterion_or_message": "missing required selector result"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "vocabulary_definition_removed",
-      "intended_mechanism": "native payload schema required field",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
-        "criterion": "payload_schema",
-        "message": "projected payload violates its declared output schema",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "STRUCTURAL_VALIDATION_FAILED",
-        "criterion_or_message": "payload_schema"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "projection_schema_discriminator_removed",
-      "intended_mechanism": "output schema discovery (properties.schema.const)",
-      "exit_code": 3,
-      "summary": {
-        "status": "succeeded",
-        "result": "unknown",
-        "typed_failure": null,
-        "criterion": null,
-        "message": null,
-        "unresolved_criteria": [
-          "payload_schema"
-        ]
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 3,
-        "typed_failure": null,
-        "criterion_or_message": "payload_schema"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "profile_digest_mutated",
-      "intended_mechanism": "profile currentness",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
-        "criterion": "profile_digest",
-        "message": "profile digest mismatch for l9.projection/strategic-planner-interaction@1",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "REVISION_MISMATCH",
-        "criterion_or_message": "profile_digest"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "source_digest_mutated",
-      "intended_mechanism": "source currentness",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
-        "criterion": "source_digest",
-        "message": "source digest mismatch for l9.source/invariants@1",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "REVISION_MISMATCH",
-        "criterion_or_message": "source_digest"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "composition_missing_namespace",
-      "intended_mechanism": "composition source_coverage exact",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/INVALID_REQUEST",
-        "criterion": "source_coverage",
-        "message": "composition must cover exactly the source classes the projection profile declares",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "INVALID_REQUEST",
-        "criterion_or_message": "source_coverage"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "composition_duplicate_source",
-      "intended_mechanism": "duplicate_source conflict",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/AMBIGUOUS_SEMANTICS",
-        "criterion": "duplicate_source",
-        "message": "a source projection may be composed once; duplicate components conflict",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "AMBIGUOUS_SEMANTICS",
-        "criterion_or_message": "duplicate_source"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "composition_profile_digest_mutated",
-      "intended_mechanism": "composition profile currentness",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
-        "criterion": "composition_profile_digest",
-        "message": "composition_profile digest mismatch for l9.compose/strategic-planner-interaction@1",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "REVISION_MISMATCH",
-        "criterion_or_message": "composition_profile_digest"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "artifact_payload_tampered",
-      "intended_mechanism": "verify-projection digest",
-      "exit_code": 2,
-      "summary": {
-        "status": "blocked",
-        "result": null,
-        "typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
-        "criterion": "projection_digest",
-        "message": "projection digest does not bind the artifact content",
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 2,
-        "typed_failure": "REVISION_MISMATCH",
-        "criterion_or_message": "projection_digest"
-      },
-      "mechanism_matched": true
-    },
-    {
-      "control": "positive_control_verify_untampered_artifact",
-      "intended_mechanism": "none",
-      "exit_code": 0,
-      "summary": {
-        "status": null,
-        "result": "pass",
-        "typed_failure": null,
-        "criterion": null,
-        "message": null,
-        "unresolved_criteria": []
-      },
-      "stderr_tail": "",
-      "expected": {
-        "exit_code": 0,
-        "typed_failure": null,
-        "criterion_or_message": null
-      },
-      "mechanism_matched": true
-    }
-  ],
-  "all_matched": true,
-  "count": 19
+	"schema": "l9.gt.producer-negative-controls/v1",
+	"authority_revision": "0827f9192b77c541ef5c446be262dba57c729e85",
+	"controls": [
+		{
+			"control": "positive_control_invariants_projection",
+			"intended_mechanism": "none",
+			"exit_code": 0,
+			"summary": {
+				"status": "succeeded",
+				"result": "pass",
+				"typed_failure": null,
+				"criterion": null,
+				"message": null,
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 0,
+				"typed_failure": null,
+				"criterion_or_message": null
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "profile_selects_sv_invariant",
+			"intended_mechanism": "forbidden payload_excludes (invariants)",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
+				"criterion": "payload_schema",
+				"message": "projected payload violates its declared output schema",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "STRUCTURAL_VALIDATION_FAILED",
+				"criterion_or_message": "payload_schema"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "profile_selects_sv_vocabulary_term",
+			"intended_mechanism": "forbidden payload_excludes (vocabulary)",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
+				"criterion": "declared_constraint:forbidden:sv_semantic_records_excluded_from_gt_projection",
+				"message": "projected payload carries content its profile forbids",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "STRUCTURAL_VALIDATION_FAILED",
+				"criterion_or_message": "sv_semantic_records_excluded_from_gt_projection"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "profile_selects_sv_contract",
+			"intended_mechanism": "forbidden payload_excludes (contracts)",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
+				"criterion": "payload_schema",
+				"message": "projected payload violates its declared output schema",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "STRUCTURAL_VALIDATION_FAILED",
+				"criterion_or_message": "payload_schema"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "profile_selects_sv_invariant_with_schema_widened",
+			"intended_mechanism": "forbidden payload_excludes (invariants), schema layer bypassed",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
+				"criterion": "declared_constraint:forbidden:sv_semantic_records_excluded_from_gt_projection",
+				"message": "projected payload carries content its profile forbids",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "STRUCTURAL_VALIDATION_FAILED",
+				"criterion_or_message": "sv_semantic_records_excluded_from_gt_projection"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "profile_selects_sv_contract_with_schema_widened",
+			"intended_mechanism": "forbidden payload_excludes (contracts), schema layer bypassed",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
+				"criterion": "declared_constraint:forbidden:sv_semantic_records_excluded_from_gt_projection",
+				"message": "projected payload carries content its profile forbids",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "STRUCTURAL_VALIDATION_FAILED",
+				"criterion_or_message": "sv_semantic_records_excluded_from_gt_projection"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "profile_reverts_to_unregistered_forbidden_tokens",
+			"intended_mechanism": "PROJECTION-016: undeclared criterion stays unresolved",
+			"exit_code": 3,
+			"summary": {
+				"status": "succeeded",
+				"result": "unknown",
+				"typed_failure": null,
+				"criterion": null,
+				"message": null,
+				"unresolved_criteria": [
+					"declared_constraint:forbidden:claiming_unverified_actor_intent_as_fact",
+					"declared_constraint:forbidden:projection_ranking_or_executing"
+				]
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 3,
+				"typed_failure": null,
+				"criterion_or_message": "declared_constraint:forbidden:projection_ranking_or_executing"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "profile_drops_one_governing_invariant",
+			"intended_mechanism": "native payload schema min_items 6",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
+				"criterion": "payload_schema",
+				"message": "projected payload violates its declared output schema",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "STRUCTURAL_VALIDATION_FAILED",
+				"criterion_or_message": "payload_schema"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "governing_invariant_id_renamed",
+			"intended_mechanism": "profile selector resolution",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/INVALID_PROFILE",
+				"criterion": null,
+				"message": "missing required selector result: $.invariants[?(@.id==\"L9-EVIDENCE-001\")]",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "INVALID_PROFILE",
+				"criterion_or_message": "missing required selector result"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "gt_core_contract_id_renamed",
+			"intended_mechanism": "profile selector resolution",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/INVALID_PROFILE",
+				"criterion": null,
+				"message": "missing required selector result: $.contracts[?(@.id==\"l9.contract/strategic-interaction-assessment@1\")]",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "INVALID_PROFILE",
+				"criterion_or_message": "missing required selector result"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "vocabulary_definition_removed",
+			"intended_mechanism": "native payload schema required field",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
+				"criterion": "payload_schema",
+				"message": "projected payload violates its declared output schema",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "STRUCTURAL_VALIDATION_FAILED",
+				"criterion_or_message": "payload_schema"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "projection_schema_discriminator_removed",
+			"intended_mechanism": "output schema discovery (properties.schema.const)",
+			"exit_code": 3,
+			"summary": {
+				"status": "succeeded",
+				"result": "unknown",
+				"typed_failure": null,
+				"criterion": null,
+				"message": null,
+				"unresolved_criteria": ["payload_schema"]
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 3,
+				"typed_failure": null,
+				"criterion_or_message": "payload_schema"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "profile_digest_mutated",
+			"intended_mechanism": "profile currentness",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
+				"criterion": "profile_digest",
+				"message": "profile digest mismatch for l9.projection/strategic-planner-interaction@1",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "REVISION_MISMATCH",
+				"criterion_or_message": "profile_digest"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "source_digest_mutated",
+			"intended_mechanism": "source currentness",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
+				"criterion": "source_digest",
+				"message": "source digest mismatch for l9.source/invariants@1",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "REVISION_MISMATCH",
+				"criterion_or_message": "source_digest"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "composition_missing_namespace",
+			"intended_mechanism": "composition source_coverage exact",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/INVALID_REQUEST",
+				"criterion": "source_coverage",
+				"message": "composition must cover exactly the source classes the projection profile declares",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "INVALID_REQUEST",
+				"criterion_or_message": "source_coverage"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "composition_duplicate_source",
+			"intended_mechanism": "duplicate_source conflict",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/AMBIGUOUS_SEMANTICS",
+				"criterion": "duplicate_source",
+				"message": "a source projection may be composed once; duplicate components conflict",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "AMBIGUOUS_SEMANTICS",
+				"criterion_or_message": "duplicate_source"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "composition_profile_digest_mutated",
+			"intended_mechanism": "composition profile currentness",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
+				"criterion": "composition_profile_digest",
+				"message": "composition_profile digest mismatch for l9.compose/strategic-planner-interaction@1",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "REVISION_MISMATCH",
+				"criterion_or_message": "composition_profile_digest"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "artifact_payload_tampered",
+			"intended_mechanism": "verify-projection digest",
+			"exit_code": 2,
+			"summary": {
+				"status": "blocked",
+				"result": null,
+				"typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
+				"criterion": "projection_digest",
+				"message": "projection digest does not bind the artifact content",
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 2,
+				"typed_failure": "REVISION_MISMATCH",
+				"criterion_or_message": "projection_digest"
+			},
+			"mechanism_matched": true
+		},
+		{
+			"control": "positive_control_verify_untampered_artifact",
+			"intended_mechanism": "none",
+			"exit_code": 0,
+			"summary": {
+				"status": null,
+				"result": "pass",
+				"typed_failure": null,
+				"criterion": null,
+				"message": null,
+				"unresolved_criteria": []
+			},
+			"stderr_tail": "",
+			"expected": {
+				"exit_code": 0,
+				"typed_failure": null,
+				"criterion_or_message": null
+			},
+			"mechanism_matched": true
+		}
+	],
+	"all_matched": true,
+	"count": 19
 }
