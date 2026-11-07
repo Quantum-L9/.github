@@ -15,6 +15,8 @@ purpose: Constrain exactly one GT-only source projection from vocabulary, invari
   No Strategic Value source or calculation belongs here.
 type: object
 properties:
+  schema:
+    const: l9.projection.strategic-planner-interaction/v1
   terms:
     type: object
     required:
@@ -153,7 +155,7 @@ properties:
             type: string
   invariants:
     type: array
-    min_items: 1
+    min_items: 6
     items:
       type: object
       required:
@@ -163,7 +165,13 @@ properties:
       - owner
       properties:
         id:
-          const: L9-GT-001
+          enum:
+          - L9-GT-001
+          - L9-AUTH-002
+          - L9-HARD-001
+          - L9-UNKNOWN-001
+          - L9-EVIDENCE-001
+          - L9-ASSURANCE-001
         statement:
           type: string
         scope:

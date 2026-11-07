@@ -261,8 +261,8 @@
       "properties": {
         "invariants": {
           "type": "array",
-          "minItems": 1,
-          "maxItems": 1,
+          "minItems": 6,
+          "maxItems": 6,
           "items": {
             "type": "object",
             "required": [
@@ -273,7 +273,14 @@
             ],
             "properties": {
               "id": {
-                "const": "L9-GT-001"
+                "enum": [
+                  "L9-GT-001",
+                  "L9-AUTH-002",
+                  "L9-HARD-001",
+                  "L9-UNKNOWN-001",
+                  "L9-EVIDENCE-001",
+                  "L9-ASSURANCE-001"
+                ]
               },
               "statement": {
                 "type": "string",
@@ -287,7 +294,87 @@
               }
             },
             "additionalProperties": false
-          }
+          },
+          "allOf": [
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "const": "L9-GT-001"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "const": "L9-AUTH-002"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "const": "L9-HARD-001"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "const": "L9-UNKNOWN-001"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "const": "L9-EVIDENCE-001"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "const": "L9-ASSURANCE-001"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          ]
         }
       },
       "additionalProperties": false

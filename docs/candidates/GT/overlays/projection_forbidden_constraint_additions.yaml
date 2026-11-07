@@ -1,0 +1,39 @@
+# GT projection forbidden-constraint registration (candidate, not admitted).
+# Applied under semantics/projection_profiles.yaml#forbidden_constraints.definitions.
+# Criterion: payload_excludes (PROJECTION-016). Excludes every SV-owned record
+# the GT-only profile could reach: the eleven SV vocabulary terms, the two
+# reduced SV invariants (PR #215 @ a64d05a) and the SV assessment contract.
+# The SV value model is a separate source class the GT profile does not select;
+# exact source-class coverage, not this criterion, keeps it out.
+forbidden_constraint_definitions:
+  sv_semantic_records_excluded_from_gt_projection:
+    criterion: payload_excludes
+    excluded_selections:
+    - source_class: vocabulary
+      selector: $.terms.strategic_value
+    - source_class: vocabulary
+      selector: $.terms.systemic_future_value
+    - source_class: vocabulary
+      selector: $.terms.strategic_value_assessment
+    - source_class: vocabulary
+      selector: $.terms.counterfactual_baseline
+    - source_class: vocabulary
+      selector: $.terms.future_effect_identity
+    - source_class: vocabulary
+      selector: $.terms.bidirectional_value_propagation
+    - source_class: vocabulary
+      selector: $.terms.value_propagation_mesh
+    - source_class: vocabulary
+      selector: $.terms.future_work_elimination
+    - source_class: vocabulary
+      selector: $.terms.capability_unlock
+    - source_class: vocabulary
+      selector: $.terms.decision_relevant_information_value
+    - source_class: vocabulary
+      selector: $.terms.decision_boundary
+    - source_class: invariants
+      selector: $.invariants[?(@.id=="L9-SV-001")]
+    - source_class: invariants
+      selector: $.invariants[?(@.id=="L9-SV-002")]
+    - source_class: contracts
+      selector: $.contracts[?(@.id=="l9.contract/strategic-value-assessment@1")]
