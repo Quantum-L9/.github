@@ -145,12 +145,12 @@
 		{
 			"path": "evidence/reduction-v1/candidate-tests-summary.json",
 			"bytes": 381,
-			"sha256": "ae4611dae5e27d9300152702c0dc7fa59d0d45849d456fc3d81464e20a49777a"
+			"sha256": "c790f15f598b3a5db0be2927671dabda3216684c66e5f7fb423ccd55ce08b35f"
 		},
 		{
 			"path": "evidence/reduction-v1/candidate-tests.log",
-			"bytes": 12890,
-			"sha256": "dcce9dce22591e951cdbaa973ce1afb440f692c2c56fe478769014e3260f39f6"
+			"bytes": 12891,
+			"sha256": "c7e747dedcccc9a6a5d030eb93e8c0a4cda866d13862335d0732b7602e866d5d"
 		},
 		{
 			"path": "evidence/reduction-v1/determinism-comparison.json",
@@ -229,8 +229,8 @@
 		},
 		{
 			"path": "evidence/reduction-v1/producer_negative_controls.py",
-			"bytes": 14730,
-			"sha256": "6f11d9530af5b26d02953fecb0e512a02fc203486b762ca9659ee2f35b5214ad"
+			"bytes": 14767,
+			"sha256": "ef84d6d66c1d1144a502e3123df24f8edbc48b85252e54c19706e460f4e1a0aa"
 		},
 		{
 			"path": "evidence/reduction-v1/projection-run1.tar",
