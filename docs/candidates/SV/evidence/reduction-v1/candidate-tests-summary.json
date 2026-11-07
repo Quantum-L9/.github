@@ -1,0 +1,10 @@
+{
+  "schema": "l9.sv-reduction-candidate-tests/v1",
+  "command": "python3 -m unittest discover -s tests -v",
+  "python": "3.13.18",
+  "pyyaml": "6.0.3",
+  "exit_code": 0,
+  "tests_run": 78,
+  "candidate_parent_commit": "e3394c958d3f87e024dd77fcfbe928b8dba44e8f",
+  "note": "Run on the working tree whose parent is candidate_parent_commit; SHA256SUMS then regenerated to cover this log."
+}

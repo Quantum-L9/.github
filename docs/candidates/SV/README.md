@@ -63,7 +63,7 @@ The last row is new in this reduction. Those three ledgers record the digests of
 ## Runnable checks
 
 ```bash
-python -m unittest discover -s tests -v                 # 86 local tests
+python -m unittest discover -s tests -v                 # 78 local tests
 python tests/run_strategic_value_falsifiers.py          # six bad/control pairs
 python tests/run_strategic_value_falsifiers.py --case SV015   # ... through SV020
 python tools/reduce_to_two_invariants.py --check        # committed files == declared reduction
