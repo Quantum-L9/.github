@@ -4,18 +4,17 @@ Candidate status: **additive successor candidate**.
 
 ## Profile and payload-schema closure
 
-- **SC-001** parses 79 canonical sources as YAML mappings, the 17 new payload schemas among them.
-- **SC-003** finds 79 unique `artifact_id` values.
+- **SC-001** parses 82 canonical sources as YAML mappings, the 20 new payload schemas among them.
+- **SC-003** finds 82 unique `artifact_id` values.
 - **SC-008** proves this release record:
-  - the manifest lists all **79** canonical sources;
+  - the manifest lists all **82** canonical sources;
   - the ADR count is **24**;
   - `HASHES.sha256` inventories every canonical source, every ADR plus the index, and this release's Markdown.
-- **Compiler evidence.** It was run at a revision whose semantics tree is byte-identical to this release's (`semantics/` tree object `6c4a971d098bf308eb77bf8079e775da4dcf9387`), using `l9-semantic-compiler` at Quantum-L9/l9-semantic-compiler-engine `dd1a2373e9cf89116bc7255250ff9c318a7b2115`:
-  - **project, compose and per-source receipt verification PASS** for `evidence-assessment`, `semantic-change-context`, `architecture-break-test`, `globalization-assessment`, `work-state-continuity`, `hard-constraint-context`;
-  - all 28 of their source projections verify;
-  - before the schemas were registered, all nine derived-schema profiles were `unknown` on `payload_schema`;
-  - `identity-assurance`, `strategic-metacognition`, `strategic-planning-context` remain `unknown`, as recorded in the README.
-- **Reproducibility.** Three independent `schema-derive` runs produced byte-identical schema files.
+- **Compiler evidence.** It was run at `dc5d05cb2666bb68c75296dd8e3392d1ddf39a0f`, whose `semantics/` tree (`d955349ec6d9359687aa0323e3a9b26836c466ac`) is this release's, using `l9-semantic-compiler` at Quantum-L9/l9-semantic-compiler-engine `dd1a2373e9cf89116bc7255250ff9c318a7b2115`:
+  - **project, compose and per-source receipt verification PASS for all ten profile pairs**;
+  - all 53 of their source projections verify;
+  - before the derived schemas were registered, all nine derived-schema profiles were `unknown` on `payload_schema`.
+- **Reproducibility.** Independent `schema-derive` runs produced byte-identical schema files.
 
 ## Existing closure
 

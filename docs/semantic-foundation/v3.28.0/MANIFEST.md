@@ -4,7 +4,7 @@ Release status: **ADDITIVE SUCCESSOR CANDIDATE**
 
 ## Install surface
 
-The release contains **79** canonical semantic YAML files:
+The release contains **82** canonical semantic YAML files:
 - `semantics/actor_registry.yaml`
 - `semantics/affected_strategic_closure.schema.yaml`
 - `semantics/architecture_break_test_composition.schema.yaml`
@@ -45,6 +45,7 @@ The release contains **79** canonical semantic YAML files:
 - `semantics/hard_constraint_context_projection.schema.yaml`
 - `semantics/identity_assertion.schema.yaml`
 - `semantics/identity_assurance_composition.schema.yaml`
+- `semantics/identity_assurance_projection.schema.yaml`
 - `semantics/identity_model.yaml`
 - `semantics/invariants.yaml`
 - `semantics/ir_catalog.yaml`
@@ -72,11 +73,13 @@ The release contains **79** canonical semantic YAML files:
 - `semantics/solver_catalog.yaml`
 - `semantics/strategic_cognition_model.yaml`
 - `semantics/strategic_metacognition_composition.schema.yaml`
+- `semantics/strategic_metacognition_projection.schema.yaml`
 - `semantics/strategic_plan_graph.schema.yaml`
 - `semantics/strategic_plan_metacognitive_analysis.schema.yaml`
 - `semantics/strategic_plan_model.yaml`
 - `semantics/strategic_plan_revision_candidate.schema.yaml`
 - `semantics/strategic_planning_context_composition.schema.yaml`
+- `semantics/strategic_planning_context_projection.schema.yaml`
 - `semantics/strategic_planning_episode.schema.yaml`
 - `semantics/surface_registry.yaml`
 - `semantics/technology_capabilities.yaml`
@@ -85,7 +88,7 @@ The release contains **79** canonical semantic YAML files:
 - `semantics/work_state_continuity_composition.schema.yaml`
 - `semantics/work_state_continuity_projection.schema.yaml`
 
-The v3.27.0 inventory is preserved. 17 payload schemas are added; no ledger is removed or renamed.
+The v3.27.0 inventory is preserved. 20 payload schemas are added; no ledger is removed or renamed.
 
 ## Architecture decision records
 
@@ -95,9 +98,9 @@ v3.28.0 adds no ADR.
 
 ## Semantic changes
 
-- `semantics/projection_profiles.yaml`: adds ten projection profiles, `l9.projection/authority-resolution@1`, `l9.projection/evidence-assessment@1`, `l9.projection/semantic-change-context@1`, `l9.projection/architecture-break-test@1`, `l9.projection/globalization-assessment@1`, `l9.projection/work-state-continuity@1`, `l9.projection/strategic-planning-context@1`, `l9.projection/strategic-metacognition@1`, `l9.projection/identity-assurance@1`, `l9.projection/hard-constraint-context@1`.
+- `semantics/projection_profiles.yaml`: adds ten projection profiles, `l9.projection/authority-resolution@1`, `l9.projection/evidence-assessment@1`, `l9.projection/semantic-change-context@1`, `l9.projection/architecture-break-test@1`, `l9.projection/globalization-assessment@1`, `l9.projection/work-state-continuity@1`, `l9.projection/hard-constraint-context@1`, `l9.projection/identity-assurance@1`, `l9.projection/strategic-metacognition@1`, `l9.projection/strategic-planning-context@1`. In `identity-assurance`, `strategic-metacognition`, `strategic-planning-context`, each selected source is selected field by field, excluding only its own top-level `schema` field.
 - `semantics/composition_profiles.yaml`: adds the ten matching `l9.compose/<name>@1` profiles, each composing exactly its projection under source-class namespaces.
-- `semantics/generic_compiler_manifest.yaml`: lists the 17 payload schemas below under `requires.artifact_schemas`.
+- `semantics/generic_compiler_manifest.yaml`: lists the 20 payload schemas below under `requires.artifact_schemas`.
 - Added payload schemas:
   - `semantics/architecture_break_test_composition.schema.yaml`
   - `semantics/architecture_break_test_projection.schema.yaml`
@@ -110,10 +113,13 @@ v3.28.0 adds no ADR.
   - `semantics/hard_constraint_context_composition.schema.yaml`
   - `semantics/hard_constraint_context_projection.schema.yaml`
   - `semantics/identity_assurance_composition.schema.yaml`
+  - `semantics/identity_assurance_projection.schema.yaml`
   - `semantics/semantic_change_context_composition.schema.yaml`
   - `semantics/semantic_change_context_projection.schema.yaml`
   - `semantics/strategic_metacognition_composition.schema.yaml`
+  - `semantics/strategic_metacognition_projection.schema.yaml`
   - `semantics/strategic_planning_context_composition.schema.yaml`
+  - `semantics/strategic_planning_context_projection.schema.yaml`
   - `semantics/work_state_continuity_composition.schema.yaml`
   - `semantics/work_state_continuity_projection.schema.yaml`
 
