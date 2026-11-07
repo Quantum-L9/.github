@@ -1,0 +1,105 @@
+{
+  "schema": "l9.sv-reduction-determinism/v1",
+  "rehearsal_authority_revision": "d723fe901bfdcfe13748f302f99db5eaa88c519e",
+  "compiler_revision": "3bf1a8241452332637ba0daffeee55c433f93e05",
+  "run1_output_dir": "independent scratch dir sv-projection-run1",
+  "run2_output_dir": "independent scratch dir sv-projection-run2",
+  "files_compared": 12,
+  "byte_identical": true,
+  "committed_run1_matches_generated": true,
+  "run2_bytes": "not committed; identical to run1 by SHA-256 (projection-run2/SHA256SUMS)",
+  "projection_results": {
+    "l9.source/authority-model@1": {
+      "result": "pass",
+      "criteria": {
+        "declared_constraint:forbidden:execution_publication_or_merge_authority_grant": "pass",
+        "declared_constraint:forbidden:provider_implementation_details": "pass",
+        "delivered_bytes": "pass",
+        "envelope_schema": "pass",
+        "payload_schema": "pass",
+        "profile_currentness": "pass",
+        "projection_digest": "pass",
+        "selection_equivalence": "pass",
+        "source_currentness": "pass",
+        "source_identity": "pass"
+      }
+    },
+    "l9.source/strategic-value-model@1": {
+      "result": "pass",
+      "criteria": {
+        "declared_constraint:forbidden:execution_publication_or_merge_authority_grant": "pass",
+        "declared_constraint:forbidden:provider_implementation_details": "pass",
+        "delivered_bytes": "pass",
+        "envelope_schema": "pass",
+        "payload_schema": "pass",
+        "profile_currentness": "pass",
+        "projection_digest": "pass",
+        "selection_equivalence": "pass",
+        "source_currentness": "pass",
+        "source_identity": "pass"
+      }
+    },
+    "l9.source/invariants@1": {
+      "result": "pass",
+      "criteria": {
+        "declared_constraint:forbidden:execution_publication_or_merge_authority_grant": "pass",
+        "declared_constraint:forbidden:provider_implementation_details": "pass",
+        "delivered_bytes": "pass",
+        "envelope_schema": "pass",
+        "payload_schema": "pass",
+        "profile_currentness": "pass",
+        "projection_digest": "pass",
+        "selection_equivalence": "pass",
+        "source_currentness": "pass",
+        "source_identity": "pass"
+      }
+    },
+    "l9.source/vocabulary@1": {
+      "result": "pass",
+      "criteria": {
+        "declared_constraint:forbidden:execution_publication_or_merge_authority_grant": "pass",
+        "declared_constraint:forbidden:provider_implementation_details": "pass",
+        "delivered_bytes": "pass",
+        "envelope_schema": "pass",
+        "payload_schema": "pass",
+        "profile_currentness": "pass",
+        "projection_digest": "pass",
+        "selection_equivalence": "pass",
+        "source_currentness": "pass",
+        "source_identity": "pass"
+      }
+    },
+    "l9.source/contracts@1": {
+      "result": "pass",
+      "criteria": {
+        "declared_constraint:forbidden:execution_publication_or_merge_authority_grant": "pass",
+        "declared_constraint:forbidden:provider_implementation_details": "pass",
+        "delivered_bytes": "pass",
+        "envelope_schema": "pass",
+        "payload_schema": "pass",
+        "profile_currentness": "pass",
+        "projection_digest": "pass",
+        "selection_equivalence": "pass",
+        "source_currentness": "pass",
+        "source_identity": "pass"
+      }
+    }
+  },
+  "composition_result": {
+    "result": "unknown",
+    "criteria": {
+      "component_freshness": "pass",
+      "component_provenance": "pass",
+      "composition_digest": "pass",
+      "composition_equivalence": "pass",
+      "composition_profile_currentness": "pass",
+      "declared_constraint:required_provenance:composition_profile_digest": "unresolved",
+      "declared_constraint:required_provenance:composition_profile_ref": "unresolved",
+      "declared_constraint:required_provenance:source_projection_digests": "unresolved",
+      "declared_constraint:required_provenance:source_projection_refs": "unresolved",
+      "delivered_bytes": "pass",
+      "envelope_schema": "pass",
+      "payload_schema": "pass"
+    }
+  }
+}

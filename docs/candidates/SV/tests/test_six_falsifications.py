@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import unittest
 
+from reduction_closure import expected, load_sources
 from run_strategic_value_falsifiers import diagnose, run
 
 R=Path(__file__).resolve().parent
@@ -28,6 +29,23 @@ class IndependentlyExecutableFalsifiers(unittest.TestCase):
         self.assertEqual(set(CASES),{f'SV{x:03d}' for x in range(15,21)})
         self.assertEqual(len({x['expected_failure'] for x in CASES.values()}),6)
         self.assertEqual(run(CASE_SET)['result'],'PASS')
+
+    def test_receipts_carry_lineage_not_canonical_invariant_claims(self):
+        exp=expected()
+        model=load_sources()['model']['relocated_additional_candidate_semantics']
+        result=run(CASE_SET)
+        self.assertEqual(result['assurance'],'LOCAL_CONTRACT_FALSIFICATION_ONLY_NOT_NUMERICAL_VALIDATION')
+        for receipt in result['cases']:
+            self.assertNotIn('source_invariant',receipt)
+            origin=receipt['origin_candidate_id']
+            row=exp['relocated'][origin]
+            self.assertEqual(row['falsifier_case_ref'],receipt['case_id'])
+            self.assertEqual(receipt['disposition'],row['disposition'])
+            self.assertEqual(receipt['governing_invariants'],model[origin]['governing_invariants'])
+            self.assertEqual(receipt['contract_obligation'],model[origin]['contract_obligation'])
+            self.assertEqual(receipt['negative_result'],row['expected_negative_result'])
+            self.assertTrue(set(receipt['governing_invariants'])<=exp['selected_ids'])
+            self.assertNotIn(origin,exp['selected_ids'])
 
     def test_mutated_invalid_case_is_detectable(self):
         altered=copy.deepcopy(CASE_SET)

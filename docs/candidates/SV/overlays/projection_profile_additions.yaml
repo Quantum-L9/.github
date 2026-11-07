@@ -28,6 +28,7 @@ projection_profiles:
       - $.explicit_non_ownership
       - $.assessment_applicability
       - $.retained_former_candidate_semantics
+      - $.relocated_additional_candidate_semantics
     vocabulary:
       selectors:
       - $.terms.strategic_value
@@ -45,12 +46,6 @@ projection_profiles:
       selectors:
       - $.invariants[?(@.id=="L9-SV-001")]
       - $.invariants[?(@.id=="L9-SV-002")]
-      - $.invariants[?(@.id=="L9-SV-015")]
-      - $.invariants[?(@.id=="L9-SV-016")]
-      - $.invariants[?(@.id=="L9-SV-017")]
-      - $.invariants[?(@.id=="L9-SV-018")]
-      - $.invariants[?(@.id=="L9-SV-019")]
-      - $.invariants[?(@.id=="L9-SV-020")]
       - $.invariants[?(@.id=="L9-AUTH-001")]
       - $.invariants[?(@.id=="L9-AUTH-002")]
       - $.invariants[?(@.id=="L9-HARD-001")]
@@ -58,6 +53,9 @@ projection_profiles:
       - $.invariants[?(@.id=="L9-STRATEGY-001")]
       - $.invariants[?(@.id=="L9-PROJECTION-001")]
       - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+      - $.invariants[?(@.id=="L9-ASSURANCE-001")]
+      - $.invariants[?(@.id=="L9-COORD-001")]
     contracts:
       selectors:
       - $.contracts[?(@.id=="l9.contract/strategic-value-assessment@1")]

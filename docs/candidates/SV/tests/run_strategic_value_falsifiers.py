@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-"""Minimal executable falsification witnesses for proposed L9-SV-015..020.
+"""Minimal executable falsification witnesses for the safeguards formerly
+proposed as L9-SV-015..020 and now carried by the Strategic Value model and
+assessment contract under the twelve selected governing invariants.
 
-Not a production evaluator, numerical solver, causal model, or admission proof.
+The case IDs keep the historical candidate lineage for traceability; they are
+not canonical invariant references. Not a production evaluator, numerical
+solver, causal model, or admission proof.
 The positive result means only that THIS finite witness is not contradicted.
 Run: python tests/run_strategic_value_falsifiers.py [--case SV015]
 """
@@ -66,7 +70,12 @@ def run(fixtures, only_case=None):
         negative=diagnose(c['case_id'], copy.deepcopy(c['negative']))
         control=diagnose(c['case_id'], copy.deepcopy(c['positive']))
         passed=(negative==c['expected_failure'] and control=='DECLARATION_NOT_FALSIFIED')
-        receipts.append({'case_id':c['case_id'],'source_invariant':c['invariant_ref'],
+        # Lineage-safe descriptor: the origin is a historical candidate ID,
+        # never a claim that a canonical invariant of that ID exists.
+        receipts.append({'case_id':c['case_id'],'origin_candidate_id':c['origin_candidate_id'],
+                         'disposition':c['disposition'],
+                         'governing_invariants':list(c['governing_invariants']),
+                         'contract_obligation':c['contract_obligation'],
                          'negative_result':negative,'expected_failure':c['expected_failure'],
                          'positive_control_result':control,'pass':passed})
     return {'schema':'l9.strategic-value-falsification-result/v1',

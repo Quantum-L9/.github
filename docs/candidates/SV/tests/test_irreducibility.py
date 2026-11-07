@@ -2,6 +2,7 @@
 from pathlib import Path
 import unittest
 import yaml
+from reduction_closure import donor_statements, expected
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -40,6 +41,40 @@ class IrreducibilityTests(unittest.TestCase):
             self.assertNotIn(ident,self.contract['source_invariants'])
             self.assertFalse(any(ident in selector for selector in
                                  self.profile['sources']['invariants']['selectors']))
+
+    def test_six_additional_meanings_are_relocated_not_admitted(self):
+        exp=expected()
+        lineage=self.model['relocated_additional_candidate_semantics']
+        self.assertEqual(set(lineage),{f'L9-SV-{n:03d}' for n in range(15,21)})
+        self.assertFalse(set(lineage)&set(self.model['retained_former_candidate_semantics']))
+        statements=donor_statements()
+        for ident,p in lineage.items():
+            row=exp['relocated'][ident]
+            self.assertEqual(p['source_candidate_id'],ident)
+            self.assertEqual(p['meaning'],statements[ident])
+            self.assertEqual(p['disposition'],row['disposition'])
+            self.assertEqual(p['authority_status'],'not_admitted_as_independent_invariant')
+            self.assertEqual(p['when'],row['when'])
+            node=self.model
+            for part in p['model_section'].split('.'):
+                self.assertIn(part,node,f'{ident}: lost placement {part}')
+                node=node[part]
+            self.assertTrue(node)
+            self.assertIn(p['contract_obligation'],self.contract['requires'])
+            self.assertTrue(set(p['governing_invariants'])<=set(self.contract['source_invariants']))
+            self.assertNotIn(ident,self.contract['source_invariants'])
+            self.assertNotIn(ident,self.model['governed_by']['invariants'])
+            self.assertFalse(any(ident in selector for selector in
+                                 self.profile['sources']['invariants']['selectors']))
+            self.assertNotIn(ident,{r['id'] for r in self.inv})
+
+    def test_twenty_candidate_meanings_are_all_preserved(self):
+        kept={x['id'] for x in self.inv}
+        former=set(self.model['retained_former_candidate_semantics'])
+        relocated=set(self.model['relocated_additional_candidate_semantics'])
+        self.assertEqual(len(kept),2)
+        self.assertEqual(len(former)+len(relocated),18)
+        self.assertEqual(kept|former|relocated,{f'L9-SV-{n:03d}' for n in range(1,21)})
 
     def test_assessment_contract_does_not_apply_to_unrelated_numerical_work(self):
         self.assertEqual(self.contract['applies_to'],

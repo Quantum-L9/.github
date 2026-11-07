@@ -1,0 +1,184 @@
+schema: l9.strategic-value-reduction-disposition-ledger/v1
+pack_id: SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1
+status: DEVELOPMENT_RECOMMENDATION_NOT_OWNER_DECISION
+note: >-
+  This ledger records the development-pack disposition applied to this candidate. It is not an owner decision,
+  admission, or approval. Every owner_decision_ref is null until the authorized canonical owner records a real
+  decision; no field here may be read as one.
+target_repository: Quantum-L9/.github
+source_pr: 212
+candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
+candidate_revision_note: >-
+  The revision at which the eight dispositioned candidate identities were proposed (PR #212 head). The reduction
+  commit itself is recorded by the publishing PR, never self-referentially in this file.
+beneficiary_baseline: 020a94bea86e7c5c5e4107da7014ec259508f397
+donor_comparison_set: evidence/reduction-v1/donor
+existing_governing_invariants:
+- L9-AUTH-001
+- L9-AUTH-002
+- L9-HARD-001
+- L9-UNKNOWN-001
+- L9-STRATEGY-001
+- L9-PROJECTION-001
+- L9-PROV-001
+- L9-EVIDENCE-001
+- L9-ASSURANCE-001
+- L9-COORD-001
+selected_governing_invariants:
+- L9-SV-001
+- L9-SV-002
+- L9-AUTH-001
+- L9-AUTH-002
+- L9-HARD-001
+- L9-UNKNOWN-001
+- L9-STRATEGY-001
+- L9-PROJECTION-001
+- L9-PROV-001
+- L9-EVIDENCE-001
+- L9-ASSURANCE-001
+- L9-COORD-001
+dispositions:
+- candidate_id: L9-SV-001
+  disposition: KEEP
+  original_meaning_ref: donor/invariants_additions.yaml#invariants[id=L9-SV-001]
+  destination_ref: overlays/invariants_additions.yaml#invariants[id=L9-SV-001]
+  governing_invariant_refs:
+  - L9-SV-001
+  contract_obligation_refs:
+  - explicit_objective_utility_units_and_feasible_baseline
+  - defensible_counterfactual_comparability_under_selected_method
+  - counterfactual_worlds_share_defensible_initial_conditions_time_basis_and_identification_assumptions
+  falsifier_case_ref: SV015
+  statement_change: AMENDED_MATERIAL_SEMANTIC_CHANGE_REQUIRES_OWNER_REVIEW
+  amended_statement: >-
+    For an assessment asserting quantified Strategic Value, declare the objective, compatible utility units, feasible
+    counterfactual baseline, bounded horizon, applicable discount and utility-flow basis, model/evidence coordinates,
+    and material uncertainty. When causal intervention effects are claimed, intervention and baseline must be
+    defensibly comparable in their decision-relevant initial conditions, utility measure, exogenous context, and
+    temporal and observation basis, or their divergence must be explicitly identified and justified under the
+    selected method. Convenient scenario pairing or historical correlation alone does not establish a causal
+    intervention effect. Unknown, incompatible, or materially unidentified inputs cannot establish a complete
+    causally attributed Strategic Value ranking.
+  owner_review_points:
+  - The final sentence changes the original consequence clause from "a complete Strategic Value ranking" to "a
+    complete causally attributed Strategic Value ranking"; the owner must decide whether that narrowing is intended.
+  - The merged SV-015 safeguard says divergence must be "explicitly identified and justified under the selected
+    method" where SV-015 said "explicitly quantify their divergence"; the original wording is preserved verbatim in
+    the relocation ledger and the contract obligation is unchanged.
+  owner_decision_status: pending
+  owner_decision_ref: null
+  candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
+- candidate_id: L9-SV-002
+  disposition: KEEP
+  original_meaning_ref: donor/invariants_additions.yaml#invariants[id=L9-SV-002]
+  destination_ref: overlays/invariants_additions.yaml#invariants[id=L9-SV-002]
+  governing_invariant_refs:
+  - L9-SV-002
+  contract_obligation_refs:
+  - declared_utility_flow_basis_and_mandatory_mutually_exclusive_exhaustive_accounting_partition
+  - exactly_one_accounting_home_per_material_effect_with_gross_net_reconciliation
+  - model_coverage_ledger_has_nonoverlapping_IEV_SFV_DC_ERL_OC_effect_assignments
+  falsifier_case_ref: null
+  statement_change: UNCHANGED
+  owner_decision_status: pending
+  owner_decision_ref: null
+  candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
+- candidate_id: L9-SV-015
+  disposition: MERGE
+  original_meaning_ref: donor/invariants_additions.yaml#invariants[id=L9-SV-015]
+  destination_ref: semantics/strategic_value_model.yaml#relocated_additional_candidate_semantics.L9-SV-015
+  governing_invariant_refs:
+  - L9-SV-001
+  contract_obligation_refs:
+  - counterfactual_worlds_share_defensible_initial_conditions_time_basis_and_identification_assumptions
+  model_section: evaluation_integrity.counterfactual_identification
+  when: causal_intervention_effect_is_claimed
+  falsifier_case_ref: SV015
+  expected_negative_result: UNIDENTIFIED_COUNTERFACTUAL
+  owner_decision_status: pending
+  owner_decision_ref: null
+  candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
+- candidate_id: L9-SV-016
+  disposition: CONTRACT
+  original_meaning_ref: donor/invariants_additions.yaml#invariants[id=L9-SV-016]
+  destination_ref: semantics/strategic_value_model.yaml#relocated_additional_candidate_semantics.L9-SV-016
+  governing_invariant_refs:
+  - L9-SV-001
+  - L9-SV-002
+  - L9-AUTH-001
+  contract_obligation_refs:
+  - beneficiary_scope_and_welfare_aggregation_when_cross_actor_effects_material
+  model_section: evaluation_integrity.beneficiary_scope
+  when: material_cross_actor_valuation
+  falsifier_case_ref: SV016
+  expected_negative_result: UNAUTHORIZED_ACTOR_AGGREGATION
+  owner_decision_status: pending
+  owner_decision_ref: null
+  candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
+- candidate_id: L9-SV-017
+  disposition: CONTRACT
+  original_meaning_ref: donor/invariants_additions.yaml#invariants[id=L9-SV-017]
+  destination_ref: semantics/strategic_value_model.yaml#relocated_additional_candidate_semantics.L9-SV-017
+  governing_invariant_refs:
+  - L9-SV-001
+  - L9-PROV-001
+  contract_obligation_refs:
+  - nonanticipative_conditional_policies_when_sequential_actions_are_evaluated
+  model_section: evaluation_integrity.nonanticipativity
+  when: sequential_policy_value_claimed
+  falsifier_case_ref: SV017
+  expected_negative_result: FUTURE_OBSERVATION_LEAK
+  owner_decision_status: pending
+  owner_decision_ref: null
+  candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
+- candidate_id: L9-SV-018
+  disposition: CONTRACT
+  original_meaning_ref: donor/invariants_additions.yaml#invariants[id=L9-SV-018]
+  destination_ref: semantics/strategic_value_model.yaml#relocated_additional_candidate_semantics.L9-SV-018
+  governing_invariant_refs:
+  - L9-SV-002
+  - L9-HARD-001
+  contract_obligation_refs:
+  - joint_portfolio_counterfactual_and_resource_interactions_for_nonadditive_actions
+  model_section: evaluation_integrity.joint_portfolio_valuation
+  when: joint_or_portfolio_value_claimed
+  falsifier_case_ref: SV018
+  expected_negative_result: UNJUSTIFIED_JOINT_ADDITIVITY
+  owner_decision_status: pending
+  owner_decision_ref: null
+  candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
+- candidate_id: L9-SV-019
+  disposition: REUSE
+  original_meaning_ref: donor/invariants_additions.yaml#invariants[id=L9-SV-019]
+  destination_ref: semantics/strategic_value_model.yaml#relocated_additional_candidate_semantics.L9-SV-019
+  governing_invariant_refs:
+  - L9-UNKNOWN-001
+  - L9-SV-001
+  contract_obligation_refs:
+  - uncertainty_sensitivity_or_conditional_frontier_when_preference_can_flip
+  model_section: evaluation_integrity.uncertainty_aware_selection
+  when: material_preference_sensitive_uncertainty
+  falsifier_case_ref: SV019
+  expected_negative_result: UNSUPPORTED_PRECISE_WINNER
+  owner_decision_status: pending
+  owner_decision_ref: null
+  candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
+- candidate_id: L9-SV-020
+  disposition: REUSE
+  original_meaning_ref: donor/invariants_additions.yaml#invariants[id=L9-SV-020]
+  destination_ref: semantics/strategic_value_model.yaml#relocated_additional_candidate_semantics.L9-SV-020
+  governing_invariant_refs:
+  - L9-EVIDENCE-001
+  - L9-ASSURANCE-001
+  - L9-PROV-001
+  - L9-COORD-001
+  contract_obligation_refs:
+  - method_identity_input_lineage_executed_method_evidence_and_applicable_independently_reviewable_model_validation_evidence_for_strong_numerical_claims
+  model_section: evaluation_integrity.independent_method_assurance
+  when: model_derived_or_independently_verified_claim
+  falsifier_case_ref: SV020
+  expected_negative_result: UNSUPPORTED_VERIFIED_METHOD_CLAIM
+  owner_decision_status: pending
+  owner_decision_ref: null
+  candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
+relocation_authority_status: not_admitted_as_independent_invariant

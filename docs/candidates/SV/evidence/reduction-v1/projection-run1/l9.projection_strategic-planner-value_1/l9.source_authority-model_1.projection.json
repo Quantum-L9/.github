@@ -1,0 +1,101 @@
+{
+  "generated_by": {
+    "compiler": "l9-semantic-compiler",
+    "version": "0.9.3"
+  },
+  "payload": {
+    "admission_rules": {
+      "candidate_generation_is_not_admission": true,
+      "changed_material_subject_requires_new_decision_unless_compatibility_preserves_it": true,
+      "global_requirements": [
+        "exact_subject_identity",
+        "exact_subject_revision_or_digest_when_revisioned",
+        "target_semantic_or_authority_class",
+        "target_class_authority",
+        "explicit_decision_record",
+        "explicit_compatibility_contract_when_reusing_prior_decision_after_material_change"
+      ],
+      "self_admission_without_target_class_authority_forbidden": true
+    },
+    "authority_classes": {
+      "candidate": {
+        "authoritative": false,
+        "meaning": "Proposed artifact pending validation and authorized admission."
+      },
+      "canonical": {
+        "implicit_derivation_allowed": false,
+        "meaning": "Authoritative within the declared semantic owner scope."
+      },
+      "derived": {
+        "may_self_promote": false,
+        "meaning": "Derived from upstream authority and cannot expand authority."
+      },
+      "evidence": {
+        "grants_authority": false,
+        "meaning": "Records an observed operation or validation result."
+      },
+      "global_governance": {
+        "does_not_own": [
+          "executable_conformance_semantics"
+        ],
+        "owner": "Quantum-L9/.github",
+        "roles": [
+          "organization_governance_plane",
+          "organization_control_plane",
+          "organization_distribution_plane",
+          "canonical_l9_vocabulary_owner"
+        ]
+      }
+    },
+    "promotion_rules": {
+      "authorized_global_state_change_required": true,
+      "globalization_candidate_is_not_global_authority": true,
+      "sequence": [
+        "admitted_domain_laws",
+        "harvest",
+        "globalization_candidate",
+        "authorized_global_state_change",
+        "global_invariant_or_contract",
+        "canonical_global_law",
+        "global_fixture",
+        "published_global_profile"
+      ]
+    },
+    "strategic_authority": {
+      "definition": "Explicitly granted authority to create, revise, or supersede the Strategy represented by the Strategic Plan within a bounded scope.",
+      "grant_must_be_explicit": true,
+      "may_not_be_inferred_from": [
+        "reasoning_capability",
+        "projection_consumption",
+        "metacognitive_output"
+      ],
+      "strategy_concept_ref": "strategic_cognition_model.yaml#concepts.strategy"
+    },
+    "strategic_cognition_authority": {
+      "detailed_model": "strategic_cognition_model.yaml",
+      "global_semantics_owner": "Quantum-L9/.github",
+      "invariant_ref": "L9-STRATEGY-001",
+      "metacognition_denied": [
+        "strategic_plan_mutation",
+        "strategic_plan_supersession",
+        "strategic_authority"
+      ],
+      "roles_are_actor_identities": false,
+      "rules": [
+        "reasoning_capability_does_not_confer_strategic_authority",
+        "metacognitive_output_is_advisory_to_plan_keeper",
+        "projection_consumption_does_not_transfer_truth_source_ownership",
+        "semantic_compiler_does_not_own_strategic_cognition"
+      ],
+      "strategic_plan_authority_source": "strategic_authority",
+      "strategic_plan_owner": "plan_keeper",
+      "strategic_plan_reasoning_analysis_owner": "strategic_plan_metacognitive_reasoner"
+    }
+  },
+  "projection_digest": "sha256:9de2c2f140c2a709cee4eb098cd9f8f8fa42544d507ee1a35fd28cdf1082070e",
+  "projection_profile_digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+  "projection_profile_ref": "l9.projection/strategic-planner-value@1",
+  "schema": "l9.projection-artifact/v1",
+  "source_digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+  "source_ref": "l9.source/authority-model@1"
+}

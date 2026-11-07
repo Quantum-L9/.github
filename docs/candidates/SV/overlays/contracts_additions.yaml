@@ -7,12 +7,16 @@ contracts:
   source_invariants:
   - L9-SV-001
   - L9-SV-002
-  - L9-SV-015
-  - L9-SV-016
-  - L9-SV-017
-  - L9-SV-018
-  - L9-SV-019
-  - L9-SV-020
+  - L9-AUTH-001
+  - L9-AUTH-002
+  - L9-HARD-001
+  - L9-UNKNOWN-001
+  - L9-STRATEGY-001
+  - L9-PROJECTION-001
+  - L9-PROV-001
+  - L9-EVIDENCE-001
+  - L9-ASSURANCE-001
+  - L9-COORD-001
   applies_to:
   - assessments_asserting_applicable_objective_relative_quantitative_strategic_value_claims
   requires:

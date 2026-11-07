@@ -1,0 +1,373 @@
+{
+  "schema": "l9.sv-reduction-producer-negative-controls/v1",
+  "rehearsal_authority_revision": "d723fe901bfdcfe13748f302f99db5eaa88c519e",
+  "compiler_revision": "3bf1a8241452332637ba0daffeee55c433f93e05",
+  "all_detected": true,
+  "controls": [
+    {
+      "control": "positive_control_invariants_projection",
+      "intended_mechanism": "none",
+      "exit_code": 0,
+      "summary": {
+        "status": "succeeded",
+        "result": "pass",
+        "typed_failure": null,
+        "criterion": null,
+        "error_code": null,
+        "message": null,
+        "failing_pass_ref": null,
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "pass",
+      "detected": true
+    },
+    {
+      "control": "profile_digest_mutated",
+      "intended_mechanism": "profile_currentness",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
+        "criterion": "profile_digest",
+        "error_code": "REVISION_MISMATCH",
+        "message": "profile digest mismatch for l9.projection/strategic-planner-value@1",
+        "failing_pass_ref": "projection.project",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "source_digest_mutated",
+      "intended_mechanism": "source_currentness",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
+        "criterion": "source_digest",
+        "error_code": "REVISION_MISMATCH",
+        "message": "source digest mismatch for l9.source/invariants@1",
+        "failing_pass_ref": "projection.project",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "source_identity_swapped",
+      "intended_mechanism": "source_identity",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/INVALID_REQUEST",
+        "criterion": null,
+        "error_code": "INVALID_REQUEST",
+        "message": "source pins must name exactly the profile-declared sources the request covers",
+        "failing_pass_ref": "projection.project",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "revision_without_candidate_profile",
+      "intended_mechanism": "profile_resolution",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/UNRESOLVED_REFERENCE",
+        "criterion": null,
+        "error_code": "UNRESOLVED_REFERENCE",
+        "message": "profile not admitted at the authority revision",
+        "failing_pass_ref": "projection.project",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "model_normative_boolean_false",
+      "intended_mechanism": "payload_schema",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
+        "criterion": "payload_schema",
+        "error_code": "STRUCTURAL_VALIDATION_FAILED",
+        "message": "projected payload violates its declared output schema",
+        "failing_pass_ref": "projection.project",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "model_required_array_emptied",
+      "intended_mechanism": "payload_schema",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
+        "criterion": "payload_schema",
+        "error_code": "STRUCTURAL_VALIDATION_FAILED",
+        "message": "projected payload violates its declared output schema",
+        "failing_pass_ref": "projection.project",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "model_lineage_reintroduces_removed_id",
+      "intended_mechanism": "payload_schema",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
+        "criterion": "payload_schema",
+        "error_code": "STRUCTURAL_VALIDATION_FAILED",
+        "message": "projected payload violates its declared output schema",
+        "failing_pass_ref": "projection.project",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "vocabulary_definition_removed",
+      "intended_mechanism": "payload_schema",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/STRUCTURAL_VALIDATION_FAILED",
+        "criterion": "payload_schema",
+        "error_code": "STRUCTURAL_VALIDATION_FAILED",
+        "message": "projected payload violates its declared output schema",
+        "failing_pass_ref": "projection.project",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "selected_invariant_id_renamed",
+      "intended_mechanism": "selection_equivalence",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/INVALID_PROFILE",
+        "criterion": null,
+        "error_code": "INVALID_PROFILE",
+        "message": "missing required selector result: $.invariants[?(@.id==\"L9-COORD-001\")]",
+        "failing_pass_ref": "projection.project",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "selected_contract_id_renamed",
+      "intended_mechanism": "selection_equivalence",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/INVALID_PROFILE",
+        "criterion": null,
+        "error_code": "INVALID_PROFILE",
+        "message": "missing required selector result: $.contracts[?(@.id==\"l9.contract/hard-constraint@1\")]",
+        "failing_pass_ref": "projection.project",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "composition_missing_namespace",
+      "intended_mechanism": "composition source_coverage exact",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/INVALID_REQUEST",
+        "criterion": "source_coverage",
+        "error_code": "INVALID_REQUEST",
+        "message": "composition must cover exactly the source classes the projection profile declares",
+        "failing_pass_ref": "projection.compose",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "composition_duplicate_source",
+      "intended_mechanism": "duplicate_source conflict",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/AMBIGUOUS_SEMANTICS",
+        "criterion": "duplicate_source",
+        "error_code": "AMBIGUOUS_SEMANTICS",
+        "message": "a source projection may be composed once; duplicate components conflict",
+        "failing_pass_ref": "projection.compose",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "composition_profile_digest_mutated",
+      "intended_mechanism": "composition_profile_currentness",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
+        "criterion": "composition_profile_digest",
+        "error_code": "REVISION_MISMATCH",
+        "message": "composition_profile digest mismatch for l9.compose/strategic-planner-value@1",
+        "failing_pass_ref": "projection.compose",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "composition_component_order_reversed",
+      "intended_mechanism": "order independence",
+      "exit_code": 3,
+      "summary": {
+        "status": "succeeded",
+        "result": "unknown",
+        "typed_failure": null,
+        "criterion": null,
+        "error_code": null,
+        "message": null,
+        "failing_pass_ref": null,
+        "unresolved": [
+          "declared_constraint:required_provenance:composition_profile_digest",
+          "declared_constraint:required_provenance:composition_profile_ref",
+          "declared_constraint:required_provenance:source_projection_digests",
+          "declared_constraint:required_provenance:source_projection_refs"
+        ],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "same result as canonical order (3/unknown)",
+      "detected": true
+    },
+    {
+      "control": "artifact_payload_tampered",
+      "intended_mechanism": "projection_digest / delivered bytes",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
+        "criterion": "projection_digest",
+        "error_code": "REVISION_MISMATCH",
+        "message": "projection digest does not bind the artifact content",
+        "failing_pass_ref": "projection.verify-projection",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "artifact_receipt_binding_wrong_source_coordinate",
+      "intended_mechanism": "envelope digest / source coordinate",
+      "exit_code": 2,
+      "summary": {
+        "status": "blocked",
+        "result": null,
+        "typed_failure": "l9.semantic-compiler.error/REVISION_MISMATCH",
+        "criterion": "projection_digest",
+        "error_code": "REVISION_MISMATCH",
+        "message": "projection digest does not bind the artifact content",
+        "failing_pass_ref": "projection.verify-projection",
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "non-pass",
+      "detected": true
+    },
+    {
+      "control": "positive_control_verify_untampered_artifact",
+      "intended_mechanism": "none",
+      "exit_code": 0,
+      "summary": {
+        "status": null,
+        "result": "pass",
+        "typed_failure": null,
+        "criterion": null,
+        "error_code": null,
+        "message": null,
+        "failing_pass_ref": null,
+        "unresolved": [],
+        "failed": [],
+        "error": null
+      },
+      "stderr_tail": "",
+      "expected": "pass",
+      "detected": true
+    }
+  ]
+}

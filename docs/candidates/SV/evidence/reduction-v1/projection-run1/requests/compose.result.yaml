@@ -1,0 +1,49 @@
+artifacts:
+- content_digest: sha256:89da142dd91b220b5d1f11919c4296b1b15d3c0a4d279e9faaed621b815e6940
+  digest: sha256:7cc133cbd83e79882e06b22f58e9d5cc535f8d05a14ca25967afd6b01cd5ad63
+  path: /tmp/claude-0/-home-user/a2b6f907-ae31-5599-8c24-cf3342c0b873/scratchpad/sv-projection-run1/composed/l9.compose_strategic-planner-value_1_l9.projection_strategic-planner-value_1.composed.json
+  receipt_digest: sha256:c9657771fe6dfa8866dd39d973080f3709531e594750a8b3e351a65f37b90a79
+  receipt_path: /tmp/claude-0/-home-user/a2b6f907-ae31-5599-8c24-cf3342c0b873/scratchpad/sv-projection-run1/receipts/313a7e7723ee0ab4e05fc671de0d7834794073d44d2c97fbb276cebae216466b.json
+  ref: l9.compose/strategic-planner-value@1#l9.projection/strategic-planner-value@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - declared_constraint:required_provenance:composition_profile_digest
+  - declared_constraint:required_provenance:composition_profile_ref
+  - declared_constraint:required_provenance:source_projection_digests
+  - declared_constraint:required_provenance:source_projection_refs
+governing_coordinates:
+  artifact_schema:
+    digest: sha256:b5cf608fb33626dd6d8450040957e884c8ea3de49804895c98f2de03059c83f8
+    path: semantics/composed_projection.schema.yaml
+    ref: l9.schema/composed-projection@1
+  compiler_contract:
+    digest: sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c
+    path: semantics/compiler_contract.yaml
+    ref: l9.compiler/generic@1
+  compiler_manifest:
+    digest: sha256:1e8d7f48b0e40902dd4b6d856a2908b43d5d9a62b29b4fcd984b239a62e767f6
+    path: semantics/generic_compiler_manifest.yaml
+    ref: l9.generic-compiler/global@1
+  engine_contract:
+    digest: sha256:dd1e859497d33f186ccbc2cacd8c179cd791c19d9541e1dbe130cc343846bf7d
+    path: semantics/composition_engine_contract.yaml
+    ref: l9.compiler/composition-engine@1
+  profile_catalog:
+    digest: sha256:2375e942e680427c3157f66b1691f548cfa73d029ee9aa2617fc8233219336f8
+    path: semantics/composition_profiles.yaml
+    ref: l9.composition-profiles/global@1
+  receipt_schema:
+    digest: sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626
+    path: semantics/compiler_receipt.schema.yaml
+    ref: l9.schema/compiler-receipt@1
+  repository: Quantum-L9/.github
+  revision: d723fe901bfdcfe13748f302f99db5eaa88c519e
+  source_registry:
+    digest: sha256:860cd321665f911fd66f0adbec4ddbd7c364745b08928cdacfa047b3db8dee00
+    path: semantics/canonical_sources.yaml
+    ref: l9.canonical-sources/global@1
+operation: composition
+result: unknown
+status: succeeded
+

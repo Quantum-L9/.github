@@ -55,7 +55,8 @@ class SchemaHardeningTests(unittest.TestCase):
                     self.assertIn('items', node)
                     self.assertEqual(node['items'].get('type'), 'string') if node['items'].get('type') == 'string' else None
                     converted += node['items'].get('type') == 'string'
-            self.assertGreaterEqual(converted, 31)
+            # 31 original string lists + six relocated-lineage governing_invariants arrays.
+            self.assertEqual(converted, 37)
 
     def test_nested_vocabulary_definitions_are_typed_and_required(self):
         vocab = self.pro['properties']['terms']
@@ -68,6 +69,29 @@ class SchemaHardeningTests(unittest.TestCase):
             self.assertEqual(term['properties']['definition']['type'], 'string')
         composed = self.com['properties']['vocabulary']['properties']['terms']
         self.assertEqual(set(composed['required']), set(vocab['required']))
+
+    def test_relocated_lineage_descriptors_are_typed_and_pinned(self):
+        model = self.model['relocated_additional_candidate_semantics']
+        for schema in (self.pro['properties'],
+                       self.com['properties']['strategic_value_model']['properties']):
+            lineage = schema['relocated_additional_candidate_semantics']
+            self.assertEqual(lineage['type'], 'object')
+            self.assertEqual(set(lineage['required']), set(model))
+            for cid, record in model.items():
+                entry = lineage['properties'][cid]
+                self.assertEqual(entry['type'], 'object')
+                self.assertEqual(entry['required'], ['source_candidate_id', 'meaning', 'disposition',
+                                                     'governing_invariants', 'model_section',
+                                                     'contract_obligation', 'when', 'authority_status'])
+                props = entry['properties']
+                self.assertEqual(props['source_candidate_id'], {'const': cid})
+                self.assertEqual(props['disposition'], {'const': record['disposition']})
+                self.assertEqual(props['authority_status'], {'const': 'not_admitted_as_independent_invariant'})
+                gi = props['governing_invariants']
+                self.assertEqual((gi['type'], gi['min_items'], gi['items']['type']), ('array', 1, 'string'))
+                self.assertNotIn('L9-SV-015', gi['items']['enum'])
+                for field in ('meaning', 'model_section', 'contract_obligation', 'when'):
+                    self.assertEqual(props[field], {'type': 'string'})
 
     def test_derived_profile_and_composition_version_unmodified(self):
         profile = load('overlays/projection_profile_additions.yaml')['projection_profiles'][0]

@@ -1,0 +1,12 @@
+authority:
+  repository: Quantum-L9/.github
+  revision: d723fe901bfdcfe13748f302f99db5eaa88c519e
+projection_profile:
+  digest: sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5
+  ref: l9.projection/strategic-planner-value@1
+source_classes:
+- invariants
+sources:
+- digest: sha256:c17b57886f36fd5b1454618fb1f5d84ca5d76e4668079be67e75308f55bc343c
+  ref: l9.source/invariants@1
+

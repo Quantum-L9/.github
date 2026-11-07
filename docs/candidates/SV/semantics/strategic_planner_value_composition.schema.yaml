@@ -44,6 +44,7 @@ properties:
     - explicit_non_ownership
     - assessment_applicability
     - retained_former_candidate_semantics
+    - relocated_additional_candidate_semantics
     properties:
       artifact_id:
         const: l9.strategic.value@1
@@ -78,7 +79,7 @@ properties:
         properties:
           invariants:
             type: array
-            min_items: 15
+            min_items: 12
             items:
               type: string
           contracts:
@@ -809,6 +810,280 @@ properties:
                 type: string
               when:
                 type: string
+      relocated_additional_candidate_semantics:
+        type: object
+        required:
+        - L9-SV-015
+        - L9-SV-016
+        - L9-SV-017
+        - L9-SV-018
+        - L9-SV-019
+        - L9-SV-020
+        properties:
+          L9-SV-015:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-015
+              meaning:
+                type: string
+              disposition:
+                const: MERGE
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+              authority_status:
+                const: not_admitted_as_independent_invariant
+          L9-SV-016:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-016
+              meaning:
+                type: string
+              disposition:
+                const: CONTRACT
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+              authority_status:
+                const: not_admitted_as_independent_invariant
+          L9-SV-017:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-017
+              meaning:
+                type: string
+              disposition:
+                const: CONTRACT
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+              authority_status:
+                const: not_admitted_as_independent_invariant
+          L9-SV-018:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-018
+              meaning:
+                type: string
+              disposition:
+                const: CONTRACT
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+              authority_status:
+                const: not_admitted_as_independent_invariant
+          L9-SV-019:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-019
+              meaning:
+                type: string
+              disposition:
+                const: REUSE
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+              authority_status:
+                const: not_admitted_as_independent_invariant
+          L9-SV-020:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-020
+              meaning:
+                type: string
+              disposition:
+                const: REUSE
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+              authority_status:
+                const: not_admitted_as_independent_invariant
   vocabulary:
     type: object
     required:
@@ -946,7 +1221,7 @@ properties:
     properties:
       invariants:
         type: array
-        min_items: 15
+        min_items: 12
         items:
           type: object
           required:
@@ -959,12 +1234,6 @@ properties:
               enum:
               - L9-SV-001
               - L9-SV-002
-              - L9-SV-015
-              - L9-SV-016
-              - L9-SV-017
-              - L9-SV-018
-              - L9-SV-019
-              - L9-SV-020
               - L9-AUTH-001
               - L9-AUTH-002
               - L9-HARD-001
@@ -972,6 +1241,9 @@ properties:
               - L9-STRATEGY-001
               - L9-PROJECTION-001
               - L9-PROV-001
+              - L9-EVIDENCE-001
+              - L9-ASSURANCE-001
+              - L9-COORD-001
             statement:
               type: string
             scope:

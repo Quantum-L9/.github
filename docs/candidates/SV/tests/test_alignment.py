@@ -2,6 +2,7 @@
 from pathlib import Path
 import unittest
 import yaml
+from reduction_closure import expected
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -19,13 +20,18 @@ class AlignmentClosure(unittest.TestCase):
         self.catalog = read('overlays/projection_profile_additions.yaml')
         self.profile = self.catalog['projection_profiles'][0]
 
-    def test_eight_reduced_invariants_close_over_model_contract_and_profile(self):
+    def test_two_new_invariants_and_twelve_governing_ids_close_over_model_contract_and_profile(self):
+        exp = expected()
         ids = {row['id'] for row in self.inv}
-        self.assertEqual(ids, {'L9-SV-001','L9-SV-002'} | {f'L9-SV-{i:03d}' for i in range(15,21)})
-        self.assertEqual(ids, set(self.contract['source_invariants']))
-        self.assertTrue(ids.issubset(set(self.model['governed_by']['invariants'])))
-        selects = set(self.profile['sources']['invariants']['selectors'])
-        self.assertTrue({f'$.invariants[?(@.id=="{i}")]' for i in ids} <= selects)
+        self.assertEqual(ids, exp['new_ids'])
+        self.assertEqual(len(ids), 2)
+        governing = exp['selected_ids']
+        self.assertEqual(len(governing), 12)
+        self.assertEqual(set(self.contract['source_invariants']), governing)
+        self.assertEqual(set(self.model['governed_by']['invariants']), governing)
+        selects = self.profile['sources']['invariants']['selectors']
+        self.assertEqual(len(selects), 12)
+        self.assertEqual(set(selects), {f'$.invariants[?(@.id=="{i}")]' for i in governing})
 
     def test_all_11_new_vocabulary_terms_are_projected(self):
         self.assertEqual(len(self.vocab), 11)
@@ -46,7 +52,8 @@ class AlignmentClosure(unittest.TestCase):
         self.assertTrue({'$.authority', '$.canonical_source', '$.governed_by',
                          '$.valuation', '$.counterfactual_mathematics',
                          '$.strategic_interaction_lookahead', '$.evaluation_integrity',
-                         '$.assessment_claim_levels','$.assessment_applicability', '$.retained_former_candidate_semantics'} <= selectors)
+                         '$.assessment_claim_levels','$.assessment_applicability', '$.retained_former_candidate_semantics',
+                         '$.relocated_additional_candidate_semantics'} <= selectors)
         declared_global = {ref for ref in self.model['governed_by']['invariants']
                            if not ref.startswith('L9-SV-')}
         self.assertTrue({f'$.invariants[?(@.id=="{ref}")]' for ref in declared_global} <=
@@ -64,6 +71,7 @@ class AlignmentClosure(unittest.TestCase):
         self.assertNotIn('--expected-sha', script)
         self.assertIn("if actual != BASE_SHA:", script)
         self.assertNotIn('git push', script)
+        self.assertIn("'--disposable'", script)
 
 
 if __name__ == '__main__':

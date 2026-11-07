@@ -1,0 +1,15 @@
+authority:
+  repository: Quantum-L9/.github
+  revision: d723fe901bfdcfe13748f302f99db5eaa88c519e
+  root: /tmp/claude-0/-home-user/a2b6f907-ae31-5599-8c24-cf3342c0b873/scratchpad/dotgithub-base
+output_root: /tmp/claude-0/-home-user/a2b6f907-ae31-5599-8c24-cf3342c0b873/scratchpad/sv-projection-run1
+projection_profile:
+  digest: sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5
+  ref: l9.projection/strategic-planner-value@1
+schema: l9.semantic-projection-request/v1
+source_classes:
+- strategic_value_model
+sources:
+- digest: sha256:28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69
+  ref: l9.source/strategic-value-model@1
+

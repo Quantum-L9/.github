@@ -59,16 +59,28 @@ class SchemaCompositionClosure(unittest.TestCase):
                          {f'L9-SV-{i:03d}' for i in range(3,15)})
         retained=self.cs['properties']['strategic_value_model']['properties']['retained_former_candidate_semantics']
         self.assertEqual(set(retained['required']),set(self.model['retained_former_candidate_semantics']))
+        lineage_keys={f'L9-SV-{i:03d}' for i in range(15,21)}
+        self.assertEqual(set(self.model['relocated_additional_candidate_semantics']),lineage_keys)
+        for schema in (self.ps['properties'],self.cs['properties']['strategic_value_model']['properties']):
+            lineage=schema['relocated_additional_candidate_semantics']
+            self.assertEqual(set(lineage['required']),lineage_keys)
+        self.assertEqual(self.ps['properties']['relocated_additional_candidate_semantics'],
+                         self.cs['properties']['strategic_value_model']['properties']['relocated_additional_candidate_semantics'])
+        self.assertIn('relocated_additional_candidate_semantics',self.cs['properties']['strategic_value_model']['required'])
 
     def test_value_and_global_invariant_coverage_matches_schema_exact_ids(self):
         new={r['id'] for r in self.inv}
-        self.assertEqual(new,{'L9-SV-001','L9-SV-002'} | {f'L9-SV-{i:03d}' for i in range(15,21)})
+        self.assertEqual(new,{'L9-SV-001','L9-SV-002'})
         global_ids={r for r in self.model['governed_by']['invariants'] if not r.startswith('L9-SV-')}
-        sel={s.split('"')[1] for s in self.pro['sources']['invariants']['selectors']}
+        self.assertEqual(len(global_ids),10)
+        actual=[s.split('"')[1] for s in self.pro['sources']['invariants']['selectors']]
+        self.assertEqual(len(actual),12)
+        self.assertEqual(len(set(actual)),12)
+        sel=set(actual)
         self.assertEqual(sel,new|global_ids)
         schema_set=set(self.ps['properties']['invariants']['items']['properties']['id']['enum'])
         self.assertEqual(sel,schema_set)
-        self.assertEqual(self.ps['properties']['invariants']['min_items'],len(sel))
+        self.assertEqual(self.ps['properties']['invariants']['min_items'],12)
         self.assertEqual(self.cs['properties']['invariants']['properties']['invariants'],
                          self.ps['properties']['invariants'])
         self.assertEqual(set(self.ps['properties']['terms']['required']),set(self.value_terms))

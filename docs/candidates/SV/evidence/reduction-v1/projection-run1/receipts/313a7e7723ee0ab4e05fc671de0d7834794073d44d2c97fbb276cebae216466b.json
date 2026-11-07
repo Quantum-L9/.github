@@ -1,0 +1,457 @@
+{
+  "claim": "declared semantic compilation executed against exact inputs and profile",
+  "diagnostics": [],
+  "exact_subject_ref": "l9.compose/strategic-planner-value@1#l9.projection/strategic-planner-value@1",
+  "governing_coordinates": {
+    "artifact_schema": {
+      "digest": "sha256:b5cf608fb33626dd6d8450040957e884c8ea3de49804895c98f2de03059c83f8",
+      "path": "semantics/composed_projection.schema.yaml",
+      "ref": "l9.schema/composed-projection@1"
+    },
+    "compiler_contract": {
+      "digest": "sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c",
+      "path": "semantics/compiler_contract.yaml",
+      "ref": "l9.compiler/generic@1"
+    },
+    "compiler_manifest": {
+      "digest": "sha256:1e8d7f48b0e40902dd4b6d856a2908b43d5d9a62b29b4fcd984b239a62e767f6",
+      "path": "semantics/generic_compiler_manifest.yaml",
+      "ref": "l9.generic-compiler/global@1"
+    },
+    "engine_contract": {
+      "digest": "sha256:dd1e859497d33f186ccbc2cacd8c179cd791c19d9541e1dbe130cc343846bf7d",
+      "path": "semantics/composition_engine_contract.yaml",
+      "ref": "l9.compiler/composition-engine@1"
+    },
+    "profile_catalog": {
+      "digest": "sha256:2375e942e680427c3157f66b1691f548cfa73d029ee9aa2617fc8233219336f8",
+      "path": "semantics/composition_profiles.yaml",
+      "ref": "l9.composition-profiles/global@1"
+    },
+    "receipt_schema": {
+      "digest": "sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626",
+      "path": "semantics/compiler_receipt.schema.yaml",
+      "ref": "l9.schema/compiler-receipt@1"
+    },
+    "repository": "Quantum-L9/.github",
+    "revision": "d723fe901bfdcfe13748f302f99db5eaa88c519e",
+    "source_registry": {
+      "digest": "sha256:860cd321665f911fd66f0adbec4ddbd7c364745b08928cdacfa047b3db8dee00",
+      "path": "semantics/canonical_sources.yaml",
+      "ref": "l9.canonical-sources/global@1"
+    }
+  },
+  "inputs": [
+    {
+      "digest": "sha256:19562c93cb676476929d49560cd0a0f1ea36c57ebbc125e6a605fa629a55f3f4",
+      "ref": "l9.projection/strategic-planner-value@1#l9.source/strategic-value-model@1"
+    },
+    {
+      "digest": "sha256:b7b11fb6a37bd3a444d06db287d158214fea5c3cc6e1f29a5c6d43fe4bc1ac3e",
+      "ref": "l9.projection/strategic-planner-value@1#l9.source/vocabulary@1"
+    },
+    {
+      "digest": "sha256:553cc6c0d1b1b3c044b3f65456a81e31c27e8b01fa6163dbf7c5f27032b678cf",
+      "ref": "l9.projection/strategic-planner-value@1#l9.source/invariants@1"
+    },
+    {
+      "digest": "sha256:7dad61d4f6bdece56a1d8dc326f60ea5158348f44705cb7b6730eb2549d2893f",
+      "ref": "l9.projection/strategic-planner-value@1#l9.source/contracts@1"
+    },
+    {
+      "digest": "sha256:9de2c2f140c2a709cee4eb098cd9f8f8fa42544d507ee1a35fd28cdf1082070e",
+      "ref": "l9.projection/strategic-planner-value@1#l9.source/authority-model@1"
+    }
+  ],
+  "operation": "composition",
+  "output": {
+    "digest": "sha256:7cc133cbd83e79882e06b22f58e9d5cc535f8d05a14ca25967afd6b01cd5ad63",
+    "ref": "l9.compose/strategic-planner-value@1#l9.projection/strategic-planner-value@1"
+  },
+  "producer_identity": {
+    "compiler": "l9-semantic-compiler",
+    "version": "0.9.3"
+  },
+  "profile": {
+    "digest": "sha256:d2227cf302c5c12fc2ba360d5fb4f1304eb9bf35d6312986c50736b06b00fd14",
+    "ref": "l9.compose/strategic-planner-value@1"
+  },
+  "receipt_digest": "sha256:c9657771fe6dfa8866dd39d973080f3709531e594750a8b3e351a65f37b90a79",
+  "receipt_identity": "l9.receipt-instance/313a7e7723ee0ab4e05fc671de0d7834794073d44d2c97fbb276cebae216466b",
+  "receipt_type": "l9.receipt/compilation@1",
+  "result": "unknown",
+  "schema": "l9.compiler-receipt/v1",
+  "verification_basis": {
+    "components": {
+      "l9.projection/strategic-planner-value@1#l9.source/authority-model@1": {
+        "criteria": {
+          "declared_constraint:forbidden:execution_publication_or_merge_authority_grant": {
+            "applicable_selections": 4,
+            "criterion": "payload_excludes",
+            "status": "pass"
+          },
+          "declared_constraint:forbidden:provider_implementation_details": {
+            "applicable_selections": 0,
+            "criterion": "payload_excludes",
+            "status": "pass"
+          },
+          "envelope_schema": {
+            "schema": {
+              "digest": "sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e",
+              "path": "semantics/projection_artifact.schema.yaml",
+              "ref": "l9.schema/projection-artifact@1"
+            },
+            "status": "pass"
+          },
+          "payload_schema": {
+            "schema": "l9.projection.strategic-planner-value/v1",
+            "schema_artifact": {
+              "digest": "sha256:605c3ab3f74cf74f2c25bc1818d205722ceaef9258f2d0c1ce7bf54f18ef1516",
+              "path": "semantics/strategic_planner_value_projection.schema.yaml",
+              "ref": "l9.schema/strategic-planner-value-projection@1"
+            },
+            "status": "pass"
+          },
+          "profile_currentness": {
+            "digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+            "ref": "l9.projection/strategic-planner-value@1",
+            "status": "pass"
+          },
+          "projection_digest": {
+            "digest": "sha256:9de2c2f140c2a709cee4eb098cd9f8f8fa42544d507ee1a35fd28cdf1082070e",
+            "status": "pass"
+          },
+          "selection_equivalence": {
+            "selectors": 5,
+            "status": "pass"
+          },
+          "source_currentness": {
+            "digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+            "revision": "d723fe901bfdcfe13748f302f99db5eaa88c519e",
+            "status": "pass"
+          },
+          "source_identity": {
+            "path": "semantics/authority_model.yaml",
+            "ref": "l9.source/authority-model@1",
+            "source_class": "authority_model",
+            "status": "pass"
+          }
+        },
+        "projection_profile_digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+        "projection_profile_ref": "l9.projection/strategic-planner-value@1",
+        "source_digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+        "source_ref": "l9.source/authority-model@1"
+      },
+      "l9.projection/strategic-planner-value@1#l9.source/contracts@1": {
+        "criteria": {
+          "declared_constraint:forbidden:execution_publication_or_merge_authority_grant": {
+            "applicable_selections": 0,
+            "criterion": "payload_excludes",
+            "status": "pass"
+          },
+          "declared_constraint:forbidden:provider_implementation_details": {
+            "applicable_selections": 0,
+            "criterion": "payload_excludes",
+            "status": "pass"
+          },
+          "envelope_schema": {
+            "schema": {
+              "digest": "sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e",
+              "path": "semantics/projection_artifact.schema.yaml",
+              "ref": "l9.schema/projection-artifact@1"
+            },
+            "status": "pass"
+          },
+          "payload_schema": {
+            "schema": "l9.projection.strategic-planner-value/v1",
+            "schema_artifact": {
+              "digest": "sha256:605c3ab3f74cf74f2c25bc1818d205722ceaef9258f2d0c1ce7bf54f18ef1516",
+              "path": "semantics/strategic_planner_value_projection.schema.yaml",
+              "ref": "l9.schema/strategic-planner-value-projection@1"
+            },
+            "status": "pass"
+          },
+          "profile_currentness": {
+            "digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+            "ref": "l9.projection/strategic-planner-value@1",
+            "status": "pass"
+          },
+          "projection_digest": {
+            "digest": "sha256:7dad61d4f6bdece56a1d8dc326f60ea5158348f44705cb7b6730eb2549d2893f",
+            "status": "pass"
+          },
+          "selection_equivalence": {
+            "selectors": 4,
+            "status": "pass"
+          },
+          "source_currentness": {
+            "digest": "sha256:99b4d35d02ca978b381b363a330e5721a458eeb97eab492f0596f6f0a8b42459",
+            "revision": "d723fe901bfdcfe13748f302f99db5eaa88c519e",
+            "status": "pass"
+          },
+          "source_identity": {
+            "path": "semantics/contracts.yaml",
+            "ref": "l9.source/contracts@1",
+            "source_class": "contracts",
+            "status": "pass"
+          }
+        },
+        "projection_profile_digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+        "projection_profile_ref": "l9.projection/strategic-planner-value@1",
+        "source_digest": "sha256:99b4d35d02ca978b381b363a330e5721a458eeb97eab492f0596f6f0a8b42459",
+        "source_ref": "l9.source/contracts@1"
+      },
+      "l9.projection/strategic-planner-value@1#l9.source/invariants@1": {
+        "criteria": {
+          "declared_constraint:forbidden:execution_publication_or_merge_authority_grant": {
+            "applicable_selections": 0,
+            "criterion": "payload_excludes",
+            "status": "pass"
+          },
+          "declared_constraint:forbidden:provider_implementation_details": {
+            "applicable_selections": 0,
+            "criterion": "payload_excludes",
+            "status": "pass"
+          },
+          "envelope_schema": {
+            "schema": {
+              "digest": "sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e",
+              "path": "semantics/projection_artifact.schema.yaml",
+              "ref": "l9.schema/projection-artifact@1"
+            },
+            "status": "pass"
+          },
+          "payload_schema": {
+            "schema": "l9.projection.strategic-planner-value/v1",
+            "schema_artifact": {
+              "digest": "sha256:605c3ab3f74cf74f2c25bc1818d205722ceaef9258f2d0c1ce7bf54f18ef1516",
+              "path": "semantics/strategic_planner_value_projection.schema.yaml",
+              "ref": "l9.schema/strategic-planner-value-projection@1"
+            },
+            "status": "pass"
+          },
+          "profile_currentness": {
+            "digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+            "ref": "l9.projection/strategic-planner-value@1",
+            "status": "pass"
+          },
+          "projection_digest": {
+            "digest": "sha256:553cc6c0d1b1b3c044b3f65456a81e31c27e8b01fa6163dbf7c5f27032b678cf",
+            "status": "pass"
+          },
+          "selection_equivalence": {
+            "selectors": 12,
+            "status": "pass"
+          },
+          "source_currentness": {
+            "digest": "sha256:c17b57886f36fd5b1454618fb1f5d84ca5d76e4668079be67e75308f55bc343c",
+            "revision": "d723fe901bfdcfe13748f302f99db5eaa88c519e",
+            "status": "pass"
+          },
+          "source_identity": {
+            "path": "semantics/invariants.yaml",
+            "ref": "l9.source/invariants@1",
+            "source_class": "invariants",
+            "status": "pass"
+          }
+        },
+        "projection_profile_digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+        "projection_profile_ref": "l9.projection/strategic-planner-value@1",
+        "source_digest": "sha256:c17b57886f36fd5b1454618fb1f5d84ca5d76e4668079be67e75308f55bc343c",
+        "source_ref": "l9.source/invariants@1"
+      },
+      "l9.projection/strategic-planner-value@1#l9.source/strategic-value-model@1": {
+        "criteria": {
+          "declared_constraint:forbidden:execution_publication_or_merge_authority_grant": {
+            "applicable_selections": 0,
+            "criterion": "payload_excludes",
+            "status": "pass"
+          },
+          "declared_constraint:forbidden:provider_implementation_details": {
+            "applicable_selections": 0,
+            "criterion": "payload_excludes",
+            "status": "pass"
+          },
+          "envelope_schema": {
+            "schema": {
+              "digest": "sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e",
+              "path": "semantics/projection_artifact.schema.yaml",
+              "ref": "l9.schema/projection-artifact@1"
+            },
+            "status": "pass"
+          },
+          "payload_schema": {
+            "schema": "l9.projection.strategic-planner-value/v1",
+            "schema_artifact": {
+              "digest": "sha256:605c3ab3f74cf74f2c25bc1818d205722ceaef9258f2d0c1ce7bf54f18ef1516",
+              "path": "semantics/strategic_planner_value_projection.schema.yaml",
+              "ref": "l9.schema/strategic-planner-value-projection@1"
+            },
+            "status": "pass"
+          },
+          "profile_currentness": {
+            "digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+            "ref": "l9.projection/strategic-planner-value@1",
+            "status": "pass"
+          },
+          "projection_digest": {
+            "digest": "sha256:19562c93cb676476929d49560cd0a0f1ea36c57ebbc125e6a605fa629a55f3f4",
+            "status": "pass"
+          },
+          "selection_equivalence": {
+            "selectors": 18,
+            "status": "pass"
+          },
+          "source_currentness": {
+            "digest": "sha256:28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69",
+            "revision": "d723fe901bfdcfe13748f302f99db5eaa88c519e",
+            "status": "pass"
+          },
+          "source_identity": {
+            "path": "semantics/strategic_value_model.yaml",
+            "ref": "l9.source/strategic-value-model@1",
+            "source_class": "strategic_value_model",
+            "status": "pass"
+          }
+        },
+        "projection_profile_digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+        "projection_profile_ref": "l9.projection/strategic-planner-value@1",
+        "source_digest": "sha256:28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69",
+        "source_ref": "l9.source/strategic-value-model@1"
+      },
+      "l9.projection/strategic-planner-value@1#l9.source/vocabulary@1": {
+        "criteria": {
+          "declared_constraint:forbidden:execution_publication_or_merge_authority_grant": {
+            "applicable_selections": 0,
+            "criterion": "payload_excludes",
+            "status": "pass"
+          },
+          "declared_constraint:forbidden:provider_implementation_details": {
+            "applicable_selections": 0,
+            "criterion": "payload_excludes",
+            "status": "pass"
+          },
+          "envelope_schema": {
+            "schema": {
+              "digest": "sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e",
+              "path": "semantics/projection_artifact.schema.yaml",
+              "ref": "l9.schema/projection-artifact@1"
+            },
+            "status": "pass"
+          },
+          "payload_schema": {
+            "schema": "l9.projection.strategic-planner-value/v1",
+            "schema_artifact": {
+              "digest": "sha256:605c3ab3f74cf74f2c25bc1818d205722ceaef9258f2d0c1ce7bf54f18ef1516",
+              "path": "semantics/strategic_planner_value_projection.schema.yaml",
+              "ref": "l9.schema/strategic-planner-value-projection@1"
+            },
+            "status": "pass"
+          },
+          "profile_currentness": {
+            "digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+            "ref": "l9.projection/strategic-planner-value@1",
+            "status": "pass"
+          },
+          "projection_digest": {
+            "digest": "sha256:b7b11fb6a37bd3a444d06db287d158214fea5c3cc6e1f29a5c6d43fe4bc1ac3e",
+            "status": "pass"
+          },
+          "selection_equivalence": {
+            "selectors": 11,
+            "status": "pass"
+          },
+          "source_currentness": {
+            "digest": "sha256:db0491ac7b8e2892e3eaddce0c4e2fa277ce4f2247017c48727b34d7f90e8bc2",
+            "revision": "d723fe901bfdcfe13748f302f99db5eaa88c519e",
+            "status": "pass"
+          },
+          "source_identity": {
+            "path": "semantics/vocabulary.yaml",
+            "ref": "l9.source/vocabulary@1",
+            "source_class": "vocabulary",
+            "status": "pass"
+          }
+        },
+        "projection_profile_digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+        "projection_profile_ref": "l9.projection/strategic-planner-value@1",
+        "source_digest": "sha256:db0491ac7b8e2892e3eaddce0c4e2fa277ce4f2247017c48727b34d7f90e8bc2",
+        "source_ref": "l9.source/vocabulary@1"
+      }
+    },
+    "coverage": "incomplete",
+    "criteria": {
+      "component_freshness": {
+        "revision": "d723fe901bfdcfe13748f302f99db5eaa88c519e",
+        "status": "pass"
+      },
+      "component_provenance": {
+        "components": [
+          "l9.projection/strategic-planner-value@1#l9.source/authority-model@1",
+          "l9.projection/strategic-planner-value@1#l9.source/contracts@1",
+          "l9.projection/strategic-planner-value@1#l9.source/invariants@1",
+          "l9.projection/strategic-planner-value@1#l9.source/strategic-value-model@1",
+          "l9.projection/strategic-planner-value@1#l9.source/vocabulary@1"
+        ],
+        "status": "pass"
+      },
+      "composition_digest": {
+        "digest": "sha256:7cc133cbd83e79882e06b22f58e9d5cc535f8d05a14ca25967afd6b01cd5ad63",
+        "status": "pass"
+      },
+      "composition_equivalence": {
+        "status": "pass"
+      },
+      "composition_profile_currentness": {
+        "digest": "sha256:d2227cf302c5c12fc2ba360d5fb4f1304eb9bf35d6312986c50736b06b00fd14",
+        "ref": "l9.compose/strategic-planner-value@1",
+        "status": "pass"
+      },
+      "declared_constraint:required_provenance:composition_profile_digest": {
+        "reason": "no_admitted_mechanical_criterion_for_declared_constraint",
+        "status": "unresolved"
+      },
+      "declared_constraint:required_provenance:composition_profile_ref": {
+        "reason": "no_admitted_mechanical_criterion_for_declared_constraint",
+        "status": "unresolved"
+      },
+      "declared_constraint:required_provenance:source_projection_digests": {
+        "reason": "no_admitted_mechanical_criterion_for_declared_constraint",
+        "status": "unresolved"
+      },
+      "declared_constraint:required_provenance:source_projection_refs": {
+        "reason": "no_admitted_mechanical_criterion_for_declared_constraint",
+        "status": "unresolved"
+      },
+      "delivered_bytes": {
+        "content_digest": "sha256:89da142dd91b220b5d1f11919c4296b1b15d3c0a4d279e9faaed621b815e6940",
+        "path": "composed/l9.compose_strategic-planner-value_1_l9.projection_strategic-planner-value_1.composed.json",
+        "status": "pass"
+      },
+      "envelope_schema": {
+        "schema": {
+          "digest": "sha256:b5cf608fb33626dd6d8450040957e884c8ea3de49804895c98f2de03059c83f8",
+          "path": "semantics/composed_projection.schema.yaml",
+          "ref": "l9.schema/composed-projection@1"
+        },
+        "status": "pass"
+      },
+      "payload_schema": {
+        "schema": "l9.composed-projection.strategic-planner-value/v1",
+        "schema_artifact": {
+          "digest": "sha256:24dd5ff14e792332288bae02034491b021ca2682206f23b89db15d129aeb8d8a",
+          "path": "semantics/strategic_planner_value_composition.schema.yaml",
+          "ref": "l9.schema/strategic-planner-value-composition@1"
+        },
+        "status": "pass"
+      }
+    },
+    "unresolved_criteria": [
+      "declared_constraint:required_provenance:composition_profile_digest",
+      "declared_constraint:required_provenance:composition_profile_ref",
+      "declared_constraint:required_provenance:source_projection_digests",
+      "declared_constraint:required_provenance:source_projection_refs"
+    ],
+    "verification_mode": "independent_reresolution_from_governing_authority"
+  }
+}

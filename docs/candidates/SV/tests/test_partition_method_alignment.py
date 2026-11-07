@@ -86,7 +86,11 @@ class PartitionAndMethodAlignment(unittest.TestCase):
         assurance=self.model['evaluation_integrity']['independent_method_assurance']
         self.assertIn('applicable_independently_reviewable_model_validation_evidence_distinct_from_arithmetic_correctness',assurance)
         self.assertIn('mathematical_proof_of_general_real_world_forecast_adequacy_not_presumed',assurance)
-        self.assertIn('independently reviewable model-validation evidence',self.invariants['L9-SV-020'])
+        relocated=self.model['relocated_additional_candidate_semantics']['L9-SV-020']
+        self.assertIn('independently reviewable model-validation evidence',relocated['meaning'])
+        self.assertEqual(relocated['governing_invariants'],
+                         ['L9-EVIDENCE-001','L9-ASSURANCE-001','L9-PROV-001','L9-COORD-001'])
+        self.assertNotIn('L9-SV-020',self.invariants)
         self.assertIn('demanding_mathematical_proof_of_general_real_world_forecast_adequacy',
                       self.contract['forbidden'])
 
@@ -94,7 +98,8 @@ class PartitionAndMethodAlignment(unittest.TestCase):
         self.assertEqual(self.model['artifact_id'],'l9.strategic.value@1')
         self.assertEqual(self.contract['id'],'l9.contract/strategic-value-assessment@1')
         self.assertEqual(self.profile['id'],'l9.projection/strategic-planner-value@1')
-        self.assertEqual(len(self.invariants),8)
+        self.assertEqual(len(self.invariants),2)
+        self.assertEqual(len(self.contract['source_invariants']),12)
         self.assertEqual(len(self.profile['sources']),5)
         self.assertEqual(len(load('overlays/vocabulary_additions.yaml')['terms']),11)
 
