@@ -1,0 +1,435 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_architecture_break_test_projection_payload_schema
+artifact_id: l9.schema/architecture-break-test-projection@1
+canonical_source:
+  format: yaml
+  artifact: architecture_break_test_projection.schema.yaml
+governed_by:
+  projection_profile_ref: l9.projection/architecture-break-test@1
+purpose: Typed per-source payload of l9.projection/architecture-break-test@1, derived from the payloads
+  its selectors produce at the recorded authority revision. Exact selected membership is independently
+  governed by selector equivalence; the schema adds no authority.
+derivation:
+  method: l9.schema-derivation/selected-payload@1
+  basis: selected_payload_observation_at_authority_revision
+  authority_repository: Quantum-L9/.github
+  authority_revision: 290bcd90378577392640cea9c6053c178423f0da
+  projection_profile:
+    ref: l9.projection/architecture-break-test@1
+    digest: sha256:34a09739bfbfee51beead7a21a6e0fd642cf7b8ad1160050326ec297c73ecea3
+  composition_profile:
+    ref: l9.compose/architecture-break-test@1
+    digest: sha256:0b8ff86a49305cf119199498f7c9482191110c99aaa19a2f1a97cddf26942a73
+  selector_model:
+    ref: l9.selector-model/global@1
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+  sources:
+  - source_class: invariants
+    source_ref: l9.source/invariants@1
+    source_path: semantics/invariants.yaml
+    source_digest: sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a
+  - source_class: contracts
+    source_ref: l9.source/contracts@1
+    source_path: semantics/contracts.yaml
+    source_digest: sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79
+  - source_class: requirement_model
+    source_ref: l9.source/requirement-model@1
+    source_path: semantics/requirement_model.yaml
+    source_digest: sha256:7865723e78b7f02817db9d5f54aedb1350cb08b45d42759c8bdafeba1320c7c2
+  - source_class: resolution_model
+    source_ref: l9.source/resolution-model@1
+    source_path: semantics/resolution_model.yaml
+    source_digest: sha256:3c0636b0eaca00789d6ced5425fb1c3a314319dd00525dd5f811f38f81c365fc
+  - source_class: architecture_rules
+    source_ref: l9.source/architecture-rules@1
+    source_path: semantics/architecture_rules.yaml
+    source_digest: sha256:7026597235f9a5ba168f325f92fcdb7f00c495cd04ce364ca4d70f4c51ccacbe
+type: object
+properties:
+  schema:
+    const: l9.projection.architecture-break-test/v1
+  invariants:
+    type: array
+    min_items: 11
+    items:
+      type: object
+      required:
+      - id
+      - statement
+      - scope
+      - owner
+      properties:
+        id:
+          type: string
+          enum:
+          - L9-AUTH-001
+          - L9-SEM-001
+          - L9-EVIDENCE-001
+          - L9-ASSURANCE-001
+          - L9-UNKNOWN-001
+          - L9-HARD-001
+          - L9-DEGRADE-001
+          - L9-IDENTITY-001
+          - L9-COMPAT-001
+          - L9-VALIDATION-001
+          - L9-CORRECTNESS-001
+        statement:
+          type: string
+        scope:
+          type: string
+          const: global
+        owner:
+          type: string
+          const: Quantum-L9/.github
+  contracts:
+    type: array
+    min_items: 4
+    items:
+      type: object
+      required:
+      - id
+      - purpose
+      - scope
+      - owner
+      - source_invariants
+      - applies_to
+      - requires
+      - guarantees
+      - forbidden
+      - outcomes
+      properties:
+        id:
+          type: string
+          enum:
+          - l9.contract/unknown-and-degradation@1
+          - l9.contract/hard-constraint@1
+          - l9.contract/semantic-identity-and-compatibility@1
+          - l9.contract/validation-and-correctness@1
+        purpose:
+          type: string
+        scope:
+          type: string
+          const: global
+        owner:
+          type: string
+          const: Quantum-L9/.github
+        source_invariants:
+          type: string_list
+          min_items: 2
+        applies_to:
+          type: string_list
+          min_items: 3
+        requires:
+          type: string_list
+          min_items: 2
+        guarantees:
+          type: string_list
+          min_items: 3
+        forbidden:
+          type: string_list
+          min_items: 3
+        outcomes:
+          type: object
+          required:
+          - unresolved
+          properties:
+            resolved:
+              type: string
+              const: required_semantics_are_known_or_validly_substituted_or_conflict_is_authoritatively_resolved
+            unresolved:
+              type: string
+            refused:
+              type: string
+              const: requested_substitution_lacks_compatibility_or_authority
+            admissible:
+              type: string
+              const: all_applicable_hard_constraints_are_satisfied
+            inadmissible:
+              type: string
+              const: one_or_more_applicable_hard_constraints_fail
+            compatible:
+              type: string
+              const: applicable_declared_compatibility_contract_is_satisfied
+            incompatible:
+              type: string
+              const: applicable_declared_compatibility_contract_is_violated
+            satisfied:
+              type: string
+              const: every_applicable_required_criterion_was_evaluated_and_evidence_supports_the_candidate_against_each
+            rejected:
+              type: string
+              const: evidence_refutes_the_candidate_against_declared_criteria
+  global_rules:
+    type: object
+    properties:
+      requirements_are_typed:
+        type: boolean
+        const: true
+      requirements_preserve_source_provenance:
+        type: boolean
+        const: true
+      hard_requirements_are_non_compensable:
+        type: boolean
+        const: true
+      preferences_do_not_satisfy_hard_requirements:
+        type: boolean
+        const: true
+      unresolved_requirements_remain_explicit:
+        type: boolean
+        const: true
+      resolution_does_not_create_authority:
+        type: boolean
+        const: true
+      provider_capability_is_not_semantic_requirement_ownership:
+        type: boolean
+        const: true
+      all_resolvers_share_one_result_algebra:
+        type: boolean
+        const: true
+      resolution_is_evidence_bound:
+        type: boolean
+        const: true
+      resolution_does_not_admit_subjects:
+        type: boolean
+        const: true
+      unknown_is_not_resolved:
+        type: boolean
+        const: true
+      ambiguity_is_not_silently_collapsed:
+        type: boolean
+        const: true
+      incompatibility_is_not_optimization_failure:
+        type: boolean
+        const: true
+      rules_derive_obligations_not_complete_architectures:
+        type: boolean
+        const: true
+      architecture_patterns_remain_separate_catalog:
+        type: boolean
+        const: true
+      provider_choice_does_not_define_semantic_structure:
+        type: boolean
+        const: true
+      architecture_synthesis_may_not_invent_domain_law:
+        type: boolean
+        const: true
+      product_kind_obligations_precede_architecture_synthesis:
+        type: boolean
+        const: true
+      kind_rule_obligations_apply_unmodified_unless_an_admitted_product_kind_exception_binds_the_exact_product:
+        type: boolean
+        const: true
+  requirement_classes:
+    type: object
+    required:
+    - semantic
+    - authority
+    - capability
+    - interface
+    - architecture
+    - technology
+    - conformance
+    - operational
+    - objective
+    properties:
+      semantic:
+        type: object
+        required:
+        - meaning
+        - default_hardness
+        properties:
+          meaning:
+            type: string
+          default_hardness:
+            type: string
+            const: hard
+      authority:
+        type: object
+        required:
+        - meaning
+        - default_hardness
+        properties:
+          meaning:
+            type: string
+          default_hardness:
+            type: string
+            const: hard
+      capability:
+        type: object
+        required:
+        - meaning
+        - default_hardness
+        properties:
+          meaning:
+            type: string
+          default_hardness:
+            type: string
+            const: hard
+      interface:
+        type: object
+        required:
+        - meaning
+        - default_hardness
+        properties:
+          meaning:
+            type: string
+          default_hardness:
+            type: string
+            const: hard
+      architecture:
+        type: object
+        required:
+        - meaning
+        - default_hardness
+        properties:
+          meaning:
+            type: string
+          default_hardness:
+            type: string
+            const: hard
+      technology:
+        type: object
+        required:
+        - meaning
+        - default_hardness
+        - note
+        properties:
+          meaning:
+            type: string
+          default_hardness:
+            type: string
+            const: hard
+          note:
+            type: string
+      conformance:
+        type: object
+        required:
+        - meaning
+        - default_hardness
+        properties:
+          meaning:
+            type: string
+          default_hardness:
+            type: string
+            const: hard
+      operational:
+        type: object
+        required:
+        - meaning
+        - default_hardness
+        - note
+        properties:
+          meaning:
+            type: string
+          default_hardness:
+            type: string
+            const: hard
+          note:
+            type: string
+      objective:
+        type: object
+        required:
+        - meaning
+        - default_hardness
+        properties:
+          meaning:
+            type: string
+          default_hardness:
+            type: string
+            const: soft
+  requirement_entry_contract:
+    type: object
+    required:
+    - required
+    - optional
+    - hardness_domain
+    properties:
+      required:
+        type: string_list
+        min_items: 5
+      optional:
+        type: string_list
+        min_items: 6
+      hardness_domain:
+        type: string_list
+        min_items: 2
+  closure_rules:
+    type: string_list
+    min_items: 4
+  result_domain:
+    type: object
+    required:
+    - resolved
+    - unresolved
+    - incompatible
+    - unsat
+    - ambiguous
+    properties:
+      resolved:
+        type: string
+      unresolved:
+        type: string
+      incompatible:
+        type: string
+      unsat:
+        type: string
+      ambiguous:
+        type: string
+  selection_rules:
+    type: string_list
+    min_items: 3
+  rules:
+    type: array
+    min_items: 7
+    items:
+      type: object
+      required:
+      - id
+      - when
+      - derive
+      - source_refs
+      properties:
+        id:
+          type: string
+          enum:
+          - l9.arch-rule/product-kind-node@1
+          - l9.arch-rule/product-kind-dependency@1
+          - l9.arch-rule/product-kind-exception@1
+          - l9.arch-rule/product-archetype-kind-coherence@1
+          - l9.arch-rule/provider-backed-semantics@1
+          - l9.arch-rule/consequential-capability@1
+          - l9.arch-rule/canonical-source-multiple-views@1
+        when:
+          type: object
+          properties:
+            product_kind:
+              type: string
+            requirement:
+              type: string
+            effect_requirement:
+              type: string
+              const: consequential
+        derive:
+          type: object
+          required:
+          - architecture_obligations
+          properties:
+            architecture_obligations:
+              type: string_list
+              min_items: 1
+        requires_patterns:
+          type: string_list
+          min_items: 1
+        source_refs:
+          type: string_list
+          min_items: 3
+        forbid:
+          type: string_list
+          min_items: 1
+  resolution_rule:
+    type: string

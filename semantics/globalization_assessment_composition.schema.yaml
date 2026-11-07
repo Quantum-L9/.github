@@ -1,0 +1,346 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_globalization_assessment_composed_payload_schema
+artifact_id: l9.schema/globalization-assessment-composition@1
+canonical_source:
+  format: yaml
+  artifact: globalization_assessment_composition.schema.yaml
+governed_by:
+  composition_profile_ref: l9.compose/globalization-assessment@1
+  projection_profile_ref: l9.projection/globalization-assessment@1
+purpose: Exact 5-source composition of l9.projection/globalization-assessment@1. Each required namespace
+  preserves its source-class identity and the constraints derived from its selected payload.
+derivation:
+  method: l9.schema-derivation/selected-payload@1
+  basis: selected_payload_observation_at_authority_revision
+  authority_repository: Quantum-L9/.github
+  authority_revision: 290bcd90378577392640cea9c6053c178423f0da
+  projection_profile:
+    ref: l9.projection/globalization-assessment@1
+    digest: sha256:71b69b0d8cbbd781472d67317dda1cffa4f059a34bb472deb87073e9f1d4a06f
+  composition_profile:
+    ref: l9.compose/globalization-assessment@1
+    digest: sha256:221d81d21e7fb3998fcc8fa75ddd9f3c64c20f1af610dd15ef26e9bfa159e668
+  selector_model:
+    ref: l9.selector-model/global@1
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+  sources:
+  - source_class: invariants
+    source_ref: l9.source/invariants@1
+    source_path: semantics/invariants.yaml
+    source_digest: sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a
+  - source_class: contracts
+    source_ref: l9.source/contracts@1
+    source_path: semantics/contracts.yaml
+    source_digest: sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79
+  - source_class: authority_model
+    source_ref: l9.source/authority-model@1
+    source_path: semantics/authority_model.yaml
+    source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
+  - source_class: lifecycle
+    source_ref: l9.source/lifecycle@1
+    source_path: semantics/lifecycle.yaml
+    source_digest: sha256:65285d583154cefa1623f9a93061a3413cef2d1dd26349accb80225ce866b1b5
+  - source_class: packet_catalog
+    source_ref: l9.source/packet-catalog@1
+    source_path: semantics/packet_catalog.yaml
+    source_digest: sha256:3a1fea5eed1ee1b43e16f0adabefd8ef5151702ed5b9dc14801d642183b41017
+type: object
+required:
+- invariants
+- contracts
+- authority_model
+- lifecycle
+- packet_catalog
+properties:
+  schema:
+    const: l9.composed-projection.globalization-assessment/v1
+  invariants:
+    type: object
+    required:
+    - invariants
+    properties:
+      invariants:
+        type: array
+        min_items: 9
+        items:
+          type: object
+          required:
+          - id
+          - statement
+          - scope
+          - owner
+          properties:
+            id:
+              type: string
+              enum:
+              - L9-AUTH-001
+              - L9-AUTH-002
+              - L9-OWNER-001
+              - L9-SEM-001
+              - L9-SCOPE-001
+              - L9-PROMOTION-001
+              - L9-DERIVED-001
+              - L9-ADMISSION-001
+              - L9-GLOBALIZATION-001
+            statement:
+              type: string
+            scope:
+              type: string
+              const: global
+            owner:
+              type: string
+              const: Quantum-L9/.github
+  contracts:
+    type: object
+    required:
+    - contracts
+    properties:
+      contracts:
+        type: array
+        min_items: 3
+        items:
+          type: object
+          required:
+          - id
+          - purpose
+          - scope
+          - owner
+          - source_invariants
+          - applies_to
+          - requires
+          - guarantees
+          - forbidden
+          - outcomes
+          properties:
+            id:
+              type: string
+              enum:
+              - l9.contract/authority-boundary@1
+              - l9.contract/semantic-ownership@1
+              - l9.contract/admission-and-promotion@1
+            purpose:
+              type: string
+            scope:
+              type: string
+              const: global
+            owner:
+              type: string
+              const: Quantum-L9/.github
+            source_invariants:
+              type: string_list
+              min_items: 2
+            applies_to:
+              type: string_list
+              min_items: 5
+            requires:
+              type: string_list
+              min_items: 2
+            guarantees:
+              type: string_list
+              min_items: 3
+            forbidden:
+              type: string_list
+              min_items: 4
+            outcomes:
+              type: object
+              required:
+              - unresolved
+              properties:
+                satisfied:
+                  type: string
+                violated:
+                  type: string
+                unresolved:
+                  type: string
+                admitted:
+                  type: string
+                  const: exact_subject_is_admitted_by_target_class_authority
+                refused:
+                  type: string
+                  const: exact_subject_is_not_admitted
+                new_decision_required:
+                  type: string
+                  const: subject_changed_materially_without_compatibility_preservation
+  authority_model:
+    type: object
+    required:
+    - promotion_rules
+    - global_promotion
+    - global_admission_rules
+    properties:
+      promotion_rules:
+        type: object
+        required:
+        - sequence
+        - globalization_candidate_is_not_global_authority
+        - authorized_global_state_change_required
+        properties:
+          sequence:
+            type: string_list
+            min_items: 8
+          globalization_candidate_is_not_global_authority:
+            type: boolean
+            const: true
+          authorized_global_state_change_required:
+            type: boolean
+            const: true
+      global_promotion:
+        type: object
+        required:
+        - candidate
+        - requires
+        - automatic_promotion_forbidden
+        properties:
+          candidate:
+            type: string
+            const: globalization_candidate
+          requires:
+            type: string_list
+            min_items: 2
+          automatic_promotion_forbidden:
+            type: boolean
+            const: true
+      global_admission_rules:
+        type: object
+        required:
+        - requirements
+        - requires_global_authority
+        - candidate_generation_is_not_admission
+        properties:
+          requirements:
+            type: string_list
+            min_items: 6
+          requires_global_authority:
+            type: boolean
+            const: true
+          candidate_generation_is_not_admission:
+            type: boolean
+            const: true
+  lifecycle:
+    type: object
+    required:
+    - lifecycles
+    properties:
+      lifecycles:
+        type: object
+        required:
+        - globalization_candidate
+        - harvest_packet
+        - architecture_pattern
+        properties:
+          globalization_candidate:
+            type: object
+            required:
+            - semantic_owner
+            - purpose
+            - stages
+            - terminal_resolutions
+            - rules
+            properties:
+              semantic_owner:
+                type: string
+                const: Quantum-L9/.github
+              purpose:
+                type: string
+              stages:
+                type: string_list
+                min_items: 4
+              terminal_resolutions:
+                type: string_list
+                min_items: 4
+              rules:
+                type: string_list
+                min_items: 3
+          harvest_packet:
+            type: object
+            required:
+            - semantic_owner
+            - purpose
+            - artifact_state
+            - stages
+            - rules
+            properties:
+              semantic_owner:
+                type: string
+                const: packet_semantic_owner
+              purpose:
+                type: string
+              artifact_state:
+                type: string
+                const: immutable_after_emission
+              stages:
+                type: string_list
+                min_items: 3
+              rules:
+                type: string_list
+                min_items: 3
+          architecture_pattern:
+            type: object
+            required:
+            - semantic_owner
+            - purpose
+            - stages
+            - branches
+            - rules
+            properties:
+              semantic_owner:
+                type: string
+                const: Quantum-L9/.github
+              purpose:
+                type: string
+              stages:
+                type: string_list
+                min_items: 7
+              branches:
+                type: object
+                required:
+                - admitted_global_pattern
+                - domain_pattern
+                - rejected
+                - unresolved
+                properties:
+                  admitted_global_pattern:
+                    type: string
+                    const: applicable_global_authority_admits_exact_candidate
+                  domain_pattern:
+                    type: string
+                    const: domain_specific_authority_is_required_or_globalization_is_not_supported
+                  rejected:
+                    type: string
+                    const: applicable_authority_refuses_candidate
+                  unresolved:
+                    type: string
+                    const: evidence_or_authority_is_insufficient
+              rules:
+                type: string_list
+                min_items: 3
+  packet_catalog:
+    type: object
+    required:
+    - packets
+    properties:
+      packets:
+        type: object
+        required:
+        - fixture_harvest
+        properties:
+          fixture_harvest:
+            type: object
+            required:
+            - canonical_name
+            - purpose
+            - required_semantics
+            properties:
+              canonical_name:
+                type: string
+                const: FixtureHarvestPacket
+              purpose:
+                type: string
+              required_semantics:
+                type: string_list
+                min_items: 4
