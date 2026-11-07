@@ -1,6 +1,6 @@
 # ADR-025 — Manifest Interface Surface and the Python Gate Node Target Binding
 
-**Status:** Candidate for semantic-foundation v3.28.0. Drafted on 2026-11-07 at the repository owner's instruction, as the canonical first step before the Semantic Compiler implements compilation Stage 14 (`implementation`) and Stage 15 (`target_artifacts`) for Nodes. Admission of v3.28.0 is the acceptance gate; this record does not admit itself.
+**Status:** Candidate for semantic-foundation v3.29.0. Drafted on 2026-11-07 at the repository owner's instruction, as the canonical first step before the Semantic Compiler implements compilation Stage 14 (`implementation`) and Stage 15 (`target_artifacts`) for Nodes. Admission of v3.29.0 is the acceptance gate; this record does not admit itself.
 
 ## Context
 

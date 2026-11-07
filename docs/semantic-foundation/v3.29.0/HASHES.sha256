@@ -25,7 +25,7 @@ f853a6bd29ccd7c07fcbf8837489436f22e680b3255d6b872fd3fb1e23ac0c87  ./docs/adr/ADR
 9823ea123ba605a3e1007f2f71e950b4fb6c86b4010955f26830e73487860708  ./docs/adr/ADR-022-pr-audit-projection-composition-schemas-and-closure.md
 35f22e9b5ae3c10a29ce81055fe58df2b5c116fad086e4f5520f82b06a004c3a  ./docs/adr/ADR-023-operating-plane-v2-major-successor-and-declared-selection-removal.md
 1f7417bc76c83e7e7080eb35531d9907b0fc3eae174effa26cc851fe836d93d6  ./docs/adr/ADR-024-artifact-header-field-semantics.md
-61118bf1d6ae68c450e1185ea3d05845be4d061eac544e4f3abc3c4240fee1b8  ./docs/adr/ADR-025-manifest-interface-surface-and-python-gate-node-binding.md
+6a7a16000fcd24c26a10bc96c478c181df6d569a4734a46879e1d04d32346349  ./docs/adr/ADR-025-manifest-interface-surface-and-python-gate-node-binding.md
 415238bf1db999ae27705e6b6859ab6f977f4a4a9b60167bf01c91b0296df8df  ./docs/adr/README.md
 34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f  ./semantics/actor_registry.yaml
 09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4  ./semantics/affected_strategic_closure.schema.yaml
