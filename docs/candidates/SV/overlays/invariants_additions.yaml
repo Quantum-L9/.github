@@ -1,0 +1,50 @@
+invariants:
+- id: L9-SV-001
+  statement: For an assessment asserting quantified Strategic Value, declare the objective, compatible utility units, feasible counterfactual baseline,
+    bounded horizon, applicable discount and utility-flow basis, model/evidence coordinates and material uncertainty. Unknown or incompatible inputs cannot
+    establish a complete Strategic Value ranking.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SV-002
+  statement: For an assessment asserting quantified Strategic Value, every material consequence must have an exhaustive, mutually exclusive accounting partition
+    across IEV, SFV, DC, ERL and OC. Reconcile gross and net utility, common causal/time identities, separately subtracted versus embedded costs and losses,
+    overlaps, attribution and probability weighting; conflicting or missing coverage remains Unknown or conditional, not zero.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SV-015
+  statement: For a Strategic Value claim, a counterfactual comparison must identify the same decision-relevant initial conditions, utility measure, exogenous
+    context and time basis across intervention and baseline worlds, or explicitly quantify their divergence. A convenient scenario pairing or historical
+    correlation is not evidence of an identifiable causal intervention effect.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SV-016
+  statement: For a Strategic Value claim, the assessment must declare the focal beneficiary or authorized social-welfare aggregation before combining outcomes
+    across actors. Benefits to counterparties, externalities, transfers and costs cannot be credited to the focal objective twice or silently converted
+    between actors with incompatible utilities.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SV-017
+  statement: When a Strategic Value claim evaluates a sequential decision policy, the policy may condition each action only on observations and information
+    available at the time of that action. A lookahead ranking must not exploit hindsight, future responses or post-action evidence as if they were known
+    at decision time; posterior updates must preserve observation provenance.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SV-018
+  statement: For a Strategic Value claim about a portfolio or joint intervention, its value is evaluated against the joint feasible counterfactual and shared
+    resource constraints. Standalone action values may be summed only with evidence of additive independence; shared dependencies, synergies, substitution,
+    resource collision and cannibalization must be represented or remain unresolved.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SV-019
+  statement: When uncertainty can change preference in a Strategic Value comparison, the evaluation must expose a bounded sensitivity or uncertainty result
+    and conditional decision boundary, not an unjustified precise winner. A robustness claim requires declared uncertainty sets, bounds or probability models
+    and an applicable comparison method.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SV-020
+  statement: Claims of model-derived or independently verified Strategic Value require version-bound numerical method identity, input/assumption lineage,
+    execution provenance and applicable, independently reviewable model-validation evidence appropriate to the claim. Empirical forecast validity may be
+    supported by calibration, backtesting, sensitivity or out-of-sample evaluation where applicable, not presumed mathematical proof of general real-world
+    adequacy. Arithmetic, projection receipts and model-validation evidence establish different things and cannot substitute for one another.
+  scope: global
+  owner: Quantum-L9/.github

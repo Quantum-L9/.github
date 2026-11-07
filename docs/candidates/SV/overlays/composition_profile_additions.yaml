@@ -1,0 +1,26 @@
+profiles:
+- id: l9.compose/strategic-planner-value@1
+  purpose: >-
+    Compose the five independently produced canonical-source projections under
+    l9.projection/strategic-planner-value@1 into one derived, versioned,
+    non-authoritative consumer view. Preserve each source payload whole under
+    its source-class identity, detect missing/duplicate sources and conflicting
+    identities, and prohibit interpretation or numerical evaluation during
+    composition.
+  accepts:
+  - projection_artifact
+  composes:
+    projection_profile: l9.projection/strategic-planner-value@1
+  merge_strategy:
+    placement: source_class_namespace
+    source_coverage: exact
+    duplicate_source: conflict
+    semantic_identity_collision: require_equivalence
+  conflict_result: invalid
+  output:
+    schema: l9.composed-projection.strategic-planner-value/v1
+  required_provenance:
+  - source_projection_refs
+  - source_projection_digests
+  - composition_profile_ref
+  - composition_profile_digest
