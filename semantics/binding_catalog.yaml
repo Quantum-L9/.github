@@ -117,6 +117,40 @@ bindings:
   - dummy_success_targets_are_forbidden
   - existing_makefile_bytes_have_no_authority_or_preservation_privilege
   - additional_operator_targets_require_a_successor_binding_version
+- id: l9.binding/python-gate-node@1
+  class: target
+  source_ir: implementation_ir
+  target_ir: target_ir
+  target:
+    technology: python
+    transport_technology: gate-sdk
+    semantic_profile: gate_node_shell
+  applies_to:
+    product_kind: node
+  maps:
+    inbound_interface_action: gate_sdk_registered_action_handler
+    action_request_contract: handler_request_validation_against_the_declared_contract
+    consequential_operation: gate_runtime_idempotency_requirement
+    forbidden_action: absent_registration
+    inbound_port_implementation: bound_implementation_reference
+    outbound_port: bound_port_interface_reference
+    adapter_requirement: bound_adapter_implementation_reference
+    composition_root: gate_sdk_node_app_factory
+  rules:
+  - consumes_only_implementation_ir_lowered_from_a_manifest_satisfying_the_resolved_manifest_gate
+  - every_registered_action_is_exactly_one_manifest_interfaces_action_and_every_manifest_action_is_registered
+  - registered_actions_are_reached_only_through_gate_sdk_transport
+  - every_manifest_effects_consequential_operation_requires_gate_runtime_idempotency
+  - forbidden_actions_are_never_registered
+  - port_and_adapter_implementations_are_bound_by_manifest_implementation_ref_and_verified_not_regenerated
+  - behavior_code_is_emitted_only_where_an_admitted_behavior_contract_determines_it
+  - unresolved_action_contract_effect_port_adapter_or_implementation_ref_fails_closed
+  - optional_port_without_a_declared_adapter_is_not_given_an_invented_adapter
+  - binding_emits_no_http_route_authentication_peer_url_or_routing_logic
+  - generated_artifacts_are_derived_and_never_semantic_authority
+  - final_conformance_is_required_before_generated_artifacts_count_as_realized
+  - existing_target_bytes_have_no_authority_or_preservation_privilege
+  - rendering_is_deterministic_and_semantically_noncreative
 
 validation_binding_families:
 - LocalSATBinding
