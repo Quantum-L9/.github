@@ -1,3 +1,5 @@
+> **Historical (PR #212 @ `85531616`).** Superseded by `SV_ALIGNMENT.md`, which binds GT to the reduced SV candidate in PR #215 @ `a64d05a`. Kept unchanged below as the record of the first alignment.
+
 # PR #212 alignment: bounded break-test results
 
 **Local outcome:** 12/12 selected attacks pass local synthetic controls. **Formal status:** BLOCKED pending independent invariant-owner decisions, real current-source checkout and compiler validation; this is not an independent Break Tester producer receipt.

@@ -15,5 +15,5 @@
 Primary donor: [l9-wip PR #6](https://github.com/Quantum-L9/l9-wip/pull/6) at `fb0ae95620cea0dc3f48aa009056ddb755d69640`; original Dropbox file `/Downloads (DBOX)/L9 Reasoning Plane - Game Theory.md` modified 2026-09-27. Full conversation provenance not certified beyond available extracted file.
 
 
-## PR #212 binding update
-GT candidate now resolves against the exact review HEAD `85531616cee2da94bbb7154418a78537549a4d76` with the canonical parent/main source revision `020a94bea86e7c5c5e4107da7014ec259508f397`. See PR212_ALIGNMENT.md and evidence/pr212_alignment_binding.json. SV proposed model/overlays stay owned by PR #212; they are not copied into this ZIP.
+## SV binding (PR #215)
+GT core is prepared on top of the reduced SV candidate: PR #215 at `a64d05a152b5920dad577cead26618a6f05fef09` (stacked on PR #212 at `85531616`), applied to canonical `020a94bea86e7c5c5e4107da7014ec259508f397`. The SV-applied file digests are pinned in `evidence/sv_alignment_binding.json`; see `SV_ALIGNMENT.md`. SV model, overlays and schemas stay owned by the SV pack and are not copied here.

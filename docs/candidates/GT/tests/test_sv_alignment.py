@@ -250,5 +250,13 @@ class IntegratedQualificationEvidence(unittest.TestCase):
         )
 
 
+class PackInventory(unittest.TestCase):
+    def test_manifest_checksums_and_revision_are_current(self):
+        sys.path.insert(0, str(ROOT / "tools"))
+        import refresh_pack_inventory
+
+        self.assertEqual(refresh_pack_inventory.main(["--check"]), 0)
+
+
 if __name__ == "__main__":
     unittest.main()
