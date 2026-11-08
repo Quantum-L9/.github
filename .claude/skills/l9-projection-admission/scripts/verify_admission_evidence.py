@@ -1,0 +1,965 @@
+"""Admission evidence and producer evidence for Quantum-L9/.github semantics.
+
+Two independent verifications, both read-only and fail-closed:
+
+1. Admission evidence (`release_admission`, `decision_scope`). An admitted status line and an
+   ADR that says `Accepted` only nominate a release. Admission is established when, at the
+   commit that first flipped the release to ADMITTED:
+     - the release record is unedited since, and its full SC-008 inventory verifies there;
+     - an ADR accepting exactly that version already existed, is listed in the ADR index,
+       is hashed by the release at its bytes, and is unedited since on main;
+     - the ADR's subject table binds the approved `semantics/` tree, and that tree is the
+       admission commit's `semantics/` tree; it names the release and the target class
+       (canonical global semantics); it carries a decision reference;
+     - every identity that release introduced (absent or different at the prior admitted
+       release) and that the subject contains is named in the ADR.
+   Parsing a record cannot prove that its author held authority. The evidence binds the
+   decision record to the exact subject; the decision itself stays the owner's.
+
+2. Producer evidence (`verify_outputs`, `compare_runs`). The compiler's own `result: pass`
+   is not taken on trust: every emitted projection, composition and receipt is re-read from
+   its bytes and checked for digests, provenance, exact source coverage, exact id-record
+   selection, payload schema (the compiler's native interpreter plus strict Boolean typing)
+   and receipt binding; negative controls prove the checks reject corrupted artifacts; two
+   runs must be byte-identical.
+
+Usage (admission evidence for one subject):
+  python3 verify_admission_evidence.py --checkout REPO --subject SUBJECT.json
+      --release vX.Y.Z [--main-ref origin/main]
+
+Exit codes: 0 established, 1 not established, 2 UNRESOLVED.
+"""
+
+from __future__ import annotations
+
+import argparse
+import copy
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+import check_admission_closure as cac
+
+EVIDENCE_SCHEMA = "l9.projection-admission-evidence/v1"
+TARGET_AUTHORITY_CLASS = "canonical global semantics"
+PROJECTION_ENVELOPE = "l9.projection-artifact/v1"
+COMPOSITION_ENVELOPE = "l9.composed-projection/v1"
+PASSING_CRITERIA = {"pass", "not_applicable"}
+DECISION_REF = re.compile(
+    r"(session_[A-Za-z0-9]{8,}|Quantum-L9/[\w.-]+#\d+|https://github\.com/\S+)"
+)
+SHA40 = re.compile(r"\b[0-9a-f]{40}\b")
+
+
+# --------------------------------------------------------------------------- ADR reading
+
+
+def _cell(text: str, label: str) -> str | None:
+    """The value cell of a two-column Markdown table row whose label matches."""
+    pattern = re.compile(rf"^\|\s*{label}\s*\|(?P<value>.*)\|\s*$", re.IGNORECASE)
+    for line in text.splitlines():
+        match = pattern.match(line)
+        if match:
+            return match["value"]
+    return None
+
+
+def _status_paragraph(text: str) -> str:
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if line.startswith("**Status:**"):
+            block = []
+            for follow in lines[index:]:
+                if not follow.strip() or follow.startswith("#"):
+                    break
+                block.append(follow)
+            return " ".join(block)
+    return ""
+
+
+def _names(text: str, name: str) -> bool:
+    boundary = r"A-Za-z0-9_@/-"
+    return (
+        re.search(rf"(?<![{boundary}]){re.escape(name)}(?![{boundary}])", text)
+        is not None
+    )
+
+
+def _later_commits(repo: Path, commit: str, main: str, path: str) -> list[str]:
+    return cac.git_out(
+        repo, "log", "--format=%H", f"{commit}..{main}", "--", path
+    ).split()
+
+
+# --------------------------------------------------------------------------- admission
+
+
+def release_admission(repo: Path, main: cac.Tree, version: str) -> dict[str, Any]:
+    """Subject-independent admission evidence for one release on main."""
+    gaps: list[str] = []
+    proof: dict[str, Any] = {
+        "schema": EVIDENCE_SCHEMA,
+        "admission_release": version,
+        "target_authority_class": None,
+        "authorized_decision_ref": [],
+        "admission_commit": None,
+        "admitted_semantics_tree": None,
+        "candidate_revision": [],
+        "adr": None,
+    }
+
+    def done() -> dict[str, Any]:
+        proof["status"] = "pass" if not gaps else "fail"
+        proof["gaps"] = gaps
+        return proof
+
+    commit = cac.admission_commit(repo, main.ref, version)
+    if commit is None:
+        gaps.append(f"{version}: no commit on main flips this release to ADMITTED")
+        return done()
+    proof["admission_commit"] = commit
+    later = _later_commits(repo, commit, main.ref, f"{cac.RELEASES}/{version}")
+    if later:
+        gaps.append(f"{version}: release record edited after admission: {later}")
+    at = cac.Tree(repo, commit)
+    inventory = cac.release_inventory(at, version)
+    if inventory["status"] != "pass":
+        gaps += [f"at admission commit: {g}" for g in inventory["gaps"][:10]]
+    adr = cac.accepted_adr(at, version)
+    if adr is None:
+        gaps.append(
+            f"{version}: no ADR accepting exactly this version existed at the admission "
+            f"commit {commit[:12]}"
+        )
+        return done()
+    proof["adr"] = adr
+    adr_path = f"docs/adr/{adr}"
+    raw = at.read(adr_path)
+    if raw is None:
+        raise cac.InputError(f"{adr_path} listed at {commit[:12]} but unreadable")
+    text = raw.decode("utf-8", "replace")
+    if main.read(adr_path) != raw or _later_commits(repo, commit, main.ref, adr_path):
+        gaps.append(f"{adr}: edited or removed on main after the admission commit")
+    hashes_raw = at.read(f"{cac.RELEASES}/{version}/HASHES.sha256") or b""
+    hashes, _ = cac._hash_lines(hashes_raw, version)
+    if hashes.get(f"./{adr_path}") != cac.sha_bytes(raw):
+        gaps.append(f"{adr}: not hashed by {version} at its admission bytes")
+    number = re.match(r"(ADR-\d+)", adr)
+    index = (at.read("docs/adr/README.md") or b"").decode("utf-8", "replace")
+    if number is None or not re.search(rf"^- {number.group(1)}:", index, re.MULTILINE):
+        gaps.append(f"{adr}: not listed in docs/adr/README.md at the admission commit")
+    tree_cell = _cell(text, r"Approved semantic tree")
+    actual_tree = cac.git_out(repo, "rev-parse", f"{commit}:semantics")
+    if tree_cell is None or not SHA40.search(tree_cell):
+        gaps.append(f"{adr}: the subject table binds no approved semantics/ tree")
+    else:
+        hashes_named = SHA40.findall(tree_cell)
+        approved = hashes_named[0]
+        proof["admitted_semantics_tree"] = approved
+        if approved != actual_tree:
+            gaps.append(
+                f"{adr}: approved semantics/ tree {approved[:12]} is not the admission "
+                f"commit's tree {actual_tree[:12]}"
+            )
+        for named in hashes_named[1:]:
+            if (
+                cac.run_git(repo, "cat-file", "-e", f"{named}^{{commit}}").returncode
+                != 0
+            ):
+                proof["candidate_revision"].append({"commit": named, "resolved": False})
+                continue
+            carries = cac.git_out(repo, "rev-parse", f"{named}:semantics") == approved
+            proof["candidate_revision"].append(
+                {"commit": named, "resolved": True, "carries_approved_tree": carries}
+            )
+            if not carries:
+                gaps.append(
+                    f"{adr}: names candidate {named[:12]}, which does not carry the "
+                    "approved semantics/ tree"
+                )
+    release_cell = _cell(text, r"Release")
+    if release_cell is None or not _names(release_cell, version):
+        gaps.append(f"{adr}: the subject table does not name release {version}")
+    target_cell = _cell(text, r"Target class(?: and authority)?")
+    if target_cell is None or TARGET_AUTHORITY_CLASS not in target_cell.lower():
+        gaps.append(
+            f"{adr}: the subject table does not name the target authority class"
+        )
+    else:
+        proof["target_authority_class"] = "canonical_global_semantics"
+    refs = sorted(
+        set(DECISION_REF.findall(_status_paragraph(text) + "\n" + (target_cell or "")))
+    )
+    proof["authorized_decision_ref"] = refs
+    if not refs:
+        gaps.append(f"{adr}: the decision record carries no decision reference")
+    return done()
+
+
+def _predecessor_state(
+    repo: Path, main: cac.Tree, version: str, commit: str
+) -> tuple[str | None, str | None]:
+    """The release below `version` and the last commit, up to `commit`, that recorded it.
+
+    Release records are regenerated after the last edit to any covered file, so that commit
+    is the state the predecessor release describes; this release's delta is measured from it.
+    """
+    older = [
+        v
+        for v in cac.release_versions(main)
+        if cac.version_key(v) < cac.version_key(version)
+    ]
+    if not older:
+        return None, None
+    prior = older[-1]
+    last = cac.git_out(
+        repo, "log", "-1", "--format=%H", commit, "--", f"{cac.RELEASES}/{prior}"
+    )
+    return prior, last or None
+
+
+def _introduced(
+    repo: Path,
+    main: cac.Tree,
+    version: str,
+    commit: str,
+    subject: dict[str, list[str]],
+    records: dict[str, Any],
+) -> tuple[list[str], str | None]:
+    """Subject record keys this release introduced relative to its predecessor release."""
+    prior, prior_commit = _predecessor_state(repo, main, version, commit)
+    prior_records: dict[str, Any] = {}
+    if prior_commit is not None:
+        prior_records = cac.registration(cac.Tree(repo, prior_commit), subject)[
+            "records"
+        ]
+    introduced = sorted(
+        key
+        for key, value in records.items()
+        if not key.startswith(("source_file:", "source_class_file:"))
+        and cac.digest(prior_records.get(key)) != cac.digest(value)
+    )
+    return introduced, prior
+
+
+def _covering_names(key: str, at: cac.Tree, subject: dict[str, list[str]]) -> set[str]:
+    """Names whose presence in the ADR covers one introduced identity.
+
+    Projection and composition profiles are admitted as pairs: a composition is covered by
+    the projection profile it composes, and a payload schema by the artifact id, the output
+    schema id, or any name covering the profile whose output it is.
+    """
+    kind, _, ident = key.partition(":")
+    names = {ident}
+    reg = cac.Registration(at, subject)
+    by_id = {p.get("id"): p for p in reg.projections + reg.compositions}
+
+    def profile_names(ref: str) -> set[str]:
+        found = {ref}
+        composes = ((by_id.get(ref) or {}).get("composes") or {}).get(
+            "projection_profile"
+        )
+        if isinstance(composes, str):
+            found.add(composes)
+        return found
+
+    if kind == "composition profile":
+        names |= profile_names(ident)
+    if kind == "schema":
+        doc = reg.schemas["docs"].get(ident) or {}
+        const = ((doc.get("properties") or {}).get("schema") or {}).get("const")
+        names |= {doc.get("artifact_id"), const} - {None}
+        for ref, profile in by_id.items():
+            if (
+                const is not None
+                and (profile.get("output") or {}).get("schema") == const
+            ):
+                names |= profile_names(ref)
+    return {n for n in names if isinstance(n, str)}
+
+
+def decision_scope(
+    repo: Path,
+    main: cac.Tree,
+    version: str,
+    proof: dict[str, Any],
+    subject: dict[str, list[str]],
+    records: dict[str, Any],
+) -> dict[str, Any]:
+    """The ADR names every subject identity the admitted release introduced."""
+    commit = proof["admission_commit"]
+    at = cac.Tree(repo, commit)
+    text = (at.read(f"docs/adr/{proof['adr']}") or b"").decode("utf-8", "replace")
+    introduced, prior = _introduced(repo, main, version, commit, subject, records)
+    gaps = [
+        f"{proof['adr']}: does not name {key}, which {version} introduced; the decision "
+        "does not cover it"
+        for key in introduced
+        if not any(_names(text, n) for n in _covering_names(key, at, subject))
+    ]
+    return {
+        "status": "pass" if not gaps else "fail",
+        "gaps": gaps,
+        "introduced": introduced,
+        "predecessor_release": prior,
+        "decision_scope": sorted({k.partition(":")[2] for k in introduced}),
+        "subject_digest": cac.digest(records),
+    }
+
+
+# --------------------------------------------------------------------------- producer
+
+
+_NATIVE = (
+    "import json, sys\n"
+    "from l9_semantic_compiler.passes.validate import schema_violations\n"
+    "batch = json.load(sys.stdin)\n"
+    "print(json.dumps([schema_violations(i['value'], i['schema']) for i in batch]))\n"
+)
+
+
+def native_schema_violations(
+    compiler_src: Path, batch: list[tuple[Any, Any]]
+) -> list[list[str]]:
+    """The compiler's own schema interpreter over (value, descriptor) pairs."""
+    if not batch:
+        return []
+    done = subprocess.run(
+        [sys.executable, "-c", _NATIVE],
+        input=json.dumps([{"value": v, "schema": s} for v, s in batch]),
+        capture_output=True,
+        text=True,
+        env=dict(os.environ, PYTHONPATH=str(compiler_src / "src")),
+        check=False,
+    )
+    try:
+        result = json.loads(done.stdout)
+    except ValueError:
+        result = None
+    if (
+        done.returncode != 0
+        or not isinstance(result, list)
+        or len(result) != len(batch)
+    ):
+        raise cac.InputError(
+            "the compiler's native schema interpreter could not run: "
+            + done.stderr.strip()[-300:]
+        )
+    return result
+
+
+def strict_const_violations(value: Any, descriptor: Any, path: str = "$") -> list[str]:
+    """Typed const/enum equality the native interpreter does not enforce.
+
+    Python's `==` makes `1 == True` and `0 == False`, so a payload carrying 1 where a
+    normative Boolean constant is declared passes `schema_violations`. Booleans and numbers
+    are distinct here.
+    """
+    if not isinstance(descriptor, dict):
+        return []
+
+    def same(a: Any, b: Any) -> bool:
+        return isinstance(a, bool) == isinstance(b, bool) and a == b
+
+    found: list[str] = []
+    if "const" in descriptor and not same(value, descriptor["const"]):
+        found.append(f"{path}: not the typed const {descriptor['const']!r}")
+    enum = descriptor.get("enum")
+    if isinstance(enum, list) and not any(same(value, e) for e in enum):
+        found.append(f"{path}: not a typed member of the declared enum")
+    fields = descriptor.get("fields")
+    if fields is None:
+        fields = descriptor.get("properties")
+    if isinstance(value, dict) and isinstance(fields, dict):
+        for key, child in fields.items():
+            if key in value and value[key] is not None:
+                found += strict_const_violations(value[key], child, f"{path}.{key}")
+    items = descriptor.get("items")
+    if isinstance(value, list) and isinstance(items, dict):
+        for index, item in enumerate(value):
+            found += strict_const_violations(item, items, f"{path}[{index}]")
+    return found
+
+
+def _read_json(
+    path: Any, what: str, gaps: list[str]
+) -> tuple[dict[str, Any] | None, bytes]:
+    if not isinstance(path, str) or not Path(path).is_file():
+        gaps.append(f"{what}: emitted file {path} does not exist")
+        return None, b""
+    raw = Path(path).read_bytes()
+    try:
+        doc = json.loads(raw)
+    except ValueError:
+        gaps.append(f"{what}: {path} is not JSON")
+        return None, raw
+    if not isinstance(doc, dict):
+        gaps.append(f"{what}: {path} is not a JSON object")
+        return None, raw
+    return doc, raw
+
+
+def _self_digest(doc: dict[str, Any], field: str) -> str:
+    return cac.digest({k: v for k, v in doc.items() if k != field})
+
+
+def check_receipt(
+    receipt: dict[str, Any] | None,
+    what: str,
+    *,
+    output: dict[str, Any],
+    profile: dict[str, Any],
+    inputs: list[dict[str, Any]],
+    stated_digest: Any = None,
+) -> list[str]:
+    """A receipt that binds exactly this output, profile and inputs, complete and passing."""
+    if receipt is None:
+        return [f"{what}: no readable receipt"]
+    gaps = []
+    if receipt.get("receipt_digest") != _self_digest(receipt, "receipt_digest"):
+        gaps.append(f"{what}: receipt_digest does not match the receipt's bytes")
+    if stated_digest is not None and receipt.get("receipt_digest") != stated_digest:
+        gaps.append(
+            f"{what}: receipt digest differs from the one the compiler reported"
+        )
+    if receipt.get("result") != "pass":
+        gaps.append(f"{what}: receipt result is {receipt.get('result')}")
+    basis = receipt.get("verification_basis") or {}
+    if basis.get("coverage") != "complete":
+        gaps.append(
+            f"{what}: receipt coverage is {basis.get('coverage')}, not complete"
+        )
+    if basis.get("unresolved_criteria") != []:
+        gaps.append(
+            f"{what}: receipt unresolved_criteria is {basis.get('unresolved_criteria')}"
+        )
+    criteria = basis.get("criteria")
+    if not isinstance(criteria, dict) or not criteria:
+        gaps.append(f"{what}: receipt states no criteria")
+    else:
+        bad = sorted(
+            k
+            for k, v in criteria.items()
+            if not isinstance(v, dict) or v.get("status") not in PASSING_CRITERIA
+        )
+        if bad:
+            gaps.append(f"{what}: receipt criteria not passing: {bad}")
+    if receipt.get("output") != output:
+        gaps.append(f"{what}: receipt output {receipt.get('output')} is not {output}")
+    if receipt.get("profile") != profile:
+        gaps.append(f"{what}: receipt profile is not {profile}")
+    stated = sorted(json.dumps(i, sort_keys=True) for i in receipt.get("inputs") or [])
+    if stated != sorted(json.dumps(i, sort_keys=True) for i in inputs):
+        gaps.append(f"{what}: receipt inputs are not exactly {inputs}")
+    return gaps
+
+
+class ProjectionContext:
+    """Everything a projection artifact must agree with, read from the authority tree."""
+
+    def __init__(self, tree: cac.Tree, revision: str, profile: dict[str, Any]) -> None:
+        self.revision = revision
+        self.profile = profile
+        self.profile_digest = cac.digest(profile)
+        sources, _ = cac.source_registry(tree)
+        classes = cac._class_artifacts(tree)
+        self.by_source: dict[str, dict[str, Any]] = {}
+        for cls, spec in (profile.get("sources") or {}).items():
+            rel = classes.get(cls)
+            owners = [e for e in sources.values() if e.get("path") == rel]
+            data = tree.read(rel) if rel else None
+            if len(owners) != 1 or data is None:
+                raise cac.InputError(
+                    f"source class {cls} does not resolve at {tree.label()}"
+                )
+            self.by_source[owners[0]["id"]] = {
+                "class": cls,
+                "path": rel,
+                "digest": "sha256:" + cac.sha_bytes(data),
+                "document": cac.parse_yaml_mapping(data, rel),
+                "selectors": list((spec or {}).get("selectors") or []),
+            }
+        schema_id = (profile.get("output") or {}).get("schema")
+        names = cac.schema_registry(tree)["consts"].get(schema_id) or []
+        self.schema = (
+            cac.schema_registry(tree)["docs"][names[0]] if len(names) == 1 else None
+        )
+
+
+def check_projection(
+    doc: dict[str, Any] | None, ctx: ProjectionContext, ref: str, compiler_src: Path
+) -> list[str]:
+    """One projection artifact, from its own content, against the authority tree."""
+    if doc is None:
+        return [f"{ref}: no readable artifact"]
+    gaps = []
+    profile_ref = ctx.profile.get("id")
+    if doc.get("schema") != PROJECTION_ENVELOPE:
+        gaps.append(f"{ref}: envelope schema is {doc.get('schema')}")
+    if doc.get("projection_digest") != _self_digest(doc, "projection_digest"):
+        gaps.append(f"{ref}: projection_digest does not match the artifact's content")
+    if doc.get("projection_profile_ref") != profile_ref:
+        gaps.append(f"{ref}: projection_profile_ref is not {profile_ref}")
+    if doc.get("projection_profile_digest") != ctx.profile_digest:
+        gaps.append(f"{ref}: profile digest is not the digest of {profile_ref} at HEAD")
+    source = ctx.by_source.get(doc.get("source_ref"))
+    if source is None or ref != f"{profile_ref}#{doc.get('source_ref')}":
+        gaps.append(
+            f"{ref}: source {doc.get('source_ref')} is not one this profile selects"
+        )
+        return gaps
+    if doc.get("source_digest") != source["digest"]:
+        gaps.append(
+            f"{ref}: source_digest is not the digest of {source['path']} at HEAD"
+        )
+    payload = doc.get("payload")
+    if not isinstance(payload, dict):
+        return [*gaps, f"{ref}: payload is not a mapping"]
+    roots = set()
+    expected_ids: dict[str, set[str]] = {}
+    for selector in source["selectors"]:
+        steps = cac.parse_selector(selector)
+        roots.add(steps[0][1] if steps else None)
+        found = cac.selected_record_ids(source["document"], selector)
+        if found is not None:
+            expected_ids.setdefault(found[0], set()).update(found[1])
+    if None not in roots:
+        extra = sorted(set(payload) - roots)
+        if extra:
+            gaps.append(f"{ref}: payload carries unselected fields {extra}")
+    for root, ids in sorted(expected_ids.items()):
+        records = payload.get(root)
+        got = {r.get("id") for r in records or [] if isinstance(r, dict)}
+        if not isinstance(records, list) or got != ids:
+            gaps.append(
+                f"{ref}: selected records under {root} are not exactly the declared "
+                f"selection (missing {sorted(ids - got)[:5]}, extra {sorted(got - ids)[:5]})"
+            )
+    gaps += _schema_gaps(ref, payload, ctx.schema, compiler_src)
+    return gaps
+
+
+def _schema_gaps(ref: str, payload: Any, schema: Any, compiler_src: Path) -> list[str]:
+    if schema is None:
+        return [
+            f"{ref}: the profile's output schema does not resolve to one registered schema"
+        ]
+    gaps = [
+        f"{ref}: payload schema: {v}" for v in strict_const_violations(payload, schema)
+    ]
+    gaps += [
+        f"{ref}: payload schema (native): {v}"
+        for v in native_schema_violations(compiler_src, [(payload, schema)])[0]
+    ]
+    return gaps
+
+
+def check_composition(
+    doc: dict[str, Any] | None,
+    record: dict[str, Any],
+    ref: str,
+    projections: dict[str, dict[str, Any]],
+    schema: Any,
+    compiler_src: Path,
+) -> list[str]:
+    """One composed artifact against its verified components and its profile."""
+    if doc is None:
+        return [f"{ref}: no readable artifact"]
+    gaps = []
+    if doc.get("schema") != COMPOSITION_ENVELOPE:
+        gaps.append(f"{ref}: envelope schema is {doc.get('schema')}")
+    if doc.get("composition_digest") != _self_digest(doc, "composition_digest"):
+        gaps.append(f"{ref}: composition_digest does not match the artifact's content")
+    profile = {"ref": record.get("id"), "digest": cac.digest(record)}
+    if doc.get("composition_profile") != profile:
+        gaps.append(
+            f"{ref}: composition_profile is not {profile['ref']} at its HEAD digest"
+        )
+    components = doc.get("components")
+    if not isinstance(components, list) or not all(
+        isinstance(c, dict) for c in components
+    ):
+        return [*gaps, f"{ref}: components is not a list of mappings"]
+    proj_refs = [c.get("projection_ref") for c in components]
+    if len(set(proj_refs)) != len(proj_refs):
+        gaps.append(f"{ref}: a component appears more than once")
+    if set(proj_refs) != set(projections):
+        gaps.append(
+            f"{ref}: components {sorted(map(str, proj_refs))} are not exactly the verified "
+            f"projections {sorted(projections)}"
+        )
+    for component in components:
+        source = projections.get(component.get("projection_ref"))
+        if source is None:
+            continue
+        for field, value in (
+            ("projection_digest", source.get("projection_digest")),
+            ("source_ref", source.get("source_ref")),
+            ("source_digest", source.get("source_digest")),
+        ):
+            if field in component and component[field] != value:
+                gaps.append(
+                    f"{ref}: component {component['projection_ref']} {field} differs"
+                )
+        if component.get("projection_digest") != source.get("projection_digest"):
+            gaps.append(
+                f"{ref}: component {component['projection_ref']} digest differs"
+            )
+    if record.get("merge_strategy") == cac.NAMESPACED_MERGE:
+        classes = [c.get("source_class") for c in components]
+        if len(set(classes)) != len(classes):
+            gaps.append(f"{ref}: a source class namespace is filled twice")
+        payload = doc.get("payload")
+        expected_payload = {}
+        for component in components:
+            source = projections.get(component.get("projection_ref"))
+            if source is not None:
+                expected_payload[component.get("source_class")] = source.get("payload")
+        if not isinstance(payload, dict) or set(payload) != set(classes):
+            gaps.append(
+                f"{ref}: payload namespaces are not exactly the component classes"
+            )
+        elif payload != expected_payload:
+            gaps.append(
+                f"{ref}: a payload namespace differs from its component's payload"
+            )
+    gaps += _schema_gaps(ref, doc.get("payload"), schema, compiler_src)
+    return gaps
+
+
+def verify_outputs(
+    tree: cac.Tree,
+    revision: str,
+    compiler_src: Path,
+    subject: dict[str, list[str]],
+    run: dict[str, Any],
+) -> dict[str, Any]:
+    """Every artifact and receipt of one producer run, verified from its bytes."""
+    gaps: list[str] = []
+    reg = cac.Registration(tree, subject)
+    projections_by_id = {p.get("id"): p for p in reg.projections}
+    compositions_by_id = {p.get("id"): p for p in reg.compositions}
+    verified: dict[str, dict[str, dict[str, Any]]] = {}
+    contexts: dict[str, ProjectionContext] = {}
+    for ref, outcome in run["projections"].items():
+        profile = projections_by_id.get(ref)
+        if profile is None or "artifacts" not in outcome:
+            gaps.append(f"{ref}: no artifacts to verify")
+            continue
+        ctx = ProjectionContext(tree, revision, profile)
+        contexts[ref] = ctx
+        expected = {f"{ref}#{s}" for s in ctx.by_source}
+        emitted = {a["ref"] for a in outcome["artifacts"]}
+        if emitted != expected:
+            gaps.append(
+                f"{ref}: emitted {sorted(map(str, emitted))}, but the profile's registered "
+                f"sources are {sorted(expected)}"
+            )
+        pinned = {
+            s.get("ref"): s.get("digest")
+            for s in (outcome.get("pins") or {}).get("sources", [])
+        }
+        verified[ref] = {}
+        for art in outcome["artifacts"]:
+            what = str(art["ref"])
+            doc, raw = _read_json(art["path"], what, gaps)
+            if (
+                raw
+                and "sha256:" + hashlib.sha256(raw).hexdigest() != art["content_digest"]
+            ):
+                gaps.append(
+                    f"{what}: delivered bytes differ from the reported content_digest"
+                )
+            if doc is not None and doc.get("projection_digest") != art["digest"]:
+                gaps.append(
+                    f"{what}: reported digest is not the artifact's projection_digest"
+                )
+            gaps += check_projection(doc, ctx, what, compiler_src)
+            if doc is None:
+                continue
+            source = ctx.by_source.get(doc.get("source_ref")) or {}
+            if pinned.get(doc.get("source_ref")) != source.get("digest"):
+                gaps.append(
+                    f"{what}: compiler pinned a source digest that is not HEAD's"
+                )
+            receipt, _ = _read_json(art["receipt_path"], f"{what} receipt", gaps)
+            gaps += check_receipt(
+                receipt,
+                f"{what} receipt",
+                output={"ref": what, "digest": doc.get("projection_digest")},
+                profile={"ref": ref, "digest": ctx.profile_digest},
+                inputs=[
+                    {
+                        "ref": doc.get("source_ref"),
+                        "digest": source.get("digest"),
+                        "revision": revision,
+                        "path": source.get("path"),
+                    }
+                ],
+                stated_digest=art["receipt_digest"],
+            )
+            verified[ref][what] = doc
+    composed: dict[str, dict[str, Any]] = {}
+    for ref, outcome in run["compositions"].items():
+        record = compositions_by_id.get(ref)
+        if record is None or not outcome.get("artifacts"):
+            gaps.append(f"{ref}: no artifacts to verify")
+            continue
+        components = verified.get(outcome.get("composes"), {})
+        schema_id = (record.get("output") or {}).get("schema")
+        names = reg.schemas["consts"].get(schema_id) or []
+        schema = reg.schemas["docs"][names[0]] if len(names) == 1 else None
+        art = outcome["artifacts"][0]
+        what = str(art["ref"])
+        doc, raw = _read_json(art["path"], what, gaps)
+        if raw and "sha256:" + hashlib.sha256(raw).hexdigest() != art["content_digest"]:
+            gaps.append(
+                f"{what}: delivered bytes differ from the reported content_digest"
+            )
+        if doc is not None and doc.get("composition_digest") != art["digest"]:
+            gaps.append(
+                f"{what}: reported digest is not the artifact's composition_digest"
+            )
+        gaps += check_composition(doc, record, what, components, schema, compiler_src)
+        if doc is None:
+            continue
+        receipt, _ = _read_json(art["receipt_path"], f"{what} receipt", gaps)
+        gaps += check_receipt(
+            receipt,
+            f"{what} receipt",
+            output={"ref": what, "digest": doc.get("composition_digest")},
+            profile={"ref": ref, "digest": cac.digest(record)},
+            inputs=[
+                {"ref": c.get("projection_ref"), "digest": c.get("projection_digest")}
+                for c in doc.get("components") or []
+                if isinstance(c, dict)
+            ],
+            stated_digest=art["receipt_digest"],
+        )
+        composed[ref] = {"doc": doc, "record": record, "schema": schema, "what": what}
+    controls = negative_controls(verified, contexts, composed, compiler_src)
+    gaps += [
+        f"negative control accepted: {name}" for name, ok in controls.items() if not ok
+    ]
+    return {
+        "status": "pass" if not gaps else "fail",
+        "gaps": gaps,
+        "verified_projections": sum(len(v) for v in verified.values()),
+        "verified_compositions": len(composed),
+        "negative_controls": controls,
+    }
+
+
+def _resealed(doc: dict[str, Any], field: str) -> dict[str, Any]:
+    doc[field] = _self_digest(doc, field)
+    return doc
+
+
+def _drop_required_field(payload: dict[str, Any], schema: dict[str, Any]) -> bool:
+    """Remove one schema-required, non-id field from the first record of a typed list."""
+    for key, child in (schema.get("properties") or {}).items():
+        items = child.get("items") if isinstance(child, dict) else None
+        records = payload.get(key)
+        if not isinstance(items, dict) or not isinstance(records, list) or not records:
+            continue
+        first = records[0]
+        for field in items.get("required") or []:
+            if field != "id" and isinstance(first, dict) and field in first:
+                del first[field]
+                return True
+    return False
+
+
+def _projection_controls(
+    original: dict[str, Any], ctx: ProjectionContext
+) -> list[tuple[str, dict[str, Any], str]]:
+    """(name, corrupted artifact, the gap text that must reject it), one per mechanism."""
+    zero = "sha256:" + "0" * 64
+    controls = []
+    doc = copy.deepcopy(original)
+    doc["source_digest"] = zero
+    controls.append(
+        ("source digest", _resealed(doc, "projection_digest"), "source_digest")
+    )
+    doc = copy.deepcopy(original)
+    doc["projection_profile_digest"] = zero
+    controls.append(
+        ("profile digest", _resealed(doc, "projection_digest"), "profile digest")
+    )
+    doc = copy.deepcopy(original)
+    doc["payload"] = {**doc["payload"], "__forged__": 1}
+    controls.append(("unsealed edit", doc, "projection_digest does not match"))
+    root = next(
+        (k for k, v in original["payload"].items() if isinstance(v, list) and v), None
+    )
+    if root is not None:
+        doc = copy.deepcopy(original)
+        doc["payload"][root] = doc["payload"][root][1:]
+        controls.append(
+            (
+                "selected record dropped",
+                _resealed(doc, "projection_digest"),
+                "selected records",
+            )
+        )
+    if ctx.schema is not None:
+        doc = copy.deepcopy(original)
+        if _drop_required_field(doc["payload"], ctx.schema):
+            controls.append(
+                (
+                    "schema required field",
+                    _resealed(doc, "projection_digest"),
+                    "payload schema",
+                )
+            )
+    return controls
+
+
+def _composition_controls(doc: dict[str, Any]) -> list[tuple[str, dict[str, Any], str]]:
+    controls = []
+    corrupted = copy.deepcopy(doc)
+    corrupted["components"].append(copy.deepcopy(corrupted["components"][0]))
+    controls.append(
+        (
+            "duplicate component",
+            _resealed(corrupted, "composition_digest"),
+            "more than once",
+        )
+    )
+    if len(doc["components"]) > 1:
+        corrupted = copy.deepcopy(doc)
+        corrupted["components"].pop()
+        controls.append(
+            (
+                "missing component",
+                _resealed(corrupted, "composition_digest"),
+                "not exactly",
+            )
+        )
+    corrupted = copy.deepcopy(doc)
+    corrupted["components"][0]["projection_digest"] = "sha256:" + "0" * 64
+    controls.append(
+        (
+            "component digest",
+            _resealed(corrupted, "composition_digest"),
+            "digest differs",
+        )
+    )
+    return controls
+
+
+def negative_controls(
+    verified: dict[str, dict[str, dict[str, Any]]],
+    contexts: dict[str, ProjectionContext],
+    composed: dict[str, dict[str, Any]],
+    compiler_src: Path,
+) -> dict[str, bool]:
+    """Corrupt one mechanism at a time, re-seal the digest, and require rejection by it.
+
+    True means the verifier rejected the corrupted artifact through the targeted check. A
+    control whose precondition is absent (no list-valued selection, one component, no
+    required non-id field) is not run.
+    """
+    results: dict[str, bool] = {}
+    for ref, docs in verified.items():
+        if not docs:
+            continue
+        for what in sorted(docs):
+            for name, corrupted, marker in _projection_controls(
+                docs[what], contexts[ref]
+            ):
+                gaps = check_projection(corrupted, contexts[ref], what, compiler_src)
+                results[f"{what}: {name}"] = any(marker in g for g in gaps)
+    for ref, item in composed.items():
+        composes = (item["record"].get("composes") or {}).get("projection_profile")
+        components = verified.get(composes, {})
+        for name, corrupted, marker in _composition_controls(item["doc"]):
+            gaps = check_composition(
+                corrupted,
+                item["record"],
+                item["what"],
+                components,
+                item["schema"],
+                compiler_src,
+            )
+            results[f"{ref}: {name}"] = any(marker in g for g in gaps)
+    return results
+
+
+def compare_runs(first: Path, second: Path) -> dict[str, Any]:
+    """Two producer runs must emit the same normative files with the same bytes.
+
+    `requests/` is the gate's own input to each run (it names its output root), not output.
+    """
+
+    def files(root: Path) -> dict[str, str]:
+        return {
+            str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(root.rglob("*"))
+            if p.is_file() and p.relative_to(root).parts[0] != "requests"
+        }
+
+    a, b = files(first), files(second)
+    differing = sorted(k for k in set(a) & set(b) if a[k] != b[k])
+    only_first = sorted(set(a) - set(b))
+    only_second = sorted(set(b) - set(a))
+    ok = bool(a) and not differing and not only_first and not only_second
+    return {
+        "status": "pass" if ok else "fail",
+        "files": len(a),
+        "differing": differing,
+        "only_in_first": only_first,
+        "only_in_second": only_second,
+    }
+
+
+# --------------------------------------------------------------------------- CLI
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument("--checkout", type=Path, required=True)
+    parser.add_argument("--subject", type=Path, required=True)
+    parser.add_argument("--release", required=True)
+    parser.add_argument("--main-ref", default="origin/main")
+    args = parser.parse_args(argv)
+    try:
+        repo = args.checkout.resolve()
+        subject = cac.load_subject(args.subject)
+        main_tree = cac.Tree(repo, args.main_ref)
+        if args.release not in cac.release_versions(main_tree):
+            raise cac.InputError(f"{args.release} is not a release on {args.main_ref}")
+        proof = release_admission(repo, main_tree, args.release)
+        if proof["status"] == "pass":
+            at = cac.Tree(repo, proof["admission_commit"])
+            reg = cac.registration(at, subject)
+            if reg["status"] != "pass":
+                proof["gaps"].append(
+                    "the subject is not registered at the admission commit"
+                )
+            else:
+                scope = decision_scope(
+                    repo, main_tree, args.release, proof, subject, reg["records"]
+                )
+                proof["decision_scope"] = scope
+                proof["subject_digest"] = scope["subject_digest"]
+                proof["gaps"] += scope["gaps"]
+            proof["status"] = "pass" if not proof["gaps"] else "fail"
+    except cac.InputError as exc:
+        print(
+            json.dumps(
+                {"schema": EVIDENCE_SCHEMA, "status": "UNRESOLVED", "reason": str(exc)}
+            )
+        )
+        return 2
+    print(json.dumps(proof, indent=2, sort_keys=True))
+    return 0 if proof["status"] == "pass" else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
