@@ -1,3 +1,5 @@
+> **Historical (PR #212 @ `85531616`).** Superseded by `SV_ALIGNMENT.md`, which binds GT to the reduced SV candidate in PR #215 @ `a64d05a`. Kept unchanged below as the record of the first alignment.
+
 # Game Theory candidate aligned to Strategic Value PR #212
 
 **Scope:** GT-only repo candidate, no skill. **Source read:** [Quantum-L9/.github PR #212](https://github.com/Quantum-L9/.github/pull/212) at `85531616cee2da94bbb7154418a78537549a4d76`.

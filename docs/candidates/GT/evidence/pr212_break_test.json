@@ -1,103 +1,103 @@
 {
-  "schema": "l9.gt.pr212.local-breaktest/v1",
-  "candidate_revision": "sha256:d5cf5b50668a2d6388e20ee0385ba9f9e27d7252ab5263d4f9c9e706b6c0e0cb",
-  "review_target": "Quantum-L9/.github/pull/212@85531616cee2da94bbb7154418a78537549a4d76",
-  "canonical_base": "020a94bea86e7c5c5e4107da7014ec259508f397",
-  "result": "LOCAL_FALSIFICATION_SURVIVED; FORMAL_AUTHORITY_AND_COMPILER_QUALIFICATION_BLOCKED",
-  "attacks": [
-    {
-      "id": "GT212-01",
-      "name": "Canonical vocabulary identity collision",
-      "local_test": "test_canonical_plan_commitment_collision_repaired",
-      "outcome": "PASS_LOCAL",
-      "disposition": "Repaired by distinct incentive_bearing_commitment; canonical Plan strategic_commitment unchanged"
-    },
-    {
-      "id": "GT212-02",
-      "name": "SV term and invariant duplication",
-      "local_test": "test_sv_specific_terms_and_invariants_not_copied",
-      "outcome": "PASS_LOCAL",
-      "disposition": "Zero exact GT/SV terms and global invariant IDs intersect"
-    },
-    {
-      "id": "GT212-03",
-      "name": "Three-source GT vs five-source SV profiles",
-      "local_test": "test_gt_profile_and_sv_profile_are_separate_named_views",
-      "outcome": "PASS_LOCAL",
-      "disposition": "Independent source-namespaced semantic views; no profile mixing"
-    },
-    {
-      "id": "GT212-04",
-      "name": "GT-only hidden SV dependency",
-      "local_test": "test_gt_contract_independent_of_value_and_non_universal",
-      "outcome": "PASS_LOCAL",
-      "disposition": "Unquantified GT claims do not need admitted SV"
-    },
-    {
-      "id": "GT212-05",
-      "name": "SV-dependent assessment falsely activated at PR212",
-      "local_test": "test_unresolved_sv_does_not_fabricate_sourcerefs_or_numbers",
-      "outcome": "PASS_LOCAL",
-      "disposition": "No evaluated output without admitted SV and real references"
-    },
-    {
-      "id": "GT212-06",
-      "name": "False synthetic evaluated claim without accounting",
-      "local_test": "test_evaluated_requires_accounting_and_compatible_refs",
-      "outcome": "PASS_LOCAL",
-      "disposition": "Structured consumer candidate rejects missing SV accounting receipt"
-    },
-    {
-      "id": "GT212-07",
-      "name": "Canonical Plan action authority escape",
-      "local_test": "test_no_new_valuer_or_permission",
-      "outcome": "PASS_LOCAL",
-      "disposition": "Source contract disallows GT-driven plan revision and execution"
-    },
-    {
-      "id": "GT212-08",
-      "name": "Source-class omission or profile source collision",
-      "local_test": "test_composition_fails_closed_without_namespace",
-      "outcome": "PASS_LOCAL",
-      "disposition": "Missing GT source class invalid in local schema"
-    },
-    {
-      "id": "GT212-09",
-      "name": "Manipulated source identity in consumer envelope",
-      "local_test": "test_consumer_refs_compositions_not_single_per_source_projections",
-      "outcome": "PASS_LOCAL",
-      "disposition": "Consumer references two composed views with exact expected identities"
-    },
-    {
-      "id": "GT212-10",
-      "name": "Passive-world value not affected",
-      "local_test": "test_passive_world_matches_sv_only",
-      "outcome": "PASS_LOCAL",
-      "disposition": "Expected value unchanged in degenerate response distribution"
-    },
-    {
-      "id": "GT212-11",
-      "name": "Response reverses plan ranking",
-      "local_test": "test_gt_response_can_reverse_plan_ranking",
-      "outcome": "PASS_LOCAL",
-      "disposition": "A action changes 1000 to 760, B 800 wins; no additive GT uplift"
-    },
-    {
-      "id": "GT212-12",
-      "name": "Stable softmax misrepresented as Nash",
-      "local_test": "test_softmax_fixed_point_is_not_nash_proof",
-      "outcome": "PASS_LOCAL",
-      "disposition": "Stationary update not sufficient for near-zero unilateral deviation gap"
-    }
-  ],
-  "material_unknowns": [
-    "SV PR212 is documentation-only and not an admitted .github revision",
-    "Canonical L9-SV invariant IDs are not adjudicated by owner",
-    "The proposed GT invariant global irreducibility still requires independent owner decision",
-    "Real compiler schema interpreter, selector replay, projection and composition receipts not executed",
-    "Actual GT and SV numerical method/empirical calibration not proven",
-    "PR212 source blob IDs observed via connected GitHub; no independently rehashed PR checkout in this environment"
-  ],
-  "scope": "Synthetic/local contract, selector, schema, and arithmetic probes only; not producer-validated independent break tester receipt",
-  "remote_mutation": false
+	"schema": "l9.gt.pr212.local-breaktest/v1",
+	"candidate_revision": "sha256:d5cf5b50668a2d6388e20ee0385ba9f9e27d7252ab5263d4f9c9e706b6c0e0cb",
+	"review_target": "Quantum-L9/.github/pull/212@85531616cee2da94bbb7154418a78537549a4d76",
+	"canonical_base": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"result": "LOCAL_FALSIFICATION_SURVIVED; FORMAL_AUTHORITY_AND_COMPILER_QUALIFICATION_BLOCKED",
+	"attacks": [
+		{
+			"id": "GT212-01",
+			"name": "Canonical vocabulary identity collision",
+			"local_test": "test_canonical_plan_commitment_collision_repaired",
+			"outcome": "PASS_LOCAL",
+			"disposition": "Repaired by distinct incentive_bearing_commitment; canonical Plan strategic_commitment unchanged"
+		},
+		{
+			"id": "GT212-02",
+			"name": "SV term and invariant duplication",
+			"local_test": "test_sv_specific_terms_and_invariants_not_copied",
+			"outcome": "PASS_LOCAL",
+			"disposition": "Zero exact GT/SV terms and global invariant IDs intersect"
+		},
+		{
+			"id": "GT212-03",
+			"name": "Three-source GT vs five-source SV profiles",
+			"local_test": "test_gt_profile_and_sv_profile_are_separate_named_views",
+			"outcome": "PASS_LOCAL",
+			"disposition": "Independent source-namespaced semantic views; no profile mixing"
+		},
+		{
+			"id": "GT212-04",
+			"name": "GT-only hidden SV dependency",
+			"local_test": "test_gt_contract_independent_of_value_and_non_universal",
+			"outcome": "PASS_LOCAL",
+			"disposition": "Unquantified GT claims do not need admitted SV"
+		},
+		{
+			"id": "GT212-05",
+			"name": "SV-dependent assessment falsely activated at PR212",
+			"local_test": "test_unresolved_sv_does_not_fabricate_sourcerefs_or_numbers",
+			"outcome": "PASS_LOCAL",
+			"disposition": "No evaluated output without admitted SV and real references"
+		},
+		{
+			"id": "GT212-06",
+			"name": "False synthetic evaluated claim without accounting",
+			"local_test": "test_evaluated_requires_accounting_and_compatible_refs",
+			"outcome": "PASS_LOCAL",
+			"disposition": "Structured consumer candidate rejects missing SV accounting receipt"
+		},
+		{
+			"id": "GT212-07",
+			"name": "Canonical Plan action authority escape",
+			"local_test": "test_no_new_valuer_or_permission",
+			"outcome": "PASS_LOCAL",
+			"disposition": "Source contract disallows GT-driven plan revision and execution"
+		},
+		{
+			"id": "GT212-08",
+			"name": "Source-class omission or profile source collision",
+			"local_test": "test_composition_fails_closed_without_namespace",
+			"outcome": "PASS_LOCAL",
+			"disposition": "Missing GT source class invalid in local schema"
+		},
+		{
+			"id": "GT212-09",
+			"name": "Manipulated source identity in consumer envelope",
+			"local_test": "test_consumer_refs_compositions_not_single_per_source_projections",
+			"outcome": "PASS_LOCAL",
+			"disposition": "Consumer references two composed views with exact expected identities"
+		},
+		{
+			"id": "GT212-10",
+			"name": "Passive-world value not affected",
+			"local_test": "test_passive_world_matches_sv_only",
+			"outcome": "PASS_LOCAL",
+			"disposition": "Expected value unchanged in degenerate response distribution"
+		},
+		{
+			"id": "GT212-11",
+			"name": "Response reverses plan ranking",
+			"local_test": "test_gt_response_can_reverse_plan_ranking",
+			"outcome": "PASS_LOCAL",
+			"disposition": "A action changes 1000 to 760, B 800 wins; no additive GT uplift"
+		},
+		{
+			"id": "GT212-12",
+			"name": "Stable softmax misrepresented as Nash",
+			"local_test": "test_softmax_fixed_point_is_not_nash_proof",
+			"outcome": "PASS_LOCAL",
+			"disposition": "Stationary update not sufficient for near-zero unilateral deviation gap"
+		}
+	],
+	"material_unknowns": [
+		"SV PR212 is documentation-only and not an admitted .github revision",
+		"Canonical L9-SV invariant IDs are not adjudicated by owner",
+		"The proposed GT invariant global irreducibility still requires independent owner decision",
+		"Real compiler schema interpreter, selector replay, projection and composition receipts not executed",
+		"Actual GT and SV numerical method/empirical calibration not proven",
+		"PR212 source blob IDs observed via connected GitHub; no independently rehashed PR checkout in this environment"
+	],
+	"scope": "Synthetic/local contract, selector, schema, and arithmetic probes only; not producer-validated independent break tester receipt",
+	"remote_mutation": false
 }

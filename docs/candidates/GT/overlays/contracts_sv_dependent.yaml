@@ -1,23 +1,29 @@
 contracts:
 - id: l9.contract/strategic-value-interaction-composition@1
-  purpose: 'Govern a consumer''s interaction-conditioned evaluation using GT response semantics and the independently
-    admitted l9.contract/strategic-value-assessment@1 plus l9.strategic.value@1, as proposed in .github PR
-    #212. GT does not own valuation, create an SV model, or grant plan or execution authority.'
+  purpose: Govern a consumer's interaction-conditioned evaluation using GT response semantics and the independently
+    admitted l9.contract/strategic-value-assessment@1 plus l9.strategic.value@1. GT does not own valuation, create
+    an SV model, or grant plan or execution authority.
   scope: global
   owner: Quantum-L9/.github
   source_invariants:
   - L9-GT-001
+  - L9-SV-001
+  - L9-SV-002
   - L9-AUTH-002
   - L9-HARD-001
   - L9-UNKNOWN-001
   - L9-PROJECTION-001
   - L9-EVIDENCE-001
+  - L9-ASSURANCE-001
+  - L9-PROV-001
+  - L9-COORD-001
   applies_to:
   - assessments_claiming_combined_gt_and_strategic_value
   requires:
-  - sv_source_l9_strategic_value_model_and_contract_are_separately_admitted_not_merely_staged_in_pr_212
-  - sv_projection_l9_projection_strategic_planner_value_at_1_and_composition_l9_compose_strategic_planner_value_at_1_are_authentic_and_current
-  - gt_projection_l9_projection_strategic_planner_interaction_at_1_and_composition_l9_compose_strategic_planner_interaction_at_1_are_authentic_and_current
+  - independently_admitted_sv_model_and_assessment_contract
+  - authenticated_current_sv_projection_and_composition
+  - authenticated_current_gt_projection_and_composition
+  - exact_compatible_canonical_authority_coordinates
   - five_source_sv_semantic_view_and_three_source_gt_semantic_view_are_independently_compiled_with_real_producer_provenance
   - combined_assessment_expressly_claims_interaction_conditioned_strategic_value_not_just_gt_only
   - one_explicit_compatible_objective_focal_beneficiary_or_authorized_welfare_aggregation_utility_units_and_feasible_baseline
@@ -47,7 +53,7 @@ contracts:
   - treating_merged_projection_payload_as_executed_numerical_assessment
   - ranking_infeasible_actions_by_soft_value
   - automatic_plan_revision_or_action_from_combined_assessment
-  - claiming_sv_contract_is_admitted_because_pr_212_is_open_or_candidate_schemas_pass
+  - claiming_sv_contract_is_admitted_because_a_candidate_is_open_or_candidate_schemas_pass
   - constructing_gt_plus_sv_value_by_summing_standalone_sv_and_gt_uplift
   - pairing_arbitrary_baseline_and_intervention_worlds_as_causal_identification
   - counting_counterparty_benefits_without_declared_welfare_aggregation

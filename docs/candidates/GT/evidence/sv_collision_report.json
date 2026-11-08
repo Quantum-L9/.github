@@ -1,30 +1,26 @@
 {
-  "comparison_scope": "exact PR #212 head SV candidate and canonical main GT candidate overlay",
-  "pr212_head": "85531616cee2da94bbb7154418a78537549a4d76",
-  "canonical_main_base": "020a94bea86e7c5c5e4107da7014ec259508f397",
-  "sv_term_count": 11,
-  "gt_term_count": 12,
-  "shared_gt_sv_term_keys": [],
-  "shared_gt_sv_invariant_ids": [],
-  "shared_gt_sv_contract_ids": [],
-  "shared_gt_sv_profile_ids": [],
-  "original_gt_vs_canonical_collision": "strategic_commitment (canonical Strategic Plan meaning)",
-  "repair": "rename GT interaction meaning to incentive_bearing_commitment; no change to canonical strategic_commitment",
-  "gt_profile_sources_only": [
-    "vocabulary",
-    "invariants",
-    "contracts"
-  ],
-  "sv_profile_sources_only": [
-    "strategic_value_model",
-    "vocabulary",
-    "invariants",
-    "contracts",
-    "authority_model"
-  ],
-  "sv_profile": "l9.projection/strategic-planner-value@1",
-  "sv_composition": "l9.compose/strategic-planner-value@1",
-  "sv_staged_only": true,
-  "stronger_semantic_similarity_review": "PENDING_INDEPENDENT_OWNER",
-  "status": "NO_EXACT_ID_COLLISIONS_AFTER_RENAME; PR212_SV_UNADMITTED"
+	"comparison_scope": "exact PR #212 head SV candidate and canonical main GT candidate overlay",
+	"pr212_head": "85531616cee2da94bbb7154418a78537549a4d76",
+	"canonical_main_base": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"sv_term_count": 11,
+	"gt_term_count": 12,
+	"shared_gt_sv_term_keys": [],
+	"shared_gt_sv_invariant_ids": [],
+	"shared_gt_sv_contract_ids": [],
+	"shared_gt_sv_profile_ids": [],
+	"original_gt_vs_canonical_collision": "strategic_commitment (canonical Strategic Plan meaning)",
+	"repair": "rename GT interaction meaning to incentive_bearing_commitment; no change to canonical strategic_commitment",
+	"gt_profile_sources_only": ["vocabulary", "invariants", "contracts"],
+	"sv_profile_sources_only": [
+		"strategic_value_model",
+		"vocabulary",
+		"invariants",
+		"contracts",
+		"authority_model"
+	],
+	"sv_profile": "l9.projection/strategic-planner-value@1",
+	"sv_composition": "l9.compose/strategic-planner-value@1",
+	"sv_staged_only": true,
+	"stronger_semantic_similarity_review": "PENDING_INDEPENDENT_OWNER",
+	"status": "NO_EXACT_ID_COLLISIONS_AFTER_RENAME; PR212_SV_UNADMITTED"
 }

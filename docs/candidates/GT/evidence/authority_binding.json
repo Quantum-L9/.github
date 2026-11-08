@@ -1,50 +1,50 @@
 {
-  "authority_mode": "current",
-  "repository": "https://github.com/Quantum-L9/.github",
-  "revision": "020a94bea86e7c5c5e4107da7014ec259508f397",
-  "inspection": "exact PR212 head + canonical main source reads via GitHub connector; connector blob SHA observed but not locally rehashed",
-  "source_blob_shas": {
-    "semantics/canonical_sources.yaml": "d4eec75feb9b4928d53c0953be16f7b0286839a5",
-    "semantics/authority_model.yaml": "b0337e8912470d76ae64a7cbd0bd95752384f7b2",
-    "semantics/invariants.yaml": "e864570545765a29a0af5cfcca35d3ac64841f0a",
-    "semantics/contracts.yaml": "8a0d0513fcb28036682041ca8e759e31d7620f48",
-    "semantics/vocabulary.yaml": "8f5d25f45b13f6bd0d40d0984dc5b311e68d8b48",
-    "semantics/projection_profiles.yaml": "c05b57cb5c725484e2214ee4b2f9069225186b0c",
-    "semantics/composition_profiles.yaml": "6ee238e33e82e84d7cd6bab9f623b7670d34bcad",
-    "semantics/generic_compiler_manifest.yaml": "17e99242728b2591c1dd705107cdf25ceed8e8d7",
-    "semantics/selector_model.yaml": "2cbd9079c5a4a61f6d9faa3be4e2624706ba370a",
-    "semantics/projection_engine_contract.yaml": "799430f4398df365690d4dbeeb61f824fa5f2df5",
-    "semantics/composition_engine_contract.yaml": "96a0e4d67a0dc29a10b67cbf5ede297ee5a36d7c",
-    "semantics/projection_artifact.schema.yaml": "498a3f4adc6150f7182a4ff3560ecac8aa7beff2",
-    "semantics/composed_projection.schema.yaml": "4c61964aa5f85020525efe910b8e6e4f0ef7c2aa"
-  },
-  "sv_dependency": {
-    "artifact_id": "l9.strategic.value@1",
-    "contract_id": "l9.contract/strategic-value-assessment@1",
-    "projection_id": "l9.projection/strategic-planner-value@1",
-    "status_at_pinned_main": "not_admitted",
-    "candidate_file": "docs/candidates/SV/",
-    "status_at_pr212_head": "documented_candidate_under_docs/candidates/SV_not_canonically_admitted"
-  },
-  "source_records": [
-    "Dropbox /Downloads (DBOX)/L9 Reasoning Plane - Game Theory.md (2026-09-27 08:52 UTC)",
-    "Dropbox /Downloads (DBOX)/Reasoning plane V2.md (2026-09-27 20:41 UTC)",
-    "Dropbox /Downloads (DBOX)/GAR - Reasoning v2 Feedback.md (2026-09-27 21:07 UTC)",
-    "Dropbox /Downloads (DBOX)/Einsum work/Einsum - equilibrium.best_response.md (2026-07-17)",
-    "Quantum-L9/l9-wip PR 6 @ fb0ae95620cea0dc3f48aa009056ddb755d69640"
-  ],
-  "authority_assessment": "PARTIAL: SHA-bound inspection succeeded; formal producer-validated AuthorityResolution and native compiler replay not available.",
-  "review_pr212_revision": "85531616cee2da94bbb7154418a78537549a4d76",
-  "review_pr212_url": "https://github.com/Quantum-L9/.github/pull/212",
-  "sv_review_blob_shas": {
-    "docs/candidates/SV/README.md": "4b1aa9496b2490d591b40e508dc4243877efb65d",
-    "docs/candidates/SV/overlays/projection_profile_additions.yaml": "82e063cf2e1349fc03813a060b65fe6fc75fe30b",
-    "docs/candidates/SV/overlays/composition_profile_additions.yaml": "c14c27b842ef02e0abe965d4d2bbf1095629e9f8",
-    "docs/candidates/SV/overlays/contracts_additions.yaml": "dec12362ec14fd06de17791d759e227a3adfbf04",
-    "docs/candidates/SV/overlays/invariants_additions.yaml": "c5bdd3418bb9cc993573a87eebf29e9c405ecfb1",
-    "docs/candidates/SV/overlays/vocabulary_additions.yaml": "c5f19da2b80e9f4991a158b6f1171851192429fa",
-    "docs/candidates/SV/semantics/strategic_value_model.yaml": "5f4ffbc1b6e4add5881f76ae3b176d4a82bbbcf6",
-    "docs/candidates/SV/semantics/strategic_planner_value_projection.schema.yaml": "e702ec7f3cb26322c986eb26e917564eba5048f8",
-    "docs/candidates/SV/semantics/strategic_planner_value_composition.schema.yaml": "4bb57229d3ba7719a057c635b9976f80e7c3513e"
-  }
+	"authority_mode": "current",
+	"repository": "https://github.com/Quantum-L9/.github",
+	"revision": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"inspection": "exact PR212 head + canonical main source reads via GitHub connector; connector blob SHA observed but not locally rehashed",
+	"source_blob_shas": {
+		"semantics/canonical_sources.yaml": "d4eec75feb9b4928d53c0953be16f7b0286839a5",
+		"semantics/authority_model.yaml": "b0337e8912470d76ae64a7cbd0bd95752384f7b2",
+		"semantics/invariants.yaml": "e864570545765a29a0af5cfcca35d3ac64841f0a",
+		"semantics/contracts.yaml": "8a0d0513fcb28036682041ca8e759e31d7620f48",
+		"semantics/vocabulary.yaml": "8f5d25f45b13f6bd0d40d0984dc5b311e68d8b48",
+		"semantics/projection_profiles.yaml": "c05b57cb5c725484e2214ee4b2f9069225186b0c",
+		"semantics/composition_profiles.yaml": "6ee238e33e82e84d7cd6bab9f623b7670d34bcad",
+		"semantics/generic_compiler_manifest.yaml": "17e99242728b2591c1dd705107cdf25ceed8e8d7",
+		"semantics/selector_model.yaml": "2cbd9079c5a4a61f6d9faa3be4e2624706ba370a",
+		"semantics/projection_engine_contract.yaml": "799430f4398df365690d4dbeeb61f824fa5f2df5",
+		"semantics/composition_engine_contract.yaml": "96a0e4d67a0dc29a10b67cbf5ede297ee5a36d7c",
+		"semantics/projection_artifact.schema.yaml": "498a3f4adc6150f7182a4ff3560ecac8aa7beff2",
+		"semantics/composed_projection.schema.yaml": "4c61964aa5f85020525efe910b8e6e4f0ef7c2aa"
+	},
+	"sv_dependency": {
+		"artifact_id": "l9.strategic.value@1",
+		"contract_id": "l9.contract/strategic-value-assessment@1",
+		"projection_id": "l9.projection/strategic-planner-value@1",
+		"status_at_pinned_main": "not_admitted",
+		"candidate_file": "docs/candidates/SV/",
+		"status_at_pr212_head": "documented_candidate_under_docs/candidates/SV_not_canonically_admitted"
+	},
+	"source_records": [
+		"Dropbox /Downloads (DBOX)/L9 Reasoning Plane - Game Theory.md (2026-09-27 08:52 UTC)",
+		"Dropbox /Downloads (DBOX)/Reasoning plane V2.md (2026-09-27 20:41 UTC)",
+		"Dropbox /Downloads (DBOX)/GAR - Reasoning v2 Feedback.md (2026-09-27 21:07 UTC)",
+		"Dropbox /Downloads (DBOX)/Einsum work/Einsum - equilibrium.best_response.md (2026-07-17)",
+		"Quantum-L9/l9-wip PR 6 @ fb0ae95620cea0dc3f48aa009056ddb755d69640"
+	],
+	"authority_assessment": "PARTIAL: SHA-bound inspection succeeded; formal producer-validated AuthorityResolution and native compiler replay not available.",
+	"review_pr212_revision": "85531616cee2da94bbb7154418a78537549a4d76",
+	"review_pr212_url": "https://github.com/Quantum-L9/.github/pull/212",
+	"sv_review_blob_shas": {
+		"docs/candidates/SV/README.md": "4b1aa9496b2490d591b40e508dc4243877efb65d",
+		"docs/candidates/SV/overlays/projection_profile_additions.yaml": "82e063cf2e1349fc03813a060b65fe6fc75fe30b",
+		"docs/candidates/SV/overlays/composition_profile_additions.yaml": "c14c27b842ef02e0abe965d4d2bbf1095629e9f8",
+		"docs/candidates/SV/overlays/contracts_additions.yaml": "dec12362ec14fd06de17791d759e227a3adfbf04",
+		"docs/candidates/SV/overlays/invariants_additions.yaml": "c5bdd3418bb9cc993573a87eebf29e9c405ecfb1",
+		"docs/candidates/SV/overlays/vocabulary_additions.yaml": "c5f19da2b80e9f4991a158b6f1171851192429fa",
+		"docs/candidates/SV/semantics/strategic_value_model.yaml": "5f4ffbc1b6e4add5881f76ae3b176d4a82bbbcf6",
+		"docs/candidates/SV/semantics/strategic_planner_value_projection.schema.yaml": "e702ec7f3cb26322c986eb26e917564eba5048f8",
+		"docs/candidates/SV/semantics/strategic_planner_value_composition.schema.yaml": "4bb57229d3ba7719a057c635b9976f80e7c3513e"
+	}
 }

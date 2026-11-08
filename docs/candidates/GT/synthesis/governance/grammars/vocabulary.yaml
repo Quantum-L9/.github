@@ -1,0 +1,177 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.grammar/strategic-planner-interaction-vocabulary-candidate@1
+owner: Quantum-L9/.github
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: vocabulary
+source_ref: l9.source/vocabulary@1
+source_path: semantics/vocabulary.yaml
+source_revision: 36cb17a474350e5a66a45f7a625ddd4fbe66ea20
+source_digest: sha256:89a211d232322d6f2189e8b2475e44ba9e4b8af922ecf62fed2254f1ae44c7ef
+applies_to_selectors:
+- $.terms.strategic_interaction
+- $.terms.strategic_game_model
+- $.terms.actor_response_model
+- $.terms.strategy_profile
+- $.terms.conditional_best_response
+- $.terms.equilibrium_assessment
+- $.terms.deviation_gain
+- $.terms.incentive_bearing_commitment
+- $.terms.information_disclosure_decision
+- $.terms.policy_exploitability
+- $.terms.incentive_compatibility
+- $.terms.strategic_interaction_assessment
+grammar:
+  type: object
+  fields:
+    terms:
+      type: object
+      fields:
+        strategic_interaction:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        strategic_game_model:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        actor_response_model:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        strategy_profile:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        conditional_best_response:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        equilibrium_assessment:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        deviation_gain:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        incentive_bearing_commitment:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        information_disclosure_decision:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        policy_exploitability:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        incentive_compatibility:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        strategic_interaction_assessment:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+      additional_properties: true
+      required:
+      - strategic_interaction
+      - strategic_game_model
+      - actor_response_model
+      - strategy_profile
+      - conditional_best_response
+      - equilibrium_assessment
+      - deviation_gain
+      - incentive_bearing_commitment
+      - information_disclosure_decision
+      - policy_exploitability
+      - incentive_compatibility
+      - strategic_interaction_assessment
+  additional_properties: true

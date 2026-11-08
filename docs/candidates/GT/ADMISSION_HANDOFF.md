@@ -1,28 +1,45 @@
-# Two-stage .github handoff
+# Admission handoff: SV + GT core, then the GT+SV contract
 
-**This archive is a candidate. It makes NO GitHub changes and does NOT admit canonical law.**
+**This pack is a candidate. It makes no canonical change and admits nothing.**
 
-## Stage 1: GT-alone readiness
+## Successor release A — SV + GT core
 
-1. Freeze exact review PR #212 head and its unchanged canonical main parent; the binder in this archive is pinned to PR #212 head `85531616cee2da94bbb7154418a78537549a4d76` and must fail on drift.
-2. Review one proposed GT invariant and twelve GT-only vocabulary definitions against canonical owners and independent evidence; remove any redundant meaning.
-3. Inspect `overlays/contracts_gt_core.yaml`, `overlays/projection_profile_additions.yaml`, `overlays/composition_profile_additions.yaml`, and the two `semantics/*.schema.yaml` candidates.
-4. The local application script may prepare Stage 1 files on a clean pinned checkout. It never grants admission, pushes, or opens PRs.
-5. Run actual `.github` native validators, schema inventory and declared selector-language replay on the exact proposed successor, plus semantic integrity audit and separate authority approval.
-6. Verify producer-validated source and composed projection receipts and a real Strategic Planner consumer binding before claiming live consumption.
+Contents: the reduced SV candidate (PR #215) plus `L9-GT-001`, twelve GT terms, the GT core contract, the GT projection and composition profiles, the GT forbidden-criterion definition, and both GT payload schemas with their manifest registration. The GT+SV dependent contract is **not** in release A.
 
-## Stage 2: GT + SV dependent composition
+Canonical destination paths, as derived from the resolved target (`evidence/integration-v1/rehearsal.json`), are **15**, not the 12 the remediation spec estimated. The extra three are the derived ledgers `capabilities.yaml`, `lifecycle.yaml` and `receipt_catalog.yaml`, whose recorded digests of `invariants.yaml` and `contracts.yaml` must be rebound (as Semantic Foundation v3.8.0 did in `2ae5dfa`):
 
-1. First prove SV's `l9.strategic.value@1`, `l9.contract/strategic-value-assessment@1`, and `l9.projection/strategic-planner-value@1` are admitted at one exact canonical revision.
-2. Rebind the authority and apply `overlays/contracts_sv_dependent.yaml` in a **separately authorized successor**. The local preparation script deliberately does not add this dependent contract at Stage 1.
-3. The derived GT+SV assessment references one independently computed SV assessment and one GT assessment at comparable coordinates. `schemas/gt_sv_consumer_assessment.candidate.schema.json` is a provisional consumer-envelope proposal, not a registered owner-emitted runtime schema.
-4. The compiler composes each profile separately using source-class namespacing: GT (3 sources), SV (5 sources). The generic `l9.compose/consumer-view@1` deep-merge mode is **not** a cross-profile numerical or semantic-unification engine and may conflict on shared source fields. The consumer references both independently verified composed semantic views; the Numerical Reasoning owner then computes one canonical SV valuation over response-conditioned scenarios.
-5. Strictly test passive-world equality, a flipped action ranking, repeated effects already booked in SV, joint dependence, incompatible units/horizon, altered model revision, action infeasibility and unsupported equilibrium claims.
-6. Confirm consumer selection and authorization remain with the Strategic Planner / applicable strategic authority.
+`invariants.yaml`, `contracts.yaml`, `vocabulary.yaml`, `canonical_sources.yaml`, `projection_profiles.yaml`, `composition_profiles.yaml`, `generic_compiler_manifest.yaml`, `strategic_value_model.yaml`, `strategic_planner_value_projection.schema.yaml`, `strategic_planner_value_composition.schema.yaml`, `strategic_interaction_projection.schema.yaml`, `strategic_interaction_composition.schema.yaml`, `capabilities.yaml`, `lifecycle.yaml`, `receipt_catalog.yaml`.
 
-## Structural proof versus native evidence
+Gates the canonical owner must close:
 
-Local checks in this archive validate YAML/JSON shapes, selector closure on the proposed records, contract relationships and synthetic counterexamples. They do **not** validate the exact current canonical repository's production compiler, the target's full semantic closure, real projection bytes, numerical provider execution, model calibration, formal admission, publication, or downstream deployment.
+1. Adjudicate `L9-GT-001` independently: it must not duplicate an existing global meaning. This is not done here.
+2. Close the SV owner decisions listed in #215, including the amended `L9-SV-001` wording and whether `required_provenance` stays on `l9.compose/strategic-planner-value@1`. While it stays, the SV composition is `unknown` under compiler 0.9.3, so no GT+SV result can be evaluated.
+3. Confirm that the three derived ledgers need digest rebinding only.
+4. Prepare a successor semantic-foundation release record so SC-008 and SC-010 pass. The version is not chosen here.
+5. Re-run the integrated rehearsal at the exact successor revision, and replay it under trust.
+6. Review the compiler-generated candidate schemas and their drafted grammars in `synthesis/` (`schema-synthesize` at `18215ae`, exit 0, deterministic). Approve, amend or reject the grammars, and decide whether the candidate schemas replace or accompany `semantics/strategic_interaction_*.schema.yaml`. Then re-run `tools/synthesize_candidate_schemas.py` against the admitted revision with the approved grammars.
 
-## PR #212 alignment gate
-See `PR212_ALIGNMENT.md`: exact PR head, nine doc blob IDs, repaired canonical `strategic_commitment` collision, and the unchanged main semantic sources. The two GT YAML payload schemas now require PR212-compatible types, but their full owner-native compiler proof remains outstanding.
+## Release A after SV admission (2026-11-08)
+
+SV was admitted on its own first: Semantic Foundation v3.32.0 / ADR-029, effective at `64d8b85` (Quantum-L9/.github#222). Release A is therefore **GT core only**. `apply_to_pinned_checkout.py --stage admitted-core` applies it to a clean checkout at the `target_revision` recorded in `evidence/admitted_sv_binding.json`, a reviewed successor binding. The stage re-verifies the following before any byte is written:
+
+- the admitted SV revision is an ancestor of the target;
+- the SV-owned files equal their admitted bytes;
+- every SV record in a shared ledger equals its admitted record;
+- the v3.32.0 release and ADR-029 record the admission;
+- no GT record exists yet.
+
+Against `main` `c9bbfaf` it touches **11** canonical paths, not 15: the four SV-owned files are already admitted. The paths are `invariants.yaml`, `contracts.yaml`, `vocabulary.yaml`, `projection_profiles.yaml`, `composition_profiles.yaml`, `generic_compiler_manifest.yaml`, both GT schemas, and the derived `capabilities.yaml`, `lifecycle.yaml` and `receipt_catalog.yaml`. `evidence/sv_alignment_binding.json` stays the unchanged historical record of the SV #215 overlay rehearsal.
+
+## Successor release B — GT+SV cross-boundary contract
+
+1. Record the admitted release-A revision in `evidence/sv_alignment_binding.json#admitted_foundation_revision` through a reviewed commit.
+2. Run `apply_to_pinned_checkout.py --stage dependent` on a clean checkout at exactly that revision. It refuses otherwise, and checks that the admitted SV model, SV contract, both SV invariants and GT core are present.
+3. Separately authorize admission of `l9.contract/strategic-value-interaction-composition@1`.
+4. Verify the combined Numerical Reasoning and consumer contract. `tools/verify_consumer_envelope.py` accepts an evaluated envelope only with receipt-backed view digests at equal coordinates and a numerical-evaluation receipt over both views. No Numerical Reasoning receipt type is admitted yet, so that part remains Unknown.
+
+Admitting the dependent contract in release A, alongside the SV contract it depends on, would need the canonical authority to establish first that same-release dependency satisfaction is allowed. That permission cannot be inferred from the current contract.
+
+## Consumer activation
+
+Independent producer and consumer evidence is still required. A projection or composition receipt is never evidence of a numerical valuation or of an executed GT solver.

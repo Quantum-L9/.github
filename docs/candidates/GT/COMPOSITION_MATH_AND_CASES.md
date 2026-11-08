@@ -25,7 +25,7 @@ SV_interaction(a)
            admitted_value_contract=SV_contract_ref)
 ```
 
-`SV_canonical` means the **eventual independently admitted** Strategic Value calculation; the PR #212 files are staged under `docs/candidates/SV/` and are not yet admitted. PR #212 proposes the mandatory exhaustive mutually exclusive immediate/future/cost/risk/opportunity accounting partition, beneficiary/welfare aggregation and counterfactual identification. The GT candidate references those semantics without copying the valuation model. This definition deliberately does *not* reproduce that decomposition, introduce another GT value bucket, or take ownership of numerical methods.
+`SV_canonical` means the **eventual independently admitted** Strategic Value calculation; the SV candidate (PR #212 as reduced by PR #215 to `L9-SV-001` and `L9-SV-002`) is staged under `docs/candidates/SV/` and is not yet admitted. It proposes the mandatory exhaustive mutually exclusive immediate/future/cost/risk/opportunity accounting partition, beneficiary/welfare aggregation and counterfactual identification. The GT candidate references those semantics without copying the valuation model. This definition deliberately does *not* reproduce that decomposition, introduce another GT value bucket, or take ownership of numerical methods.
 
 When a canonical SV implementation exposes conditional scenario valuations rather than a distribution argument, the *same* meaning may be calculated as an appropriately coupled expectation over response-conditioned scenarios, **provided the inner SV value has not already integrated the same uncertainty**. Nested expectations are not allowed to apply a response probability twice.
 
@@ -68,5 +68,5 @@ An epsilon-Nash claim requires a method-appropriate proof that all declared devi
 - Strategic Planner owns its planning question, candidate framing and advisory recommendation; Strategic Authority retains any plan revision decision.
 - A GT-only projection, SV-only projection and derived GT+SV numerical assessment are distinct, digest-bound artifacts with different producers and authority scopes.
 
-## PR #212 method scope
-The SV model permits question-appropriate methods, including bounded scenario evaluation and conditional Q/V; Q/V is not universally mandatory. This GT composition does not force a Q/V algorithm, equate a fixed-point with Nash, or treat local projection validation as independent evidence of empirical adequacy. A combined numerical SV claim additionally requires the counterfactual comparability, nonanticipativity, effect-identity, evidence and uncertainty obligations proposed by PR #212.
+## SV method scope
+The SV model permits question-appropriate methods, including bounded scenario evaluation and conditional Q/V; Q/V is not universally mandatory. This GT composition does not force a Q/V algorithm, equate a fixed-point with Nash, or treat local projection validation as independent evidence of empirical adequacy. A combined numerical SV claim additionally requires the counterfactual comparability, nonanticipativity, effect-identity, evidence and uncertainty obligations of the reduced SV candidate: `L9-SV-001` (counterfactual identification), `L9-SV-002` (exhaustive five-bucket partition) and the assessment-contract obligations that now carry the former SV-015..020 meanings.
