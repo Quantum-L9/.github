@@ -1,204 +1,191 @@
 {
-  "admission": {
-    "reason": "no admitted release on main covers the subject",
-    "status": "fail",
-    "tried": [
-      {
-        "adr": null,
-        "release": "v3.31.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.30.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.29.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "admission_commit": "c6ee11d8e7d2fef6692a4ccb66f7ccee728e30ed",
-        "adr": "ADR-025-admission-of-v3.28.0-projection-and-composition-profile-pairs.md",
-        "registered_at_admission": false,
-        "release": "v3.28.0",
-        "release_status": "ADMITTED"
-      },
-      {
-        "adr": null,
-        "release": "v3.27.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.26.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.25.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.24.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.23.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.22.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.21.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.20.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.19.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.18.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.17.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.16.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.15.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.14.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.13.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.12.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.11.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": "ADR-015-strategic-plan-semantic-model.md",
-        "release": "v3.10.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.9.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": "ADR-014-strategic-cognition-reasoning-plane.md",
-        "release": "v3.8.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.7.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": "ADR-013-global-actor-and-surface-identity-registries.md",
-        "release": "v3.6.0",
-        "release_status": "CANDIDATE"
-      },
-      {
-        "adr": null,
-        "release": "v3.5.0",
-        "release_status": "CANDIDATE"
-      }
-    ]
-  },
-  "head": "c4c4a1dd7275f50e8249168fc86aa5c5d1b14ee7",
-  "main_ref": "origin/main",
-  "main_revision": "92c037a6ec8a17185841cfd60214a69873ae2501",
-  "registration": {
-    "gaps": [],
-    "status": "pass"
-  },
-  "release": {
-    "gaps": [],
-    "release_status": "CANDIDATE",
-    "status": "pass",
-    "version": "v3.32.0"
-  },
-  "repository": "Quantum-L9/.github",
-  "schema": "l9.projection-admission-closure/v1",
-  "subject": {
-    "canonical_sources": [
-      "l9.source/strategic-value-model@1"
-    ],
-    "composition_profiles": [
-      "l9.compose/strategic-planner-value@1"
-    ],
-    "contracts": [
-      "l9.contract/strategic-value-assessment@1"
-    ],
-    "invariants": [
-      "L9-SV-001",
-      "L9-SV-002"
-    ],
-    "projection_profiles": [
-      "l9.projection/strategic-planner-value@1"
-    ],
-    "schemas": [
-      "strategic_planner_value_projection.schema.yaml",
-      "strategic_planner_value_composition.schema.yaml"
-    ],
-    "source_classes": [
-      "strategic_value_model"
-    ],
-    "vocabulary_terms": [
-      "strategic_value",
-      "systemic_future_value",
-      "strategic_value_assessment",
-      "counterfactual_baseline",
-      "future_effect_identity",
-      "bidirectional_value_propagation",
-      "value_propagation_mesh",
-      "future_work_elimination",
-      "capability_unlock",
-      "decision_relevant_information_value",
-      "decision_boundary"
-    ]
-  },
-  "validator": {
-    "exit": 0,
-    "fail_lines": [],
-    "status": "pass"
-  },
-  "verdict": "RELEASED_CANDIDATE"
+	"admission": {
+		"reason": "no admitted release on main covers the subject",
+		"status": "fail",
+		"tried": [
+			{
+				"adr": null,
+				"release": "v3.31.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.30.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.29.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"admission_commit": "c6ee11d8e7d2fef6692a4ccb66f7ccee728e30ed",
+				"adr": "ADR-025-admission-of-v3.28.0-projection-and-composition-profile-pairs.md",
+				"registered_at_admission": false,
+				"release": "v3.28.0",
+				"release_status": "ADMITTED"
+			},
+			{
+				"adr": null,
+				"release": "v3.27.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.26.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.25.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.24.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.23.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.22.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.21.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.20.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.19.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.18.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.17.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.16.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.15.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.14.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.13.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.12.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.11.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": "ADR-015-strategic-plan-semantic-model.md",
+				"release": "v3.10.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.9.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": "ADR-014-strategic-cognition-reasoning-plane.md",
+				"release": "v3.8.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.7.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": "ADR-013-global-actor-and-surface-identity-registries.md",
+				"release": "v3.6.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
+				"release": "v3.5.0",
+				"release_status": "CANDIDATE"
+			}
+		]
+	},
+	"head": "c4c4a1dd7275f50e8249168fc86aa5c5d1b14ee7",
+	"main_ref": "origin/main",
+	"main_revision": "92c037a6ec8a17185841cfd60214a69873ae2501",
+	"registration": {
+		"gaps": [],
+		"status": "pass"
+	},
+	"release": {
+		"gaps": [],
+		"release_status": "CANDIDATE",
+		"status": "pass",
+		"version": "v3.32.0"
+	},
+	"repository": "Quantum-L9/.github",
+	"schema": "l9.projection-admission-closure/v1",
+	"subject": {
+		"canonical_sources": ["l9.source/strategic-value-model@1"],
+		"composition_profiles": ["l9.compose/strategic-planner-value@1"],
+		"contracts": ["l9.contract/strategic-value-assessment@1"],
+		"invariants": ["L9-SV-001", "L9-SV-002"],
+		"projection_profiles": ["l9.projection/strategic-planner-value@1"],
+		"schemas": [
+			"strategic_planner_value_projection.schema.yaml",
+			"strategic_planner_value_composition.schema.yaml"
+		],
+		"source_classes": ["strategic_value_model"],
+		"vocabulary_terms": [
+			"strategic_value",
+			"systemic_future_value",
+			"strategic_value_assessment",
+			"counterfactual_baseline",
+			"future_effect_identity",
+			"bidirectional_value_propagation",
+			"value_propagation_mesh",
+			"future_work_elimination",
+			"capability_unlock",
+			"decision_relevant_information_value",
+			"decision_boundary"
+		]
+	},
+	"validator": {
+		"exit": 0,
+		"fail_lines": [],
+		"status": "pass"
+	},
+	"verdict": "RELEASED_CANDIDATE"
 }

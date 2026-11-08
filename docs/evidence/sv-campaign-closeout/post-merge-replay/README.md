@@ -16,4 +16,6 @@ Run on a clean checkout of `Quantum-L9/.github` `main` at `64d8b8598300f94c3201f
 
 `producer-summary-39a51b7.json` reports a `compiler_revision` of a local snapshot commit; see `../compiler-lock.yaml`. Absolute sandbox paths inside `admission-closure.json` and the archive are not portable.
 
+The JSON files here and in `../pre-merge-qualification-c4c4a1d/` are Biome-formatted copies: the parsed content equals the producer's output, but the bytes do not. The original bytes are in `producer-run-33e4c58.tar.gz`, and `artifacts-*.sha256` hashes the original files.
+
 This replay is producer-side. It is not consumer binding: consumers bind through their own release process.

@@ -1,6 +1,6 @@
 schema: l9.sv-campaign-diff-census/v1
 range: 92c037a6ec8a17185841cfd60214a69873ae2501..64d8b8598300f94c3201f26866f73be6895dab60
-meaning: everything #222 brought to main
+meaning: 'everything #222 brought to main'
 totals: {files: 20, added: 4168, deleted: 13}
 predecessor_release_records_changed: 0
 adr_files_changed_other_than_ADR-029_and_index: 0
