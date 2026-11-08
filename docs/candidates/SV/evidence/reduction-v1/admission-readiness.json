@@ -1,0 +1,54 @@
+{
+	"schema": "l9.sv-reduction-admission-readiness/v1",
+	"status": "IMPLEMENTATION_COMPLETE_OWNER_APPROVED_NOT_ADMITTED",
+	"not_claimed": ["ADMITTED", "CANONICAL_BOUND", "TRUSTED_REPLAY_PASS"],
+	"semantic_integrity": {
+		"exactly_two_new_invariants": "MET",
+		"sv001_includes_counterfactual_identification": "MET without weakening: D1 Option B (donor SV-001 + donor SV-015 verbatim), owner-approved",
+		"sv002_retains_exhaustive_exclusive_accounting": "MET (statement unchanged)",
+		"sv003_014_twelve_meanings_retained": "MET",
+		"sv015_020_six_meanings_retained_verbatim": "MET as verbatim lineage text; normative force for SV-016..020 via unchanged contract obligations; SV-015 merged with weakening",
+		"relocated_ids_not_invariant_references": "MET (mechanically enforced in tests and applier)",
+		"existing_law_dependencies_resolve": "MET at 020a94b",
+		"no_numerical_or_strategic_authority_transfer": "MET (contract and model non-ownership text unchanged)"
+	},
+	"contract_and_projection_integrity": {
+		"twelve_unique_governing_ids": "MET",
+		"eleven_vocabulary_terms": "MET",
+		"four_selected_contracts": "MET",
+		"five_source_classes": "MET",
+		"one_matching_composition_profile": "MET",
+		"both_schema_identities_registered": "MET in rehearsal (generic_compiler_manifest.yaml, once each)",
+		"model_contract_selectors_schema_enums_agree": "MET: model, contract, profile, both invariant enums, both governed_by enums and all lineage enums are exactly the twelve IDs (source-reference-closure.json); contract-record source_invariants intentionally unrestricted because other projected contracts cite other invariants",
+		"normative_constants_enforced": "MET (21 boolean const pins per schema; lineage meaning/model_section/contract_obligation/when const-pinned; native rejection verified)",
+		"required_array_cardinalities_enforced": "MET (native rejection of empty and 11-item arrays)",
+		"selection_equivalence_and_exact_composition_coverage": "MET for five projections; composition coverage criterion passes, overall composition result UNKNOWN"
+	},
+	"runtime_and_evidence_integrity": {
+		"local_tests_pass": "MET (candidate-tests-summary.json)",
+		"six_falsifier_pairs_pass": "MET (falsification-results.json)",
+		"native_schema_interpreter_pass_with_revision": "MET (3bf1a8241452332637ba0daffeee55c433f93e05, 26 checks)",
+		"native_semantic_checks_no_unresolved_semantic_defects": "MET: make validate exit 0, 59 PASS, against successor release candidate v3.32.0",
+		"five_real_source_projections_pass": "MET at canonical candidate revision daca00e",
+		"real_composition_pass": "MET at daca00e with compiler 33e4c58 (R2): composition pass, 4/4 required_provenance pass",
+		"six_real_producer_receipts_verified": "PARTIAL: 6 receipts produced; 5 pass, 1 unknown; bound to the rehearsal revision",
+		"two_generations_deterministic": "MET at daca00e (29 files byte-identical)",
+		"corrupted_artifacts_fail_closed": "MET at daca00e (18/18 mechanisms matched)",
+		"independent_review_bound_to_revision": "PARTIAL: separate-agent review of f4cc0d0..ff38d1f with dispositions (independent-evidence-review.md); no human or owner review",
+		"composition_provenance_equivalence": "MET at rehearsal revision 0b50cf7: every fact the four tokens name re-derives without compiler code; not a compiler PASS"
+	},
+	"admission_integrity": {
+		"authorized_eight_way_disposition": "MET: owner-approved 2026-11-08 (evidence/admission/owner-decision.yaml)",
+		"exact_target_authority_resolved": "MET: re-resolved to b085dba (merge-refreshed after #218); admission branch agent/claude-code/sv-admission",
+		"pr211_overlap_reconciled": "MET for generation (applier compatible with PR #211 tree); merge order still an owner decision",
+		"successor_release_inventory_prepared": "MET: provisional v3.32.0 / ADR-029 selected by tools/prepare_successor_release.py; re-selected at refresh (D4/D5)",
+		"historical_release_unchanged": "MET (no file under docs/semantic-foundation/ touched)",
+		"governed_pr_and_required_checks": "PENDING (publication via the governed PR path)",
+		"canonical_admission": "UNMET: waits on D5 queue (v3.29.0, #218, #219) and owner admission",
+		"trusted_consumer_replay": "UNMET: after admission"
+	},
+	"open_owner_decisions": [],
+	"recommendation": "Implementation complete and owner-approved; admit after the preceding queue per evidence/admission/ADMISSION_CLOSEOUT.md.",
+	"owner_decision_scaffold": "evidence/admission/owner-decision.yaml",
+	"admission_closeout": "evidence/admission/ADMISSION_CLOSEOUT.md"
+}

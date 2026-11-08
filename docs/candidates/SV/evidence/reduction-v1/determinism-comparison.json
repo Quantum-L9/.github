@@ -1,0 +1,138 @@
+{
+	"schema": "l9.sv-reduction-determinism/v2",
+	"rehearsal_authority_revision": "0b50cf7a09c96986d2fcd46130032224ad7104a0",
+	"rehearsal_tree": "bb073717934f8d1e3b802163362b8fed279954b3",
+	"rehearsal_base": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"rehearsal_changed_files": {
+		"semantics/canonical_sources.yaml": "860cd321665f911fd66f0adbec4ddbd7c364745b08928cdacfa047b3db8dee00",
+		"semantics/capabilities.yaml": "67bb7f188bbaacf0f6e9d621a9e83916a89baab3336d1330553a29c55daa871e",
+		"semantics/composition_profiles.yaml": "2375e942e680427c3157f66b1691f548cfa73d029ee9aa2617fc8233219336f8",
+		"semantics/contracts.yaml": "99b4d35d02ca978b381b363a330e5721a458eeb97eab492f0596f6f0a8b42459",
+		"semantics/generic_compiler_manifest.yaml": "1e8d7f48b0e40902dd4b6d856a2908b43d5d9a62b29b4fcd984b239a62e767f6",
+		"semantics/invariants.yaml": "c17b57886f36fd5b1454618fb1f5d84ca5d76e4668079be67e75308f55bc343c",
+		"semantics/lifecycle.yaml": "e34dd36765ea68e9b4fbb6c49f70912dc234d4e812e24b4ca69c8288193ff5c2",
+		"semantics/projection_profiles.yaml": "e425e214091cd11ecf177bb4a1b992741e2d21266d6e73893a9fe1984ff73bea",
+		"semantics/receipt_catalog.yaml": "e93716787b8bfcdece83fb5e80ed23efb83c6ac650b6d4cc414968838575e194",
+		"semantics/strategic_planner_value_composition.schema.yaml": "70d95c34f9979c82b41baee44a2658905a467995cb9c246b2a3dd6afbe00d61f",
+		"semantics/strategic_planner_value_projection.schema.yaml": "f5181c76411adfbb24a034678e5fa305017ca039e6dc9f69e7fbe0f7752c7b3a",
+		"semantics/strategic_value_model.yaml": "28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69",
+		"semantics/vocabulary.yaml": "db0491ac7b8e2892e3eaddce0c4e2fa277ce4f2247017c48727b34d7f90e8bc2"
+	},
+	"rehearsal_reproduction": "Clone Quantum-L9/.github, check out the base, run apply_to_pinned_checkout.py --apply --disposable, and commit semantics/. The tree hash must equal rehearsal_tree; the commit hash depends on author and date and is not portable. The rehearsal commit itself was never pushed.",
+	"compiler_revision": "3bf1a8241452332637ba0daffeee55c433f93e05",
+	"archives": {
+		"projection-run1.tar": "32f62fd7c84ccd300bd8467b2c91de3edbac349b42d99ddaef235b948f25bfd6",
+		"projection-run2.tar": "1b9c7fe508fd33969a6c13615b1543b00cad8a9168c149fe1c98e5ee82707a83"
+	},
+	"archive_note": "Raw compiler bytes are kept in deterministic USTAR archives (sorted, mtime 0) so formatters cannot alter delivered bytes. requests/ differ between runs only by output_root and are excluded from the comparison.",
+	"files_compared": 12,
+	"byte_identical": true,
+	"per_file_sha256": {
+		"composed/l9.compose_strategic-planner-value_1_l9.projection_strategic-planner-value_1.composed.json": "89da142dd91b220b5d1f11919c4296b1b15d3c0a4d279e9faaed621b815e6940",
+		"l9.projection_strategic-planner-value_1/l9.source_authority-model_1.projection.json": "d4d8df85c5733a960f0e8a01f26e261c052f6fd4352682a19341c885852dd725",
+		"l9.projection_strategic-planner-value_1/l9.source_contracts_1.projection.json": "cc27e9d9f6dc075f4676e4658564f453a554b2042a7f18981a4436a7a13ce5af",
+		"l9.projection_strategic-planner-value_1/l9.source_invariants_1.projection.json": "a58d5efcd8d1fa103fdd32364482e98b6d0fcbd0712db7c14d2c42e479102aee",
+		"l9.projection_strategic-planner-value_1/l9.source_strategic-value-model_1.projection.json": "2460f1dd1860c72d6c9a11d5400543209c5283b887d00216bd886a501c29c8b6",
+		"l9.projection_strategic-planner-value_1/l9.source_vocabulary_1.projection.json": "51b78f79ea8f74aff2c6033edc5a18b87d16ad8cf5fa57bcc43c0d095ab54167",
+		"receipts/0f6cc6c2e8bc0c9d6781494bf31187940c48ee28b952b250ed86a2c0d15e56b0.json": "38396479dc7513b1fd53e997543aa1a0c9b7d81ee9b7bbc6e13ed7dbb39c3d06",
+		"receipts/10c7900b484bb36ae760f5a19e9b7054b024119f1df1adc9b004ea25045f1687.json": "8e296f243a20601ea375d9aed2102ed74832cc50c556e2f4f67f4785a4c84957",
+		"receipts/1c303ca4bb08c9d89dc51ae32dba441650c95d3a197cf03f8b6fe50b32c1b434.json": "c5d9082714214290875a036894b3430809914bbd3c3974353b6c2e77e051c9e1",
+		"receipts/9bf6b4390049928985cce68def3a8dbf0eb80fc9e69be0d21ada3098ececdd7b.json": "ba4dc8a4ccd13b2b5c6090c19e4da50a3afabc63b23391539b1403d7929b0a92",
+		"receipts/a96a8ab406b82fc83d7afa4196d92f6b6e0ad7149f1f93e0d312823df691259a.json": "fc3c9205ab8734d9acc7acb063f979d5a62104c9cbdba7121dd73294e1fc7120",
+		"receipts/bfda4af538a47b6e78b1b8d66f5f727a14296e89aeb52625977da98ad5f83dc9.json": "fe2735a484785b41f1947145bffb98972b08e4adb621125ca35b8a46b8b620dc"
+	},
+	"projection_results": {
+		"l9.source/invariants@1": {
+			"result": "pass",
+			"criteria": {
+				"declared_constraint:forbidden:execution_publication_or_merge_authority_grant": "pass",
+				"declared_constraint:forbidden:provider_implementation_details": "pass",
+				"delivered_bytes": "pass",
+				"envelope_schema": "pass",
+				"payload_schema": "pass",
+				"profile_currentness": "pass",
+				"projection_digest": "pass",
+				"selection_equivalence": "pass",
+				"source_currentness": "pass",
+				"source_identity": "pass"
+			}
+		},
+		"l9.source/vocabulary@1": {
+			"result": "pass",
+			"criteria": {
+				"declared_constraint:forbidden:execution_publication_or_merge_authority_grant": "pass",
+				"declared_constraint:forbidden:provider_implementation_details": "pass",
+				"delivered_bytes": "pass",
+				"envelope_schema": "pass",
+				"payload_schema": "pass",
+				"profile_currentness": "pass",
+				"projection_digest": "pass",
+				"selection_equivalence": "pass",
+				"source_currentness": "pass",
+				"source_identity": "pass"
+			}
+		},
+		"l9.source/contracts@1": {
+			"result": "pass",
+			"criteria": {
+				"declared_constraint:forbidden:execution_publication_or_merge_authority_grant": "pass",
+				"declared_constraint:forbidden:provider_implementation_details": "pass",
+				"delivered_bytes": "pass",
+				"envelope_schema": "pass",
+				"payload_schema": "pass",
+				"profile_currentness": "pass",
+				"projection_digest": "pass",
+				"selection_equivalence": "pass",
+				"source_currentness": "pass",
+				"source_identity": "pass"
+			}
+		},
+		"l9.source/authority-model@1": {
+			"result": "pass",
+			"criteria": {
+				"declared_constraint:forbidden:execution_publication_or_merge_authority_grant": "pass",
+				"declared_constraint:forbidden:provider_implementation_details": "pass",
+				"delivered_bytes": "pass",
+				"envelope_schema": "pass",
+				"payload_schema": "pass",
+				"profile_currentness": "pass",
+				"projection_digest": "pass",
+				"selection_equivalence": "pass",
+				"source_currentness": "pass",
+				"source_identity": "pass"
+			}
+		},
+		"l9.source/strategic-value-model@1": {
+			"result": "pass",
+			"criteria": {
+				"declared_constraint:forbidden:execution_publication_or_merge_authority_grant": "pass",
+				"declared_constraint:forbidden:provider_implementation_details": "pass",
+				"delivered_bytes": "pass",
+				"envelope_schema": "pass",
+				"payload_schema": "pass",
+				"profile_currentness": "pass",
+				"projection_digest": "pass",
+				"selection_equivalence": "pass",
+				"source_currentness": "pass",
+				"source_identity": "pass"
+			}
+		}
+	},
+	"composition_result": {
+		"result": "unknown",
+		"criteria": {
+			"component_freshness": "pass",
+			"component_provenance": "pass",
+			"composition_digest": "pass",
+			"composition_equivalence": "pass",
+			"composition_profile_currentness": "pass",
+			"declared_constraint:required_provenance:composition_profile_digest": "unresolved",
+			"declared_constraint:required_provenance:composition_profile_ref": "unresolved",
+			"declared_constraint:required_provenance:source_projection_digests": "unresolved",
+			"declared_constraint:required_provenance:source_projection_refs": "unresolved",
+			"delivered_bytes": "pass",
+			"envelope_schema": "pass",
+			"payload_schema": "pass"
+		}
+	}
+}

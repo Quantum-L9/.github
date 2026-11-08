@@ -1,0 +1,105 @@
+{
+	"schema": "l9.sv-reduction-source-digest-lock/v1",
+	"source_candidate_sha": "85531616cee2da94bbb7154418a78537549a4d76",
+	"donor_files": [
+		{
+			"path": "docs/candidates/SV/overlays/contracts_additions.yaml",
+			"frozen_copy": "donor/contracts_additions.yaml",
+			"sha256": "b2aa7ac2f93b2cfe689d851fddc9adfdc6f618d95150f7cd5a69774d377c2f72",
+			"git_blob_at_source": "dec12362ec14fd06de17791d759e227a3adfbf04"
+		},
+		{
+			"path": "docs/candidates/SV/tests/falsification_cases.json",
+			"frozen_copy": "donor/falsification_cases.json.pr212",
+			"sha256": "ee597f3f8d8254254db787587f4ef01beb3dac20f69e67e5ff57601bb54fa819",
+			"git_blob_at_source": "c19c4e41382e1ec3342de55cb9cf5bf47db4c1b3"
+		},
+		{
+			"path": "docs/candidates/SV/overlays/invariants_additions.yaml",
+			"frozen_copy": "donor/invariants_additions.yaml",
+			"sha256": "b259540393a1e30573e09317760ea9919ccc049f87a461a10c62c9bd26aa48f3",
+			"git_blob_at_source": "c5bdd3418bb9cc993573a87eebf29e9c405ecfb1"
+		},
+		{
+			"path": "docs/candidates/SV/overlays/projection_profile_additions.yaml",
+			"frozen_copy": "donor/projection_profile_additions.yaml",
+			"sha256": "ee3722c3178ab41c98f65ef76b11f6b268dd59eef59d2e2a5fe75b655a9e21c5",
+			"git_blob_at_source": "82e063cf2e1349fc03813a060b65fe6fc75fe30b"
+		},
+		{
+			"path": "docs/candidates/SV/semantics/strategic_planner_value_composition.schema.yaml",
+			"frozen_copy": "donor/strategic_planner_value_composition.schema.yaml",
+			"sha256": "79643fb3c5031074d5b3153173329bcc10d3cffdf54050861f179fc714ea48dc",
+			"git_blob_at_source": "4bb57229d3ba7719a057c635b9976f80e7c3513e"
+		},
+		{
+			"path": "docs/candidates/SV/semantics/strategic_planner_value_projection.schema.yaml",
+			"frozen_copy": "donor/strategic_planner_value_projection.schema.yaml",
+			"sha256": "10323a7b8bf729db1ef811e511ebd9c434477090d957a95178ae1a2fc4813730",
+			"git_blob_at_source": "e702ec7f3cb26322c986eb26e917564eba5048f8"
+		},
+		{
+			"path": "docs/candidates/SV/semantics/strategic_value_model.yaml",
+			"frozen_copy": "donor/strategic_value_model.yaml",
+			"sha256": "189e44474315ed5c5770a6d1246264297a0dddaf7d704f45d5a1611d7e237088",
+			"git_blob_at_source": "5f4ffbc1b6e4add5881f76ae3b176d4a82bbbcf6"
+		}
+	],
+	"reduced_candidate_files": [
+		{
+			"path": "overlays/invariants_additions.yaml",
+			"sha256": "d649596ab3f0649446e4e6d825d0f842b40ef29a7f2b2f85fbd8ac5060481ef6"
+		},
+		{
+			"path": "overlays/contracts_additions.yaml",
+			"sha256": "dcae0ce039f4277a44442436da0907a41ec8bace98f9aaa4fa594c57dcc41e8f"
+		},
+		{
+			"path": "overlays/projection_profile_additions.yaml",
+			"sha256": "c264f75c392bde4e3addcd77bc49a2b13d2497a1a091a5b5ab71ea35f6357cfc"
+		},
+		{
+			"path": "overlays/composition_profile_additions.yaml",
+			"sha256": "789826d08b1489d2b999f6974e6b28591c177f0897c52b93678edcf3b10df106"
+		},
+		{
+			"path": "overlays/vocabulary_additions.yaml",
+			"sha256": "05ec0d782e8e7591418dea2bbc1515fcc44cfd81f9eed8a8fad4e85cc424e89c"
+		},
+		{
+			"path": "semantics/strategic_value_model.yaml",
+			"sha256": "28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69"
+		},
+		{
+			"path": "semantics/strategic_planner_value_projection.schema.yaml",
+			"sha256": "f5181c76411adfbb24a034678e5fa305017ca039e6dc9f69e7fbe0f7752c7b3a"
+		},
+		{
+			"path": "semantics/strategic_planner_value_composition.schema.yaml",
+			"sha256": "70d95c34f9979c82b41baee44a2658905a467995cb9c246b2a3dd6afbe00d61f"
+		},
+		{
+			"path": "tests/falsification_cases.json",
+			"sha256": "1166cd95770029ba49948c3f1dd25887b532c0d1c38ad131264d1a017b7177d8"
+		},
+		{
+			"path": "apply_to_pinned_checkout.py",
+			"sha256": "ae5972f247b3fbb65903778e57f09efe04d5aafe0d659c5cfb152124ae542cf1"
+		},
+		{
+			"path": "tools/reduce_to_two_invariants.py",
+			"sha256": "c8154f0b651565786d9788109dc16a6c8f4f72d2e62b9b86e7d30f44d63852d7"
+		}
+	],
+	"compiler": {
+		"repository": "Quantum-L9/l9-semantic-compiler-engine",
+		"revision": "3bf1a8241452332637ba0daffeee55c433f93e05",
+		"version": "0.9.3"
+	},
+	"rehearsal_authority": {
+		"base": "020a94bea86e7c5c5e4107da7014ec259508f397",
+		"local_rehearsal_commit": "0b50cf7a09c96986d2fcd46130032224ad7104a0",
+		"tree": "bb073717934f8d1e3b802163362b8fed279954b3",
+		"pushed": false
+	}
+}

@@ -1,0 +1,84 @@
+{
+  "admission": "not_granted",
+  "authority_base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
+  "authority_rehearsal_pushed": false,
+  "authority_rehearsal_revision": "d6f4db8b9689eb97a825e6184e2b346bf27eeebf",
+  "authority_repository": "Quantum-L9/.github",
+  "compiler": {
+    "executable_digest": "sha256:6f37429d108a8922add28cdf77ad2c86461f37a75077c96bd6003a80a45353d4",
+    "repository": "Quantum-L9/l9-semantic-compiler-engine",
+    "revision": "18215ae2cd948ff8c9cc8992785d2f72f8b53310"
+  },
+  "deterministic_replay": true,
+  "governance_catalog_revision": "98576c1bd294bd09152676cb913dc17ec4960ae8",
+  "governance_grammar_revision": "88b18e382c6003329aec983918c592aa7eee60cf",
+  "governance_store": "local, rebuilt by this tool from synthesis/governance/ (never pushed)",
+  "grammar_summary": {
+    "authority_model": {
+      "carried": 39,
+      "not_carried": 0,
+      "structural_fill": 12,
+      "v1_semantics": 11
+    },
+    "contracts": {
+      "carried": 15,
+      "not_carried": 1,
+      "structural_fill": 33,
+      "v1_semantics": 4
+    },
+    "invariants": {
+      "carried": 5,
+      "not_carried": 3,
+      "structural_fill": 1,
+      "v1_semantics": 2
+    },
+    "strategic_value_model": {
+      "carried": 346,
+      "not_carried": 0,
+      "structural_fill": 0,
+      "v1_semantics": 40
+    },
+    "vocabulary": {
+      "carried": 33,
+      "not_carried": 0,
+      "structural_fill": 3,
+      "v1_semantics": 13
+    }
+  },
+  "output_digests": {
+    "composition_schema": "sha256:ac3230fbe9a28ca01b343a2dc86cb7f17af38726d092007e3854256238e8c782",
+    "digest_basis": "canonical_json_utf8_sorted_keys_with_newline",
+    "projection_schema": "sha256:a351375e73619a3757e0c56dc8cfc265de48c70fbcf63d698321469b9ed95b1f",
+    "provenance": "sha256:0dceec7de3d4aa3ff4dfde9e36d11e6ba1948679dba7a83471b7e7fbc0a662a3"
+  },
+  "outputs": {
+    "composition_schema": {
+      "path": "strategic_planner_value_composition.candidate.schema.json",
+      "sha256": "sha256:ac3230fbe9a28ca01b343a2dc86cb7f17af38726d092007e3854256238e8c782"
+    },
+    "projection_schema": {
+      "path": "strategic_planner_value_projection.candidate.schema.json",
+      "sha256": "sha256:a351375e73619a3757e0c56dc8cfc265de48c70fbcf63d698321469b9ed95b1f"
+    },
+    "provenance": {
+      "path": "candidate.json#/provenance",
+      "sha256": "sha256:0dceec7de3d4aa3ff4dfde9e36d11e6ba1948679dba7a83471b7e7fbc0a662a3"
+    }
+  },
+  "owner_review": "not_performed",
+  "schema": "l9.sv.candidate-schema-synthesis-run/v1",
+  "schema_candidate_check": {
+    "admission": "not_granted",
+    "authenticity": "not_established",
+    "canonical": false,
+    "producer_consumer_qualification": "not_evaluated",
+    "status": "candidate_digests_consistent"
+  },
+  "schema_candidate_check_exit_code": 0,
+  "schema_derive_exit_code": 3,
+  "schema_synthesize_exit_codes": [
+    0,
+    0
+  ],
+  "status": "candidate_not_admitted"
+}

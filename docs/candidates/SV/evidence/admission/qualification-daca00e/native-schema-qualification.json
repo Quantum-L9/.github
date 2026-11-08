@@ -1,0 +1,164 @@
+{
+	"result": "NATIVE_SCHEMA_DIALECT_REGRESSIONS_PASS",
+	"compiler": {
+		"module_path": "/home/user/compiler-r2/src/l9_semantic_compiler/__init__.py",
+		"git_head": "33e4c5832bf73c7d9b0b70854af011e9582f1ab2",
+		"src_dirty": false
+	},
+	"check_count": 26,
+	"checks": [
+		{
+			"check": "complete_reduced_model_selected_payload",
+			"expected_violation": false,
+			"observed": null
+		},
+		{
+			"check": "normative_boolean_cannot_be_False",
+			"expected_violation": true,
+			"observed": [
+				"$.valuation.accounting_partition_contract.normative_partition.mutually_exclusive_booking: expected const True"
+			]
+		},
+		{
+			"check": "normative_boolean_cannot_be_1",
+			"expected_violation": true,
+			"observed": [
+				"$.valuation.accounting_partition_contract.normative_partition.mutually_exclusive_booking: expected boolean"
+			]
+		},
+		{
+			"check": "empty_min_items_with_array",
+			"expected_violation": true,
+			"observed": ["$.governed_by.invariants: fewer than 12 items"]
+		},
+		{
+			"check": "governed_by_requires_twelve_invariants",
+			"expected_violation": true,
+			"observed": ["$.governed_by.invariants: fewer than 12 items"]
+		},
+		{
+			"check": "lineage_entry_missing",
+			"expected_violation": true,
+			"observed": [
+				"$.relocated_additional_candidate_semantics.L9-SV-017: required field missing"
+			]
+		},
+		{
+			"check": "lineage_authority_status_promoted",
+			"expected_violation": true,
+			"observed": [
+				"$.relocated_additional_candidate_semantics.L9-SV-015.authority_status: expected const 'not_admitted_as_independent_invariant'"
+			]
+		},
+		{
+			"check": "lineage_disposition_changed",
+			"expected_violation": true,
+			"observed": [
+				"$.relocated_additional_candidate_semantics.L9-SV-019.disposition: expected const 'REUSE'"
+			]
+		},
+		{
+			"check": "lineage_governing_invariants_empty",
+			"expected_violation": true,
+			"observed": [
+				"$.relocated_additional_candidate_semantics.L9-SV-020.governing_invariants: fewer than 1 items"
+			]
+		},
+		{
+			"check": "lineage_governed_by_removed_candidate",
+			"expected_violation": true,
+			"observed": [
+				"$.relocated_additional_candidate_semantics.L9-SV-016.governing_invariants[0]: value not in declared enum"
+			]
+		},
+		{
+			"check": "lineage_meaning_not_string",
+			"expected_violation": true,
+			"observed": [
+				"$.relocated_additional_candidate_semantics.L9-SV-018.meaning: expected const 'For a Strategic Value claim about a portfolio or joint intervention, its value is evaluated against the joint feasible counterfactual and shared resource constraints. Standalone action values may be summed only with evidence of additive independence; shared dependencies, synergies, substitution, resource collision and cannibalization must be represented or remain unresolved.'"
+			]
+		},
+		{
+			"check": "lineage_meaning_rewritten",
+			"expected_violation": true,
+			"observed": [
+				"$.relocated_additional_candidate_semantics.L9-SV-015.meaning: expected const 'For a Strategic Value claim, a counterfactual comparison must identify the same decision-relevant initial conditions, utility measure, exogenous context and time basis across intervention and baseline worlds, or explicitly quantify their divergence. A convenient scenario pairing or historical correlation is not evidence of an identifiable causal intervention effect.'"
+			]
+		},
+		{
+			"check": "lineage_contract_obligation_rewritten",
+			"expected_violation": true,
+			"observed": [
+				"$.relocated_additional_candidate_semantics.L9-SV-019.contract_obligation: expected const 'uncertainty_sensitivity_or_conditional_frontier_when_preference_can_flip'"
+			]
+		},
+		{
+			"check": "lineage_source_id_swapped",
+			"expected_violation": true,
+			"observed": [
+				"$.relocated_additional_candidate_semantics.L9-SV-015.source_candidate_id: expected const 'L9-SV-015'"
+			]
+		},
+		{
+			"check": "twelve_invariant_records_positive",
+			"expected_violation": false,
+			"observed": null
+		},
+		{
+			"check": "removed_candidate_L9-SV-015_rejected_as_invariant",
+			"expected_violation": true,
+			"observed": ["$.invariants[0].id: value not in declared enum"]
+		},
+		{
+			"check": "removed_candidate_L9-SV-016_rejected_as_invariant",
+			"expected_violation": true,
+			"observed": ["$.invariants[0].id: value not in declared enum"]
+		},
+		{
+			"check": "removed_candidate_L9-SV-017_rejected_as_invariant",
+			"expected_violation": true,
+			"observed": ["$.invariants[0].id: value not in declared enum"]
+		},
+		{
+			"check": "removed_candidate_L9-SV-018_rejected_as_invariant",
+			"expected_violation": true,
+			"observed": ["$.invariants[0].id: value not in declared enum"]
+		},
+		{
+			"check": "removed_candidate_L9-SV-019_rejected_as_invariant",
+			"expected_violation": true,
+			"observed": ["$.invariants[0].id: value not in declared enum"]
+		},
+		{
+			"check": "removed_candidate_L9-SV-020_rejected_as_invariant",
+			"expected_violation": true,
+			"observed": ["$.invariants[0].id: value not in declared enum"]
+		},
+		{
+			"check": "eleven_invariant_records_rejected",
+			"expected_violation": true,
+			"observed": ["$.invariants: fewer than 12 items"]
+		},
+		{
+			"check": "nested_terms_positive",
+			"expected_violation": false,
+			"observed": null
+		},
+		{
+			"check": "nested_terms_malformed_definition",
+			"expected_violation": true,
+			"observed": ["$.terms.strategic_value.definition: expected string"]
+		},
+		{
+			"check": "composition_missing_four_namespaces",
+			"expected_violation": true,
+			"observed": ["$.vocabulary: required field missing"]
+		},
+		{
+			"check": "composition_model_namespace_requires_lineage",
+			"expected_violation": true,
+			"observed": ["$.vocabulary: required field missing"]
+		}
+	],
+	"scope": "schema_violations_only_not_real_projections_or_receipts"
+}
