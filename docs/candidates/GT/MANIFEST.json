@@ -78,6 +78,11 @@
 			"sha256": "f22ca91a035e19d6b0bcf08bb124015ba27fda81809bc293ae0bd6585d38a843"
 		},
 		{
+			"path": "evidence/admission/gt-owner-decision.yaml",
+			"bytes": 4337,
+			"sha256": "02ce97666c182d2dcf25b08c6afff39ff46425e7b5f7052844a332b202a38002"
+		},
+		{
 			"path": "evidence/admitted_sv_binding.json",
 			"bytes": 2098,
 			"sha256": "85daf0014168ce301c39aac9401cf458debf5b175f46a725804e14db645d4f51"
@@ -326,6 +331,11 @@
 			"path": "tools/gt_producer_negative_controls.py",
 			"bytes": 19661,
 			"sha256": "5c1d9904bfe07fcb3764e664566c0930857b7caa1a39ef171226d75551c3d6bf"
+		},
+		{
+			"path": "tools/prepare_gt_release.py",
+			"bytes": 17859,
+			"sha256": "705df08a37d0fa231df7accef676c5706601c9e1491dfa04f69e4b3f2f15bf55"
 		},
 		{
 			"path": "tools/refresh_pack_inventory.py",
