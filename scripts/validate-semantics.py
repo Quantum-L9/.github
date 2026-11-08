@@ -13387,36 +13387,74 @@ PROVENANCE_RULE = (
 )
 
 
-def _evaluate_rc033(docs: dict[str, dict], report: Report) -> None:
-    catalog = _mapping(docs.get(COMPOSITION_PROFILES_PATH))
+def _rc033_fail(field: str, value: object, message: str, report: Report) -> None:
+    report.fail("RC-033", COMPOSITION_PROFILES_PATH, field, value, message)
+
+
+def _rc033_rules(catalog: dict, report: Report) -> None:
     rules = _mapping(catalog.get("global_rules"))
     for rule in ("source_projection_provenance_required", PROVENANCE_RULE):
         if rules.get(rule) is not True:
-            report.fail(
-                "RC-033",
-                COMPOSITION_PROFILES_PATH,
-                f"global_rules.{rule}",
-                rules.get(rule),
-                "must be true",
-            )
+            _rc033_fail(f"global_rules.{rule}", rules.get(rule), "must be true", report)
+
+
+def _rc033_declared_tokens(catalog: dict, report: Report) -> dict[str, list[str]]:
+    """Every required_provenance token, mapped to the profiles that declare it."""
     tokens: dict[str, list[str]] = {}
     for profile in catalog.get("profiles") or []:
-        declared = _mapping(profile).get("required_provenance")
+        record = _mapping(profile)
+        declared = record.get("required_provenance")
         if declared is None:
             continue
         if not isinstance(declared, list) or not all(
             isinstance(t, str) for t in declared
         ):
-            report.fail(
-                "RC-033",
-                COMPOSITION_PROFILES_PATH,
-                f"profiles[{_mapping(profile).get('id')}].required_provenance",
+            _rc033_fail(
+                f"profiles[{record.get('id')}].required_provenance",
                 declared,
                 "must be a list of token names",
+                report,
             )
             continue
         for token in declared:
-            tokens.setdefault(token, []).append(str(profile.get("id")))
+            tokens.setdefault(token, []).append(str(record.get("id")))
+    return tokens
+
+
+def _rc033_definitions(
+    constraints: dict, tokens: dict[str, list[str]], report: Report
+) -> None:
+    if constraints["criterion_language"] != PROVENANCE_LANGUAGE:
+        _rc033_fail(
+            "provenance_constraints.criterion_language",
+            constraints["criterion_language"],
+            f"must be {PROVENANCE_LANGUAGE}",
+            report,
+        )
+    definitions = _mapping(constraints["definitions"])
+    for token, definition in sorted(definitions.items()):
+        well_formed = isinstance(definition, dict) and set(definition) == {"criterion"}
+        if not well_formed or definition.get("criterion") not in PROVENANCE_CRITERIA:
+            _rc033_fail(
+                f"provenance_constraints.definitions.{token}",
+                definition,
+                f"must be exactly one criterion from {sorted(PROVENANCE_CRITERIA)}",
+                report,
+            )
+    for token, profiles in sorted(tokens.items()):
+        if token not in definitions:
+            _rc033_fail(
+                f"provenance_constraints.definitions.{token}",
+                None,
+                f"required by {sorted(profiles)} but declares no criterion",
+                report,
+            )
+
+
+def _evaluate_rc033(docs: dict[str, dict], report: Report) -> None:
+    catalog = _mapping(docs.get(COMPOSITION_PROFILES_PATH))
+    _rc033_rules(catalog, report)
+    tokens = _rc033_declared_tokens(catalog, report)
     constraints = catalog.get("provenance_constraints")
     if not tokens and constraints is None:
         return
@@ -13424,45 +13462,14 @@ def _evaluate_rc033(docs: dict[str, dict], report: Report) -> None:
         "criterion_language",
         "definitions",
     }:
-        report.fail(
-            "RC-033",
-            COMPOSITION_PROFILES_PATH,
+        _rc033_fail(
             "provenance_constraints",
             sorted(constraints) if isinstance(constraints, dict) else constraints,
             "must declare exactly criterion_language and definitions",
+            report,
         )
         return
-    if constraints["criterion_language"] != PROVENANCE_LANGUAGE:
-        report.fail(
-            "RC-033",
-            COMPOSITION_PROFILES_PATH,
-            "provenance_constraints.criterion_language",
-            constraints["criterion_language"],
-            f"must be {PROVENANCE_LANGUAGE}",
-        )
-    definitions = _mapping(constraints["definitions"])
-    for token, definition in sorted(definitions.items()):
-        if (
-            not isinstance(definition, dict)
-            or set(definition) != {"criterion"}
-            or (definition.get("criterion") not in PROVENANCE_CRITERIA)
-        ):
-            report.fail(
-                "RC-033",
-                COMPOSITION_PROFILES_PATH,
-                f"provenance_constraints.definitions.{token}",
-                definition,
-                f"must be exactly one criterion from {sorted(PROVENANCE_CRITERIA)}",
-            )
-    for token, profiles in sorted(tokens.items()):
-        if token not in definitions:
-            report.fail(
-                "RC-033",
-                COMPOSITION_PROFILES_PATH,
-                f"provenance_constraints.definitions.{token}",
-                None,
-                f"required by {sorted(profiles)} but declares no criterion",
-            )
+    _rc033_definitions(constraints, tokens, report)
 
 
 def _check_rc033_negative_cases(docs: dict[str, dict], report: Report) -> None:
