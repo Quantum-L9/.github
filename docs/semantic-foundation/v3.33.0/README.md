@@ -1,6 +1,6 @@
 # Semantic Foundation v3.33.0
 
-Status: **ADDITIVE SUCCESSOR CANDIDATE**
+Status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-030, 2026-11-08).
 
 v3.33.0 carries ADR-030: Game Theory Core: Conditional Strategic Interaction.
 
@@ -22,4 +22,4 @@ Owner decisions: `docs/candidates/GT/evidence/admission/gt-owner-decision.yaml`.
 
 ## Authority
 
-`Quantum-L9/.github` owns these ledgers. Nothing here grants plan admission, strategic commitment, execution, publication, merge, admission or deployment authority. This candidate does not admit itself.
+`Quantum-L9/.github` owns these ledgers. Nothing here grants plan admission, strategic commitment, execution, publication, merge, admission or deployment authority. ADR-030 admits the v3.33.0 delta.

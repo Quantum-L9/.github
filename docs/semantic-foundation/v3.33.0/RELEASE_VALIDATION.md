@@ -1,6 +1,6 @@
 # Release Validation v3.33.0
 
-Candidate status: **additive successor candidate**.
+Release status: **admitted additive successor** (ADR-030, 2026-11-08). Admission takes effect at the `main` commit that merges Quantum-L9/.github#225.
 
 ## Closure
 
@@ -16,4 +16,4 @@ Candidate status: **additive successor candidate**.
 
 ## Admission state
 
-v3.33.0 is a candidate and does not admit itself.
+The repository owner admitted v3.33.0 in ADR-030. The validation evidence above, and the producer qualification recorded in the GT candidate pack, are what the decision relied on; the evidence itself grants no authority. The `semantics/` tree is unchanged since the producer qualification, so that evidence applies to the admitted bytes without requalification. Post-merge trusted replay is a separate, later step.

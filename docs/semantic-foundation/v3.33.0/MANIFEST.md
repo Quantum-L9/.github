@@ -1,6 +1,6 @@
 # Semantic Foundation Manifest v3.33.0
 
-Release status: **ADDITIVE SUCCESSOR CANDIDATE**
+Release status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-030, 2026-11-08)
 
 ## Install surface
 
@@ -100,7 +100,7 @@ The v3.32.0 inventory is preserved. 2 files are added: `semantics/strategic_inte
 
 The release contains **30** accepted ADRs plus the ADR index under `docs/adr/`.
 
-v3.33.0 adds ADR-030 (Game Theory Core: Conditional Strategic Interaction), a candidate for this release; admission of the release is its acceptance gate.
+v3.33.0 adds ADR-030 (Game Theory Core: Conditional Strategic Interaction), the owner's admission decision for this release. Admission is scoped to the v3.33.0 delta.
 
 ## Semantic changes
 

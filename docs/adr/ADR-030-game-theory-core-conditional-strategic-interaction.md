@@ -1,6 +1,20 @@
 # ADR-030 — Game Theory Core: Conditional Strategic Interaction
 
-**Status:** Candidate for semantic-foundation v3.33.0.
+**Status:** Accepted for semantic-foundation v3.33.0. The repository owner admitted v3.33.0 on 2026-11-08. The decision was given as explicit instructions in a governed Claude Code session (`session_017xwbxytavCYavKdhRr9a6n`): the campaign contract L9-GT-SEAM-CAMPAIGN-CLOSEOUT-CONTRACT/v1 ("Complete GT core admission"), then "The GT candidate IS to be admitted that’s the point of this close out". This record is the explicit decision record that `semantics/authority_model.yaml#admission_rules` requires. It takes effect when Quantum-L9/.github#225 merges into `main`.
+
+## Subject
+
+| Item | Value |
+|---|---|
+| Release | Semantic Foundation **v3.33.0**, additive successor to v3.32.0 |
+| Pull request | Quantum-L9/.github#225. The candidate pack reaches `main` through #216 → #213. |
+| Approved semantic tree | `semantics/` tree `3ce1adaf6da7f5eea8c47414bffc86145906505c`. It is identical at the qualified commit `f03f85981a7bd8249bc5998ee04535f53608fd73` and at #225's head; the later commits change only this ADR, its index and the v3.33.0 release documents. |
+| Producer | `Quantum-L9/l9-semantic-compiler-engine@39a51b76057f6d950877ffe1c2c87c4cb6d4a891` |
+| Target class and authority | Canonical global semantics. `Quantum-L9/.github` owns them, and its repository owner holds `target_class_authority`. |
+| Owner decisions | `docs/candidates/GT/evidence/admission/gt-owner-decision.yaml` (G1 KEEP, G2 subject, G3 native schemas retained, G4 dependent contract later) |
+| Effective revision | The `main` commit that merges #225. It is recorded on the merged pull request; it cannot be recorded inside the hashed bytes it admits. |
+
+Admission is scoped to the v3.33.0 delta. The v3.29.0, v3.30.0 and v3.31.0 deltas, merged to `main` as candidates, are not admitted by this record.
 
 ## Context
 
@@ -25,3 +39,10 @@ Strategic planning needs admitted semantics for conditional strategic interactio
 ## Evidence relied on
 
 Owner decisions: `docs/candidates/GT/evidence/admission/gt-owner-decision.yaml`. Producer: `Quantum-L9/l9-semantic-compiler-engine@39a51b76057f6d950877ffe1c2c87c4cb6d4a891`. See `docs/semantic-foundation/v3.33.0/RELEASE_VALIDATION.md`.
+
+## What admission does not establish
+
+- Admission of `l9.contract/strategic-value-interaction-composition@1`; it is a separate subject in its own release.
+- Independent consumer replay or consumer binding.
+- Admission of the compiler-generated candidate schemas or drafted grammars under `docs/candidates/GT/synthesis/`.
+- Any game-solver execution, equilibrium claim, numerical valuation, plan admission, execution, publication or deployment authority.
