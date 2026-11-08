@@ -114,8 +114,8 @@
 		},
 		{
 			"path": "evidence/admission/ADMISSION_CLOSEOUT.md",
-			"bytes": 7573,
-			"sha256": "80b2b399edc24ce22371a2c495f13521d80d0c0467dddc4fcced0bfc6f67a5c7"
+			"bytes": 7648,
+			"sha256": "cf72a2ba979feb7c05fd14075ffd52b929015e741b6d2b2bdbcc636f0bb5af3c"
 		},
 		{
 			"path": "evidence/admission/composition-provenance-equivalence.json",

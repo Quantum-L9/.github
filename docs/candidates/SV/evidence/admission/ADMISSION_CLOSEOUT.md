@@ -13,13 +13,13 @@
 
 | Coordinate | Value |
 | --- | --- |
-| Admission branch | `Quantum-L9/.github` `agent/claude-code/sv-admission` |
+| Admission branch / PR | `Quantum-L9/.github` `agent/claude-code/sv-admission` — Quantum-L9/.github#222 (targets `main`; merge after #218, #219) |
 | Admission base (fetched `origin/main`) | `9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88` |
 | Semantic change commit | `f589e10` (overlay applied by `apply_to_pinned_checkout.py`, RC-033) |
 | **Qualified candidate revision** | `7d9ca4757722894aa5ef2a21a4190f9e8dd98c3d` |
 | `semantics/` tree at that revision | `de6d21719ecc4ca8ccb8bf2f769ddb344413b904` |
 | Release candidate / ADR (provisional) | `v3.32.0` / `ADR-029`, selected by `tools/prepare_successor_release.py` from merged state (`v3.30.0` / `ADR-027`) skipping queued claims of #218 and #219 |
-| Producer | `Quantum-L9/l9-semantic-compiler-engine` `agent/claude-code/required-provenance-criteria` at `33e4c5832bf73c7d9b0b70854af011e9582f1ab2` (base `18215ae`, version label 0.9.3) |
+| Producer | Quantum-L9/l9-semantic-compiler-engine#33, `agent/claude-code/required-provenance-criteria` at `33e4c5832bf73c7d9b0b70854af011e9582f1ab2` (base `18215ae`, version label 0.9.3) |
 
 ## Owner decisions realized
 
