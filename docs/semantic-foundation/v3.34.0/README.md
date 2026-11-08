@@ -1,6 +1,6 @@
 # Semantic Foundation v3.34.0
 
-Status: **ADDITIVE SUCCESSOR CANDIDATE**
+Status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-031, 2026-11-08).
 
 v3.34.0 carries ADR-031: Strategic Value and Game Theory Interaction Composition Contract.
 
@@ -17,4 +17,4 @@ Owner decisions: `docs/candidates/GT/evidence/admission/gt-owner-decision.yaml`.
 
 ## Authority
 
-`Quantum-L9/.github` owns these ledgers. Nothing here grants plan admission, strategic commitment, execution, publication, merge, admission or deployment authority. This candidate does not admit itself.
+`Quantum-L9/.github` owns these ledgers. Nothing here grants plan admission, strategic commitment, execution, publication, merge, admission or deployment authority. ADR-031 admits the v3.34.0 delta.

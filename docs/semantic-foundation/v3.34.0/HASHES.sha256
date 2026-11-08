@@ -1,6 +1,6 @@
-66f5c8630b85171c6474c873df1eaa246d0165984447bc7f83bf5a0c102970e9  ./MANIFEST.md
-7557547159c34000b7ddf8c8e5aa6d9c921ecff3f502a74e4fa704142885a9ac  ./README.md
-9624f07fbf1a607601935ecacefcbb25663c456d11bd87bbf464c8bfe2527cd2  ./RELEASE_VALIDATION.md
+989df2021e8c1b1f03b080164f6b3a28bd5edc27498bfb08657d6b8fc4bcdd43  ./MANIFEST.md
+9a0164abf8c978169d3b10ac3391ad34cf57b185980cf80a904678b123e3d8f9  ./README.md
+8dde379ef0090ae0d4e987922342ec9957cf9c9e38ebe1f23a0eab34f847d8eb  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -31,7 +31,7 @@ ed874f5daffa93184bd52d92eb434cce2c1eb77fe1c125016ca5a4b6f4a42edd  ./docs/adr/ADR
 0ac3839d837f6b7197ed8820b71ff7d7d1b62390b060e79056308cf4a4c64aa8  ./docs/adr/ADR-028-single-kind-architecture-pattern-fields.md
 87ef6371774ef5e2cdedf6c161d1bd899871d7f1495ae0e961aecf5d8fc0848c  ./docs/adr/ADR-029-strategic-value-foundation-and-composition-provenance-criteria.md
 3a401face3d4b92d130934e515f196ce58225a49a57c7ffbdd02736ca984b236  ./docs/adr/ADR-030-game-theory-core-conditional-strategic-interaction.md
-981021fd254f295d9b58cd1297c0719a9f5c16c5aec60b7e12be9cedc98ede1d  ./docs/adr/ADR-031-strategic-value-interaction-composition-contract.md
+6fd57bdad6e9d389408a59ab4199274550443c6426801caa84e184718a8ff0ab  ./docs/adr/ADR-031-strategic-value-interaction-composition-contract.md
 a4cd0dc936a02006dd08a7835261236a14678a17c6922b079a0ee54199713ace  ./docs/adr/README.md
 34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f  ./semantics/actor_registry.yaml
 09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4  ./semantics/affected_strategic_closure.schema.yaml
