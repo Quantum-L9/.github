@@ -256,6 +256,14 @@ class TargetPinning(unittest.TestCase):
 
 
 class DependentStage(unittest.TestCase):
+    """The historical path: the constant from sv_alignment_binding.json."""
+
+    def setUp(self):
+        absent = Path(tempfile.gettempdir()) / "no-such-foundation-binding.json"
+        patcher = mock.patch.object(applier, "ADMITTED_FOUNDATION_BINDING", absent)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_refuses_without_admitted_foundation(self):
         self.assertIsNone(applier.ADMITTED_FOUNDATION_REVISION)
         with tempfile.TemporaryDirectory() as tmp:
@@ -584,3 +592,127 @@ class AdmittedCoreStage(unittest.TestCase):
             applier.BINDING["admitted_foundation_revision"],
             "the historical binding stays unchanged",
         )
+
+
+def _admit(root, release, adr):
+    rel = root / "docs/semantic-foundation" / release
+    rel.mkdir(parents=True)
+    (rel / "README.md").write_text(
+        f"# {release}\n\nStatus: **ADMITTED ADDITIVE SUCCESSOR**.\n"
+    )
+    (rel / "MANIFEST.md").write_text(
+        f"# {release}\n\nRelease status: **ADMITTED ADDITIVE SUCCESSOR**\n"
+    )
+    (root / adr).parent.mkdir(parents=True, exist_ok=True)
+    (root / adr).write_text("# ADR\n\n**Status:** Accepted for the release.\n")
+
+
+class DependentStageAdmittedFoundation(unittest.TestCase):
+    """--stage dependent through the reviewed successor foundation binding."""
+
+    SV_ADR = "docs/adr/ADR-029-sv.md"
+    GT_ADR = "docs/adr/ADR-030-gt.md"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = synthetic_sv_applied(Path(self.tmp.name) / "repo")
+        _admit(self.root, "v3.32.0", self.SV_ADR)
+        self.sv = init_repo(self.root)
+        changed, *_ = applier.generate_core(self.root)
+        for rel, text in changed.items():
+            (self.root / rel).write_text(text)
+        _admit(self.root, "v3.33.0", self.GT_ADR)
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-q", "-m", "gt core admitted")
+        self.gt = git(self.root, "rev-parse", "HEAD")
+        self.path = Path(self.tmp.name) / "foundation.json"
+        patcher = mock.patch.object(applier, "ADMITTED_FOUNDATION_BINDING", self.path)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def write(self, **over):
+        fb = {
+            "admitted_foundation_revision": self.gt,
+            "admitted_sv": {
+                "release": "v3.32.0",
+                "adr": self.SV_ADR,
+                "effective_revision": self.sv,
+            },
+            "admitted_gt_core": {
+                "release": "v3.33.0",
+                "adr": self.GT_ADR,
+                "effective_revision": self.gt,
+            },
+        }
+        for key, value in over.items():
+            if isinstance(value, dict):
+                fb[key] = {**fb[key], **value}
+            else:
+                fb[key] = value
+        self.path.write_text(json.dumps(fb))
+
+    def test_applies_on_the_revision_carrying_both_foundations(self):
+        self.write()
+        changed, _, rebound, _ = applier.generate_dependent(self.root)
+        ids = [
+            c["id"]
+            for c in yaml.safe_load(changed["semantics/contracts.yaml"])["contracts"]
+        ]
+        self.assertEqual(ids.count(applier.GT_DEPENDENT_CONTRACT_ID), 1)
+        self.assertIn("semantics/lifecycle.yaml", rebound)
+
+    def test_binding_overrides_the_historical_null(self):
+        self.write()
+        self.assertIsNone(applier.ADMITTED_FOUNDATION_REVISION)
+        self.assertEqual(
+            applier.load_admitted_foundation_binding()["admitted_foundation_revision"],
+            self.gt,
+        )
+
+    def test_other_head_is_refused(self):
+        self.write(admitted_foundation_revision=self.sv)
+        with self.assertRaisesRegex(ValueError, "admitted foundation"):
+            applier.generate_dependent(self.root)
+
+    def test_gt_release_not_admitted_is_refused(self):
+        self.write()
+        readme = self.root / "docs/semantic-foundation/v3.33.0/README.md"
+        readme.write_text("# v3.33.0\n\nStatus: **ADDITIVE SUCCESSOR CANDIDATE**\n")
+        head = git(self.root, "rev-parse", "HEAD")
+        git(self.root, "commit", "-q", "-am", "unadmit")
+        head = git(self.root, "rev-parse", "HEAD")
+        self.write(admitted_foundation_revision=head)
+        with self.assertRaisesRegex(ValueError, "README is not marked admitted"):
+            applier.generate_dependent(self.root)
+
+    def test_foundation_that_is_not_an_ancestor_is_refused(self):
+        self.write(admitted_gt_core={"effective_revision": "e" * 40})
+        with self.assertRaisesRegex(ValueError, "admitted_gt_core revision"):
+            applier.generate_dependent(self.root)
+
+    def test_option_shaped_revision_is_refused(self):
+        self.write(admitted_sv={"effective_revision": "--output=/tmp/x"})
+        with self.assertRaisesRegex(ValueError, "40-hex commit SHA"):
+            applier.load_admitted_foundation_binding()
+
+    def test_missing_release_or_adr_is_refused(self):
+        self.write(admitted_gt_core={"adr": ""})
+        with self.assertRaisesRegex(ValueError, "must name its release and ADR"):
+            applier.load_admitted_foundation_binding()
+
+    def test_dependent_contract_already_admitted_is_refused(self):
+        self.write()
+        changed, *_ = applier.generate_dependent(self.root)
+        for rel, text in changed.items():
+            (self.root / rel).write_text(text)
+        git(self.root, "commit", "-q", "-am", "dependent applied")
+        head = git(self.root, "rev-parse", "HEAD")
+        self.write(admitted_foundation_revision=head)
+        # Refused before any merge: release A with the dependent contract already
+        # present is not a valid foundation for adding it (Article 8.2, no mutation
+        # of an admitted @1 identity).
+        with self.assertRaisesRegex(
+            ValueError, "dependent contract must not be applied"
+        ):
+            applier.generate_dependent(self.root)

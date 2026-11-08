@@ -824,19 +824,64 @@ def generate_core(checkout):
     return changed, inv_count, rebound, resolved
 
 
+ADMITTED_FOUNDATION_BINDING = ROOT / "evidence/admitted_foundation_binding.json"
+FOUNDATION_KEYS = ("admitted_sv", "admitted_gt_core")
+
+
+def load_admitted_foundation_binding():
+    """The reviewed successor binding for release B, or None while it is absent.
+
+    It names the revision carrying both admitted foundations (SV and GT core)
+    and each foundation's own admission record. The historical
+    sv_alignment_binding.json keeps its null admitted_foundation_revision.
+    """
+    if not ADMITTED_FOUNDATION_BINDING.is_file():
+        return None
+    fb = json.loads(ADMITTED_FOUNDATION_BINDING.read_text(encoding="utf-8"))
+    full_sha(fb.get("admitted_foundation_revision"), "admitted_foundation_revision")
+    for key in FOUNDATION_KEYS:
+        record = fb.get(key) or {}
+        full_sha(record.get("effective_revision"), f"{key}.effective_revision")
+        if not record.get("release") or not record.get("adr"):
+            raise ValueError(f"{key} must name its release and ADR")
+    return fb
+
+
+def _verify_foundations(checkout, head, fb):
+    """Both admitted foundations are ancestors and their records say admitted."""
+    for key in FOUNDATION_KEYS:
+        record = fb[key]
+        revision = full_sha(record["effective_revision"], f"{key}.effective_revision")
+        # S6350: argv list, no shell; revision and head are 40-hex commits.
+        ancestor = subprocess.run(  # NOSONAR
+            ["git", "-C", str(checkout), "merge-base", "--is-ancestor", revision, head],
+            capture_output=True,
+            check=False,
+        )
+        if ancestor.returncode != 0:
+            raise ValueError(f"{key} revision {revision} is not an ancestor of {head}")
+        _verify_admission_record(checkout, record)
+
+
 def generate_dependent(checkout):
-    if ADMITTED_FOUNDATION_REVISION is None:
+    fb = load_admitted_foundation_binding()
+    expected = (
+        fb["admitted_foundation_revision"] if fb else ADMITTED_FOUNDATION_REVISION
+    )
+    if expected is None:
         raise ValueError(
-            "no admitted SV + GT-core foundation revision is recorded in "
-            "evidence/sv_alignment_binding.json; the dependent contract cannot be prepared"
+            "no admitted SV + GT-core foundation revision is recorded "
+            "(evidence/admitted_foundation_binding.json is absent and "
+            "evidence/sv_alignment_binding.json keeps null); "
+            "the dependent contract cannot be prepared"
         )
     head = git(checkout, "rev-parse", "HEAD").strip()
-    if head != ADMITTED_FOUNDATION_REVISION:
-        raise ValueError(
-            f"HEAD {head} != admitted foundation {ADMITTED_FOUNDATION_REVISION}"
-        )
+    if head != expected:
+        raise ValueError(f"HEAD {head} != admitted foundation {expected}")
     if dirty_paths(checkout):
         raise ValueError("checkout not clean")
+    if fb:
+        _verify_foundations(checkout, head, fb)
 
     def current(rel):
         return (checkout / rel).read_text(encoding="utf-8")
@@ -941,6 +986,9 @@ def main(argv=None):
             proposed, count, rebound, resolved = generate_core(checkout)
         else:
             proposed, count, rebound, resolved = generate_dependent(checkout)
+            foundation = load_admitted_foundation_binding()
+            if foundation:
+                target = foundation["admitted_foundation_revision"]
         if args.apply:
             if not args.disposable:
                 raise ValueError("--apply requires --disposable")
@@ -955,6 +1003,8 @@ def main(argv=None):
             print(
                 "ADMITTED_SV_REVISION=" + admitted["admitted_sv"]["effective_revision"]
             )
+        elif args.stage == "dependent" and target != CANONICAL_TARGET:
+            print("ADMITTED_FOUNDATION_REVISION=" + target)
         else:
             print("SV_CANDIDATE_HEAD=" + SV_CANDIDATE_HEAD)
         print("INVARIANT_COUNT=" + str(count))
