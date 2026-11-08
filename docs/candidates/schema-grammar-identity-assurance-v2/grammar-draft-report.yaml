@@ -1,0 +1,31 @@
+authority_repository: Quantum-L9/.github
+authority_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+projection_profile: l9.projection/identity-assurance@2
+composition_profile: l9.compose/identity-assurance@2
+written:
+- source_class: invariants
+  path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/invariants.yaml
+  digest: sha256:6344ffa2affd0f3f5adf88126ec5c1569faed9325ec5add07bd18d24fc537734
+  normative_overlay: []
+- source_class: contracts
+  path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/contracts.yaml
+  digest: sha256:426a6ac47bbabb78920c2b0dac8271873f4096138d78bad8bcb2dc4b7c888ae8
+  normative_overlay: []
+- source_class: identity_model
+  path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/identity_model.yaml
+  digest: sha256:71318aff3c877705c8b999c1400030ea752e1f46e08c947176b19aea99b9d87d
+  normative_overlay: []
+- source_class: authority_model
+  path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/authority_model.yaml
+  digest: sha256:124ee1f9cfbc48537a23526305ef8d6bb93a98c1ded8e13871873a3b6df28834
+  normative_overlay: []
+- source_class: actor_registry
+  path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/actor_registry.yaml
+  digest: sha256:9d20f4874c8f0ade0d7a41372b3de1299ee94bee322ebf1b873f54790ee2e9f3
+  normative_overlay: []
+- source_class: surface_registry
+  path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/surface_registry.yaml
+  digest: sha256:36038a9e71be14929252b244032c06899bbca7f6bf4c56cc6f67f38aa4fd7da1
+  normative_overlay: []
+inexpressible: []
+pack_dir: docs/candidates/schema-grammar-identity-assurance-v2

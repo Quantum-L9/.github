@@ -1,0 +1,33 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/identity-assurance-v2/grammar/authority-model@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: authority_model
+source_ref: l9.source/authority-model@1
+source_path: semantics/authority_model.yaml
+source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
+applies_to_selectors:
+- $.identity_authority
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    identity_authority:
+      type: object
+      additional_properties: true
+      fields:
+        global_semantics_owner:
+          type: string
+        product_identity_owner:
+          type: string
+        actor_identity_source:
+          type: string
+        runtime_and_surface_resolution_owner:
+          type: string
+        governance_profile_owner:
+          type: string
+        rules:
+          type: string_list

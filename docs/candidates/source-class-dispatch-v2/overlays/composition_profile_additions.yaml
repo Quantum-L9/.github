@@ -1,0 +1,57 @@
+candidate: source-class-dispatch-v2
+status: candidate
+admission: not_granted
+base_repository: Quantum-L9/.github
+base_sha: c9bbfaf61bd0f7444b1a617876a031c2fba75406
+target: semantics/composition_profiles.yaml#profiles
+derivation: 'Each record is the @1 composition at base_sha with exactly these changes: id @2; composes
+  the @2 projection profile; output.schema l9.composed-projection.<name>/v2; payload_validation declared.'
+records:
+- id: l9.compose/identity-assurance@2
+  purpose: Compose exact source projections for l9.projection/identity-assurance@1.
+  accepts:
+  - projection_artifact
+  composes:
+    projection_profile: l9.projection/identity-assurance@2
+  merge_strategy:
+    placement: source_class_namespace
+    source_coverage: exact
+    duplicate_source: conflict
+    semantic_identity_collision: require_equivalence
+  conflict_result: invalid
+  output:
+    schema: l9.composed-projection.identity-assurance/v2
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+- id: l9.compose/strategic-planning-context@2
+  purpose: Compose exact source projections for l9.projection/strategic-planning-context@1.
+  accepts:
+  - projection_artifact
+  composes:
+    projection_profile: l9.projection/strategic-planning-context@2
+  merge_strategy:
+    placement: source_class_namespace
+    source_coverage: exact
+    duplicate_source: conflict
+    semantic_identity_collision: require_equivalence
+  conflict_result: invalid
+  output:
+    schema: l9.composed-projection.strategic-planning-context/v2
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+- id: l9.compose/strategic-metacognition@2
+  purpose: Compose exact source projections for l9.projection/strategic-metacognition@1.
+  accepts:
+  - projection_artifact
+  composes:
+    projection_profile: l9.projection/strategic-metacognition@2
+  merge_strategy:
+    placement: source_class_namespace
+    source_coverage: exact
+    duplicate_source: conflict
+    semantic_identity_collision: require_equivalence
+  conflict_result: invalid
+  output:
+    schema: l9.composed-projection.strategic-metacognition/v2
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1

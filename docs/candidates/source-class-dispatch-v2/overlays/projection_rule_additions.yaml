@@ -1,0 +1,9 @@
+candidate: source-class-dispatch-v2
+status: candidate
+admission: not_granted
+base_repository: Quantum-L9/.github
+base_sha: c9bbfaf61bd0f7444b1a617876a031c2fba75406
+target: semantics/projection_profiles.yaml#validation_rules
+records:
+- id: PROJECTION-017
+  rule: a_profile_declaring_payload_validation_source_class_dispatch_resolves_its_output_schema_from_the_verified_profile_and_the_verified_source_class_at_the_pinned_revision_and_never_from_a_field_of_the_projected_payload

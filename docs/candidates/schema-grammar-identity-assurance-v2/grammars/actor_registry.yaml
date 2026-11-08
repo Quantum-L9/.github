@@ -1,0 +1,171 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/identity-assurance-v2/grammar/actor-registry@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: actor_registry
+source_ref: l9.source/actor-registry@1
+source_path: semantics/actor_registry.yaml
+source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_digest: sha256:34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f
+applies_to_selectors:
+- $.artifact_id
+- $.canonical
+- $.authority
+- $.canonical_source
+- $.governed_by
+- $.purpose
+- $.identity_dimension
+- $.detailed_model
+- $.global_rules
+- $.does_not_own
+- $.actor_kinds
+- $.actor_statuses
+- $.actors
+- $.aliases
+- $.alias_rules
+- $.downstream_obligations
+- $
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    artifact_id:
+      type: string
+    canonical:
+      type: boolean
+    authority:
+      type: object
+      additional_properties: true
+      fields:
+        owner:
+          type: string
+        scope:
+          type: string
+        authority_class:
+          type: string
+    canonical_source:
+      type: object
+      additional_properties: true
+      fields:
+        format:
+          type: string
+        artifact:
+          type: string
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        contracts:
+          type: string_list
+    purpose:
+      type: string
+    identity_dimension:
+      type: string
+    detailed_model:
+      type: string
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        registry_names_identity_only:
+          type: boolean
+        registry_does_not_interpret_runtime_evidence:
+          type: boolean
+        registry_grants_no_credential_role_or_execution_authority:
+          type: boolean
+        registry_does_not_assign_surfaces:
+          type: boolean
+        registry_does_not_select_governance_profile:
+          type: boolean
+        aliases_are_scoped_to_actor_identity:
+          type: boolean
+        equal_strings_in_other_identity_dimensions_are_unrelated:
+          type: boolean
+        unknown_or_ambiguous_consequential_actor_identity_fails_closed:
+          type: boolean
+        actor_admission_is_a_separate_digest_bound_decision:
+          type: boolean
+    does_not_own:
+      type: string_list
+    actor_kinds:
+      type: object
+      additional_properties: true
+      fields:
+        agent:
+          type: string
+        human:
+          type: string
+    actor_statuses:
+      type: object
+      additional_properties: true
+      fields:
+        current:
+          type: string
+        superseded:
+          type: string
+        retired:
+          type: string
+    actors:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          kind:
+            type: string
+          status:
+            type: string
+          description:
+            type: string
+    aliases:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          alias:
+            type: string
+          canonical:
+            type: string
+          alias_kind:
+            type: string
+          note:
+            type: string
+    alias_rules:
+      type: object
+      additional_properties: true
+      fields:
+        alias_kinds:
+          type: object
+          additional_properties: true
+          fields:
+            historical_actor_alias:
+              type: string
+        alias_resolves_to_exactly_one_canonical_actor:
+          type: boolean
+        alias_never_targets_another_alias:
+          type: boolean
+        alias_never_shadows_a_canonical_actor:
+          type: boolean
+        alias_meaning_is_bounded_to_actor_identity:
+          type: boolean
+        alias_does_not_authorize_new_consequential_authorship_after_downstream_migration:
+          type: boolean
+    downstream_obligations:
+      type: object
+      additional_properties: true
+      fields:
+        resolve_actor_from_runtime_evidence_under:
+          type: string
+        emit_assertion_matching:
+          type: string
+        validate_asserted_actor_against_this_registry:
+          type: boolean
+        concrete_runtime_evidence_interpretation_remains_downstream:
+          type: boolean
+    schema:
+      type: string

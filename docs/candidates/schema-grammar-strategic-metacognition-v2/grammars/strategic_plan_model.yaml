@@ -1,0 +1,58 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/strategic-metacognition-v2/grammar/strategic-plan-model@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: strategic_plan_model
+source_ref: l9.source/strategic-plan-model@1
+source_path: semantics/strategic_plan_model.yaml
+source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_digest: sha256:4fffeb59d95fa05158c718b3637288c20bad41243b58b9ed3be50121acae840a
+applies_to_selectors:
+- $.global_rules
+- $.reasoning_concepts
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        strategic_plan_represents_strategy_without_absorbing_external_truth_ownership:
+          type: boolean
+        strategic_hypothesis_is_plan_owned_belief_not_authoritative_truth:
+          type: boolean
+        reality_change_may_require_reconsideration_but_never_directly_modifies_or_invalidates_strategic_plan:
+          type: boolean
+        reasoning_workspace_content_is_not_strategic_plan_content_without_authorized_decision:
+          type: boolean
+        planning_horizon_does_not_create_primitive_types:
+          type: boolean
+        compound_causal_claims_are_expressible_by_one_strategic_hypothesis:
+          type: boolean
+        outcome_of_one_primitive_does_not_establish_correctness_of_another:
+          type: boolean
+    reasoning_concepts:
+      type: object
+      additional_properties: true
+      fields:
+        affected_strategic_closure:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+            purpose:
+              type: string
+            representation_schema_ref:
+              type: string
+            authority_class:
+              type: string
+            authoritative:
+              type: boolean
+            representation_does_not_define_closure_algorithm:
+              type: boolean
+            may_not:
+              type: string_list

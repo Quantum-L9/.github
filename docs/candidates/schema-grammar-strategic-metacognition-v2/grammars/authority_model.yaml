@@ -1,0 +1,52 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/strategic-metacognition-v2/grammar/authority-model@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: authority_model
+source_ref: l9.source/authority-model@1
+source_path: semantics/authority_model.yaml
+source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
+applies_to_selectors:
+- $.strategic_authority
+- $.strategic_cognition_authority
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    strategic_authority:
+      type: object
+      additional_properties: true
+      fields:
+        definition:
+          type: string
+        strategy_concept_ref:
+          type: string
+        grant_must_be_explicit:
+          type: boolean
+        may_not_be_inferred_from:
+          type: string_list
+    strategic_cognition_authority:
+      type: object
+      additional_properties: true
+      fields:
+        global_semantics_owner:
+          type: string
+        detailed_model:
+          type: string
+        invariant_ref:
+          type: string
+        strategic_plan_owner:
+          type: string
+        strategic_plan_authority_source:
+          type: string
+        strategic_plan_reasoning_analysis_owner:
+          type: string
+        metacognition_denied:
+          type: string_list
+        roles_are_actor_identities:
+          type: boolean
+        rules:
+          type: string_list

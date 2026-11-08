@@ -1,0 +1,333 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/strategic-metacognition-v2/grammar/strategic-plan-metacognitive-analysis-schema@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: strategic_plan_metacognitive_analysis_schema
+source_ref: l9.source/strategic-plan-metacognitive-analysis-schema@1
+source_path: semantics/strategic_plan_metacognitive_analysis.schema.yaml
+source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_digest: sha256:ae0f69362f82548968dab60b999ddd074c244ad9e6c78520ea9d653cfa1dc349
+applies_to_selectors:
+- $.artifact_id
+- $.canonical
+- $.authority
+- $.canonical_source
+- $.governed_by
+- $.purpose
+- $.instance_semantics
+- $.type
+- $.required
+- $.properties
+- $.analysis_rules
+- $.semantic_rules
+- $
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    artifact_id:
+      type: string
+    canonical:
+      type: boolean
+    authority:
+      type: object
+      additional_properties: true
+      fields:
+        owner:
+          type: string
+        scope:
+          type: string
+        authority_class:
+          type: string
+    canonical_source:
+      type: object
+      additional_properties: true
+      fields:
+        format:
+          type: string
+        artifact:
+          type: string
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        semantic_model_ref:
+          type: string
+        role_ref:
+          type: string
+        authority_ref:
+          type: string
+    purpose:
+      type: string
+    instance_semantics:
+      type: object
+      additional_properties: true
+      fields:
+        authority_class:
+          type: string
+        authoritative:
+          type: boolean
+        output_authority:
+          type: string
+        authority_effect:
+          type: string
+        producer_role:
+          type: string
+    type:
+      type: string
+    required:
+      type: string_list
+    properties:
+      type: object
+      additional_properties: true
+      fields:
+        schema:
+          type: object
+          additional_properties: true
+          fields:
+            const:
+              type: string
+        analysis_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        plan_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        subject_episodes:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            min_items:
+              type: integer
+            items:
+              type: object
+              additional_properties: true
+              fields:
+                type:
+                  type: string
+                required:
+                  type: string_list
+                fields:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    digest:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+        plan_revision_refs:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        outcome_evidence_refs:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        prior_analysis_refs:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        findings:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            items:
+              type: object
+              additional_properties: true
+              fields:
+                type:
+                  type: string
+                required:
+                  type: string_list
+                fields:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    kind:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        enum:
+                          type: string_list
+                    statement:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    basis_refs:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                        min_items:
+                          type: integer
+        patterns:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            items:
+              type: object
+              additional_properties: true
+              fields:
+                type:
+                  type: string
+                required:
+                  type: string_list
+                fields:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    kind:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        enum:
+                          type: string_list
+                    statement:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    occurrence_refs:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                        min_items:
+                          type: integer
+        lessons:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            items:
+              type: object
+              additional_properties: true
+              fields:
+                type:
+                  type: string
+                required:
+                  type: string_list
+                fields:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    statement:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    basis_refs:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                        min_items:
+                          type: integer
+                    applicability_scope_refs:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    authority_effect:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        const:
+                          type: string
+        unresolved:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        provenance:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        analysis_digest:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+    analysis_rules:
+      type: object
+      additional_properties: true
+      fields:
+        findings_must_trace_to_exact_episode_revision_or_evidence_refs:
+          type: boolean
+        recurring_pattern_requires_multiple_occurrence_refs:
+          type: boolean
+        lessons_must_trace_to_findings_patterns_or_exact_source_refs:
+          type: boolean
+        lesson_is_advisory_input_to_plan_keeper_only:
+          type: boolean
+        metacognitive_analysis_cannot_modify_or_supersede_strategic_plan:
+          type: boolean
+        metacognitive_analysis_cannot_grant_strategic_authority:
+          type: boolean
+        metacognitive_analysis_cannot_reinterpret_external_evidence_as_owned_truth:
+          type: boolean
+        metacognitive_analysis_is_not_universal_metacognitive_authority:
+          type: boolean
+    semantic_rules:
+      type: string_list
+    schema:
+      type: string

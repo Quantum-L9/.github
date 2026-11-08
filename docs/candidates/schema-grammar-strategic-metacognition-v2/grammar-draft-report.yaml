@@ -1,0 +1,31 @@
+authority_repository: Quantum-L9/.github
+authority_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+projection_profile: l9.projection/strategic-metacognition@2
+composition_profile: l9.compose/strategic-metacognition@2
+written:
+- source_class: invariants
+  path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/invariants.yaml
+  digest: sha256:3171e72dc95f6a419f9a984555b83f102742eae46f88981aac808c3fd21fa16e
+  normative_overlay: []
+- source_class: contracts
+  path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/contracts.yaml
+  digest: sha256:1f3bf4f09864d557de27e5c4ee432299186fc4f820621cb01e69a9df1f0aadd0
+  normative_overlay: []
+- source_class: authority_model
+  path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/authority_model.yaml
+  digest: sha256:d889efa43c3291d0ea8afce7409562a454624868d9abca7ee7066d47780f4716
+  normative_overlay: []
+- source_class: strategic_cognition_model
+  path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/strategic_cognition_model.yaml
+  digest: sha256:35a8a9d8cf86fee73f8fba6cae1af7fc7aaa57b792cc66d059e11dcc809bfdf2
+  normative_overlay: []
+- source_class: strategic_plan_model
+  path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/strategic_plan_model.yaml
+  digest: sha256:4af637461fc7943ea7f956376f35ddbeb9da94888d2705d33eedb7546a6cc3c9
+  normative_overlay: []
+- source_class: strategic_plan_metacognitive_analysis_schema
+  path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/strategic_plan_metacognitive_analysis_schema.yaml
+  digest: sha256:b0ab252162059b31d23da3ccd27aa79c8879ce2f2532cf04052cb8610e364de5
+  normative_overlay: []
+inexpressible: []
+pack_dir: docs/candidates/schema-grammar-strategic-metacognition-v2
