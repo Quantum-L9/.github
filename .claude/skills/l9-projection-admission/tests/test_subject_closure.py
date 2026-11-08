@@ -165,6 +165,71 @@ class Discovery(_Fixture):
         )
 
 
+class NamedBase(Discovery):
+    """A release main admitted but the verifier rejects is measured from, never waived."""
+
+    def admit_v11_without_target_row(self):
+        self.add_invariant("L9-Y-001")
+        self.repo.admit("v1.1.0", 2, ["L9-Y-001"], target_row=False)
+        return self.repo.commit("admit v1.1.0")
+
+    def main_tree(self):
+        return cac.Tree(self.repo.root, "origin/main")
+
+    def test_unverified_release_is_skipped_by_admitted_base(self):
+        self.admit_v11_without_target_row()
+        base = das.admitted_base(self.repo.root, self.main_tree())
+        self.assertEqual(base["release"], "v1.0.0")
+        self.assertIn("target authority class", base["tried"][0]["reason"])
+
+    def test_named_base_measures_from_it_and_reports_its_gaps(self):
+        commit = self.admit_v11_without_target_row()
+        base = das.named_admitted_base(self.repo.root, self.main_tree(), "v1.1.0")
+        self.assertEqual(
+            (base["release"], base["admission_commit"]), ("v1.1.0", commit)
+        )
+        self.assertEqual(base["verified_base"], "v1.0.0")
+        self.assertTrue(
+            any("target authority class" in g for g in base["verification_gaps"])
+        )
+        found = das.discover(self.repo.root, base["tree"], cac.Tree(self.repo.root))
+        # L9-Y-001 was admitted by v1.1.0, so it is not this candidate's subject.
+        self.assertFalse(any(found["admission_subjects"].values()))
+
+    def test_named_base_must_be_admitted(self):
+        self.add_invariant("L9-Y-001")
+        self.repo.release("v1.1.0", CANDIDATE)
+        self.repo.commit("candidate v1.1.0")
+        with self.assertRaises(cac.InputError):
+            das.named_admitted_base(self.repo.root, self.main_tree(), "v1.1.0")
+
+    def test_named_base_cannot_be_older_than_the_verified_base(self):
+        self.add_invariant("L9-Y-001")
+        self.repo.admit("v1.1.0", 2, ["L9-Y-001"])
+        self.repo.commit("admit v1.1.0")
+        with self.assertRaises(cac.InputError):
+            das.named_admitted_base(self.repo.root, self.main_tree(), "v1.0.0")
+
+    def test_closure_gate_scopes_from_the_named_base(self):
+        self.admit_v11_without_target_row()
+        self.add_invariant("L9-Y-002")
+        self.candidate("v1.2.0")
+        subject = self.subject(invariants=["L9-Y-002"])
+        report = self.verdict(subject, admitted_base_version="v1.1.0")
+        self.assertEqual(report["verdict"], "RELEASED_CANDIDATE", report.get("scope"))
+        self.assertTrue(report["admitted_base"]["verification_gaps"])
+        # Measured from the verified v1.0.0, v1.1.0's own L9-Y-001 is an omitted subject.
+        self.assertEqual(self.verdict(subject)["verdict"], "REGISTERED")
+
+    def test_command_line_named_base(self):
+        self.admit_v11_without_target_row()
+        main = ["--checkout", str(self.repo.root)]
+        self.assertEqual(das.main([*main, "--admitted-base", "v1.1.0"]), 0)
+        self.assertEqual(
+            das.main([*main, "--admitted-base", "v1.1.0", "--base", "HEAD"]), 2
+        )
+
+
 class Scope(Discovery):
     def declared(self, **items):
         return cac.load_subject(self._subject({"schema": cac.SUBJECT_SCHEMA, **items}))

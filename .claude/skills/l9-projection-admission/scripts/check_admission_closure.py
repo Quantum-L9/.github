@@ -104,6 +104,9 @@ NOT_ACCEPTED = re.compile(
     r"\bcandidate\b|does not admit|not admitted|not accepted|pending|withdrawn|superseded",
     re.IGNORECASE,
 )
+# Quoted words are the owner's, reported verbatim ("The GT candidate IS to be admitted"),
+# and code spans are names; neither is the record's own disclaimer of acceptance.
+QUOTED = re.compile(r'"[^"\n]*"|\u201c[^\u201d\n]*\u201d|`[^`\n]*`')
 
 # Identity shapes for new subject items (all ids on main at 9488d8f conform).
 PROJECTION_ID = re.compile(r"^l9\.projection/[a-z0-9][a-z0-9.-]*@([1-9]\d*)$")
@@ -1200,7 +1203,7 @@ def accepted_adr(tree: Tree, version: str) -> str | None:
         if data is None:
             raise InputError(f"docs/adr/{name} listed but unreadable")
         for line in data.decode("utf-8", "replace").splitlines()[:8]:
-            if pattern.match(line) and not NOT_ACCEPTED.search(line):
+            if pattern.match(line) and not NOT_ACCEPTED.search(QUOTED.sub("", line)):
                 return name
     return None
 
@@ -1801,6 +1804,7 @@ def evaluate(
     compiler_src: Path | None = None,
     output_root: Path | None = None,
     compiler_revision: str | None = None,
+    admitted_base_version: str | None = None,
 ) -> dict[str, Any]:
     import discover_admission_subject as discover  # local: it imports this module
 
@@ -1815,7 +1819,11 @@ def evaluate(
         "main_revision": main_revision,
         "subject": subject,
     }
-    base = discover.admitted_base(repo, main_tree)
+    base = (
+        discover.named_admitted_base(repo, main_tree, admitted_base_version)
+        if admitted_base_version is not None
+        else discover.admitted_base(repo, main_tree)
+    )
     report["admitted_base"] = {k: v for k, v in base.items() if k != "tree"}
     reg = registration(head, subject)
     reg["gaps"] += version_integrity(head, base.get("tree"), subject)
@@ -1889,6 +1897,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--compiler-src", type=Path)
     parser.add_argument("--output-root", type=Path)
     parser.add_argument("--compiler-revision")
+    parser.add_argument(
+        "--admitted-base",
+        metavar="VERSION",
+        help="measure scope from this ADMITTED release; its evidence gaps are reported",
+    )
     args = parser.parse_args(argv)
     try:
         if args.require == "downstream" and args.compiler_src is None:
@@ -1904,6 +1917,7 @@ def main(argv: list[str] | None = None) -> int:
             args.compiler_src.resolve() if args.compiler_src else None,
             args.output_root.resolve() if args.output_root else None,
             args.compiler_revision,
+            args.admitted_base,
         )
     except InputError as exc:
         print(

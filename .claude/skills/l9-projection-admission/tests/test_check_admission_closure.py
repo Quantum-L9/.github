@@ -851,6 +851,27 @@ class ReviewRegressions(_Fixture):
         )
         self.assertEqual(cac.accepted_adr(tree, "v1.0.0"), "ADR-001-admit-v1.0.0.md")
 
+    def test_quoted_owner_words_do_not_disclaim_acceptance(self):
+        # ADR-030/ADR-031 quote the owner: "The GT candidate IS to be admitted".
+        tree = cac.Tree(self.repo.root)
+        name = "docs/adr/ADR-001-admit-v1.0.0.md"
+        accepted = (
+            '**Status:** Accepted for semantic-foundation v1.0.0. The owner said "The GT candidate IS to be admitted".',
+            "**Status:** Accepted for semantic-foundation v1.0.0. The owner said \u201cadmit the candidate\u201d.",
+            "**Status:** Accepted for semantic-foundation v1.0.0 under `candidate-pack` rules.",
+        )
+        for line in accepted:
+            self.repo.write(name, f"# ADR-001\n\n{line}\n")
+            self.assertEqual(
+                cac.accepted_adr(tree, "v1.0.0"), "ADR-001-admit-v1.0.0.md", line
+            )
+        # Outside the quotes the record's own words still decide.
+        self.repo.write(
+            name,
+            '# ADR-001\n\n**Status:** Accepted for semantic-foundation v1.0.0 "now", pending owner review.\n',
+        )
+        self.assertIsNone(cac.accepted_adr(tree, "v1.0.0"))
+
     def test_downstream_without_profiles_is_not_applicable(self):
         report = cac.evaluate(
             self.repo.root,

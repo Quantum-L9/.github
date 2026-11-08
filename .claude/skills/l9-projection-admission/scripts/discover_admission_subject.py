@@ -107,6 +107,43 @@ def admitted_base(repo: Path, main: cac.Tree) -> dict[str, Any]:
     return {"release": None, "admission_commit": None, "tree": None, "tried": tried}
 
 
+def named_admitted_base(repo: Path, main: cac.Tree, version: str) -> dict[str, Any]:
+    """The admission commit of one named release, with its evidence gaps on the record.
+
+    For a release main admitted whose decision record predates a verifier requirement:
+    `admitted_base` skips it, which measures from an older base and pulls that release's
+    own admitted identities into the subject. Naming it is bounded: the release must be
+    ADMITTED on main by a flipping commit, it must not be older than the base
+    `admitted_base` verifies, and every gap the verifier finds stays in
+    `verification_gaps`. Nothing is waived; it is only measured from.
+    """
+    import verify_admission_evidence as evidence  # local: it imports check_admission_closure
+
+    if cac.release_status(main, version) != "ADMITTED":
+        raise cac.InputError(f"{version} is not ADMITTED on {main.label()}")
+    verified = admitted_base(repo, main)
+    floor = verified.get("release")
+    if floor is not None and cac.version_key(version) < cac.version_key(floor):
+        raise cac.InputError(
+            f"{version} is older than the verified admitted base {floor}; name a newer one"
+        )
+    proof = evidence.release_admission(repo, main, version)
+    commit = proof["admission_commit"]
+    if commit is None:
+        raise cac.InputError(
+            f"{version}: no commit on main flips this release to ADMITTED"
+        )
+    return {
+        "release": version,
+        "admission_commit": commit,
+        "adr": proof["adr"],
+        "tree": cac.Tree(repo, commit),
+        "named": True,
+        "verified_base": floor,
+        "verification_gaps": proof["gaps"],
+    }
+
+
 # --------------------------------------------------------------------------- census
 
 
@@ -539,6 +576,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--checkout", type=Path, required=True)
     parser.add_argument("--base", default="admitted")
+    parser.add_argument(
+        "--admitted-base",
+        metavar="VERSION",
+        help="measure from this ADMITTED release; its evidence gaps are reported",
+    )
     parser.add_argument("--candidate", help="a ref; the working tree when omitted")
     parser.add_argument("--main-ref", default="origin/main")
     parser.add_argument("--declared", type=Path)
@@ -549,7 +591,14 @@ def main(argv: list[str] | None = None) -> int:
         top = cac.run_git(repo, "rev-parse", "--show-toplevel")
         if top.returncode != 0 or top.stdout.strip() != str(repo):
             raise cac.InputError(f"{repo} is not the top of a git checkout")
-        if args.base == "admitted":
+        if args.admitted_base is not None:
+            if args.base != "admitted":
+                raise cac.InputError("--admitted-base and --base are exclusive")
+            base_info = named_admitted_base(
+                repo, cac.Tree(repo, args.main_ref), args.admitted_base
+            )
+            base = base_info["tree"]
+        elif args.base == "admitted":
             base_info = admitted_base(repo, cac.Tree(repo, args.main_ref))
             base = base_info["tree"]
         else:
