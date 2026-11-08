@@ -45,7 +45,7 @@ A control that is accepted fails downstream.
 
 **Replay.** `run-1/` and `run-2/` must hold the same files with the same bytes, excluding the gate's own `requests/`.
 
-Real-repository evidence (main `9488d8f`, compiler `18215ae`): `l9.projection/authority-resolution@1` and `l9.compose/authority-resolution@1` produced 4 projections and 1 composition. All of them verified, 19 controls were rejected, and 10 files replayed byte-identically.
+Real-repository evidence (main `b085dba`, compiler `18215ae`): `l9.projection/authority-resolution@1` and `l9.compose/authority-resolution@1` produced 4 projections and 1 composition. All of them verified, all 25 negative controls were rejected, and 10 files replayed byte-identically. Admission rested on v3.28.0, ADR-025, approved tree `7c6f35d`, predecessor v3.27.0.
 
 ## Consumer side (`docs/PROJECTION_PUBLICATION.md`)
 
