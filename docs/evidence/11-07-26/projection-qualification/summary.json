@@ -1,0 +1,112 @@
+{
+  "authority_repository": "Quantum-L9/.github",
+  "authority_root": "/tmp/l9-projection-qa.nBKv8FWo/candidate",
+  "baseline_check_log": "/home/ubuntu/l9-projection-campaign/baseline-independent-replay.log",
+  "baseline_verification_log": "/home/ubuntu/l9-projection-campaign/verify-baseline-checks.log",
+  "candidate_revision": "432788798e06dfedd1f0089a7e2dd4e162d8032f",
+  "composition_digest_helper": "Cursor-Governance driver composition_pin",
+  "consumer_driver_revision": "8e4b352a0849ad6b04cda61ea9aa41f6fb1523a2",
+  "description": "Real pinned-producer diagnostics only; these raw trees are not consumer bundles.",
+  "driver_sha256": "sha256:4468bf70bf4fa8188ac740fffa8cfd36f13156bca24869393fd16f6fa89a7515",
+  "postflight": {
+    "candidate": {
+      "head": "432788798e06dfedd1f0089a7e2dd4e162d8032f",
+      "status_porcelain": ""
+    },
+    "compiler": {
+      "head": "943db9a462d35ba66771a700ece77c746295f591",
+      "status_porcelain": ""
+    },
+    "consumer": {
+      "head": "8e4b352a0849ad6b04cda61ea9aa41f6fb1523a2",
+      "status_porcelain": ""
+    }
+  },
+  "preflight": {
+    "candidate": {
+      "head": "432788798e06dfedd1f0089a7e2dd4e162d8032f",
+      "root": "/tmp/l9-projection-qa.nBKv8FWo/candidate",
+      "status_porcelain": ""
+    },
+    "compiler": {
+      "head": "943db9a462d35ba66771a700ece77c746295f591",
+      "root": "/tmp/l9-projection-qa.nBKv8FWo/compiler",
+      "status_porcelain": ""
+    },
+    "consumer": {
+      "head": "8e4b352a0849ad6b04cda61ea9aa41f6fb1523a2",
+      "root": "/tmp/l9-projection-qa.nBKv8FWo/consumer",
+      "status_porcelain": ""
+    }
+  },
+  "producer_cli": "/tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler",
+  "producer_cli_sha256": "sha256:1421c5484014a96d63cbea5ac4d009594b93054b2936c60b5d7afa0f120d019e",
+  "producer_revision": "943db9a462d35ba66771a700ece77c746295f591",
+  "qa_root": "/tmp/l9-projection-qa.nBKv8FWo",
+  "qualification": "Unknown results or typed errors are non-qualification; no consumer-bundle qualification was attempted.",
+  "summary": {
+    "all_actual_compose_attempted": true,
+    "composition": {
+      "attempted": 20,
+      "not_attempted": 0,
+      "results": {
+        "unknown": 20
+      },
+      "return_codes": {
+        "3": 20
+      }
+    },
+    "coordinates": {
+      "attempted": 20,
+      "not_attempted": 0,
+      "results": {
+        "None": 20
+      },
+      "return_codes": {
+        "0": 20
+      }
+    },
+    "determinism_by_profile": {
+      "composition_artifacts": {
+        "different": 0,
+        "equal": 10,
+        "not_produced": 0
+      },
+      "composition_receipts": {
+        "different": 0,
+        "equal": 10,
+        "not_produced": 0
+      },
+      "projection_artifacts": {
+        "different": 0,
+        "equal": 10,
+        "not_produced": 0
+      },
+      "projection_receipts": {
+        "different": 0,
+        "equal": 10,
+        "not_produced": 0
+      }
+    },
+    "harness_run_errors": 0,
+    "profile_helper_errors": 0,
+    "profiles": 10,
+    "projection": {
+      "attempted": 20,
+      "not_attempted": 0,
+      "results": {
+        "unknown": 20
+      },
+      "return_codes": {
+        "3": 20
+      }
+    },
+    "projection_artifacts_total": 106,
+    "projection_artifacts_unknown": 106,
+    "projection_unresolved_criteria": [
+      "payload_schema"
+    ],
+    "runs": 20
+  },
+  "unchanged_driver": "/tmp/l9-projection-qa.nBKv8FWo/consumer/tools/authority/produce_projection_bundle.py"
+}

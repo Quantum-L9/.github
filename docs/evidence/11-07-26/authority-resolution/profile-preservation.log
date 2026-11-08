@@ -1,0 +1,5 @@
+semantics/projection_profiles.yaml old_count= 31 new_count= 41 old_changed= 0 new_added= 10 unique= True
+semantics/composition_profiles.yaml old_count= 4 new_count= 14 old_changed= 0 new_added= 10 unique= True
+PREVIOUS_CANDIDATES_BYTE_IDENTICAL semantics/projection_profiles.yaml
+PREVIOUS_CANDIDATES_BYTE_IDENTICAL semantics/composition_profiles.yaml
+HISTORICAL_RELEASE_UNCHANGED

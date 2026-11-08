@@ -6,7 +6,14 @@
 #
 # This file is NOT part of the seeded template set (see templates/) — it is
 # local to this repository and does not cascade to consumers.
-.claude/
+#
+# One exception is tracked: skills this repository owns because it owns the
+# meaning they act on. Governance-projected skill links beside them stay ignored.
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/l9-projection-admission/
+.claude/skills/l9-projection-admission/**/__pycache__/
 .mcp.json
 # Created by make validate when the system python3 has no PyYAML.
 .venv/

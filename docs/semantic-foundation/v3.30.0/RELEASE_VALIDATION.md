@@ -58,7 +58,31 @@ These cross-field controls pass the shape by construction. Each is stated as a n
 | Manifest digest mismatch | not a shape violation | `subject_and_provenance_manifest_digest_are_the_consumed_manifest_digest` |
 | Unbound required port | caught only when `implementation_ref` has the wrong type | `bound_requires_an_admitted_implementation_ref_preserved_exactly_from_the_manifest` |
 
-Also not checked: the sixteen rules as a whole, and that no release check pins the schema.
+Also not checked: the nineteen rules as a whole, and that no release check pins the schema.
+
+## Amendment: behavior-contract dependency, typed unresolved results, no operation_ref
+
+Run at `Quantum-L9/.github@004a49b2a0ac155f838b9e1fec6a27f06bd64f16` (the semantic amendment before this record), with the unmodified `Quantum-L9/l9-semantic-compiler-engine@18215ae2cd948ff8c9cc8992785d2f72f8b53310`.
+
+- **Resolution.** `schema_defining("l9.implementation-ir/v1")` returns `l9.schema/implementation-ir@1` with 19 `semantic_rules`.
+- **Positive.** The hand-lowered State fixture passes. It is a structural qualification fixture, not compiler output, with 13 actions (8 consequential), 2 forbidden, 4 ports, 4 adapters, `provenance.behavior_contracts: []` and the optional ScopeAuthorization port `unresolved` with `result: unresolved`. Each of `unresolved`, `incompatible`, `unsat` and `ambiguous` is accepted as a result.
+- **Shape negatives: 21 of 21 rejected at the intended field.** These are the 15 above re-run against the amended schema, plus the following:
+
+| Case | Interpreter result |
+|---|---|
+| Provenance without `behavior_contracts` | `$.provenance.behavior_contracts: required field missing` |
+| Behavior-contract entry without digest | `$.provenance.behavior_contracts[0].digest: required field missing` |
+| Behavior-contract malformed digest | `$.provenance.behavior_contracts[0].digest: expected semantic_digest` |
+| Unresolved entry without result | `$.unresolved[0].result: required field missing` |
+| Unresolved result `resolved` | `$.unresolved[0].result: value not in declared enum` |
+| Unresolved result `unknown` | `$.unresolved[0].result: value not in declared enum` |
+
+- **Behavior-contract invalidation: structural fixture proof only.**
+  - A shape-valid IR claims `generable` behavior through `example.behavior/x@1` and lists `{ref, digest}` with the compiler's canonical digest of content v1.
+  - The digest rule holds for v1.
+  - After a one-field content change (v2), the digests differ. The retained claim fails the rule, so it is stale.
+  - `example.behavior/x@1` is an illustrative coordinate with no authority. No behavior-contract kind is admitted, so a live end-to-end invalidation of generated behavior is not demonstrable at this release.
+- **operation_ref.** It is absent from `interfaces.actions[].behavior.properties`. The v1 interpreter does not reject undeclared fields, so its absence is a contract statement, enforced by `implementation_ir_adds_no_product_meaning_and_is_never_semantic_authority`.
 
 ## Existing closure
 

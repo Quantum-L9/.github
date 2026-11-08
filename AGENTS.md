@@ -157,3 +157,17 @@ local gate as before (seed-payload suites, SHA pins, semantic closure),
 `make check` is its SHA-pin audit, and `make test` is its
 `ops/validate-starters.sh` suites. `make validate` stays the one gate to run
 before a change; Core runs all four phases in order.
+
+## Repository-owned skill
+
+Admitting new semantics follows one procedure, carried by the skill
+`.claude/skills/l9-projection-admission/`. New semantics means invariants,
+vocabulary, contracts, sources, projection or composition profiles, and payload
+schemas. The procedure validates, registers and releases them, admits them
+only on the owner's decision, and then proves the compiler consumes them.
+
+This repository owns that skill because it owns the language the skill admits.
+Its gate, `scripts/check_admission_closure.py` inside the skill, reports the
+highest rung reached: `INCOMPLETE`, `REGISTERED`, `RELEASED_CANDIDATE`,
+`ADMITTED` or `DOWNSTREAM_USABLE`. The gate is evidence. It never admits
+anything itself.

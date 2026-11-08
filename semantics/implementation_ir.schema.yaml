@@ -126,8 +126,6 @@ properties:
                   - unresolved
                 implementation_ref:
                   type: string
-                operation_ref:
-                  type: semantic_ref
                 behavior_contract_ref:
                   type: semantic_ref
       forbidden_actions:
@@ -242,10 +240,17 @@ properties:
       type: object
       required:
       - obligation_ref
+      - result
       - reason
       properties:
         obligation_ref:
           type: semantic_ref
+        result:
+          enum:
+          - unresolved
+          - incompatible
+          - unsat
+          - ambiguous
         reason:
           type: string
   provenance:
@@ -255,6 +260,7 @@ properties:
     - product_topology_digest
     - repository_spec_digest
     - workflow_spec_digest
+    - behavior_contracts
     - compiler
     properties:
       manifest_digest:
@@ -265,6 +271,18 @@ properties:
         type: semantic_digest
       workflow_spec_digest:
         type: semantic_digest
+      behavior_contracts:
+        type: array
+        items:
+          type: object
+          required:
+          - ref
+          - digest
+          properties:
+            ref:
+              type: semantic_ref
+            digest:
+              type: semantic_digest
       compiler:
         type: object
         required:
@@ -284,7 +302,10 @@ semantic_rules:
 - a_port_is_required_unless_the_manifest_declares_no_adapter_and_no_inbound_action_for_it
 - bound_requires_an_admitted_implementation_ref_preserved_exactly_from_the_manifest
 - generable_requires_a_behavior_contract_ref_or_a_target_binding_map_that_determines_the_obligation
+- a_behavior_contract_ref_supports_generable_only_when_it_resolves_to_an_admitted_behavior_contract_listed_exactly_once_in_provenance_behavior_contracts_and_every_listed_entry_is_so_referenced
+- each_provenance_behavior_contract_digest_is_the_semantic_digest_of_that_contracts_resolved_content_and_a_mismatch_makes_the_implementation_ir_and_its_target_artifacts_stale
 - unresolved_obligations_are_listed_in_unresolved_and_are_never_realized
+- each_unresolved_entry_result_is_the_resolution_model_result_for_that_obligation_and_never_resolved_and_its_reason_only_explains_it
 - no_optional_port_receives_an_invented_adapter_or_provider
 - no_disposition_named_or_implied_other_than_generable_bound_or_unresolved
 - provenance_digests_equal_the_manifest_provenance_digests

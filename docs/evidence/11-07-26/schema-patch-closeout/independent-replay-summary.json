@@ -1,0 +1,1972 @@
+{
+ "authority_repository": "Quantum-L9/.github",
+ "authority_revision": "453701a671b3c9acc3400c47c926d1235adfeffd",
+ "compiler_src": "/tmp/claude-0/-home-user/0522ea30-2ef8-5fa0-92ed-0a9f6c6b7df6/scratchpad/compiler-943db9a/src",
+ "profiles": {
+  "architecture-break-test": {
+   "positive": {
+    "checks": {
+     "_composition": {
+      "artifact_result": "pass",
+      "component_order": true,
+      "composition_profile_identity": true,
+      "namespace_coverage": true,
+      "receipt_coverage": "complete",
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "reverify": {
+       "payload_schema": "pass",
+       "result": "pass",
+       "unresolved": []
+      },
+      "unresolved": []
+     },
+     "_source_coverage": true,
+     "l9.source/architecture-rules@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:694ab7088bc0095b2fe001e0c0b19cbb5eee818c70274ed17ab766fdab85bb79",
+       "path": "semantics/architecture_break_test_projection.schema.yaml",
+       "ref": "l9.schema/architecture-break-test-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/contracts@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:694ab7088bc0095b2fe001e0c0b19cbb5eee818c70274ed17ab766fdab85bb79",
+       "path": "semantics/architecture_break_test_projection.schema.yaml",
+       "ref": "l9.schema/architecture-break-test-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/invariants@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:694ab7088bc0095b2fe001e0c0b19cbb5eee818c70274ed17ab766fdab85bb79",
+       "path": "semantics/architecture_break_test_projection.schema.yaml",
+       "ref": "l9.schema/architecture-break-test-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/requirement-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:694ab7088bc0095b2fe001e0c0b19cbb5eee818c70274ed17ab766fdab85bb79",
+       "path": "semantics/architecture_break_test_projection.schema.yaml",
+       "ref": "l9.schema/architecture-break-test-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/resolution-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:694ab7088bc0095b2fe001e0c0b19cbb5eee818c70274ed17ab766fdab85bb79",
+       "path": "semantics/architecture_break_test_projection.schema.yaml",
+       "ref": "l9.schema/architecture-break-test-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     }
+    },
+    "compose_exit": 0,
+    "compose_result": "pass",
+    "composition_profile": {
+     "digest": "sha256:0b8ff86a49305cf119199498f7c9482191110c99aaa19a2f1a97cddf26942a73",
+     "ref": "l9.compose/architecture-break-test@1"
+    },
+    "coordinates": {
+     "authority": {
+      "repository": "Quantum-L9/.github",
+      "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+     },
+     "projection_profile": {
+      "digest": "sha256:34a09739bfbfee51beead7a21a6e0fd642cf7b8ad1160050326ec297c73ecea3",
+      "ref": "l9.projection/architecture-break-test@1"
+     },
+     "sources": [
+      {
+       "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+       "ref": "l9.source/invariants@1"
+      },
+      {
+       "digest": "sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79",
+       "ref": "l9.source/contracts@1"
+      },
+      {
+       "digest": "sha256:7865723e78b7f02817db9d5f54aedb1350cb08b45d42759c8bdafeba1320c7c2",
+       "ref": "l9.source/requirement-model@1"
+      },
+      {
+       "digest": "sha256:3c0636b0eaca00789d6ced5425fb1c3a314319dd00525dd5f811f38f81c365fc",
+       "ref": "l9.source/resolution-model@1"
+      },
+      {
+       "digest": "sha256:7026597235f9a5ba168f325f92fcdb7f00c495cd04ce364ca4d70f4c51ccacbe",
+       "ref": "l9.source/architecture-rules@1"
+      }
+     ]
+    },
+    "files": {
+     "out/composed/l9.compose_architecture-break-test_1_l9.projection_architecture-break-test_1.composed.json": "sha256:0e81bbacdacef85ba50702f29771f8cc5198d6f89615ad6520e6c8c1707a241a",
+     "out/l9.projection_architecture-break-test_1/l9.source_architecture-rules_1.projection.json": "sha256:56052c895c0c11a9d8d674860e120c0cf2b553e86df1c5f3b8cc5398fd9fdf5e",
+     "out/l9.projection_architecture-break-test_1/l9.source_contracts_1.projection.json": "sha256:9f9f3ca4c0716f4e44a447c999406a50fd5898e91e44fd1bb802ad0a1edfe786",
+     "out/l9.projection_architecture-break-test_1/l9.source_invariants_1.projection.json": "sha256:01af7a704a306bfa333fcd59ebeafe7511ee05e798e310a67647664684360e21",
+     "out/l9.projection_architecture-break-test_1/l9.source_requirement-model_1.projection.json": "sha256:53a8cffab1bc5c9df5fb8e51a83fee9cbe00f02604d4e0c2aa2a10a1695947e8",
+     "out/l9.projection_architecture-break-test_1/l9.source_resolution-model_1.projection.json": "sha256:bf1f2dac17b741c6122a6b62dbc97161f671d6fbe99e438e2b37be39034ebf6f",
+     "out/receipts/0214a548dfcd7593437578ec030948088788358b96d6144e7b077f95fbd9b631.json": "sha256:c19c37f5eb61eafa5fbf0098dfaacc321a90ce5b7397f81205e833003d447e4c",
+     "out/receipts/0b9fe95bcaf98c90389cfe5bb98fa6645a4b68d17ed15b4e3722a035705086bf.json": "sha256:05fc2fbb73eb07d6587ce3cc6dd11475efd6c9c009a0a10ca8c77f6815b41f46",
+     "out/receipts/b3efd56a43be8d06ef8219fde077ded5f20805ad11d4a75cbb48b86ab3d706b4.json": "sha256:aed55471ae8c0f21c99e96166cda707d4b3510994bbff7fd5fcccf38aa0c9c0f",
+     "out/receipts/bc0445322b923fbf52339d8d959ffd648e750ff0cab82d8f62660a7575899dd5.json": "sha256:c879477c8ceeedcbb23eeae7c6bb0e9dbb9829def77142cd3a61eaf7bae23c71",
+     "out/receipts/e83cb2125cffdb1c686cde46d408160ffe56a50ef6bcf59bef6b4a7fcc89f747.json": "sha256:69e498d4eab2c564f2b652ad6f9e9c81445d8b0bd8aa94dacb34c89f37122103",
+     "out/receipts/f841717096aeebe785f850b24ed2fcd28c3c282b176b41af09d8644c60f29a31.json": "sha256:d52951d85a6f03daeb6613a108e11e547d185238b11d1beb26cd6eea25660270"
+    },
+    "profile": "l9.projection/architecture-break-test@1",
+    "project_exit": 0,
+    "project_result": "pass"
+   },
+   "positive_pass": true
+  },
+  "authority-resolution": {
+   "positive": {
+    "checks": {
+     "_composition": {
+      "artifact_result": "pass",
+      "component_order": true,
+      "composition_profile_identity": true,
+      "namespace_coverage": true,
+      "receipt_coverage": "complete",
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "reverify": {
+       "payload_schema": "pass",
+       "result": "pass",
+       "unresolved": []
+      },
+      "unresolved": []
+     },
+     "_source_coverage": true,
+     "l9.source/artifact-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:dcacdf3c2557b32f91e3048a5f7b1ff791e6eb1fbc34c975b2d64f5a8830fbbe",
+       "path": "semantics/authority_resolution_projection.schema.yaml",
+       "ref": "l9.schema/authority-resolution-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/authority-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:dcacdf3c2557b32f91e3048a5f7b1ff791e6eb1fbc34c975b2d64f5a8830fbbe",
+       "path": "semantics/authority_resolution_projection.schema.yaml",
+       "ref": "l9.schema/authority-resolution-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/contracts@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:dcacdf3c2557b32f91e3048a5f7b1ff791e6eb1fbc34c975b2d64f5a8830fbbe",
+       "path": "semantics/authority_resolution_projection.schema.yaml",
+       "ref": "l9.schema/authority-resolution-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/invariants@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:dcacdf3c2557b32f91e3048a5f7b1ff791e6eb1fbc34c975b2d64f5a8830fbbe",
+       "path": "semantics/authority_resolution_projection.schema.yaml",
+       "ref": "l9.schema/authority-resolution-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     }
+    },
+    "compose_exit": 0,
+    "compose_result": "pass",
+    "composition_profile": {
+     "digest": "sha256:d7d5a565b94588c8acf70c737d1a24e61967f183a96f3af2e89e1a2b4f78f34b",
+     "ref": "l9.compose/authority-resolution@1"
+    },
+    "coordinates": {
+     "authority": {
+      "repository": "Quantum-L9/.github",
+      "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+     },
+     "projection_profile": {
+      "digest": "sha256:7cfc37826814a450ceb9cd50fb75d55ed09520c72015eba01e9a7ca9f53d32ea",
+      "ref": "l9.projection/authority-resolution@1"
+     },
+     "sources": [
+      {
+       "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+       "ref": "l9.source/invariants@1"
+      },
+      {
+       "digest": "sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79",
+       "ref": "l9.source/contracts@1"
+      },
+      {
+       "digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+       "ref": "l9.source/authority-model@1"
+      },
+      {
+       "digest": "sha256:21f8bb783d7611ae1b3c60474c6ca31f6096f29d7ef0e94ef81f12e6d2defe09",
+       "ref": "l9.source/artifact-model@1"
+      }
+     ]
+    },
+    "files": {
+     "out/composed/l9.compose_authority-resolution_1_l9.projection_authority-resolution_1.composed.json": "sha256:9db874855d34d553deae2f2eb0ca89cdc9a832438743bd92b30010209dd59248",
+     "out/l9.projection_authority-resolution_1/l9.source_artifact-model_1.projection.json": "sha256:2301667565e40d3fdb8b10bd9ed8bbee892ea626fa839baa01f9542522b89777",
+     "out/l9.projection_authority-resolution_1/l9.source_authority-model_1.projection.json": "sha256:f6a365c2c25315efd17ea8c83c4999c28d862e35a417d3dc6c78494d6ccac53e",
+     "out/l9.projection_authority-resolution_1/l9.source_contracts_1.projection.json": "sha256:2085a069ce2b0a11d51d9d556034ce38d308500fe877f7180f2eb9ea24b15e87",
+     "out/l9.projection_authority-resolution_1/l9.source_invariants_1.projection.json": "sha256:e59d21a945334a416e34e9e9a789e2af7fef1afa92785e2d1eeebaf6b096489d",
+     "out/receipts/618ee9baecf361a1117c1e879028f82630c38927e4b3965012ba3fd1a94d11c4.json": "sha256:2ccf9ca915900fdad0e69ce719798cf7714a1e6f6d49a212bfa39fa159984dcb",
+     "out/receipts/6546f8f5bfc845a73b9b32d7ac97ca9323be25e80336623e5ba9b9de4f0ddf0e.json": "sha256:5fcc7d5d44d49d8a4d11b5442d915130efc6fe9e25f0c923939f8101dbe87e81",
+     "out/receipts/857d7ce3648fa8bca88957505bf3a46f1234bed57f27a02dd5154b831768d7cc.json": "sha256:f05a005c8356f9b87b9329b2db9903014c8f4343fb7aee1dbfcc0f2657a8652a",
+     "out/receipts/9be03c12d0a7b2bbf3cd59ca6d6b74ccd10964de7c7f876392beef08ca5a963a.json": "sha256:026b61e5968f8e2f5e1dca1e2a10de3ec83e15ba350839a9dda743523be3d333",
+     "out/receipts/a3e5bad5f1546faaaf85ff67c80b8c14ddf94c3cd82151d182dc9a075134fe18.json": "sha256:accafa6112320671d7476d696d91a1e3bace15cd69ab8c946e42367410e0ca50"
+    },
+    "profile": "l9.projection/authority-resolution@1",
+    "project_exit": 0,
+    "project_result": "pass"
+   },
+   "positive_pass": true
+  },
+  "evidence-assessment": {
+   "positive": {
+    "checks": {
+     "_composition": {
+      "artifact_result": "pass",
+      "component_order": true,
+      "composition_profile_identity": true,
+      "namespace_coverage": true,
+      "receipt_coverage": "complete",
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "reverify": {
+       "payload_schema": "pass",
+       "result": "pass",
+       "unresolved": []
+      },
+      "unresolved": []
+     },
+     "_source_coverage": true,
+     "l9.source/conformance-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:920b938b8a14fccfcd5bfdc559c7efd15496e40116fe80cd65941115c3623f74",
+       "path": "semantics/evidence_assessment_projection.schema.yaml",
+       "ref": "l9.schema/evidence-assessment-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/contracts@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:920b938b8a14fccfcd5bfdc559c7efd15496e40116fe80cd65941115c3623f74",
+       "path": "semantics/evidence_assessment_projection.schema.yaml",
+       "ref": "l9.schema/evidence-assessment-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/invariants@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:920b938b8a14fccfcd5bfdc559c7efd15496e40116fe80cd65941115c3623f74",
+       "path": "semantics/evidence_assessment_projection.schema.yaml",
+       "ref": "l9.schema/evidence-assessment-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/receipt-catalog@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:920b938b8a14fccfcd5bfdc559c7efd15496e40116fe80cd65941115c3623f74",
+       "path": "semantics/evidence_assessment_projection.schema.yaml",
+       "ref": "l9.schema/evidence-assessment-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     }
+    },
+    "compose_exit": 0,
+    "compose_result": "pass",
+    "composition_profile": {
+     "digest": "sha256:1b8110e2c8048beccb0561c7f110720d290416d1f42b0be4e2f9dd8e895baa78",
+     "ref": "l9.compose/evidence-assessment@1"
+    },
+    "coordinates": {
+     "authority": {
+      "repository": "Quantum-L9/.github",
+      "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+     },
+     "projection_profile": {
+      "digest": "sha256:dc8b69b2d0a4a1e461c9eebe41250d733a7d80e502946543719380ab5737682c",
+      "ref": "l9.projection/evidence-assessment@1"
+     },
+     "sources": [
+      {
+       "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+       "ref": "l9.source/invariants@1"
+      },
+      {
+       "digest": "sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79",
+       "ref": "l9.source/contracts@1"
+      },
+      {
+       "digest": "sha256:0dc3a305a53cbd6f2f1e0cba440d21cf7b3c6b241285a15be8bdb185babc1c84",
+       "ref": "l9.source/receipt-catalog@1"
+      },
+      {
+       "digest": "sha256:e777a3cb7b8d94e044934d4778045d697bcdd85ecb2ebe241e95fe60bd7141c5",
+       "ref": "l9.source/conformance-model@1"
+      }
+     ]
+    },
+    "files": {
+     "out/composed/l9.compose_evidence-assessment_1_l9.projection_evidence-assessment_1.composed.json": "sha256:f007040f8e38caa67236f5e5522ed31e34db339e81cf41f9a3b3da7f37abfe7d",
+     "out/l9.projection_evidence-assessment_1/l9.source_conformance-model_1.projection.json": "sha256:5e51fbebe243cefbd2220948757bc8ae97017cd9c86a8a97843f9558b7e459f6",
+     "out/l9.projection_evidence-assessment_1/l9.source_contracts_1.projection.json": "sha256:7cfbb9067336da91b71b5627d025d27abc896e26863f43cc38d000c3ae7898a7",
+     "out/l9.projection_evidence-assessment_1/l9.source_invariants_1.projection.json": "sha256:402a5c8bf217efdaefcfb07c99151c903ca27c831d460f210971ffb3f242aeba",
+     "out/l9.projection_evidence-assessment_1/l9.source_receipt-catalog_1.projection.json": "sha256:bbe40255a46cbe684f54a1999d2d5e766bc355b18d8a46cdb8294604dc24a7f2",
+     "out/receipts/004ce75be69a52429466eb67fa02938ee80299ed19eba25c0c910d99f694fc94.json": "sha256:5053f00af7f4d4c684ab6ee2912ce29bda4b1da1874b8fa659a9544d733fa1db",
+     "out/receipts/66daa4de4fbd476646da7391dcb2821995354e88574e05f79ac681ce7b448842.json": "sha256:f0c077794ba505876a34ee6de8744a8e9cb7a053db7b83435f0c49688bc7d592",
+     "out/receipts/77d33fc129dc490fdbf4152f4535bf0d53a8421e45b2db15be626d770e7ac688.json": "sha256:69819ff183e98b69e07be433bcdb3e821c95e20d8bcfd8f72b8312d75ca64da4",
+     "out/receipts/9c839a97457d640bfbfbc044914da3817adcb5f0289d52e4dfecb63f8eb47eef.json": "sha256:790f848e4f6dd634865f95e842c5988445ea8d312fc3d929d940b920909a764a",
+     "out/receipts/aa88483801209418fcdea56980e7913d3759518de6b80758cc0d0d461f7586a5.json": "sha256:a14343ee51ff5345fd33225c3066b8121864572a5d6f06621c1898dbc6067cc1"
+    },
+    "profile": "l9.projection/evidence-assessment@1",
+    "project_exit": 0,
+    "project_result": "pass"
+   },
+   "positive_pass": true
+  },
+  "globalization-assessment": {
+   "positive": {
+    "checks": {
+     "_composition": {
+      "artifact_result": "pass",
+      "component_order": true,
+      "composition_profile_identity": true,
+      "namespace_coverage": true,
+      "receipt_coverage": "complete",
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "reverify": {
+       "payload_schema": "pass",
+       "result": "pass",
+       "unresolved": []
+      },
+      "unresolved": []
+     },
+     "_source_coverage": true,
+     "l9.source/authority-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:5e99c35677d3ec86676e159ac587e4183f8d1bc191386c8035bb0c317a2e335a",
+       "path": "semantics/globalization_assessment_projection.schema.yaml",
+       "ref": "l9.schema/globalization-assessment-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/contracts@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:5e99c35677d3ec86676e159ac587e4183f8d1bc191386c8035bb0c317a2e335a",
+       "path": "semantics/globalization_assessment_projection.schema.yaml",
+       "ref": "l9.schema/globalization-assessment-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/invariants@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:5e99c35677d3ec86676e159ac587e4183f8d1bc191386c8035bb0c317a2e335a",
+       "path": "semantics/globalization_assessment_projection.schema.yaml",
+       "ref": "l9.schema/globalization-assessment-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/lifecycle@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:5e99c35677d3ec86676e159ac587e4183f8d1bc191386c8035bb0c317a2e335a",
+       "path": "semantics/globalization_assessment_projection.schema.yaml",
+       "ref": "l9.schema/globalization-assessment-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/packet-catalog@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:5e99c35677d3ec86676e159ac587e4183f8d1bc191386c8035bb0c317a2e335a",
+       "path": "semantics/globalization_assessment_projection.schema.yaml",
+       "ref": "l9.schema/globalization-assessment-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     }
+    },
+    "compose_exit": 0,
+    "compose_result": "pass",
+    "composition_profile": {
+     "digest": "sha256:221d81d21e7fb3998fcc8fa75ddd9f3c64c20f1af610dd15ef26e9bfa159e668",
+     "ref": "l9.compose/globalization-assessment@1"
+    },
+    "coordinates": {
+     "authority": {
+      "repository": "Quantum-L9/.github",
+      "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+     },
+     "projection_profile": {
+      "digest": "sha256:71b69b0d8cbbd781472d67317dda1cffa4f059a34bb472deb87073e9f1d4a06f",
+      "ref": "l9.projection/globalization-assessment@1"
+     },
+     "sources": [
+      {
+       "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+       "ref": "l9.source/invariants@1"
+      },
+      {
+       "digest": "sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79",
+       "ref": "l9.source/contracts@1"
+      },
+      {
+       "digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+       "ref": "l9.source/authority-model@1"
+      },
+      {
+       "digest": "sha256:65285d583154cefa1623f9a93061a3413cef2d1dd26349accb80225ce866b1b5",
+       "ref": "l9.source/lifecycle@1"
+      },
+      {
+       "digest": "sha256:3a1fea5eed1ee1b43e16f0adabefd8ef5151702ed5b9dc14801d642183b41017",
+       "ref": "l9.source/packet-catalog@1"
+      }
+     ]
+    },
+    "files": {
+     "out/composed/l9.compose_globalization-assessment_1_l9.projection_globalization-assessment_1.composed.json": "sha256:3596fdbf2573a3ca68acd8a1643cb924fa402764a781157d661967e68c26f572",
+     "out/l9.projection_globalization-assessment_1/l9.source_authority-model_1.projection.json": "sha256:ae6f023e681e3bd406df6eff31289c27630ac34ef86149dd552e094003f6f27a",
+     "out/l9.projection_globalization-assessment_1/l9.source_contracts_1.projection.json": "sha256:c80565bea938219a83e7fd77821a8c6877508fc33ee16342030dad4f0438027a",
+     "out/l9.projection_globalization-assessment_1/l9.source_invariants_1.projection.json": "sha256:3594e861a32e041526e4afddaef9b0a57ca57b17def8e0752fb4f47c01f7703f",
+     "out/l9.projection_globalization-assessment_1/l9.source_lifecycle_1.projection.json": "sha256:3737c2c2d9d091cae353c52958ded072ef3931cd4b0a018b7cce33382fe9ca32",
+     "out/l9.projection_globalization-assessment_1/l9.source_packet-catalog_1.projection.json": "sha256:43abc7de9b1d4697efa55b4a2f1885563148bcdc4062b701c1cc067f8f349688",
+     "out/receipts/2e85fd00c4de5cd849fd93f5ab4ff308f99f87b62eaa3ad023291ad6c2e2b619.json": "sha256:5a0ddb9841f64c175b847b7fdf8aabcc785934620672cd9dbc71987805a047a9",
+     "out/receipts/5a3a0a24563aacb4bc723258e2fa207fdf37331ecf3af3caffcc64eef3162dcd.json": "sha256:0d10d85fdfd05db0eef417278b39abd433f8e144f4d05ac414e016f5591647ff",
+     "out/receipts/5b81ada2068837a32447cd0edbbe03ce2771886f4c623010e586a4ac90b30ca7.json": "sha256:3b5295bfc250314a536e213db8d3a24627eb7f6410d330a4c0ee51ae1100f3b2",
+     "out/receipts/a0fcbfbf2d9971cd51f4530975cb46afe22c74a8dddbda99b5e17983131452c4.json": "sha256:d570b91ce354516be2e7b4c9c03cdee1a76cd18e883e696eb9b8a2406c85d40b",
+     "out/receipts/a2469400cc9c3c5e2d66fe9e696ceb894459904d0b659105af99a986af08d991.json": "sha256:38d1bd1f327a2ab8c70c888fefdf2b94637a0db0c67250144984b0e6b63566d7",
+     "out/receipts/afb021b7c0ec84007e9f5704f6fead2dbeeab32a40ad3ba0c1f2cdfe9435dd04.json": "sha256:5da78df81ce586aa7a3b5cb56fc0a6d8858d3dafc289f71ea4c326106c55ceea"
+    },
+    "profile": "l9.projection/globalization-assessment@1",
+    "project_exit": 0,
+    "project_result": "pass"
+   },
+   "positive_pass": true
+  },
+  "hard-constraint-context": {
+   "positive": {
+    "checks": {
+     "_composition": {
+      "artifact_result": "pass",
+      "component_order": true,
+      "composition_profile_identity": true,
+      "namespace_coverage": true,
+      "receipt_coverage": "complete",
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "reverify": {
+       "payload_schema": "pass",
+       "result": "pass",
+       "unresolved": []
+      },
+      "unresolved": []
+     },
+     "_source_coverage": true,
+     "l9.source/contracts@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:e3e8ac8cba30d253a07cf880204eb4c7d31a60a96db671bb8e327d63c2a4a82e",
+       "path": "semantics/hard_constraint_context_projection.schema.yaml",
+       "ref": "l9.schema/hard-constraint-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/invariants@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:e3e8ac8cba30d253a07cf880204eb4c7d31a60a96db671bb8e327d63c2a4a82e",
+       "path": "semantics/hard_constraint_context_projection.schema.yaml",
+       "ref": "l9.schema/hard-constraint-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/requirement-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:e3e8ac8cba30d253a07cf880204eb4c7d31a60a96db671bb8e327d63c2a4a82e",
+       "path": "semantics/hard_constraint_context_projection.schema.yaml",
+       "ref": "l9.schema/hard-constraint-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/resolution-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:e3e8ac8cba30d253a07cf880204eb4c7d31a60a96db671bb8e327d63c2a4a82e",
+       "path": "semantics/hard_constraint_context_projection.schema.yaml",
+       "ref": "l9.schema/hard-constraint-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     }
+    },
+    "compose_exit": 0,
+    "compose_result": "pass",
+    "composition_profile": {
+     "digest": "sha256:58c9c97ed650a120f96460791575738af8e5a8d9584b2cc95b67b6eec1f2bf2b",
+     "ref": "l9.compose/hard-constraint-context@1"
+    },
+    "coordinates": {
+     "authority": {
+      "repository": "Quantum-L9/.github",
+      "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+     },
+     "projection_profile": {
+      "digest": "sha256:b578df8e3c53ef93b897ca94d2404472acc1d9bf88415eae8cceea1055d3f77c",
+      "ref": "l9.projection/hard-constraint-context@1"
+     },
+     "sources": [
+      {
+       "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+       "ref": "l9.source/invariants@1"
+      },
+      {
+       "digest": "sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79",
+       "ref": "l9.source/contracts@1"
+      },
+      {
+       "digest": "sha256:7865723e78b7f02817db9d5f54aedb1350cb08b45d42759c8bdafeba1320c7c2",
+       "ref": "l9.source/requirement-model@1"
+      },
+      {
+       "digest": "sha256:3c0636b0eaca00789d6ced5425fb1c3a314319dd00525dd5f811f38f81c365fc",
+       "ref": "l9.source/resolution-model@1"
+      }
+     ]
+    },
+    "files": {
+     "out/composed/l9.compose_hard-constraint-context_1_l9.projection_hard-constraint-context_1.composed.json": "sha256:a16a1a1245d9361309805789455b832b35cf4bc39403e72e802ead8828996e84",
+     "out/l9.projection_hard-constraint-context_1/l9.source_contracts_1.projection.json": "sha256:9ac0df3a293e0c8c02dfe519fbe19848c19e59a7cf0c425fdf23eb3bba9c547a",
+     "out/l9.projection_hard-constraint-context_1/l9.source_invariants_1.projection.json": "sha256:7ab8f7defa80cd4c556c3c31263c25201a9a72561dc0c16c4cbda77ffae592c9",
+     "out/l9.projection_hard-constraint-context_1/l9.source_requirement-model_1.projection.json": "sha256:0ae8cff60674134b32ff79fd765046daa7540bebf86964f288e5cc6da9d275fd",
+     "out/l9.projection_hard-constraint-context_1/l9.source_resolution-model_1.projection.json": "sha256:c0bddf7fd3bb06055036bde6b6e994370d2847e10abd9641cc59e9126617ccde",
+     "out/receipts/562867aa40efcdfbc6516041a735285f7f446e2f290db3cc88c506cb122c8ae0.json": "sha256:66b4814bd8f56772475c9642bf7f27f87a91793e62d731219d65758001e5195b",
+     "out/receipts/8532a83609c55b48452a18e1b67207c4d84589ac535c73cbabca443a411bb9d1.json": "sha256:b82f89c7210e0bfe35631f3fad81eec263d44c4c05a2d64e2cadeac3134732ee",
+     "out/receipts/e31427b8d675eb3e48946d1bc113483d2836ee84f0ba2ed00ee2d3402da8060e.json": "sha256:a448f5474f21a7e6efe699e03628218de8f8d65767cb32251c11be5e801ed24b",
+     "out/receipts/f4f146b5e7a13af6403e0c713b72a3546273e143368e40095536d826b17cc2f2.json": "sha256:fc499bd4fb6046a15d087acae386f79b70146bd4a38bbdf31200b6e8d57e298f",
+     "out/receipts/fcf79ff7941eedc34e51da9f747c7cdba1bda892f5dbdaad4dd95bc637a6a752.json": "sha256:ece087c66fd75e3c4694b3de84a1c5151c0cfb2e731eead20b60895762a293b5"
+    },
+    "profile": "l9.projection/hard-constraint-context@1",
+    "project_exit": 0,
+    "project_result": "pass"
+   },
+   "positive_pass": true
+  },
+  "identity-assurance": {
+   "positive": {
+    "checks": {
+     "_composition": {
+      "artifact_result": "pass",
+      "component_order": true,
+      "composition_profile_identity": true,
+      "namespace_coverage": true,
+      "receipt_coverage": "complete",
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "reverify": {
+       "payload_schema": "pass",
+       "result": "pass",
+       "unresolved": []
+      },
+      "unresolved": []
+     },
+     "_source_coverage": true,
+     "l9.source/actor-registry@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:8817ada1678ce8a9b483125d9d0b272718e1191f99d520342b2b8a28e917a5e4",
+       "path": "semantics/identity_assurance_projection.schema.yaml",
+       "ref": "l9.schema/identity-assurance-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/authority-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:8817ada1678ce8a9b483125d9d0b272718e1191f99d520342b2b8a28e917a5e4",
+       "path": "semantics/identity_assurance_projection.schema.yaml",
+       "ref": "l9.schema/identity-assurance-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/contracts@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:8817ada1678ce8a9b483125d9d0b272718e1191f99d520342b2b8a28e917a5e4",
+       "path": "semantics/identity_assurance_projection.schema.yaml",
+       "ref": "l9.schema/identity-assurance-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/identity-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:8817ada1678ce8a9b483125d9d0b272718e1191f99d520342b2b8a28e917a5e4",
+       "path": "semantics/identity_assurance_projection.schema.yaml",
+       "ref": "l9.schema/identity-assurance-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/invariants@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:8817ada1678ce8a9b483125d9d0b272718e1191f99d520342b2b8a28e917a5e4",
+       "path": "semantics/identity_assurance_projection.schema.yaml",
+       "ref": "l9.schema/identity-assurance-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/surface-registry@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:8817ada1678ce8a9b483125d9d0b272718e1191f99d520342b2b8a28e917a5e4",
+       "path": "semantics/identity_assurance_projection.schema.yaml",
+       "ref": "l9.schema/identity-assurance-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     }
+    },
+    "compose_exit": 0,
+    "compose_result": "pass",
+    "composition_profile": {
+     "digest": "sha256:9e8e52f72d1efcddfada3517be61a035f2ef8d84e698e45e52c603cd80d55b1b",
+     "ref": "l9.compose/identity-assurance@1"
+    },
+    "coordinates": {
+     "authority": {
+      "repository": "Quantum-L9/.github",
+      "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+     },
+     "projection_profile": {
+      "digest": "sha256:e5b099a569fbdd49e75d715ed982460b6f30d9bd805cc17264d91aa2b865a32d",
+      "ref": "l9.projection/identity-assurance@1"
+     },
+     "sources": [
+      {
+       "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+       "ref": "l9.source/invariants@1"
+      },
+      {
+       "digest": "sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79",
+       "ref": "l9.source/contracts@1"
+      },
+      {
+       "digest": "sha256:b9245eca99501a38976e909e1d151942c1253b2eee2bd6bab9c6382687db4288",
+       "ref": "l9.source/identity-model@1"
+      },
+      {
+       "digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+       "ref": "l9.source/authority-model@1"
+      },
+      {
+       "digest": "sha256:34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f",
+       "ref": "l9.source/actor-registry@1"
+      },
+      {
+       "digest": "sha256:d7200409ff02141a274ff8c9221d31429f6a6fae27539e6d9c8d20f1a6eba988",
+       "ref": "l9.source/surface-registry@1"
+      }
+     ]
+    },
+    "files": {
+     "out/composed/l9.compose_identity-assurance_1_l9.projection_identity-assurance_1.composed.json": "sha256:e98a368d09368285fdc5dd23157671cee6848b1fe9acaf4a2f08948055dd0056",
+     "out/l9.projection_identity-assurance_1/l9.source_actor-registry_1.projection.json": "sha256:a12226177efb9dd6275e382b2663184dd67190997b9b058f511b20530ed55077",
+     "out/l9.projection_identity-assurance_1/l9.source_authority-model_1.projection.json": "sha256:97ffa92282b8481771e5bafbe42cc73d682ae360328ffd14f6edb289b8518d20",
+     "out/l9.projection_identity-assurance_1/l9.source_contracts_1.projection.json": "sha256:46e7b766d5250c89b16467935e18630950e5a41fb20a993a0046bb856c2a88a9",
+     "out/l9.projection_identity-assurance_1/l9.source_identity-model_1.projection.json": "sha256:70d1353baab5ca7aec883cab965cd2a652e9f3bfe5109f69810b91a5c6f1b5e0",
+     "out/l9.projection_identity-assurance_1/l9.source_invariants_1.projection.json": "sha256:bcd939187e53ec307a425585fb12a97000bbcf15782471f8066874e8f112675d",
+     "out/l9.projection_identity-assurance_1/l9.source_surface-registry_1.projection.json": "sha256:4a2c4af0e197f1e10b22ef42ea43022d5c4572a822a4d5189df39e1bd723070c",
+     "out/receipts/26738a9fa1d71a47053509bd4adfa4746340c0848975d61d1530febc82ff3117.json": "sha256:17e3bc55fbfa1917fb5377c9f731b378e31d2d5f687d2ad88baa132ddab97cb4",
+     "out/receipts/6fc521ad82284908fe4dc9ff4030509a56b9ef082e52f44b4e68ba89fde85ae3.json": "sha256:86f1e00acd1f6daee0be2ea21f6d80c8757ab0f4cbc97382f74d2ca77f5f6a3d",
+     "out/receipts/75b179459efe04c4f8411e7d25d78da0927c7a29e1249da8194c6238e74a25d2.json": "sha256:df7112bf1ae01d0ab303bc5c86a07f544c33fbe808f81f95e04c815da2bed0b7",
+     "out/receipts/78eaea5c1764ef922f61092585c127893052b486e1a8a7378938af0c25185539.json": "sha256:93bb80231bcba5a0d0ebdc06805a8a7e4a75c9928947347d030ff0fea1ed2629",
+     "out/receipts/a5d226b191449583c7e5fd9dad4778c09394f2b5331023646e5e1d69f40b37ee.json": "sha256:baaf9c7d5dee228bb8256d5cae7477282890887ad02b9e5ca590a64708b05f7b",
+     "out/receipts/a8ffc740eab42a666905423fa8fbc36a61f604b7e09b33a8d7144f67199d76ab.json": "sha256:702f5610ba5d736adc756052030210d6bc08663ce5d6aa6de18007d40512ccb8",
+     "out/receipts/f679726b1f31789ea0dcc4e1c86e33b9dd6268ad5064d46900f77f354d081e2d.json": "sha256:b31fc8829e6ac7f0ac6d6b48afc63a64f5230d220bfc9c2785511eeb1933347b"
+    },
+    "profile": "l9.projection/identity-assurance@1",
+    "project_exit": 0,
+    "project_result": "pass"
+   },
+   "positive_pass": true
+  },
+  "semantic-change-context": {
+   "positive": {
+    "checks": {
+     "_composition": {
+      "artifact_result": "pass",
+      "component_order": true,
+      "composition_profile_identity": true,
+      "namespace_coverage": true,
+      "receipt_coverage": "complete",
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "reverify": {
+       "payload_schema": "pass",
+       "result": "pass",
+       "unresolved": []
+      },
+      "unresolved": []
+     },
+     "_source_coverage": true,
+     "l9.source/contracts@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:4b3036f7bcd3951aef570ae740a99d76e7664daacc63c70e7724d3144e073cc2",
+       "path": "semantics/semantic_change_context_projection.schema.yaml",
+       "ref": "l9.schema/semantic-change-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/invariants@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:4b3036f7bcd3951aef570ae740a99d76e7664daacc63c70e7724d3144e073cc2",
+       "path": "semantics/semantic_change_context_projection.schema.yaml",
+       "ref": "l9.schema/semantic-change-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/lifecycle@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:4b3036f7bcd3951aef570ae740a99d76e7664daacc63c70e7724d3144e073cc2",
+       "path": "semantics/semantic_change_context_projection.schema.yaml",
+       "ref": "l9.schema/semantic-change-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/semantic-dependency-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:4b3036f7bcd3951aef570ae740a99d76e7664daacc63c70e7724d3144e073cc2",
+       "path": "semantics/semantic_change_context_projection.schema.yaml",
+       "ref": "l9.schema/semantic-change-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     }
+    },
+    "compose_exit": 0,
+    "compose_result": "pass",
+    "composition_profile": {
+     "digest": "sha256:e1a7d53f16141d25f9fca3cc72d3f2df06719d8267830836521e7215a39b4099",
+     "ref": "l9.compose/semantic-change-context@1"
+    },
+    "coordinates": {
+     "authority": {
+      "repository": "Quantum-L9/.github",
+      "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+     },
+     "projection_profile": {
+      "digest": "sha256:fa9411e657adf383c155e71d096547c51925235538215a49230fdc5f5e98c7ca",
+      "ref": "l9.projection/semantic-change-context@1"
+     },
+     "sources": [
+      {
+       "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+       "ref": "l9.source/invariants@1"
+      },
+      {
+       "digest": "sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79",
+       "ref": "l9.source/contracts@1"
+      },
+      {
+       "digest": "sha256:d48ad347e3c39c33274017ccca30843b4a11f5339c519cc957aaa057f0440a14",
+       "ref": "l9.source/semantic-dependency-model@1"
+      },
+      {
+       "digest": "sha256:65285d583154cefa1623f9a93061a3413cef2d1dd26349accb80225ce866b1b5",
+       "ref": "l9.source/lifecycle@1"
+      }
+     ]
+    },
+    "files": {
+     "out/composed/l9.compose_semantic-change-context_1_l9.projection_semantic-change-context_1.composed.json": "sha256:476ceaf75d311c4e259a78e173e75e7fc35c39a0f4a8c3ce3fea953849c0d64b",
+     "out/l9.projection_semantic-change-context_1/l9.source_contracts_1.projection.json": "sha256:1676e824bcf9faf5728c3d009a56852357a92626003873cfd9ec8e6857616b58",
+     "out/l9.projection_semantic-change-context_1/l9.source_invariants_1.projection.json": "sha256:be1454afa987442014e0e1ca65d0bbb571396363b55bb4849e7339d07785f878",
+     "out/l9.projection_semantic-change-context_1/l9.source_lifecycle_1.projection.json": "sha256:030947996bd7913de99613ccb7db3062ade12b7d2bd4b4f8c0228396f941a811",
+     "out/l9.projection_semantic-change-context_1/l9.source_semantic-dependency-model_1.projection.json": "sha256:bbf00fcfccdcd4a11d3f3340bd8c342c2134c43fbea458b0ba2b3a5ace73f793",
+     "out/receipts/517ee1185ed78c040f80157adf11b86d2aca17f32e15eacd866dd219d0338f51.json": "sha256:603f11ef4cf0ca70d655bb9ed3bd54f2634b6244ee7ab3ba4528866d32aecf14",
+     "out/receipts/5caead45b45e92d1edf160e1ce8d534999939db6b922c405c02dddd618a1c5df.json": "sha256:388755720621f3844523e1a821837c137b799154fe9296d914816fa4efdab380",
+     "out/receipts/a3ba447316434e01c98be7c4f5a8238381f2dd55a4908c24aece51e5e84a1400.json": "sha256:11816b39c2a69ec74c9926a4e1b2c97caa1855ebe4c83fbd90134a8239cd0bc3",
+     "out/receipts/c39c87cacf06649d8d4335452f333cd879a1cb7273b8ec7d9dc5f3172e66ad6b.json": "sha256:41181dc26f2b68b1b22c3d3ce3f7ff27dc8a98ed74da9f6c8da2570b948909c1",
+     "out/receipts/fc637f670301f40888684c6ee9041d07b7bed7789d9cb33cbb3002ab711a3d4d.json": "sha256:e7c45dfd94a6b92376b1ebd7d3fc8ea27076606fa05a061e02908af111d66105"
+    },
+    "profile": "l9.projection/semantic-change-context@1",
+    "project_exit": 0,
+    "project_result": "pass"
+   },
+   "positive_pass": true
+  },
+  "strategic-metacognition": {
+   "positive": {
+    "checks": {
+     "_composition": {
+      "artifact_result": "pass",
+      "component_order": true,
+      "composition_profile_identity": true,
+      "namespace_coverage": true,
+      "receipt_coverage": "complete",
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "reverify": {
+       "payload_schema": "pass",
+       "result": "pass",
+       "unresolved": []
+      },
+      "unresolved": []
+     },
+     "_source_coverage": true,
+     "l9.source/authority-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:168ab5be44ed4c1087041f60da1a4852e8edeb602937dd69c3e200bab9685f58",
+       "path": "semantics/strategic_metacognition_projection.schema.yaml",
+       "ref": "l9.schema/strategic-metacognition-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/contracts@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:168ab5be44ed4c1087041f60da1a4852e8edeb602937dd69c3e200bab9685f58",
+       "path": "semantics/strategic_metacognition_projection.schema.yaml",
+       "ref": "l9.schema/strategic-metacognition-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/invariants@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:168ab5be44ed4c1087041f60da1a4852e8edeb602937dd69c3e200bab9685f58",
+       "path": "semantics/strategic_metacognition_projection.schema.yaml",
+       "ref": "l9.schema/strategic-metacognition-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/strategic-cognition-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:168ab5be44ed4c1087041f60da1a4852e8edeb602937dd69c3e200bab9685f58",
+       "path": "semantics/strategic_metacognition_projection.schema.yaml",
+       "ref": "l9.schema/strategic-metacognition-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/strategic-plan-metacognitive-analysis-schema@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:168ab5be44ed4c1087041f60da1a4852e8edeb602937dd69c3e200bab9685f58",
+       "path": "semantics/strategic_metacognition_projection.schema.yaml",
+       "ref": "l9.schema/strategic-metacognition-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/strategic-plan-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:168ab5be44ed4c1087041f60da1a4852e8edeb602937dd69c3e200bab9685f58",
+       "path": "semantics/strategic_metacognition_projection.schema.yaml",
+       "ref": "l9.schema/strategic-metacognition-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     }
+    },
+    "compose_exit": 0,
+    "compose_result": "pass",
+    "composition_profile": {
+     "digest": "sha256:20b1f5b9cec2ea8b300774a2656b9de833965d1ab6e1beb0be216508ba5ec971",
+     "ref": "l9.compose/strategic-metacognition@1"
+    },
+    "coordinates": {
+     "authority": {
+      "repository": "Quantum-L9/.github",
+      "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+     },
+     "projection_profile": {
+      "digest": "sha256:209b6329843a1f6261e4cb6e037e65e4ffa3163e1688f4be4e3ac37a2c9f2c1d",
+      "ref": "l9.projection/strategic-metacognition@1"
+     },
+     "sources": [
+      {
+       "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+       "ref": "l9.source/invariants@1"
+      },
+      {
+       "digest": "sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79",
+       "ref": "l9.source/contracts@1"
+      },
+      {
+       "digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+       "ref": "l9.source/authority-model@1"
+      },
+      {
+       "digest": "sha256:af540e9607915878b66cb7632fd3ca63f57f80707b1c605fc21536d06ec81a7d",
+       "ref": "l9.source/strategic-cognition-model@1"
+      },
+      {
+       "digest": "sha256:4fffeb59d95fa05158c718b3637288c20bad41243b58b9ed3be50121acae840a",
+       "ref": "l9.source/strategic-plan-model@1"
+      },
+      {
+       "digest": "sha256:ae0f69362f82548968dab60b999ddd074c244ad9e6c78520ea9d653cfa1dc349",
+       "ref": "l9.source/strategic-plan-metacognitive-analysis-schema@1"
+      }
+     ]
+    },
+    "files": {
+     "out/composed/l9.compose_strategic-metacognition_1_l9.projection_strategic-metacognition_1.composed.json": "sha256:2fa4549c57359de87b6e3d4edc4871c7daad98dd5a821298a40354007789d42b",
+     "out/l9.projection_strategic-metacognition_1/l9.source_authority-model_1.projection.json": "sha256:3a389ff0dd973037c03bf410c900fdc89bc50563df724b79f68e4be84b67d82f",
+     "out/l9.projection_strategic-metacognition_1/l9.source_contracts_1.projection.json": "sha256:2dd46c9fb45f2c7094d6d81fdbddcf0e22f3d6fdce3041be8f4b1512fba28db7",
+     "out/l9.projection_strategic-metacognition_1/l9.source_invariants_1.projection.json": "sha256:eb8656ca82506aa7576a0086a618bdf489ff36038eb11a5b4eeeec17aa93f4e6",
+     "out/l9.projection_strategic-metacognition_1/l9.source_strategic-cognition-model_1.projection.json": "sha256:ca87891dc42d430fbf5839cabf99e7fe4cb3c26408dcf6895727fb4bc7f76e0b",
+     "out/l9.projection_strategic-metacognition_1/l9.source_strategic-plan-metacognitive-analysis-schema_1.projection.json": "sha256:2f19b42164ba6d4eabf5891dc7b07a5770bbfc51df3f6cdddf42c7de1791ba4b",
+     "out/l9.projection_strategic-metacognition_1/l9.source_strategic-plan-model_1.projection.json": "sha256:1466eda4bccc27772e9c3c9a585411a512a256cce388ad84293feeeadeac2a6b",
+     "out/receipts/11011f40a5e740899a650890294fe17983e62040c7de04dcdea2e8acb55d0826.json": "sha256:5703419249027f18bc46c89db72a89e756d21053c8205766a94eeae2b1ef3479",
+     "out/receipts/287bccd5d0c66c33b97b63b6da98fdced320846cc86a3ced1ec45533473b38dd.json": "sha256:dca8aa0571e09849927e5ce4b5ab649089875ee81a47489573eae0d666b325c9",
+     "out/receipts/52370cc4b0eda5466d5d49ea458b74cb358e72b3b1158008bc1981483df59a5a.json": "sha256:2f34cefe246292a34e086cdd23ac95c4d8da50ef2a14997fc974a1516c84854c",
+     "out/receipts/7a44ba41e634a1f4a50c19eccd1eab7036b94d020dfb3e785a80846804ee5d1d.json": "sha256:cc8f08e8522251d45e00f098775646300678c026b157536860afad5a7f60971c",
+     "out/receipts/ba14ca1f2f7e3c47ed0d8552a36cc0d5df86bda8acaa69329cdef9219768b504.json": "sha256:0f98e03de75d20bd4cf3594671ea390b5532f7de1ccb51fd3b3c098cb4973b73",
+     "out/receipts/d031503e85c906dd67558492223ea57c3a65b7016fe630b692c987e77fc02c92.json": "sha256:e4601862b3067028142dc0b0fddf286afe2b2e16ba366837443ee3120b695c8a",
+     "out/receipts/ffb1075faed48b8156dfed1ea9179ee5cdaab46b0dd1111ea9e497a89d7af136.json": "sha256:80cac96d734dc97ed92dee23c5a37baa2804e8813c6fa1c19d0951290decbde8"
+    },
+    "profile": "l9.projection/strategic-metacognition@1",
+    "project_exit": 0,
+    "project_result": "pass"
+   },
+   "positive_pass": true
+  },
+  "strategic-planning-context": {
+   "positive": {
+    "checks": {
+     "_composition": {
+      "artifact_result": "pass",
+      "component_order": true,
+      "composition_profile_identity": true,
+      "namespace_coverage": true,
+      "receipt_coverage": "complete",
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "reverify": {
+       "payload_schema": "pass",
+       "result": "pass",
+       "unresolved": []
+      },
+      "unresolved": []
+     },
+     "_source_coverage": true,
+     "l9.source/affected-strategic-closure-schema@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:d1d3265a22d7574bbd7b9447bbc4c8932f8136df8b566c673ee9fe3e385ffe7b",
+       "path": "semantics/strategic_planning_context_projection.schema.yaml",
+       "ref": "l9.schema/strategic-planning-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/authority-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:d1d3265a22d7574bbd7b9447bbc4c8932f8136df8b566c673ee9fe3e385ffe7b",
+       "path": "semantics/strategic_planning_context_projection.schema.yaml",
+       "ref": "l9.schema/strategic-planning-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/contracts@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:d1d3265a22d7574bbd7b9447bbc4c8932f8136df8b566c673ee9fe3e385ffe7b",
+       "path": "semantics/strategic_planning_context_projection.schema.yaml",
+       "ref": "l9.schema/strategic-planning-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/invariants@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:d1d3265a22d7574bbd7b9447bbc4c8932f8136df8b566c673ee9fe3e385ffe7b",
+       "path": "semantics/strategic_planning_context_projection.schema.yaml",
+       "ref": "l9.schema/strategic-planning-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/strategic-cognition-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:d1d3265a22d7574bbd7b9447bbc4c8932f8136df8b566c673ee9fe3e385ffe7b",
+       "path": "semantics/strategic_planning_context_projection.schema.yaml",
+       "ref": "l9.schema/strategic-planning-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/strategic-plan-graph-schema@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:d1d3265a22d7574bbd7b9447bbc4c8932f8136df8b566c673ee9fe3e385ffe7b",
+       "path": "semantics/strategic_planning_context_projection.schema.yaml",
+       "ref": "l9.schema/strategic-planning-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/strategic-plan-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:d1d3265a22d7574bbd7b9447bbc4c8932f8136df8b566c673ee9fe3e385ffe7b",
+       "path": "semantics/strategic_planning_context_projection.schema.yaml",
+       "ref": "l9.schema/strategic-planning-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/strategic-plan-revision-candidate-schema@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:d1d3265a22d7574bbd7b9447bbc4c8932f8136df8b566c673ee9fe3e385ffe7b",
+       "path": "semantics/strategic_planning_context_projection.schema.yaml",
+       "ref": "l9.schema/strategic-planning-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/strategic-planning-episode-schema@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:d1d3265a22d7574bbd7b9447bbc4c8932f8136df8b566c673ee9fe3e385ffe7b",
+       "path": "semantics/strategic_planning_context_projection.schema.yaml",
+       "ref": "l9.schema/strategic-planning-context-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     }
+    },
+    "compose_exit": 0,
+    "compose_result": "pass",
+    "composition_profile": {
+     "digest": "sha256:d91dd43a7e069711d5851f894cf1433ae17d472b6f536d9b9ab515d6e2c2011a",
+     "ref": "l9.compose/strategic-planning-context@1"
+    },
+    "coordinates": {
+     "authority": {
+      "repository": "Quantum-L9/.github",
+      "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+     },
+     "projection_profile": {
+      "digest": "sha256:3966f5be950e8fdce0f7c896b292ebdc03a6bf715f684edfc1c3ddfdce6a9b58",
+      "ref": "l9.projection/strategic-planning-context@1"
+     },
+     "sources": [
+      {
+       "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+       "ref": "l9.source/invariants@1"
+      },
+      {
+       "digest": "sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79",
+       "ref": "l9.source/contracts@1"
+      },
+      {
+       "digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+       "ref": "l9.source/authority-model@1"
+      },
+      {
+       "digest": "sha256:af540e9607915878b66cb7632fd3ca63f57f80707b1c605fc21536d06ec81a7d",
+       "ref": "l9.source/strategic-cognition-model@1"
+      },
+      {
+       "digest": "sha256:4fffeb59d95fa05158c718b3637288c20bad41243b58b9ed3be50121acae840a",
+       "ref": "l9.source/strategic-plan-model@1"
+      },
+      {
+       "digest": "sha256:76bbf51d9233452d3e83e8bf4148a27eb6b8e29ff3126777c6c28d818ce1a885",
+       "ref": "l9.source/strategic-plan-graph-schema@1"
+      },
+      {
+       "digest": "sha256:09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4",
+       "ref": "l9.source/affected-strategic-closure-schema@1"
+      },
+      {
+       "digest": "sha256:017931d0f8a07e85124a6492e07f65c7781905ed86042c7978c7451a80ab8513",
+       "ref": "l9.source/strategic-planning-episode-schema@1"
+      },
+      {
+       "digest": "sha256:48fdecd1a015f13cd739e718b3ea48948ce7891c2905311201ea90bd7d56c0fc",
+       "ref": "l9.source/strategic-plan-revision-candidate-schema@1"
+      }
+     ]
+    },
+    "files": {
+     "out/composed/l9.compose_strategic-planning-context_1_l9.projection_strategic-planning-context_1.composed.json": "sha256:6160127c30336cedc19741d3cb17465bf68920a09943d99d6a70382e93ce89e6",
+     "out/l9.projection_strategic-planning-context_1/l9.source_affected-strategic-closure-schema_1.projection.json": "sha256:f8a88c00871949ddccaa55788e86dc07afc806d34c0196eadfc11020b3d715e8",
+     "out/l9.projection_strategic-planning-context_1/l9.source_authority-model_1.projection.json": "sha256:62a55b5cd4f889b7dab02806099c623d393afdcb4e9b8f22ac2bcd1f7c9538c2",
+     "out/l9.projection_strategic-planning-context_1/l9.source_contracts_1.projection.json": "sha256:ce3fdc40a7dbb176136cc3f486d9cc863c2b1f56d0cf5c060b675bc27cda3205",
+     "out/l9.projection_strategic-planning-context_1/l9.source_invariants_1.projection.json": "sha256:1d588915925c142c0b12286944b9b13463d89eb037bcbd86f5f95f077047cef8",
+     "out/l9.projection_strategic-planning-context_1/l9.source_strategic-cognition-model_1.projection.json": "sha256:6dfb7fcaa41fc432eee0cee0dc2253f857dbed2d863e59f20d6866bb3192bad8",
+     "out/l9.projection_strategic-planning-context_1/l9.source_strategic-plan-graph-schema_1.projection.json": "sha256:7a912e9a532043da9588086b80a043d0473f33f94f54b037aac05484f7008b10",
+     "out/l9.projection_strategic-planning-context_1/l9.source_strategic-plan-model_1.projection.json": "sha256:1dc48b5327859863ae8d6b0672cafd1e7cdb1b0d9412f0d7e74fb181d424260d",
+     "out/l9.projection_strategic-planning-context_1/l9.source_strategic-plan-revision-candidate-schema_1.projection.json": "sha256:e5dab6537faa6f7b18bfc0949d312319706e6936bc9c8f938563a6e5f5ee3740",
+     "out/l9.projection_strategic-planning-context_1/l9.source_strategic-planning-episode-schema_1.projection.json": "sha256:a6d800100555ccb3b97c4d576420c814fdd13b8cd3e710797a998729d2655124",
+     "out/receipts/082d48a96df8b5c79490cb152ee37314d8a86213e2490306ca5742a50746c26b.json": "sha256:835c42c18eb3a74ccdff349a316737f3d9760d8e52471d3c626a9b85111b509f",
+     "out/receipts/0ecc6daaba6544a37a4211c80839d785fa89a4c468788ac0e23931deb4036eaa.json": "sha256:6e936a7c7e4a20712378886a1a5cb041620977a77d0d13f98c2da54cda0c8b4a",
+     "out/receipts/3e82f50a5a78ed07f608b825916fefc6a8c6c1df1ee87cd6f579fe46b20245f4.json": "sha256:a8a049fbba97c50534effcd0480278b81cc13f91119383e5d6b3859cafab21fe",
+     "out/receipts/7efed07a7072ff6b4c63a88fb3b838316304f769bfb3e225087a842196e4d8dd.json": "sha256:4f3fe65b56021823a07c75e51aa7100bdce4ef65bfa614271f0a15f2e4ab8a9a",
+     "out/receipts/8c93f4a571fba56bbf03a5682a01b1ba395d6adf388b65a48e597485cfb23f0a.json": "sha256:3d0e62078a13319583c05c683bb1b3b6f61e2c1078030b7f45ab7030afe8f87d",
+     "out/receipts/9e7785d087e90c54b980eaa6458810adf829a086240ffea8aa2a7f0d419821bd.json": "sha256:86dd7081ef389d7bf7bc52f6d1a6f41ec4425f0443a45b07aeb42611d331cb9f",
+     "out/receipts/ad79d4c2cc30182ecbc56f11bf025a80dc0b2262cf305883d7033b0a81c3a868.json": "sha256:ee2a5cf03838729e6720fa4ba22386dcd5e030514b62f107cd0e8d5dcc02723f",
+     "out/receipts/e43ffb02aa45b0a87da7f1c9e06e5b8174c0847de8c7cbf380c23e75eabd8dea.json": "sha256:d06dcf17b58f559cf2c7714c5d675e0f6a6579fa0feac511c3ff753e61d1a416",
+     "out/receipts/f5001aab3af0edee8b3518b2da2ac44c98238cedd802224949f76e63da84e73a.json": "sha256:969b176e37d0dbb8392d6c518ae13910f50ea72438b96d58f282145dd9e8abdc",
+     "out/receipts/f7d4d34f6c9666b64a66b40ff1d303ca01e815e6bf5ee2b128ec31fda5e18736.json": "sha256:7fcc22ca1f97b9b8a1db44881a8944d3125e2efbc90ff28fa74e04bae3b6613a"
+    },
+    "profile": "l9.projection/strategic-planning-context@1",
+    "project_exit": 0,
+    "project_result": "pass"
+   },
+   "positive_pass": true
+  },
+  "work-state-continuity": {
+   "positive": {
+    "checks": {
+     "_composition": {
+      "artifact_result": "pass",
+      "component_order": true,
+      "composition_profile_identity": true,
+      "namespace_coverage": true,
+      "receipt_coverage": "complete",
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "reverify": {
+       "payload_schema": "pass",
+       "result": "pass",
+       "unresolved": []
+      },
+      "unresolved": []
+     },
+     "_source_coverage": true,
+     "l9.source/contracts@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:b728e717e892af2b2ca4186365825af42b2f998340facdec2d9ecc2e708d9eaa",
+       "path": "semantics/work_state_continuity_projection.schema.yaml",
+       "ref": "l9.schema/work-state-continuity-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/invariants@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:b728e717e892af2b2ca4186365825af42b2f998340facdec2d9ecc2e708d9eaa",
+       "path": "semantics/work_state_continuity_projection.schema.yaml",
+       "ref": "l9.schema/work-state-continuity-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/lifecycle@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:b728e717e892af2b2ca4186365825af42b2f998340facdec2d9ecc2e708d9eaa",
+       "path": "semantics/work_state_continuity_projection.schema.yaml",
+       "ref": "l9.schema/work-state-continuity-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/packet-catalog@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:b728e717e892af2b2ca4186365825af42b2f998340facdec2d9ecc2e708d9eaa",
+       "path": "semantics/work_state_continuity_projection.schema.yaml",
+       "ref": "l9.schema/work-state-continuity-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/receipt-catalog@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:b728e717e892af2b2ca4186365825af42b2f998340facdec2d9ecc2e708d9eaa",
+       "path": "semantics/work_state_continuity_projection.schema.yaml",
+       "ref": "l9.schema/work-state-continuity-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     },
+     "l9.source/semantic-dependency-model@1": {
+      "artifact_result": "pass",
+      "payload_schema": "pass",
+      "payload_schema_artifact": {
+       "digest": "sha256:b728e717e892af2b2ca4186365825af42b2f998340facdec2d9ecc2e708d9eaa",
+       "path": "semantics/work_state_continuity_projection.schema.yaml",
+       "ref": "l9.schema/work-state-continuity-projection@1"
+      },
+      "profile_identity": true,
+      "receipt_binds_output": true,
+      "receipt_coverage": "complete",
+      "receipt_input_coordinates": true,
+      "receipt_output_binds_artifact": true,
+      "receipt_result": "pass",
+      "receipt_valid": true,
+      "selection_equivalence": "pass",
+      "source_digest_matches_pin": true,
+      "unresolved": [],
+      "verify_exit": 0,
+      "verify_result": "pass",
+      "verify_unresolved": []
+     }
+    },
+    "compose_exit": 0,
+    "compose_result": "pass",
+    "composition_profile": {
+     "digest": "sha256:37b7a42ab086334ee35ace3eb177370deecca4d1842c653547b0ab030a750cce",
+     "ref": "l9.compose/work-state-continuity@1"
+    },
+    "coordinates": {
+     "authority": {
+      "repository": "Quantum-L9/.github",
+      "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+     },
+     "projection_profile": {
+      "digest": "sha256:053d23787baa62020ec31976a7bd08893c95b4bfbd8558edb677ebc4fba2bb40",
+      "ref": "l9.projection/work-state-continuity@1"
+     },
+     "sources": [
+      {
+       "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+       "ref": "l9.source/invariants@1"
+      },
+      {
+       "digest": "sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79",
+       "ref": "l9.source/contracts@1"
+      },
+      {
+       "digest": "sha256:3a1fea5eed1ee1b43e16f0adabefd8ef5151702ed5b9dc14801d642183b41017",
+       "ref": "l9.source/packet-catalog@1"
+      },
+      {
+       "digest": "sha256:0dc3a305a53cbd6f2f1e0cba440d21cf7b3c6b241285a15be8bdb185babc1c84",
+       "ref": "l9.source/receipt-catalog@1"
+      },
+      {
+       "digest": "sha256:65285d583154cefa1623f9a93061a3413cef2d1dd26349accb80225ce866b1b5",
+       "ref": "l9.source/lifecycle@1"
+      },
+      {
+       "digest": "sha256:d48ad347e3c39c33274017ccca30843b4a11f5339c519cc957aaa057f0440a14",
+       "ref": "l9.source/semantic-dependency-model@1"
+      }
+     ]
+    },
+    "files": {
+     "out/composed/l9.compose_work-state-continuity_1_l9.projection_work-state-continuity_1.composed.json": "sha256:266c148d6e5acaa1e6a6813829891393165efdfe09e8162f263c9859441dbc97",
+     "out/l9.projection_work-state-continuity_1/l9.source_contracts_1.projection.json": "sha256:fe14921b15caabed01d03f32dd206b13d04e1380ecbf3a913fc9b1a60a8281f0",
+     "out/l9.projection_work-state-continuity_1/l9.source_invariants_1.projection.json": "sha256:b0ffb35448faacbd029cc037f3c15fcb1d8c3880e83b348729718f389a640913",
+     "out/l9.projection_work-state-continuity_1/l9.source_lifecycle_1.projection.json": "sha256:842f8b5bf5d65d9117503d52593f003ff997fc0e5b8cdfa16be4cfe5e6062b65",
+     "out/l9.projection_work-state-continuity_1/l9.source_packet-catalog_1.projection.json": "sha256:12cb075ff70f56f979c545243b94872bb79003e23d065903b2cdff947d49a3d5",
+     "out/l9.projection_work-state-continuity_1/l9.source_receipt-catalog_1.projection.json": "sha256:43a883037bfda02b86e2fd3dc276e065b8d6a00b173bef0a4bdb5a04aed20e0b",
+     "out/l9.projection_work-state-continuity_1/l9.source_semantic-dependency-model_1.projection.json": "sha256:0f46b11a73d4fac1f5243c6963dba25dbb8324357c0d48465e5e11d7e497b8ed",
+     "out/receipts/11166c8d090a4b5a4565e4d2ac692663d533df27ca3830ab4ad26dd8e650ff3d.json": "sha256:933cd172c23ae642c231b4156a7519ed2d36d8e4cf7167614ea6514f44f027c4",
+     "out/receipts/1628b8dc39527e818c23f3c436ad5f279a81dbe0a74d271f585fd9bef84765bd.json": "sha256:20beaab617ce69bc7595ba20148e39bd167883c6e60f76fc564cc1e4e31e4f5b",
+     "out/receipts/86390fa7ce2f7847a2cee3e87704a19c6c3065c75bef152dcb69cbb48b0a04cb.json": "sha256:76c3f4f454370b817737df393570b563ae811234050727bdd9e4f7ce49f21512",
+     "out/receipts/d07ce7a49d3c4c5fd60b62f88400c581461bdae3fb6c4e6c8e2872f40776051a.json": "sha256:6fcff7c3ac984e89e4e257a910c0423c2d46cb5e6cdf6f283a94679cba8b6e54",
+     "out/receipts/d4b6ae8aa22b18a45313c72033ce90542324a54243d889b352a1bf978fde8257.json": "sha256:6f28b83cb67780fd0e2c10c93b3aab0d99ce611dc6887884fa2364755a43eae5",
+     "out/receipts/f45c674cbc531bfb5d9d976f8cea95ad1decf02ad0ba2b88e8bf675b6a313b24.json": "sha256:b1249b1b1f7d793c6101d8656d9593a61d73e342935c51f9a8111bffee203cd7",
+     "out/receipts/f815932a8ca0d22ac980d35c7f9a4a51938d52e91f992f92abe8df4b0fec568c.json": "sha256:53c4fb39fef8680e09fbeb8208728e1248498eca1c8556f63783ed8a8498243e"
+    },
+    "profile": "l9.projection/work-state-continuity@1",
+    "project_exit": 0,
+    "project_result": "pass"
+   },
+   "positive_pass": true
+  }
+ },
+ "semantics_tree": "7c6f35ddc701e6913c78054745e1e2179775299f"
+}

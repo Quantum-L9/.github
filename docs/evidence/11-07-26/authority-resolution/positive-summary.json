@@ -1,0 +1,1763 @@
+{
+  "commits_expected": {
+    "authority": "290bcd90378577392640cea9c6053c178423f0da",
+    "compiler": "943db9a462d35ba66771a700ece77c746295f591",
+    "consumer": "8e4b352a0849ad6b04cda61ea9aa41f6fb1523a2"
+  },
+  "comparison": {
+    "all_exact_bytes_equal": true,
+    "file_results": {
+      "bundle.lock.json": {
+        "exact_bytes_equal": true,
+        "run1_sha256": "sha256:ee76a5b2c2cd8939e0b13b997a449235de624cb7181c08d7cbc7998b867c1dd1",
+        "run2_sha256": "sha256:ee76a5b2c2cd8939e0b13b997a449235de624cb7181c08d7cbc7998b867c1dd1"
+      },
+      "composed.json": {
+        "exact_bytes_equal": true,
+        "run1_sha256": "sha256:9db874855d34d553deae2f2eb0ca89cdc9a832438743bd92b30010209dd59248",
+        "run2_sha256": "sha256:9db874855d34d553deae2f2eb0ca89cdc9a832438743bd92b30010209dd59248"
+      },
+      "projections/artifact_model.projection.json": {
+        "exact_bytes_equal": true,
+        "run1_sha256": "sha256:2301667565e40d3fdb8b10bd9ed8bbee892ea626fa839baa01f9542522b89777",
+        "run2_sha256": "sha256:2301667565e40d3fdb8b10bd9ed8bbee892ea626fa839baa01f9542522b89777"
+      },
+      "projections/authority_model.projection.json": {
+        "exact_bytes_equal": true,
+        "run1_sha256": "sha256:f6a365c2c25315efd17ea8c83c4999c28d862e35a417d3dc6c78494d6ccac53e",
+        "run2_sha256": "sha256:f6a365c2c25315efd17ea8c83c4999c28d862e35a417d3dc6c78494d6ccac53e"
+      },
+      "projections/contracts.projection.json": {
+        "exact_bytes_equal": true,
+        "run1_sha256": "sha256:2085a069ce2b0a11d51d9d556034ce38d308500fe877f7180f2eb9ea24b15e87",
+        "run2_sha256": "sha256:2085a069ce2b0a11d51d9d556034ce38d308500fe877f7180f2eb9ea24b15e87"
+      },
+      "projections/invariants.projection.json": {
+        "exact_bytes_equal": true,
+        "run1_sha256": "sha256:e59d21a945334a416e34e9e9a789e2af7fef1afa92785e2d1eeebaf6b096489d",
+        "run2_sha256": "sha256:e59d21a945334a416e34e9e9a789e2af7fef1afa92785e2d1eeebaf6b096489d"
+      },
+      "receipts/artifact_model.receipt.json": {
+        "exact_bytes_equal": true,
+        "run1_sha256": "sha256:87d79dfce9bf189162cff50964587b4b5efccf373d8f06a6d8730a2f8c2ee404",
+        "run2_sha256": "sha256:87d79dfce9bf189162cff50964587b4b5efccf373d8f06a6d8730a2f8c2ee404"
+      },
+      "receipts/authority_model.receipt.json": {
+        "exact_bytes_equal": true,
+        "run1_sha256": "sha256:d69f52e34137ddba9912f78593a7f81e6cc0fce3de0eeda0615466810f59d908",
+        "run2_sha256": "sha256:d69f52e34137ddba9912f78593a7f81e6cc0fce3de0eeda0615466810f59d908"
+      },
+      "receipts/composed.receipt.json": {
+        "exact_bytes_equal": true,
+        "run1_sha256": "sha256:4c58c69deed7d19ec0a0bc415ab6c58fde8e8cfe4e34c571f332033f5b1aec5a",
+        "run2_sha256": "sha256:4c58c69deed7d19ec0a0bc415ab6c58fde8e8cfe4e34c571f332033f5b1aec5a"
+      },
+      "receipts/contracts.receipt.json": {
+        "exact_bytes_equal": true,
+        "run1_sha256": "sha256:516b155ab74b5290aace1eac8cd898c5a807111702131ff234460a6cb414f1e8",
+        "run2_sha256": "sha256:516b155ab74b5290aace1eac8cd898c5a807111702131ff234460a6cb414f1e8"
+      },
+      "receipts/invariants.receipt.json": {
+        "exact_bytes_equal": true,
+        "run1_sha256": "sha256:c9b01e18a9abad7cb92124300ebe480d2d7574d57516d26f87d401f176a7a395",
+        "run2_sha256": "sha256:c9b01e18a9abad7cb92124300ebe480d2d7574d57516d26f87d401f176a7a395"
+      }
+    },
+    "inventory_equal": true,
+    "run1_inventory": [
+      "bundle.lock.json",
+      "composed.json",
+      "projections/artifact_model.projection.json",
+      "projections/authority_model.projection.json",
+      "projections/contracts.projection.json",
+      "projections/invariants.projection.json",
+      "receipts/artifact_model.receipt.json",
+      "receipts/authority_model.receipt.json",
+      "receipts/composed.receipt.json",
+      "receipts/contracts.receipt.json",
+      "receipts/invariants.receipt.json"
+    ],
+    "run2_inventory": [
+      "bundle.lock.json",
+      "composed.json",
+      "projections/artifact_model.projection.json",
+      "projections/authority_model.projection.json",
+      "projections/contracts.projection.json",
+      "projections/invariants.projection.json",
+      "receipts/artifact_model.receipt.json",
+      "receipts/authority_model.receipt.json",
+      "receipts/composed.receipt.json",
+      "receipts/contracts.receipt.json",
+      "receipts/invariants.receipt.json"
+    ]
+  },
+  "declared": {
+    "composition_profile": {
+      "digest": "sha256:d7d5a565b94588c8acf70c737d1a24e61967f183a96f3af2e89e1a2b4f78f34b",
+      "ref": "l9.compose/authority-resolution@1"
+    },
+    "projection_profile": {
+      "digest": "sha256:7cfc37826814a450ceb9cd50fb75d55ed09520c72015eba01e9a7ca9f53d32ea",
+      "ref": "l9.projection/authority-resolution@1"
+    },
+    "source_classes": [
+      "invariants",
+      "contracts",
+      "authority_model",
+      "artifact_model"
+    ],
+    "source_refs": [
+      "l9.source/invariants@1",
+      "l9.source/contracts@1",
+      "l9.source/authority-model@1",
+      "l9.source/artifact-model@1"
+    ],
+    "sources": [
+      {
+        "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+        "path": "semantics/invariants.yaml",
+        "ref": "l9.source/invariants@1"
+      },
+      {
+        "digest": "sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79",
+        "path": "semantics/contracts.yaml",
+        "ref": "l9.source/contracts@1"
+      },
+      {
+        "digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+        "path": "semantics/authority_model.yaml",
+        "ref": "l9.source/authority-model@1"
+      },
+      {
+        "digest": "sha256:21f8bb783d7611ae1b3c60474c6ca31f6096f29d7ef0e94ef81f12e6d2defe09",
+        "path": "semantics/artifact_model.yaml",
+        "ref": "l9.source/artifact-model@1"
+      }
+    ]
+  },
+  "errors": [],
+  "execution_constraint_deviation": {
+    "explanation": "The terminal tool automatically saved three truncated output transcripts outside the requested directory. These platform-generated files were not written by the harness or producer and were not removed because the instruction forbids altering locations outside the output directory.",
+    "platform_generated_transcripts": [
+      "/home/ubuntu/terminal_full_output/2026-11-07_16-59-39_658676_412.txt",
+      "/home/ubuntu/terminal_full_output/2026-11-07_17-00-29_665141_412.txt",
+      "/home/ubuntu/terminal_full_output/2026-11-07_17-01-07_888233_412.txt"
+    ],
+    "requested_writes_confined_to_output": false
+  },
+  "installed_package_comparison": {
+    "difference_count": 0,
+    "differences": [],
+    "driver_sha256": "sha256:4468bf70bf4fa8188ac740fffa8cfd36f13156bca24869393fd16f6fa89a7515",
+    "excludes": [
+      "__pycache__",
+      "*.pyc",
+      "*.pyo"
+    ],
+    "installed_file_count": 45,
+    "launcher_sha256": "sha256:1421c5484014a96d63cbea5ac4d009594b93054b2936c60b5d7afa0f120d019e",
+    "source_commit_blob_mismatches": [],
+    "source_file_count": 45,
+    "source_files_sha256": {
+      "__init__.py": "sha256:eaa7da69ef9ed8d7aa15b0ecf559ce60d72bf7b0c076959ccaef305d176b947d",
+      "__main__.py": "sha256:935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+      "cli.py": "sha256:d6f5e9beba34a27a718e702d54725cdabe781217f480549a5a271361e21dcf87",
+      "compiler.py": "sha256:1dfc4342ddd929acdc6af7740525473865153145b6edce569ace7d364cbd6982",
+      "engine/__init__.py": "sha256:d364a44a759cfe3d2b767f94b47a7445c5d61c867725012cd0c4986b5c8ae919",
+      "engine/canonical.py": "sha256:245070aaf9cccf7e4212b8b09865b7fe30ef8282f52dd8bbcb5442dd76422425",
+      "engine/compiler.py": "sha256:cd72cdfa3d32efcc648622d1234f23ca7856a581bfa5379bb162d7f94908c209",
+      "engine/errors.py": "sha256:294ae75ede637ba4b597ac8234445c2e5ef344a2cd114e953c862733b8198b1c",
+      "engine/failures.py": "sha256:074140f7da9eca2e65fe5b944fd857f0731434f5d3d26dbecb9b9471542d6f49",
+      "engine/incremental.py": "sha256:8d69fcf6d9bc39c29479141191dbecdfccfb8a8ec2dbfd2c4ab697727bfeb010",
+      "engine/loader.py": "sha256:0002c5a2e2886d1aae78f046907198db115a277555d5651a8838dc1c449cc940",
+      "engine/models.py": "sha256:16a5956bbe72544b35e6c75c3677ec78299bc821e861b5577f9754e2da90d88f",
+      "engine/owned_regions.py": "sha256:96eb1965f087f1fafcaa541b02706c2b88c61789a369673dde9e1012eeeeff64",
+      "engine/receipts.py": "sha256:a75b6458302acf8ce937dd6cf664f220be667810508ba2dbf46e08346009ce83",
+      "engine/registry.py": "sha256:84b52ca9fd65486f6154826bd533f463d7d9a42cf394c8b2d1b0c79fe0a632fc",
+      "engine/selectors.py": "sha256:648042603b10bf8bf33cc51e7b0ea7015278dd2d048247f975f00aa2382706af",
+      "engine/stages.py": "sha256:43d00c26b9aac0381456b501cc68afb2af8c10473b946703742abe3f3b748e53",
+      "ir/__init__.py": "sha256:d364a44a759cfe3d2b767f94b47a7445c5d61c867725012cd0c4986b5c8ae919",
+      "ir/dependency.py": "sha256:6248b4ec1f5625fbba8e254873ba8afab9982903d147fd14ec120b7f73a24488",
+      "ir/models.py": "sha256:268ff5d5d757bcf9b3e1acc2269b0b66a2e90b125f7998290ab27f6309f83089",
+      "passes/__init__.py": "sha256:d364a44a759cfe3d2b767f94b47a7445c5d61c867725012cd0c4986b5c8ae919",
+      "passes/bind.py": "sha256:96e953f8490d29d822e7b2837c1709bb9629a43b7ea6019b45c4e7f44af2f373",
+      "passes/common.py": "sha256:81134a47d10229bfcf2963bd7b843c8fad0fa3003dedaf617bb0116f78e28e75",
+      "passes/dependency.py": "sha256:2facd8dfd43fb4c95566317b6d7ae769aefca9bf4256d1430c14c517c22aea73",
+      "passes/equivalence.py": "sha256:72633fdd586090580ceed4b76a61cd507c93118dd130874b02d0c720a383024b",
+      "passes/expand.py": "sha256:c2efc1eb0d4591c5de3333f74917d4dea8bd0ea4cec7840b07c93007282eaa7d",
+      "passes/lower.py": "sha256:35c602fdd69a480c4de203fef9647d57c80f7e7a2913d857bd43eba1b25b79fb",
+      "passes/normalize.py": "sha256:deb7c60b7a80571e17f04c6f5c2b5feebb5ed00cf142f4e78a6807615981f1ed",
+      "passes/observe.py": "sha256:25c2442bf320ed7026f2512b939cf39492645e9b704985ecffbde12e31dc32fa",
+      "passes/parse.py": "sha256:b0cb6ef4d9e8f15861ec0bb2324eaf58e16bd8bce4580f45b429772a65972533",
+      "passes/plan.py": "sha256:408e758af35f76ed86fc70516000a50e124b74df7b0608e495b33eff232a20e9",
+      "passes/projection.py": "sha256:fb1d77fb63f7a981906ac4b2ab48a5b45d1abbe4f6fbf491f7c9fd4bffa1015c",
+      "passes/reference.py": "sha256:b11f8cd15fdc1aac0f8653b62a34098bf83d2146ad2ea5435a62c0b44989c4a9",
+      "passes/render.py": "sha256:9f38e99c627c82bc921440aea004456913901d8f345449efa70917375801a2da",
+      "passes/resolve.py": "sha256:4a72705084df030d4d1ba61436e3daf7ae07595be26736fcf5b8b1277aadb53e",
+      "passes/semantic_ir.py": "sha256:6ebca250259f5ddb0b5d4c93b055f74832ed4a0b37253bdeeb68b114d0d44401",
+      "passes/structural.py": "sha256:1dfed4943044237e739fdf4c2139fffa620a20b5f9c8aff4c7a3d9072a86080f",
+      "passes/typecheck.py": "sha256:bef36628953edf857a9aa744ca4f4f440c78ba163e396943d0edc00e48a0e124",
+      "passes/validate.py": "sha256:41f28d75767c688da2f6be6500c4a889e0587e1f7127404ac4c12e0cd6041185",
+      "product/__init__.py": "sha256:d364a44a759cfe3d2b767f94b47a7445c5d61c867725012cd0c4986b5c8ae919",
+      "product/compiler.py": "sha256:72cb30a50a99758a95976a64c357387d8f2870006aae2b72ec9a094ad8d9c30d",
+      "resources/__init__.py": "sha256:d364a44a759cfe3d2b767f94b47a7445c5d61c867725012cd0c4986b5c8ae919",
+      "resources/bindings.yaml": "sha256:3dd7bb122365488368eb666f521cbf55145b10f8a2c38ee0503bb0f596d6039c",
+      "selfhost/__init__.py": "sha256:d364a44a759cfe3d2b767f94b47a7445c5d61c867725012cd0c4986b5c8ae919",
+      "selfhost/reconcile.py": "sha256:9533cfe75d8f938fbf2287987a63291d61afe3b079e0572f1b74fd157d30a48d"
+    }
+  },
+  "not_proven": [
+    "independent consumer replay",
+    "release admission",
+    "trusted replay",
+    "string_list minima"
+  ],
+  "post_production_integrity": {
+    "all_post_checks_pass": true,
+    "bytecode_check_evidence": "bytecode-check.json",
+    "compiler_bytecode_caches_checked": 44,
+    "consumer_driver_bytecode_cache_present": false,
+    "installed_bytecode_cache_matches_source": true,
+    "repositories": {
+      "authority": {
+        "expected_revision": "290bcd90378577392640cea9c6053c178423f0da",
+        "head": "290bcd90378577392640cea9c6053c178423f0da",
+        "head_matches": true,
+        "porcelain": "",
+        "worktree_clean": true
+      },
+      "compiler": {
+        "expected_revision": "943db9a462d35ba66771a700ece77c746295f591",
+        "head": "943db9a462d35ba66771a700ece77c746295f591",
+        "head_matches": true,
+        "porcelain": "",
+        "worktree_clean": true
+      },
+      "consumer": {
+        "expected_revision": "8e4b352a0849ad6b04cda61ea9aa41f6fb1523a2",
+        "head": "8e4b352a0849ad6b04cda61ea9aa41f6fb1523a2",
+        "head_matches": true,
+        "porcelain": "",
+        "worktree_clean": true
+      }
+    },
+    "runs": {
+      "run1": {
+        "compiler_command_exit_codes_all_zero": true,
+        "compiler_commands": [
+          {
+            "result": null,
+            "returncode": 0,
+            "stderr_empty": true,
+            "subcommand": "projection-coordinates"
+          },
+          {
+            "result": "pass",
+            "returncode": 0,
+            "stderr_empty": true,
+            "subcommand": "project"
+          },
+          {
+            "result": "pass",
+            "returncode": 0,
+            "stderr_empty": true,
+            "subcommand": "compose"
+          }
+        ],
+        "project_and_compose_return_pass": true,
+        "receipt_additional_checks": {
+          "artifact_model": {
+            "all_reported_criteria_pass_or_not_applicable": true,
+            "diagnostics_empty": true,
+            "payload_schema_coordinate_exact": true
+          },
+          "authority_model": {
+            "all_reported_criteria_pass_or_not_applicable": true,
+            "diagnostics_empty": true,
+            "payload_schema_coordinate_exact": true
+          },
+          "composed": {
+            "all_reported_criteria_pass_or_not_applicable": true,
+            "diagnostics_empty": true,
+            "payload_schema_coordinate_exact": true
+          },
+          "contracts": {
+            "all_reported_criteria_pass_or_not_applicable": true,
+            "diagnostics_empty": true,
+            "payload_schema_coordinate_exact": true
+          },
+          "invariants": {
+            "all_reported_criteria_pass_or_not_applicable": true,
+            "diagnostics_empty": true,
+            "payload_schema_coordinate_exact": true
+          }
+        },
+        "stderr_all_empty": true
+      },
+      "run2": {
+        "compiler_command_exit_codes_all_zero": true,
+        "compiler_commands": [
+          {
+            "result": null,
+            "returncode": 0,
+            "stderr_empty": true,
+            "subcommand": "projection-coordinates"
+          },
+          {
+            "result": "pass",
+            "returncode": 0,
+            "stderr_empty": true,
+            "subcommand": "project"
+          },
+          {
+            "result": "pass",
+            "returncode": 0,
+            "stderr_empty": true,
+            "subcommand": "compose"
+          }
+        ],
+        "project_and_compose_return_pass": true,
+        "receipt_additional_checks": {
+          "artifact_model": {
+            "all_reported_criteria_pass_or_not_applicable": true,
+            "diagnostics_empty": true,
+            "payload_schema_coordinate_exact": true
+          },
+          "authority_model": {
+            "all_reported_criteria_pass_or_not_applicable": true,
+            "diagnostics_empty": true,
+            "payload_schema_coordinate_exact": true
+          },
+          "composed": {
+            "all_reported_criteria_pass_or_not_applicable": true,
+            "diagnostics_empty": true,
+            "payload_schema_coordinate_exact": true
+          },
+          "contracts": {
+            "all_reported_criteria_pass_or_not_applicable": true,
+            "diagnostics_empty": true,
+            "payload_schema_coordinate_exact": true
+          },
+          "invariants": {
+            "all_reported_criteria_pass_or_not_applicable": true,
+            "diagnostics_empty": true,
+            "payload_schema_coordinate_exact": true
+          }
+        },
+        "stderr_all_empty": true
+      }
+    }
+  },
+  "preflight": {
+    "authority_head": {
+      "expected": "290bcd90378577392640cea9c6053c178423f0da",
+      "observed": "290bcd90378577392640cea9c6053c178423f0da",
+      "passed": true
+    },
+    "authority_worktree_clean": {
+      "expected": "",
+      "observed": "",
+      "passed": true
+    },
+    "compiler_executable_shebang": {
+      "observed": "#!/tmp/l9-projection-qa.nBKv8FWo/venv/bin/python",
+      "passed": true
+    },
+    "compiler_head": {
+      "expected": "943db9a462d35ba66771a700ece77c746295f591",
+      "observed": "943db9a462d35ba66771a700ece77c746295f591",
+      "passed": true
+    },
+    "compiler_worktree_clean": {
+      "expected": "",
+      "observed": "",
+      "passed": true
+    },
+    "composition_profile_target_and_strategy": {
+      "passed": true
+    },
+    "consumer_head": {
+      "expected": "8e4b352a0849ad6b04cda61ea9aa41f6fb1523a2",
+      "observed": "8e4b352a0849ad6b04cda61ea9aa41f6fb1523a2",
+      "passed": true
+    },
+    "consumer_worktree_clean": {
+      "expected": "",
+      "observed": "",
+      "passed": true
+    },
+    "driver_exact_commit_bytes": {
+      "passed": true
+    },
+    "exact_declared_source_classes_order": {
+      "expected": [
+        "invariants",
+        "contracts",
+        "authority_model",
+        "artifact_model"
+      ],
+      "observed": [
+        "invariants",
+        "contracts",
+        "authority_model",
+        "artifact_model"
+      ],
+      "passed": true
+    },
+    "exact_declared_source_refs_order": {
+      "expected": [
+        "l9.source/invariants@1",
+        "l9.source/contracts@1",
+        "l9.source/authority-model@1",
+        "l9.source/artifact-model@1"
+      ],
+      "observed": [
+        "l9.source/invariants@1",
+        "l9.source/contracts@1",
+        "l9.source/authority-model@1",
+        "l9.source/artifact-model@1"
+      ],
+      "passed": true
+    },
+    "installed_package_actually_imported": {
+      "observed": "/tmp/l9-projection-qa.nBKv8FWo/venv/lib/python3.12/site-packages/l9_semantic_compiler/__init__.py",
+      "passed": true
+    },
+    "installed_package_exact_source_bytes": {
+      "observed": [],
+      "passed": true
+    },
+    "profile_declarations_unique": {
+      "passed": true
+    },
+    "source_package_matches_pinned_commit": {
+      "observed": [],
+      "passed": true
+    }
+  },
+  "python": {
+    "executable": "/tmp/l9-projection-qa.nBKv8FWo/venv/bin/python",
+    "launcher_shebang": "#!/tmp/l9-projection-qa.nBKv8FWo/venv/bin/python",
+    "package_import": "/tmp/l9-projection-qa.nBKv8FWo/venv/lib/python3.12/site-packages/l9_semantic_compiler/__init__.py",
+    "version": "0.9.3"
+  },
+  "roots": {
+    "authority": "/home/ubuntu/l9-projection-campaign/code-pr",
+    "compiler_checkout": "/tmp/l9-projection-qa.nBKv8FWo/compiler",
+    "compiler_executable": "/tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler",
+    "consumer_checkout": "/tmp/l9-projection-qa.nBKv8FWo/consumer",
+    "installed_package": "/tmp/l9-projection-qa.nBKv8FWo/venv/lib/python3.12/site-packages/l9_semantic_compiler",
+    "output": "/home/ubuntu/l9-projection-campaign/authority-schema-run/positive"
+  },
+  "runs": {
+    "run1": {
+      "assemble_entered": true,
+      "assemble_return_event_seen": true,
+      "assemble_returned": true,
+      "checks": {
+        "artifact_model.compiler_receipt_schema": {
+          "observed": [],
+          "passed": true
+        },
+        "artifact_model.genuine_receipt_reconstruction_exact": {
+          "passed": true
+        },
+        "artifact_model.genuine_receipt_validator": {
+          "passed": true
+        },
+        "artifact_model.governing_coordinates_exact": {
+          "passed": true
+        },
+        "artifact_model.lock_component_exact": {
+          "passed": true
+        },
+        "artifact_model.producer_identity": {
+          "passed": true
+        },
+        "artifact_model.projection_coordinates_and_generated_by": {
+          "passed": true
+        },
+        "artifact_model.projection_digest_independent": {
+          "passed": true
+        },
+        "artifact_model.projection_payload_schema_genuine_interpreter": {
+          "observed": [],
+          "passed": true
+        },
+        "artifact_model.receipt_delivered_bytes": {
+          "passed": true
+        },
+        "artifact_model.receipt_digest_independent": {
+          "passed": true
+        },
+        "artifact_model.receipt_identity_independent": {
+          "passed": true
+        },
+        "artifact_model.receipt_result_criteria_unresolved": {
+          "observed": {
+            "criteria": {
+              "payload_schema": {
+                "schema": "l9.projection.authority-resolution/v1",
+                "schema_artifact": {
+                  "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                  "path": "semantics/authority_resolution_projection.schema.yaml",
+                  "ref": "l9.schema/authority-resolution-projection@1"
+                },
+                "status": "pass"
+              },
+              "selection_equivalence": {
+                "selectors": 1,
+                "status": "pass"
+              }
+            },
+            "result": "pass",
+            "unresolved_criteria": []
+          },
+          "passed": true
+        },
+        "artifact_model.receipt_subject_inputs_profile_output": {
+          "passed": true
+        },
+        "authority_model.compiler_receipt_schema": {
+          "observed": [],
+          "passed": true
+        },
+        "authority_model.genuine_receipt_reconstruction_exact": {
+          "passed": true
+        },
+        "authority_model.genuine_receipt_validator": {
+          "passed": true
+        },
+        "authority_model.governing_coordinates_exact": {
+          "passed": true
+        },
+        "authority_model.lock_component_exact": {
+          "passed": true
+        },
+        "authority_model.producer_identity": {
+          "passed": true
+        },
+        "authority_model.projection_coordinates_and_generated_by": {
+          "passed": true
+        },
+        "authority_model.projection_digest_independent": {
+          "passed": true
+        },
+        "authority_model.projection_payload_schema_genuine_interpreter": {
+          "observed": [],
+          "passed": true
+        },
+        "authority_model.receipt_delivered_bytes": {
+          "passed": true
+        },
+        "authority_model.receipt_digest_independent": {
+          "passed": true
+        },
+        "authority_model.receipt_identity_independent": {
+          "passed": true
+        },
+        "authority_model.receipt_result_criteria_unresolved": {
+          "observed": {
+            "criteria": {
+              "payload_schema": {
+                "schema": "l9.projection.authority-resolution/v1",
+                "schema_artifact": {
+                  "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                  "path": "semantics/authority_resolution_projection.schema.yaml",
+                  "ref": "l9.schema/authority-resolution-projection@1"
+                },
+                "status": "pass"
+              },
+              "selection_equivalence": {
+                "selectors": 6,
+                "status": "pass"
+              }
+            },
+            "result": "pass",
+            "unresolved_criteria": []
+          },
+          "passed": true
+        },
+        "authority_model.receipt_subject_inputs_profile_output": {
+          "passed": true
+        },
+        "bundle_unchanged_since_original_production": {
+          "passed": true
+        },
+        "captured_command_streams_unchanged": {
+          "passed": true
+        },
+        "complete_exact_11_file_inventory": {
+          "expected": [
+            "bundle.lock.json",
+            "composed.json",
+            "projections/artifact_model.projection.json",
+            "projections/authority_model.projection.json",
+            "projections/contracts.projection.json",
+            "projections/invariants.projection.json",
+            "receipts/artifact_model.receipt.json",
+            "receipts/authority_model.receipt.json",
+            "receipts/composed.receipt.json",
+            "receipts/contracts.receipt.json",
+            "receipts/invariants.receipt.json"
+          ],
+          "observed": [
+            "bundle.lock.json",
+            "composed.json",
+            "projections/artifact_model.projection.json",
+            "projections/authority_model.projection.json",
+            "projections/contracts.projection.json",
+            "projections/invariants.projection.json",
+            "receipts/artifact_model.receipt.json",
+            "receipts/authority_model.receipt.json",
+            "receipts/composed.receipt.json",
+            "receipts/contracts.receipt.json",
+            "receipts/invariants.receipt.json"
+          ],
+          "passed": true
+        },
+        "composed.compiler_receipt_schema": {
+          "observed": [],
+          "passed": true
+        },
+        "composed.genuine_receipt_reconstruction_exact": {
+          "passed": true
+        },
+        "composed.genuine_receipt_validator": {
+          "passed": true
+        },
+        "composed.governing_coordinates_exact": {
+          "passed": true
+        },
+        "composed.producer_identity": {
+          "passed": true
+        },
+        "composed.receipt_delivered_bytes": {
+          "passed": true
+        },
+        "composed.receipt_digest_independent": {
+          "passed": true
+        },
+        "composed.receipt_identity_independent": {
+          "passed": true
+        },
+        "composed.receipt_result_criteria_unresolved": {
+          "observed": {
+            "criteria": {
+              "composition_equivalence": {
+                "status": "pass"
+              },
+              "payload_schema": {
+                "schema": "l9.composed-projection.authority-resolution/v1",
+                "schema_artifact": {
+                  "digest": "sha256:3275c32fac5ed06c331dac18f153633069719c06bc318d817ec966521f4eaad1",
+                  "path": "semantics/authority_resolution_composition.schema.yaml",
+                  "ref": "l9.schema/authority-resolution-composition@1"
+                },
+                "status": "pass"
+              }
+            },
+            "result": "pass",
+            "unresolved_criteria": []
+          },
+          "passed": true
+        },
+        "composed.receipt_subject_inputs_profile_output": {
+          "passed": true
+        },
+        "composition_component_coordinates_exact": {
+          "passed": true
+        },
+        "composition_declared_class_and_ref_order": {
+          "passed": true
+        },
+        "composition_envelope_digest_independent": {
+          "passed": true
+        },
+        "composition_namespace_exact_payloads": {
+          "passed": true
+        },
+        "composition_payload_schema_genuine_interpreter": {
+          "observed": [],
+          "passed": true
+        },
+        "contracts.compiler_receipt_schema": {
+          "observed": [],
+          "passed": true
+        },
+        "contracts.genuine_receipt_reconstruction_exact": {
+          "passed": true
+        },
+        "contracts.genuine_receipt_validator": {
+          "passed": true
+        },
+        "contracts.governing_coordinates_exact": {
+          "passed": true
+        },
+        "contracts.lock_component_exact": {
+          "passed": true
+        },
+        "contracts.producer_identity": {
+          "passed": true
+        },
+        "contracts.projection_coordinates_and_generated_by": {
+          "passed": true
+        },
+        "contracts.projection_digest_independent": {
+          "passed": true
+        },
+        "contracts.projection_payload_schema_genuine_interpreter": {
+          "observed": [],
+          "passed": true
+        },
+        "contracts.receipt_delivered_bytes": {
+          "passed": true
+        },
+        "contracts.receipt_digest_independent": {
+          "passed": true
+        },
+        "contracts.receipt_identity_independent": {
+          "passed": true
+        },
+        "contracts.receipt_result_criteria_unresolved": {
+          "observed": {
+            "criteria": {
+              "payload_schema": {
+                "schema": "l9.projection.authority-resolution/v1",
+                "schema_artifact": {
+                  "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                  "path": "semantics/authority_resolution_projection.schema.yaml",
+                  "ref": "l9.schema/authority-resolution-projection@1"
+                },
+                "status": "pass"
+              },
+              "selection_equivalence": {
+                "selectors": 4,
+                "status": "pass"
+              }
+            },
+            "result": "pass",
+            "unresolved_criteria": []
+          },
+          "passed": true
+        },
+        "contracts.receipt_subject_inputs_profile_output": {
+          "passed": true
+        },
+        "exact_direct_compiler_command_sequence": {
+          "expected": [
+            "projection-coordinates",
+            "project",
+            "compose"
+          ],
+          "observed": [
+            "projection-coordinates",
+            "project",
+            "compose"
+          ],
+          "passed": true
+        },
+        "invariants.compiler_receipt_schema": {
+          "observed": [],
+          "passed": true
+        },
+        "invariants.genuine_receipt_reconstruction_exact": {
+          "passed": true
+        },
+        "invariants.genuine_receipt_validator": {
+          "passed": true
+        },
+        "invariants.governing_coordinates_exact": {
+          "passed": true
+        },
+        "invariants.lock_component_exact": {
+          "passed": true
+        },
+        "invariants.producer_identity": {
+          "passed": true
+        },
+        "invariants.projection_coordinates_and_generated_by": {
+          "passed": true
+        },
+        "invariants.projection_digest_independent": {
+          "passed": true
+        },
+        "invariants.projection_payload_schema_genuine_interpreter": {
+          "observed": [],
+          "passed": true
+        },
+        "invariants.receipt_delivered_bytes": {
+          "passed": true
+        },
+        "invariants.receipt_digest_independent": {
+          "passed": true
+        },
+        "invariants.receipt_identity_independent": {
+          "passed": true
+        },
+        "invariants.receipt_result_criteria_unresolved": {
+          "observed": {
+            "criteria": {
+              "payload_schema": {
+                "schema": "l9.projection.authority-resolution/v1",
+                "schema_artifact": {
+                  "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                  "path": "semantics/authority_resolution_projection.schema.yaml",
+                  "ref": "l9.schema/authority-resolution-projection@1"
+                },
+                "status": "pass"
+              },
+              "selection_equivalence": {
+                "selectors": 12,
+                "status": "pass"
+              }
+            },
+            "result": "pass",
+            "unresolved_criteria": []
+          },
+          "passed": true
+        },
+        "invariants.receipt_subject_inputs_profile_output": {
+          "passed": true
+        },
+        "lock_composed_file_binding": {
+          "passed": true
+        },
+        "lock_declared_class_and_ref_order": {
+          "passed": true
+        },
+        "lock_identity_authority_producer": {
+          "observed": {
+            "authority": {
+              "repository": "Quantum-L9/.github",
+              "revision": "290bcd90378577392640cea9c6053c178423f0da"
+            },
+            "producer": {
+              "compiler": "l9-semantic-compiler",
+              "repository": "Quantum-L9/l9-semantic-compiler-engine",
+              "revision": "943db9a462d35ba66771a700ece77c746295f591",
+              "revision_basis": "caller_asserted",
+              "version": "0.9.3"
+            }
+          },
+          "passed": true
+        },
+        "observer_no_errors": {
+          "observed": [],
+          "passed": true
+        },
+        "produce_returned_normally": {
+          "passed": true
+        },
+        "profile_refs_and_independent_digests": {
+          "passed": true
+        },
+        "unchanged_assemble_completed": {
+          "passed": true
+        }
+      },
+      "commands": [
+        {
+          "argv": [
+            "git",
+            "-C",
+            "/home/ubuntu/l9-projection-campaign/code-pr",
+            "rev-parse",
+            "HEAD"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run1/01.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run1/01.stdout.txt",
+          "stdout_sha256": "sha256:424bf13c24044d563ea22f978e26d4f8c64f6e7787a33974421c34d9b23c9fa2"
+        },
+        {
+          "argv": [
+            "git",
+            "-C",
+            "/home/ubuntu/l9-projection-campaign/code-pr",
+            "show",
+            "290bcd90378577392640cea9c6053c178423f0da:semantics/projection_profiles.yaml"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run1/02.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run1/02.stdout.txt",
+          "stdout_sha256": "sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd"
+        },
+        {
+          "argv": [
+            "git",
+            "-C",
+            "/home/ubuntu/l9-projection-campaign/code-pr",
+            "show",
+            "290bcd90378577392640cea9c6053c178423f0da:semantics/canonical_sources.yaml"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run1/03.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run1/03.stdout.txt",
+          "stdout_sha256": "sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b"
+        },
+        {
+          "argv": [
+            "/tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler",
+            "projection-coordinates",
+            "--authority-root",
+            "/home/ubuntu/l9-projection-campaign/code-pr",
+            "--revision",
+            "290bcd90378577392640cea9c6053c178423f0da",
+            "--repository",
+            "Quantum-L9/.github",
+            "--profile",
+            "l9.projection/authority-resolution@1"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run1/04.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run1/04.stdout.txt",
+          "stdout_sha256": "sha256:6a61420e86e14001ef0817b4f4d3b0a1d3bca055d68ce286000cb74bd70f2ce4"
+        },
+        {
+          "argv": [
+            "/tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler",
+            "project",
+            "/home/ubuntu/l9-projection-campaign/authority-schema-run/positive/tmp/tmp5vqoddtu/project.yaml"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run1/05.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run1/05.stdout.txt",
+          "stdout_sha256": "sha256:542fd6157ba0bc73c1441555826da41a94ad29e9c713564975c21089298e79d2"
+        },
+        {
+          "argv": [
+            "git",
+            "-C",
+            "/home/ubuntu/l9-projection-campaign/code-pr",
+            "show",
+            "290bcd90378577392640cea9c6053c178423f0da:semantics/composition_profiles.yaml"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run1/06.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run1/06.stdout.txt",
+          "stdout_sha256": "sha256:0bb8d91822f5315b87b30e88619539d1da36e5bf6810b08b392f0ff69eb4e807"
+        },
+        {
+          "argv": [
+            "/tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler",
+            "compose",
+            "/home/ubuntu/l9-projection-campaign/authority-schema-run/positive/tmp/tmp5vqoddtu/compose.yaml"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run1/07.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run1/07.stdout.txt",
+          "stdout_sha256": "sha256:4956e14db3ce275a66026225594dae00d4c10a1477bf17f7f7bd13fbf43290b8"
+        }
+      ],
+      "exception": null,
+      "file_inventory_sha256": {
+        "bundle.lock.json": "sha256:ee76a5b2c2cd8939e0b13b997a449235de624cb7181c08d7cbc7998b867c1dd1",
+        "composed.json": "sha256:9db874855d34d553deae2f2eb0ca89cdc9a832438743bd92b30010209dd59248",
+        "projections/artifact_model.projection.json": "sha256:2301667565e40d3fdb8b10bd9ed8bbee892ea626fa839baa01f9542522b89777",
+        "projections/authority_model.projection.json": "sha256:f6a365c2c25315efd17ea8c83c4999c28d862e35a417d3dc6c78494d6ccac53e",
+        "projections/contracts.projection.json": "sha256:2085a069ce2b0a11d51d9d556034ce38d308500fe877f7180f2eb9ea24b15e87",
+        "projections/invariants.projection.json": "sha256:e59d21a945334a416e34e9e9a789e2af7fef1afa92785e2d1eeebaf6b096489d",
+        "receipts/artifact_model.receipt.json": "sha256:87d79dfce9bf189162cff50964587b4b5efccf373d8f06a6d8730a2f8c2ee404",
+        "receipts/authority_model.receipt.json": "sha256:d69f52e34137ddba9912f78593a7f81e6cc0fce3de0eeda0615466810f59d908",
+        "receipts/composed.receipt.json": "sha256:4c58c69deed7d19ec0a0bc415ab6c58fde8e8cfe4e34c571f332033f5b1aec5a",
+        "receipts/contracts.receipt.json": "sha256:516b155ab74b5290aace1eac8cd898c5a807111702131ff234460a6cb414f1e8",
+        "receipts/invariants.receipt.json": "sha256:c9b01e18a9abad7cb92124300ebe480d2d7574d57516d26f87d401f176a7a395"
+      },
+      "output": "/home/ubuntu/l9-projection-campaign/authority-schema-run/positive/run1",
+      "produce_returned": true,
+      "receipts": {
+        "artifact_model": {
+          "diagnostics": [],
+          "digest": "sha256:d1b2d9ea4e37648df2c9ba53fc21d0ae07a2dc5ca092614841baaf8c91309fcd",
+          "identity": "l9.receipt-instance/9585093fd7b7c3c7481b538602218005e4784f18261e72f3f88ab35bca716901",
+          "result": "pass",
+          "selected_criteria": {
+            "payload_schema": {
+              "schema": "l9.projection.authority-resolution/v1",
+              "schema_artifact": {
+                "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                "path": "semantics/authority_resolution_projection.schema.yaml",
+                "ref": "l9.schema/authority-resolution-projection@1"
+              },
+              "status": "pass"
+            },
+            "selection_equivalence": {
+              "selectors": 1,
+              "status": "pass"
+            }
+          },
+          "unresolved_criteria": []
+        },
+        "authority_model": {
+          "diagnostics": [],
+          "digest": "sha256:32ea5726e1d8a7bb795e695526b5216702b6e5b0f7cd0c60bc5a079972742785",
+          "identity": "l9.receipt-instance/2e57d699ed74256e22bead15ec7d7500544bdd91fc5f4dabb1a6f3c5cfb4cff3",
+          "result": "pass",
+          "selected_criteria": {
+            "payload_schema": {
+              "schema": "l9.projection.authority-resolution/v1",
+              "schema_artifact": {
+                "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                "path": "semantics/authority_resolution_projection.schema.yaml",
+                "ref": "l9.schema/authority-resolution-projection@1"
+              },
+              "status": "pass"
+            },
+            "selection_equivalence": {
+              "selectors": 6,
+              "status": "pass"
+            }
+          },
+          "unresolved_criteria": []
+        },
+        "composed": {
+          "diagnostics": [],
+          "digest": "sha256:f52c50405e891d77471b2f7dd7321c5c3488dd46401918c3cac0d86be4ddb394",
+          "identity": "l9.receipt-instance/ab7916bb2c02b449d75dc9dcfeb9426cd01b24cdb54d0c079714a630771ba55f",
+          "result": "pass",
+          "selected_criteria": {
+            "composition_equivalence": {
+              "status": "pass"
+            },
+            "payload_schema": {
+              "schema": "l9.composed-projection.authority-resolution/v1",
+              "schema_artifact": {
+                "digest": "sha256:3275c32fac5ed06c331dac18f153633069719c06bc318d817ec966521f4eaad1",
+                "path": "semantics/authority_resolution_composition.schema.yaml",
+                "ref": "l9.schema/authority-resolution-composition@1"
+              },
+              "status": "pass"
+            }
+          },
+          "unresolved_criteria": []
+        },
+        "contracts": {
+          "diagnostics": [],
+          "digest": "sha256:f29c61c1b5eeb499a2f6cda61fc1ef3270721860b4f318957f635a06b3de4c18",
+          "identity": "l9.receipt-instance/ba68f00d45f111de2bf1da0abec7562db03805f5ee0f22508a74e949a71f6b7e",
+          "result": "pass",
+          "selected_criteria": {
+            "payload_schema": {
+              "schema": "l9.projection.authority-resolution/v1",
+              "schema_artifact": {
+                "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                "path": "semantics/authority_resolution_projection.schema.yaml",
+                "ref": "l9.schema/authority-resolution-projection@1"
+              },
+              "status": "pass"
+            },
+            "selection_equivalence": {
+              "selectors": 4,
+              "status": "pass"
+            }
+          },
+          "unresolved_criteria": []
+        },
+        "invariants": {
+          "diagnostics": [],
+          "digest": "sha256:33ef217495e314f4c52950a82885c9313b304fbe2de708dc7b53248123d8fe14",
+          "identity": "l9.receipt-instance/30ac872890e14bae46551d050701f1eff045bcbad5a11fff5533148ed98a095c",
+          "result": "pass",
+          "selected_criteria": {
+            "payload_schema": {
+              "schema": "l9.projection.authority-resolution/v1",
+              "schema_artifact": {
+                "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                "path": "semantics/authority_resolution_projection.schema.yaml",
+                "ref": "l9.schema/authority-resolution-projection@1"
+              },
+              "status": "pass"
+            },
+            "selection_equivalence": {
+              "selectors": 12,
+              "status": "pass"
+            }
+          },
+          "unresolved_criteria": []
+        }
+      },
+      "semantic_digests": {
+        "composition": "sha256:44f261d080addf9570950682392d6801d64ce648976488cd67333b7c33ed459b",
+        "composition_profile": "sha256:d7d5a565b94588c8acf70c737d1a24e61967f183a96f3af2e89e1a2b4f78f34b",
+        "projection_profile": "sha256:7cfc37826814a450ceb9cd50fb75d55ed09520c72015eba01e9a7ca9f53d32ea",
+        "projections": {
+          "artifact_model": "sha256:2bcaf00078f8c77dc7c79001a6f366ec6a9f00f269fef2af58ae9c66fac1c511",
+          "authority_model": "sha256:4f2c969ef83b721d300d8073bb05548bd7bea2fef5d3f50813115bee89c784f3",
+          "contracts": "sha256:b27e0ff446e9155f62efc97c0eef29aa0b615bd00fd02e52ce55622509c66564",
+          "invariants": "sha256:edc5bcbffe7515122689c399e8ef692bc8407c8d4965ce6eba3f5e1c4bc56541"
+        }
+      },
+      "snapshots": [
+        "producer-snapshots/run1/project",
+        "producer-snapshots/run1/compose"
+      ]
+    },
+    "run2": {
+      "assemble_entered": true,
+      "assemble_return_event_seen": true,
+      "assemble_returned": true,
+      "checks": {
+        "artifact_model.compiler_receipt_schema": {
+          "observed": [],
+          "passed": true
+        },
+        "artifact_model.genuine_receipt_reconstruction_exact": {
+          "passed": true
+        },
+        "artifact_model.genuine_receipt_validator": {
+          "passed": true
+        },
+        "artifact_model.governing_coordinates_exact": {
+          "passed": true
+        },
+        "artifact_model.lock_component_exact": {
+          "passed": true
+        },
+        "artifact_model.producer_identity": {
+          "passed": true
+        },
+        "artifact_model.projection_coordinates_and_generated_by": {
+          "passed": true
+        },
+        "artifact_model.projection_digest_independent": {
+          "passed": true
+        },
+        "artifact_model.projection_payload_schema_genuine_interpreter": {
+          "observed": [],
+          "passed": true
+        },
+        "artifact_model.receipt_delivered_bytes": {
+          "passed": true
+        },
+        "artifact_model.receipt_digest_independent": {
+          "passed": true
+        },
+        "artifact_model.receipt_identity_independent": {
+          "passed": true
+        },
+        "artifact_model.receipt_result_criteria_unresolved": {
+          "observed": {
+            "criteria": {
+              "payload_schema": {
+                "schema": "l9.projection.authority-resolution/v1",
+                "schema_artifact": {
+                  "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                  "path": "semantics/authority_resolution_projection.schema.yaml",
+                  "ref": "l9.schema/authority-resolution-projection@1"
+                },
+                "status": "pass"
+              },
+              "selection_equivalence": {
+                "selectors": 1,
+                "status": "pass"
+              }
+            },
+            "result": "pass",
+            "unresolved_criteria": []
+          },
+          "passed": true
+        },
+        "artifact_model.receipt_subject_inputs_profile_output": {
+          "passed": true
+        },
+        "authority_model.compiler_receipt_schema": {
+          "observed": [],
+          "passed": true
+        },
+        "authority_model.genuine_receipt_reconstruction_exact": {
+          "passed": true
+        },
+        "authority_model.genuine_receipt_validator": {
+          "passed": true
+        },
+        "authority_model.governing_coordinates_exact": {
+          "passed": true
+        },
+        "authority_model.lock_component_exact": {
+          "passed": true
+        },
+        "authority_model.producer_identity": {
+          "passed": true
+        },
+        "authority_model.projection_coordinates_and_generated_by": {
+          "passed": true
+        },
+        "authority_model.projection_digest_independent": {
+          "passed": true
+        },
+        "authority_model.projection_payload_schema_genuine_interpreter": {
+          "observed": [],
+          "passed": true
+        },
+        "authority_model.receipt_delivered_bytes": {
+          "passed": true
+        },
+        "authority_model.receipt_digest_independent": {
+          "passed": true
+        },
+        "authority_model.receipt_identity_independent": {
+          "passed": true
+        },
+        "authority_model.receipt_result_criteria_unresolved": {
+          "observed": {
+            "criteria": {
+              "payload_schema": {
+                "schema": "l9.projection.authority-resolution/v1",
+                "schema_artifact": {
+                  "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                  "path": "semantics/authority_resolution_projection.schema.yaml",
+                  "ref": "l9.schema/authority-resolution-projection@1"
+                },
+                "status": "pass"
+              },
+              "selection_equivalence": {
+                "selectors": 6,
+                "status": "pass"
+              }
+            },
+            "result": "pass",
+            "unresolved_criteria": []
+          },
+          "passed": true
+        },
+        "authority_model.receipt_subject_inputs_profile_output": {
+          "passed": true
+        },
+        "bundle_unchanged_since_original_production": {
+          "passed": true
+        },
+        "captured_command_streams_unchanged": {
+          "passed": true
+        },
+        "complete_exact_11_file_inventory": {
+          "expected": [
+            "bundle.lock.json",
+            "composed.json",
+            "projections/artifact_model.projection.json",
+            "projections/authority_model.projection.json",
+            "projections/contracts.projection.json",
+            "projections/invariants.projection.json",
+            "receipts/artifact_model.receipt.json",
+            "receipts/authority_model.receipt.json",
+            "receipts/composed.receipt.json",
+            "receipts/contracts.receipt.json",
+            "receipts/invariants.receipt.json"
+          ],
+          "observed": [
+            "bundle.lock.json",
+            "composed.json",
+            "projections/artifact_model.projection.json",
+            "projections/authority_model.projection.json",
+            "projections/contracts.projection.json",
+            "projections/invariants.projection.json",
+            "receipts/artifact_model.receipt.json",
+            "receipts/authority_model.receipt.json",
+            "receipts/composed.receipt.json",
+            "receipts/contracts.receipt.json",
+            "receipts/invariants.receipt.json"
+          ],
+          "passed": true
+        },
+        "composed.compiler_receipt_schema": {
+          "observed": [],
+          "passed": true
+        },
+        "composed.genuine_receipt_reconstruction_exact": {
+          "passed": true
+        },
+        "composed.genuine_receipt_validator": {
+          "passed": true
+        },
+        "composed.governing_coordinates_exact": {
+          "passed": true
+        },
+        "composed.producer_identity": {
+          "passed": true
+        },
+        "composed.receipt_delivered_bytes": {
+          "passed": true
+        },
+        "composed.receipt_digest_independent": {
+          "passed": true
+        },
+        "composed.receipt_identity_independent": {
+          "passed": true
+        },
+        "composed.receipt_result_criteria_unresolved": {
+          "observed": {
+            "criteria": {
+              "composition_equivalence": {
+                "status": "pass"
+              },
+              "payload_schema": {
+                "schema": "l9.composed-projection.authority-resolution/v1",
+                "schema_artifact": {
+                  "digest": "sha256:3275c32fac5ed06c331dac18f153633069719c06bc318d817ec966521f4eaad1",
+                  "path": "semantics/authority_resolution_composition.schema.yaml",
+                  "ref": "l9.schema/authority-resolution-composition@1"
+                },
+                "status": "pass"
+              }
+            },
+            "result": "pass",
+            "unresolved_criteria": []
+          },
+          "passed": true
+        },
+        "composed.receipt_subject_inputs_profile_output": {
+          "passed": true
+        },
+        "composition_component_coordinates_exact": {
+          "passed": true
+        },
+        "composition_declared_class_and_ref_order": {
+          "passed": true
+        },
+        "composition_envelope_digest_independent": {
+          "passed": true
+        },
+        "composition_namespace_exact_payloads": {
+          "passed": true
+        },
+        "composition_payload_schema_genuine_interpreter": {
+          "observed": [],
+          "passed": true
+        },
+        "contracts.compiler_receipt_schema": {
+          "observed": [],
+          "passed": true
+        },
+        "contracts.genuine_receipt_reconstruction_exact": {
+          "passed": true
+        },
+        "contracts.genuine_receipt_validator": {
+          "passed": true
+        },
+        "contracts.governing_coordinates_exact": {
+          "passed": true
+        },
+        "contracts.lock_component_exact": {
+          "passed": true
+        },
+        "contracts.producer_identity": {
+          "passed": true
+        },
+        "contracts.projection_coordinates_and_generated_by": {
+          "passed": true
+        },
+        "contracts.projection_digest_independent": {
+          "passed": true
+        },
+        "contracts.projection_payload_schema_genuine_interpreter": {
+          "observed": [],
+          "passed": true
+        },
+        "contracts.receipt_delivered_bytes": {
+          "passed": true
+        },
+        "contracts.receipt_digest_independent": {
+          "passed": true
+        },
+        "contracts.receipt_identity_independent": {
+          "passed": true
+        },
+        "contracts.receipt_result_criteria_unresolved": {
+          "observed": {
+            "criteria": {
+              "payload_schema": {
+                "schema": "l9.projection.authority-resolution/v1",
+                "schema_artifact": {
+                  "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                  "path": "semantics/authority_resolution_projection.schema.yaml",
+                  "ref": "l9.schema/authority-resolution-projection@1"
+                },
+                "status": "pass"
+              },
+              "selection_equivalence": {
+                "selectors": 4,
+                "status": "pass"
+              }
+            },
+            "result": "pass",
+            "unresolved_criteria": []
+          },
+          "passed": true
+        },
+        "contracts.receipt_subject_inputs_profile_output": {
+          "passed": true
+        },
+        "exact_direct_compiler_command_sequence": {
+          "expected": [
+            "projection-coordinates",
+            "project",
+            "compose"
+          ],
+          "observed": [
+            "projection-coordinates",
+            "project",
+            "compose"
+          ],
+          "passed": true
+        },
+        "invariants.compiler_receipt_schema": {
+          "observed": [],
+          "passed": true
+        },
+        "invariants.genuine_receipt_reconstruction_exact": {
+          "passed": true
+        },
+        "invariants.genuine_receipt_validator": {
+          "passed": true
+        },
+        "invariants.governing_coordinates_exact": {
+          "passed": true
+        },
+        "invariants.lock_component_exact": {
+          "passed": true
+        },
+        "invariants.producer_identity": {
+          "passed": true
+        },
+        "invariants.projection_coordinates_and_generated_by": {
+          "passed": true
+        },
+        "invariants.projection_digest_independent": {
+          "passed": true
+        },
+        "invariants.projection_payload_schema_genuine_interpreter": {
+          "observed": [],
+          "passed": true
+        },
+        "invariants.receipt_delivered_bytes": {
+          "passed": true
+        },
+        "invariants.receipt_digest_independent": {
+          "passed": true
+        },
+        "invariants.receipt_identity_independent": {
+          "passed": true
+        },
+        "invariants.receipt_result_criteria_unresolved": {
+          "observed": {
+            "criteria": {
+              "payload_schema": {
+                "schema": "l9.projection.authority-resolution/v1",
+                "schema_artifact": {
+                  "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                  "path": "semantics/authority_resolution_projection.schema.yaml",
+                  "ref": "l9.schema/authority-resolution-projection@1"
+                },
+                "status": "pass"
+              },
+              "selection_equivalence": {
+                "selectors": 12,
+                "status": "pass"
+              }
+            },
+            "result": "pass",
+            "unresolved_criteria": []
+          },
+          "passed": true
+        },
+        "invariants.receipt_subject_inputs_profile_output": {
+          "passed": true
+        },
+        "lock_composed_file_binding": {
+          "passed": true
+        },
+        "lock_declared_class_and_ref_order": {
+          "passed": true
+        },
+        "lock_identity_authority_producer": {
+          "observed": {
+            "authority": {
+              "repository": "Quantum-L9/.github",
+              "revision": "290bcd90378577392640cea9c6053c178423f0da"
+            },
+            "producer": {
+              "compiler": "l9-semantic-compiler",
+              "repository": "Quantum-L9/l9-semantic-compiler-engine",
+              "revision": "943db9a462d35ba66771a700ece77c746295f591",
+              "revision_basis": "caller_asserted",
+              "version": "0.9.3"
+            }
+          },
+          "passed": true
+        },
+        "observer_no_errors": {
+          "observed": [],
+          "passed": true
+        },
+        "produce_returned_normally": {
+          "passed": true
+        },
+        "profile_refs_and_independent_digests": {
+          "passed": true
+        },
+        "unchanged_assemble_completed": {
+          "passed": true
+        }
+      },
+      "commands": [
+        {
+          "argv": [
+            "git",
+            "-C",
+            "/home/ubuntu/l9-projection-campaign/code-pr",
+            "rev-parse",
+            "HEAD"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run2/01.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run2/01.stdout.txt",
+          "stdout_sha256": "sha256:424bf13c24044d563ea22f978e26d4f8c64f6e7787a33974421c34d9b23c9fa2"
+        },
+        {
+          "argv": [
+            "git",
+            "-C",
+            "/home/ubuntu/l9-projection-campaign/code-pr",
+            "show",
+            "290bcd90378577392640cea9c6053c178423f0da:semantics/projection_profiles.yaml"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run2/02.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run2/02.stdout.txt",
+          "stdout_sha256": "sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd"
+        },
+        {
+          "argv": [
+            "git",
+            "-C",
+            "/home/ubuntu/l9-projection-campaign/code-pr",
+            "show",
+            "290bcd90378577392640cea9c6053c178423f0da:semantics/canonical_sources.yaml"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run2/03.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run2/03.stdout.txt",
+          "stdout_sha256": "sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b"
+        },
+        {
+          "argv": [
+            "/tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler",
+            "projection-coordinates",
+            "--authority-root",
+            "/home/ubuntu/l9-projection-campaign/code-pr",
+            "--revision",
+            "290bcd90378577392640cea9c6053c178423f0da",
+            "--repository",
+            "Quantum-L9/.github",
+            "--profile",
+            "l9.projection/authority-resolution@1"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run2/04.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run2/04.stdout.txt",
+          "stdout_sha256": "sha256:6a61420e86e14001ef0817b4f4d3b0a1d3bca055d68ce286000cb74bd70f2ce4"
+        },
+        {
+          "argv": [
+            "/tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler",
+            "project",
+            "/home/ubuntu/l9-projection-campaign/authority-schema-run/positive/tmp/tmpleb6oo88/project.yaml"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run2/05.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run2/05.stdout.txt",
+          "stdout_sha256": "sha256:28e80369a55d6c8dc3d7e1fb461e455309da99cca83e7294c7341c9327cdc803"
+        },
+        {
+          "argv": [
+            "git",
+            "-C",
+            "/home/ubuntu/l9-projection-campaign/code-pr",
+            "show",
+            "290bcd90378577392640cea9c6053c178423f0da:semantics/composition_profiles.yaml"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run2/06.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run2/06.stdout.txt",
+          "stdout_sha256": "sha256:0bb8d91822f5315b87b30e88619539d1da36e5bf6810b08b392f0ff69eb4e807"
+        },
+        {
+          "argv": [
+            "/tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler",
+            "compose",
+            "/home/ubuntu/l9-projection-campaign/authority-schema-run/positive/tmp/tmpleb6oo88/compose.yaml"
+          ],
+          "returncode": 0,
+          "stderr": "trace/run2/07.stderr.txt",
+          "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout": "trace/run2/07.stdout.txt",
+          "stdout_sha256": "sha256:f8cf29c4291ca00b55e5708ab6a134b70176865ba125a05801fe33fbf5f00d8d"
+        }
+      ],
+      "exception": null,
+      "file_inventory_sha256": {
+        "bundle.lock.json": "sha256:ee76a5b2c2cd8939e0b13b997a449235de624cb7181c08d7cbc7998b867c1dd1",
+        "composed.json": "sha256:9db874855d34d553deae2f2eb0ca89cdc9a832438743bd92b30010209dd59248",
+        "projections/artifact_model.projection.json": "sha256:2301667565e40d3fdb8b10bd9ed8bbee892ea626fa839baa01f9542522b89777",
+        "projections/authority_model.projection.json": "sha256:f6a365c2c25315efd17ea8c83c4999c28d862e35a417d3dc6c78494d6ccac53e",
+        "projections/contracts.projection.json": "sha256:2085a069ce2b0a11d51d9d556034ce38d308500fe877f7180f2eb9ea24b15e87",
+        "projections/invariants.projection.json": "sha256:e59d21a945334a416e34e9e9a789e2af7fef1afa92785e2d1eeebaf6b096489d",
+        "receipts/artifact_model.receipt.json": "sha256:87d79dfce9bf189162cff50964587b4b5efccf373d8f06a6d8730a2f8c2ee404",
+        "receipts/authority_model.receipt.json": "sha256:d69f52e34137ddba9912f78593a7f81e6cc0fce3de0eeda0615466810f59d908",
+        "receipts/composed.receipt.json": "sha256:4c58c69deed7d19ec0a0bc415ab6c58fde8e8cfe4e34c571f332033f5b1aec5a",
+        "receipts/contracts.receipt.json": "sha256:516b155ab74b5290aace1eac8cd898c5a807111702131ff234460a6cb414f1e8",
+        "receipts/invariants.receipt.json": "sha256:c9b01e18a9abad7cb92124300ebe480d2d7574d57516d26f87d401f176a7a395"
+      },
+      "output": "/home/ubuntu/l9-projection-campaign/authority-schema-run/positive/run2",
+      "produce_returned": true,
+      "receipts": {
+        "artifact_model": {
+          "diagnostics": [],
+          "digest": "sha256:d1b2d9ea4e37648df2c9ba53fc21d0ae07a2dc5ca092614841baaf8c91309fcd",
+          "identity": "l9.receipt-instance/9585093fd7b7c3c7481b538602218005e4784f18261e72f3f88ab35bca716901",
+          "result": "pass",
+          "selected_criteria": {
+            "payload_schema": {
+              "schema": "l9.projection.authority-resolution/v1",
+              "schema_artifact": {
+                "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                "path": "semantics/authority_resolution_projection.schema.yaml",
+                "ref": "l9.schema/authority-resolution-projection@1"
+              },
+              "status": "pass"
+            },
+            "selection_equivalence": {
+              "selectors": 1,
+              "status": "pass"
+            }
+          },
+          "unresolved_criteria": []
+        },
+        "authority_model": {
+          "diagnostics": [],
+          "digest": "sha256:32ea5726e1d8a7bb795e695526b5216702b6e5b0f7cd0c60bc5a079972742785",
+          "identity": "l9.receipt-instance/2e57d699ed74256e22bead15ec7d7500544bdd91fc5f4dabb1a6f3c5cfb4cff3",
+          "result": "pass",
+          "selected_criteria": {
+            "payload_schema": {
+              "schema": "l9.projection.authority-resolution/v1",
+              "schema_artifact": {
+                "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                "path": "semantics/authority_resolution_projection.schema.yaml",
+                "ref": "l9.schema/authority-resolution-projection@1"
+              },
+              "status": "pass"
+            },
+            "selection_equivalence": {
+              "selectors": 6,
+              "status": "pass"
+            }
+          },
+          "unresolved_criteria": []
+        },
+        "composed": {
+          "diagnostics": [],
+          "digest": "sha256:f52c50405e891d77471b2f7dd7321c5c3488dd46401918c3cac0d86be4ddb394",
+          "identity": "l9.receipt-instance/ab7916bb2c02b449d75dc9dcfeb9426cd01b24cdb54d0c079714a630771ba55f",
+          "result": "pass",
+          "selected_criteria": {
+            "composition_equivalence": {
+              "status": "pass"
+            },
+            "payload_schema": {
+              "schema": "l9.composed-projection.authority-resolution/v1",
+              "schema_artifact": {
+                "digest": "sha256:3275c32fac5ed06c331dac18f153633069719c06bc318d817ec966521f4eaad1",
+                "path": "semantics/authority_resolution_composition.schema.yaml",
+                "ref": "l9.schema/authority-resolution-composition@1"
+              },
+              "status": "pass"
+            }
+          },
+          "unresolved_criteria": []
+        },
+        "contracts": {
+          "diagnostics": [],
+          "digest": "sha256:f29c61c1b5eeb499a2f6cda61fc1ef3270721860b4f318957f635a06b3de4c18",
+          "identity": "l9.receipt-instance/ba68f00d45f111de2bf1da0abec7562db03805f5ee0f22508a74e949a71f6b7e",
+          "result": "pass",
+          "selected_criteria": {
+            "payload_schema": {
+              "schema": "l9.projection.authority-resolution/v1",
+              "schema_artifact": {
+                "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                "path": "semantics/authority_resolution_projection.schema.yaml",
+                "ref": "l9.schema/authority-resolution-projection@1"
+              },
+              "status": "pass"
+            },
+            "selection_equivalence": {
+              "selectors": 4,
+              "status": "pass"
+            }
+          },
+          "unresolved_criteria": []
+        },
+        "invariants": {
+          "diagnostics": [],
+          "digest": "sha256:33ef217495e314f4c52950a82885c9313b304fbe2de708dc7b53248123d8fe14",
+          "identity": "l9.receipt-instance/30ac872890e14bae46551d050701f1eff045bcbad5a11fff5533148ed98a095c",
+          "result": "pass",
+          "selected_criteria": {
+            "payload_schema": {
+              "schema": "l9.projection.authority-resolution/v1",
+              "schema_artifact": {
+                "digest": "sha256:c7ef65ceadfdeb93fab8f06112ac90e5f8344ac56eff6d460b777dff933cae07",
+                "path": "semantics/authority_resolution_projection.schema.yaml",
+                "ref": "l9.schema/authority-resolution-projection@1"
+              },
+              "status": "pass"
+            },
+            "selection_equivalence": {
+              "selectors": 12,
+              "status": "pass"
+            }
+          },
+          "unresolved_criteria": []
+        }
+      },
+      "semantic_digests": {
+        "composition": "sha256:44f261d080addf9570950682392d6801d64ce648976488cd67333b7c33ed459b",
+        "composition_profile": "sha256:d7d5a565b94588c8acf70c737d1a24e61967f183a96f3af2e89e1a2b4f78f34b",
+        "projection_profile": "sha256:7cfc37826814a450ceb9cd50fb75d55ed09520c72015eba01e9a7ca9f53d32ea",
+        "projections": {
+          "artifact_model": "sha256:2bcaf00078f8c77dc7c79001a6f366ec6a9f00f269fef2af58ae9c66fac1c511",
+          "authority_model": "sha256:4f2c969ef83b721d300d8073bb05548bd7bea2fef5d3f50813115bee89c784f3",
+          "contracts": "sha256:b27e0ff446e9155f62efc97c0eef29aa0b615bd00fd02e52ce55622509c66564",
+          "invariants": "sha256:edc5bcbffe7515122689c399e8ef692bc8407c8d4965ce6eba3f5e1c4bc56541"
+        }
+      },
+      "snapshots": [
+        "producer-snapshots/run2/project",
+        "producer-snapshots/run2/compose"
+      ]
+    }
+  },
+  "scope": "producer/driver positive qualification only",
+  "status": "PASS",
+  "verification_correction": {
+    "initial_error": "Checker incorrectly used semantic YAML digests for full authority source and governing documents; producer uses SHA-256 of committed file bytes. Profile records and artifact envelopes use semantic canonical JSON digests.",
+    "previous_harness": "qualify.initial-check.py",
+    "previous_log": "qualification.initial-check.log",
+    "previous_summary": "summary.initial-check.json",
+    "producer_invoked_again": false
+  }
+}
