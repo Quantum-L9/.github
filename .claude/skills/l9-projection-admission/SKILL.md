@@ -60,8 +60,8 @@ python3 .claude/skills/l9-projection-admission/scripts/check_admission_closure.p
 | `INCOMPLETE` | At least one gap in `registration.gaps`. |
 | `REGISTERED` | Registration passes, but `validator.fail_lines` is non-empty or `release.gaps` is non-empty. |
 | `RELEASED_CANDIDATE` | Validator passes and the release covers the subject, but no admitted release covers it on main. `admission.tried` shows why. |
-| `ADMITTED` | Admission found: `admission.release`, `admission.adr` and `admission.release_commit`, with `changed_since_admission` empty. |
-| `DOWNSTREAM_USABLE` | Admitted, and every projection and composition is PASS at `main`. |
+| `ADMITTED` | Admission found: `admission.release`, `admission.adr` and `admission.admission_commit`, with nothing listed in `changed_on_main_since_admission` or `changed_at_head_since_admission`. |
+| `DOWNSTREAM_USABLE` | Admitted, and every projection (covering exactly its pinned sources) and every composition is PASS at `main`. A subject with no profile reports `downstream.status: not_applicable` and stays at `ADMITTED`. |
 
 Exit 0 means the `--require` rung was reached, 1 means it was not, and 2 means UNRESOLVED (an unreadable input or ref). Never report exit 2 as a pass.
 

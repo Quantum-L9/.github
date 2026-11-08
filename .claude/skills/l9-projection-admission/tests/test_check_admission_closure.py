@@ -63,6 +63,34 @@ VALIDATOR = (
 )
 
 
+FAKE_COMPILER = """
+import sys, yaml
+mode = open(__file__.replace("__main__.py", "mode")).read().strip()
+cmd = sys.argv[1]
+if mode == "garbage":
+    print("not yaml: [unbalanced")
+    sys.exit(0)
+if cmd == "projection-coordinates":
+    print(yaml.safe_dump({"projection_profile": {"ref": "l9.projection/x@1", "digest": "sha256:0"},
+                          "sources": [{"ref": "l9.source/x-model@1", "digest": "sha256:1"}]}))
+elif cmd == "project":
+    ref = "l9.projection/x@1#" + ("l9.source/x-model@1" if mode == "pass" else "l9.source/other@1")
+    print(yaml.safe_dump({"result": "pass", "artifacts": [{"ref": ref, "result": "pass", "path": "/x.json"}]}))
+elif cmd == "compose":
+    print(yaml.safe_dump({"result": "pass", "artifacts": [{"ref": "l9.compose/x@1", "result": "pass"}]}))
+"""
+
+
+def fake_compiler(root: Path, mode: str) -> Path:
+    """A stand-in l9-semantic-compiler-engine checkout whose output the test controls."""
+    pkg = root / "engine" / "src" / "l9_semantic_compiler"
+    pkg.mkdir(parents=True, exist_ok=True)
+    (pkg / "__init__.py").write_text("", encoding="utf-8")
+    (pkg / "__main__.py").write_text(FAKE_COMPILER, encoding="utf-8")
+    (pkg / "mode").write_text(mode, encoding="utf-8")
+    return root / "engine"
+
+
 class Repo:
     def __init__(self, root: Path) -> None:
         self.root = root
@@ -148,7 +176,8 @@ class Ladder(_Fixture):
         self.assertEqual(report["verdict"], "ADMITTED", json.dumps(report, indent=1))
         self.assertEqual(report["admission"]["release"], "v1.0.0")
         self.assertEqual(report["admission"]["adr"], "ADR-001-admit.md")
-        self.assertEqual(report["admission"]["changed_since_admission"], [])
+        self.assertEqual(report["admission"]["changed_on_main_since_admission"], [])
+        self.assertEqual(report["admission"]["changed_at_head_since_admission"], [])
 
     def test_unregistered_schema_is_incomplete(self):
         self.repo.write(
@@ -241,7 +270,7 @@ class Ladder(_Fixture):
         self.assertEqual(report["release"]["version"], "v1.1.0")
         self.assertIn(
             "projection profile:l9.projection/x@1",
-            report["admission"]["changed_since_admission"],
+            report["admission"]["changed_on_main_since_admission"],
         )
 
     def test_later_admitted_release_takes_over(self):
@@ -318,12 +347,175 @@ class InputsAndExitCodes(_Fixture):
         )
         result = cac.downstream(
             self.repo.root,
-            self.tmp / "no-compiler",
+            fake_compiler(self.tmp, "pass"),
             self.tmp / "out",
             cac.load_subject(self._subject()),
         )
         self.assertEqual(result["status"], "fail")
         self.assertIn("tracked changes", result["reason"])
+
+
+class ReviewRegressions(_Fixture):
+    """One test per false-PASS or swallowed-UNRESOLVED path found in independent review."""
+
+    def test_source_file_changed_on_main_after_admission_is_not_admitted(self):
+        self.repo.write(
+            "semantics/x_model.yaml", LEDGERS["x_model.yaml"] + "value2: 2\n"
+        )
+        self.repo.release("v1.1.0", "**ADDITIVE SUCCESSOR CANDIDATE**")
+        self.repo.commit("candidate v1.1.0 changes the model ledger")
+        subject = {
+            "schema": cac.SUBJECT_SCHEMA,
+            "canonical_sources": ["l9.source/x-model@1"],
+        }
+        report = self.verdict(cac.load_subject(self._subject(subject)))
+        self.assertEqual(report["verdict"], "RELEASED_CANDIDATE")
+        self.assertIn(
+            "source_file:l9.source/x-model@1",
+            report["admission"]["changed_on_main_since_admission"],
+        )
+
+    def test_source_class_file_is_covered_and_compared(self):
+        self.repo.write(
+            "semantics/x_model.yaml", LEDGERS["x_model.yaml"] + "value2: 2\n"
+        )
+        self.repo.release("v1.1.0", "**ADDITIVE SUCCESSOR CANDIDATE**")
+        self.repo.commit("candidate v1.1.0 changes the class artifact")
+        subject = {"schema": cac.SUBJECT_SCHEMA, "source_classes": ["x_model"]}
+        report = self.verdict(cac.load_subject(self._subject(subject)))
+        self.assertEqual(report["verdict"], "RELEASED_CANDIDATE")
+        self.assertIn(
+            "source_class_file:x_model",
+            report["admission"]["changed_on_main_since_admission"],
+        )
+
+    def test_uncommitted_edit_to_admitted_term_is_not_admitted(self):
+        self.repo.write(
+            "semantics/vocabulary.yaml",
+            "terms:\n  x_term:\n    definition: a different x\n",
+        )
+        self.repo.release("v1.1.0", "**ADDITIVE SUCCESSOR CANDIDATE**")
+        report = self.verdict()
+        self.assertEqual(report["verdict"], "RELEASED_CANDIDATE")
+        self.assertIn(
+            "term:x_term", report["admission"]["changed_at_head_since_admission"]
+        )
+
+    def test_release_record_edited_after_admission_is_not_admitted(self):
+        self.repo.write(
+            "semantics/vocabulary.yaml",
+            "terms:\n  x_term:\n    definition: a different x\n",
+        )
+        self.repo.release("v1.0.0", "**ADMITTED ADDITIVE SUCCESSOR** (ADR-001)")
+        self.repo.commit("rewrite the admitted release record in place")
+        report = self.verdict()
+        self.assertEqual(report["verdict"], "RELEASED_CANDIDATE")
+        self.assertIn(
+            "edited after admission", report["admission"]["tried"][0]["reason"]
+        )
+
+    def test_status_lines_that_merely_mention_admitted_are_not_admitted(self):
+        for line in (
+            "Status: not yet ADMITTED",
+            "Status: UNADMITTED draft",
+            "Status: WITHDRAWN (was ADMITTED in error)",
+            "Status: Admitted? No, awaiting owner",
+            "Status: **ADDITIVE SUCCESSOR CANDIDATE**",
+        ):
+            self.repo.write(
+                "docs/semantic-foundation/v1.0.0/README.md", f"# v\n\n{line}\n"
+            )
+            self.assertNotEqual(
+                cac.release_status(cac.Tree(self.repo.root), "v1.0.0"), "ADMITTED", line
+            )
+        self.repo.write(
+            "docs/semantic-foundation/v1.0.0/README.md",
+            "# v\n\nStatus: **ADMITTED ADDITIVE SUCCESSOR** (ADR-001, 2026-11-08).\n",
+        )
+        self.assertEqual(
+            cac.release_status(cac.Tree(self.repo.root), "v1.0.0"), "ADMITTED"
+        )
+
+    def test_adr_must_accept_exactly_this_version(self):
+        tree = cac.Tree(self.repo.root)
+        rejected = (
+            "**Status:** Accepted for semantic-foundation v3.21.0; it supersedes the v1.0.0 draft",
+            "**Status:** Accepted for v3.0.0. Not accepted for v1.0.0.",
+            "**Status:** Accepted for semantic-foundation v1.0.0-rc1 candidate",
+            "**Status:** Accepted for semantic-foundation v1.0.0.1",
+            "**Status:** Accepted for semantic-foundation v1.0.0 candidate. Admission is the gate.",
+        )
+        for line in rejected:
+            self.repo.write("docs/adr/ADR-001-admit.md", f"# ADR-001\n\n{line}\n")
+            self.assertIsNone(cac.accepted_adr(tree, "v1.0.0"), line)
+        self.repo.write(
+            "docs/adr/ADR-001-admit.md",
+            "# ADR-001\n\n**Status:** Accepted for semantic-foundation v1.0.0. The owner admitted it.\n",
+        )
+        self.assertEqual(cac.accepted_adr(tree, "v1.0.0"), "ADR-001-admit.md")
+
+    def test_downstream_without_profiles_is_not_applicable(self):
+        subject = {"schema": cac.SUBJECT_SCHEMA, "invariants": ["L9-X-001"]}
+        report = cac.evaluate(
+            self.repo.root,
+            cac.load_subject(self._subject(subject)),
+            "origin/main",
+            self.tmp / "nonexistent-engine",
+            self.tmp / "out",
+        )
+        self.assertEqual(report["downstream"]["status"], "not_applicable")
+        self.assertEqual(report["verdict"], "ADMITTED")
+
+    def test_missing_compiler_checkout_is_unresolved(self):
+        code = cac.main(
+            ["--checkout", str(self.repo.root), "--subject", str(self._subject()),
+             "--require", "downstream", "--compiler-src", str(self.tmp / "nonexistent-engine"),
+             "--output-root", str(self.tmp / "out")]
+        )  # fmt: skip
+        self.assertEqual(code, 2)
+
+    def test_malformed_compiler_output_is_unresolved(self):
+        code = cac.main(
+            ["--checkout", str(self.repo.root), "--subject", str(self._subject()),
+             "--require", "downstream", "--compiler-src", str(fake_compiler(self.tmp, "garbage")),
+             "--output-root", str(self.tmp / "out")]
+        )  # fmt: skip
+        self.assertEqual(code, 2)
+
+    def test_projection_not_covering_its_pinned_sources_fails(self):
+        result = cac.downstream(
+            self.repo.root,
+            fake_compiler(self.tmp, "wrong-source"),
+            self.tmp / "out",
+            cac.load_subject(self._subject()),
+        )
+        self.assertEqual(result["status"], "fail")
+        self.assertFalse(
+            result["projections"]["l9.projection/x@1"]["covers_pinned_sources"]
+        )
+
+    def test_stub_compiler_pass_reaches_downstream_usable(self):
+        report = cac.evaluate(
+            self.repo.root,
+            cac.load_subject(self._subject()),
+            "origin/main",
+            fake_compiler(self.tmp, "pass"),
+            self.tmp / "out",
+        )
+        self.assertEqual(
+            report["verdict"], "DOWNSTREAM_USABLE", json.dumps(report, indent=1)
+        )
+
+    def test_malformed_schema_file_is_unresolved(self):
+        self.repo.write(
+            "semantics/x_projection.schema.yaml", "properties: [unbalanced\n"
+        )
+        with self.assertRaises(cac.InputError):
+            self.verdict()
+
+    def test_unresolvable_ref_is_unresolved(self):
+        with self.assertRaises(cac.InputError):
+            cac.Tree(self.repo.root, "no-such-ref")
 
 
 if __name__ == "__main__":

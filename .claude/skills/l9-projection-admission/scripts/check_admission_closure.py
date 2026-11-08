@@ -5,17 +5,21 @@ classes, projection profiles, composition profiles, payload schemas) up a fixed 
 reports the highest rung every lower rung supports:
 
   INCOMPLETE          a subject item is missing from a registration surface at HEAD
-  REGISTERED          registered at HEAD, but the native validator fails or no release record
-                      covers the subject's files at their current bytes
+  REGISTERED          registered at HEAD, but the native validator fails or the highest
+                      release record does not cover the subject's files at their current bytes
   RELEASED_CANDIDATE  validator passes and the highest release record covers the subject,
-                      but no admitted release (status line + accepted ADR) covers it on main
-  ADMITTED            an admitted release record covered the subject when it was cut, that
-                      record is on origin/main, and origin/main still carries the same records
-  DOWNSTREAM_USABLE   ADMITTED, and the real compiler projects every subject projection
-                      profile and composes every subject composition profile to PASS at a
-                      clean checkout whose HEAD is origin/main
+                      but no admitted release covers it unchanged on main and at HEAD
+  ADMITTED            the commit that admitted a release (status line flipped to ADMITTED,
+                      ADR accepted for exactly that version) is on main, that release's record
+                      is unedited since, it covered the subject, and the subject's records and
+                      ledger bytes are identical at admission, on main and at HEAD
+  DOWNSTREAM_USABLE   ADMITTED, the subject names at least one profile, and the real compiler
+                      projects every subject projection profile over exactly its pinned sources
+                      and composes every subject composition profile to PASS at a clean
+                      checkout whose HEAD is main
 
-UNRESOLVED (exit 2) means an input could not be read; it is never reported as a rung.
+UNRESOLVED (exit 2) means an input, a git read or the compiler's output could not be read or
+was malformed; it is never reported as a rung.
 
 Usage:
   python3 check_admission_closure.py --checkout REPO --subject SUBJECT.json
@@ -78,54 +82,83 @@ KIND_LEDGER = {
 }
 RELEASES = "docs/semantic-foundation"
 VERSION_DIR = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
+# The only admitted form in use: "Status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-025, ...)".
+ADMITTED_STATUS = re.compile(r"^Status:\s*\*\*ADMITTED\b[^*]*\*\*")
 
 
 class InputError(Exception):
     """A required input is missing, unreadable or malformed: UNRESOLVED, never a rung."""
 
 
-# --------------------------------------------------------------------------- trees
+# --------------------------------------------------------------------------- git and trees
+
+
+def run_git(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", "-C", str(repo), *args], capture_output=True, text=True, check=False
+    )
+
+
+def git_out(repo: Path, *args: str) -> str:
+    """Stdout of a git command that must succeed; any failure is UNRESOLVED."""
+    done = run_git(repo, *args)
+    if done.returncode != 0:
+        raise InputError(f"git {' '.join(args)} failed: {done.stderr.strip()[:200]}")
+    return done.stdout.strip()
+
+
+def resolve_commit(repo: Path, ref: str) -> str:
+    done = run_git(repo, "rev-parse", "--verify", f"{ref}^{{commit}}")
+    if done.returncode != 0:
+        raise InputError(f"{ref} does not resolve to a commit; fetch it first")
+    return done.stdout.strip()
 
 
 class Tree:
-    """Read files from the working tree (ref None) or from a git revision."""
+    """Read files from the working tree (ref None) or from a resolved git commit.
+
+    A path that does not exist reads as None; any other read failure is UNRESOLVED.
+    """
 
     def __init__(self, repo: Path, ref: str | None = None) -> None:
         self.repo = repo
-        self.ref = ref
+        self.ref = resolve_commit(repo, ref) if ref is not None else None
 
     def label(self) -> str:
-        return self.ref or "WORKTREE"
+        return self.ref[:12] if self.ref else "WORKTREE"
+
+    def _exists(self, rel: str) -> bool:
+        return run_git(self.repo, "cat-file", "-e", f"{self.ref}:{rel}").returncode == 0
 
     def read(self, rel: str) -> bytes | None:
         if self.ref is None:
             path = self.repo / rel
-            return path.read_bytes() if path.is_file() else None
+            if not path.exists():
+                return None
+            try:
+                return path.read_bytes()
+            except OSError as exc:
+                raise InputError(f"cannot read {rel}: {exc}") from exc
+        if not self._exists(rel):
+            return None
         done = subprocess.run(
             ["git", "-C", str(self.repo), "show", f"{self.ref}:{rel}"],
             capture_output=True,
             check=False,
         )
-        return done.stdout if done.returncode == 0 else None
+        if done.returncode != 0:
+            raise InputError(f"git show {self.label()}:{rel} failed")
+        return done.stdout
 
     def listdir(self, rel: str) -> list[str]:
         if self.ref is None:
             path = self.repo / rel
             return sorted(p.name for p in path.iterdir()) if path.is_dir() else []
-        done = subprocess.run(
-            [
-                "git",
-                "-C",
-                str(self.repo),
-                "ls-tree",
-                "--name-only",
-                f"{self.ref}:{rel}",
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
+        if not self._exists(rel):
+            return []
+        return sorted(
+            git_out(self.repo, "ls-tree", "--name-only", f"{self.ref}:{rel}").split()
         )
-        return sorted(done.stdout.split()) if done.returncode == 0 else []
 
     def yaml(self, rel: str) -> dict[str, Any]:
         data = self.read(rel)
@@ -140,16 +173,13 @@ class Tree:
         return value
 
 
-def git(repo: Path, *args: str) -> str | None:
-    done = subprocess.run(
-        ["git", "-C", str(repo), *args], capture_output=True, text=True, check=False
-    )
-    return done.stdout.strip() if done.returncode == 0 else None
-
-
 def digest(value: Any) -> str:
     data = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return "sha256:" + hashlib.sha256(data.encode("utf-8")).hexdigest()
+
+
+def sha_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
 
 
 # --------------------------------------------------------------------------- subject
@@ -180,6 +210,22 @@ def load_subject(path: Path) -> dict[str, list[str]]:
     return subject
 
 
+def _sources(tree: Tree) -> dict[str, dict[str, Any]]:
+    entries = tree.yaml("semantics/canonical_sources.yaml").get("sources") or []
+    return {e["id"]: e for e in entries if isinstance(e, dict) and "id" in e}
+
+
+def _class_artifacts(tree: Tree) -> dict[str, str]:
+    classes = (
+        tree.yaml("semantics/projection_profiles.yaml").get("source_classes") or {}
+    )
+    return {
+        cls: f"semantics/{decl['canonical_artifact']}"
+        for cls, decl in classes.items()
+        if isinstance(decl, dict) and isinstance(decl.get("canonical_artifact"), str)
+    }
+
+
 def subject_files(tree: Tree, subject: dict[str, list[str]]) -> list[str]:
     """Every semantics/ file whose bytes carry a subject item."""
     files = {f"semantics/{KIND_LEDGER[k]}" for k, items in subject.items() if items}
@@ -188,15 +234,12 @@ def subject_files(tree: Tree, subject: dict[str, list[str]]) -> list[str]:
     for ref in subject["canonical_sources"]:
         if ref in sources and isinstance(sources[ref].get("path"), str):
             files.add(sources[ref]["path"])
+    artifacts = _class_artifacts(tree)
+    files |= {artifacts[c] for c in subject["source_classes"] if c in artifacts}
     return sorted(files)
 
 
 # --------------------------------------------------------------------------- registration
-
-
-def _sources(tree: Tree) -> dict[str, dict[str, Any]]:
-    entries = tree.yaml("semantics/canonical_sources.yaml").get("sources") or []
-    return {e["id"]: e for e in entries if isinstance(e, dict) and "id" in e}
 
 
 def _ids(entries: Any) -> list[str]:
@@ -212,8 +255,10 @@ def _schema_consts(tree: Tree, artifact_schemas: list[str]) -> dict[str, str]:
             continue
         try:
             doc = yaml.safe_load(data)
-        except yaml.YAMLError:
-            continue
+        except yaml.YAMLError as exc:
+            raise InputError(
+                f"{tree.label()}:semantics/{name} is not YAML: {exc}"
+            ) from exc
         const = (((doc or {}).get("properties") or {}).get("schema") or {}).get("const")
         if isinstance(const, str):
             consts[const] = name
@@ -221,10 +266,14 @@ def _schema_consts(tree: Tree, artifact_schemas: list[str]) -> dict[str, str]:
 
 
 def registration(tree: Tree, subject: dict[str, list[str]]) -> dict[str, Any]:
-    """Every subject item registered on every surface it needs, in one tree."""
+    """Every subject item registered on every surface it needs, in one tree.
+
+    ``records`` captures what admission must keep identical: each item's record and the
+    bytes of each file that is itself a subject item (model ledgers, schemas).
+    """
     gaps: list[str] = []
     records: dict[str, Any] = {}
-    invariants = _ids(tree.yaml("semantics/invariants.yaml").get("invariants"))
+    invariant_entries = tree.yaml("semantics/invariants.yaml").get("invariants") or []
     terms = tree.yaml("semantics/vocabulary.yaml").get("terms") or {}
     contracts = tree.yaml("semantics/contracts.yaml").get("contracts") or []
     sources = _sources(tree)
@@ -249,13 +298,15 @@ def registration(tree: Tree, subject: dict[str, list[str]]) -> dict[str, Any]:
         records[f"{kind}:{ident}"] = found[0]
         return found[0]
 
+    def file_record(key: str, rel: str) -> bool:
+        data = tree.read(rel)
+        if data is None:
+            return False
+        records[key] = sha_bytes(data)
+        return True
+
     for ident in subject["invariants"]:
-        if invariants.count(ident) != 1:
-            gaps.append(f"invariant {ident}: defined {invariants.count(ident)} times")
-        else:
-            unique(
-                "invariant", ident, tree.yaml("semantics/invariants.yaml")["invariants"]
-            )
+        unique("invariant", ident, invariant_entries)
     for term in subject["vocabulary_terms"]:
         if term not in terms:
             gaps.append(f"vocabulary term {term}: absent from vocabulary.yaml terms")
@@ -272,7 +323,7 @@ def registration(tree: Tree, subject: dict[str, list[str]]) -> dict[str, Any]:
             continue
         records[f"source:{ref}"] = entry
         path = entry.get("path")
-        if not isinstance(path, str) or tree.read(path) is None:
+        if not isinstance(path, str) or not file_record(f"source_file:{ref}", path):
             gaps.append(f"canonical source {ref}: path {path} does not exist")
         elif Path(path).name not in catalogs:
             gaps.append(
@@ -289,10 +340,11 @@ def registration(tree: Tree, subject: dict[str, list[str]]) -> dict[str, Any]:
             )
             continue
         records[f"source_class:{cls}"] = decl
-        if not any(e.get("path") == f"semantics/{artifact}" for e in sources.values()):
-            gaps.append(
-                f"source class {cls}: semantics/{artifact} is not a registered source"
-            )
+        rel = f"semantics/{artifact}"
+        if not any(e.get("path") == rel for e in sources.values()):
+            gaps.append(f"source class {cls}: {rel} is not a registered source")
+        elif not file_record(f"source_class_file:{cls}", rel):
+            gaps.append(f"source class {cls}: {rel} does not exist")
     for ref in subject["projection_profiles"]:
         profile = unique("projection profile", ref, projections)
         if profile is None:
@@ -324,12 +376,9 @@ def registration(tree: Tree, subject: dict[str, list[str]]) -> dict[str, Any]:
             gaps.append(
                 f"schema {name}: not in generic_compiler_manifest artifact_schemas"
             )
-        data = tree.read(f"semantics/{name}")
-        if data is None:
+        if not file_record(f"schema:{name}", f"semantics/{name}"):
             gaps.append(f"schema {name}: semantics/{name} does not exist")
-            continue
-        records[f"schema:{name}"] = hashlib.sha256(data).hexdigest()
-        if name not in consts.values():
+        elif name not in consts.values():
             gaps.append(f"schema {name}: no properties.schema.const declared")
     return {"status": "pass" if not gaps else "fail", "gaps": gaps, "records": records}
 
@@ -350,37 +399,41 @@ def release_status(tree: Tree, version: str) -> str:
         return "MISSING"
     for line in data.decode("utf-8", "replace").splitlines():
         if line.startswith("Status:"):
-            upper = line.upper()
-            if "CANDIDATE" in upper or "NOT ADMITTED" in upper:
-                return "CANDIDATE"
-            if "ADMITTED" in upper:
+            if ADMITTED_STATUS.match(line):
                 return "ADMITTED"
-            return "UNKNOWN"
-    return "UNKNOWN"
+            return "CANDIDATE" if "CANDIDATE" in line.upper() else "OTHER"
+    return "OTHER"
 
 
 def accepted_adr(tree: Tree, version: str) -> str | None:
+    """The ADR whose status accepts exactly this version, not a candidate of it."""
     pattern = re.compile(
-        r"^\*\*Status:\*\*\s*Accepted\b.*\b" + re.escape(version) + r"\b"
+        r"^\*\*Status:\*\*\s*Accepted for (?:semantic-foundation )?"
+        + re.escape(version)
+        + r"(?![\w-]|\.\w)(?!\s+candidate)"
     )
     for name in tree.listdir("docs/adr"):
         if not name.startswith("ADR-"):
             continue
-        data = tree.read(f"docs/adr/{name}") or b""
+        data = tree.read(f"docs/adr/{name}")
+        if data is None:
+            raise InputError(f"docs/adr/{name} listed but unreadable")
         for line in data.decode("utf-8", "replace").splitlines()[:8]:
-            if pattern.search(line):
+            if pattern.match(line):
                 return name
     return None
 
 
 def release_coverage(tree: Tree, version: str, files: list[str]) -> dict[str, Any]:
     gaps: list[str] = []
-    manifest = (tree.read(f"{RELEASES}/{version}/MANIFEST.md") or b"").decode(
-        "utf-8", "replace"
-    )
+    manifest_raw = tree.read(f"{RELEASES}/{version}/MANIFEST.md")
     hashes_raw = tree.read(f"{RELEASES}/{version}/HASHES.sha256")
-    if hashes_raw is None:
-        return {"status": "fail", "gaps": [f"{version}: HASHES.sha256 missing"]}
+    if manifest_raw is None or hashes_raw is None:
+        return {
+            "status": "fail",
+            "gaps": [f"{version}: MANIFEST.md or HASHES.sha256 missing"],
+        }
+    manifest = manifest_raw.decode("utf-8", "replace")
     hashes: dict[str, str] = {}
     for line in hashes_raw.decode("utf-8", "replace").splitlines():
         parts = line.split(None, 1)
@@ -392,21 +445,39 @@ def release_coverage(tree: Tree, version: str, files: list[str]) -> dict[str, An
         data = tree.read(rel)
         if rel not in hashes:
             gaps.append(f"{version}: HASHES.sha256 has no entry for {rel}")
-        elif data is None or hashlib.sha256(data).hexdigest() != hashes[rel]:
+        elif data is None or sha_bytes(data) != hashes[rel]:
             gaps.append(f"{version}: {rel} bytes differ from the release hash")
     return {"status": "pass" if not gaps else "fail", "gaps": gaps}
 
 
-def last_commit_touching(repo: Path, ref: str, rel: str) -> str | None:
-    return git(repo, "log", "-1", "--format=%H", ref, "--", rel) or None
+def admission_commit(repo: Path, main: str, version: str) -> str | None:
+    """The oldest commit on main whose release README carries the ADMITTED status line."""
+    log = git_out(
+        repo,
+        "log",
+        "--format=%H",
+        "--reverse",
+        main,
+        "--",
+        f"{RELEASES}/{version}/README.md",
+    )
+    for commit in log.split():
+        if release_status(Tree(repo, commit), version) == "ADMITTED":
+            return commit
+    return None
+
+
+def _drift(admitted: dict[str, Any], other: dict[str, Any]) -> list[str]:
+    return sorted(k for k, v in admitted.items() if digest(other.get(k)) != digest(v))
 
 
 def admission(
-    repo: Path, main_ref: str, subject: dict[str, list[str]]
+    repo: Path,
+    main_ref: str,
+    subject: dict[str, list[str]],
+    head_records: dict[str, Any],
 ) -> dict[str, Any]:
-    """Highest admitted release on main_ref that covered the subject, and currentness."""
-    if git(repo, "rev-parse", "--verify", f"{main_ref}^{{commit}}") is None:
-        raise InputError(f"{main_ref} does not resolve; fetch it first")
+    """Highest admitted release on main that covered the subject, and currentness."""
     main = Tree(repo, main_ref)
     main_reg = registration(main, subject)
     tried: list[dict[str, Any]] = []
@@ -421,16 +492,26 @@ def admission(
         tried.append(entry)
         if status != "ADMITTED" or adr is None:
             continue
-        commit = last_commit_touching(
-            repo, main_ref, f"{RELEASES}/{version}/HASHES.sha256"
-        )
-        entry["release_commit"] = commit
+        commit = admission_commit(repo, main.ref, version)
+        entry["admission_commit"] = commit
         if commit is None:
+            entry["reason"] = "no commit on main flips this release to ADMITTED"
+            continue
+        later = git_out(
+            repo,
+            "log",
+            "--format=%H",
+            f"{commit}..{main.ref}",
+            "--",
+            f"{RELEASES}/{version}",
+        )
+        if later:
+            entry["reason"] = f"release record edited after admission: {later.split()}"
             continue
         at_release = Tree(repo, commit)
         reg = registration(at_release, subject)
         if reg["status"] != "pass":
-            entry["registered_at_release"] = False
+            entry["registered_at_admission"] = False
             continue
         coverage = release_coverage(
             at_release, version, subject_files(at_release, subject)
@@ -438,18 +519,17 @@ def admission(
         entry["release_coverage"] = coverage
         if coverage["status"] != "pass":
             continue
-        drift = sorted(
-            key
-            for key, value in reg["records"].items()
-            if digest(main_reg["records"].get(key)) != digest(value)
+        entry["changed_on_main_since_admission"] = _drift(
+            reg["records"], main_reg["records"]
         )
-        entry["changed_since_admission"] = drift
-        entry["current_on_main"] = main_reg["status"] == "pass" and not drift
-        return {
-            "status": "pass" if entry["current_on_main"] else "fail",
-            **entry,
-            "tried": tried,
-        }
+        entry["changed_at_head_since_admission"] = _drift(reg["records"], head_records)
+        current = (
+            main_reg["status"] == "pass"
+            and not entry["changed_on_main_since_admission"]
+            and not entry["changed_at_head_since_admission"]
+        )
+        entry["current"] = current
+        return {"status": "pass" if current else "fail", **entry, "tried": tried}
     return {
         "status": "fail",
         "reason": "no admitted release on main covers the subject",
@@ -471,34 +551,60 @@ def _compiler(compiler_src: Path, args: list[str]) -> subprocess.CompletedProces
     )
 
 
-def _artifact_results(stdout: str) -> tuple[str | None, list[dict[str, Any]]]:
+def _mapping(stdout: str, what: str) -> dict[str, Any]:
     try:
-        doc = yaml.safe_load(stdout) or {}
-    except yaml.YAMLError:
-        return None, []
-    arts = [
+        doc = yaml.safe_load(stdout)
+    except yaml.YAMLError as exc:
+        raise InputError(f"compiler {what} output is not YAML: {exc}") from exc
+    if not isinstance(doc, dict):
+        raise InputError(f"compiler {what} output is not a mapping")
+    return doc
+
+
+def _artifacts(doc: dict[str, Any], what: str) -> list[dict[str, Any]]:
+    arts = doc.get("artifacts")
+    if not isinstance(arts, list) or not all(isinstance(a, dict) for a in arts):
+        raise InputError(f"compiler {what} output has no artifacts list")
+    return [
         {
             "ref": a.get("ref"),
             "result": a.get("result"),
             "path": a.get("path"),
             "unresolved": a.get("unresolved_criteria") or [],
         }
-        for a in doc.get("artifacts") or []
-        if isinstance(a, dict)
+        for a in arts
     ]
-    return doc.get("result"), arts
+
+
+def _request_path(output_root: Path, ref: str, kind: str) -> Path:
+    path = (
+        output_root
+        / "requests"
+        / (re.sub(r"[^A-Za-z0-9_.-]", "_", ref) + f".{kind}.yaml")
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def downstream(
     repo: Path, compiler_src: Path, output_root: Path, subject: dict[str, list[str]]
 ) -> dict[str, Any]:
     """Run the real compiler at the checkout's HEAD; every artifact must PASS."""
-    if git(repo, "status", "--porcelain", "--untracked-files=no"):
+    if not subject["projection_profiles"] and not subject["composition_profiles"]:
+        return {
+            "status": "not_applicable",
+            "reason": "the subject names no profile to compile",
+        }
+    if not (compiler_src / "src" / "l9_semantic_compiler").is_dir():
+        raise InputError(
+            f"{compiler_src} is not an l9-semantic-compiler-engine checkout"
+        )
+    if git_out(repo, "status", "--porcelain", "--untracked-files=no"):
         return {
             "status": "fail",
             "reason": "checkout has tracked changes; compile a clean revision",
         }
-    revision = git(repo, "rev-parse", "HEAD")
+    revision = git_out(repo, "rev-parse", "HEAD")
     authority = {"repository": REPOSITORY, "root": str(repo), "revision": revision}
     output_root.mkdir(parents=True, exist_ok=True)
     results: dict[str, Any] = {"projections": {}, "compositions": {}}
@@ -507,18 +613,9 @@ def downstream(
     for ref in subject["projection_profiles"]:
         coords = _compiler(
             compiler_src,
-            [
-                "projection-coordinates",
-                "--authority-root",
-                str(repo),
-                "--revision",
-                str(revision),
-                "--repository",
-                REPOSITORY,
-                "--profile",
-                ref,
-            ],
-        )
+            ["projection-coordinates", "--authority-root", str(repo), "--revision", revision,
+             "--repository", REPOSITORY, "--profile", ref],
+        )  # fmt: skip
         if coords.returncode != 0:
             results["projections"][ref] = {
                 "result": "coordinates_failed",
@@ -526,7 +623,13 @@ def downstream(
             }
             failed = True
             continue
-        pins = yaml.safe_load(coords.stdout)
+        pins = _mapping(coords.stdout, "projection-coordinates")
+        if not isinstance(pins.get("projection_profile"), dict) or not isinstance(
+            pins.get("sources"), list
+        ):
+            raise InputError(
+                "projection-coordinates output lacks projection_profile or sources"
+            )
         request = {
             "schema": "l9.semantic-projection-request/v1",
             "authority": authority,
@@ -534,26 +637,27 @@ def downstream(
             "sources": pins["sources"],
             "output_root": str(output_root),
         }
-        path = (
-            output_root
-            / "requests"
-            / (ref.replace("/", "_").replace("@", "_") + ".project.yaml")
-        )
-        path.parent.mkdir(parents=True, exist_ok=True)
+        path = _request_path(output_root, ref, "project")
         path.write_text(yaml.safe_dump(request), encoding="utf-8")
         done = _compiler(compiler_src, ["project", str(path)])
-        result, arts = _artifact_results(done.stdout)
+        doc = _mapping(done.stdout, "project")
+        arts = _artifacts(doc, "project")
+        expected = sorted(
+            f"{ref}#{s.get('ref')}" for s in pins["sources"] if isinstance(s, dict)
+        )
+        covered = sorted(a["ref"] for a in arts) == expected
         ok = (
             done.returncode == 0
-            and result == "pass"
-            and arts
+            and doc.get("result") == "pass"
+            and covered
             and all(a["result"] == "pass" for a in arts)
         )
         failed |= not ok
         produced[ref] = [a["path"] for a in arts if a["path"]]
         results["projections"][ref] = {
             "exit": done.returncode,
-            "result": result,
+            "result": doc.get("result"),
+            "covers_pinned_sources": covered,
             "artifacts": arts,
         }
     compositions = (
@@ -580,24 +684,21 @@ def downstream(
             "components": sorted(components),
             "output_root": str(output_root),
         }
-        path = (
-            output_root
-            / "requests"
-            / (ref.replace("/", "_").replace("@", "_") + ".compose.yaml")
-        )
+        path = _request_path(output_root, ref, "compose")
         path.write_text(yaml.safe_dump(request), encoding="utf-8")
         done = _compiler(compiler_src, ["compose", str(path)])
-        result, arts = _artifact_results(done.stdout)
+        doc = _mapping(done.stdout, "compose")
+        arts = _artifacts(doc, "compose")
         ok = (
             done.returncode == 0
-            and result == "pass"
-            and arts
-            and all(a["result"] == "pass" for a in arts)
+            and doc.get("result") == "pass"
+            and len(arts) == 1
+            and arts[0]["result"] == "pass"
         )
         failed |= not ok
         results["compositions"][ref] = {
             "exit": done.returncode,
-            "result": result,
+            "result": doc.get("result"),
             "artifacts": arts,
         }
     return {"status": "fail" if failed else "pass", "revision": revision, **results}
@@ -633,18 +734,19 @@ def evaluate(
     output_root: Path | None = None,
 ) -> dict[str, Any]:
     head = Tree(repo)
+    main_revision = resolve_commit(repo, main_ref)
     report: dict[str, Any] = {
         "schema": REPORT_SCHEMA,
         "repository": REPOSITORY,
-        "head": git(repo, "rev-parse", "HEAD"),
+        "head": git_out(repo, "rev-parse", "HEAD"),
         "main_ref": main_ref,
-        "main_revision": git(repo, "rev-parse", main_ref),
+        "main_revision": main_revision,
         "subject": subject,
     }
-    report["registration"] = registration(head, subject)
-    report["registration"].pop("records")
+    reg = registration(head, subject)
+    report["registration"] = {"status": reg["status"], "gaps": reg["gaps"]}
     verdict = "INCOMPLETE"
-    if report["registration"]["status"] == "pass":
+    if reg["status"] == "pass":
         verdict = "REGISTERED"
         report["validator"] = run_validator(repo)
         versions = release_versions(head)
@@ -661,14 +763,14 @@ def evaluate(
             and report["release"]["status"] == "pass"
         ):
             verdict = "RELEASED_CANDIDATE"
-            report["admission"] = admission(repo, main_ref, subject)
+            report["admission"] = admission(repo, main_ref, subject, reg["records"])
             if report["admission"]["status"] == "pass":
                 verdict = "ADMITTED"
     if compiler_src is not None:
         if output_root is None:
             raise InputError("--compiler-src needs --output-root")
         report["downstream"] = downstream(repo, compiler_src, output_root, subject)
-        report["downstream"]["head_is_main"] = report["head"] == report["main_revision"]
+        report["downstream"]["head_is_main"] = report["head"] == main_revision
         if (
             verdict == "ADMITTED"
             and report["downstream"]["status"] == "pass"
@@ -692,7 +794,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.require == "downstream" and args.compiler_src is None:
             raise InputError("--require downstream needs --compiler-src")
         repo = args.checkout.resolve()
-        if git(repo, "rev-parse", "--show-toplevel") != str(repo):
+        top = run_git(repo, "rev-parse", "--show-toplevel")
+        if top.returncode != 0 or top.stdout.strip() != str(repo):
             raise InputError(f"{repo} is not the top of a git checkout")
         report = evaluate(
             repo,
