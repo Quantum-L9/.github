@@ -154,9 +154,10 @@ try {
 		categories: ["community-health"],
 		repository: "Quantum-L9/example",
 	})["SECURITY.md"];
-	assert.match(
-		security,
-		/https:\/\/github\.com\/Quantum-L9\/example\/security\/advisories\/new/,
+	assert.ok(
+		security.includes(
+			"https://github.com/Quantum-L9/example/security/advisories/new",
+		),
 	);
 	assert.doesNotMatch(
 		security,
@@ -168,9 +169,10 @@ try {
 		categories: ["issue-templates"],
 		repository: "Quantum-L9/example",
 	})[".github/ISSUE_TEMPLATE/config.yml"];
-	assert.match(
-		cfg,
-		/https:\/\/github\.com\/Quantum-L9\/example\/security\/advisories\/new/,
+	assert.ok(
+		cfg.includes(
+			"https://github.com/Quantum-L9/example/security/advisories/new",
+		),
 	);
 
 	// The default payload's dependabot.yml is the github-actions-only golden,
