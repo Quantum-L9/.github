@@ -18,6 +18,11 @@ Stacked on the v3.28.0 candidate (Quantum-L9/.github#214); no file that v3.28.0 
   - It maps interface actions to registered handlers, consequential operations to Gate runtime idempotency, and forbidden actions to absent registrations.
   - It binds existing port and adapter implementations by the manifest's `implementation_ref` and verifies them; it never regenerates them.
   - It emits behavior code only where an admitted behavior contract determines it, and fails closed on anything unresolved.
+- `semantics/product_topology.schema.yaml`:
+  - It admits the item shapes of the port and adapter entry lists, as the Semantic Compiler already enforces them.
+  - It admits the optional `implementation_ref` source coordinate (`<path>[::<symbol>]`, relative to the RepositorySpec directory, never escaping it). The binding binds existing code through this coordinate.
+  - The coordinate is a declared source location: it creates no code, carries no semantic authority, and never makes an entry resolve.
+  - The manifest preserves it exactly.
 - ADR-025.
 
 ## Evidence

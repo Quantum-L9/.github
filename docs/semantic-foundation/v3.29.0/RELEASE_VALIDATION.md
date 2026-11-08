@@ -13,7 +13,8 @@ Candidate status: **additive successor candidate**.
 - **Not mechanically checked:**
   - `target.transport_technology`: a scratch-copy probe setting it to an unregistered id raised no failure beyond the expected SC-008 hash mismatch, because SC-006 reads only `target.technology` and `provider.technology`. `gate-sdk` is registered in `technology_capabilities.yaml`, so the shipped value is correct by inspection only.
   - The eight `maps` entries and fourteen `rules` of the new binding.
-  - The five new manifest semantic rules, and the exactness of a manifest's `interfaces` and `effects` copy against its source topology.
+  - The six new manifest semantic rules, and the exactness of a manifest's `interfaces`, `effects` and `implementation_ref` copies against its source topology.
+  - The new `entry_shapes` block and the three new topology rules, including the form, confinement and symbol rules of `implementation_ref`. The Semantic Compiler at `3bf1a82` enforces the port and adapter resolution law that the shapes record; it does not yet check the coordinate.
 - **SC-008** proves this release record:
   - the manifest lists all **82** canonical sources;
   - the ADR count is **25**;

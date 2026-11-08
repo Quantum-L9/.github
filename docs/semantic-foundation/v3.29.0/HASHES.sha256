@@ -1,6 +1,6 @@
-68091e868b3df6807d292ddacff2f75ffa12e37a7c91e401a803e64f821a4090  ./MANIFEST.md
-00729f5b6e43417789f898b42c0223bfbe5528f6da9bbe3b261fffcb70d570c3  ./README.md
-71d7b921be87cff972e3ba37af0c385e997ff9680abea75ef1253e93a72027da  ./RELEASE_VALIDATION.md
+f44fa1e6571cc94dd2dfe3ddb64f6f02136366573410840ba0f5e315c9716009  ./MANIFEST.md
+7d71c100db467b6ae33989645a8764bf8b5e71eb9fe131bc662a54d05f651302  ./README.md
+35e0625968c4acfe98be0d05f54d9289107d47221b5b68ba8ab1edd982c604e8  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -25,7 +25,7 @@ f853a6bd29ccd7c07fcbf8837489436f22e680b3255d6b872fd3fb1e23ac0c87  ./docs/adr/ADR
 9823ea123ba605a3e1007f2f71e950b4fb6c86b4010955f26830e73487860708  ./docs/adr/ADR-022-pr-audit-projection-composition-schemas-and-closure.md
 35f22e9b5ae3c10a29ce81055fe58df2b5c116fad086e4f5520f82b06a004c3a  ./docs/adr/ADR-023-operating-plane-v2-major-successor-and-declared-selection-removal.md
 1f7417bc76c83e7e7080eb35531d9907b0fc3eae174effa26cc851fe836d93d6  ./docs/adr/ADR-024-artifact-header-field-semantics.md
-6a7a16000fcd24c26a10bc96c478c181df6d569a4734a46879e1d04d32346349  ./docs/adr/ADR-025-manifest-interface-surface-and-python-gate-node-binding.md
+25275ca3247c9a1947866b7b18a9434856a97a25865d69a1ece9fed033a4d6d0  ./docs/adr/ADR-025-manifest-interface-surface-and-python-gate-node-binding.md
 415238bf1db999ae27705e6b6859ab6f977f4a4a9b60167bf01c91b0296df8df  ./docs/adr/README.md
 34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f  ./semantics/actor_registry.yaml
 09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4  ./semantics/affected_strategic_closure.schema.yaml
@@ -78,8 +78,8 @@ f53354d355b2d1f5a2e69fb80a30eccb4e73fa8bacaea43071f12a0270a07098  ./semantics/po
 f3cb7f3b3eec113c8998ed4108aff524755b982dc6e11b82bc89f11733fc5e82  ./semantics/pr_audit_composition.schema.yaml
 7992d47d2f0cb83b427ccfeab4037664816fe4775b595ea3ebbeb9f05382c5dd  ./semantics/pr_audit_projection.schema.yaml
 294ae7a47b93619bd655619874d962b244e5c027eb6dd31ea508c53d129ace13  ./semantics/product_kinds.yaml
-9da05ed1ea6d3ebf53f1ceab8c4a07c2648f8702fc095f9eab81e1b67c3632e7  ./semantics/product_manifest.schema.yaml
-5ecf2e7a18eef93177230a7f379453dfcd444bedad9f74eba4d1504737bc6520  ./semantics/product_topology.schema.yaml
+3a2cbc316b090e59a06dcd7bb0393f4bc56b7f65e3a08c64403d815ce22e7ede  ./semantics/product_manifest.schema.yaml
+a2510f4fc80b755d25b66c08f0d723e2f14b65966d6689b8b426ea23e5c3abf4  ./semantics/product_topology.schema.yaml
 92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e  ./semantics/projection_artifact.schema.yaml
 fabe78189f47e7463b99da27b58da1b3d72561b8a8d3913ede06dd821f88e5f1  ./semantics/projection_engine_contract.yaml
 9f27914e2e3c6794fa5448444e2b253b9f1c9a2935a6c897e5303ae0f908841c  ./semantics/projection_profiles.yaml

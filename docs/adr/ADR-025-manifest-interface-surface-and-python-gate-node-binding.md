@@ -46,13 +46,23 @@ Option C.
    - Port and adapter implementations are bound by the manifest's `implementation_ref` and verified, never regenerated. Behavior code is emitted only where an admitted behavior contract determines it.
    - Anything unresolved fails closed, and an optional port is never given an invented adapter.
    - The binding emits no HTTP route, authentication, peer URL or routing logic.
-3. No RC check is added. No compiler, Gate SDK, product, IR catalog, compilation profile or solver catalog change is part of this release.
+3. `semantics/product_topology.schema.yaml` admits the item shapes of `port_binding_list` and `adapter_requirement_list` under a new `entry_shapes` block, with the optional `implementation_ref` source coordinate. The field types were previously named but never defined anywhere in the Foundation, so the binding's `implementation_ref` named an unadmitted coordinate (review finding on Quantum-L9/.github#217).
+   - The shapes record the port and adapter law the Semantic Compiler already enforces at `3bf1a82`:
+     - a port needs an explicit, unique, non-forbidden `port_ref` and non-empty `contract_refs` that resolve through the product's own contract authority;
+     - an adapter needs an explicit, unique, non-forbidden `adapter_ref` and at least one of `port_ref` or `realizes_port` naming a resolved port;
+     - `capability_ref`, `contract_refs` and provider coordinates must resolve when present;
+     - a declared `transport` stays unresolved.
+   - Fields that are not listed are descriptive: they are permitted and can never make an entry resolve.
+   - `implementation_ref` has the form `<repository-relative POSIX path>[::<top-level symbol>]`. The path is relative to the directory holding the product's RepositorySpec and may not escape it. The coordinate names existing code and creates none. It is a declared source location, not semantic authority, and it never makes a port or adapter resolve.
+   - Three topology semantic rules state this. The manifest gains `manifest_preserves_each_port_and_adapter_implementation_ref_exactly_from_the_source_topology`.
+4. No RC check is added. No compiler, Gate SDK, product, IR catalog, compilation profile or solver catalog change is part of this release.
 
 ## Review findings (recorded, not resolved)
 
 - The properties are typed only as `object`, like most manifest properties. Their field shape is the topology's. No release check pins that the manifest copy is exact; the compiler must prove it.
 - `final-conformance/v1` and `implementation-contract-validator/v1` are registered solvers with no implementation in the Semantic Compiler at `3bf1a82`. Implementing them is compiler work that follows this release.
-- The compiler pins canonical meaning to `Quantum-L9/.github@020a94b` and does not read `binding_catalog.yaml` today. Consuming this release requires a compiler re-pin to the admitted revision.
+- The compiler pins canonical meaning to `Quantum-L9/.github@020a94b` and does not read `binding_catalog.yaml` today. `product_topology.schema.yaml` is one of the five catalogs it pins by blob id, so consuming this release requires re-pinning that catalog and the authority revision.
+- The `entry_shapes` and `implementation_source_coordinate` rules are not pinned by a release check. The compiler enforces the port and adapter resolution law today; it does not yet check the coordinate's form, confinement or symbol.
 - No ledger yet defines an executable behavior contract. Until one is admitted, the binding emits Node shells that bind existing implementations and generates no behavior.
 
 ## Consequences

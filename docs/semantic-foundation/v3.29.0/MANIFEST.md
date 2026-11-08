@@ -100,16 +100,22 @@ v3.29.0 adds ADR-025 (manifest interface surface and the Python Gate Node target
 
 - `semantics/product_manifest.schema.yaml` (`l9.schema/product-manifest@1`):
   - New optional object properties `interfaces` and `effects`.
-  - Five new semantic rules:
+  - Six new semantic rules:
     - `manifest_interfaces_and_effects_preserve_the_source_topology_declarations_exactly`
     - `manifest_interfaces_and_effects_are_required_when_the_source_topology_declares_them`
     - `implementation_lowering_takes_inbound_action_routing_only_from_manifest_interfaces`
     - `implementation_lowering_takes_consequential_operation_idempotency_only_from_manifest_effects`
     - `an_interface_action_or_consequential_operation_absent_from_the_manifest_is_not_lowered`
+    - `manifest_preserves_each_port_and_adapter_implementation_ref_exactly_from_the_source_topology`
   - The `required` list and the `resolved_manifest_gate` are unchanged.
 - `semantics/binding_catalog.yaml` (`l9.binding-catalog/global@1`): admits the target binding `l9.binding/python-gate-node@1`.
   - Shape: `source_ir: implementation_ir`, `target_ir: target_ir`, `target.technology: python`, `target.transport_technology: gate-sdk`, `target.semantic_profile: gate_node_shell`, `applies_to.product_kind: node`.
   - It has 8 maps and 14 fail-closed rules.
+- `semantics/product_topology.schema.yaml` (`l9.schema/product-topology@1`): a new `entry_shapes` block.
+  - It gives the item shapes of `port_binding_list` (required `port_ref` and `contract_refs`) and `adapter_requirement_list` (required `adapter_ref`, and one of `port_ref` or `realizes_port`). Both are the port and adapter law the Semantic Compiler already enforces. Unlisted fields are descriptive.
+  - It defines `implementation_source_coordinate` (`<repository-relative POSIX path>[::<top-level symbol>]`) for the optional `implementation_ref` field.
+  - Three semantic rules are added: `port_and_adapter_entries_follow_entry_shapes`, `implementation_ref_is_an_optional_declared_source_coordinate_not_semantic_authority` and `implementation_ref_never_makes_a_port_or_adapter_resolve`.
+  - The `required` list, `kind_resolution` and the product fields are unchanged.
 - `docs/adr/README.md`: indexes ADR-025.
 
 No other ledger, rule, profile, criterion, contract or invariant changes.
