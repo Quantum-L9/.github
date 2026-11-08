@@ -1,9 +1,9 @@
 {
 	"schema": "l9.strategic-value-dotgithub-qualification-candidate/v3",
-	"status": "TWO_INVARIANT_REDUCTION_LOCAL_PASS_COMPOSITION_UNKNOWN_NOT_ADMITTED",
+	"status": "TWO_INVARIANT_CANDIDATE_OWNER_APPROVED_QUALIFIED_NOT_ADMITTED",
 	"pack_id": "SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1",
 	"base_repo": "Quantum-L9/.github",
-	"base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"base_sha": "b085dba0533b22be24eebef80c99d8b520268afa",
 	"source_pr": 212,
 	"source_candidate_sha": "85531616cee2da94bbb7154418a78537549a4d76",
 	"donor": "Quantum-L9/l9-wip#6",
@@ -18,7 +18,7 @@
 	"source_classes": 5,
 	"composition_profiles": 1,
 	"canonical_destination_paths": 13,
-	"local_tests": 82,
+	"local_tests": 114,
 	"local_test_exit_code": 0,
 	"local_test_pass": true,
 	"independently_runnable_purpose_built_falsifiers": 6,
@@ -32,7 +32,7 @@
 	"independent_review": "SEPARATE_AGENT_REVIEW_NOT_HUMAN_OR_OWNER",
 	"native_schema_qualification": "PASS_26_CHECKS_COMPILER_3bf1a82",
 	"five_source_compilation": "PASS_AGAINST_LOCAL_REHEARSAL_REVISION_0b50cf7_TREE_bb07371",
-	"composition": "UNKNOWN_REQUIRED_PROVENANCE_DECLARED_CONSTRAINTS_UNRESOLVED",
+	"composition": "PASS_AT_daca00e_WITH_COMPILER_33e4c58_R2",
 	"native_semantic_validation": "ORDINARY_CHECKS_PASS_SC008_SC010_FAIL_SUCCESSOR_RELEASE_INVENTORY_REQUIRED",
 	"canonical_admission": "NOT_PERFORMED",
 	"remote_mutation": "candidate-pack PR only; no canonical semantics, release, merge or admission",
@@ -64,8 +64,8 @@
 		},
 		{
 			"path": "README.md",
-			"bytes": 10297,
-			"sha256": "c95cc8fd33838a252b8b2c27fb0b6f5113d2dd9b0c604a03fd30637783ca8d5f"
+			"bytes": 12360,
+			"sha256": "d317d8e66b17df7673ff8761edadfa0c9c916147d0979531846d003af864a0b2"
 		},
 		{
 			"path": "SCHEMA_QUALIFICATION_REVIEW.md",
@@ -74,8 +74,8 @@
 		},
 		{
 			"path": "apply_to_pinned_checkout.py",
-			"bytes": 27695,
-			"sha256": "7208096e14f670746caa8945a93534367458efab10c0ca668e4f923fcd5ded04"
+			"bytes": 29587,
+			"sha256": "81e7ac6723dca84dce00ffb91b2ad6cf19694002c60aa59707aeb9d36e868787"
 		},
 		{
 			"path": "evidence/SV015_falsification.json",
@@ -113,6 +113,61 @@
 			"sha256": "487f252a311559a507a3dcb90b13cab13c62c2db9c33631f5b09eabe578b986a"
 		},
 		{
+			"path": "evidence/admission/ADMISSION_CLOSEOUT.md",
+			"bytes": 8336,
+			"sha256": "f9d18690d3875feb0420d4f0073b6bdcfdf25d4fd33486235a3859a5b83f7fd5"
+		},
+		{
+			"path": "evidence/admission/composition-provenance-equivalence.json",
+			"bytes": 8763,
+			"sha256": "0adbcea0b47679a2a40d16ade832ac7601b09ba1cef721387fb947fe1c9074a3"
+		},
+		{
+			"path": "evidence/admission/owner-decision.yaml",
+			"bytes": 6472,
+			"sha256": "6d285c6ce344b70aa8e1a5d99736c953043ea55125fb2853cd30157f34276bd5"
+		},
+		{
+			"path": "evidence/admission/qualification-daca00e/admission-closure-gate.json",
+			"bytes": 4065,
+			"sha256": "d098d9df9076615447cd3abccdb3ddd37f8c8e4c0aca61d2f0f15c5244809c7c"
+		},
+		{
+			"path": "evidence/admission/qualification-daca00e/determinism.json",
+			"bytes": 7913,
+			"sha256": "13dc39d89804dbd100ad61d50199311bd0b65276ebeb7467384cdb9cda4c086f"
+		},
+		{
+			"path": "evidence/admission/qualification-daca00e/native-schema-qualification.json",
+			"bytes": 5729,
+			"sha256": "20f7a60cb95009906bdad53e0a9f74d619bb6c92ca547a913930d96501a22c7a"
+		},
+		{
+			"path": "evidence/admission/qualification-daca00e/producer-negative-controls.json",
+			"bytes": 12703,
+			"sha256": "81c838e186e5e1d267a757b78f0555567b0fd823a7f1054da0d10be55548cdd1"
+		},
+		{
+			"path": "evidence/admission/qualification-daca00e/producer-run1.tar",
+			"bytes": 522240,
+			"sha256": "7cd74ed7bcfcadeb97a30064b5e4f4cf800c353a5a10e63cb4e17d7366944db0"
+		},
+		{
+			"path": "evidence/admission/qualification-daca00e/producer-run2.tar",
+			"bytes": 522240,
+			"sha256": "fae7f68738e01342da1ea922e092684e5a68e3d850224fedda4101194d994400"
+		},
+		{
+			"path": "evidence/admission/qualification-daca00e/producer-summary.json",
+			"bytes": 2325,
+			"sha256": "0970361dfe77f78ab89002ed12c9dc6df81f35e6969d354052081951611b03e0"
+		},
+		{
+			"path": "evidence/admission/qualification-daca00e/provenance-verifier.json",
+			"bytes": 2542,
+			"sha256": "57d434d376abe0b309aff30f877bbe9d27944768c0518a8a7f3707fa602be5c2"
+		},
+		{
 			"path": "evidence/native_schema_gate.json",
 			"bytes": 162,
 			"sha256": "243fb90813e5b107c68bb1ce987554f5d863bd364bb6dc8dc51dcc52ec0224ab"
@@ -134,8 +189,8 @@
 		},
 		{
 			"path": "evidence/reduction-v1/admission-readiness.json",
-			"bytes": 5061,
-			"sha256": "c8009959b9956e2dbea97adcee1a52ae8ca2ced1d6ddbc3891ef69a8436c4ca6"
+			"bytes": 4520,
+			"sha256": "1165d7f51c5bd9987760100cccc874da416416b910c77175a1db9838d5c59505"
 		},
 		{
 			"path": "evidence/reduction-v1/authority-resolution.json",
@@ -219,8 +274,8 @@
 		},
 		{
 			"path": "evidence/reduction-v1/owner-disposition-ledger.yaml",
-			"bytes": 9988,
-			"sha256": "705ddf50502058c059f44cebdb4c39f2b3973c09aa1e0175ca3b2cd32051e762"
+			"bytes": 10071,
+			"sha256": "ce25c10910df47b432988ee2f7a5c658dd2cc02aab6ce99604a5a69d0b9c4a68"
 		},
 		{
 			"path": "evidence/reduction-v1/producer-negative-controls.json",
@@ -229,8 +284,8 @@
 		},
 		{
 			"path": "evidence/reduction-v1/producer_negative_controls.py",
-			"bytes": 15642,
-			"sha256": "12118a36318be65bdd02c1cde1819d7070d99d607bc46477aadeef9f2949f31a"
+			"bytes": 16031,
+			"sha256": "fc8f2d90dcdbb865da4bb240a394288fa9b86f04e2d95a2a2776b7afb9753d09"
 		},
 		{
 			"path": "evidence/reduction-v1/projection-run1.tar",
@@ -268,14 +323,19 @@
 			"sha256": "789826d08b1489d2b999f6974e6b28591c177f0897c52b93678edcf3b10df106"
 		},
 		{
+			"path": "overlays/composition_provenance_constraints.yaml",
+			"bytes": 405,
+			"sha256": "f06dd0d1a38802a64ee1746418af3e4fb1af782cad35bea99d7ba0445bebb5aa"
+		},
+		{
 			"path": "overlays/contracts_additions.yaml",
 			"bytes": 6181,
 			"sha256": "dcae0ce039f4277a44442436da0907a41ec8bace98f9aaa4fa594c57dcc41e8f"
 		},
 		{
 			"path": "overlays/invariants_additions.yaml",
-			"bytes": 1415,
-			"sha256": "d649596ab3f0649446e4e6d825d0f842b40ef29a7f2b2f85fbd8ac5060481ef6"
+			"bytes": 1312,
+			"sha256": "14832f76eeec42b1015194eaa8796b837d48dd4ab4b3991ce905a7e908702ec1"
 		},
 		{
 			"path": "overlays/projection_profile_additions.yaml",
@@ -410,12 +470,17 @@
 		{
 			"path": "tests/test_alignment.py",
 			"bytes": 4671,
-			"sha256": "514fbb52efcac3289d31eb357c545770d58c3df406301356c8a134b69c013003"
+			"sha256": "7182e3223c97d59a44cc27a1a935c9670041ae552dd66969a6c1e8f707e91bcf"
 		},
 		{
 			"path": "tests/test_candidate.py",
-			"bytes": 13353,
-			"sha256": "81c880c1f19583a3a86ed5754d87cac027ac764850c5684ab91263cdb70f2e92"
+			"bytes": 14524,
+			"sha256": "f571bd0f31965f224b08116b28308ff8824538c0846daf58bee7c0491ca442ff"
+		},
+		{
+			"path": "tests/test_composition_provenance_equivalence.py",
+			"bytes": 13359,
+			"sha256": "57d867df61daf0ccebe4c3de2a0751e36bec733e32c11c003ac63095a4b39245"
 		},
 		{
 			"path": "tests/test_irreducibility.py",
@@ -439,8 +504,8 @@
 		},
 		{
 			"path": "tests/test_reduction_closure.py",
-			"bytes": 17701,
-			"sha256": "34a7f9df1318b73f16900f622f739226d39f5e14c97896b92bc1a97663cdef8e"
+			"bytes": 19765,
+			"sha256": "1121c9a70f1660633222996018d2ca8e3bd82f69833f9e48438ba6e9a875e19c"
 		},
 		{
 			"path": "tests/test_schema_hardening.py",
@@ -453,9 +518,29 @@
 			"sha256": "b3b95c575f503a9b73bbca0f9c9dbf5e00ffaa1226a4e0133b0ca5d88e6846da"
 		},
 		{
+			"path": "tests/test_successor_release.py",
+			"bytes": 2322,
+			"sha256": "efdc8f25e831eee9506acb3c72005da0186dc912eceb4d921c72646e81dcdc91"
+		},
+		{
+			"path": "tests/verify_composition_provenance.py",
+			"bytes": 16744,
+			"sha256": "f29aa29ef3d472d90c64a5b8bc0ce15390f34ee4063a0e6608ccc40addb133cc"
+		},
+		{
+			"path": "tools/prepare_successor_release.py",
+			"bytes": 22126,
+			"sha256": "276b4dc36477ee4f93e33b9a59bffbd23acff790fc9b80ea7e4481e15f8e288a"
+		},
+		{
 			"path": "tools/reduce_to_two_invariants.py",
-			"bytes": 14263,
-			"sha256": "332b850688119691ca99d5ede0c253f978720b9230bf629a7537700f7448b8c8"
+			"bytes": 14969,
+			"sha256": "c950736d91a5e30ee914a9fea571a80628f6f1243313cd2f5a4e62e4a8a52911"
+		},
+		{
+			"path": "tools/run_producer_qualification.py",
+			"bytes": 10680,
+			"sha256": "89548c2907abcd85c455abfecd6bb366c7dd5064e25e18d2a03e10b91aa2396c"
 		},
 		{
 			"path": "tools/synthesize_candidate_schemas.py",
@@ -463,5 +548,34 @@
 			"sha256": "d1fdfe224cb6743d6180143b03cc54fd8cc62d8d145a9e57035470bed49fb7e6"
 		}
 	],
-	"no_skill_files": true
+	"no_skill_files": true,
+	"composition_provenance_equivalence": {
+		"result": "PASS_INDEPENDENT_EVIDENCE_NOT_COMPILER_PASS",
+		"evidence": "evidence/admission/composition-provenance-equivalence.json",
+		"verifier": "tests/verify_composition_provenance.py",
+		"negative_controls": 17,
+		"authority_revision": "0b50cf7a09c96986d2fcd46130032224ad7104a0"
+	},
+	"admission_closeout": {
+		"record": "evidence/admission/ADMISSION_CLOSEOUT.md",
+		"owner_decision_scaffold": "evidence/admission/owner-decision.yaml",
+		"owner_decision_status": "PENDING_UNTIL_AUTHORIZED",
+		"main_at_resolution": "b085dba"
+	},
+	"previous_base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"owner_decision": {
+		"record": "evidence/admission/owner-decision.yaml",
+		"status": "OWNER_APPROVED_NOT_ADMITTED",
+		"decided_on": "2026-11-08"
+	},
+	"canonical_admission_candidate": {
+		"branch": "agent/claude-code/sv-admission",
+		"base": "b085dba0533b22be24eebef80c99d8b520268afa",
+		"revision": "daca00e0d03c2205ef1bf51753dff539093d3999",
+		"semantics_tree": "f3c9c624db0905bd627a6a685eb5aa85477b981c",
+		"release_provisional": "v3.32.0",
+		"adr_provisional": "ADR-029",
+		"producer_revision": "33e4c5832bf73c7d9b0b70854af011e9582f1ab2",
+		"evidence": "evidence/admission/qualification-daca00e/"
+	}
 }

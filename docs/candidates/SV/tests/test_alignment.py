@@ -108,7 +108,7 @@ class AlignmentClosure(unittest.TestCase):
         script = (ROOT / "apply_to_pinned_checkout.py").read_text()
         self.assertRegex(
             script,
-            r"(?m)^BASE_SHA = ['\"]020a94bea86e7c5c5e4107da7014ec259508f397['\"]$",
+            r"(?m)^BASE_SHA = ['\"]b085dba0533b22be24eebef80c99d8b520268afa['\"]$",
         )
         self.assertNotIn("--expected-sha", script)
         self.assertIn("if actual != BASE_SHA:", script)

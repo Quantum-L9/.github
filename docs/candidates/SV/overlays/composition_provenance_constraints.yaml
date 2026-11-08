@@ -1,0 +1,13 @@
+provenance_constraints:
+  criterion_language:
+    name: l9.provenance-constraint
+    version: 1
+  definitions:
+    source_projection_refs:
+      criterion: component_projection_refs
+    source_projection_digests:
+      criterion: component_projection_digests
+    composition_profile_ref:
+      criterion: composition_profile_ref
+    composition_profile_digest:
+      criterion: composition_profile_digest

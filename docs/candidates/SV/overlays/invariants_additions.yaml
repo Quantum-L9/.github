@@ -1,11 +1,10 @@
 invariants:
 - id: L9-SV-001
   statement: For an assessment asserting quantified Strategic Value, declare the objective, compatible utility units, feasible counterfactual baseline,
-    bounded horizon, applicable discount and utility-flow basis, model/evidence coordinates, and material uncertainty. When causal intervention effects
-    are claimed, intervention and baseline must be defensibly comparable in their decision-relevant initial conditions, utility measure, exogenous context,
-    and temporal and observation basis, or their divergence must be explicitly identified and justified under the selected method. Convenient scenario pairing
-    or historical correlation alone does not establish a causal intervention effect. Unknown, incompatible, or materially unidentified inputs cannot establish
-    a complete causally attributed Strategic Value ranking.
+    bounded horizon, applicable discount and utility-flow basis, model/evidence coordinates and material uncertainty. Unknown or incompatible inputs cannot
+    establish a complete Strategic Value ranking. For a Strategic Value claim, a counterfactual comparison must identify the same decision-relevant initial
+    conditions, utility measure, exogenous context and time basis across intervention and baseline worlds, or explicitly quantify their divergence. A convenient
+    scenario pairing or historical correlation is not evidence of an identifiable causal intervention effect.
   scope: global
   owner: Quantum-L9/.github
 - id: L9-SV-002

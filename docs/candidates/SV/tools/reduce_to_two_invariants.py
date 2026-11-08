@@ -34,6 +34,8 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 DONOR = ROOT / "evidence" / "reduction-v1" / "donor"
 LEDGER = ROOT / "evidence" / "reduction-v1" / "owner-disposition-ledger.yaml"
+OWNER_DECISION_REF = "evidence/admission/owner-decision.yaml"
+OWNER_DECISION = ROOT / OWNER_DECISION_REF
 
 DONOR_SHA256 = {
     "invariants_additions.yaml": "b259540393a1e30573e09317760ea9919ccc049f87a461a10c62c9bd26aa48f3",
@@ -94,6 +96,25 @@ def load_donor():
     return donor
 
 
+def require_backed_decision(row, decision):
+    """A pending row carries no decision; an approved row must cite the approved record."""
+    status, ref = row["owner_decision_status"], row["owner_decision_ref"]
+    if status == "pending" and ref is None:
+        return
+    backed = (
+        status == "approved"
+        and ref == OWNER_DECISION_REF
+        and decision.get("decision_status") == "OWNER_APPROVED_NOT_ADMITTED"
+        and decision["approved_dispositions"].get(row["candidate_id"])
+        == row["disposition"]
+    )
+    if not backed:
+        raise ValueError(
+            f"{row['candidate_id']}: owner decision {status}/{ref} is not backed by an "
+            "approved owner-decision record for this disposition"
+        )
+
+
 def load_ledger():
     ledger = yaml.safe_load(LEDGER.read_text(encoding="utf-8"))
     ids = [row["candidate_id"] for row in ledger["dispositions"]]
@@ -112,14 +133,9 @@ def load_ledger():
         raise ValueError(
             "ledger selection must be the two kept IDs plus the ten existing IDs"
         )
+    decision = yaml.safe_load(OWNER_DECISION.read_text(encoding="utf-8"))
     for row in ledger["dispositions"]:
-        if (
-            row["owner_decision_ref"] is not None
-            or row["owner_decision_status"] != "pending"
-        ):
-            raise ValueError(
-                f"{row['candidate_id']}: development ledger cannot carry an owner decision"
-            )
+        require_backed_decision(row, decision)
         for ref in row["governing_invariant_refs"]:
             if ref not in selected:
                 raise ValueError(

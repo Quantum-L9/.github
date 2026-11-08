@@ -1,10 +1,10 @@
 schema: l9.strategic-value-reduction-disposition-ledger/v1
 pack_id: SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1
-status: DEVELOPMENT_RECOMMENDATION_NOT_OWNER_DECISION
+status: OWNER_APPROVED_DISPOSITION_NOT_ADMITTED
 note: >-
-  This ledger records the development-pack disposition applied to this candidate. It is not an owner decision,
-  admission, or approval. Every owner_decision_ref is null until the authorized canonical owner records a real
-  decision; no field here may be read as one.
+  The repository owner approved these eight dispositions and the D1 (Option B) SV-001 wording on 2026-11-08
+  (evidence/admission/owner-decision.yaml). Approval is not admission: canonical admission is the ADR and release
+  status flip merged to main in sequence (D5).
 target_repository: Quantum-L9/.github
 source_pr: 212
 candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
@@ -49,31 +49,30 @@ dispositions:
   - defensible_counterfactual_comparability_under_selected_method
   - counterfactual_worlds_share_defensible_initial_conditions_time_basis_and_identification_assumptions
   falsifier_case_ref: SV015
-  statement_change: AMENDED_MATERIAL_SEMANTIC_CHANGE_REQUIRES_OWNER_REVIEW
+  statement_change: VERBATIM_CONCATENATION_OF_DONOR_SV001_AND_SV015_OWNER_APPROVED_D1
   amended_statement: >-
-    For an assessment asserting quantified Strategic Value, declare the objective, compatible utility units, feasible
-    counterfactual baseline, bounded horizon, applicable discount and utility-flow basis, model/evidence coordinates,
-    and material uncertainty. When causal intervention effects are claimed, intervention and baseline must be
-    defensibly comparable in their decision-relevant initial conditions, utility measure, exogenous context, and
-    temporal and observation basis, or their divergence must be explicitly identified and justified under the
+    For an assessment asserting quantified Strategic Value, declare the objective, compatible utility units,
+    feasible counterfactual baseline, bounded horizon, applicable discount and utility-flow basis, model/evidence
+    coordinates and material uncertainty. Unknown or incompatible inputs cannot establish a complete Strategic Value
+    ranking. For a Strategic Value claim, a counterfactual comparison must identify the same decision-relevant
+    initial conditions, utility measure, exogenous context and time basis across intervention and baseline worlds,
+    or explicitly quantify their divergence. A convenient scenario pairing or historical correlation is not evidence
+    of an identifiable causal intervention effect.
+  owner_review_resolution:
+  - D1 Option B keeps the donor SV-001 text verbatim, including its unqualified consequence "cannot establish a
+    complete Strategic Value ranking", and appends the donor SV-015 text verbatim, including its claim-wide scope
+    and "explicitly quantify their divergence". Independent review findings 1-2 no longer apply.
+  superseded_development_statement: >-
+    For an assessment asserting quantified Strategic Value, declare the objective, compatible utility units,
+    feasible counterfactual baseline, bounded horizon, applicable discount and utility-flow basis, model/evidence
+    coordinates, and material uncertainty. When causal intervention effects are claimed, intervention and baseline
+    must be defensibly comparable in their decision-relevant initial conditions, utility measure, exogenous context,
+    and temporal and observation basis, or their divergence must be explicitly identified and justified under the
     selected method. Convenient scenario pairing or historical correlation alone does not establish a causal
     intervention effect. Unknown, incompatible, or materially unidentified inputs cannot establish a complete
     causally attributed Strategic Value ranking.
-  owner_review_points:
-  - The final sentence changes the original consequence clause from "a complete Strategic Value ranking" to "a
-    complete causally attributed Strategic Value ranking"; the owner must decide whether that narrowing is intended.
-  - The merged SV-015 safeguard says divergence must be "explicitly identified and justified under the selected
-    method" where SV-015 said "explicitly quantify their divergence"; the original wording is preserved verbatim in
-    the relocation ledger and the contract obligation is unchanged.
-  - The merged safeguard applies only "When causal intervention effects are claimed" and only to quantified
-    Strategic Value assessments; the original SV-015 applied to every counterfactual comparison in any Strategic
-    Value claim. The broader scope now survives only in the unchanged contract obligation and the lineage text.
-  - Independent review (independent-evidence-review.md, findings 1-2) classifies this amendment as a normative
-    weakening of SV-001 and SV-015. A non-weakening alternative is to keep the original SV-001 consequence clause
-    verbatim and append the SV-015 safeguard as separate sentences with "explicitly quantify their divergence".
-    This pack applies the development-pack text as mandated and leaves that choice to the owner.
-  owner_decision_status: pending
-  owner_decision_ref: null
+  owner_decision_status: approved
+  owner_decision_ref: evidence/admission/owner-decision.yaml
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
 - candidate_id: L9-SV-002
   disposition: KEEP
@@ -87,8 +86,8 @@ dispositions:
   - model_coverage_ledger_has_nonoverlapping_IEV_SFV_DC_ERL_OC_effect_assignments
   falsifier_case_ref: null
   statement_change: UNCHANGED
-  owner_decision_status: pending
-  owner_decision_ref: null
+  owner_decision_status: approved
+  owner_decision_ref: evidence/admission/owner-decision.yaml
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
 - candidate_id: L9-SV-015
   disposition: MERGE
@@ -102,9 +101,9 @@ dispositions:
   when: causal_intervention_effect_is_claimed
   falsifier_case_ref: SV015
   expected_negative_result: UNIDENTIFIED_COUNTERFACTUAL
-  meaning_preservation: MERGE_WITH_WEAKENING_REQUIRES_OWNER_DECISION
-  owner_decision_status: pending
-  owner_decision_ref: null
+  meaning_preservation: MERGE_VERBATIM_OWNER_APPROVED_D1
+  owner_decision_status: approved
+  owner_decision_ref: evidence/admission/owner-decision.yaml
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
 - candidate_id: L9-SV-016
   disposition: CONTRACT
@@ -121,8 +120,8 @@ dispositions:
   falsifier_case_ref: SV016
   expected_negative_result: UNAUTHORIZED_ACTOR_AGGREGATION
   meaning_preservation: VERBATIM_LINEAGE_NORMATIVE_FORCE_VIA_UNCHANGED_CONTRACT_OBLIGATION
-  owner_decision_status: pending
-  owner_decision_ref: null
+  owner_decision_status: approved
+  owner_decision_ref: evidence/admission/owner-decision.yaml
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
 - candidate_id: L9-SV-017
   disposition: CONTRACT
@@ -138,8 +137,8 @@ dispositions:
   falsifier_case_ref: SV017
   expected_negative_result: FUTURE_OBSERVATION_LEAK
   meaning_preservation: VERBATIM_LINEAGE_NORMATIVE_FORCE_VIA_UNCHANGED_CONTRACT_OBLIGATION
-  owner_decision_status: pending
-  owner_decision_ref: null
+  owner_decision_status: approved
+  owner_decision_ref: evidence/admission/owner-decision.yaml
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
 - candidate_id: L9-SV-018
   disposition: CONTRACT
@@ -155,8 +154,8 @@ dispositions:
   falsifier_case_ref: SV018
   expected_negative_result: UNJUSTIFIED_JOINT_ADDITIVITY
   meaning_preservation: VERBATIM_LINEAGE_NORMATIVE_FORCE_VIA_UNCHANGED_CONTRACT_OBLIGATION
-  owner_decision_status: pending
-  owner_decision_ref: null
+  owner_decision_status: approved
+  owner_decision_ref: evidence/admission/owner-decision.yaml
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
 - candidate_id: L9-SV-019
   disposition: REUSE
@@ -172,8 +171,8 @@ dispositions:
   falsifier_case_ref: SV019
   expected_negative_result: UNSUPPORTED_PRECISE_WINNER
   meaning_preservation: VERBATIM_LINEAGE_NORMATIVE_FORCE_VIA_UNCHANGED_CONTRACT_OBLIGATION
-  owner_decision_status: pending
-  owner_decision_ref: null
+  owner_decision_status: approved
+  owner_decision_ref: evidence/admission/owner-decision.yaml
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
 - candidate_id: L9-SV-020
   disposition: REUSE
@@ -191,7 +190,7 @@ dispositions:
   falsifier_case_ref: SV020
   expected_negative_result: UNSUPPORTED_VERIFIED_METHOD_CLAIM
   meaning_preservation: VERBATIM_LINEAGE_NORMATIVE_FORCE_VIA_UNCHANGED_CONTRACT_OBLIGATION
-  owner_decision_status: pending
-  owner_decision_ref: null
+  owner_decision_status: approved
+  owner_decision_ref: evidence/admission/owner-decision.yaml
   candidate_revision: 85531616cee2da94bbb7154418a78537549a4d76
 relocation_authority_status: not_admitted_as_independent_invariant
