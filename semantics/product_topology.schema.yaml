@@ -432,6 +432,55 @@ properties:
       autonomy_contract_refs: semantic_ref_list
       selection_inputs: string_list
       rules: semantic_ref_or_string_list
+entry_shapes:
+  purpose: Item shapes of the port and adapter entry lists named under properties.ports and properties.adapters. Fields
+    not listed here are descriptive; they are permitted and can never make a port or adapter resolve.
+  port_binding_list:
+    item_type: object
+    required:
+    - port_ref
+    - contract_refs
+    fields:
+      port_ref: semantic_ref
+      contract_refs: semantic_ref_list
+      capability_ref: semantic_ref
+      implementation_ref: implementation_source_coordinate
+    resolution:
+    - port_ref_is_explicit_unique_across_inbound_outbound_and_extension_and_not_forbidden
+    - contract_refs_are_non_empty_and_resolve_through_the_product_declared_contract_authority
+    - capability_ref_when_present_names_a_declared_capability
+  adapter_requirement_list:
+    item_type: object
+    required:
+    - adapter_ref
+    required_one_of:
+    - port_ref
+    - realizes_port
+    fields:
+      adapter_ref: semantic_ref
+      port_ref: semantic_ref
+      realizes_port: semantic_ref
+      capability_ref: semantic_ref
+      contract_refs: semantic_ref_list
+      provider: semantic_ref
+      provider_ref: semantic_ref
+      transport: semantic_ref
+      implementation_ref: implementation_source_coordinate
+    resolution:
+    - adapter_ref_is_explicit_unique_across_all_adapter_groups_and_not_forbidden
+    - every_declared_port_link_names_a_resolved_port_and_at_least_one_is_declared
+    - capability_ref_contract_refs_and_provider_coordinates_when_present_resolve_through_their_owners
+    - declared_transport_stays_unresolved_until_a_transport_binding_authority_is_admitted
+  implementation_source_coordinate:
+    type: string
+    form: <repository-relative POSIX path>[::<top-level symbol>]
+    rules:
+    - path_is_relative_to_the_directory_holding_the_product_repository_spec
+    - path_is_neither_absolute_nor_escapes_that_directory
+    - symbol_when_present_names_exactly_one_top_level_definition_in_that_file
+    - coordinate_names_existing_code_and_creates_none
+    - absent_coordinate_binds_no_existing_implementation
+    - coordinate_is_declared_source_location_not_semantic_authority
 semantic_rules:
 - product_topology_is_authoritative_product_contract
 - every_l9_product_uses_one_product_topology_vocabulary
@@ -451,6 +500,9 @@ semantic_rules:
 - dynamic_identity_is_resolved_into_identity_assertion_not_authored_as_static_session_fact
 - valid_identity_assertion_is_consumed_not_rederived
 - product_kind_exception_is_claimed_only_by_explicit_reference_and_exact_subject_binding
+- port_and_adapter_entries_follow_entry_shapes
+- implementation_ref_is_an_optional_declared_source_coordinate_not_semantic_authority
+- implementation_ref_never_makes_a_port_or_adapter_resolve
 kind_resolution:
   canonical_source: product_kinds.yaml
   admitted_kind_rule: Declared kind must resolve to an admitted ProductKind before ProductManifest may pass the
