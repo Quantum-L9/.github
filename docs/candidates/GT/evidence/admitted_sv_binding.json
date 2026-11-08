@@ -14,10 +14,7 @@
 		"semantics_tree": "251bb3d9238f93f0207b1f8443c80359e034595b",
 		"post_merge_verification": "docs/evidence/sv-campaign-closeout/ (Quantum-L9/.github#224, DOWNSTREAM_USABLE)",
 		"identities": {
-			"sv_new_invariants": [
-				"L9-SV-001",
-				"L9-SV-002"
-			],
+			"sv_new_invariants": ["L9-SV-001", "L9-SV-002"],
 			"sv_vocabulary_terms": [
 				"strategic_value",
 				"systemic_future_value",

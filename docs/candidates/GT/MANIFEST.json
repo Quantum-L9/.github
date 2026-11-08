@@ -79,8 +79,8 @@
 		},
 		{
 			"path": "evidence/admitted_sv_binding.json",
-			"bytes": 2111,
-			"sha256": "d8d8775ea1a66e163294e40fd4e05fe9b50acd7070c79df55abf20812793c667"
+			"bytes": 2098,
+			"sha256": "85daf0014168ce301c39aac9401cf458debf5b175f46a725804e14db645d4f51"
 		},
 		{
 			"path": "evidence/authority_binding.json",
