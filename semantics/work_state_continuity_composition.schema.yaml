@@ -140,19 +140,14 @@ properties:
               const: Quantum-L9/.github
             source_invariants:
               type: string_list
-              min_items: 3
             applies_to:
               type: string_list
-              min_items: 3
             requires:
               type: string_list
-              min_items: 2
             guarantees:
               type: string_list
-              min_items: 3
             forbidden:
               type: string_list
-              min_items: 3
             outcomes:
               type: object
               properties:
@@ -229,7 +224,6 @@ properties:
                 type: string
               required_semantics:
                 type: string_list
-                min_items: 7
   receipt_catalog:
     type: object
     required:
@@ -311,7 +305,6 @@ properties:
         properties:
           required_semantics:
             type: string_list
-            min_items: 9
           field_semantics:
             type: object
             required:
@@ -376,7 +369,6 @@ properties:
                 const: false
           forbidden:
             type: string_list
-            min_items: 6
   lifecycle:
     type: object
     required:

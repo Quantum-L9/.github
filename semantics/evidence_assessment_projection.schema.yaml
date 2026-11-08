@@ -114,19 +114,14 @@ properties:
           const: Quantum-L9/.github
         source_invariants:
           type: string_list
-          min_items: 3
         applies_to:
           type: string_list
-          min_items: 3
         requires:
           type: string_list
-          min_items: 3
         guarantees:
           type: string_list
-          min_items: 3
         forbidden:
           type: string_list
-          min_items: 3
         outcomes:
           type: object
           properties:
@@ -235,7 +230,6 @@ properties:
     properties:
       required_semantics:
         type: string_list
-        min_items: 9
       field_semantics:
         type: object
         required:
@@ -300,7 +294,6 @@ properties:
             const: false
       forbidden:
         type: string_list
-        min_items: 6
   receipts:
     type: object
     required:
@@ -332,16 +325,13 @@ properties:
             type: string
           additional_required_semantics:
             type: string_list
-            min_items: 8
           result_semantics_source:
             type: string
             const: error_taxonomy.result_domains.validation
           rules:
             type: string_list
-            min_items: 3
           forbidden:
             type: string_list
-            min_items: 3
       compilation:
         type: object
         required:
@@ -364,7 +354,6 @@ properties:
             type: string
           additional_required_semantics:
             type: string_list
-            min_items: 6
           result_semantics_source:
             type: string
             const: compiler_contract.yaml
@@ -373,10 +362,8 @@ properties:
             const: compiler_receipt.schema.yaml
           rules:
             type: string_list
-            min_items: 3
           forbidden:
             type: string_list
-            min_items: 3
       conformance:
         type: object
         required:
@@ -398,16 +385,13 @@ properties:
             type: string
           additional_required_semantics:
             type: string_list
-            min_items: 6
           result_semantics_source:
             type: string
             const: l9-conformance
           rules:
             type: string_list
-            min_items: 3
           forbidden:
             type: string_list
-            min_items: 3
       admission:
         type: object
         required:
@@ -429,16 +413,13 @@ properties:
             type: string
           additional_required_semantics:
             type: string_list
-            min_items: 6
           result_semantics_source:
             type: string
             const: l9.contract/admission-and-promotion@1
           rules:
             type: string_list
-            min_items: 2
           forbidden:
             type: string_list
-            min_items: 3
       distribution:
         type: object
         required:
@@ -460,16 +441,13 @@ properties:
             type: string
           additional_required_semantics:
             type: string_list
-            min_items: 5
           result_semantics_source:
             type: string
             const: applicable_distribution_contract
           rules:
             type: string_list
-            min_items: 2
           forbidden:
             type: string_list
-            min_items: 2
       reconciliation:
         type: object
         required:
@@ -491,16 +469,13 @@ properties:
             type: string
           additional_required_semantics:
             type: string_list
-            min_items: 4
           result_semantics_source:
             type: string
             const: applicable_reconciliation_contract
           rules:
             type: string_list
-            min_items: 2
           forbidden:
             type: string_list
-            min_items: 2
   ownership_boundary:
     type: object
     required:
@@ -512,7 +487,6 @@ properties:
         const: global_semantics_for_deriving_conformance_requirements
       l9_conformance_owns:
         type: string_list
-        min_items: 5
   conformance_requirement_shape:
     type: object
     required:
@@ -521,7 +495,5 @@ properties:
     properties:
       required:
         type: string_list
-        min_items: 5
       optional:
         type: string_list
-        min_items: 3

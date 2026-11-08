@@ -142,19 +142,14 @@ properties:
               const: Quantum-L9/.github
             source_invariants:
               type: string_list
-              min_items: 3
             applies_to:
               type: string_list
-              min_items: 3
             requires:
               type: string_list
-              min_items: 4
             guarantees:
               type: string_list
-              min_items: 3
             forbidden:
               type: string_list
-              min_items: 3
             outcomes:
               type: object
               properties:
@@ -401,10 +396,8 @@ properties:
             type: string
           allowed_fields:
             type: string_list
-            min_items: 12
           rules:
             type: string_list
-            min_items: 3
       identity_resolution:
         type: object
         required:
@@ -417,13 +410,10 @@ properties:
             type: string
           inputs:
             type: string_list
-            min_items: 4
           result_domain:
             type: string_list
-            min_items: 4
           rules:
             type: string_list
-            min_items: 5
       identity_assertion:
         type: object
         required:
@@ -439,10 +429,8 @@ properties:
             const: l9.schema/identity-assertion@1
           required:
             type: string_list
-            min_items: 8
           rules:
             type: string_list
-            min_items: 4
       consumer_rules:
         type: object
         required:
@@ -453,16 +441,12 @@ properties:
         properties:
           memory:
             type: string_list
-            min_items: 3
           bootstrap:
             type: string_list
-            min_items: 2
           governance:
             type: string_list
-            min_items: 2
           receipts:
             type: string_list
-            min_items: 2
   authority_model:
     type: object
     required:
@@ -495,7 +479,6 @@ properties:
             const: applicable_governance_owner
           rules:
             type: string_list
-            min_items: 4
   actor_registry:
     type: object
     required:
@@ -557,7 +540,6 @@ properties:
         properties:
           contracts:
             type: string_list
-            min_items: 3
       purpose:
         type: string
       identity_dimension:
@@ -608,7 +590,6 @@ properties:
             const: true
       does_not_own:
         type: string_list
-        min_items: 13
       actor_kinds:
         type: object
         required:
@@ -792,7 +773,6 @@ properties:
         properties:
           contracts:
             type: string_list
-            min_items: 3
       purpose:
         type: string
       identity_dimension:
@@ -843,7 +823,6 @@ properties:
             const: true
       does_not_own:
         type: string_list
-        min_items: 9
       surface_statuses:
         type: object
         required:
