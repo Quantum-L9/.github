@@ -30,7 +30,9 @@ If no release verifies, the base is empty and every identity is new. Any exact r
 | `composition_profiles` | `composition_profiles.yaml#profiles[].id` | the profile |
 | `schemas` | each file in `generic_compiler_manifest.yaml#requires.artifact_schemas` | its bytes |
 
-A source's **residual content** is its YAML with two parts removed: every `derivation` subtree, and the collections it hosts as identities of their own kind. Those collections are `invariants`, `terms`, `contracts`, and `source_classes` plus `projection_profiles`. As a result, adding an invariant makes the invariant a subject, not `invariants.yaml` as well. A digest-cascade update is a derived coordinate, not a change of meaning.
+A source's **residual content** is its YAML with two parts removed: every derivation *coordinate* (a key ending in `sha256`, `digest` or `_count` under a `derivation` block), and the collections it hosts as identities of their own kind. Those collections are `invariants`, `terms`, `contracts`, and `source_classes` plus `projection_profiles`.
+
+As a result, adding an invariant makes the invariant a subject, not `invariants.yaml` as well. A digest-cascade update is a derived coordinate, not a change of meaning. Governing text inside a `derivation` block, such as `rule`, stays part of the source's meaning, so rewriting it makes the source a subject. Every ledger is parsed with duplicate mapping keys refused; a repeated key is UNRESOLVED, never silently collapsed.
 
 ## Discovery report (`l9.projection-admission-subject-closure/v1`)
 
@@ -42,7 +44,7 @@ A source's **residual content** is its YAML with two parts removed: every `deriv
 | `revisions` | Changed identities whose meaning is redefined, as `<kind>:<id>` (see below) |
 | `superseded` | New profiles declaring `successor_of` |
 | `required_dependencies[]` | `{subject, dependency, state}`. `state` is `admitted` (present at the base and not a subject), `subject` or `missing`. |
-| `changed_derived_coordinates[]` | `{file, path}` of each `derivation` subtree whose value changed |
+| `changed_derived_coordinates[]` | `{file, path}` of each derivation coordinate leaf whose value changed |
 | `unclassified_changes[]` | Changed `semantics/` files that no kind accounts for, such as a compiler contract file or the non-identity part of a registry host. This skill cannot admit them. |
 | `status`, `gaps` | `fail` on a census ambiguity, a removed identity, an admitted profile edited in place, a missing dependency or an unclassified change |
 

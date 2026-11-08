@@ -44,6 +44,7 @@ Exit codes: 0 the verdict reached --require, 1 it did not, 2 UNRESOLVED.
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import os
@@ -96,8 +97,13 @@ KIND_LEDGER = {
 RELEASES = "docs/semantic-foundation"
 VERSION_DIR = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
 # The only admitted form in use: "Status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-025, ...)".
-ADMITTED_STATUS = re.compile(r"^Status:\s*\*\*ADMITTED\b[^*]*\*\*")
+ADMITTED_STATUS = re.compile(r"^Status:\s*\*\*ADMITTED(?: [A-Z][A-Z ]*)?\*\*")
 MAKE_GATES = ("validate", "check", "test")
+# Words that turn an "Accepted for vX" status line into something other than acceptance.
+NOT_ACCEPTED = re.compile(
+    r"\bcandidate\b|does not admit|not admitted|not accepted|pending|withdrawn|superseded",
+    re.IGNORECASE,
+)
 
 # Identity shapes for new subject items (all ids on main at 9488d8f conform).
 PROJECTION_ID = re.compile(r"^l9\.projection/[a-z0-9][a-z0-9.-]*@([1-9]\d*)$")
@@ -232,9 +238,38 @@ class Tree:
         return {} if data is None else parse_yaml_mapping(data, f"{self.label()}:{rel}")
 
 
+class _UniqueKeyLoader(yaml.SafeLoader):
+    """SafeLoader that refuses a repeated mapping key instead of keeping the last one."""
+
+
+def _unique_mapping(loader: _UniqueKeyLoader, node: Any, deep: bool = False) -> Any:
+    loader.flatten_mapping(node)
+    seen: set[Any] = set()
+    for key_node, _ in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in seen:
+            raise yaml.constructor.ConstructorError(
+                None, None, f"duplicate mapping key {key!r}", key_node.start_mark
+            )
+        seen.add(key)
+    return loader.construct_mapping(node, deep=deep)
+
+
+_UniqueKeyLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _unique_mapping
+)
+
+
+def load_yaml(data: bytes | str) -> Any:
+    """Parse YAML; a duplicated key raises yaml.YAMLError rather than silently collapsing."""
+    return yaml.load(
+        data, Loader=_UniqueKeyLoader
+    )  # SafeLoader subclass: no arbitrary objects
+
+
 def parse_yaml_mapping(data: bytes, label: str) -> dict[str, Any]:
     try:
-        value = yaml.safe_load(data)
+        value = load_yaml(data)
     except yaml.YAMLError as exc:
         raise InputError(f"{label} is not YAML: {exc}") from exc
     if not isinstance(value, dict):
@@ -366,29 +401,69 @@ def resolve_selector(document: Any, steps: list[tuple[str, ...]]) -> bool:
     )
 
 
-def selected_record_ids(document: Any, selector: str) -> tuple[str, set[str]] | None:
-    """(root key, ids) of the records a selector keeps whole or field-wise, when id-bearing.
+_WHOLE = True
 
-    None when the selector does not address a list of id-bearing records at its root.
-    """
-    steps = parse_selector(selector)
-    if not steps or steps[0][0] != "field" or not isinstance(document, dict):
-        return None
-    root = steps[0][1]
-    records = document.get(root)
-    if not isinstance(records, list) or not all(
-        isinstance(r, dict) and isinstance(r.get("id"), str) for r in records
-    ):
-        return None
-    if len(steps) == 1:
-        return root, {r["id"] for r in records}
-    step = steps[1]
-    if step[0] == "filter":
-        _, field, op, expected = step
-        return root, {r["id"] for r in records if _matches(r, field, op, expected)}
+
+def _mask(value: Any, steps: list[tuple[str, ...]]) -> Any:
+    """The compiler's selection mask: _WHOLE, a {member: mask} dict, or None when absent."""
+    if not steps:
+        return _WHOLE
+    step, rest = steps[0], steps[1:]
+    if step[0] == "field":
+        if not isinstance(value, dict) or step[1] not in value:
+            return None
+        child = _mask(value[step[1]], rest)
+        return None if child is None else {step[1]: child}
+    if not isinstance(value, list):
+        raise SelectorError("selector expects a list")
+    members: dict[Any, Any] = {}
     if step[0] == "all":
-        return root, {r["id"] for r in records if resolve_selector(r, steps[2:])}
-    return None
+        for index, item in enumerate(value):
+            child = _mask(item, rest)
+            if child is not None:
+                members[index] = child
+        return None if value and not members else members
+    _, field, op, expected = step
+    for index, item in enumerate(value):
+        if isinstance(item, dict) and _matches(item, field, op, expected):
+            members[index] = _WHOLE
+    return members or None
+
+
+def _merge_mask(existing: Any, new: Any) -> Any:
+    if existing is _WHOLE or new is _WHOLE:
+        return _WHOLE
+    if existing is None:
+        return new
+    for key, value in new.items():
+        existing[key] = _merge_mask(existing.get(key), value)
+    return existing
+
+
+def _apply(value: Any, mask: Any) -> Any:
+    if mask is _WHOLE:
+        return copy.deepcopy(value)
+    if isinstance(value, dict):
+        return {key: _apply(value[key], sub) for key, sub in mask.items()}
+    return [_apply(value[index], mask[index]) for index in sorted(mask)]
+
+
+def select_payload(document: Any, selectors: list[str]) -> Any:
+    """The exact record-preserving payload the selectors select from `document`.
+
+    An independent re-implementation of the compiler's `select_records`: the union of every
+    selected path, each collection item one record carrying exactly its selected fields, in
+    source order. Raises SelectorError when a selector is unresolved.
+    """
+    mask: Any = None
+    for selector in selectors:
+        selected = _mask(document, parse_selector(selector))
+        if selected is None:
+            raise SelectorError(f"missing required selector result: {selector}")
+        mask = _merge_mask(mask, selected)
+    if mask is None:
+        raise SelectorError("selection requires a non-empty selector list")
+    return _apply(document, mask)
 
 
 # --------------------------------------------------------------------------- registries
@@ -448,7 +523,7 @@ def schema_registry(tree: Tree) -> dict[str, Any]:
         if data is None:
             continue
         try:
-            doc = yaml.safe_load(data)
+            doc = load_yaml(data)
         except yaml.YAMLError as exc:
             raise InputError(
                 f"{tree.label()}:semantics/{name} is not YAML: {exc}"
@@ -579,6 +654,30 @@ class Registration:
         self.records[f"{kind}:{ident}"] = found[0]
         return found[0]
 
+    def dependency_file(self, rel: str) -> None:
+        data = self.tree.read(rel)
+        self.records[f"dep:file:{rel}"] = None if data is None else sha_bytes(data)
+
+    def projection_dependencies(self, profile: dict[str, Any]) -> None:
+        """Bytes a projection's meaning depends on: its sources, schema and criteria."""
+        for cls in profile.get("sources") or {}:
+            artifact = (self.classes.get(cls) or {}).get("canonical_artifact")
+            if isinstance(artifact, str):
+                self.dependency_file(f"semantics/{artifact}")
+        schema_id = (profile.get("output") or {}).get("schema")
+        names = (
+            self.schemas["consts"].get(schema_id)
+            if isinstance(schema_id, str)
+            else None
+        )
+        for name in names or []:
+            self.dependency_file(f"semantics/{name}")
+        definitions = (self.profiles_doc.get("forbidden_constraints") or {}).get(
+            "definitions"
+        ) or {}
+        for token in profile.get("forbidden") or []:
+            self.records[f"dep:forbidden:{token}"] = definitions.get(token)
+
     def file_record(self, key: str, rel: str) -> bool:
         data = self.tree.read(rel)
         if data is None:
@@ -652,6 +751,12 @@ class Registration:
             )
             return
         self.records[f"term:{term}"] = record
+        if isinstance(record.get("subtype_of"), str):
+            self.records[f"dep:term:{record['subtype_of']}"] = self.terms.get(
+                record["subtype_of"]
+            )
+        if isinstance(record.get("detailed_model"), str):
+            self.dependency_file(f"semantics/{record['detailed_model']}")
         if not _nonempty_str(record.get("definition")):
             self.gaps.append(f"vocabulary term {term}: no definition")
         if not _nonempty_str(record.get("semantic_class")):
@@ -683,6 +788,9 @@ class Registration:
             self.gaps.append(f"contract {ident}: no source_invariants")
             return
         known = set(_ids(self.invariants))
+        for ref in refs:
+            found = [e for e in self.invariants if e.get("id") == ref]
+            self.records[f"dep:invariant:{ref}"] = found[0] if len(found) == 1 else None
         for ref in refs:
             if ref not in known:
                 self.gaps.append(
@@ -747,6 +855,7 @@ class Registration:
         for cls, spec in sources.items():
             self._profile_source(who, cls, spec)
         self.output_schema(who, profile)
+        self.projection_dependencies(profile)
         for token in profile.get("forbidden") or []:
             if token not in self.forbidden_defs:
                 self.unresolvable.append(
@@ -828,6 +937,10 @@ class Registration:
             self.gaps.append(f"{who}: merge_strategy is not a supported exact strategy")
         if composes is not None and _ids(self.projections).count(composes) != 1:
             self.gaps.append(f"{who}: composes unknown profile {composes}")
+        elif composes is not None:
+            composed = next(p for p in self.projections if p.get("id") == composes)
+            self.records[f"dep:projection profile:{composes}"] = composed
+            self.projection_dependencies(composed)
         self.output_schema(who, profile)
         for value in profile.get("required_provenance") or []:
             self.unresolvable.append(
@@ -928,7 +1041,7 @@ def accepted_adr(tree: Tree, version: str) -> str | None:
         if data is None:
             raise InputError(f"docs/adr/{name} listed but unreadable")
         for line in data.decode("utf-8", "replace").splitlines()[:8]:
-            if pattern.match(line):
+            if pattern.match(line) and not NOT_ACCEPTED.search(line):
                 return name
     return None
 
@@ -1069,6 +1182,10 @@ def release_sequence(head: Tree, main: Tree) -> dict[str, Any]:
             continue
         if _release_files(main, version) != _release_files(head, version):
             gaps.append(f"release {version} is immutable on main but differs at HEAD")
+    for tree, where in ((main, "main"), (head, "HEAD")):
+        odd = [n for n in tree.listdir(RELEASES) if not VERSION_DIR.match(n)]
+        if odd:
+            gaps.append(f"{RELEASES} on {where} holds non-version entries {odd}")
     new = [v for v in at_head if v not in on_main]
     if len(new) > 1:
         gaps.append(
@@ -1258,11 +1375,14 @@ def compiler_identity(compiler_src: Path, expected: str | None) -> dict[str, Any
             f"{compiler_src} is not a git checkout; its revision is unknown"
         )
     revision = git_out(compiler_src, "rev-parse", "HEAD")
-    dirty = bool(git_out(compiler_src, "status", "--porcelain", "--untracked-files=no"))
+    # Untracked files count: an untracked module under src/ would shadow an import.
+    dirty = bool(
+        git_out(compiler_src, "status", "--porcelain", "--untracked-files=all")
+    )
     gaps = []
     if dirty:
         gaps.append(
-            "compiler checkout has tracked changes; it is not an exact revision"
+            "compiler checkout has tracked or untracked changes; it is not an exact revision"
         )
     if expected is not None and resolve_commit(compiler_src, expected) != revision:
         gaps.append(f"compiler HEAD {revision[:12]} is not the required {expected}")

@@ -77,8 +77,26 @@ class Discovery(_Fixture):
         self.assertFalse(any(found["admission_subjects"].values()), found)
         self.assertEqual(
             found["changed_derived_coordinates"],
-            [{"file": "semantics/contracts.yaml", "path": "$.derivation"}],
+            [
+                {
+                    "file": "semantics/contracts.yaml",
+                    "path": "$.derivation.source_digest_sha256",
+                }
+            ],
         )
+
+    def test_governing_text_inside_derivation_is_meaning_not_a_coordinate(self):
+        # Review finding 6: a `derivation.rule` rewrite was hidden as a derived coordinate.
+        self.repo.write(
+            "semantics/contracts.yaml",
+            LEDGERS["contracts.yaml"]
+            + "derivation:\n  rule: every x is now forbidden\n",
+        )
+        found = self.discover()
+        self.assertEqual(
+            found["admission_subjects"]["canonical_sources"], ["l9.source/contracts@1"]
+        )
+        self.assertEqual(found["changed_derived_coordinates"], [])
 
     def test_removed_identity_fails_closure(self):
         self.repo.write("semantics/vocabulary.yaml", "terms: {}\n")

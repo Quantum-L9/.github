@@ -50,8 +50,11 @@ TARGET_AUTHORITY_CLASS = "canonical global semantics"
 PROJECTION_ENVELOPE = "l9.projection-artifact/v1"
 COMPOSITION_ENVELOPE = "l9.composed-projection/v1"
 PASSING_CRITERIA = {"pass", "not_applicable"}
+# A decision reference names where the decision was given: a governed session, or a pull
+# request or issue. An arbitrary URL is not one.
 DECISION_REF = re.compile(
-    r"(session_[A-Za-z0-9]{8,}|Quantum-L9/[\w.-]+#\d+|https://github\.com/\S+)"
+    r"(session_[A-Za-z0-9]{8,}|Quantum-L9/[\w.-]+#\d+"
+    r"|https://github\.com/[\w.-]+/[\w.-]+/(?:pull|issues)/\d+)"
 )
 SHA40 = re.compile(r"\b[0-9a-f]{40}\b")
 
@@ -83,11 +86,27 @@ def _status_paragraph(text: str) -> str:
 
 
 def _names(text: str, name: str) -> bool:
-    boundary = r"A-Za-z0-9_@/-"
-    return (
-        re.search(rf"(?<![{boundary}]){re.escape(name)}(?![{boundary}])", text)
-        is not None
-    )
+    """`name` occurs as a whole identifier: not inside a longer id, path or file name."""
+    inner = r"A-Za-z0-9_@/"
+    pattern = rf"(?<![{inner}.-]){re.escape(name)}(?![{inner}-])(?!\.[A-Za-z0-9])"
+    return re.search(pattern, text) is not None
+
+
+def _admitted_block(text: str) -> str:
+    """The ADR's "Admitted definitions" block, up to the next heading.
+
+    Naming an identity anywhere else (evidence, limitations, exclusions) is not admitting it.
+    """
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if re.match(r"^(#+\s*)?Admitted definitions\b", line.strip(), re.IGNORECASE):
+            block = []
+            for follow in lines[index + 1 :]:
+                if follow.startswith("#"):
+                    break
+                block.append(follow)
+            return "\n".join(block)
+    return ""
 
 
 def _later_commits(repo: Path, commit: str, main: str, path: str) -> list[str]:
@@ -186,7 +205,8 @@ def release_admission(repo: Path, main: cac.Tree, version: str) -> dict[str, Any
     if release_cell is None or not _names(release_cell, version):
         gaps.append(f"{adr}: the subject table does not name release {version}")
     target_cell = _cell(text, r"Target class(?: and authority)?")
-    if target_cell is None or TARGET_AUTHORITY_CLASS not in target_cell.lower():
+    target = re.sub(r"[*_`]", "", target_cell or "").strip().lower()
+    if not target.startswith(TARGET_AUTHORITY_CLASS):
         gaps.append(
             f"{adr}: the subject table does not name the target authority class"
         )
@@ -204,16 +224,21 @@ def release_admission(repo: Path, main: cac.Tree, version: str) -> dict[str, Any
 def _predecessor_state(
     repo: Path, main: cac.Tree, version: str, commit: str
 ) -> tuple[str | None, str | None]:
-    """The release below `version` and the last commit, up to `commit`, that recorded it.
+    """The state this release's delta is measured from, and the release that recorded it.
 
-    Release records are regenerated after the last edit to any covered file, so that commit
-    is the state the predecessor release describes; this release's delta is measured from it.
+    It is the admission commit of the highest *admitted* release below `version`, so an
+    unadmitted candidate in between can never stand in for admitted law. Only when no lower
+    release was admitted (the first admission under this record shape, v3.28.0 here) is it
+    the last commit, up to `commit`, that recorded the release directly below.
     """
     older = [
         v
         for v in cac.release_versions(main)
         if cac.version_key(v) < cac.version_key(version)
     ]
+    for prior in reversed(older):
+        if cac.release_status(main, prior) == "ADMITTED":
+            return prior, cac.admission_commit(repo, main.ref, prior)
     if not older:
         return None, None
     prior = older[-1]
@@ -224,62 +249,82 @@ def _predecessor_state(
 
 
 def _introduced(
-    repo: Path,
-    main: cac.Tree,
-    version: str,
-    commit: str,
+    prior_tree: cac.Tree | None,
     subject: dict[str, list[str]],
     records: dict[str, Any],
-) -> tuple[list[str], str | None]:
-    """Subject record keys this release introduced relative to its predecessor release."""
-    prior, prior_commit = _predecessor_state(repo, main, version, commit)
+) -> list[str]:
+    """Subject record keys this release introduced: absent or different before it.
+
+    Dependency records (`dep:`) are not identities of the subject; a changed dependency is
+    a subject of its own and is caught by closure before admission.
+    """
     prior_records: dict[str, Any] = {}
-    if prior_commit is not None:
-        prior_records = cac.registration(cac.Tree(repo, prior_commit), subject)[
-            "records"
-        ]
-    introduced = sorted(
+    if prior_tree is not None:
+        prior_records = cac.registration(prior_tree, subject)["records"]
+    return sorted(
         key
         for key, value in records.items()
-        if not key.startswith(("source_file:", "source_class_file:"))
+        if not key.startswith("dep:")
         and cac.digest(prior_records.get(key)) != cac.digest(value)
     )
-    return introduced, prior
 
 
-def _covering_names(key: str, at: cac.Tree, subject: dict[str, list[str]]) -> set[str]:
-    """Names whose presence in the ADR covers one introduced identity.
+def _profiles(tree: cac.Tree | None) -> dict[str, Any]:
+    if tree is None:
+        return {}
+    reg = cac.Registration(tree, {k: [] for k in (*cac.ITEM_KINDS, "revisions")})
+    return {p.get("id"): p for p in reg.projections + reg.compositions}
 
-    Projection and composition profiles are admitted as pairs: a composition is covered by
-    the projection profile it composes, and a payload schema by the artifact id, the output
-    schema id, or any name covering the profile whose output it is.
+
+def _covering_names(
+    key: str, at: cac.Tree, prior_tree: cac.Tree | None, subject: dict[str, list[str]]
+) -> set[str]:
+    """Names whose presence in the admitted-definitions block covers one identity.
+
+    Profiles admitted together as a pair cover each other: a composition is covered by the
+    projection profile it composes only when that projection profile is new or changed in
+    the same release, never by a mention of an already-admitted one. A payload schema is
+    covered by its artifact id, its output schema id, or a name covering its profile. A
+    ledger content change is covered by its source id or file.
     """
     kind, _, ident = key.partition(":")
     names = {ident}
     reg = cac.Registration(at, subject)
-    by_id = {p.get("id"): p for p in reg.projections + reg.compositions}
+    now = _profiles(at)
+    before = _profiles(prior_tree)
+
+    def introduced(ref: str) -> bool:
+        return ref in now and cac.digest(before.get(ref)) != cac.digest(now[ref])
 
     def profile_names(ref: str) -> set[str]:
         found = {ref}
-        composes = ((by_id.get(ref) or {}).get("composes") or {}).get(
+        composes = ((now.get(ref) or {}).get("composes") or {}).get(
             "projection_profile"
         )
-        if isinstance(composes, str):
+        if isinstance(composes, str) and introduced(composes):
             found.add(composes)
         return found
 
     if kind == "composition profile":
         names |= profile_names(ident)
-    if kind == "schema":
+    elif kind == "schema":
         doc = reg.schemas["docs"].get(ident) or {}
         const = ((doc.get("properties") or {}).get("schema") or {}).get("const")
         names |= {doc.get("artifact_id"), const} - {None}
-        for ref, profile in by_id.items():
+        for ref, profile in now.items():
             if (
                 const is not None
                 and (profile.get("output") or {}).get("schema") == const
             ):
-                names |= profile_names(ref)
+                names |= profile_names(ref) if introduced(ref) else {ref}
+    elif kind == "source_file":
+        path = (reg.sources.get(ident) or {}).get("path")
+        names |= {path, Path(path).name} if isinstance(path, str) else set()
+    elif kind == "source_class_file":
+        artifact = (reg.classes.get(ident) or {}).get("canonical_artifact")
+        names |= (
+            {artifact, f"semantics/{artifact}"} if isinstance(artifact, str) else set()
+        )
     return {n for n in names if isinstance(n, str)}
 
 
@@ -291,16 +336,21 @@ def decision_scope(
     subject: dict[str, list[str]],
     records: dict[str, Any],
 ) -> dict[str, Any]:
-    """The ADR names every subject identity the admitted release introduced."""
+    """The ADR's admitted definitions name every subject identity the release introduced."""
     commit = proof["admission_commit"]
     at = cac.Tree(repo, commit)
     text = (at.read(f"docs/adr/{proof['adr']}") or b"").decode("utf-8", "replace")
-    introduced, prior = _introduced(repo, main, version, commit, subject, records)
+    block = _admitted_block(text)
+    prior, prior_commit = _predecessor_state(repo, main, version, commit)
+    prior_tree = cac.Tree(repo, prior_commit) if prior_commit else None
+    introduced = _introduced(prior_tree, subject, records)
     gaps = [
-        f"{proof['adr']}: does not name {key}, which {version} introduced; the decision "
-        "does not cover it"
+        f"{proof['adr']}: its admitted definitions do not name {key}, which {version} "
+        "introduced; the decision does not cover it"
         for key in introduced
-        if not any(_names(text, n) for n in _covering_names(key, at, subject))
+        if not any(
+            _names(block, n) for n in _covering_names(key, at, prior_tree, subject)
+        )
     ]
     return {
         "status": "pass" if not gaps else "fail",
@@ -520,26 +570,20 @@ def check_projection(
     payload = doc.get("payload")
     if not isinstance(payload, dict):
         return [*gaps, f"{ref}: payload is not a mapping"]
-    roots = set()
-    expected_ids: dict[str, set[str]] = {}
-    for selector in source["selectors"]:
-        steps = cac.parse_selector(selector)
-        roots.add(steps[0][1] if steps else None)
-        found = cac.selected_record_ids(source["document"], selector)
-        if found is not None:
-            expected_ids.setdefault(found[0], set()).update(found[1])
-    if None not in roots:
-        extra = sorted(set(payload) - roots)
-        if extra:
-            gaps.append(f"{ref}: payload carries unselected fields {extra}")
-    for root, ids in sorted(expected_ids.items()):
-        records = payload.get(root)
-        got = {r.get("id") for r in records or [] if isinstance(r, dict)}
-        if not isinstance(records, list) or got != ids:
-            gaps.append(
-                f"{ref}: selected records under {root} are not exactly the declared "
-                f"selection (missing {sorted(ids - got)[:5]}, extra {sorted(got - ids)[:5]})"
-            )
+    try:
+        expected = cac.select_payload(source["document"], source["selectors"])
+    except cac.SelectorError as exc:
+        return [*gaps, f"{ref}: the declared selection does not resolve: {exc}"]
+    if payload != expected:
+        missing = sorted(k for k in expected if k not in payload)
+        extra = sorted(k for k in payload if k not in expected)
+        differing = sorted(
+            k for k in expected if k in payload and payload[k] != expected[k]
+        )
+        gaps.append(
+            f"{ref}: payload is not exactly the declared selection of {source['path']} "
+            f"(missing {missing}, extra {extra}, differing {differing})"
+        )
     gaps += _schema_gaps(ref, payload, ctx.schema, compiler_src)
     return gaps
 
@@ -566,8 +610,13 @@ def check_composition(
     projections: dict[str, dict[str, Any]],
     schema: Any,
     compiler_src: Path,
+    classes: dict[str, str],
 ) -> list[str]:
-    """One composed artifact against its verified components and its profile."""
+    """One composed artifact against its verified components and its profile.
+
+    `classes` maps each verified projection ref to the source class its source is bound to
+    in the registry, so a component cannot relabel its own namespace.
+    """
     if doc is None:
         return [f"{ref}: no readable artifact"]
     gaps = []
@@ -610,24 +659,34 @@ def check_composition(
             gaps.append(
                 f"{ref}: component {component['projection_ref']} digest differs"
             )
-    if record.get("merge_strategy") == cac.NAMESPACED_MERGE:
-        classes = [c.get("source_class") for c in components]
-        if len(set(classes)) != len(classes):
-            gaps.append(f"{ref}: a source class namespace is filled twice")
-        payload = doc.get("payload")
-        expected_payload = {}
-        for component in components:
-            source = projections.get(component.get("projection_ref"))
-            if source is not None:
-                expected_payload[component.get("source_class")] = source.get("payload")
-        if not isinstance(payload, dict) or set(payload) != set(classes):
+    if record.get("merge_strategy") != cac.NAMESPACED_MERGE:
+        # A deep-merge payload cannot be recomputed independently here: fail closed.
+        return [
+            *gaps,
+            (
+                f"{ref}: only a source-class-namespaced composition can be verified "
+                "independently"
+            ),
+        ]
+    labels = [c.get("source_class") for c in components]
+    if len(set(labels)) != len(labels):
+        gaps.append(f"{ref}: a source class namespace is filled twice")
+    expected_payload = {}
+    for component in components:
+        proj = component.get("projection_ref")
+        true_class = classes.get(proj)
+        if proj in projections and component.get("source_class") != true_class:
             gaps.append(
-                f"{ref}: payload namespaces are not exactly the component classes"
+                f"{ref}: component {proj} claims source class "
+                f"{component.get('source_class')}, but its source is bound to {true_class}"
             )
-        elif payload != expected_payload:
-            gaps.append(
-                f"{ref}: a payload namespace differs from its component's payload"
-            )
+        if proj in projections and true_class is not None:
+            expected_payload[true_class] = projections[proj].get("payload")
+    if doc.get("payload") != expected_payload:
+        gaps.append(
+            f"{ref}: payload is not exactly each verified component's payload under its "
+            "registered source class"
+        )
     gaps += _schema_gaps(ref, doc.get("payload"), schema, compiler_src)
     return gaps
 
@@ -711,6 +770,7 @@ def verify_outputs(
             gaps.append(f"{ref}: no artifacts to verify")
             continue
         components = verified.get(outcome.get("composes"), {})
+        classes = _component_classes(components, contexts.get(outcome.get("composes")))
         schema_id = (record.get("output") or {}).get("schema")
         names = reg.schemas["consts"].get(schema_id) or []
         schema = reg.schemas["docs"][names[0]] if len(names) == 1 else None
@@ -725,7 +785,9 @@ def verify_outputs(
             gaps.append(
                 f"{what}: reported digest is not the artifact's composition_digest"
             )
-        gaps += check_composition(doc, record, what, components, schema, compiler_src)
+        gaps += check_composition(
+            doc, record, what, components, schema, compiler_src, classes
+        )
         if doc is None:
             continue
         receipt, _ = _read_json(art["receipt_path"], f"{what} receipt", gaps)
@@ -741,7 +803,13 @@ def verify_outputs(
             ],
             stated_digest=art["receipt_digest"],
         )
-        composed[ref] = {"doc": doc, "record": record, "schema": schema, "what": what}
+        composed[ref] = {
+            "doc": doc,
+            "record": record,
+            "schema": schema,
+            "what": what,
+            "classes": classes,
+        }
     controls = negative_controls(verified, contexts, composed, compiler_src)
     gaps += [
         f"negative control accepted: {name}" for name, ok in controls.items() if not ok
@@ -753,6 +821,44 @@ def verify_outputs(
         "verified_compositions": len(composed),
         "negative_controls": controls,
     }
+
+
+def _component_classes(
+    components: dict[str, dict[str, Any]], ctx: ProjectionContext | None
+) -> dict[str, str]:
+    """Each verified projection's source class, from the registry, not from the artifact."""
+    if ctx is None:
+        return {}
+    return {
+        ref: ctx.by_source[doc["source_ref"]]["class"]
+        for ref, doc in components.items()
+        if doc.get("source_ref") in ctx.by_source
+    }
+
+
+def _alter_first_scalar(value: Any) -> bool:
+    """Change the first scalar leaf in place (depth first); False when there is none."""
+    items = (
+        list(value.items())
+        if isinstance(value, dict)
+        else list(enumerate(value))
+        if isinstance(value, list)
+        else []
+    )
+    for key, child in items:
+        if isinstance(child, (dict, list)):
+            if _alter_first_scalar(child):
+                return True
+        elif not isinstance(child, bool) and isinstance(child, (int, float)):
+            value[key] = child + 1
+            return True
+        elif isinstance(child, str):
+            value[key] = child + " (altered)"
+            return True
+        elif isinstance(child, bool):
+            value[key] = not child
+            return True
+    return False
 
 
 def _resealed(doc: dict[str, Any], field: str) -> dict[str, Any]:
@@ -804,7 +910,16 @@ def _projection_controls(
             (
                 "selected record dropped",
                 _resealed(doc, "projection_digest"),
-                "selected records",
+                "declared selection",
+            )
+        )
+    doc = copy.deepcopy(original)
+    if _alter_first_scalar(doc["payload"]):
+        controls.append(
+            (
+                "selected value altered",
+                _resealed(doc, "projection_digest"),
+                "declared selection",
             )
         )
     if ctx.schema is not None:
@@ -839,6 +954,30 @@ def _composition_controls(doc: dict[str, Any]) -> list[tuple[str, dict[str, Any]
                 "missing component",
                 _resealed(corrupted, "composition_digest"),
                 "not exactly",
+            )
+        )
+    if len(doc["components"]) > 1:
+        corrupted = copy.deepcopy(doc)
+        first, second = corrupted["components"][0], corrupted["components"][1]
+        first["source_class"], second["source_class"] = (
+            second["source_class"],
+            first["source_class"],
+        )
+        controls.append(
+            (
+                "namespace relabelled",
+                _resealed(corrupted, "composition_digest"),
+                "claims source class",
+            )
+        )
+    corrupted = copy.deepcopy(doc)
+    payload = corrupted.get("payload")
+    if isinstance(payload, dict) and _alter_first_scalar(payload):
+        controls.append(
+            (
+                "namespace payload altered",
+                _resealed(corrupted, "composition_digest"),
+                "payload is not exactly",
             )
         )
     corrupted = copy.deepcopy(doc)
@@ -886,6 +1025,7 @@ def negative_controls(
                 components,
                 item["schema"],
                 compiler_src,
+                item["classes"],
             )
             results[f"{ref}: {name}"] = any(marker in g for g in gaps)
     return results

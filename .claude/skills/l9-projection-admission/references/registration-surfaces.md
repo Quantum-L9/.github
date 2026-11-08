@@ -26,7 +26,7 @@ Copy the shape of an entry already on `main`, never one from memory. All paths a
 
 ## What the gate checks per kind (`INCOMPLETE` on any gap)
 
-Registries are checked whole first. A duplicate source id, two ids at one path, a schema listed twice, or two registered schemas declaring one output id makes **every** subject INCOMPLETE. The gate never resolves an ambiguity by position.
+Registries are checked whole first. A duplicate source id, two ids at one path, a schema listed twice, or two registered schemas declaring one output id makes **every** subject INCOMPLETE. A repeated YAML mapping key in any ledger is UNRESOLVED. The gate never resolves an ambiguity by position.
 
 | Kind | Policy |
 | --- | --- |

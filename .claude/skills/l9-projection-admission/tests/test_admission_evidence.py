@@ -161,7 +161,7 @@ class DecisionScope(_Fixture):
         scope = self.scope(repo)
         self.assertEqual(scope["status"], "fail")
         self.assertIn(
-            "does not name projection profile:l9.projection/x@1",
+            "do not name projection profile:l9.projection/x@1",
             "\n".join(scope["gaps"]),
         )
 

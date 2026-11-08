@@ -48,13 +48,15 @@ ADR-026 shows the opposite case: a candidate release whose ADR says it "does not
 | --- | --- |
 | `admission_release` | A release on main with the ADMITTED status line and an ADR that accepts exactly that version, not a candidate of it |
 | `admission_commit` | The oldest commit on main whose release README carries the ADMITTED status line. The release directory must be unedited after it, and its full SC-008 inventory must verify at that commit. |
-| `adr` | Existed and accepted the version **at the admission commit**. Listed in the ADR index there, hashed by the release at its bytes, and unedited or not removed on main since. |
+| `adr` | Existed and accepted the version **at the admission commit**: its status line accepts exactly that version and does not call itself a candidate, pending, withdrawn or self-denying. It is listed in the ADR index there, hashed by the release at its bytes, and unedited or not removed on main since. |
 | `admitted_semantics_tree` | The first 40-hex value in the ADR's `Approved semantic tree` row. It must equal `git rev-parse <admission_commit>:semantics`. |
 | `candidate_revision` | Further 40-hex commits in that row. Each one that resolves must carry the approved tree. |
-| `target_authority_class` | The `Target class (and authority)` row names canonical global semantics |
-| `authorized_decision_ref` | A session id, a `Quantum-L9/<repo>#<n>` reference or a GitHub URL in the status paragraph or target row |
-| `decision_scope` | Every subject identity the release *introduced*, meaning absent or different at the last commit recording the predecessor release, is named in the ADR. A composition profile is also covered by the projection profile it composes. A payload schema is also covered by its artifact id, its output schema id, or the profile pair whose output it is. |
+| `target_authority_class` | The `Target class (and authority)` row **starts with** "Canonical global semantics". A row that only mentions it, such as "NOT canonical global semantics", is rejected. |
+| `authorized_decision_ref` | A governed session id, a `Quantum-L9/<repo>#<n>` reference, or a GitHub pull-request or issue URL, in the status paragraph or target row. An arbitrary URL is not one. |
+| `decision_scope` | Every subject identity the release *introduced* is named inside the ADR's **Admitted definitions** block. A mention elsewhere (evidence, limitations, an exclusion) does not count. "Introduced" means absent or different at the predecessor state: the admission commit of the highest *admitted* lower release, so an unadmitted candidate in between cannot absorb introductions. The predecessor directory's last commit is used only when no lower release was ever admitted. Ledger content changes count. Dependency records do not count; closure covers those. A composition is covered by the projection profile it composes only when both are introduced together. A schema is covered by its artifact id, its output id, or its profile's covering names. |
 | `subject_digest` | The canonical-JSON digest of the subject's records at the admission commit |
+
+Once admitted, a subject stays ADMITTED only while its records **and its dependencies** are unchanged on main and at HEAD. The dependencies are a projection's source files, its schema and forbidden-criterion definitions; a composition's projection profile and that profile's dependencies; a contract's source invariants; and a term's parent and detailed model. Drift in any of them is reported under `changed_*_since_admission` as a `dep:` key.
 
 ### What evidence cannot prove
 

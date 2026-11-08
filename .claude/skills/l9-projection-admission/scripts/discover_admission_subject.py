@@ -33,6 +33,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -122,28 +123,70 @@ def _strip(
     return doc
 
 
-def _without_derivation(value: Any) -> Any:
+# Inside a `derivation` block, only these leaves are derived coordinates (the digest
+# cascade). Anything else there, such as a `rule`, is governing text and stays meaning.
+COORDINATE = re.compile(r"(sha256|digest|_count)$")
+
+
+def _strip_coordinates(value: Any) -> Any:
     if isinstance(value, dict):
         return {
-            k: _without_derivation(v) for k, v in value.items() if k != "derivation"
+            k: _strip_coordinates(v)
+            for k, v in value.items()
+            if not COORDINATE.search(k)
         }
+    if isinstance(value, list):
+        return [_strip_coordinates(v) for v in value]
+    return value
+
+
+def _has_content(value: Any) -> bool:
+    if isinstance(value, dict):
+        return any(_has_content(v) for v in value.values())
+    if isinstance(value, list):
+        return any(_has_content(v) for v in value)
+    return True
+
+
+def _without_derivation(value: Any) -> Any:
+    """The document with every derivation coordinate removed and everything else kept.
+
+    A derivation block that held nothing but coordinates disappears entirely, so adding
+    or rebinding the digest cascade is never a change of meaning.
+    """
+    if isinstance(value, dict):
+        out = {}
+        for k, v in value.items():
+            if k == "derivation":
+                stripped = _strip_coordinates(v)
+                if _has_content(stripped):
+                    out[k] = stripped
+            else:
+                out[k] = _without_derivation(v)
+        return out
     if isinstance(value, list):
         return [_without_derivation(v) for v in value]
     return value
 
 
-def _derivations(value: Any, path: str = "$") -> dict[str, Any]:
+def _coordinates(value: Any, path: str, inside: bool) -> dict[str, Any]:
     found: dict[str, Any] = {}
     if isinstance(value, dict):
         for key, child in value.items():
-            if key == "derivation":
-                found[f"{path}.derivation"] = child
+            here = f"{path}.{key}"
+            if inside and COORDINATE.search(key):
+                found[here] = child
             else:
-                found.update(_derivations(child, f"{path}.{key}"))
+                found.update(_coordinates(child, here, inside or key == "derivation"))
     elif isinstance(value, list):
         for index, child in enumerate(value):
-            found.update(_derivations(child, f"{path}[{index}]"))
+            found.update(_coordinates(child, f"{path}[{index}]", inside))
     return found
+
+
+def _derivations(value: Any) -> dict[str, Any]:
+    """Every derivation coordinate (digest or count under a `derivation` key) by path."""
+    return _coordinates(value, "$", False)
 
 
 def _by_id(entries: Any, kind: str, problems: list[str]) -> dict[str, Any]:

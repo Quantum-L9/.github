@@ -278,6 +278,8 @@ elif cmd == "project":
         payload = select(yaml.safe_load(raw), selectors)
         if MODE == "bad-payload":
             payload["records"][0]["v"] = "not-an-integer"
+        if MODE == "tamper-value":
+            payload["value"] = 424242
         art = {"schema": "l9.projection-artifact/v1", "source_ref": sid,
                "source_digest": ZERO if MODE == "bad-source-digest"
                else "sha256:" + hashlib.sha256(raw).hexdigest(),
@@ -317,6 +319,9 @@ elif cmd == "compose":
         payload[cls] = art["payload"]
     if MODE == "dup-component":
         components.append(dict(components[0]))
+    if MODE == "relabel":
+        components[0]["source_class"] = "wrong_class"
+        payload = {"wrong_class": payload[cls]}
     composed = {"schema": "l9.composed-projection/v1",
                 "composition_profile": {"ref": ref, "digest": digest(record)},
                 "components": components, "payload": payload}
@@ -343,6 +348,7 @@ def fake_compiler(root: Path, mode: str) -> Path:
     (pkg / "passes" / "__init__.py").write_text("", encoding="utf-8")
     (pkg / "passes" / "validate.py").write_text(FAKE_VALIDATE, encoding="utf-8")
     if not (engine / ".git").exists():
+        (engine / ".gitignore").write_text("mode\n__pycache__/\n", encoding="utf-8")
         git = Repo(engine)
         git.git("init", "-q")
         git.git("config", "user.email", "fixture@example.invalid")
@@ -394,10 +400,12 @@ class Repo:
         target_row=True,
         decision_ref=True,
         index=True,
+        target="Canonical global semantics. The owner holds it.",
+        ref=" The owner decided in session `session_fixture000001` (Quantum-L9/.github#1).",
+        extra="",
     ) -> str:
         """An ADR in the ADR-025 shape: status, subject table, admitted definitions."""
         name = f"ADR-{number:03d}-admit-{version}.md"
-        ref = " The owner decided in session `session_fixture000001` (Quantum-L9/.github#1)."
         line = (
             status
             or f"**Status:** Accepted for semantic-foundation {version}.{ref if decision_ref else ''}"
@@ -407,9 +415,10 @@ class Repo:
             rows += f"| Release | Semantic Foundation **{version}** |\n"
         rows += f"| Approved semantic tree | `semantics/` tree `{tree or self.semantics_tree()}` |\n"
         if target_row:
-            rows += "| Target class and authority | Canonical global semantics. The owner holds it. |\n"
+            rows += f"| Target class and authority | {target} |\n"
         body = f"# ADR-{number:03d}\n\n{line}\n\n## Subject\n\n{rows}\nAdmitted definitions:\n\n"
         body += "".join(f"- `{n}`\n" for n in names)
+        body += f"\n## Evidence relied on\n\n{extra}\n" if extra else ""
         self.write(f"docs/adr/{name}", body)
         if index:
             entries = [
@@ -1331,6 +1340,182 @@ class RealRepository(unittest.TestCase):
         )
         self.assertNotIn(report["verdict"], ("ADMITTED", "DOWNSTREAM_USABLE"))
         self.assertEqual(report["admission"]["status"], "fail")
+
+
+class SecondReview(_Fixture):
+    """One test per false-PASS path the second independent review reproduced."""
+
+    def add_invariant(self, ident):
+        self.repo.write(
+            "semantics/invariants.yaml",
+            self.repo.read("semantics/invariants.yaml")
+            + f"- id: {ident}\n  statement: {ident} holds\n  scope: global\n  owner: o\n",
+        )
+
+    def test_unadmitted_intermediate_candidate_cannot_hide_an_introduction(self):
+        # Finding 1: v1.1.0 (candidate) adds L9-Y-001; v1.2.0 is admitted naming nothing.
+        self.add_invariant("L9-Y-001")
+        self.candidate()
+        self.repo.admit("v1.2.0", 2, ["unrelated"])
+        self.repo.commit("admit v1.2.0")
+        report = self.verdict(self.subject(invariants=["L9-Y-001"]))
+        self.assertNotIn(report["verdict"], ("ADMITTED", "DOWNSTREAM_USABLE"))
+        scope = report["admission"]["tried"][0]["decision_scope"]
+        self.assertEqual(scope["predecessor_release"], "v1.0.0")
+        self.assertIn("invariant:L9-Y-001", scope["introduced"])
+
+    def test_tampered_projection_value_fails_downstream(self):
+        # Finding 2: a re-sealed artifact with altered values passed every check.
+        result = self.downstream("tamper-value")
+        self.assertEqual(result["status"], "fail")
+        self.assertIn(
+            "payload is not exactly the declared selection",
+            "\n".join(result["verification"]["gaps"]),
+        )
+
+    def test_relabelled_composition_namespace_fails_downstream(self):
+        # Finding 3: a component's self-declared source_class was trusted.
+        result = self.downstream("relabel")
+        self.assertIn("claims source class", "\n".join(result["verification"]["gaps"]))
+
+    def test_deep_merge_composition_is_never_verified_pass(self):
+        import verify_admission_evidence as vae
+
+        record = {"id": "l9.compose/d@1", "merge_strategy": cac.DEEP_MERGE}
+        doc = {"schema": vae.COMPOSITION_ENVELOPE, "components": [], "payload": {}}
+        gaps = vae.check_composition(doc, record, "d", {}, None, self.tmp, {})
+        self.assertIn("only a source-class-namespaced composition", "\n".join(gaps))
+
+    def test_dependency_changed_after_admission_demotes_the_subject(self):
+        # Finding 4: the profile's selected source and its schema changed on main.
+        self.repo.write("semantics/x_model.yaml", LEDGERS["x_model.yaml"] + "more: 1\n")
+        self.repo.write(
+            "semantics/x_projection.schema.yaml",
+            LEDGERS["x_projection.schema.yaml"].replace("min_items: 1", "min_items: 0"),
+        )
+        self.candidate()
+        report = self.verdict(self.subject(projection_profiles=["l9.projection/x@1"]))
+        self.assertNotEqual(report["verdict"], "ADMITTED")
+        drift = report["admission"]["changed_on_main_since_admission"]
+        self.assertIn("dep:file:semantics/x_model.yaml", drift)
+        self.assertIn("dep:file:semantics/x_projection.schema.yaml", drift)
+
+    def test_ledger_content_change_must_be_named_by_the_decision(self):
+        # Finding 5: a content-only ledger change was excluded from "introduced".
+        self.repo.write("semantics/x_model.yaml", LEDGERS["x_model.yaml"] + "more: 1\n")
+        self.repo.admit("v1.1.0", 2, ["unrelated"])
+        self.repo.commit("admit v1.1.0")
+        report = self.verdict(self.subject(canonical_sources=["l9.source/x-model@1"]))
+        self.assertNotEqual(report["verdict"], "ADMITTED")
+        scope = report["admission"]["tried"][0]["decision_scope"]
+        self.assertIn("source_file:l9.source/x-model@1", scope["introduced"])
+
+    def admitted_v11(self, **adr):
+        self.add_invariant("L9-Y-001")
+        self.repo.admit("v1.1.0", 2, adr.pop("names", ["L9-Y-001"]), **adr)
+        self.repo.commit("admit v1.1.0")
+        return self.verdict(self.subject(invariants=["L9-Y-001"]))
+
+    def test_genuine_v11_admission_is_admitted(self):
+        self.assertEqual(self.admitted_v11()["verdict"], "ADMITTED")
+
+    def test_mention_outside_admitted_definitions_does_not_cover(self):
+        # Finding 7: "NOT ADMITTED: L9-Y-001 ..." counted as naming it.
+        report = self.admitted_v11(
+            names=["unrelated"],
+            extra="NOT ADMITTED: `L9-Y-001` is outside this decision.",
+        )
+        self.assertNotEqual(report["verdict"], "ADMITTED")
+
+    def test_negated_target_class_is_rejected(self):
+        report = self.admitted_v11(
+            target="NOT canonical global semantics; product-local only"
+        )
+        self.assertNotEqual(report["verdict"], "ADMITTED")
+
+    def test_arbitrary_url_is_not_a_decision_reference(self):
+        report = self.admitted_v11(ref=" Pending; see https://github.com/x/y.")
+        self.assertNotEqual(report["verdict"], "ADMITTED")
+
+    def test_self_denying_status_line_is_not_acceptance(self):
+        status = (
+            "**Status:** Accepted for semantic-foundation v1.1.0 as a candidate only; "
+            "this record does not admit itself. Session `session_fixture000001`."
+        )
+        report = self.admitted_v11(status=status)
+        self.assertNotEqual(report["verdict"], "ADMITTED")
+
+    def test_admitted_projection_profile_does_not_cover_a_new_composition(self):
+        composition = COMPOSITION.replace(
+            "l9.compose/x@1", "l9.compose/evil@1"
+        ).replace("l9.composed-projection.x/v1", "l9.composed-projection.evil/v1")
+        self.repo.write(
+            "semantics/composition_profiles.yaml",
+            LEDGERS["composition_profiles.yaml"] + composition,
+        )
+        self.repo.write(
+            "semantics/evil_composition.schema.yaml",
+            LEDGERS["x_composition.schema.yaml"]
+            .replace("x-composition", "evil-composition")
+            .replace("l9.compose/x@1", "l9.compose/evil@1")
+            .replace("composed-projection.x/", "composed-projection.evil/"),
+        )
+        self.repo.write(
+            "semantics/generic_compiler_manifest.yaml",
+            manifest(
+                (
+                    "x_projection.schema.yaml",
+                    "x_composition.schema.yaml",
+                    "evil_composition.schema.yaml",
+                )
+            ),
+        )
+        self.repo.admit("v1.1.0", 2, ["l9.projection/x@1"])
+        self.repo.commit("admit v1.1.0")
+        report = self.verdict(
+            self.subject(
+                composition_profiles=["l9.compose/evil@1"],
+                schemas=["evil_composition.schema.yaml"],
+            )
+        )
+        self.assertNotEqual(
+            report["verdict"], "ADMITTED", json.dumps(report, indent=1)[:3000]
+        )
+        gaps = "\n".join(report["admission"]["tried"][0]["decision_scope"]["gaps"])
+        self.assertIn("composition profile:l9.compose/evil@1", gaps)
+
+
+class PlausibleHardening(_Fixture):
+    def test_duplicate_yaml_key_is_unresolved(self):
+        self.repo.write(
+            "semantics/vocabulary.yaml",
+            LEDGERS["vocabulary.yaml"]
+            + "  x_term:\n    semantic_class: c\n    definition: d\n",
+        )
+        with self.assertRaises(cac.InputError):
+            self.verdict()
+
+    def test_status_with_trailing_question_is_not_admitted(self):
+        self.repo.write(
+            "docs/semantic-foundation/v1.0.0/README.md", "Status: **ADMITTED? NO**\n"
+        )
+        self.assertNotEqual(
+            cac.release_status(cac.Tree(self.repo.root), "v1.0.0"), "ADMITTED"
+        )
+
+    def test_non_version_release_entry_fails_the_sequence(self):
+        self.repo.write("docs/semantic-foundation/v9-draft/README.md", "x\n")
+        report = self.verdict()
+        self.assertIn("non-version entries", "\n".join(report["release"]["gaps"]))
+
+    def test_untracked_file_in_the_compiler_is_not_an_exact_revision(self):
+        engine = fake_compiler(self.tmp, "pass")
+        (engine / "src" / "json.py").write_text("raise SystemExit('shadowed')\n")
+        result = cac.downstream(
+            self.repo.root, engine, self.tmp / "out", cac.load_subject(self._subject())
+        )
+        self.assertEqual(result["status"], "fail")
+        self.assertTrue(result["compiler"]["dirty"])
 
 
 if __name__ == "__main__":
