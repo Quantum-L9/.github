@@ -1,0 +1,170 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.grammar/strategic-planner-value-vocabulary-candidate@1
+owner: Quantum-L9/.github
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: vocabulary
+source_ref: l9.source/vocabulary@1
+source_path: semantics/vocabulary.yaml
+source_revision: d6f4db8b9689eb97a825e6184e2b346bf27eeebf
+source_digest: sha256:db0491ac7b8e2892e3eaddce0c4e2fa277ce4f2247017c48727b34d7f90e8bc2
+applies_to_selectors:
+- $.terms.strategic_value
+- $.terms.systemic_future_value
+- $.terms.strategic_value_assessment
+- $.terms.counterfactual_baseline
+- $.terms.future_effect_identity
+- $.terms.bidirectional_value_propagation
+- $.terms.value_propagation_mesh
+- $.terms.future_work_elimination
+- $.terms.capability_unlock
+- $.terms.decision_relevant_information_value
+- $.terms.decision_boundary
+grammar:
+  type: object
+  fields:
+    terms:
+      type: object
+      fields:
+        strategic_value:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+            artifact_id:
+              type: string
+            detailed_model:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        systemic_future_value:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+            detailed_model:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        strategic_value_assessment:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        counterfactual_baseline:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        future_effect_identity:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        bidirectional_value_propagation:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        value_propagation_mesh:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        future_work_elimination:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        capability_unlock:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        decision_relevant_information_value:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+        decision_boundary:
+          type: object
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+          additional_properties: true
+          required:
+          - semantic_class
+          - definition
+      additional_properties: true
+      required:
+      - strategic_value
+      - systemic_future_value
+      - strategic_value_assessment
+      - counterfactual_baseline
+      - future_effect_identity
+      - bidirectional_value_propagation
+      - value_propagation_mesh
+      - future_work_elimination
+      - capability_unlock
+      - decision_relevant_information_value
+      - decision_boundary
+  additional_properties: true
