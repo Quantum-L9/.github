@@ -100,7 +100,7 @@ class SchemaCompositionClosure(unittest.TestCase):
             set(selects),
             set(self.cs["properties"]["strategic_value_model"]["required"]),
         )
-        self.assertTrue(set(selects) <= set(self.model))
+        self.assertLessEqual(set(selects), set(self.model))
         for k in selects:
             self.assertIn(k, self.ps["properties"])
             self.assertIn(

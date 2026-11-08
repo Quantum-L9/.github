@@ -96,6 +96,13 @@ def load_donor():
     return donor
 
 
+# Statuses of a record the owner approved. Admission changes what was done with the approval,
+# not whether the dispositions were approved.
+OWNER_APPROVED_STATUSES = frozenset(
+    {"OWNER_APPROVED_NOT_ADMITTED", "OWNER_APPROVED_AND_ADMITTED"}
+)
+
+
 def require_backed_decision(row, decision):
     """A pending row carries no decision; an approved row must cite the approved record."""
     status, ref = row["owner_decision_status"], row["owner_decision_ref"]
@@ -104,7 +111,7 @@ def require_backed_decision(row, decision):
     backed = (
         status == "approved"
         and ref == OWNER_DECISION_REF
-        and decision.get("decision_status") == "OWNER_APPROVED_NOT_ADMITTED"
+        and decision.get("decision_status") in OWNER_APPROVED_STATUSES
         and decision["approved_dispositions"].get(row["candidate_id"])
         == row["disposition"]
     )

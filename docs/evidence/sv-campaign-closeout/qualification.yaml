@@ -1,0 +1,23 @@
+schema: l9.sv-campaign-qualification/v1
+subject_revision: c4c4a1dd7275f50e8249168fc86aa5c5d1b14ee7
+semantics_tree: 251bb3d9238f93f0207b1f8443c80359e034595b
+producer: Quantum-L9/l9-semantic-compiler-engine@33e4c5832bf73c7d9b0b70854af011e9582f1ab2
+records: pre-merge-qualification-c4c4a1d/
+results:
+  source_projections: {count: 5, pass: 5}
+  composition:
+    profile: l9.compose/strategic-planner-value@1
+    result: pass
+    digest: sha256:7e93f3afe35bc5d628ac716952088bf02ddb1bef0c32fc6a1528f915108e38e7
+    required_provenance: {pass: 4, unresolved: 0}
+  stage_context_regression:
+    required_provenance: {pass: 4}
+    overall: unknown
+    reason: 8 payload_schema criteria; neither the GAR components nor the stage-context output has a registered payload schema (predates SV, outside D2)
+  determinism: two runs, 29 artifact/composed/receipt/summary files byte-identical
+  independent_verifier: PASS (no compiler imports)
+  producer_negative_controls: {controls: 18, all_mechanisms_matched: true}
+  native_schema_regressions: {checks: 26, result: pass}
+  falsifiers: PASS (local contract falsification, not numerical validation)
+  admission_gate: RELEASED_CANDIDATE at c4c4a1d (expected before admission)
+earlier_record: docs/candidates/SV/evidence/admission/qualification-daca00e/ (same composition digest at daca00e)

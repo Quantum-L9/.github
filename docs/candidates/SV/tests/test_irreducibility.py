@@ -82,9 +82,8 @@ class IrreducibilityTests(unittest.TestCase):
                 node = node[part]
             self.assertTrue(node)
             self.assertIn(p["contract_obligation"], self.contract["requires"])
-            self.assertTrue(
-                set(p["governing_invariants"])
-                <= set(self.contract["source_invariants"])
+            self.assertLessEqual(
+                set(p["governing_invariants"]), set(self.contract["source_invariants"])
             )
             self.assertNotIn(ident, self.contract["source_invariants"])
             self.assertNotIn(ident, self.model["governed_by"]["invariants"])

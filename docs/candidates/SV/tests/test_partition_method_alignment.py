@@ -104,14 +104,14 @@ class PartitionAndMethodAlignment(unittest.TestCase):
             look["method_policy"],
             "supported_mathematical_formulation_not_universal_algorithm_requirement",
         )
-        self.assertTrue(
+        self.assertLessEqual(
             {
                 "bounded_scenario_analysis",
                 "robust_optimization",
                 "bounded_QV_belief_state_lookahead",
                 "other_owner_admitted_question_appropriate_methods",
-            }
-            <= set(look["supported_method_families"])
+            },
+            set(look["supported_method_families"]),
         )
         self.assertIn("qv_only_required_model_coordinates", look)
         self.assertIn("qv_only_stopping_conditions", look)

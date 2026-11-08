@@ -10,8 +10,8 @@ import json
 import tarfile
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
-from unittest import mock
 
 import verify_composition_provenance as vcp
 
@@ -152,7 +152,7 @@ class NegativeControls(_RunFixture):
         real = vcp.candidate_profiles()
         edited = copy.deepcopy(real[0])
         edited["merge_strategy"]["duplicate_source"] = "merge"
-        with mock.patch.object(
+        with unittest.mock.patch.object(
             vcp, "candidate_profiles", return_value=(edited, real[1])
         ):
             self.assertIn("composition_profile_digest", self.failed())
@@ -269,11 +269,19 @@ class OwnerDecisionRecord(unittest.TestCase):
         data = self.yaml.safe_load((vcp.PACK / rel).read_text(encoding="utf-8"))
         return {r["id"]: r["statement"] for r in data["invariants"]}
 
-    def test_approval_is_recorded_and_is_not_admission(self):
-        self.assertEqual(self.doc["decision_status"], "OWNER_APPROVED_NOT_ADMITTED")
+    def test_approval_is_recorded_and_admission_cites_its_record(self):
+        self.assertEqual(self.doc["decision_status"], "OWNER_APPROVED_AND_ADMITTED")
         self.assertEqual(self.doc["statuses"]["owner_approval"], "APPROVED")
-        self.assertEqual(self.doc["statuses"]["canonical_admission"], "NOT_ADMITTED")
-        self.assertEqual(self.doc["statuses"]["post_merge_trusted_replay"], "NOT_RUN")
+        self.assertEqual(self.doc["statuses"]["canonical_admission"], "ADMITTED")
+        # Admission is claimed only with its decision record and the effective main commit.
+        ref = self.doc["statuses"]["canonical_admission_ref"]
+        self.assertIn("ADR-029", ref)
+        self.assertIn("64d8b8598300f94c3201f26866f73be6895dab60", ref)
+        self.assertTrue(
+            (vcp.PACK.parents[2] / self.doc["decision_record_ref"]).is_file(),
+            self.doc["decision_record_ref"],
+        )
+        self.assertEqual(self.doc["statuses"]["consumer_trusted_replay"], "NOT_RUN")
         self.assertIn(
             "session_017xwbxytavCYavKdhRr9a6n", self.doc["authorized_decider_ref"]
         )

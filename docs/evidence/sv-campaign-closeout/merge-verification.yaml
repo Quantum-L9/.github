@@ -1,0 +1,17 @@
+schema: l9.sv-campaign-merge-verification/v1
+pr: Quantum-L9/.github#222
+qualified_head: c4c4a1dd7275f50e8249168fc86aa5c5d1b14ee7
+admission_head: 5c7fcc524160662e297cee2b393f2768d1de915c
+merge_commit: 64d8b8598300f94c3201f26866f73be6895dab60
+merge_commit_parent: 92c037a6ec8a17185841cfd60214a69873ae2501
+tree_equality:
+  admission_head_tree: 98d078d804b5aa8ac06b719a797a5e055ff6579d
+  main_merge_tree: 98d078d804b5aa8ac06b719a797a5e055ff6579d
+  equal: true
+semantics_tree:
+  qualified_at_c4c4a1d: 251bb3d9238f93f0207b1f8443c80359e034595b
+  at_admission_head: 251bb3d9238f93f0207b1f8443c80359e034595b
+  at_main_merge: 251bb3d9238f93f0207b1f8443c80359e034595b
+  requalification_needed: false
+required_check_at_admission_head: {name: Analyze (central Core), conclusion: success}
+other_checks_at_admission_head: validate-semantics.py, check, CodeQL, SonarCloud Code Analysis, actionlint, audit all success; the reusable body/body job showed pending and cancelled runs (non-required)

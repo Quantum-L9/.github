@@ -75,7 +75,7 @@
 		{
 			"path": "apply_to_pinned_checkout.py",
 			"bytes": 29587,
-			"sha256": "81e7ac6723dca84dce00ffb91b2ad6cf19694002c60aa59707aeb9d36e868787"
+			"sha256": "64851bc1d419e3b5f0bb552b1fba02eb9b23f253cdf1293d02fe95829dd74ff0"
 		},
 		{
 			"path": "evidence/SV015_falsification.json",
@@ -114,8 +114,8 @@
 		},
 		{
 			"path": "evidence/admission/ADMISSION_CLOSEOUT.md",
-			"bytes": 8336,
-			"sha256": "f9d18690d3875feb0420d4f0073b6bdcfdf25d4fd33486235a3859a5b83f7fd5"
+			"bytes": 9155,
+			"sha256": "f006609a0d735de71cf50bc9ceb01e2bb3bb41a082b4475d6d24e34e245880ef"
 		},
 		{
 			"path": "evidence/admission/composition-provenance-equivalence.json",
@@ -124,8 +124,8 @@
 		},
 		{
 			"path": "evidence/admission/owner-decision.yaml",
-			"bytes": 6472,
-			"sha256": "6d285c6ce344b70aa8e1a5d99736c953043ea55125fb2853cd30157f34276bd5"
+			"bytes": 7018,
+			"sha256": "6e1d2b1c7241cc8a0f6425c23b813781855a8da055e3be8562a927e9fb25db23"
 		},
 		{
 			"path": "evidence/admission/qualification-daca00e/admission-closure-gate.json",
@@ -469,8 +469,8 @@
 		},
 		{
 			"path": "tests/test_alignment.py",
-			"bytes": 4671,
-			"sha256": "7182e3223c97d59a44cc27a1a935c9670041ae552dd66969a6c1e8f707e91bcf"
+			"bytes": 4679,
+			"sha256": "a3b343e5ad54128d64eff0b96053b3a17eadfd0da30debab57640dcfe05472c8"
 		},
 		{
 			"path": "tests/test_candidate.py",
@@ -479,13 +479,13 @@
 		},
 		{
 			"path": "tests/test_composition_provenance_equivalence.py",
-			"bytes": 13359,
-			"sha256": "57d867df61daf0ccebe4c3de2a0751e36bec733e32c11c003ac63095a4b39245"
+			"bytes": 13789,
+			"sha256": "d2ed877fc801222ddb306476c62f8124fa503d570e2923c304fb11d57aaf8d08"
 		},
 		{
 			"path": "tests/test_irreducibility.py",
-			"bytes": 5858,
-			"sha256": "b7f4019973d04bf8b359474575ce7dd04e9bc09b4dbedcc85fc42886eb8d758c"
+			"bytes": 5845,
+			"sha256": "24d00b55149970a12d578229dd149fd82e0bd4105aa0d067f48b49bb88439e3b"
 		},
 		{
 			"path": "tests/test_new_invariants.py",
@@ -494,13 +494,13 @@
 		},
 		{
 			"path": "tests/test_partition_method_alignment.py",
-			"bytes": 7633,
-			"sha256": "59b4d5e8fe233e4e429842798ae1fdd36d442e145fe609d7d60490096f7be64e"
+			"bytes": 7637,
+			"sha256": "77e057b9a4a611eeea4b297a1a9048783f69931e2c97fd2e89bed3d1c868546e"
 		},
 		{
 			"path": "tests/test_projection_composition_schema.py",
-			"bytes": 8920,
-			"sha256": "93a3f802caaa8a7d904059d29dc2d5b7381cdb9bceb72a6db95bf99d8b53e6a2"
+			"bytes": 8923,
+			"sha256": "a16e388cf626c2f0cfd7a8e7fe1b646b304bcf051ae0836ec654d54675fab801"
 		},
 		{
 			"path": "tests/test_reduction_closure.py",
@@ -514,8 +514,8 @@
 		},
 		{
 			"path": "tests/test_six_falsifications.py",
-			"bytes": 3124,
-			"sha256": "b3b95c575f503a9b73bbca0f9c9dbf5e00ffaa1226a4e0133b0ca5d88e6846da"
+			"bytes": 3157,
+			"sha256": "9503e27276c975dc12a61e7d7953edf0849c9d15a2b0d19c9c2ea5959756e2bb"
 		},
 		{
 			"path": "tests/test_successor_release.py",
@@ -534,8 +534,8 @@
 		},
 		{
 			"path": "tools/reduce_to_two_invariants.py",
-			"bytes": 14969,
-			"sha256": "c950736d91a5e30ee914a9fea571a80628f6f1243313cd2f5a4e62e4a8a52911"
+			"bytes": 15211,
+			"sha256": "5d494771e248cc855c62832f1b1c3c2ed8b88c7c8830ab30e13f5bc6a1397137"
 		},
 		{
 			"path": "tools/run_producer_qualification.py",
