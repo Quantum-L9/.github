@@ -1,0 +1,3893 @@
+{
+ "admission": "not_granted",
+ "authority": {
+  "repository": "Quantum-L9/.github",
+  "repository_identity_basis": "caller_asserted",
+  "revision": "d6f4db8b9689eb97a825e6184e2b346bf27eeebf"
+ },
+ "composition_profile": {
+  "digest": "sha256:d2227cf302c5c12fc2ba360d5fb4f1304eb9bf35d6312986c50736b06b00fd14",
+  "ref": "l9.compose/strategic-planner-value@1"
+ },
+ "method": "l9.schema-observation/selected-payload@1",
+ "normative": false,
+ "normative_constraints": [],
+ "output_schemas": {
+  "composition": "l9.composed-projection.strategic-planner-value/v1",
+  "projection": "l9.projection.strategic-planner-value/v1"
+ },
+ "projection_profile": {
+  "digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+  "ref": "l9.projection/strategic-planner-value@1"
+ },
+ "report_kind": "selected_payload_observations",
+ "selector_model": {
+  "digest": "sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56",
+  "path": "semantics/selector_model.yaml",
+  "ref": "l9.selector-model/global@1"
+ },
+ "sources": [
+  {
+   "observed_facts": [
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.artifact_id"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.assessment_applicability"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.assessment_applicability.claim_gate"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 3,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.assessment_applicability.does_not_govern"
+    },
+    {
+     "distinct_scalar_values_observed": 3,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 3,
+     "path": "$.assessment_applicability.does_not_govern[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.assessment_applicability.method_applicability"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.assessment_applicability.non_claim"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.assessment_applicability.unsupported_claim"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.assessment_claim_levels"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.assessment_claim_levels.declared_aggregate"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.assessment_claim_levels.independently_verified_numerical_assessment"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.assessment_claim_levels.supplied_trajectory_calculation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.assessment_claim_levels.unknown_or_degraded"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.authority"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.authority.authority_class"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.authority.owner"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.authority.scope"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.canonical_source"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.canonical_source.artifact"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.canonical_source.format"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.causal_accounting"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.causal_accounting.conditional_relevance"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.causal_accounting.explicit_attribution_and_overlap_required"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.causal_accounting.loops_unrolled_through_time"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.causal_accounting.negative_drag_and_coordination_costs_preserved"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.causal_accounting.shared_state_delta_booked_once"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.causal_accounting.stable_effect_identity_required"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 4,
+      "min": 4
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.causal_accounting.topology_kinds"
+    },
+    {
+     "distinct_scalar_values_observed": 4,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 4,
+     "path": "$.causal_accounting.topology_kinds[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.causal_accounting.unchanged_echo_incremental_value"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.comparisons"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.comparisons.compatible_objective_and_units_required"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 5,
+      "min": 5
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.comparisons.may_return"
+    },
+    {
+     "distinct_scalar_values_observed": 5,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 5,
+     "path": "$.comparisons.may_return[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.comparisons.output_is_not_authorization"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.comparisons.output_is_not_strategic_commitment"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.comparisons.output_is_not_strategic_plan_graph_content"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 5,
+      "min": 5
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.comparisons.relevant_meta_action_kinds"
+    },
+    {
+     "distinct_scalar_values_observed": 5,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 5,
+     "path": "$.comparisons.relevant_meta_action_kinds[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.comparisons.stale_model_or_evidence_invalidates_affected_assessment"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.comparisons.unknown_is_not_zero"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.comparisons.valuation_does_not_override_mandatory_constraints"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.counterfactual_mathematics"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.counterfactual_mathematics.bounded_expression"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.counterfactual_mathematics.consumer_behavior"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 6,
+      "min": 6
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.counterfactual_mathematics.expectation_semantics"
+    },
+    {
+     "distinct_scalar_values_observed": 6,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 6,
+     "path": "$.counterfactual_mathematics.expectation_semantics[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.counterfactual_mathematics.geometric_discount_special_case"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.counterfactual_mathematics.normative_meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.counterfactual_mathematics.numerical_owner"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 10,
+      "min": 10
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.counterfactual_mathematics.utility_accounting"
+    },
+    {
+     "distinct_scalar_values_observed": 10,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 10,
+     "path": "$.counterfactual_mathematics.utility_accounting[]"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.evaluation_integrity"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 3,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.evaluation_integrity.beneficiary_scope"
+    },
+    {
+     "distinct_scalar_values_observed": 3,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 3,
+     "path": "$.evaluation_integrity.beneficiary_scope[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 3,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.evaluation_integrity.counterfactual_identification"
+    },
+    {
+     "distinct_scalar_values_observed": 3,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 3,
+     "path": "$.evaluation_integrity.counterfactual_identification[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 8,
+      "min": 8
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.evaluation_integrity.independent_method_assurance"
+    },
+    {
+     "distinct_scalar_values_observed": 8,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 8,
+     "path": "$.evaluation_integrity.independent_method_assurance[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 3,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.evaluation_integrity.joint_portfolio_valuation"
+    },
+    {
+     "distinct_scalar_values_observed": 3,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 3,
+     "path": "$.evaluation_integrity.joint_portfolio_valuation[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 3,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.evaluation_integrity.nonanticipativity"
+    },
+    {
+     "distinct_scalar_values_observed": 3,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 3,
+     "path": "$.evaluation_integrity.nonanticipativity[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 3,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.evaluation_integrity.uncertainty_aware_selection"
+    },
+    {
+     "distinct_scalar_values_observed": 3,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 3,
+     "path": "$.evaluation_integrity.uncertainty_aware_selection[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 8,
+      "min": 8
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.explicit_non_ownership"
+    },
+    {
+     "distinct_scalar_values_observed": 8,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 8,
+     "path": "$.explicit_non_ownership[]"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.forecast_and_realization"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.forecast_and_realization.predicted_value_is"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.forecast_and_realization.realization_never_retroactively_proves_ex_ante_forecast"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.forecast_and_realization.realized_value_is"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.governed_by"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 3,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.governed_by.contracts"
+    },
+    {
+     "distinct_scalar_values_observed": 3,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 3,
+     "path": "$.governed_by.contracts[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 12,
+      "min": 12
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.governed_by.invariants"
+    },
+    {
+     "distinct_scalar_values_observed": 12,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 12,
+     "path": "$.governed_by.invariants[]"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.identity"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.identity.assessment_contract_ref"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.identity.canonical_term_ref"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.identity.numerical_owner"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.identity.related_term_ref"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.identity.semantic_ref"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.identity.strategic_plan_owner_ref"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.purpose"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-015"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-015.authority_status"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-015.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-015.disposition"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 1,
+      "min": 1
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-015.governing_invariants"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-015.governing_invariants[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-015.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-015.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-015.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-015.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-016"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-016.authority_status"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-016.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-016.disposition"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 3,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-016.governing_invariants"
+    },
+    {
+     "distinct_scalar_values_observed": 3,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 3,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-016.governing_invariants[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-016.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-016.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-016.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-016.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-017"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-017.authority_status"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-017.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-017.disposition"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 2,
+      "min": 2
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-017.governing_invariants"
+    },
+    {
+     "distinct_scalar_values_observed": 2,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 2,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-017.governing_invariants[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-017.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-017.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-017.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-017.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-018"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-018.authority_status"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-018.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-018.disposition"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 2,
+      "min": 2
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-018.governing_invariants"
+    },
+    {
+     "distinct_scalar_values_observed": 2,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 2,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-018.governing_invariants[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-018.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-018.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-018.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-018.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-019"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-019.authority_status"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-019.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-019.disposition"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 2,
+      "min": 2
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-019.governing_invariants"
+    },
+    {
+     "distinct_scalar_values_observed": 2,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 2,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-019.governing_invariants[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-019.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-019.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-019.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-019.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-020"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-020.authority_status"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-020.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-020.disposition"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 4,
+      "min": 4
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-020.governing_invariants"
+    },
+    {
+     "distinct_scalar_values_observed": 4,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 4,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-020.governing_invariants[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-020.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-020.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-020.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.relocated_additional_candidate_semantics.L9-SV-020.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-003"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-003.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-003.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-003.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-003.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-003.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-003.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-004"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-004.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-004.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-004.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-004.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-004.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-004.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-005"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-005.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-005.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-005.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-005.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-005.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-005.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-006"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-006.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-006.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-006.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-006.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-006.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-006.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-007"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-007.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-007.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-007.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-007.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-007.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-007.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-008"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-008.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-008.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-008.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-008.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-008.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-008.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-009"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-009.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-009.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-009.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-009.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-009.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-009.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-010"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-010.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-010.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-010.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-010.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-010.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-010.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-011"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-011.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-011.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-011.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-011.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-011.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-011.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-012"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-012.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-012.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-012.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-012.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-012.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-012.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-013"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-013.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-013.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-013.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-013.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-013.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-013.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-014"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-014.contract_obligation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-014.governing_layer"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-014.meaning"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-014.model_section"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-014.source_candidate_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.retained_former_candidate_semantics.L9-SV-014.when"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.applies_when"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.bounded_recurrence"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.method_policy"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.ownership"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.ownership.available_actions_and_execution_authority"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.ownership.belief_and_response_uncertainty"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.ownership.formal_admissibility"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.ownership.objective_utility_and_lookahead_valuation"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 7,
+      "min": 7
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.qv_only_required_model_coordinates"
+    },
+    {
+     "distinct_scalar_values_observed": 7,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 7,
+     "path": "$.strategic_interaction_lookahead.qv_only_required_model_coordinates[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 6,
+      "min": 6
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.qv_only_stopping_conditions"
+    },
+    {
+     "distinct_scalar_values_observed": 6,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 6,
+     "path": "$.strategic_interaction_lookahead.qv_only_stopping_conditions[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.rule"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 5,
+      "min": 5
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.selection_requirements"
+    },
+    {
+     "distinct_scalar_values_observed": 5,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 5,
+     "path": "$.strategic_interaction_lookahead.selection_requirements[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 4,
+      "min": 4
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_interaction_lookahead.supported_method_families"
+    },
+    {
+     "distinct_scalar_values_observed": 4,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 4,
+     "path": "$.strategic_interaction_lookahead.supported_method_families[]"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.component_coverage_ledger"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.component_coverage_ledger.embedded_cost_handling"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.component_coverage_ledger.incomplete_coverage_result"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 6,
+      "min": 6
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.component_coverage_ledger.required_per_material_effect"
+    },
+    {
+     "distinct_scalar_values_observed": 6,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 6,
+     "path": "$.valuation.accounting_partition_contract.component_coverage_ledger.required_per_material_effect[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.component_coverage_ledger.zero_bucket_semantics"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.example_equivalence"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.example_equivalence.gross"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.example_equivalence.invalid"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.example_equivalence.reconciled_net"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.negative_witnesses"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.negative_witnesses.embedded_DC_subtracted_again"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.negative_witnesses.embedded_expected_risk_loss_subtracted_again"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.negative_witnesses.embedded_opportunity_cost_subtracted_again"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.negative_witnesses.genuinely_distinct_recurring_period_effects"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.negative_witnesses.same_effect_in_mutually_exclusive_scenarios"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.negative_witnesses.unclassified_material_consequence"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.negative_witnesses.zero_subtraction_without_ledger_basis"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.normative_partition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.normative_partition.common_utility_units_time_basis_and_discount_treatment_required"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.normative_partition.each_effect_requires_one_accounting_home_after_reconciliation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.normative_partition.each_effect_requires_stable_causal_and_period_identity"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.normative_partition.exhaustive_material_consequence_coverage"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.normative_partition.losses_and_costs_already_reflected_in_utility_flows_cannot_be_subtracted_again"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.normative_partition.mutually_exclusive_booking"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.normative_partition.shared_or_overlapping_effects_require_explicit_attribution_and_exclusion"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.normative_partition.unknown_effect_booking_never_defaults_to_zero"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 2,
+      "min": 2
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.representation_modes"
+    },
+    {
+     "distinct_scalar_values_observed": 2,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 2,
+     "path": "$.valuation.accounting_partition_contract.representation_modes[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 5,
+      "min": 5
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.required_component_buckets"
+    },
+    {
+     "distinct_scalar_values_observed": 5,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 5,
+     "path": "$.valuation.accounting_partition_contract.required_component_buckets[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.scope"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 4,
+      "min": 4
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.sign_and_expectation_discipline"
+    },
+    {
+     "distinct_scalar_values_observed": 4,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 4,
+     "path": "$.valuation.accounting_partition_contract.sign_and_expectation_discipline[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.accounting_partition_contract.status"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.conceptual_decomposition"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 9,
+      "min": 9
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.explanatory_dimensions"
+    },
+    {
+     "distinct_scalar_values_observed": 9,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 9,
+     "path": "$.valuation.explanatory_dimensions[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 8,
+      "min": 8
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.requires_declared"
+    },
+    {
+     "distinct_scalar_values_observed": 8,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 8,
+     "path": "$.valuation.requires_declared[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.rule"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.semantic_class"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.valuation.systemic_future_value_definition"
+    }
+   ],
+   "selection_coverage": [
+    {
+     "selector": "$.artifact_id",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.authority",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.canonical_source",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.governed_by",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.purpose",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.identity",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.valuation",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.counterfactual_mathematics",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.strategic_interaction_lookahead",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.assessment_claim_levels",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.evaluation_integrity",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.causal_accounting",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.forecast_and_realization",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.comparisons",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.explicit_non_ownership",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.assessment_applicability",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.retained_former_candidate_semantics",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.relocated_additional_candidate_semantics",
+     "status": "resolved"
+    }
+   ],
+   "selectors": [
+    "$.artifact_id",
+    "$.authority",
+    "$.canonical_source",
+    "$.governed_by",
+    "$.purpose",
+    "$.identity",
+    "$.valuation",
+    "$.counterfactual_mathematics",
+    "$.strategic_interaction_lookahead",
+    "$.assessment_claim_levels",
+    "$.evaluation_integrity",
+    "$.causal_accounting",
+    "$.forecast_and_realization",
+    "$.comparisons",
+    "$.explicit_non_ownership",
+    "$.assessment_applicability",
+    "$.retained_former_candidate_semantics",
+    "$.relocated_additional_candidate_semantics"
+   ],
+   "source_class": "strategic_value_model",
+   "source_digest": "sha256:28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69",
+   "source_path": "semantics/strategic_value_model.yaml",
+   "source_ref": "l9.source/strategic-value-model@1"
+  },
+  {
+   "observed_facts": [
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.bidirectional_value_propagation"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.bidirectional_value_propagation.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.bidirectional_value_propagation.semantic_class"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.capability_unlock"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.capability_unlock.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.capability_unlock.semantic_class"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.counterfactual_baseline"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.counterfactual_baseline.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.counterfactual_baseline.semantic_class"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.decision_boundary"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.decision_boundary.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.decision_boundary.semantic_class"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.decision_relevant_information_value"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.decision_relevant_information_value.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.decision_relevant_information_value.semantic_class"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.future_effect_identity"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.future_effect_identity.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.future_effect_identity.semantic_class"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.future_work_elimination"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.future_work_elimination.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.future_work_elimination.semantic_class"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.strategic_value"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.strategic_value.artifact_id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.strategic_value.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.strategic_value.detailed_model"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.strategic_value.semantic_class"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.strategic_value_assessment"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.strategic_value_assessment.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.strategic_value_assessment.semantic_class"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.systemic_future_value"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.systemic_future_value.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.systemic_future_value.detailed_model"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.systemic_future_value.semantic_class"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.value_propagation_mesh"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.value_propagation_mesh.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.terms.value_propagation_mesh.semantic_class"
+    }
+   ],
+   "selection_coverage": [
+    {
+     "selector": "$.terms.strategic_value",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.terms.systemic_future_value",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.terms.strategic_value_assessment",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.terms.counterfactual_baseline",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.terms.future_effect_identity",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.terms.bidirectional_value_propagation",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.terms.value_propagation_mesh",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.terms.future_work_elimination",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.terms.capability_unlock",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.terms.decision_relevant_information_value",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.terms.decision_boundary",
+     "status": "resolved"
+    }
+   ],
+   "selectors": [
+    "$.terms.strategic_value",
+    "$.terms.systemic_future_value",
+    "$.terms.strategic_value_assessment",
+    "$.terms.counterfactual_baseline",
+    "$.terms.future_effect_identity",
+    "$.terms.bidirectional_value_propagation",
+    "$.terms.value_propagation_mesh",
+    "$.terms.future_work_elimination",
+    "$.terms.capability_unlock",
+    "$.terms.decision_relevant_information_value",
+    "$.terms.decision_boundary"
+   ],
+   "source_class": "vocabulary",
+   "source_digest": "sha256:db0491ac7b8e2892e3eaddce0c4e2fa277ce4f2247017c48727b34d7f90e8bc2",
+   "source_path": "semantics/vocabulary.yaml",
+   "source_ref": "l9.source/vocabulary@1"
+  },
+  {
+   "observed_facts": [
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 12,
+      "min": 12
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.invariants"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 12,
+     "path": "$.invariants[]"
+    },
+    {
+     "distinct_scalar_values_observed": 12,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 12,
+     "path": "$.invariants[].id"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 12,
+     "path": "$.invariants[].owner"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 12,
+     "path": "$.invariants[].scope"
+    },
+    {
+     "distinct_scalar_values_observed": 12,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 12,
+     "path": "$.invariants[].statement"
+    }
+   ],
+   "selection_coverage": [
+    {
+     "selector": "$.invariants[?(@.id==\"L9-SV-001\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.invariants[?(@.id==\"L9-SV-002\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.invariants[?(@.id==\"L9-AUTH-001\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.invariants[?(@.id==\"L9-AUTH-002\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.invariants[?(@.id==\"L9-HARD-001\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.invariants[?(@.id==\"L9-UNKNOWN-001\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.invariants[?(@.id==\"L9-STRATEGY-001\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.invariants[?(@.id==\"L9-PROJECTION-001\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.invariants[?(@.id==\"L9-PROV-001\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.invariants[?(@.id==\"L9-EVIDENCE-001\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.invariants[?(@.id==\"L9-ASSURANCE-001\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.invariants[?(@.id==\"L9-COORD-001\")]",
+     "status": "resolved"
+    }
+   ],
+   "selectors": [
+    "$.invariants[?(@.id==\"L9-SV-001\")]",
+    "$.invariants[?(@.id==\"L9-SV-002\")]",
+    "$.invariants[?(@.id==\"L9-AUTH-001\")]",
+    "$.invariants[?(@.id==\"L9-AUTH-002\")]",
+    "$.invariants[?(@.id==\"L9-HARD-001\")]",
+    "$.invariants[?(@.id==\"L9-UNKNOWN-001\")]",
+    "$.invariants[?(@.id==\"L9-STRATEGY-001\")]",
+    "$.invariants[?(@.id==\"L9-PROJECTION-001\")]",
+    "$.invariants[?(@.id==\"L9-PROV-001\")]",
+    "$.invariants[?(@.id==\"L9-EVIDENCE-001\")]",
+    "$.invariants[?(@.id==\"L9-ASSURANCE-001\")]",
+    "$.invariants[?(@.id==\"L9-COORD-001\")]"
+   ],
+   "source_class": "invariants",
+   "source_digest": "sha256:c17b57886f36fd5b1454618fb1f5d84ca5d76e4668079be67e75308f55bc343c",
+   "source_path": "semantics/invariants.yaml",
+   "source_ref": "l9.source/invariants@1"
+  },
+  {
+   "observed_facts": [
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 4,
+      "min": 4
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.contracts"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[]"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.contracts[].applicability"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 3,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.contracts[].applicability.does_not_apply_to"
+    },
+    {
+     "distinct_scalar_values_observed": 3,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 3,
+     "path": "$.contracts[].applicability.does_not_apply_to[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.contracts[].applicability.method_conditional"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.contracts[].applicability.trigger"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.contracts[].applicability.unavailable_claim"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 6,
+      "min": 1
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[].applies_to"
+    },
+    {
+     "distinct_scalar_values_observed": 13,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 13,
+     "path": "$.contracts[].applies_to[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 24,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[].forbidden"
+    },
+    {
+     "distinct_scalar_values_observed": 37,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 37,
+     "path": "$.contracts[].forbidden[]"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 5,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[].guarantees"
+    },
+    {
+     "distinct_scalar_values_observed": 15,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 15,
+     "path": "$.contracts[].guarantees[]"
+    },
+    {
+     "distinct_scalar_values_observed": 4,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[].id"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[].outcomes"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.contracts[].outcomes.admissible"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.contracts[].outcomes.inadmissible"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.contracts[].outcomes.invalid_projection"
+    },
+    {
+     "distinct_scalar_values_observed": 2,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 2,
+     "path": "$.contracts[].outcomes.satisfied"
+    },
+    {
+     "distinct_scalar_values_observed": 4,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[].outcomes.unresolved"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.contracts[].outcomes.valid_projection"
+    },
+    {
+     "distinct_scalar_values_observed": 2,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 2,
+     "path": "$.contracts[].outcomes.violated"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[].owner"
+    },
+    {
+     "distinct_scalar_values_observed": 4,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[].purpose"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 35,
+      "min": 2
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[].requires"
+    },
+    {
+     "distinct_scalar_values_observed": 43,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 43,
+     "path": "$.contracts[].requires[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[].scope"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 12,
+      "min": 2
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 4,
+     "path": "$.contracts[].source_invariants"
+    },
+    {
+     "distinct_scalar_values_observed": 13,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 20,
+     "path": "$.contracts[].source_invariants[]"
+    }
+   ],
+   "selection_coverage": [
+    {
+     "selector": "$.contracts[?(@.id==\"l9.contract/strategic-value-assessment@1\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.contracts[?(@.id==\"l9.contract/authority-boundary@1\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.contracts[?(@.id==\"l9.contract/projection@1\")]",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.contracts[?(@.id==\"l9.contract/hard-constraint@1\")]",
+     "status": "resolved"
+    }
+   ],
+   "selectors": [
+    "$.contracts[?(@.id==\"l9.contract/strategic-value-assessment@1\")]",
+    "$.contracts[?(@.id==\"l9.contract/authority-boundary@1\")]",
+    "$.contracts[?(@.id==\"l9.contract/projection@1\")]",
+    "$.contracts[?(@.id==\"l9.contract/hard-constraint@1\")]"
+   ],
+   "source_class": "contracts",
+   "source_digest": "sha256:99b4d35d02ca978b381b363a330e5721a458eeb97eab492f0596f6f0a8b42459",
+   "source_path": "semantics/contracts.yaml",
+   "source_ref": "l9.source/contracts@1"
+  },
+  {
+   "observed_facts": [
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.admission_rules"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.admission_rules.candidate_generation_is_not_admission"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.admission_rules.changed_material_subject_requires_new_decision_unless_compatibility_preserves_it"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 6,
+      "min": 6
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.admission_rules.global_requirements"
+    },
+    {
+     "distinct_scalar_values_observed": 6,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 6,
+     "path": "$.admission_rules.global_requirements[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.admission_rules.self_admission_without_target_class_authority_forbidden"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.candidate"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.candidate.authoritative"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.candidate.meaning"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.canonical"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.canonical.implicit_derivation_allowed"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.canonical.meaning"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.derived"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.derived.may_self_promote"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.derived.meaning"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.evidence"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.evidence.grants_authority"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.evidence.meaning"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.global_governance"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 1,
+      "min": 1
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.global_governance.does_not_own"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.global_governance.does_not_own[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.global_governance.owner"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 4,
+      "min": 4
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.authority_classes.global_governance.roles"
+    },
+    {
+     "distinct_scalar_values_observed": 4,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 4,
+     "path": "$.authority_classes.global_governance.roles[]"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.promotion_rules"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.promotion_rules.authorized_global_state_change_required"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.promotion_rules.globalization_candidate_is_not_global_authority"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 8,
+      "min": 8
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.promotion_rules.sequence"
+    },
+    {
+     "distinct_scalar_values_observed": 8,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 8,
+     "path": "$.promotion_rules.sequence[]"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_authority"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_authority.definition"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_authority.grant_must_be_explicit"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 3,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_authority.may_not_be_inferred_from"
+    },
+    {
+     "distinct_scalar_values_observed": 3,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 3,
+     "path": "$.strategic_authority.may_not_be_inferred_from[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_authority.strategy_concept_ref"
+    },
+    {
+     "kinds_observed": [
+      "object"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_cognition_authority"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_cognition_authority.detailed_model"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_cognition_authority.global_semantics_owner"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_cognition_authority.invariant_ref"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 3,
+      "min": 3
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_cognition_authority.metacognition_denied"
+    },
+    {
+     "distinct_scalar_values_observed": 3,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 3,
+     "path": "$.strategic_cognition_authority.metacognition_denied[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "boolean"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_cognition_authority.roles_are_actor_identities"
+    },
+    {
+     "array_lengths_observed": {
+      "max": 4,
+      "min": 4
+     },
+     "kinds_observed": [
+      "array"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_cognition_authority.rules"
+    },
+    {
+     "distinct_scalar_values_observed": 4,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 4,
+     "path": "$.strategic_cognition_authority.rules[]"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_cognition_authority.strategic_plan_authority_source"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_cognition_authority.strategic_plan_owner"
+    },
+    {
+     "distinct_scalar_values_observed": 1,
+     "kinds_observed": [
+      "string"
+     ],
+     "occurrences": 1,
+     "path": "$.strategic_cognition_authority.strategic_plan_reasoning_analysis_owner"
+    }
+   ],
+   "selection_coverage": [
+    {
+     "selector": "$.authority_classes",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.admission_rules",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.promotion_rules",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.strategic_authority",
+     "status": "resolved"
+    },
+    {
+     "selector": "$.strategic_cognition_authority",
+     "status": "resolved"
+    }
+   ],
+   "selectors": [
+    "$.authority_classes",
+    "$.admission_rules",
+    "$.promotion_rules",
+    "$.strategic_authority",
+    "$.strategic_cognition_authority"
+   ],
+   "source_class": "authority_model",
+   "source_digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+   "source_path": "semantics/authority_model.yaml",
+   "source_ref": "l9.source/authority-model@1"
+  }
+ ],
+ "unresolved": [
+  {
+   "field_path": "$.artifact_id",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.authority",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.canonical_source",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.governed_by",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.purpose",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.identity",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.valuation",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.counterfactual_mathematics",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.strategic_interaction_lookahead",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.assessment_claim_levels",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.evaluation_integrity",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.causal_accounting",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.forecast_and_realization",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.comparisons",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.explicit_non_ownership",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.assessment_applicability",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.retained_former_candidate_semantics",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.relocated_additional_candidate_semantics",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "strategic_value_model"
+  },
+  {
+   "field_path": "$.terms",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "vocabulary"
+  },
+  {
+   "field_path": "$.invariants",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "invariants"
+  },
+  {
+   "field_path": "$.contracts",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "contracts"
+  },
+  {
+   "field_path": "$.authority_classes",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "authority_model"
+  },
+  {
+   "field_path": "$.admission_rules",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "authority_model"
+  },
+  {
+   "field_path": "$.promotion_rules",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "authority_model"
+  },
+  {
+   "field_path": "$.strategic_authority",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "authority_model"
+  },
+  {
+   "field_path": "$.strategic_cognition_authority",
+   "reason": "governing_source_field_grammar_not_supplied",
+   "source_class": "authority_model"
+  }
+ ]
+}

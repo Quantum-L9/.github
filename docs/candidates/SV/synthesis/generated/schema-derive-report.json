@@ -1,0 +1,142 @@
+{
+  "normative": false,
+  "observations": {
+    "path": "observations.json",
+    "sha256": "sha256:36350a284cdd1a366e21826fd920ba7d4c2b38c06aff87d8d50d34a5b16e7fea"
+  },
+  "reason": "normative constraints need a governing source-field grammar; use schema-synthesize with pinned grammars",
+  "schemas_emitted": [],
+  "status": "unknown",
+  "unresolved": [
+    {
+      "field_path": "$.artifact_id",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.authority",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.canonical_source",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.governed_by",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.purpose",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.identity",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.valuation",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.counterfactual_mathematics",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.strategic_interaction_lookahead",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.assessment_claim_levels",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.evaluation_integrity",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.causal_accounting",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.forecast_and_realization",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.comparisons",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.explicit_non_ownership",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.assessment_applicability",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.retained_former_candidate_semantics",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.relocated_additional_candidate_semantics",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "field_path": "$.terms",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "vocabulary"
+    },
+    {
+      "field_path": "$.invariants",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "invariants"
+    },
+    {
+      "field_path": "$.contracts",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "contracts"
+    },
+    {
+      "field_path": "$.authority_classes",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "authority_model"
+    },
+    {
+      "field_path": "$.admission_rules",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "authority_model"
+    },
+    {
+      "field_path": "$.promotion_rules",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "authority_model"
+    },
+    {
+      "field_path": "$.strategic_authority",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "authority_model"
+    },
+    {
+      "field_path": "$.strategic_cognition_authority",
+      "reason": "governing_source_field_grammar_not_supplied",
+      "source_class": "authority_model"
+    }
+  ]
+}

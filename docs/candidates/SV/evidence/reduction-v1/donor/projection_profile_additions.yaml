@@ -1,0 +1,78 @@
+source_classes:
+  strategic_value_model:
+    canonical_artifact: strategic_value_model.yaml
+projection_profiles:
+- id: l9.projection/strategic-planner-value@1
+  class: consumer
+  consumer: strategic-planner
+  purpose: Supply the Strategic Planner with exact admitted numerical Strategic Value semantics and mandatory evidence, counterfactual, overlap,
+    model/uncertainty, hard-constraint, authority, and projection boundaries. Select existing canonical meaning without scoring, forecasting,
+    generating alternatives, inventing weights, granting plan admission or issuing execution permission.
+  sources:
+    strategic_value_model:
+      selectors:
+      - $.artifact_id
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.identity
+      - $.valuation
+      - $.counterfactual_mathematics
+      - $.strategic_interaction_lookahead
+      - $.assessment_claim_levels
+      - $.evaluation_integrity
+      - $.causal_accounting
+      - $.forecast_and_realization
+      - $.comparisons
+      - $.explicit_non_ownership
+      - $.assessment_applicability
+      - $.retained_former_candidate_semantics
+    vocabulary:
+      selectors:
+      - $.terms.strategic_value
+      - $.terms.systemic_future_value
+      - $.terms.strategic_value_assessment
+      - $.terms.counterfactual_baseline
+      - $.terms.future_effect_identity
+      - $.terms.bidirectional_value_propagation
+      - $.terms.value_propagation_mesh
+      - $.terms.future_work_elimination
+      - $.terms.capability_unlock
+      - $.terms.decision_relevant_information_value
+      - $.terms.decision_boundary
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-SV-001")]
+      - $.invariants[?(@.id=="L9-SV-002")]
+      - $.invariants[?(@.id=="L9-SV-015")]
+      - $.invariants[?(@.id=="L9-SV-016")]
+      - $.invariants[?(@.id=="L9-SV-017")]
+      - $.invariants[?(@.id=="L9-SV-018")]
+      - $.invariants[?(@.id=="L9-SV-019")]
+      - $.invariants[?(@.id=="L9-SV-020")]
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-AUTH-002")]
+      - $.invariants[?(@.id=="L9-HARD-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-STRATEGY-001")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+    contracts:
+      selectors:
+      - $.contracts[?(@.id=="l9.contract/strategic-value-assessment@1")]
+      - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
+      - $.contracts[?(@.id=="l9.contract/projection@1")]
+      - $.contracts[?(@.id=="l9.contract/hard-constraint@1")]
+    authority_model:
+      selectors:
+      - $.authority_classes
+      - $.admission_rules
+      - $.promotion_rules
+      - $.strategic_authority
+      - $.strategic_cognition_authority
+  output:
+    schema: l9.projection.strategic-planner-value/v1
+  forbidden:
+  - provider_implementation_details
+  - execution_publication_or_merge_authority_grant

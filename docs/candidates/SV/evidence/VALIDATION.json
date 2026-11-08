@@ -1,0 +1,96 @@
+{
+  "schema": "l9.strategic-value-package-local-validation/v1",
+  "target": "Quantum-L9/.github",
+  "pinned_base": "020a94bea86e7c5c5e4107da7014ec259508f397",
+  "status": "LOCAL_CANDIDATE_ONLY_NOT_CANONICALLY_ADMITTED",
+  "candidate_global_invariants": 8,
+  "former_original_meanings_retained_in_model_contract": 12,
+  "new_additions_with_executable_falsifiers": 6,
+  "projection_profile_ref": "l9.projection/strategic-planner-value@1",
+  "projection_payload_schema": "l9.projection.strategic-planner-value/v1",
+  "composition_profile_ref": "l9.compose/strategic-planner-value@1",
+  "composition_payload_schema": "l9.composed-projection.strategic-planner-value/v1",
+  "source_classes": [
+    "strategic_value_model",
+    "vocabulary",
+    "invariants",
+    "contracts",
+    "authority_model"
+  ],
+  "local_unittest_count": 39,
+  "local_unittest_passed": true,
+  "falsifiers": {
+    "schema": "l9.strategic-value-falsification-result/v1",
+    "assurance": "LOCAL_CONTRACT_FALSIFICATION_ONLY_NOT_NUMERICAL_VALIDATION",
+    "result": "PASS",
+    "cases": [
+      {
+        "case_id": "SV015",
+        "source_invariant": "L9-SV-015",
+        "negative_result": "UNIDENTIFIED_COUNTERFACTUAL",
+        "expected_failure": "UNIDENTIFIED_COUNTERFACTUAL",
+        "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+        "pass": true
+      },
+      {
+        "case_id": "SV016",
+        "source_invariant": "L9-SV-016",
+        "negative_result": "UNAUTHORIZED_ACTOR_AGGREGATION",
+        "expected_failure": "UNAUTHORIZED_ACTOR_AGGREGATION",
+        "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+        "pass": true
+      },
+      {
+        "case_id": "SV017",
+        "source_invariant": "L9-SV-017",
+        "negative_result": "FUTURE_OBSERVATION_LEAK",
+        "expected_failure": "FUTURE_OBSERVATION_LEAK",
+        "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+        "pass": true
+      },
+      {
+        "case_id": "SV018",
+        "source_invariant": "L9-SV-018",
+        "negative_result": "UNJUSTIFIED_JOINT_ADDITIVITY",
+        "expected_failure": "UNJUSTIFIED_JOINT_ADDITIVITY",
+        "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+        "pass": true
+      },
+      {
+        "case_id": "SV019",
+        "source_invariant": "L9-SV-019",
+        "negative_result": "UNSUPPORTED_PRECISE_WINNER",
+        "expected_failure": "UNSUPPORTED_PRECISE_WINNER",
+        "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+        "pass": true
+      },
+      {
+        "case_id": "SV020",
+        "source_invariant": "L9-SV-020",
+        "negative_result": "UNSUPPORTED_VERIFIED_METHOD_CLAIM",
+        "expected_failure": "UNSUPPORTED_VERIFIED_METHOD_CLAIM",
+        "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+        "pass": true
+      }
+    ]
+  },
+  "external_proofs_not_run": [
+    "dotgithub_native_semantic_validator",
+    "semantic_compiler_projection_schema_qualification",
+    "official_producer_pass_receipts",
+    "independent_numerical_method_execution",
+    "canonical_admission"
+  ],
+  "remote_mutation": false,
+  "qualification": {
+    "native_engine_repo": "Quantum-L9/l9-semantic-compiler-engine",
+    "native_engine_commit": "943db9a462d35ba66771a700ece77c746295f591",
+    "native_schema_qualification": "BLOCKED_REAL_COMPILER_NOT_IMPORTABLE",
+    "native_schema_exit_code": 2,
+    "local_schema_regressions": "PASS_5_ADDITIONAL_TESTS",
+    "bool_const_field_count_each_schema": 21,
+    "converted_string_min_array_count_each_schema": 31,
+    "user_supplied_review_falsifiers": "PURPOSE_BUILT_LOCAL_CHECKS_NOT_CONSUMER_NUMERICAL_VALIDATION",
+    "projection_composition_producer_receipts": "NOT_GENERATED"
+  }
+}

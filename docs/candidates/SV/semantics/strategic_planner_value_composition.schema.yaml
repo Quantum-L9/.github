@@ -1,0 +1,1451 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_strategic_planner_value_composed_payload_schema
+artifact_id: l9.schema/strategic-planner-value-composition@1
+canonical_source:
+  format: yaml
+  artifact: strategic_planner_value_composition.schema.yaml
+governed_by:
+  composition_profile_ref: l9.compose/strategic-planner-value@1
+  projection_profile_ref: l9.projection/strategic-planner-value@1
+purpose: Validate one derived consumer view made of exactly five independently compiled per-source projections under
+  their source-class names, without reinterpreting or merging source meanings. Exact source coverage and producer
+  provenance remain separate composition/replay obligations.
+type: object
+required:
+- strategic_value_model
+- vocabulary
+- invariants
+- contracts
+- authority_model
+properties:
+  schema:
+    const: l9.composed-projection.strategic-planner-value/v1
+  strategic_value_model:
+    type: object
+    required:
+    - artifact_id
+    - authority
+    - canonical_source
+    - governed_by
+    - purpose
+    - identity
+    - valuation
+    - counterfactual_mathematics
+    - strategic_interaction_lookahead
+    - assessment_claim_levels
+    - evaluation_integrity
+    - causal_accounting
+    - forecast_and_realization
+    - comparisons
+    - explicit_non_ownership
+    - assessment_applicability
+    - retained_former_candidate_semantics
+    - relocated_additional_candidate_semantics
+    properties:
+      artifact_id:
+        const: l9.strategic.value@1
+      authority:
+        type: object
+        required:
+        - owner
+        - scope
+        - authority_class
+        properties:
+          owner:
+            type: string
+          scope:
+            type: string
+          authority_class:
+            type: string
+      canonical_source:
+        type: object
+        required:
+        - format
+        - artifact
+        properties:
+          format:
+            type: string
+          artifact:
+            type: string
+      governed_by:
+        type: object
+        required:
+        - invariants
+        - contracts
+        properties:
+          invariants:
+            type: array
+            min_items: 12
+            items:
+              type: string
+              enum:
+              - L9-SV-001
+              - L9-SV-002
+              - L9-AUTH-001
+              - L9-AUTH-002
+              - L9-HARD-001
+              - L9-UNKNOWN-001
+              - L9-STRATEGY-001
+              - L9-PROJECTION-001
+              - L9-PROV-001
+              - L9-EVIDENCE-001
+              - L9-ASSURANCE-001
+              - L9-COORD-001
+          contracts:
+            type: array
+            min_items: 3
+            items:
+              type: string
+      purpose:
+        type: string
+      identity:
+        type: object
+        required:
+        - semantic_ref
+        - canonical_term_ref
+        - related_term_ref
+        - assessment_contract_ref
+        - numerical_owner
+        - strategic_plan_owner_ref
+        properties:
+          semantic_ref:
+            type: string
+          canonical_term_ref:
+            type: string
+          related_term_ref:
+            type: string
+          assessment_contract_ref:
+            type: string
+          numerical_owner:
+            type: string
+          strategic_plan_owner_ref:
+            type: string
+      valuation:
+        type: object
+        required:
+        - conceptual_decomposition
+        - semantic_class
+        - requires_declared
+        - systemic_future_value_definition
+        - explanatory_dimensions
+        - rule
+        - accounting_partition_contract
+        properties:
+          conceptual_decomposition:
+            type: string
+          semantic_class:
+            type: string
+          requires_declared:
+            type: array
+            min_items: 8
+            items:
+              type: string
+          systemic_future_value_definition:
+            type: string
+          explanatory_dimensions:
+            type: array
+            min_items: 9
+            items:
+              type: string
+          rule:
+            type: string
+          accounting_partition_contract:
+            type: object
+            required:
+            - status
+            - scope
+            - representation_modes
+            - required_component_buckets
+            - normative_partition
+            - component_coverage_ledger
+            - sign_and_expectation_discipline
+            - example_equivalence
+            - negative_witnesses
+            properties:
+              status:
+                type: string
+              scope:
+                type: string
+              representation_modes:
+                type: array
+                min_items: 2
+                items:
+                  type: string
+              required_component_buckets:
+                type: array
+                min_items: 5
+                items:
+                  type: string
+              normative_partition:
+                type: object
+                required:
+                - mutually_exclusive_booking
+                - exhaustive_material_consequence_coverage
+                - each_effect_requires_stable_causal_and_period_identity
+                - each_effect_requires_one_accounting_home_after_reconciliation
+                - shared_or_overlapping_effects_require_explicit_attribution_and_exclusion
+                - common_utility_units_time_basis_and_discount_treatment_required
+                - losses_and_costs_already_reflected_in_utility_flows_cannot_be_subtracted_again
+                - unknown_effect_booking_never_defaults_to_zero
+                properties:
+                  mutually_exclusive_booking:
+                    type: boolean
+                    const: true
+                  exhaustive_material_consequence_coverage:
+                    type: boolean
+                    const: true
+                  each_effect_requires_stable_causal_and_period_identity:
+                    type: boolean
+                    const: true
+                  each_effect_requires_one_accounting_home_after_reconciliation:
+                    type: boolean
+                    const: true
+                  shared_or_overlapping_effects_require_explicit_attribution_and_exclusion:
+                    type: boolean
+                    const: true
+                  common_utility_units_time_basis_and_discount_treatment_required:
+                    type: boolean
+                    const: true
+                  losses_and_costs_already_reflected_in_utility_flows_cannot_be_subtracted_again:
+                    type: boolean
+                    const: true
+                  unknown_effect_booking_never_defaults_to_zero:
+                    type: boolean
+                    const: true
+              component_coverage_ledger:
+                type: object
+                required:
+                - required_per_material_effect
+                - embedded_cost_handling
+                - zero_bucket_semantics
+                - incomplete_coverage_result
+                properties:
+                  required_per_material_effect:
+                    type: array
+                    min_items: 6
+                    items:
+                      type: string
+                  embedded_cost_handling:
+                    type: string
+                  zero_bucket_semantics:
+                    type: string
+                  incomplete_coverage_result:
+                    type: string
+              sign_and_expectation_discipline:
+                type: array
+                min_items: 4
+                items:
+                  type: string
+              example_equivalence:
+                type: object
+                required:
+                - gross
+                - reconciled_net
+                - invalid
+                properties:
+                  gross:
+                    type: string
+                  reconciled_net:
+                    type: string
+                  invalid:
+                    type: string
+              negative_witnesses:
+                type: object
+                required:
+                - embedded_DC_subtracted_again
+                - embedded_expected_risk_loss_subtracted_again
+                - embedded_opportunity_cost_subtracted_again
+                - unclassified_material_consequence
+                - zero_subtraction_without_ledger_basis
+                - same_effect_in_mutually_exclusive_scenarios
+                - genuinely_distinct_recurring_period_effects
+                properties:
+                  embedded_DC_subtracted_again:
+                    type: string
+                  embedded_expected_risk_loss_subtracted_again:
+                    type: string
+                  embedded_opportunity_cost_subtracted_again:
+                    type: string
+                  unclassified_material_consequence:
+                    type: string
+                  zero_subtraction_without_ledger_basis:
+                    type: string
+                  same_effect_in_mutually_exclusive_scenarios:
+                    type: string
+                  genuinely_distinct_recurring_period_effects:
+                    type: string
+      counterfactual_mathematics:
+        type: object
+        required:
+        - normative_meaning
+        - bounded_expression
+        - geometric_discount_special_case
+        - expectation_semantics
+        - utility_accounting
+        - numerical_owner
+        - consumer_behavior
+        properties:
+          normative_meaning:
+            type: string
+          bounded_expression:
+            type: string
+          geometric_discount_special_case:
+            type: string
+          expectation_semantics:
+            type: array
+            min_items: 6
+            items:
+              type: string
+          utility_accounting:
+            type: array
+            min_items: 10
+            items:
+              type: string
+          numerical_owner:
+            type: string
+          consumer_behavior:
+            type: string
+      strategic_interaction_lookahead:
+        type: object
+        required:
+        - applies_when
+        - method_policy
+        - supported_method_families
+        - selection_requirements
+        - bounded_recurrence
+        - qv_only_required_model_coordinates
+        - qv_only_stopping_conditions
+        - ownership
+        - rule
+        properties:
+          applies_when:
+            type: string
+          method_policy:
+            type: string
+          supported_method_families:
+            type: array
+            min_items: 4
+            items:
+              type: string
+          selection_requirements:
+            type: array
+            min_items: 5
+            items:
+              type: string
+          bounded_recurrence:
+            type: string
+          qv_only_required_model_coordinates:
+            type: array
+            min_items: 7
+            items:
+              type: string
+          qv_only_stopping_conditions:
+            type: array
+            min_items: 6
+            items:
+              type: string
+          ownership:
+            type: object
+            required:
+            - formal_admissibility
+            - belief_and_response_uncertainty
+            - objective_utility_and_lookahead_valuation
+            - available_actions_and_execution_authority
+            properties:
+              formal_admissibility:
+                type: string
+              belief_and_response_uncertainty:
+                type: string
+              objective_utility_and_lookahead_valuation:
+                type: string
+              available_actions_and_execution_authority:
+                type: string
+          rule:
+            type: string
+      assessment_claim_levels:
+        type: object
+        required:
+        - declared_aggregate
+        - supplied_trajectory_calculation
+        - independently_verified_numerical_assessment
+        - unknown_or_degraded
+        properties:
+          declared_aggregate:
+            type: string
+          supplied_trajectory_calculation:
+            type: string
+          independently_verified_numerical_assessment:
+            type: string
+          unknown_or_degraded:
+            type: string
+      evaluation_integrity:
+        type: object
+        required:
+        - counterfactual_identification
+        - beneficiary_scope
+        - nonanticipativity
+        - joint_portfolio_valuation
+        - uncertainty_aware_selection
+        - independent_method_assurance
+        properties:
+          counterfactual_identification:
+            type: array
+            min_items: 3
+            items:
+              type: string
+          beneficiary_scope:
+            type: array
+            min_items: 3
+            items:
+              type: string
+          nonanticipativity:
+            type: array
+            min_items: 3
+            items:
+              type: string
+          joint_portfolio_valuation:
+            type: array
+            min_items: 3
+            items:
+              type: string
+          uncertainty_aware_selection:
+            type: array
+            min_items: 3
+            items:
+              type: string
+          independent_method_assurance:
+            type: array
+            min_items: 8
+            items:
+              type: string
+      causal_accounting:
+        type: object
+        required:
+        - stable_effect_identity_required
+        - shared_state_delta_booked_once
+        - explicit_attribution_and_overlap_required
+        - loops_unrolled_through_time
+        - unchanged_echo_incremental_value
+        - topology_kinds
+        - negative_drag_and_coordination_costs_preserved
+        - conditional_relevance
+        properties:
+          stable_effect_identity_required:
+            type: boolean
+            const: true
+          shared_state_delta_booked_once:
+            type: boolean
+            const: true
+          explicit_attribution_and_overlap_required:
+            type: boolean
+            const: true
+          loops_unrolled_through_time:
+            type: boolean
+            const: true
+          unchanged_echo_incremental_value:
+            type: string
+          topology_kinds:
+            type: array
+            min_items: 4
+            items:
+              type: string
+          negative_drag_and_coordination_costs_preserved:
+            type: boolean
+            const: true
+          conditional_relevance:
+            type: string
+      forecast_and_realization:
+        type: object
+        required:
+        - predicted_value_is
+        - realized_value_is
+        - realization_never_retroactively_proves_ex_ante_forecast
+        properties:
+          predicted_value_is:
+            type: string
+          realized_value_is:
+            type: string
+          realization_never_retroactively_proves_ex_ante_forecast:
+            type: boolean
+            const: true
+      comparisons:
+        type: object
+        required:
+        - compatible_objective_and_units_required
+        - may_return
+        - relevant_meta_action_kinds
+        - unknown_is_not_zero
+        - valuation_does_not_override_mandatory_constraints
+        - output_is_not_authorization
+        - output_is_not_strategic_plan_graph_content
+        - output_is_not_strategic_commitment
+        - stale_model_or_evidence_invalidates_affected_assessment
+        properties:
+          compatible_objective_and_units_required:
+            type: boolean
+            const: true
+          may_return:
+            type: array
+            min_items: 5
+            items:
+              type: string
+          relevant_meta_action_kinds:
+            type: array
+            min_items: 5
+            items:
+              type: string
+          unknown_is_not_zero:
+            type: boolean
+            const: true
+          valuation_does_not_override_mandatory_constraints:
+            type: boolean
+            const: true
+          output_is_not_authorization:
+            type: boolean
+            const: true
+          output_is_not_strategic_plan_graph_content:
+            type: boolean
+            const: true
+          output_is_not_strategic_commitment:
+            type: boolean
+            const: true
+          stale_model_or_evidence_invalidates_affected_assessment:
+            type: boolean
+            const: true
+      explicit_non_ownership:
+        type: array
+        min_items: 8
+        items:
+          type: string
+      assessment_applicability:
+        type: object
+        required:
+        - claim_gate
+        - does_not_govern
+        - method_applicability
+        - non_claim
+        - unsupported_claim
+        properties:
+          claim_gate:
+            type: string
+          does_not_govern:
+            type: array
+            min_items: 3
+            items:
+              type: string
+          method_applicability:
+            type: string
+          non_claim:
+            type: string
+          unsupported_claim:
+            type: string
+      retained_former_candidate_semantics:
+        type: object
+        required:
+        - L9-SV-003
+        - L9-SV-004
+        - L9-SV-005
+        - L9-SV-006
+        - L9-SV-007
+        - L9-SV-008
+        - L9-SV-009
+        - L9-SV-010
+        - L9-SV-011
+        - L9-SV-012
+        - L9-SV-013
+        - L9-SV-014
+        properties:
+          L9-SV-003:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+          L9-SV-004:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+          L9-SV-005:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+          L9-SV-006:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+          L9-SV-007:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+          L9-SV-008:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+          L9-SV-009:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+          L9-SV-010:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+          L9-SV-011:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+          L9-SV-012:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+          L9-SV-013:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+          L9-SV-014:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - governing_layer
+            - model_section
+            - contract_obligation
+            - when
+            properties:
+              source_candidate_id:
+                type: string
+              meaning:
+                type: string
+              governing_layer:
+                type: string
+              model_section:
+                type: string
+              contract_obligation:
+                type: string
+              when:
+                type: string
+      relocated_additional_candidate_semantics:
+        type: object
+        required:
+        - L9-SV-015
+        - L9-SV-016
+        - L9-SV-017
+        - L9-SV-018
+        - L9-SV-019
+        - L9-SV-020
+        properties:
+          L9-SV-015:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-015
+              meaning:
+                const: For a Strategic Value claim, a counterfactual comparison must identify the same decision-relevant
+                  initial conditions, utility measure, exogenous context and time basis across intervention and
+                  baseline worlds, or explicitly quantify their divergence. A convenient scenario pairing or historical
+                  correlation is not evidence of an identifiable causal intervention effect.
+              disposition:
+                const: MERGE
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                const: evaluation_integrity.counterfactual_identification
+              contract_obligation:
+                const: counterfactual_worlds_share_defensible_initial_conditions_time_basis_and_identification_assumptions
+              when:
+                const: causal_intervention_effect_is_claimed
+              authority_status:
+                const: not_admitted_as_independent_invariant
+          L9-SV-016:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-016
+              meaning:
+                const: For a Strategic Value claim, the assessment must declare the focal beneficiary or authorized
+                  social-welfare aggregation before combining outcomes across actors. Benefits to counterparties,
+                  externalities, transfers and costs cannot be credited to the focal objective twice or silently
+                  converted between actors with incompatible utilities.
+              disposition:
+                const: CONTRACT
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                const: evaluation_integrity.beneficiary_scope
+              contract_obligation:
+                const: beneficiary_scope_and_welfare_aggregation_when_cross_actor_effects_material
+              when:
+                const: material_cross_actor_valuation
+              authority_status:
+                const: not_admitted_as_independent_invariant
+          L9-SV-017:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-017
+              meaning:
+                const: When a Strategic Value claim evaluates a sequential decision policy, the policy may condition
+                  each action only on observations and information available at the time of that action. A lookahead
+                  ranking must not exploit hindsight, future responses or post-action evidence as if they were known
+                  at decision time; posterior updates must preserve observation provenance.
+              disposition:
+                const: CONTRACT
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                const: evaluation_integrity.nonanticipativity
+              contract_obligation:
+                const: nonanticipative_conditional_policies_when_sequential_actions_are_evaluated
+              when:
+                const: sequential_policy_value_claimed
+              authority_status:
+                const: not_admitted_as_independent_invariant
+          L9-SV-018:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-018
+              meaning:
+                const: For a Strategic Value claim about a portfolio or joint intervention, its value is evaluated
+                  against the joint feasible counterfactual and shared resource constraints. Standalone action values
+                  may be summed only with evidence of additive independence; shared dependencies, synergies, substitution,
+                  resource collision and cannibalization must be represented or remain unresolved.
+              disposition:
+                const: CONTRACT
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                const: evaluation_integrity.joint_portfolio_valuation
+              contract_obligation:
+                const: joint_portfolio_counterfactual_and_resource_interactions_for_nonadditive_actions
+              when:
+                const: joint_or_portfolio_value_claimed
+              authority_status:
+                const: not_admitted_as_independent_invariant
+          L9-SV-019:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-019
+              meaning:
+                const: When uncertainty can change preference in a Strategic Value comparison, the evaluation must
+                  expose a bounded sensitivity or uncertainty result and conditional decision boundary, not an unjustified
+                  precise winner. A robustness claim requires declared uncertainty sets, bounds or probability models
+                  and an applicable comparison method.
+              disposition:
+                const: REUSE
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                const: evaluation_integrity.uncertainty_aware_selection
+              contract_obligation:
+                const: uncertainty_sensitivity_or_conditional_frontier_when_preference_can_flip
+              when:
+                const: material_preference_sensitive_uncertainty
+              authority_status:
+                const: not_admitted_as_independent_invariant
+          L9-SV-020:
+            type: object
+            required:
+            - source_candidate_id
+            - meaning
+            - disposition
+            - governing_invariants
+            - model_section
+            - contract_obligation
+            - when
+            - authority_status
+            properties:
+              source_candidate_id:
+                const: L9-SV-020
+              meaning:
+                const: Claims of model-derived or independently verified Strategic Value require version-bound numerical
+                  method identity, input/assumption lineage, execution provenance and applicable, independently
+                  reviewable model-validation evidence appropriate to the claim. Empirical forecast validity may
+                  be supported by calibration, backtesting, sensitivity or out-of-sample evaluation where applicable,
+                  not presumed mathematical proof of general real-world adequacy. Arithmetic, projection receipts
+                  and model-validation evidence establish different things and cannot substitute for one another.
+              disposition:
+                const: REUSE
+              governing_invariants:
+                type: array
+                min_items: 1
+                items:
+                  type: string
+                  enum:
+                  - L9-SV-001
+                  - L9-SV-002
+                  - L9-AUTH-001
+                  - L9-AUTH-002
+                  - L9-HARD-001
+                  - L9-UNKNOWN-001
+                  - L9-STRATEGY-001
+                  - L9-PROJECTION-001
+                  - L9-PROV-001
+                  - L9-EVIDENCE-001
+                  - L9-ASSURANCE-001
+                  - L9-COORD-001
+              model_section:
+                const: evaluation_integrity.independent_method_assurance
+              contract_obligation:
+                const: method_identity_input_lineage_executed_method_evidence_and_applicable_independently_reviewable_model_validation_evidence_for_strong_numerical_claims
+              when:
+                const: model_derived_or_independently_verified_claim
+              authority_status:
+                const: not_admitted_as_independent_invariant
+  vocabulary:
+    type: object
+    required:
+    - terms
+    properties:
+      terms:
+        type: object
+        required:
+        - strategic_value
+        - systemic_future_value
+        - strategic_value_assessment
+        - counterfactual_baseline
+        - future_effect_identity
+        - bidirectional_value_propagation
+        - value_propagation_mesh
+        - future_work_elimination
+        - capability_unlock
+        - decision_relevant_information_value
+        - decision_boundary
+        fields:
+          strategic_value:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          systemic_future_value:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          strategic_value_assessment:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          counterfactual_baseline:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          future_effect_identity:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          bidirectional_value_propagation:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          value_propagation_mesh:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          future_work_elimination:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          capability_unlock:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          decision_relevant_information_value:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          decision_boundary:
+            type: object
+            required:
+            - semantic_class
+            - definition
+            properties:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+  invariants:
+    type: object
+    required:
+    - invariants
+    properties:
+      invariants:
+        type: array
+        min_items: 12
+        items:
+          type: object
+          required:
+          - id
+          - statement
+          - scope
+          - owner
+          properties:
+            id:
+              enum:
+              - L9-SV-001
+              - L9-SV-002
+              - L9-AUTH-001
+              - L9-AUTH-002
+              - L9-HARD-001
+              - L9-UNKNOWN-001
+              - L9-STRATEGY-001
+              - L9-PROJECTION-001
+              - L9-PROV-001
+              - L9-EVIDENCE-001
+              - L9-ASSURANCE-001
+              - L9-COORD-001
+            statement:
+              type: string
+            scope:
+              const: global
+            owner:
+              const: Quantum-L9/.github
+  contracts:
+    type: object
+    required:
+    - contracts
+    properties:
+      contracts:
+        type: array
+        min_items: 4
+        items:
+          type: object
+          required:
+          - id
+          - purpose
+          - scope
+          - owner
+          - source_invariants
+          - applies_to
+          - requires
+          - guarantees
+          - forbidden
+          - outcomes
+          properties:
+            id:
+              enum:
+              - l9.contract/strategic-value-assessment@1
+              - l9.contract/authority-boundary@1
+              - l9.contract/projection@1
+              - l9.contract/hard-constraint@1
+            purpose:
+              type: string
+            scope:
+              const: global
+            owner:
+              const: Quantum-L9/.github
+            source_invariants:
+              type: array
+              min_items: 1
+              items:
+                type: string
+            applies_to:
+              type: array
+              min_items: 1
+              items:
+                type: string
+            requires:
+              type: string_list
+            guarantees:
+              type: string_list
+            forbidden:
+              type: string_list
+            outcomes:
+              type: object
+  authority_model:
+    type: object
+    required:
+    - authority_classes
+    - admission_rules
+    - promotion_rules
+    - strategic_authority
+    - strategic_cognition_authority
+    properties:
+      authority_classes:
+        type: object
+        required:
+        - global_governance
+        - canonical
+        - derived
+        - candidate
+        - evidence
+        properties:
+          canonical:
+            type: object
+            required:
+            - meaning
+            - implicit_derivation_allowed
+            properties:
+              implicit_derivation_allowed:
+                const: false
+          derived:
+            type: object
+            required:
+            - may_self_promote
+            properties:
+              may_self_promote:
+                const: false
+          candidate:
+            type: object
+            required:
+            - authoritative
+            properties:
+              authoritative:
+                const: false
+          evidence:
+            type: object
+            required:
+            - grants_authority
+            properties:
+              grants_authority:
+                const: false
+      admission_rules:
+        type: object
+        required:
+        - global_requirements
+        - candidate_generation_is_not_admission
+        - self_admission_without_target_class_authority_forbidden
+        properties:
+          global_requirements:
+            type: array
+            min_items: 1
+            items:
+              type: string
+          candidate_generation_is_not_admission:
+            const: true
+          self_admission_without_target_class_authority_forbidden:
+            const: true
+      promotion_rules:
+        type: object
+        required:
+        - sequence
+        - globalization_candidate_is_not_global_authority
+        - authorized_global_state_change_required
+        properties:
+          sequence:
+            type: array
+            min_items: 1
+            items:
+              type: string
+          globalization_candidate_is_not_global_authority:
+            const: true
+          authorized_global_state_change_required:
+            const: true
+      strategic_authority:
+        type: object
+        required:
+        - definition
+        - grant_must_be_explicit
+        - may_not_be_inferred_from
+        properties:
+          definition:
+            type: string
+          grant_must_be_explicit:
+            const: true
+          may_not_be_inferred_from:
+            type: array
+            min_items: 1
+            items:
+              type: string
+      strategic_cognition_authority:
+        type: object
+        required:
+        - global_semantics_owner
+        - strategic_plan_owner
+        - strategic_plan_reasoning_analysis_owner
+        - rules
+        properties:
+          global_semantics_owner:
+            const: Quantum-L9/.github
+          strategic_plan_owner:
+            const: plan_keeper
+          strategic_plan_reasoning_analysis_owner:
+            const: strategic_plan_metacognitive_reasoner
+          rules:
+            type: array
+            min_items: 1
+            items:
+              type: string
