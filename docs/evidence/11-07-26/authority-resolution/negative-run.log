@@ -1,0 +1,17 @@
+Revisions and checkout state verified
+Projection receipts: projection:invariants=pass, projection:contracts=pass, projection:authority_model=pass, projection:artifact_model=pass
+Composition receipt: pass strict five-control PASS gate: True
+01_missing_source_pin PASS diagnostic_match= True observed= INVALID_REQUEST / None
+02_wrong_profile_digest PASS diagnostic_match= True observed= REVISION_MISMATCH / profile_digest
+03_payload_without_redigest PASS diagnostic_match= True observed= REVISION_MISMATCH / projection_digest
+04_payload_with_producer_redigest PASS diagnostic_match= True observed= SEMANTIC_DIVERGENCE / selection_equivalence
+05_missing_source_component PASS diagnostic_match= True observed= INVALID_REQUEST / source_coverage
+06_duplicate_component PASS diagnostic_match= True observed= AMBIGUOUS_SEMANTICS / duplicate_source
+07_wrong_composition_pin PASS diagnostic_match= True observed= REVISION_MISMATCH / composition_profile_digest
+08_receipt_tamper_without_redigest PASS diagnostic_match= True observed= INVALID_REQUEST / None
+09_omitted_namespace_redigested_verify PASS diagnostic_match= True observed= SEMANTIC_DIVERGENCE / composition_equivalence
+10_missing_namespace_direct_schema PASS diagnostic_match= True violations= ['$.artifact_model: required field missing']
+String-list min_items capability: FAIL accepted [] direct= [] full= []
+COUNTS positive= {'PASS': 5} negative= {'PASS': 10} diagnostic_matches= 10 diagnostic_mismatches= 0
+INTEGRITY checkout= {'authority': True, 'compiler': True} emissions= True
+SUMMARY /home/ubuntu/l9-projection-campaign/authority-schema-run/negative/summary.json

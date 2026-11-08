@@ -1,0 +1,317 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_implementation_ir_schema
+artifact_id: l9.schema/implementation-ir@1
+canonical_source:
+  format: yaml
+  artifact: implementation_ir.schema.yaml
+governed_by:
+  contracts:
+  - l9.contract/product-manifest@1
+  - l9.contract/technology-binding@1
+  - l9.contract/derived-artifact@1
+  - l9.contract/provenance-and-coordinate@1
+  - l9.contract/unknown-and-degradation@1
+  - l9.contract/validation-and-correctness@1
+purpose: Structural contract of l9.implementation-ir/v1, the output of compilation Stage 14 (implementation) and the
+  only input of Stage 15 (target_artifacts). It fixes the shape a compiler must produce and a validator must check.
+  It adds no product meaning. Every value is lowered from one resolved ProductManifest and one admitted target
+  binding, and every realizable obligation carries exactly one disposition.
+dispositions:
+  generable: The obligation is completely determined by the ImplementationIR and the admitted target binding, so
+    the target binding may emit it.
+  bound: An existing product-owned implementation, named by an admitted implementation_ref coordinate, realizes the
+    obligation. It is verified and bound, never regenerated.
+  unresolved: Neither complete executable semantics nor an acceptable binding exists. The obligation is recorded
+    and its realization is refused.
+type: object
+required:
+- schema
+- subject
+- authority
+- target
+- interfaces
+- ports
+- adapters
+- composition
+- conformance
+- unresolved
+- provenance
+properties:
+  schema:
+    const: l9.implementation-ir/v1
+  subject:
+    type: object
+    required:
+    - product_ref
+    - product_kind
+    - archetype_ref
+    - manifest_digest
+    properties:
+      product_ref:
+        type: semantic_ref
+      product_kind:
+        type: semantic_ref
+      archetype_ref:
+        type: semantic_ref
+      manifest_digest:
+        type: semantic_digest
+  authority:
+    type: object
+    required:
+    - authority_revision
+    - compilation_profile_ref
+    - stage
+    properties:
+      authority_revision:
+        type: semantic_ref
+      compilation_profile_ref:
+        const: l9.compilation/product-build@1
+      stage:
+        const: implementation
+  target:
+    type: object
+    required:
+    - binding_ref
+    - technology
+    properties:
+      binding_ref:
+        type: semantic_ref
+      technology:
+        type: semantic_ref
+      transport_technology:
+        type: semantic_ref
+  interfaces:
+    type: object
+    required:
+    - actions
+    - forbidden_actions
+    properties:
+      actions:
+        type: array
+        items:
+          type: object
+          required:
+          - action_ref
+          - request_contract_ref
+          - effect_class
+          - consequential
+          - inbound_port_ref
+          - behavior
+          properties:
+            action_ref:
+              type: semantic_ref
+            request_contract_ref:
+              type: semantic_ref
+            result_contract_ref:
+              type: semantic_ref
+            effect_class:
+              type: semantic_ref
+            consequential:
+              type: boolean
+            inbound_port_ref:
+              type: semantic_ref
+            behavior:
+              type: object
+              required:
+              - disposition
+              properties:
+                disposition:
+                  enum:
+                  - generable
+                  - bound
+                  - unresolved
+                implementation_ref:
+                  type: string
+                behavior_contract_ref:
+                  type: semantic_ref
+      forbidden_actions:
+        type: array
+        items:
+          type: semantic_ref
+  ports:
+    type: array
+    items:
+      type: object
+      required:
+      - port_ref
+      - direction
+      - contract_refs
+      - required
+      - disposition
+      properties:
+        port_ref:
+          type: semantic_ref
+        direction:
+          enum:
+          - inbound
+          - outbound
+          - extension
+        contract_refs:
+          type: array
+          min_items: 1
+          items:
+            type: semantic_ref
+        required:
+          type: boolean
+        disposition:
+          enum:
+          - generable
+          - bound
+          - unresolved
+        implementation_ref:
+          type: string
+  adapters:
+    type: array
+    items:
+      type: object
+      required:
+      - adapter_ref
+      - realizes_port_ref
+      - disposition
+      properties:
+        adapter_ref:
+          type: semantic_ref
+        realizes_port_ref:
+          type: semantic_ref
+        provider_ref:
+          type: semantic_ref
+        disposition:
+          enum:
+          - generable
+          - bound
+          - unresolved
+        implementation_ref:
+          type: string
+  composition:
+    type: object
+    required:
+    - root
+    - dependencies
+    properties:
+      root:
+        type: object
+        required:
+        - binding_map
+        - disposition
+        properties:
+          binding_map:
+            const: composition_root
+          disposition:
+            enum:
+            - generable
+            - bound
+            - unresolved
+      dependencies:
+        type: array
+        items:
+          type: object
+          required:
+          - port_ref
+          - satisfied_by
+          properties:
+            port_ref:
+              type: semantic_ref
+            satisfied_by:
+              type: array
+              items:
+                type: semantic_ref
+  conformance:
+    type: array
+    items:
+      type: object
+      required:
+      - obligation_ref
+      - applies_to
+      properties:
+        obligation_ref:
+          type: semantic_ref
+        applies_to:
+          type: array
+          min_items: 1
+          items:
+            type: semantic_ref
+  unresolved:
+    type: array
+    items:
+      type: object
+      required:
+      - obligation_ref
+      - result
+      - reason
+      properties:
+        obligation_ref:
+          type: semantic_ref
+        result:
+          enum:
+          - unresolved
+          - incompatible
+          - unsat
+          - ambiguous
+        reason:
+          type: string
+  provenance:
+    type: object
+    required:
+    - manifest_digest
+    - product_topology_digest
+    - repository_spec_digest
+    - workflow_spec_digest
+    - behavior_contracts
+    - compiler
+    properties:
+      manifest_digest:
+        type: semantic_digest
+      product_topology_digest:
+        type: semantic_digest
+      repository_spec_digest:
+        type: semantic_digest
+      workflow_spec_digest:
+        type: semantic_digest
+      behavior_contracts:
+        type: array
+        items:
+          type: object
+          required:
+          - ref
+          - digest
+          properties:
+            ref:
+              type: semantic_ref
+            digest:
+              type: semantic_digest
+      compiler:
+        type: object
+        required:
+        - compiler_version
+        properties:
+          compiler_version:
+            type: semantic_ref
+semantic_rules:
+- implementation_ir_is_lowered_only_from_a_manifest_satisfying_the_resolved_manifest_gate
+- subject_and_provenance_manifest_digest_are_the_consumed_manifest_digest
+- subject_product_kind_and_archetype_equal_the_manifest_product
+- target_binding_is_admitted_and_its_applies_to_and_source_ir_admit_the_subject
+- interface_actions_are_exactly_the_manifest_interfaces_actions_with_no_addition_omission_or_reordering_of_identity
+- consequential_is_true_exactly_for_the_manifest_effects_consequential_operations
+- forbidden_actions_are_exactly_the_manifest_interfaces_forbidden_actions_and_none_is_an_interface_action
+- ports_and_adapters_are_exactly_the_manifest_ports_and_adapters
+- a_port_is_required_unless_the_manifest_declares_no_adapter_and_no_inbound_action_for_it
+- bound_requires_an_admitted_implementation_ref_preserved_exactly_from_the_manifest
+- generable_requires_a_behavior_contract_ref_or_a_target_binding_map_that_determines_the_obligation
+- a_behavior_contract_ref_supports_generable_only_when_it_resolves_to_an_admitted_behavior_contract_listed_exactly_once_in_provenance_behavior_contracts_and_every_listed_entry_is_so_referenced
+- each_provenance_behavior_contract_digest_is_the_semantic_digest_of_that_contracts_resolved_content_and_a_mismatch_makes_the_implementation_ir_and_its_target_artifacts_stale
+- unresolved_obligations_are_listed_in_unresolved_and_are_never_realized
+- each_unresolved_entry_result_is_the_resolution_model_result_for_that_obligation_and_never_resolved_and_its_reason_only_explains_it
+- no_optional_port_receives_an_invented_adapter_or_provider
+- no_disposition_named_or_implied_other_than_generable_bound_or_unresolved
+- provenance_digests_equal_the_manifest_provenance_digests
+- implementation_ir_adds_no_product_meaning_and_is_never_semantic_authority
+enforcement:
+  structural: This schema, through the l9.schema-definition/v1 interpreter.
+  semantic_rules: implementation-contract-validator/v1 (solver_catalog.yaml, stage implementation). The v1 interpreter
+    checks shape only; the rules above are cross-field obligations that solver must check against the consumed
+    manifest and the selected target binding.

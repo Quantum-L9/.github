@@ -1,0 +1,9 @@
+STATIC_SCHEMA_CONTRACT_PASS
+Registered projection and composition payload schemas
+Selected invariants: 12
+Selected contracts: 4
+Source namespaces: invariants, contracts, authority_model, artifact_model
+Four local negative controls rejected
+PRODUCER_QUALIFICATION_NOT_YET_EXECUTED
+RELEASE_ADMISSION_NOT_CLAIMED
+Script exit: 0
