@@ -38,6 +38,8 @@ def pack_files():
         for p in ROOT.rglob("*")
         if p.is_file()
         and "__pycache__" not in p.parts
+        # Tool caches (.ruff_cache, ...) are local state, not pack content.
+        and not any(part.startswith(".") for part in p.relative_to(ROOT).parts)
         and p.relative_to(ROOT).as_posix() not in DERIVED
     )
 
@@ -104,10 +106,14 @@ def render():
         "sv_candidate_head": binding["sv_candidate"]["head"],
         "canonical_target": binding["canonical_target"],
     }
+    # Tab indentation is Biome's JSON format, the repository formatter for JSON.
     return {
-        "MANIFEST.json": json.dumps(manifest, indent=1) + "\n",
+        "MANIFEST.json": json.dumps(manifest, indent="\t", ensure_ascii=False) + "\n",
         "SHA256SUMS.txt": sums,
-        "evidence/candidate_revision.json": json.dumps(cand, indent=2) + "\n",
+        "evidence/candidate_revision.json": json.dumps(
+            cand, indent="\t", ensure_ascii=False
+        )
+        + "\n",
     }
 
 

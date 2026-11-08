@@ -28,51 +28,6 @@
 	"candidate_revision": "sha256:d92025969c2431aabe1b4a6fe79b3c402af156a2e4fec13808aec488ce8fdbf4",
 	"files": [
 		{
-			"path": ".ruff_cache/.gitignore",
-			"bytes": 35,
-			"sha256": "9e3a60f1e6ec4ae60215c11d54b171392745ec25e9dded433d5bd921363af316"
-		},
-		{
-			"path": ".ruff_cache/0.16.1/12123395588383726612",
-			"bytes": 268,
-			"sha256": "b0a783b9de05a8bbab4b15a91c491b702d4915a34159b5efe93f221babd6a332"
-		},
-		{
-			"path": ".ruff_cache/0.16.1/14837314301282023367",
-			"bytes": 188,
-			"sha256": "b1c2453dd543141d43877ddfdd0578e6c84610e3717520759204dedf679b5c53"
-		},
-		{
-			"path": ".ruff_cache/0.16.1/16579121424469182316",
-			"bytes": 236,
-			"sha256": "fc4aef03c54ad5634a26214bfdcea1a5e25773afb54f1822cb2954287cfd15b5"
-		},
-		{
-			"path": ".ruff_cache/0.16.1/17014296583786248280",
-			"bytes": 236,
-			"sha256": "654a2aa8d73a173c0fb73cd1acdcad270f311e34aff6b74dbc3c6905f55e8f9a"
-		},
-		{
-			"path": ".ruff_cache/0.16.1/2908544144163660224",
-			"bytes": 268,
-			"sha256": "68d2725768821b5619cee9bc4a8aea644b9d27e6bf65a051d0a832ed73a7092e"
-		},
-		{
-			"path": ".ruff_cache/0.16.1/5809450779140157187",
-			"bytes": 188,
-			"sha256": "d2f895d90067d85934e198d88e5d9299273a6d9aaa00a4def1968cd21495a74a"
-		},
-		{
-			"path": ".ruff_cache/0.16.1/6621753525589297852",
-			"bytes": 188,
-			"sha256": "2e66420a8a30817fe9934cb091829d9c5a52361d9c658e11a53cdd41bc77280b"
-		},
-		{
-			"path": ".ruff_cache/CACHEDIR.TAG",
-			"bytes": 43,
-			"sha256": "5953156d7e0c564a427251316eaf26f8870e6483ae2197f916b630e4f93e31ae"
-		},
-		{
 			"path": "ADMISSION_HANDOFF.md",
 			"bytes": 3768,
 			"sha256": "b6a3546c210c61d6d0911a7005434ee8ed76ad6ed9cc29bdb781570d87ffc491"
@@ -339,8 +294,8 @@
 		},
 		{
 			"path": "tests/test_applier.py",
-			"bytes": 18347,
-			"sha256": "fb06e927dacb0583fa43ca133c12d3885b37691f9d8213fc673b3d70b3032209"
+			"bytes": 18346,
+			"sha256": "8a8b6c50c6ef8c3006c7b28f7f2a1380eabbf5919595b5fe7b61972757f7f7fb"
 		},
 		{
 			"path": "tests/test_candidate.py",
@@ -369,8 +324,8 @@
 		},
 		{
 			"path": "tools/refresh_pack_inventory.py",
-			"bytes": 5387,
-			"sha256": "3286895ffd6e4384e2a3f75362ab5da477445e2a046220a05786442febf0af3a"
+			"bytes": 5700,
+			"sha256": "389c2da29cfe7b234ac08a891c7ee06723586557b12bfc70d159edbcd9289a2b"
 		},
 		{
 			"path": "tools/run_integrated_qualification.py",
