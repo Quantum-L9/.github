@@ -76,7 +76,7 @@ decisions_required:
     R1-remove-redundant-stanza:
       effect: >-
         Drop the profile-local required_provenance list; the general composed-projection contract and the
-        compiler's always-on criteria still enforce the same facts (proved independently, both runs, 16 negative
+        compiler's always-on criteria still enforce the same facts (proved independently, both runs, 17 negative
         controls).
       caution: >-
         Precedent on main is mixed: l9.compose/stage-context@1 declares the same four tokens; the other thirteen

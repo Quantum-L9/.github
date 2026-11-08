@@ -37,7 +37,7 @@
 		"native_schema_interpreter_pass_with_revision": "MET (3bf1a8241452332637ba0daffeee55c433f93e05, 26 checks)",
 		"native_semantic_checks_no_unresolved_semantic_defects": "MET for ordinary checks; UNMET overall: SC-008/SC-010 need a successor release inventory",
 		"five_real_source_projections_pass": "MET against local rehearsal revision 0b50cf7 (tree bb07371), not a canonical revision",
-		"real_composition_pass": "UNMET: compiler result unknown; four declared required_provenance criteria lack a mechanical criterion in compiler 0.9.3. Independent equivalence PROVED on both rehearsal runs (evidence/admission/composition-provenance-equivalence.json, 16 negative controls); route R1/R2 is owner decision D2",
+		"real_composition_pass": "UNMET: compiler result unknown; four declared required_provenance criteria lack a mechanical criterion in compiler 0.9.3. Independent equivalence PROVED on both rehearsal runs (evidence/admission/composition-provenance-equivalence.json, 17 negative controls); route R1/R2 is owner decision D2",
 		"six_real_producer_receipts_verified": "PARTIAL: 6 receipts produced; 5 pass, 1 unknown; bound to the rehearsal revision",
 		"two_generations_deterministic": "MET (12 artifact/receipt files byte-identical; both runs committed in deterministic tar archives)",
 		"corrupted_artifacts_fail_closed": "MET (16 negatives and 2 positives each match their asserted exit code, typed failure and criterion; plus an order-invariance check)",

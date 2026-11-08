@@ -18,7 +18,7 @@
 	"source_classes": 5,
 	"composition_profiles": 1,
 	"canonical_destination_paths": 13,
-	"local_tests": 112,
+	"local_tests": 114,
 	"local_test_exit_code": 0,
 	"local_test_pass": true,
 	"independently_runnable_purpose_built_falsifiers": 6,
@@ -65,7 +65,7 @@
 		{
 			"path": "README.md",
 			"bytes": 11299,
-			"sha256": "2de6f647b33e603e6ef076355de5ecfda096000d9c214b284fd55000da50e125"
+			"sha256": "46559557f34071de485894fbe1221888bc17dbac4294d948d363734a4cc4f265"
 		},
 		{
 			"path": "SCHEMA_QUALIFICATION_REVIEW.md",
@@ -114,18 +114,18 @@
 		},
 		{
 			"path": "evidence/admission/ADMISSION_CLOSEOUT.md",
-			"bytes": 5770,
-			"sha256": "b31ba2dc5b76a3bf398b9ff84380ef02bd1d753b80d975991a966e5651d33a59"
+			"bytes": 5797,
+			"sha256": "4d47af844588c163e8c38cde9c1e3140790694e206bb09906cf61d56026222ed"
 		},
 		{
 			"path": "evidence/admission/composition-provenance-equivalence.json",
-			"bytes": 9828,
-			"sha256": "ec0f3eb166924c1e52cc66e6b4ee02ae614c7a4b0df29dfdefe685d355740eb3"
+			"bytes": 10092,
+			"sha256": "54e95ebd6bad0674d69ad1f721dae9214450955ee2afcf192bc125db06016900"
 		},
 		{
 			"path": "evidence/admission/owner-decision.yaml",
 			"bytes": 6732,
-			"sha256": "38b542c2ecfddea987e86f4fc7de86aef7d1b3a9692f6dfa72538ae1d17e4080"
+			"sha256": "f0e81a3b6deda73e823f7737d8b68884dbb6847b820793b15bfb5eebed150512"
 		},
 		{
 			"path": "evidence/native_schema_gate.json",
@@ -150,7 +150,7 @@
 		{
 			"path": "evidence/reduction-v1/admission-readiness.json",
 			"bytes": 5765,
-			"sha256": "59d70c88c4ddce22f26f6490f27c3170859228d15cf96fa5d58ca1c407b5c1e4"
+			"sha256": "78ef39d5ad8249cf5c47c132722b2cc4a9fdc927d18b15cb8bfa5376448a7bc6"
 		},
 		{
 			"path": "evidence/reduction-v1/authority-resolution.json",
@@ -434,8 +434,8 @@
 		},
 		{
 			"path": "tests/test_composition_provenance_equivalence.py",
-			"bytes": 10574,
-			"sha256": "2874bf7ed0cacf6b2cca2e7231aafc1ab1db1b9d6bc4838d701549af330e8e71"
+			"bytes": 11808,
+			"sha256": "46e77012e781030365a2b0649e74c206211f5ed831fb1c9bee43cfc04b497fe0"
 		},
 		{
 			"path": "tests/test_irreducibility.py",
@@ -474,8 +474,8 @@
 		},
 		{
 			"path": "tests/verify_composition_provenance.py",
-			"bytes": 14753,
-			"sha256": "2b16934c3bfeec91c64316c602661fbc13463d0e031485451a4cd0a3646cc881"
+			"bytes": 16256,
+			"sha256": "675767cce7942e8cd11ebd16de7db4cb3db3472e2904f787c201f78b8e705b2d"
 		},
 		{
 			"path": "tools/reduce_to_two_invariants.py",
@@ -493,7 +493,7 @@
 		"result": "PASS_INDEPENDENT_EVIDENCE_NOT_COMPILER_PASS",
 		"evidence": "evidence/admission/composition-provenance-equivalence.json",
 		"verifier": "tests/verify_composition_provenance.py",
-		"negative_controls": 16,
+		"negative_controls": 17,
 		"authority_revision": "0b50cf7a09c96986d2fcd46130032224ad7104a0"
 	},
 	"admission_closeout": {

@@ -42,6 +42,15 @@ REQUIRED_SOURCE_CLASSES = (
     "strategic_value_model",
     "vocabulary",
 )
+# source class -> canonical artifact, from projection_profiles.yaml source_classes at the pin (020a94b)
+# for the four existing classes and overlays/projection_profile_additions.yaml for the new one.
+SOURCE_CLASS_ARTIFACTS = {
+    "authority_model": "semantics/authority_model.yaml",
+    "contracts": "semantics/contracts.yaml",
+    "invariants": "semantics/invariants.yaml",
+    "strategic_value_model": "semantics/strategic_value_model.yaml",
+    "vocabulary": "semantics/vocabulary.yaml",
+}
 REQUIRED_PROVENANCE_TOKENS = (
     "source_projection_refs",
     "source_projection_digests",
@@ -52,7 +61,7 @@ REQUIRED_PROVENANCE_TOKENS = (
 # criterion that already enforces the same fact on every composition.
 TOKEN_EQUIVALENCE = {
     "source_projection_refs": {
-        "verifier_checks": ["component_refs", "coverage", "receipt_binding"],
+        "verifier_checks": ["component_refs", "coverage", "source_class_binding", "receipt_binding"],
         "compiler_always_on": ["component_provenance", "composition_equivalence"],
     },
     "source_projection_digests": {
@@ -224,6 +233,7 @@ def verify(run: dict[str, Any], revision: str | None = None) -> dict[str, Any]:
     )
 
     checks["receipt_binding"] = _receipt_binding(run, composed, artifacts, revision)
+    checks["source_class_binding"] = _source_class_binding(run, components)
 
     failed = sorted(k for k, v in checks.items() if v["status"] != "pass")
     tokens = {
@@ -295,6 +305,24 @@ def _receipt_binding(run, composed, artifacts, revision) -> dict[str, Any]:
         compiler_result=rc.get("result"),
         compiler_unresolved=sorted(basis.get("unresolved_criteria") or []),
     )
+
+
+def _source_class_binding(run, components) -> dict[str, Any]:
+    """Each component's declared source class must name the file its projection was compiled from."""
+    compiled_from: dict[str, list[str]] = {}
+    for _, receipt in run["receipts"]:
+        if receipt.get("operation") == "projection":
+            ref = (receipt.get("output") or {}).get("ref")
+            compiled_from[ref] = sorted(str(i.get("path")) for i in receipt.get("inputs") or [])
+    errors = []
+    for c in components:
+        expected = SOURCE_CLASS_ARTIFACTS.get(c.get("source_class"))
+        if expected is None or compiled_from.get(c.get("projection_ref")) != [expected]:
+            errors.append(
+                f"{c.get('projection_ref')}: class {c.get('source_class')} != "
+                f"{compiled_from.get(c.get('projection_ref'))}"
+            )
+    return _check(bool(components) and not errors, errors=errors)
 
 
 def _run_from_archive(archive: Path, workdir: Path) -> Path:

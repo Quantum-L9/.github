@@ -9,7 +9,7 @@ approved. The remaining steps need the owner's authority or a canonical base, an
 | --- | --- | --- |
 | Why the composition result is UNKNOWN | Compiler 0.9.3 has no evaluator for `required_provenance`. `passes/projection.py::_declared_constraints` marks every declared value `unresolved` without reading it, and any unresolved criterion makes the result `unknown`. | `composition-provenance-equivalence.json` (`finding`) |
 | The four declared facts hold | PASS on both rehearsal runs, with identical reports. Profile ref and digest, five component refs and digests, composition digest, exact five-class coverage with whole-payload placement, and receipt binding (5 PASS projection receipts, 1 composition receipt, one revision, sealed digests) all re-derive without compiler code. | `tests/verify_composition_provenance.py` |
-| Fails closed | 16 negative controls fail on the intended check: corrupted component or source digest, swapped or foreign ref, changed profile digest or ref, edited profile record, duplicated or missing source, payload drift, unsealed artifact, tampered projection, wrong revision, receipt input mismatch, UNKNOWN forged to PASS, missing projection receipt. Unreadable input returns `UNRESOLVED` (exit 2), never PASS. | `tests/test_composition_provenance_equivalence.py` |
+| Fails closed | 17 negative controls fail on the intended check: corrupted component or source digest, swapped or foreign ref, relabelled source classes, changed profile digest or ref, edited profile record, duplicated or missing source, payload drift, unsealed artifact, tampered projection, wrong revision, receipt input mismatch, UNKNOWN forged to PASS, missing projection receipt. Unreadable input returns `UNRESOLVED` (exit 2), never PASS. | `tests/test_composition_provenance_equivalence.py` |
 | Canonical precedent | Mixed. On `main`, `l9.compose/stage-context@1` declares the same four tokens, and the other 13 composition profiles declare none. `global_rules.source_projection_provenance_required: true` is not read by the compiler. | `semantics/composition_profiles.yaml` at `9488d8f` |
 | Owner-decision scaffold | Five decisions (D1–D5) carry exact option texts. Every authority reference is `null`. | `owner-decision.yaml` |
 
@@ -45,7 +45,7 @@ The pack was built against `020a94b`. `origin/main` has since moved to `9488d8f`
 | 7 | PR #211 and v3.28.0/v3.29.0 registry overlaps reconciled | PARTIAL: #211 is merged, and the anchors survive by inspection | Rehearsal on the new base, plus D5 |
 | 8 | Successor release manifest and hash inventory | UNMET | D4 |
 | 9 | Native validation, five projections and composition PASS | UNMET | Items 2, 6 and 8 |
-| 10 | Determinism and negative controls at the final revision | Reusable assets exist (82 + 27 tests, 18 producer controls, this verifier) | Final subject |
+| 10 | Determinism and negative controls at the final revision | Reusable assets exist (82 + 32 tests, 18 producer controls, this verifier) | Final subject |
 | 11 | Canonical admission PR approved and merged | UNMET | Items 1–10 |
 | 12 | Admitted `main` read back and consumer replay verified | UNMET | Item 11 |
 

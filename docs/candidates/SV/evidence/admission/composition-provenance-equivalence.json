@@ -71,6 +71,10 @@
           "errors": [],
           "projection_receipts_pass": 5,
           "status": "pass"
+        },
+        "source_class_binding": {
+          "errors": [],
+          "status": "pass"
         }
       },
       "compiler_reported_result": "unknown",
@@ -123,6 +127,7 @@
           "verifier_checks": [
             "component_refs",
             "coverage",
+            "source_class_binding",
             "receipt_binding"
           ]
         }
@@ -187,6 +192,10 @@
           "errors": [],
           "projection_receipts_pass": 5,
           "status": "pass"
+        },
+        "source_class_binding": {
+          "errors": [],
+          "status": "pass"
         }
       },
       "compiler_reported_result": "unknown",
@@ -239,6 +248,7 @@
           "verifier_checks": [
             "component_refs",
             "coverage",
+            "source_class_binding",
             "receipt_binding"
           ]
         }

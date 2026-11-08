@@ -139,6 +139,29 @@ class NegativeControls(_RunFixture):
         with mock.patch.object(vcp, "candidate_profiles", return_value=(edited, real[1])):
             self.assertIn("composition_profile_digest", self.failed())
 
+    def test_relabelled_source_classes_fail(self):
+        # Swap two class labels and their payload keys, then reseal: refs, digests, coverage and
+        # placement all still agree, so only the class-to-compiled-file binding can catch it.
+        run = copy.deepcopy(self.run)
+        a, b = run["composed"]["components"][0], run["composed"]["components"][1]
+        payload = run["composed"]["payload"]
+        payload[a["source_class"]], payload[b["source_class"]] = payload[b["source_class"]], payload[a["source_class"]]
+        a["source_class"], b["source_class"] = b["source_class"], a["source_class"]
+        _reseal_composed(run)
+        failed = self.failed(run)
+        self.assertIn("source_class_binding", failed)
+        self.assertNotIn("coverage", failed)
+        self.assertNotIn("component_refs", failed)
+
+    def test_source_class_artifacts_match_the_candidate_overlay(self):
+        import yaml
+
+        overlay = yaml.safe_load(
+            (vcp.PACK / "overlays" / "projection_profile_additions.yaml").read_text(encoding="utf-8")
+        )
+        for cls, record in overlay["source_classes"].items():
+            self.assertEqual(vcp.SOURCE_CLASS_ARTIFACTS[cls], "semantics/" + record["canonical_artifact"])
+
     def test_duplicated_source_fails(self):
         run = copy.deepcopy(self.run)
         comps = run["composed"]["components"]
