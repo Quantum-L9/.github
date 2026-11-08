@@ -1,0 +1,49 @@
+{
+ "run_a_authority_root": "/home/user/wt-214",
+ "run_b_authority_root": "/tmp/claude-0/-home-user/0522ea30-2ef8-5fa0-92ed-0a9f6c6b7df6/scratchpad/authority-clone-b",
+ "revision": "453701a671b3c9acc3400c47c926d1235adfeffd",
+ "profiles": {
+  "architecture-break-test": {
+   "files": 12,
+   "byte_identical": true
+  },
+  "authority-resolution": {
+   "files": 10,
+   "byte_identical": true
+  },
+  "evidence-assessment": {
+   "files": 10,
+   "byte_identical": true
+  },
+  "globalization-assessment": {
+   "files": 12,
+   "byte_identical": true
+  },
+  "hard-constraint-context": {
+   "files": 10,
+   "byte_identical": true
+  },
+  "identity-assurance": {
+   "files": 14,
+   "byte_identical": true
+  },
+  "semantic-change-context": {
+   "files": 10,
+   "byte_identical": true
+  },
+  "strategic-metacognition": {
+   "files": 14,
+   "byte_identical": true
+  },
+  "strategic-planning-context": {
+   "files": 20,
+   "byte_identical": true
+  },
+  "work-state-continuity": {
+   "files": 14,
+   "byte_identical": true
+  }
+ },
+ "all_byte_identical": true,
+ "files": 126
+}

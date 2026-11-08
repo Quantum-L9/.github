@@ -92,6 +92,7 @@ requires:
   - identity_assurance_projection.schema.yaml
   - strategic_metacognition_projection.schema.yaml
   - strategic_planning_context_projection.schema.yaml
+  - implementation_ir.schema.yaml
 capabilities:
 - canonical_source_resolution
 - profile_resolution

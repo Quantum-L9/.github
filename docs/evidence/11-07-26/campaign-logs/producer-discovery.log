@@ -1,0 +1,8 @@
+=== Candidate revision ===
+020a94bea86e7c5c5e4107da7014ec259508f397
+ [31mM[m semantics/composition_profiles.yaml
+ [31mM[m semantics/projection_profiles.yaml
+=== Projection-related executable references ===
+scripts/validate-semantics.py
+=== Candidate producer, composer and replay files ===
+ops/fetch-composer.sh
