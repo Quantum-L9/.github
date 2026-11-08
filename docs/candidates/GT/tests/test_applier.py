@@ -13,9 +13,8 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from fixtures import GOVERNING, ROOT, git, init_repo, synthetic_sv_applied
-
 import apply_to_pinned_checkout as applier
+from fixtures import GOVERNING, ROOT, git, init_repo, synthetic_sv_applied
 
 
 class CoreStageOnSyntheticTarget(unittest.TestCase):
