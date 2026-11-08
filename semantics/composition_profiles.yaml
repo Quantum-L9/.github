@@ -12,6 +12,7 @@ global_rules:
   silent_precedence_is_forbidden: true
   composition_does_not_create_authority: true
   required_provenance_is_evaluated_only_through_declared_provenance_constraints: true
+  source_class_dispatch_composition_is_source_namespaced_and_declares_the_protocol_of_its_projection_profile: true
 provenance_constraints:
   criterion_language:
     name: l9.provenance-constraint
@@ -274,3 +275,51 @@ profiles:
     conflict_result: invalid
     output:
       schema: l9.composed-projection.strategic-planner-interaction/v1
+  - id: l9.compose/identity-assurance@2
+    purpose: Compose exact source projections for l9.projection/identity-assurance@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/identity-assurance@2
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.identity-assurance/v2
+    payload_validation:
+      protocol: l9.payload-validation/source-class-dispatch@1
+  - id: l9.compose/strategic-planning-context@2
+    purpose: Compose exact source projections for l9.projection/strategic-planning-context@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/strategic-planning-context@2
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.strategic-planning-context/v2
+    payload_validation:
+      protocol: l9.payload-validation/source-class-dispatch@1
+  - id: l9.compose/strategic-metacognition@2
+    purpose: Compose exact source projections for l9.projection/strategic-metacognition@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/strategic-metacognition@2
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.strategic-metacognition/v2
+    payload_validation:
+      protocol: l9.payload-validation/source-class-dispatch@1

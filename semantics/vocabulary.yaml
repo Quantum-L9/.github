@@ -1327,6 +1327,41 @@ terms:
     semantic_class: derived_assessment
     definition: Evidence- and model-bound advisory assessment of actor responses, strategy profiles, selected
       solution concepts and uncertainty, without independent valuation or execution authority.
+  payload_validation_protocol:
+    semantic_class: compiler_operator
+    definition: 'The declared procedure by which a compiler selects and applies the validator of a projected or composed
+      payload. A profile declares it in its top-level payload_validation field; a profile that omits it keeps the
+      legacy v1 procedure. The one candidate value is l9.payload-validation/source-class-dispatch@1: the output schema
+      is the registered schema whose own schema_id equals the profile''s output.schema, and the validator is that
+      schema''s descriptor for the verified source class. No payload field participates in the choice.'
+    question: How is this payload's validator chosen?
+    properties:
+      payload_fields_select_validator: false
+      unknown_protocol_fails_closed: true
+      changes_artifact_envelope: false
+  source_class_payload_schema:
+    semantic_class: artifact
+    definition: 'A registered payload schema document (schema: l9.source-class-payload-schema/v1) with keys schema,
+      artifact_id, authority, schema_id, document_kind (projection_payload_schema or composition_payload_schema),
+      payload_validation, descriptor_dialect, governed_by and source_shapes, and optional canonical, purpose, canonical_source,
+      derivation and admission. It governs exactly one profile and carries one strict descriptor per source class;
+      it carries no top-level union grammar (type, properties, fields, required, items, const, enum).'
+    question: Which descriptor validates this source class's payload?
+    properties:
+      identity_declared_by_schema_id: true
+      one_descriptor_per_source_class: true
+      legacy_marker_resolvable: false
+  strict_descriptor_dialect:
+    semantic_class: compiler_configuration
+    definition: The candidate descriptor dialect l9.schema-dialect/candidate-v2@1. Types object, array, string_list,
+      string, boolean, integer, number and null; keywords type, fields, required, additional_properties (explicit
+      boolean), items, min_items, const and enum (scalars only). Unknown keywords and unrestricted open objects fail
+      closed. It remains a candidate document in each grammar pack until separately admitted.
+    question: Which descriptor keywords are enforced, and how strictly?
+    properties:
+      candidate_only: true
+      object_openness_explicit: true
+      unknown_keyword_fails_closed: true
 relationships:
   authority_flow:
     sequence:

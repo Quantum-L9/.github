@@ -2637,6 +2637,259 @@ projection_profiles:
     schema: l9.projection.strategic-planner-interaction/v1
   forbidden:
   - sv_semantic_records_excluded_from_gt_projection
+- id: l9.projection/identity-assurance@2
+  class: consumer
+  consumer: l9-identity-assurance
+  purpose: Evidence-bound identity resolution and assertion verification; does not confuse actor, surface or governance
+    profile identities.
+  sources:
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-IDENTITY-002")]
+      - $.invariants[?(@.id=="L9-IDENTITY-003")]
+      - $.invariants[?(@.id=="L9-IDENTITY-004")]
+      - $.invariants[?(@.id=="L9-IDENTITY-005")]
+      - $.invariants[?(@.id=="L9-IDENTITY-006")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-COORD-001")]
+      - $.invariants[?(@.id=="L9-IDENTITY-001")]
+      - $.invariants[?(@.id=="L9-OWNER-001")]
+      - $.invariants[?(@.id=="L9-REVISION-001")]
+    contracts:
+      selectors:
+      - $.contracts[?(@.id=="l9.contract/identity-topology@1")]
+      - $.contracts[?(@.id=="l9.contract/identity-resolution@1")]
+      - $.contracts[?(@.id=="l9.contract/identity-assertion@1")]
+      - $.contracts[?(@.id=="l9.contract/provenance-and-coordinate@1")]
+    identity_model:
+      selectors:
+      - $.global_rules
+      - $.identity_dimensions
+      - $.non_identity_dimensions
+      - $.identity_binding
+      - $.identity_resolution
+      - $.identity_assertion
+      - $.consumer_rules
+    authority_model:
+      selectors:
+      - $.identity_authority
+    actor_registry:
+      selectors:
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.identity_dimension
+      - $.detailed_model
+      - $.global_rules
+      - $.does_not_own
+      - $.actor_kinds
+      - $.actor_statuses
+      - $.actors
+      - $.aliases
+      - $.alias_rules
+      - $.downstream_obligations
+      - $
+    surface_registry:
+      selectors:
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.identity_dimension
+      - $.detailed_model
+      - $.global_rules
+      - $.does_not_own
+      - $.surface_statuses
+      - $.surfaces
+      - $.aliases
+      - $.alias_rules
+      - $.downstream_obligations
+      - $
+  output:
+    schema: l9.projection.identity-assurance/v2
+  forbidden:
+  - obligation_not_admitted_in_a_selected_source
+  - repository_local_policy_as_global_law
+  successor_of: l9.projection/identity-assurance@1
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+- id: l9.projection/strategic-planning-context@2
+  class: consumer
+  consumer: plan_keeper
+  purpose: Planning semantics for the Plan Keeper under granted Strategic Authority; separates external truth from
+    Plan-owned strategy.
+  sources:
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-STRATEGY-001")]
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-OWNER-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-AUTH-002")]
+      - $.invariants[?(@.id=="L9-DERIVED-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-SCOPE-001")]
+      - $.invariants[?(@.id=="L9-SEM-001")]
+    contracts:
+      selectors:
+      - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
+      - $.contracts[?(@.id=="l9.contract/semantic-ownership@1")]
+      - $.contracts[?(@.id=="l9.contract/projection@1")]
+    authority_model:
+      selectors:
+      - $.strategic_authority
+      - $.strategic_cognition_authority
+    strategic_cognition_model:
+      selectors:
+      - $.global_rules
+      - $.concepts
+      - $.roles.plan_keeper
+      - $.reasoning_artifacts.strategic_planning_episode
+      - $.reasoning_artifacts.strategic_plan_revision_candidate
+      - $.authority_separation
+    strategic_plan_model:
+      selectors:
+      - $.global_rules
+      - $.primitives
+      - $.relations
+      - $.relation_rules
+      - $.reasoning_concepts
+    strategic_plan_graph_schema:
+      selectors:
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.type
+      - $.required
+      - $.properties
+      - $.reference_rules
+      - $.relation_constraints
+      - $.revision_rules
+      - $.semantic_rules
+      - $
+    affected_strategic_closure_schema:
+      selectors:
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.instance_semantics
+      - $.type
+      - $.required
+      - $.properties
+      - $.closure_rules
+      - $.semantic_rules
+      - $
+    strategic_planning_episode_schema:
+      selectors:
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.instance_semantics
+      - $.type
+      - $.required
+      - $.properties
+      - $.workspace_rules
+      - $.semantic_rules
+      - $
+    strategic_plan_revision_candidate_schema:
+      selectors:
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.instance_semantics
+      - $.type
+      - $.required
+      - $.properties
+      - $.candidate_rules
+      - $.semantic_rules
+      - $
+  output:
+    schema: l9.projection.strategic-planning-context/v2
+  forbidden:
+  - obligation_not_admitted_in_a_selected_source
+  - repository_local_policy_as_global_law
+  successor_of: l9.projection/strategic-planning-context@1
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+- id: l9.projection/strategic-metacognition@2
+  class: consumer
+  consumer: strategic_plan_metacognitive_reasoner
+  purpose: Advisory analysis of Plan Keeper reasoning; cannot modify Strategy, supersede Plan Keeper or acquire
+    Strategic Authority.
+  sources:
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-STRATEGY-001")]
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-OWNER-001")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-AUTH-002")]
+      - $.invariants[?(@.id=="L9-DERIVED-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-SCOPE-001")]
+      - $.invariants[?(@.id=="L9-SEM-001")]
+    contracts:
+      selectors:
+      - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
+      - $.contracts[?(@.id=="l9.contract/semantic-ownership@1")]
+      - $.contracts[?(@.id=="l9.contract/projection@1")]
+    authority_model:
+      selectors:
+      - $.strategic_authority
+      - $.strategic_cognition_authority
+    strategic_cognition_model:
+      selectors:
+      - $.global_rules
+      - $.authority_separation
+      - $.roles.strategic_plan_metacognitive_reasoner
+      - $.reasoning_artifacts.strategic_plan_metacognitive_analysis
+    strategic_plan_model:
+      selectors:
+      - $.global_rules
+      - $.reasoning_concepts
+    strategic_plan_metacognitive_analysis_schema:
+      selectors:
+      - $.artifact_id
+      - $.canonical
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.instance_semantics
+      - $.type
+      - $.required
+      - $.properties
+      - $.analysis_rules
+      - $.semantic_rules
+      - $
+  output:
+    schema: l9.projection.strategic-metacognition/v2
+  forbidden:
+  - obligation_not_admitted_in_a_selected_source
+  - repository_local_policy_as_global_law
+  successor_of: l9.projection/strategic-metacognition@1
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
 projection_engine_contract_ref:
   artifact: projection_engine_contract.yaml
   artifact_id: l9.compiler/projection-engine@1
@@ -2802,3 +3055,5 @@ validation_rules:
   rule: each_stage_consumer_resolves_to_exactly_one_unsuperseded_stage_profile
 - id: PROJECTION-016
   rule: a_forbidden_category_is_evaluated_only_through_a_criterion_declared_in_forbidden_constraints_and_otherwise_remains_unresolved
+- id: PROJECTION-017
+  rule: a_profile_declaring_payload_validation_source_class_dispatch_resolves_its_output_schema_from_the_verified_profile_and_the_verified_source_class_at_the_pinned_revision_and_never_from_a_field_of_the_projected_payload
