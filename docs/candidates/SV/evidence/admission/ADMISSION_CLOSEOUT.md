@@ -6,8 +6,9 @@
 | --- | --- | --- |
 | Implementation | **COMPLETE** for the admission candidate | this file |
 | Owner approval | **APPROVED** D1-D5, 2026-11-08 | `owner-decision.yaml` |
-| Canonical admission | **NOT ADMITTED** — waits on the release queue (D5) | — |
-| Post-merge trusted replay | **NOT RUN** — only possible after admission | — |
+| Canonical admission | **ADMITTED** — v3.32.0 / ADR-029, effective at `main` `64d8b85` (Quantum-L9/.github#222) | `docs/adr/ADR-029-…` |
+| Post-merge producer replay | **PASS** — `DOWNSTREAM_USABLE` at `64d8b85` | `docs/evidence/sv-campaign-closeout/` |
+| Consumer trusted replay | **NOT RUN** — consumers bind through their own release process | — |
 
 ## Exact coordinates
 
@@ -56,14 +57,14 @@ Residual (not provenance): `l9.compose/stage-context@1` over the GAR projection 
 | 2 | Real composition receipt reports PASS | **DONE** at `daca00e` |
 | 3 | SV-001 final wording approved and frozen | **DONE** (D1 Option B) |
 | 4 | Eight dispositions authorized at exact digest | **APPROVED** (owner-decision.yaml; ADR-029 binds the final tree) |
-| 5 | PR #215 merged into its staging branch | PENDING review (#220 stacks on it) |
+| 5 | PR #215 merged into its staging branch | **DONE** (`2912fa9`; #220 `1a46c54` first, then #212 to `main` `92c037a`) |
 | 6 | Overlay applied to freshly resolved main | **DONE** (`9488d8f`, then refreshed by merge to `b085dba`; applier re-pinned output and admission branch byte-identical) |
 | 7 | Registry overlaps reconciled | **DONE** through #218 (merge refresh at `5ec8d2d`); #219 reconciles at its refresh (D5) |
 | 8 | Successor release manifest and hash inventory | **DONE**, provisional identity v3.32.0 / ADR-029 |
 | 9 | Native validation, five projections and composition PASS | **DONE** |
 | 10 | Determinism and negative controls at final revision | **DONE** |
-| 11 | Canonical admission PR approved and merged | OPEN — waits on D5 queue and owner merge |
-| 12 | Admitted main read back and consumer replay | NOT RUN — after 11 |
+| 11 | Canonical admission PR approved and merged | **DONE** — owner admitted; #222 merged at `64d8b85` (refreshed onto `92c037a`, requalified at `c4c4a1d`) |
+| 12 | Admitted main read back and consumer replay | Read back and producer replay **DONE** (`DOWNSTREAM_USABLE`); consumer replay NOT RUN |
 
 ## Shortest remaining path to merge
 
@@ -73,3 +74,7 @@ Residual (not provenance): `l9.compose/stage-context@1` over the GAR projection 
 4. Re-run `tools/run_producer_qualification.py` twice, the verifier and the negative controls at the refreshed revision. Every coordinate changes, so this evidence must be regenerated.
 5. Owner admits: ADR status `Accepted`, the release status line flips to ADMITTED, and the hashes are regenerated (the ADR-025 precedent). Then merge to `main`.
 6. Post-merge: run `l9-projection-admission` `--require downstream` on a clean `main` checkout, then consumer trusted replay.
+
+## Outcome (appended 2026-11-08)
+
+The path above was completed. The compiler PR merged (#33), and #219 landed. The admission branch was refreshed onto `92c037a` and requalified at `c4c4a1d`, with the same composition digest. The owner admitted v3.32.0 / ADR-029, and #222 merged at `64d8b85`. The full campaign record is in `docs/evidence/sv-campaign-closeout/`. The coordinates and qualification tables above describe `daca00e`. They are kept as recorded.

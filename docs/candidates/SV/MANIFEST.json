@@ -114,8 +114,8 @@
 		},
 		{
 			"path": "evidence/admission/ADMISSION_CLOSEOUT.md",
-			"bytes": 8336,
-			"sha256": "f9d18690d3875feb0420d4f0073b6bdcfdf25d4fd33486235a3859a5b83f7fd5"
+			"bytes": 9155,
+			"sha256": "f006609a0d735de71cf50bc9ceb01e2bb3bb41a082b4475d6d24e34e245880ef"
 		},
 		{
 			"path": "evidence/admission/composition-provenance-equivalence.json",
@@ -124,8 +124,8 @@
 		},
 		{
 			"path": "evidence/admission/owner-decision.yaml",
-			"bytes": 6472,
-			"sha256": "6d285c6ce344b70aa8e1a5d99736c953043ea55125fb2853cd30157f34276bd5"
+			"bytes": 7018,
+			"sha256": "6e1d2b1c7241cc8a0f6425c23b813781855a8da055e3be8562a927e9fb25db23"
 		},
 		{
 			"path": "evidence/admission/qualification-daca00e/admission-closure-gate.json",
@@ -479,8 +479,8 @@
 		},
 		{
 			"path": "tests/test_composition_provenance_equivalence.py",
-			"bytes": 13363,
-			"sha256": "dbb5fce348a2b8630abc3ac9da3df1c528f683a6de68cc4a527b2330e55ac0ce"
+			"bytes": 13789,
+			"sha256": "d2ed877fc801222ddb306476c62f8124fa503d570e2923c304fb11d57aaf8d08"
 		},
 		{
 			"path": "tests/test_irreducibility.py",
@@ -534,8 +534,8 @@
 		},
 		{
 			"path": "tools/reduce_to_two_invariants.py",
-			"bytes": 14969,
-			"sha256": "c950736d91a5e30ee914a9fea571a80628f6f1243313cd2f5a4e62e4a8a52911"
+			"bytes": 15211,
+			"sha256": "5d494771e248cc855c62832f1b1c3c2ed8b88c7c8830ab30e13f5bc6a1397137"
 		},
 		{
 			"path": "tools/run_producer_qualification.py",

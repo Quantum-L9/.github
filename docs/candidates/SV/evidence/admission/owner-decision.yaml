@@ -4,12 +4,14 @@ schema_note: >-
   admission mechanism (semantics/authority_model.yaml admission_rules, realized by an ADR as ADR-025 did for v3.28.0)
   then binds. Owner approval of these decisions is not canonical admission: admission is the ADR plus the release
   status flip merged to main after the preceding releases (D5).
-decision_status: OWNER_APPROVED_NOT_ADMITTED
+decision_status: OWNER_APPROVED_AND_ADMITTED
 statuses:
   owner_approval: APPROVED
   implementation: see ADMISSION_CLOSEOUT.md
-  canonical_admission: NOT_ADMITTED
-  post_merge_trusted_replay: NOT_RUN
+  canonical_admission: ADMITTED
+  canonical_admission_ref: ADR-029, Semantic Foundation v3.32.0, effective at Quantum-L9/.github main 64d8b8598300f94c3201f26866f73be6895dab60 (#222)
+  post_merge_producer_replay: PASS (docs/evidence/sv-campaign-closeout/post-merge-replay/, DOWNSTREAM_USABLE)
+  consumer_trusted_replay: NOT_RUN
 authorized_decider_ref: >-
   Repository owner of Quantum-L9/.github, explicit written instruction in governed Claude Code session
   session_017xwbxytavCYavKdhRr9a6n on 2026-11-08 ("Proceed with the following decisions for the SV admission
@@ -99,7 +101,9 @@ decisions:
     release, then GT core on the remediated #216 candidate and the admitted SV foundation, then the GT+SV dependent
     contract once its dependencies are satisfied. SV is not coupled to unrelated GT work; SV/GT compatibility is
     preserved.
-decision_record_ref: null
+decision_record_ref: docs/adr/ADR-029-strategic-value-foundation-and-composition-provenance-criteria.md
 decision_record_ref_note: >-
-  The canonical decision record is the ADR in the admission PR (identity selected from merged state at admission,
-  D4). It quotes this ruling and binds the final semantics tree hash.
+  ADR-029 (identity selected from merged state, D4) is the canonical decision record. It quotes these rulings and
+  binds semantics/ tree 251bb3d9238f93f0207b1f8443c80359e034595b, qualified at c4c4a1d. The owner admitted it on
+  2026-11-08 ("I approve. Admit formally and close it out"). This file's subject block records the daca00e
+  qualification that the decisions were first approved against.

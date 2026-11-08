@@ -1,0 +1,14 @@
+schema: l9.sv-campaign-compiler-lock/v1
+producer_of_record:
+  repository: Quantum-L9/l9-semantic-compiler-engine
+  revision: 33e4c5832bf73c7d9b0b70854af011e9582f1ab2
+  version_label: 0.9.3
+  reached_main_through: Quantum-L9/l9-semantic-compiler-engine#33 (merge commit 9ca8d0ea65318121ce5110c75a8f6bb3b72b972c)
+  provenance_tests: tests/test_composition_provenance.py, 20 passed at 33e4c58 on 2026-11-08
+  pinned_by: every pre-merge and post-merge receipt in this directory and in docs/candidates/SV/evidence/admission/
+cross_check:
+  repository: Quantum-L9/l9-semantic-compiler-engine
+  revision: 39a51b76057f6d950877ffe1c2c87c4cb6d4a891
+  form: git archive of origin/main at that revision into a scratch directory with one local snapshot commit, so the summary's compiler_revision field reads that local commit, not 39a51b7
+  delta_from_producer: Stage 15 Python Gate Node lowering (#32) and schema grammar candidate builder (#29); src/l9_semantic_compiler/passes/projection.py unchanged
+  result: byte-identical projection, composition and receipt artifacts to the 33e4c58 replay (artifacts-*.sha256 differ only in summary.json)
