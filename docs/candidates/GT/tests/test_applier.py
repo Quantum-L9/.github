@@ -495,8 +495,9 @@ class AdmittedCoreStage(unittest.TestCase):
         self.assertEqual(len(resolved), 2)
 
     def test_wrong_head_fails(self):
+        ab = self.binding(target_revision="0" * 40)
         with self.assertRaisesRegex(ValueError, "wrong target HEAD"):
-            self.verify(self.binding(target_revision="0" * 40))
+            self.verify(ab)
 
     def test_dirty_target_fails(self):
         (self.root / "README.md").write_text("dirty\n")
@@ -514,8 +515,9 @@ class AdmittedCoreStage(unittest.TestCase):
             f"artifact_id: {applier.SV_MODEL_ID}\nextra: drift\n"
         )
         head = self.commit()
+        ab = self.binding(target_revision=head)
         with self.assertRaisesRegex(ValueError, "differs from its admitted bytes"):
-            self.verify(self.binding(target_revision=head))
+            self.verify(ab)
 
     def test_sv_record_changed_in_shared_ledger_fails(self):
         path = self.root / "semantics/invariants.yaml"
@@ -525,29 +527,39 @@ class AdmittedCoreStage(unittest.TestCase):
             )
         )
         head = self.commit()
+        ab = self.binding(target_revision=head)
         with self.assertRaisesRegex(ValueError, "SV records in the shared ledgers"):
-            self.verify(self.binding(target_revision=head))
+            self.verify(ab)
 
     def test_unadmitted_release_record_fails(self):
         readme = self.root / "docs/semantic-foundation/v3.32.0/README.md"
         readme.write_text("# v3.32.0\n\nStatus: **ADDITIVE SUCCESSOR CANDIDATE**\n")
         head = self.commit()
+        ab = self.binding(target_revision=head)
         with self.assertRaisesRegex(ValueError, "README is not marked admitted"):
-            self.verify(self.binding(target_revision=head))
+            self.verify(ab)
 
     def test_adr_not_accepted_fails(self):
         (self.root / self.ADR).write_text("# ADR-029\n\n**Status:** Candidate.\n")
         head = self.commit()
+        ab = self.binding(target_revision=head)
         with self.assertRaisesRegex(ValueError, "is not Accepted"):
-            self.verify(self.binding(target_revision=head))
+            self.verify(ab)
 
     def test_gt_already_present_fails(self):
         changed, *_ = applier.generate_core(self.root)
         for rel, text in changed.items():
             (self.root / rel).write_text(text)
         head = self.commit("gt applied")
+        ab = self.binding(target_revision=head)
         with self.assertRaisesRegex(ValueError, "GT additions already present"):
-            self.verify(self.binding(target_revision=head))
+            self.verify(ab)
+
+    def test_option_shaped_revision_is_refused_before_git(self):
+        ab = self.binding()
+        ab["admitted_sv"]["effective_revision"] = "--output=/tmp/x"
+        with self.assertRaisesRegex(ValueError, "40-hex commit SHA"):
+            self.verify(ab)
 
     def test_identities_differing_from_aligned_sv_are_refused(self):
         ab = self.binding()
@@ -568,8 +580,7 @@ class AdmittedCoreStage(unittest.TestCase):
             "64d8b8598300f94c3201f26866f73be6895dab60",
         )
         self.assertEqual(ab["admitted_sv"]["release"], "v3.32.0")
-        self.assertEqual(
+        self.assertIsNone(
             applier.BINDING["admitted_foundation_revision"],
-            None,
             "the historical binding stays unchanged",
         )

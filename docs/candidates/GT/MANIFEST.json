@@ -74,8 +74,8 @@
 		},
 		{
 			"path": "apply_to_pinned_checkout.py",
-			"bytes": 39660,
-			"sha256": "b8d1bb03150d6d03e66d9a24db64b090c7955715d8b06676352c1ca43f7a620c"
+			"bytes": 40050,
+			"sha256": "f22ca91a035e19d6b0bcf08bb124015ba27fda81809bc293ae0bd6585d38a843"
 		},
 		{
 			"path": "evidence/admitted_sv_binding.json",
@@ -299,8 +299,8 @@
 		},
 		{
 			"path": "tests/test_applier.py",
-			"bytes": 23996,
-			"sha256": "34d571157eb8334cbd327793c1f9750787e44ee217f1afb48ee370f9152a6d5c"
+			"bytes": 24335,
+			"sha256": "a06f9d958a40781316bee9256bc793f34dd397adcfee3501563176b9ca437ef1"
 		},
 		{
 			"path": "tests/test_candidate.py",

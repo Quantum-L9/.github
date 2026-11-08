@@ -102,6 +102,8 @@ LEDGERS = {
     "model": VALUE_MODEL,
 }
 FORBIDDEN_OVERLAY = "overlays/projection_forbidden_constraint_additions.yaml"
+VOCABULARY_OVERLAY = "overlays/vocabulary_additions.yaml"
+FULL_SHA = re.compile(r"[0-9a-f]{40}")
 INVARIANT_SELECTOR = re.compile(r'^\$\.invariants\[\?\(@\.id=="([^"]+)"\)\]$')
 CONTRACT_SELECTOR = re.compile(r'^\$\.contracts\[\?\(@\.id=="([^"]+)"\)\]$')
 
@@ -380,14 +382,20 @@ def load_admitted_sv_binding():
     for key in SV_IDENTITY_KEYS:
         if identities[key] != BINDING[key]:
             raise ValueError(f"admitted SV {key} differs from the aligned SV candidate")
-    for key in ("target_revision", "admitted_sv"):
-        if not ab.get(key):
-            raise ValueError(f"admitted-SV binding lacks {key}")
+    full_sha(ab.get("target_revision"), "target_revision")
+    full_sha(ab["admitted_sv"].get("effective_revision"), "effective_revision")
     return ab
 
 
+def full_sha(value, label):
+    """A revision read from a file must be one full commit SHA, never an option."""
+    if not isinstance(value, str) or FULL_SHA.fullmatch(value) is None:
+        raise ValueError(f"{label} must be a 40-hex commit SHA, got {value!r}")
+    return value
+
+
 def _show(checkout, revision, rel):
-    return git(checkout, "show", f"{revision}:{rel}")
+    return git(checkout, "show", f"{full_sha(revision, 'revision')}:{rel}")
 
 
 def _sv_records(docs):
@@ -462,7 +470,7 @@ def _verify_gt_absent(docs, checkout):
         ]
         + [
             t
-            for t in overlay("overlays/vocabulary_additions.yaml")["terms"]
+            for t in overlay(VOCABULARY_OVERLAY)["terms"]
             if t in docs["vocabulary"]["terms"]
         ]
         + [n for n in GT_SCHEMA_FILES if (checkout / "semantics" / n).exists()]
@@ -484,13 +492,14 @@ def verify_admitted_sv_base(checkout, ab):
     ledger must equal its admitted record, the release and ADR must record the
     admission, and no GT record may already exist.
     """
-    target, admitted = ab["target_revision"], ab["admitted_sv"]
+    target = full_sha(ab["target_revision"], "target_revision")
+    admitted = ab["admitted_sv"]
     head = git(checkout, "rev-parse", "HEAD").strip()
     if head != target:
         raise ValueError(f"wrong target HEAD {head}; expected {target}")
     if dirty_paths(checkout):
         raise ValueError("checkout not clean")
-    revision = admitted["effective_revision"]
+    revision = full_sha(admitted["effective_revision"], "effective_revision")
     ancestor = subprocess.run(
         ["git", "-C", str(checkout), "merge-base", "--is-ancestor", revision, head],
         capture_output=True,
@@ -550,7 +559,7 @@ def _verify_gt_law(docs):
         raise ValueError(
             "GT core source_invariants must be exactly the six governing IDs"
         )
-    gt_terms = list(overlay("overlays/vocabulary_additions.yaml")["terms"])
+    gt_terms = list(overlay(VOCABULARY_OVERLAY)["terms"])
     if len(gt_terms) != 12 or set(gt_terms) & set(SV_TERMS):
         raise ValueError("GT must add twelve terms disjoint from SV terms")
     return sources, gt_terms
@@ -725,11 +734,11 @@ def generate_core(checkout):
 
     p = VOCABULARY
     v = current(p)
-    incoming = overlay("overlays/vocabulary_additions.yaml")["terms"]
+    incoming = overlay(VOCABULARY_OVERLAY)["terms"]
     clash = set(yaml.safe_load(v)["terms"]) & set(incoming)
     if clash:
         raise ValueError(f"vocabulary term collision: {sorted(clash)}")
-    block = raw("overlays/vocabulary_additions.yaml").split("terms:\n", 1)[1]
+    block = raw(VOCABULARY_OVERLAY).split("terms:\n", 1)[1]
     changed[p] = one(
         v, "\nrelationships:\n", "\n" + block.rstrip() + "\nrelationships:\n", p
     )
