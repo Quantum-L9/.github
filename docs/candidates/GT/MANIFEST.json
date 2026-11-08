@@ -74,8 +74,8 @@
 		},
 		{
 			"path": "apply_to_pinned_checkout.py",
-			"bytes": 40297,
-			"sha256": "50546c75fa6467309865ac37d27aeda67dac1ff82e9236d2a6311d736fb0148b"
+			"bytes": 42258,
+			"sha256": "959f9fd84ffee55af9f4d22520d4fe534020c25e1dbb81795caa475d2ca1164e"
 		},
 		{
 			"path": "evidence/admission/gt-owner-decision.yaml",
@@ -304,8 +304,8 @@
 		},
 		{
 			"path": "tests/test_applier.py",
-			"bytes": 24335,
-			"sha256": "a06f9d958a40781316bee9256bc793f34dd397adcfee3501563176b9ca437ef1"
+			"bytes": 29917,
+			"sha256": "448a2e9bbec368e068d00c3df5311cec8f274d6d4d33bf59893da1694de78de0"
 		},
 		{
 			"path": "tests/test_candidate.py",
