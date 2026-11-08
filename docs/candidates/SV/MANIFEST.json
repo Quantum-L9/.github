@@ -119,8 +119,8 @@
 		},
 		{
 			"path": "evidence/admission/composition-provenance-equivalence.json",
-			"bytes": 10092,
-			"sha256": "54e95ebd6bad0674d69ad1f721dae9214450955ee2afcf192bc125db06016900"
+			"bytes": 8763,
+			"sha256": "0adbcea0b47679a2a40d16ade832ac7601b09ba1cef721387fb947fe1c9074a3"
 		},
 		{
 			"path": "evidence/admission/owner-decision.yaml",
