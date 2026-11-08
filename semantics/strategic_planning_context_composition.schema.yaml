@@ -1,0 +1,2406 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_strategic_planning_context_composed_payload_schema
+artifact_id: l9.schema/strategic-planning-context-composition@1
+canonical_source:
+  format: yaml
+  artifact: strategic_planning_context_composition.schema.yaml
+governed_by:
+  composition_profile_ref: l9.compose/strategic-planning-context@1
+  projection_profile_ref: l9.projection/strategic-planning-context@1
+purpose: Exact 9-source composition of l9.projection/strategic-planning-context@1. Each required namespace
+  preserves its source-class identity and the constraints derived from its selected payload.
+derivation:
+  method: l9.schema-derivation/selected-payload@1
+  basis: selected_payload_observation_at_authority_revision
+  authority_repository: Quantum-L9/.github
+  authority_revision: 2349a90b86b2d90ad5b1aa5a026fee58dbec75f3
+  projection_profile:
+    ref: l9.projection/strategic-planning-context@1
+    digest: sha256:3966f5be950e8fdce0f7c896b292ebdc03a6bf715f684edfc1c3ddfdce6a9b58
+  composition_profile:
+    ref: l9.compose/strategic-planning-context@1
+    digest: sha256:d91dd43a7e069711d5851f894cf1433ae17d472b6f536d9b9ab515d6e2c2011a
+  selector_model:
+    ref: l9.selector-model/global@1
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+  sources:
+  - source_class: invariants
+    source_ref: l9.source/invariants@1
+    source_path: semantics/invariants.yaml
+    source_digest: sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a
+  - source_class: contracts
+    source_ref: l9.source/contracts@1
+    source_path: semantics/contracts.yaml
+    source_digest: sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79
+  - source_class: authority_model
+    source_ref: l9.source/authority-model@1
+    source_path: semantics/authority_model.yaml
+    source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
+  - source_class: strategic_cognition_model
+    source_ref: l9.source/strategic-cognition-model@1
+    source_path: semantics/strategic_cognition_model.yaml
+    source_digest: sha256:af540e9607915878b66cb7632fd3ca63f57f80707b1c605fc21536d06ec81a7d
+  - source_class: strategic_plan_model
+    source_ref: l9.source/strategic-plan-model@1
+    source_path: semantics/strategic_plan_model.yaml
+    source_digest: sha256:4fffeb59d95fa05158c718b3637288c20bad41243b58b9ed3be50121acae840a
+  - source_class: strategic_plan_graph_schema
+    source_ref: l9.source/strategic-plan-graph-schema@1
+    source_path: semantics/strategic_plan_graph.schema.yaml
+    source_digest: sha256:76bbf51d9233452d3e83e8bf4148a27eb6b8e29ff3126777c6c28d818ce1a885
+  - source_class: affected_strategic_closure_schema
+    source_ref: l9.source/affected-strategic-closure-schema@1
+    source_path: semantics/affected_strategic_closure.schema.yaml
+    source_digest: sha256:09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4
+  - source_class: strategic_planning_episode_schema
+    source_ref: l9.source/strategic-planning-episode-schema@1
+    source_path: semantics/strategic_planning_episode.schema.yaml
+    source_digest: sha256:017931d0f8a07e85124a6492e07f65c7781905ed86042c7978c7451a80ab8513
+  - source_class: strategic_plan_revision_candidate_schema
+    source_ref: l9.source/strategic-plan-revision-candidate-schema@1
+    source_path: semantics/strategic_plan_revision_candidate.schema.yaml
+    source_digest: sha256:48fdecd1a015f13cd739e718b3ea48948ce7891c2905311201ea90bd7d56c0fc
+type: object
+required:
+- invariants
+- contracts
+- authority_model
+- strategic_cognition_model
+- strategic_plan_model
+- strategic_plan_graph_schema
+- affected_strategic_closure_schema
+- strategic_planning_episode_schema
+- strategic_plan_revision_candidate_schema
+properties:
+  schema:
+    const: l9.composed-projection.strategic-planning-context/v1
+  invariants:
+    type: object
+    required:
+    - invariants
+    properties:
+      invariants:
+        type: array
+        min_items: 10
+        items:
+          type: object
+          required:
+          - id
+          - statement
+          - scope
+          - owner
+          properties:
+            id:
+              type: string
+              enum:
+              - L9-AUTH-001
+              - L9-AUTH-002
+              - L9-OWNER-001
+              - L9-SEM-001
+              - L9-SCOPE-001
+              - L9-DERIVED-001
+              - L9-UNKNOWN-001
+              - L9-PROV-001
+              - L9-PROJECTION-001
+              - L9-STRATEGY-001
+            statement:
+              type: string
+            scope:
+              type: string
+              const: global
+            owner:
+              type: string
+              const: Quantum-L9/.github
+  contracts:
+    type: object
+    required:
+    - contracts
+    properties:
+      contracts:
+        type: array
+        min_items: 3
+        items:
+          type: object
+          required:
+          - id
+          - purpose
+          - scope
+          - owner
+          - source_invariants
+          - applies_to
+          - requires
+          - guarantees
+          - forbidden
+          - outcomes
+          properties:
+            id:
+              type: string
+              enum:
+              - l9.contract/authority-boundary@1
+              - l9.contract/semantic-ownership@1
+              - l9.contract/projection@1
+            purpose:
+              type: string
+            scope:
+              type: string
+              const: global
+            owner:
+              type: string
+              const: Quantum-L9/.github
+            source_invariants:
+              type: string_list
+            applies_to:
+              type: string_list
+            requires:
+              type: string_list
+            guarantees:
+              type: string_list
+            forbidden:
+              type: string_list
+            outcomes:
+              type: object
+              required:
+              - unresolved
+              properties:
+                satisfied:
+                  type: string
+                violated:
+                  type: string
+                unresolved:
+                  type: string
+                valid_projection:
+                  type: string
+                  const: output_is_a_bounded_semantics_preserving_view
+                invalid_projection:
+                  type: string
+                  const: output_invents_reinterprets_reconciles_or_expands_source_semantics
+  authority_model:
+    type: object
+    required:
+    - strategic_authority
+    - strategic_cognition_authority
+    properties:
+      strategic_authority:
+        type: object
+        required:
+        - definition
+        - strategy_concept_ref
+        - grant_must_be_explicit
+        - may_not_be_inferred_from
+        properties:
+          definition:
+            type: string
+          strategy_concept_ref:
+            type: string
+            const: strategic_cognition_model.yaml#concepts.strategy
+          grant_must_be_explicit:
+            type: boolean
+            const: true
+          may_not_be_inferred_from:
+            type: string_list
+      strategic_cognition_authority:
+        type: object
+        required:
+        - global_semantics_owner
+        - detailed_model
+        - invariant_ref
+        - strategic_plan_owner
+        - strategic_plan_authority_source
+        - strategic_plan_reasoning_analysis_owner
+        - metacognition_denied
+        - roles_are_actor_identities
+        - rules
+        properties:
+          global_semantics_owner:
+            type: string
+            const: Quantum-L9/.github
+          detailed_model:
+            type: string
+            const: strategic_cognition_model.yaml
+          invariant_ref:
+            type: string
+            const: L9-STRATEGY-001
+          strategic_plan_owner:
+            type: string
+            const: plan_keeper
+          strategic_plan_authority_source:
+            type: string
+            const: strategic_authority
+          strategic_plan_reasoning_analysis_owner:
+            type: string
+            const: strategic_plan_metacognitive_reasoner
+          metacognition_denied:
+            type: string_list
+          roles_are_actor_identities:
+            type: boolean
+            const: false
+          rules:
+            type: string_list
+  strategic_cognition_model:
+    type: object
+    required:
+    - global_rules
+    - concepts
+    - roles
+    - reasoning_artifacts
+    - authority_separation
+    properties:
+      global_rules:
+        type: object
+        required:
+        - strategic_cognition_does_not_own_underlying_truth_sources
+        - strategic_cognition_does_not_own_runtime_execution
+        - reasoning_capability_does_not_confer_strategic_authority
+        - projection_consumption_does_not_transfer_truth_source_ownership
+        - strategic_roles_are_semantic_roles_not_actor_identities
+        - strategic_label_does_not_create_authority_or_ownership
+        - metacognition_is_advisory_to_strategic_authority
+        - semantic_compiler_remains_independent_of_reasoning_plane
+        - planning_episode_is_non_authoritative_reasoning_record
+        - plan_revision_candidate_is_not_strategy_until_admitted_under_strategic_authority
+        - metacognitive_analysis_is_advisory_and_cannot_mutate_strategy
+        properties:
+          strategic_cognition_does_not_own_underlying_truth_sources:
+            type: boolean
+            const: true
+          strategic_cognition_does_not_own_runtime_execution:
+            type: boolean
+            const: true
+          reasoning_capability_does_not_confer_strategic_authority:
+            type: boolean
+            const: true
+          projection_consumption_does_not_transfer_truth_source_ownership:
+            type: boolean
+            const: true
+          strategic_roles_are_semantic_roles_not_actor_identities:
+            type: boolean
+            const: true
+          strategic_label_does_not_create_authority_or_ownership:
+            type: boolean
+            const: true
+          metacognition_is_advisory_to_strategic_authority:
+            type: boolean
+            const: true
+          semantic_compiler_remains_independent_of_reasoning_plane:
+            type: boolean
+            const: true
+          planning_episode_is_non_authoritative_reasoning_record:
+            type: boolean
+            const: true
+          plan_revision_candidate_is_not_strategy_until_admitted_under_strategic_authority:
+            type: boolean
+            const: true
+          metacognitive_analysis_is_advisory_and_cannot_mutate_strategy:
+            type: boolean
+            const: true
+      concepts:
+        type: object
+        required:
+        - strategy
+        - strategic_cognition
+        - strategic_plan
+        - current_meta_view
+        - strategic_intent
+        properties:
+          strategy:
+            type: object
+            required:
+            - definition
+            properties:
+              definition:
+                type: string
+          strategic_cognition:
+            type: object
+            required:
+            - definition
+            - consumes
+            - maintains
+            - does_not_own
+            properties:
+              definition:
+                type: string
+              consumes:
+                type: string_list
+              maintains:
+                type: string_list
+              does_not_own:
+                type: string_list
+          strategic_plan:
+            type: object
+            required:
+            - definition
+            - owner_role
+            - content_defined_here
+            - structure_defined_here
+            properties:
+              definition:
+                type: string
+              owner_role:
+                type: string
+                const: plan_keeper
+              content_defined_here:
+                type: boolean
+                const: false
+              structure_defined_here:
+                type: boolean
+                const: false
+          current_meta_view:
+            type: object
+            required:
+            - definition
+            - authority_class
+            - authoritative
+            - canonical_source
+            - artifact_class_ref
+            - component_artifact_class_ref
+            - schema_ref
+            - properties
+            properties:
+              definition:
+                type: string
+              authority_class:
+                type: string
+                const: derived
+              authoritative:
+                type: boolean
+                const: false
+              canonical_source:
+                type: boolean
+                const: false
+              artifact_class_ref:
+                type: string
+                const: composed_projection
+              component_artifact_class_ref:
+                type: string
+                const: projection_artifact
+              schema_ref:
+                type: string
+                const: l9.schema/composed-projection@1
+              properties:
+                type: object
+                required:
+                - derived
+                - disposable
+                - provenance_preserving
+                - invalidated_when_source_truth_changes
+                - may_reinterpret_source_truth
+                - may_create_authority
+                properties:
+                  derived:
+                    type: boolean
+                    const: true
+                  disposable:
+                    type: boolean
+                    const: true
+                  provenance_preserving:
+                    type: boolean
+                    const: true
+                  invalidated_when_source_truth_changes:
+                    type: boolean
+                    const: true
+                  may_reinterpret_source_truth:
+                    type: boolean
+                    const: false
+                  may_create_authority:
+                    type: boolean
+                    const: false
+          strategic_intent:
+            type: object
+            required:
+            - definition
+            - owned_here
+            - owner
+            - authority_ref
+            properties:
+              definition:
+                type: string
+              owned_here:
+                type: boolean
+                const: false
+              owner:
+                type: string
+                const: applicable_strategic_authority
+              authority_ref:
+                type: string
+                const: authority_model.yaml#strategic_authority
+      roles:
+        type: object
+        required:
+        - plan_keeper
+        properties:
+          plan_keeper:
+            type: object
+            required:
+            - role_kind
+            - actor_identity_binding
+            - definition
+            - owns
+            - reasons_over
+            - may
+            - authority_source
+            - does_not_own
+            - may_not
+            properties:
+              role_kind:
+                type: string
+                const: semantic_role
+              actor_identity_binding:
+                type: string
+                const: none
+              definition:
+                type: string
+              owns:
+                type: string_list
+              reasons_over:
+                type: string_list
+              may:
+                type: string_list
+              authority_source:
+                type: string
+                const: strategic_authority
+              does_not_own:
+                type: string_list
+              may_not:
+                type: string_list
+      reasoning_artifacts:
+        type: object
+        required:
+        - strategic_planning_episode
+        - strategic_plan_revision_candidate
+        properties:
+          strategic_planning_episode:
+            type: object
+            required:
+            - definition
+            - producer_role
+            - authority_class
+            - schema_ref
+            - authority_effect
+            - may_not
+            properties:
+              definition:
+                type: string
+              producer_role:
+                type: string
+                const: plan_keeper
+              authority_class:
+                type: string
+                const: derived
+              schema_ref:
+                type: string
+                const: l9.schema/strategic-planning-episode@1
+              authority_effect:
+                type: string
+                const: none
+              may_not:
+                type: string_list
+          strategic_plan_revision_candidate:
+            type: object
+            required:
+            - definition
+            - producer_role
+            - authority_class
+            - schema_ref
+            - authority_effect
+            - may_not
+            properties:
+              definition:
+                type: string
+              producer_role:
+                type: string
+                const: plan_keeper
+              authority_class:
+                type: string
+                const: candidate
+              schema_ref:
+                type: string
+                const: l9.schema/strategic-plan-revision-candidate@1
+              authority_effect:
+                type: string
+                const: none_until_admitted
+              may_not:
+                type: string_list
+      authority_separation:
+        type: object
+        required:
+        - invariant_ref
+        - resolution_ref
+        - strategic_plan_owner
+        - strategic_plan_reasoning_analysis_owner
+        - teaching_relation
+        properties:
+          invariant_ref:
+            type: string
+            const: L9-STRATEGY-001
+          resolution_ref:
+            type: string
+            const: authority_model.yaml#strategic_cognition_authority
+          strategic_plan_owner:
+            type: string
+            const: plan_keeper
+          strategic_plan_reasoning_analysis_owner:
+            type: string
+            const: strategic_plan_metacognitive_reasoner
+          teaching_relation:
+            type: object
+            required:
+            - from
+            - to
+            - carries
+            - authority_effect
+            properties:
+              from:
+                type: string
+                const: strategic_plan_metacognitive_reasoner
+              to:
+                type: string
+                const: plan_keeper
+              carries:
+                type: string
+                const: planning_cognition_lessons
+              authority_effect:
+                type: string
+                const: none
+  strategic_plan_model:
+    type: object
+    required:
+    - global_rules
+    - primitives
+    - relations
+    - relation_rules
+    - reasoning_concepts
+    properties:
+      global_rules:
+        type: object
+        required:
+        - strategic_plan_represents_strategy_without_absorbing_external_truth_ownership
+        - strategic_hypothesis_is_plan_owned_belief_not_authoritative_truth
+        - reality_change_may_require_reconsideration_but_never_directly_modifies_or_invalidates_strategic_plan
+        - reasoning_workspace_content_is_not_strategic_plan_content_without_authorized_decision
+        - planning_horizon_does_not_create_primitive_types
+        - compound_causal_claims_are_expressible_by_one_strategic_hypothesis
+        - outcome_of_one_primitive_does_not_establish_correctness_of_another
+        properties:
+          strategic_plan_represents_strategy_without_absorbing_external_truth_ownership:
+            type: boolean
+            const: true
+          strategic_hypothesis_is_plan_owned_belief_not_authoritative_truth:
+            type: boolean
+            const: true
+          reality_change_may_require_reconsideration_but_never_directly_modifies_or_invalidates_strategic_plan:
+            type: boolean
+            const: true
+          reasoning_workspace_content_is_not_strategic_plan_content_without_authorized_decision:
+            type: boolean
+            const: true
+          planning_horizon_does_not_create_primitive_types:
+            type: boolean
+            const: true
+          compound_causal_claims_are_expressible_by_one_strategic_hypothesis:
+            type: boolean
+            const: true
+          outcome_of_one_primitive_does_not_establish_correctness_of_another:
+            type: boolean
+            const: true
+      primitives:
+        type: object
+        required:
+        - strategic_goal
+        - strategic_target
+        - strategic_hypothesis
+        - strategic_commitment
+        properties:
+          strategic_goal:
+            type: object
+            required:
+            - definition
+            - question
+            properties:
+              definition:
+                type: string
+              question:
+                type: string
+          strategic_target:
+            type: object
+            required:
+            - definition
+            - question
+            properties:
+              definition:
+                type: string
+              question:
+                type: string
+          strategic_hypothesis:
+            type: object
+            required:
+            - definition
+            - question
+            properties:
+              definition:
+                type: string
+              question:
+                type: string
+          strategic_commitment:
+            type: object
+            required:
+            - definition
+            - question
+            properties:
+              definition:
+                type: string
+              question:
+                type: string
+      relations:
+        type: object
+        required:
+        - advances
+        - enables
+        - depends_on
+        - conflicts_with
+        - supersedes
+        properties:
+          advances:
+            type: object
+            required:
+            - meaning
+            properties:
+              meaning:
+                type: string
+          enables:
+            type: object
+            required:
+            - meaning
+            properties:
+              meaning:
+                type: string
+          depends_on:
+            type: object
+            required:
+            - meaning
+            properties:
+              meaning:
+                type: string
+          conflicts_with:
+            type: object
+            required:
+            - meaning
+            properties:
+              meaning:
+                type: string
+          supersedes:
+            type: object
+            required:
+            - semantics_ref
+            properties:
+              semantics_ref:
+                type: string
+                const: lifecycle.yaml#lifecycle_relations.supersedes
+      relation_rules:
+        type: object
+        required:
+        - relations_do_not_transfer_ownership_or_authority
+        - material_causal_enables_claims_remain_attributable_to_a_strategic_hypothesis
+        properties:
+          relations_do_not_transfer_ownership_or_authority:
+            type: boolean
+            const: true
+          material_causal_enables_claims_remain_attributable_to_a_strategic_hypothesis:
+            type: boolean
+            const: true
+      reasoning_concepts:
+        type: object
+        required:
+        - affected_strategic_closure
+        properties:
+          affected_strategic_closure:
+            type: object
+            required:
+            - definition
+            - purpose
+            - representation_schema_ref
+            - authority_class
+            - authoritative
+            - representation_does_not_define_closure_algorithm
+            - may_not
+            properties:
+              definition:
+                type: string
+              purpose:
+                type: string
+                const: selective_plan_reconsideration
+              representation_schema_ref:
+                type: string
+                const: l9.schema/affected-strategic-closure@1
+              authority_class:
+                type: string
+                const: derived
+              authoritative:
+                type: boolean
+                const: false
+              representation_does_not_define_closure_algorithm:
+                type: boolean
+                const: true
+              may_not:
+                type: string_list
+  strategic_plan_graph_schema:
+    type: object
+    required:
+    - artifact_id
+    - canonical
+    - authority
+    - canonical_source
+    - governed_by
+    - purpose
+    - type
+    - required
+    - properties
+    - reference_rules
+    - relation_constraints
+    - revision_rules
+    - semantic_rules
+    properties:
+      artifact_id:
+        type: string
+        const: l9.schema/strategic-plan-graph@1
+      canonical:
+        type: boolean
+        const: true
+      authority:
+        type: object
+        required:
+        - owner
+        - scope
+        - authority_class
+        properties:
+          owner:
+            type: string
+            const: Quantum-L9/.github
+          scope:
+            type: string
+            const: l9_global_strategic_plan_graph_schema
+          authority_class:
+            type: string
+            const: canonical
+      canonical_source:
+        type: object
+        required:
+        - format
+        - artifact
+        properties:
+          format:
+            type: string
+            const: yaml
+          artifact:
+            type: string
+            const: strategic_plan_graph.schema.yaml
+      governed_by:
+        type: object
+        required:
+        - semantic_model_ref
+        - strategic_cognition_ref
+        - authority_ref
+        - lifecycle_ref
+        properties:
+          semantic_model_ref:
+            type: string
+            const: strategic_plan_model.yaml
+          strategic_cognition_ref:
+            type: string
+            const: strategic_cognition_model.yaml
+          authority_ref:
+            type: string
+            const: authority_model.yaml#strategic_authority
+          lifecycle_ref:
+            type: string
+            const: lifecycle.yaml
+      purpose:
+        type: string
+      type:
+        type: string
+        const: object
+      required:
+        type: string_list
+      properties:
+        type: object
+        required:
+        - schema
+        - plan_ref
+        - revision_ref
+        - predecessor_revision_ref
+        - strategic_authority_ref
+        - scope
+        - strategic_intent_refs
+        - objective_refs
+        - nodes
+        - relations
+        - provenance
+        - graph_digest
+        properties:
+          schema:
+            type: object
+            required:
+            - const
+            properties:
+              const:
+                type: string
+                const: l9.strategic-plan-graph/v1
+          plan_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          revision_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          predecessor_revision_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          strategic_authority_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          scope:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref_or_string
+          strategic_intent_refs:
+            type: object
+            required:
+            - type
+            - min_items
+            properties:
+              type:
+                type: string
+                const: semantic_ref_list
+              min_items:
+                const: 1
+          objective_refs:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref_list
+          nodes:
+            type: object
+            required:
+            - type
+            - min_items
+            - items
+            properties:
+              type:
+                type: string
+                const: array
+              min_items:
+                const: 1
+              items:
+                type: object
+                required:
+                - type
+                - required
+                - fields
+                properties:
+                  type:
+                    type: string
+                    const: object
+                  required:
+                    type: string_list
+                  fields:
+                    type: object
+                    required:
+                    - ref
+                    - kind
+                    - statement
+                    - evidence_refs
+                    properties:
+                      ref:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_ref
+                      kind:
+                        type: object
+                        required:
+                        - enum
+                        properties:
+                          enum:
+                            type: string_list
+                      statement:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: string
+                      evidence_refs:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_ref_list
+          relations:
+            type: object
+            required:
+            - type
+            - items
+            properties:
+              type:
+                type: string
+                const: array
+              items:
+                type: object
+                required:
+                - type
+                - required
+                - fields
+                properties:
+                  type:
+                    type: string
+                    const: object
+                  required:
+                    type: string_list
+                  fields:
+                    type: object
+                    required:
+                    - ref
+                    - relation
+                    - source_ref
+                    - target_ref
+                    - hypothesis_ref
+                    properties:
+                      ref:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_ref
+                      relation:
+                        type: object
+                        required:
+                        - enum
+                        properties:
+                          enum:
+                            type: string_list
+                      source_ref:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_ref
+                      target_ref:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_ref
+                      hypothesis_ref:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_ref
+          provenance:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: object
+          graph_digest:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_digest
+      reference_rules:
+        type: object
+        required:
+        - local_node_identity_source
+        - non_local_relation_endpoint_semantics
+        - external_references_remain_externally_owned
+        - unresolved_external_reference_result
+        - downstream_references_governing_upstream_subjects
+        - upstream_objects_do_not_embed_downstream_consumer_inventories
+        - reverse_adjacency_is_derived
+        properties:
+          local_node_identity_source:
+            type: string
+            const: nodes.ref
+          non_local_relation_endpoint_semantics:
+            type: string
+            const: external_semantic_ref
+          external_references_remain_externally_owned:
+            type: boolean
+            const: true
+          unresolved_external_reference_result:
+            type: string
+            const: unknown
+          downstream_references_governing_upstream_subjects:
+            type: boolean
+            const: true
+          upstream_objects_do_not_embed_downstream_consumer_inventories:
+            type: boolean
+            const: true
+          reverse_adjacency_is_derived:
+            type: boolean
+            const: true
+      relation_constraints:
+        type: object
+        required:
+        - all
+        - enables
+        - supersedes
+        properties:
+          all:
+            type: object
+            required:
+            - at_least_one_endpoint_must_resolve_to_local_plan_node
+            - relation_never_transfers_ownership_or_authority
+            properties:
+              at_least_one_endpoint_must_resolve_to_local_plan_node:
+                type: boolean
+                const: true
+              relation_never_transfers_ownership_or_authority:
+                type: boolean
+                const: true
+          enables:
+            type: object
+            required:
+            - hypothesis_ref_required
+            - hypothesis_ref_must_resolve_to_local_kind
+            properties:
+              hypothesis_ref_required:
+                type: boolean
+                const: true
+              hypothesis_ref_must_resolve_to_local_kind:
+                type: string
+                const: strategic_hypothesis
+          supersedes:
+            type: object
+            required:
+            - source_must_resolve_to_local_plan_node
+            - target_must_resolve_to_same_primitive_kind
+            - target_may_resolve_to_prior_revision_same_plan_lineage
+            properties:
+              source_must_resolve_to_local_plan_node:
+                type: boolean
+                const: true
+              target_must_resolve_to_same_primitive_kind:
+                type: boolean
+                const: true
+              target_may_resolve_to_prior_revision_same_plan_lineage:
+                type: boolean
+                const: true
+      revision_rules:
+        type: object
+        required:
+        - graph_represents_exactly_one_plan_revision
+        - content_change_requires_new_revision_ref
+        - predecessor_when_present_must_reference_prior_revision_same_plan_lineage
+        - prior_revisions_remain_addressable
+        - historical_revision_content_is_immutable
+        - graph_digest_binds_exact_revision_content
+        properties:
+          graph_represents_exactly_one_plan_revision:
+            type: boolean
+            const: true
+          content_change_requires_new_revision_ref:
+            type: boolean
+            const: true
+          predecessor_when_present_must_reference_prior_revision_same_plan_lineage:
+            type: boolean
+            const: true
+          prior_revisions_remain_addressable:
+            type: boolean
+            const: true
+          historical_revision_content_is_immutable:
+            type: boolean
+            const: true
+          graph_digest_binds_exact_revision_content:
+            type: boolean
+            const: true
+      semantic_rules:
+        type: string_list
+  affected_strategic_closure_schema:
+    type: object
+    required:
+    - artifact_id
+    - canonical
+    - authority
+    - canonical_source
+    - governed_by
+    - purpose
+    - instance_semantics
+    - type
+    - required
+    - properties
+    - closure_rules
+    - semantic_rules
+    properties:
+      artifact_id:
+        type: string
+        const: l9.schema/affected-strategic-closure@1
+      canonical:
+        type: boolean
+        const: true
+      authority:
+        type: object
+        required:
+        - owner
+        - scope
+        - authority_class
+        properties:
+          owner:
+            type: string
+            const: Quantum-L9/.github
+          scope:
+            type: string
+            const: l9_global_affected_strategic_closure_schema
+          authority_class:
+            type: string
+            const: canonical
+      canonical_source:
+        type: object
+        required:
+        - format
+        - artifact
+        properties:
+          format:
+            type: string
+            const: yaml
+          artifact:
+            type: string
+            const: affected_strategic_closure.schema.yaml
+      governed_by:
+        type: object
+        required:
+        - semantic_model_ref
+        - strategic_plan_graph_schema_ref
+        - strategic_cognition_ref
+        properties:
+          semantic_model_ref:
+            type: string
+            const: strategic_plan_model.yaml#reasoning_concepts.affected_strategic_closure
+          strategic_plan_graph_schema_ref:
+            type: string
+            const: l9.schema/strategic-plan-graph@1
+          strategic_cognition_ref:
+            type: string
+            const: strategic_cognition_model.yaml
+      purpose:
+        type: string
+      instance_semantics:
+        type: object
+        required:
+        - authority_class
+        - authoritative
+        - authority_effect
+        - disposable
+        - recomputable
+        properties:
+          authority_class:
+            type: string
+            const: derived
+          authoritative:
+            type: boolean
+            const: false
+          authority_effect:
+            type: string
+            const: none
+          disposable:
+            type: boolean
+            const: true
+          recomputable:
+            type: boolean
+            const: true
+      type:
+        type: string
+        const: object
+      required:
+        type: string_list
+      properties:
+        type: object
+        required:
+        - schema
+        - closure_ref
+        - plan_ref
+        - plan_revision_ref
+        - plan_graph_digest
+        - trigger_sources
+        - affected_plan_refs
+        - unresolved_refs
+        - provenance
+        - closure_digest
+        properties:
+          schema:
+            type: object
+            required:
+            - const
+            properties:
+              const:
+                type: string
+                const: l9.affected-strategic-closure/v1
+          closure_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          plan_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          plan_revision_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          plan_graph_digest:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_digest
+          trigger_sources:
+            type: object
+            required:
+            - type
+            - min_items
+            - items
+            properties:
+              type:
+                type: string
+                const: array
+              min_items:
+                const: 1
+              items:
+                type: object
+                required:
+                - type
+                - required
+                - fields
+                properties:
+                  type:
+                    type: string
+                    const: object
+                  required:
+                    type: string_list
+                  fields:
+                    type: object
+                    required:
+                    - ref
+                    - digest
+                    - change_ref
+                    properties:
+                      ref:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_ref
+                      digest:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_digest
+                      change_ref:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_ref
+          affected_plan_refs:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref_list
+          unresolved_refs:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref_list
+          provenance:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: object
+          closure_digest:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_digest
+      closure_rules:
+        type: object
+        required:
+        - affected_refs_must_resolve_to_plan_owned_claims_in_bound_revision
+        - empty_closure_is_valid_when_no_plan_owned_claim_materially_depends_on_trigger
+        - unresolved_dependency_is_preserved_as_unknown
+        - closure_algorithm_is_not_defined_by_this_schema
+        - closure_result_is_invalidated_by_bound_plan_revision_or_trigger_digest_change
+        properties:
+          affected_refs_must_resolve_to_plan_owned_claims_in_bound_revision:
+            type: boolean
+            const: true
+          empty_closure_is_valid_when_no_plan_owned_claim_materially_depends_on_trigger:
+            type: boolean
+            const: true
+          unresolved_dependency_is_preserved_as_unknown:
+            type: boolean
+            const: true
+          closure_algorithm_is_not_defined_by_this_schema:
+            type: boolean
+            const: true
+          closure_result_is_invalidated_by_bound_plan_revision_or_trigger_digest_change:
+            type: boolean
+            const: true
+      semantic_rules:
+        type: string_list
+  strategic_planning_episode_schema:
+    type: object
+    required:
+    - artifact_id
+    - canonical
+    - authority
+    - canonical_source
+    - governed_by
+    - purpose
+    - instance_semantics
+    - type
+    - required
+    - properties
+    - workspace_rules
+    - semantic_rules
+    properties:
+      artifact_id:
+        type: string
+        const: l9.schema/strategic-planning-episode@1
+      canonical:
+        type: boolean
+        const: true
+      authority:
+        type: object
+        required:
+        - owner
+        - scope
+        - authority_class
+        properties:
+          owner:
+            type: string
+            const: Quantum-L9/.github
+          scope:
+            type: string
+            const: l9_global_strategic_planning_episode_schema
+          authority_class:
+            type: string
+            const: canonical
+      canonical_source:
+        type: object
+        required:
+        - format
+        - artifact
+        properties:
+          format:
+            type: string
+            const: yaml
+          artifact:
+            type: string
+            const: strategic_planning_episode.schema.yaml
+      governed_by:
+        type: object
+        required:
+        - semantic_model_ref
+        - plan_graph_schema_ref
+        - authority_ref
+        properties:
+          semantic_model_ref:
+            type: string
+            const: strategic_cognition_model.yaml#reasoning_artifacts.strategic_planning_episode
+          plan_graph_schema_ref:
+            type: string
+            const: l9.schema/strategic-plan-graph@1
+          authority_ref:
+            type: string
+            const: authority_model.yaml#strategic_authority
+      purpose:
+        type: string
+      instance_semantics:
+        type: object
+        required:
+        - authority_class
+        - authoritative
+        - authority_effect
+        - producer_role
+        properties:
+          authority_class:
+            type: string
+            const: derived
+          authoritative:
+            type: boolean
+            const: false
+          authority_effect:
+            type: string
+            const: none
+          producer_role:
+            type: string
+            const: plan_keeper
+      type:
+        type: string
+        const: object
+      required:
+        type: string_list
+      properties:
+        type: object
+        required:
+        - schema
+        - episode_ref
+        - plan_ref
+        - plan_revision_ref
+        - plan_graph_digest
+        - strategic_authority_ref
+        - strategic_intent_refs
+        - objective_refs
+        - current_meta_view
+        - affected_closure
+        - trigger_sources
+        - workspace
+        - recommendation
+        - provenance
+        - episode_digest
+        properties:
+          schema:
+            type: object
+            required:
+            - const
+            properties:
+              const:
+                type: string
+                const: l9.strategic-planning-episode/v1
+          episode_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          plan_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          plan_revision_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          plan_graph_digest:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_digest
+          strategic_authority_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          strategic_intent_refs:
+            type: object
+            required:
+            - type
+            - min_items
+            properties:
+              type:
+                type: string
+                const: semantic_ref_list
+              min_items:
+                const: 1
+          objective_refs:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref_list
+          current_meta_view:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+              fields:
+                type: object
+                required:
+                - ref
+                - digest
+                properties:
+                  ref:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref
+                  digest:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_digest
+          affected_closure:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+              fields:
+                type: object
+                required:
+                - ref
+                - digest
+                properties:
+                  ref:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref
+                  digest:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_digest
+          trigger_sources:
+            type: object
+            required:
+            - type
+            - items
+            properties:
+              type:
+                type: string
+                const: array
+              items:
+                type: object
+                required:
+                - type
+                - required
+                - fields
+                properties:
+                  type:
+                    type: string
+                    const: object
+                  required:
+                    type: string_list
+                  fields:
+                    type: object
+                    required:
+                    - ref
+                    - digest
+                    - change_ref
+                    properties:
+                      ref:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_ref
+                      digest:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_digest
+                      change_ref:
+                        type: object
+                        required:
+                        - type
+                        properties:
+                          type:
+                            type: string
+                            const: semantic_ref
+          workspace:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+              fields:
+                type: object
+                required:
+                - decision_question
+                - observations
+                - assumptions
+                - candidate_paths
+                - evaluations
+                - material_unknowns
+                properties:
+                  decision_question:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: string
+                  observations:
+                    type: object
+                    required:
+                    - type
+                    - items
+                    properties:
+                      type:
+                        type: string
+                        const: array
+                      items:
+                        type: object
+                        required:
+                        - type
+                        - required
+                        - fields
+                        properties:
+                          type:
+                            type: string
+                            const: object
+                          required:
+                            type: string_list
+                          fields:
+                            type: object
+                            required:
+                            - ref
+                            - statement
+                            - source_refs
+                            properties:
+                              ref:
+                                type: object
+                                required:
+                                - type
+                              statement:
+                                type: object
+                                required:
+                                - type
+                              source_refs:
+                                type: object
+                                required:
+                                - type
+                                - min_items
+                  assumptions:
+                    type: object
+                    required:
+                    - type
+                    - items
+                    properties:
+                      type:
+                        type: string
+                        const: array
+                      items:
+                        type: object
+                        required:
+                        - type
+                        - required
+                        - fields
+                        properties:
+                          type:
+                            type: string
+                            const: object
+                          required:
+                            type: string_list
+                          fields:
+                            type: object
+                            required:
+                            - ref
+                            - statement
+                            - basis_refs
+                            - status
+                            properties:
+                              ref:
+                                type: object
+                                required:
+                                - type
+                              statement:
+                                type: object
+                                required:
+                                - type
+                              basis_refs:
+                                type: object
+                                required:
+                                - type
+                              status:
+                                type: object
+                                required:
+                                - enum
+                  candidate_paths:
+                    type: object
+                    required:
+                    - type
+                    - items
+                    properties:
+                      type:
+                        type: string
+                        const: array
+                      items:
+                        type: object
+                        required:
+                        - type
+                        - required
+                        - fields
+                        properties:
+                          type:
+                            type: string
+                            const: object
+                          required:
+                            type: string_list
+                          fields:
+                            type: object
+                            required:
+                            - ref
+                            - statement
+                            - rationale_refs
+                            - disposition
+                            properties:
+                              ref:
+                                type: object
+                                required:
+                                - type
+                              statement:
+                                type: object
+                                required:
+                                - type
+                              rationale_refs:
+                                type: object
+                                required:
+                                - type
+                              disposition:
+                                type: object
+                                required:
+                                - enum
+                  evaluations:
+                    type: object
+                    required:
+                    - type
+                    - items
+                    properties:
+                      type:
+                        type: string
+                        const: array
+                      items:
+                        type: object
+                        required:
+                        - type
+                        - required
+                        - fields
+                        properties:
+                          type:
+                            type: string
+                            const: object
+                          required:
+                            type: string_list
+                          fields:
+                            type: object
+                            required:
+                            - ref
+                            - subject_ref
+                            - objective_refs
+                            - evidence_refs
+                            - result
+                            - rationale
+                            properties:
+                              ref:
+                                type: object
+                                required:
+                                - type
+                              subject_ref:
+                                type: object
+                                required:
+                                - type
+                              objective_refs:
+                                type: object
+                                required:
+                                - type
+                              evidence_refs:
+                                type: object
+                                required:
+                                - type
+                              result:
+                                type: object
+                                required:
+                                - enum
+                              rationale:
+                                type: object
+                                required:
+                                - type
+                  material_unknowns:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: unknown_list
+          recommendation:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+              fields:
+                type: object
+                required:
+                - outcome
+                - candidate_path_ref
+                - rationale_refs
+                - authority_effect
+                properties:
+                  outcome:
+                    type: object
+                    required:
+                    - enum
+                    properties:
+                      enum:
+                        type: string_list
+                  candidate_path_ref:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref_or_null
+                  rationale_refs:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref_list
+                  authority_effect:
+                    type: object
+                    required:
+                    - const
+                    properties:
+                      const:
+                        type: string
+                        const: none
+          provenance:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: object
+          episode_digest:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_digest
+      workspace_rules:
+        type: object
+        required:
+        - observations_reference_sources_but_do_not_take_truth_ownership
+        - assumptions_are_provisional_reasoning_objects_not_plan_owned_beliefs
+        - candidate_paths_are_not_strategic_commitments
+        - evaluations_do_not_create_objective_or_evidence_authority
+        - recommendation_is_not_a_strategic_decision
+        - propose_revision_outcome_requires_separate_revision_candidate_artifact
+        - changed_bound_input_digest_invalidates_episode_currentness
+        properties:
+          observations_reference_sources_but_do_not_take_truth_ownership:
+            type: boolean
+            const: true
+          assumptions_are_provisional_reasoning_objects_not_plan_owned_beliefs:
+            type: boolean
+            const: true
+          candidate_paths_are_not_strategic_commitments:
+            type: boolean
+            const: true
+          evaluations_do_not_create_objective_or_evidence_authority:
+            type: boolean
+            const: true
+          recommendation_is_not_a_strategic_decision:
+            type: boolean
+            const: true
+          propose_revision_outcome_requires_separate_revision_candidate_artifact:
+            type: boolean
+            const: true
+          changed_bound_input_digest_invalidates_episode_currentness:
+            type: boolean
+            const: true
+      semantic_rules:
+        type: string_list
+  strategic_plan_revision_candidate_schema:
+    type: object
+    required:
+    - artifact_id
+    - canonical
+    - authority
+    - canonical_source
+    - governed_by
+    - purpose
+    - instance_semantics
+    - type
+    - required
+    - properties
+    - candidate_rules
+    - semantic_rules
+    properties:
+      artifact_id:
+        type: string
+        const: l9.schema/strategic-plan-revision-candidate@1
+      canonical:
+        type: boolean
+        const: true
+      authority:
+        type: object
+        required:
+        - owner
+        - scope
+        - authority_class
+        properties:
+          owner:
+            type: string
+            const: Quantum-L9/.github
+          scope:
+            type: string
+            const: l9_global_strategic_plan_revision_candidate_schema
+          authority_class:
+            type: string
+            const: canonical
+      canonical_source:
+        type: object
+        required:
+        - format
+        - artifact
+        properties:
+          format:
+            type: string
+            const: yaml
+          artifact:
+            type: string
+            const: strategic_plan_revision_candidate.schema.yaml
+      governed_by:
+        type: object
+        required:
+        - semantic_model_ref
+        - plan_graph_schema_ref
+        - admission_pattern_ref
+        - authority_ref
+        properties:
+          semantic_model_ref:
+            type: string
+            const: strategic_cognition_model.yaml#reasoning_artifacts.strategic_plan_revision_candidate
+          plan_graph_schema_ref:
+            type: string
+            const: l9.schema/strategic-plan-graph@1
+          admission_pattern_ref:
+            type: string
+            const: l9.pattern/authority-candidate-admission@1
+          authority_ref:
+            type: string
+            const: authority_model.yaml#strategic_authority
+      purpose:
+        type: string
+      instance_semantics:
+        type: object
+        required:
+        - authority_class
+        - authoritative
+        - authority_effect
+        - producer_role
+        properties:
+          authority_class:
+            type: string
+            const: candidate
+          authoritative:
+            type: boolean
+            const: false
+          authority_effect:
+            type: string
+            const: none_until_admitted
+          producer_role:
+            type: string
+            const: plan_keeper
+      type:
+        type: string
+        const: object
+      required:
+        type: string_list
+      properties:
+        type: object
+        required:
+        - schema
+        - candidate_ref
+        - plan_ref
+        - predecessor
+        - proposed_graph
+        - reasoning_episode
+        - affected_closure
+        - strategic_authority_ref
+        - rationale_refs
+        - provenance
+        - candidate_digest
+        properties:
+          schema:
+            type: object
+            required:
+            - const
+            properties:
+              const:
+                type: string
+                const: l9.strategic-plan-revision-candidate/v1
+          candidate_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          plan_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          predecessor:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+              fields:
+                type: object
+                required:
+                - revision_ref
+                - graph_digest
+                properties:
+                  revision_ref:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref
+                  graph_digest:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_digest
+          proposed_graph:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+              fields:
+                type: object
+                required:
+                - ref
+                - schema_ref
+                - digest
+                properties:
+                  ref:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref
+                  schema_ref:
+                    type: object
+                    required:
+                    - const
+                    properties:
+                      const:
+                        type: string
+                        const: l9.schema/strategic-plan-graph@1
+                  digest:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_digest
+          reasoning_episode:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+              fields:
+                type: object
+                required:
+                - ref
+                - digest
+                properties:
+                  ref:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref
+                  digest:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_digest
+          affected_closure:
+            type: object
+            required:
+            - type
+            - required
+            - fields
+            properties:
+              type:
+                type: string
+                const: object
+              required:
+                type: string_list
+              fields:
+                type: object
+                required:
+                - ref
+                - digest
+                properties:
+                  ref:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_ref
+                  digest:
+                    type: object
+                    required:
+                    - type
+                    properties:
+                      type:
+                        type: string
+                        const: semantic_digest
+          strategic_authority_ref:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref
+          rationale_refs:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_ref_list
+          provenance:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: object
+          candidate_digest:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_digest
+      candidate_rules:
+        type: object
+        required:
+        - proposed_graph_must_conform_to_strategic_plan_graph_schema
+        - proposed_graph_plan_ref_must_equal_candidate_plan_ref
+        - proposed_graph_predecessor_must_bind_exact_predecessor
+        - predecessor_must_be_current_at_admission_or_admission_fails_closed
+        - admission_must_bind_candidate_digest_and_proposed_graph_digest
+        - candidate_change_requires_new_authority_decision
+        - proposed_graph_change_requires_new_authority_decision
+        - candidate_may_be_rejected_without_mutating_current_plan
+        properties:
+          proposed_graph_must_conform_to_strategic_plan_graph_schema:
+            type: boolean
+            const: true
+          proposed_graph_plan_ref_must_equal_candidate_plan_ref:
+            type: boolean
+            const: true
+          proposed_graph_predecessor_must_bind_exact_predecessor:
+            type: boolean
+            const: true
+          predecessor_must_be_current_at_admission_or_admission_fails_closed:
+            type: boolean
+            const: true
+          admission_must_bind_candidate_digest_and_proposed_graph_digest:
+            type: boolean
+            const: true
+          candidate_change_requires_new_authority_decision:
+            type: boolean
+            const: true
+          proposed_graph_change_requires_new_authority_decision:
+            type: boolean
+            const: true
+          candidate_may_be_rejected_without_mutating_current_plan:
+            type: boolean
+            const: true
+      semantic_rules:
+        type: string_list
