@@ -7,8 +7,8 @@ admission: not_granted
 source_class: invariants
 source_ref: l9.source/invariants@1
 source_path: semantics/invariants.yaml
-source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
-source_digest: sha256:9558c947e2538d77b634ee4448e5ce8791ff121ce3afbb6ecb0a2debd8c8256b
+source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
+source_digest: sha256:2928b1206020490e80b18de3becfde0a2fbcd934b6e967a2c550be9c67c733aa
 applies_to_selectors:
 - $.invariants[?(@.id=="L9-STRATEGY-001")]
 - $.invariants[?(@.id=="L9-AUTH-001")]

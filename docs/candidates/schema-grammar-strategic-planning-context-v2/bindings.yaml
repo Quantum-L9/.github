@@ -8,12 +8,12 @@ bindings:
 - source_class: invariants
   source_ref: l9.source/invariants@1
   source_path: semantics/invariants.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
-  source_digest: sha256:9558c947e2538d77b634ee4448e5ce8791ff121ce3afbb6ecb0a2debd8c8256b
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
+  source_digest: sha256:2928b1206020490e80b18de3becfde0a2fbcd934b6e967a2c550be9c67c733aa
   grammar_ref: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/invariants@1
   grammar_path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/invariants.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:0653a0b976054e07034397f700595f3b866eff956ffb7a45f6bf8c9f3d525105
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:7095af4546b2628f54a9753e5661d24454e5f3e7a731fff08a7d805445c67939
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.invariants[?(@.id=="L9-STRATEGY-001")]
@@ -30,12 +30,12 @@ bindings:
 - source_class: contracts
   source_ref: l9.source/contracts@1
   source_path: semantics/contracts.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
-  source_digest: sha256:fcd31cb45a68d234449951ec28a26fa03eb5ff15035243f3dcdcd07440b7bc5b
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
+  source_digest: sha256:86f6df1466e7e47f5e7e8a438c62ffdcf2a97835e9e49ecd4a4eb2dec88be0e7
   grammar_ref: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/contracts@1
   grammar_path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/contracts.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:c29f182b1c2e4bba44c20c2cc0cd5615c7f18145478217d2455edf8dea5ca915
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:bed466581a1d49400ff3db253940157bcdf6a9021b55c80b01da4dcb3c6d11fa
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
@@ -45,12 +45,12 @@ bindings:
 - source_class: authority_model
   source_ref: l9.source/authority-model@1
   source_path: semantics/authority_model.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
   grammar_ref: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/authority-model@1
   grammar_path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/authority_model.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:0bf724ce0757515d7134a5d45e7084f7e7461260b73e66ef2d6f8fd6e75d38ac
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:d6a2820d01cd96575b85d4cc49ea3833003bada1798710acdd5d1b4270719538
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.strategic_authority
@@ -59,12 +59,12 @@ bindings:
 - source_class: strategic_cognition_model
   source_ref: l9.source/strategic-cognition-model@1
   source_path: semantics/strategic_cognition_model.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:af540e9607915878b66cb7632fd3ca63f57f80707b1c605fc21536d06ec81a7d
   grammar_ref: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/strategic-cognition-model@1
   grammar_path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/strategic_cognition_model.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:eb426800966e6b43812715e9f4f254884240a6cbe012e3e137d7a4298303ef71
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:a00e8bfdd8931126bb1c3ebdefdf44461a201c9c80af75e93c31a4cbe0f05de8
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.global_rules
@@ -77,12 +77,12 @@ bindings:
 - source_class: strategic_plan_model
   source_ref: l9.source/strategic-plan-model@1
   source_path: semantics/strategic_plan_model.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:4fffeb59d95fa05158c718b3637288c20bad41243b58b9ed3be50121acae840a
   grammar_ref: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/strategic-plan-model@1
   grammar_path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/strategic_plan_model.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:f6a5bee8dcc346e1ad017c9cf9ad1ec82f39888f258756f82a8b6122c7021517
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:a5a3d21d7badbb553bc604a8e5f92867d49a29da33f4422c93928002717e5745
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.global_rules
@@ -94,12 +94,12 @@ bindings:
 - source_class: strategic_plan_graph_schema
   source_ref: l9.source/strategic-plan-graph-schema@1
   source_path: semantics/strategic_plan_graph.schema.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:76bbf51d9233452d3e83e8bf4148a27eb6b8e29ff3126777c6c28d818ce1a885
   grammar_ref: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/strategic-plan-graph-schema@1
   grammar_path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/strategic_plan_graph_schema.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:5792b1ab02c2903f0e54bf00326c4cb4e8fc4a088f0013a8bd83ec481677755c
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:153bf82d8a6e9ccafd4f242c9d4c7065dc22afe3167202917b521ed176f3af99
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.artifact_id
@@ -120,12 +120,12 @@ bindings:
 - source_class: affected_strategic_closure_schema
   source_ref: l9.source/affected-strategic-closure-schema@1
   source_path: semantics/affected_strategic_closure.schema.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4
   grammar_ref: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/affected-strategic-closure-schema@1
   grammar_path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/affected_strategic_closure_schema.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:0231d1475e0e840a47ba6615c3e40c90c9816d978f08959294a75481c4d2a505
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:21191aa9ba705f4468c3e8fd4fc87b3418880cf5d5c69fbf319ebb80522cef75
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.artifact_id
@@ -145,12 +145,12 @@ bindings:
 - source_class: strategic_planning_episode_schema
   source_ref: l9.source/strategic-planning-episode-schema@1
   source_path: semantics/strategic_planning_episode.schema.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:017931d0f8a07e85124a6492e07f65c7781905ed86042c7978c7451a80ab8513
   grammar_ref: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/strategic-planning-episode-schema@1
   grammar_path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/strategic_planning_episode_schema.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:fdd8d63713563bcfb4fad667aac0c20b2a8f83f7a8e22e9ce1e3d49fbb16e980
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:d27c6d5e91324b69726bed581eb419b209b291158519e0eb665a1324621a06d4
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.artifact_id
@@ -170,12 +170,12 @@ bindings:
 - source_class: strategic_plan_revision_candidate_schema
   source_ref: l9.source/strategic-plan-revision-candidate-schema@1
   source_path: semantics/strategic_plan_revision_candidate.schema.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:48fdecd1a015f13cd739e718b3ea48948ce7891c2905311201ea90bd7d56c0fc
   grammar_ref: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/strategic-plan-revision-candidate-schema@1
   grammar_path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/strategic_plan_revision_candidate_schema.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:760f612e2cf94186fc2212a2752814c0d9173f45f0e357206b4490dc3a06a3d6
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:5e791794968358397a2195bbefa1f68062f922a4ea168cb09402e5a246d07913
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.artifact_id

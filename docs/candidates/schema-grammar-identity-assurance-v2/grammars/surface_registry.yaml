@@ -7,7 +7,7 @@ admission: not_granted
 source_class: surface_registry
 source_ref: l9.source/surface-registry@1
 source_path: semantics/surface_registry.yaml
-source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
 source_digest: sha256:d7200409ff02141a274ff8c9221d31429f6a6fae27539e6d9c8d20f1a6eba988
 applies_to_selectors:
 - $.artifact_id

@@ -2,7 +2,7 @@ candidate: source-class-dispatch-v2
 status: candidate
 admission: not_granted
 base_repository: Quantum-L9/.github
-base_sha: c9bbfaf61bd0f7444b1a617876a031c2fba75406
+base_sha: 535400e8c4fb89771c9f08136b4c0309bb5f2a1d
 target: semantics/projection_profiles.yaml#validation_rules
 records:
 - id: PROJECTION-017

@@ -7,7 +7,7 @@ admission: not_granted
 source_class: strategic_plan_revision_candidate_schema
 source_ref: l9.source/strategic-plan-revision-candidate-schema@1
 source_path: semantics/strategic_plan_revision_candidate.schema.yaml
-source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
 source_digest: sha256:48fdecd1a015f13cd739e718b3ea48948ce7891c2905311201ea90bd7d56c0fc
 applies_to_selectors:
 - $.artifact_id

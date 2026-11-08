@@ -8,12 +8,12 @@ bindings:
 - source_class: invariants
   source_ref: l9.source/invariants@1
   source_path: semantics/invariants.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
-  source_digest: sha256:9558c947e2538d77b634ee4448e5ce8791ff121ce3afbb6ecb0a2debd8c8256b
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
+  source_digest: sha256:2928b1206020490e80b18de3becfde0a2fbcd934b6e967a2c550be9c67c733aa
   grammar_ref: l9.candidate.schema-synthesis/strategic-metacognition-v2/grammar/invariants@1
   grammar_path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/invariants.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:3171e72dc95f6a419f9a984555b83f102742eae46f88981aac808c3fd21fa16e
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:f094dda19b0859fdb4cf3502b059dcc2b52981be782c100276391021718c072c
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.invariants[?(@.id=="L9-STRATEGY-001")]
@@ -29,12 +29,12 @@ bindings:
 - source_class: contracts
   source_ref: l9.source/contracts@1
   source_path: semantics/contracts.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
-  source_digest: sha256:fcd31cb45a68d234449951ec28a26fa03eb5ff15035243f3dcdcd07440b7bc5b
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
+  source_digest: sha256:86f6df1466e7e47f5e7e8a438c62ffdcf2a97835e9e49ecd4a4eb2dec88be0e7
   grammar_ref: l9.candidate.schema-synthesis/strategic-metacognition-v2/grammar/contracts@1
   grammar_path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/contracts.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:1f3bf4f09864d557de27e5c4ee432299186fc4f820621cb01e69a9df1f0aadd0
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:73df6f9609e19c0d6d3342e8c293d8a41f8edcdc127bc47ee9e83554f8d883a3
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
@@ -44,12 +44,12 @@ bindings:
 - source_class: authority_model
   source_ref: l9.source/authority-model@1
   source_path: semantics/authority_model.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
   grammar_ref: l9.candidate.schema-synthesis/strategic-metacognition-v2/grammar/authority-model@1
   grammar_path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/authority_model.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:d889efa43c3291d0ea8afce7409562a454624868d9abca7ee7066d47780f4716
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:321245f160aec125f98a9d5a4528cdf6e18caec0978e5c195da208790cf98f11
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.strategic_authority
@@ -58,12 +58,12 @@ bindings:
 - source_class: strategic_cognition_model
   source_ref: l9.source/strategic-cognition-model@1
   source_path: semantics/strategic_cognition_model.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:af540e9607915878b66cb7632fd3ca63f57f80707b1c605fc21536d06ec81a7d
   grammar_ref: l9.candidate.schema-synthesis/strategic-metacognition-v2/grammar/strategic-cognition-model@1
   grammar_path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/strategic_cognition_model.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:35a8a9d8cf86fee73f8fba6cae1af7fc7aaa57b792cc66d059e11dcc809bfdf2
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:752937ba31a76f0ffbb6df9923ef90d8852699c804822556f961789a94e33e76
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.global_rules
@@ -74,12 +74,12 @@ bindings:
 - source_class: strategic_plan_model
   source_ref: l9.source/strategic-plan-model@1
   source_path: semantics/strategic_plan_model.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:4fffeb59d95fa05158c718b3637288c20bad41243b58b9ed3be50121acae840a
   grammar_ref: l9.candidate.schema-synthesis/strategic-metacognition-v2/grammar/strategic-plan-model@1
   grammar_path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/strategic_plan_model.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:4af637461fc7943ea7f956376f35ddbeb9da94888d2705d33eedb7546a6cc3c9
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:00615b802e75eaa62ddb9e353862588d9421bceea8122219ddb29a26979b5fa8
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.global_rules
@@ -88,12 +88,12 @@ bindings:
 - source_class: strategic_plan_metacognitive_analysis_schema
   source_ref: l9.source/strategic-plan-metacognitive-analysis-schema@1
   source_path: semantics/strategic_plan_metacognitive_analysis.schema.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:ae0f69362f82548968dab60b999ddd074c244ad9e6c78520ea9d653cfa1dc349
   grammar_ref: l9.candidate.schema-synthesis/strategic-metacognition-v2/grammar/strategic-plan-metacognitive-analysis-schema@1
   grammar_path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/strategic_plan_metacognitive_analysis_schema.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:b0ab252162059b31d23da3ccd27aa79c8879ce2f2532cf04052cb8610e364de5
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:d0dd287616eabf07ac110cf0270ef8fe92dbd70fce0ef87b1a0c8edd47c9e64a
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.artifact_id

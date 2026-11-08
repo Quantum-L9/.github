@@ -7,7 +7,7 @@ admission: not_granted
 source_class: strategic_plan_model
 source_ref: l9.source/strategic-plan-model@1
 source_path: semantics/strategic_plan_model.yaml
-source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
 source_digest: sha256:4fffeb59d95fa05158c718b3637288c20bad41243b58b9ed3be50121acae840a
 applies_to_selectors:
 - $.global_rules

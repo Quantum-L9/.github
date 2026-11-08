@@ -43,7 +43,7 @@ from typing import Any
 
 import yaml
 
-BASE_SHA = "c9bbfaf61bd0f7444b1a617876a031c2fba75406"
+BASE_SHA = "535400e8c4fb89771c9f08136b4c0309bb5f2a1d"
 REPOSITORY = "Quantum-L9/.github"
 PACK = Path(__file__).resolve().parent
 PACK_REL = "docs/candidates/source-class-dispatch-v2"
@@ -142,11 +142,54 @@ def _pack_dir(name: str) -> str:
     return f"docs/candidates/schema-grammar-{name}-v2"
 
 
+def _compiler_env(compiler: Path) -> dict[str, str]:
+    """Import the compiler from the pinned checkout, never from whatever is installed.
+
+    An interpreter whose environment has the compiler installed (an editable
+    install of another checkout, for example) would otherwise execute that code
+    instead of ``--compiler-root``. PYTHONPATH precedes site-packages.
+    """
+    return {"PYTHONPATH": str(compiler / "src")}
+
+
+_CLI = "import sys; from l9_semantic_compiler.cli import main; sys.exit(main(sys.argv[1:]))"
+_WHERE = "import l9_semantic_compiler as m; print(m.__file__)"
+
+
 def _tool(compiler: Path, python: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return _run(
         [str(python), str(compiler / "tools/build_schema_grammar_candidate.py"), *args],
+        env=_compiler_env(compiler),
         check=False,
     )
+
+
+def _cli(
+    compiler: Path, python: Path, *args: str, check: bool = False
+) -> subprocess.CompletedProcess[str]:
+    return _run(
+        [str(python), "-c", _CLI, *args], env=_compiler_env(compiler), check=check
+    )
+
+
+def _require_pinned_compiler(compiler: Path, python: Path) -> str:
+    """Fail closed unless subprocesses and this process both import the pinned code."""
+    expected = (compiler / "src/l9_semantic_compiler/__init__.py").resolve()
+    executed = Path(
+        _run([str(python), "-c", _WHERE], env=_compiler_env(compiler)).stdout.strip()
+    ).resolve()
+    if executed != expected:
+        raise SystemExit(
+            f"refusing: compiler subprocess imports {executed}, not {expected}"
+        )
+    sys.path.insert(0, str(compiler / "src"))
+    import l9_semantic_compiler
+
+    if Path(l9_semantic_compiler.__file__).resolve() != expected:
+        raise SystemExit(
+            f"refusing: rehearsal imports {l9_semantic_compiler.__file__}, not {expected}"
+        )
+    return "src/l9_semantic_compiler/__init__.py"
 
 
 def _executable_digest(compiler: Path, revision: str) -> str:
@@ -279,7 +322,6 @@ def _synthesize(
     work: Path,
 ) -> tuple[list[str], dict[str, bytes]]:
     """S: pinned request and schema-synthesize per pair; a failure is recorded, never hidden."""
-    cli = python.parent / "l9-semantic-compiler"
     members: dict[str, bytes] = {}
     synthesized: list[str] = []
     for name in PAIRS:
@@ -305,7 +347,7 @@ def _synthesize(
             raise SystemExit(f"request failed for {name}: {proc.stderr[-400:]}")
         text = request.read_text("utf-8").replace(str(dest), "<disposable>")
         members[f"request-{name}.yaml"] = text.encode()
-        result = _run([str(cli), "schema-synthesize", str(request)], check=False)
+        result = _cli(compiler, python, "schema-synthesize", str(request))
         report["pairs"][name].update(_synthesis_entry(result))
         if result.returncode == 0:
             (work / f"pair-{name}.json").write_text(result.stdout, encoding="utf-8")
@@ -318,7 +360,6 @@ def _register(
     dest: Path, compiler: Path, synthesized: list[str], work: Path
 ) -> dict[str, bytes]:
     """R inputs: rendered registrations, registered in the rehearsal clone only."""
-    sys.path.insert(0, str(compiler / "src"))
     from l9_semantic_compiler.passes.payload_validation import (
         registered_schema_documents,
     )
@@ -350,8 +391,10 @@ def _register(
 
 
 def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[str, Any]:
+    executed = _require_pinned_compiler(compiler, python)
     _clone_at_base(dest)
     report = _new_report(compiler, revision)
+    report["compiler"]["executed_module"] = executed
     commits = report["commits"]
     apply_overlays(dest)
     commits["A_overlays_applied"] = _commit(
@@ -377,11 +420,15 @@ def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[st
     commits["R_registrations"] = _commit(
         dest, "rehearsal R: register rendered candidate output schemas", "semantics"
     )
-    cli = python.parent / "l9-semantic-compiler"
     producer_members: dict[str, bytes] = {}
     for name in synthesized:
         report["pairs"][name]["producer"] = _produce(
-            dest, commits["R_registrations"], name, cli, work, producer_members
+            dest,
+            commits["R_registrations"],
+            name,
+            lambda *args: _cli(compiler, python, *args),
+            work,
+            producer_members,
         )
     report["producer_archive"] = "evidence/producer.tar.gz"
     shutil.rmtree(work)
@@ -397,27 +444,27 @@ def _produce(
     root: Path,
     revision: str,
     name: str,
-    cli: Path,
+    cli: Any,
     work: Path,
     members: dict[str, bytes],
 ) -> dict[str, Any]:
     spec = {"repository": REPOSITORY, "root": str(root), "revision": revision}
-    coords = yaml.safe_load(
-        _run(
-            [
-                str(cli),
-                "projection-coordinates",
-                "--authority-root",
-                str(root),
-                "--revision",
-                revision,
-                "--repository",
-                REPOSITORY,
-                "--profile",
-                f"l9.projection/{name}@2",
-            ]
-        ).stdout
+    located = cli(
+        "projection-coordinates",
+        "--authority-root",
+        str(root),
+        "--revision",
+        revision,
+        "--repository",
+        REPOSITORY,
+        "--profile",
+        f"l9.projection/{name}@2",
     )
+    if located.returncode:
+        raise SystemExit(
+            f"projection-coordinates failed for {name}: {located.stderr[-400:]}"
+        )
+    coords = yaml.safe_load(located.stdout)
     out = work / f"producer-{name}"
     request = work / f"project-{name}.json"
     request.write_text(
@@ -431,7 +478,7 @@ def _produce(
             }
         )
     )
-    project = _run([str(cli), "project", str(request)], check=False)
+    project = cli("project", str(request))
     artifacts = sorted((out / "projections").rglob("*.projection.json"))
     profile = _composition_coordinate(root, revision, name)
     request = work / f"compose-{name}.json"
@@ -446,7 +493,7 @@ def _produce(
             }
         )
     )
-    compose = _run([str(cli), "compose", str(request)], check=False)
+    compose = cli("compose", str(request))
     summary: dict[str, Any] = {
         "project_exit": project.returncode,
         "compose_exit": compose.returncode,
