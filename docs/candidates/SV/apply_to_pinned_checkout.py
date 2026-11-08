@@ -20,7 +20,7 @@ from pathlib import Path
 
 import yaml
 
-BASE_SHA = "9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88"
+BASE_SHA = "b085dba0533b22be24eebef80c99d8b520268afa"
 PROVENANCE_RULE = (
     "required_provenance_is_evaluated_only_through_declared_provenance_constraints"
 )

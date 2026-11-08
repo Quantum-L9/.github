@@ -13,12 +13,12 @@
 
 | Coordinate | Value |
 | --- | --- |
-| Admission branch / PR | `Quantum-L9/.github` `agent/claude-code/sv-admission` — Quantum-L9/.github#222 (targets `main`; merge after #218, #219) |
-| Admission base (fetched `origin/main`) | `9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88` |
-| Semantic change commits | `f589e10` (overlay applied by `apply_to_pinned_checkout.py`, RC-033), `7d9ca47` (release record), `eeba4a1` (RC-033 split into helpers for SonarCloud S3776; behavior unchanged). Evidence first produced at `7d9ca47` was regenerated at `eeba4a1` with identical results. |
-| **Qualified candidate revision** | `eeba4a152268d929dcc191da5f4eacdee22d2fcd` |
-| `semantics/` tree at that revision | `de6d21719ecc4ca8ccb8bf2f769ddb344413b904` |
-| Release candidate / ADR (provisional) | `v3.32.0` / `ADR-029`, selected by `tools/prepare_successor_release.py` from merged state (`v3.30.0` / `ADR-027`) skipping queued claims of #218 and #219 |
+| Admission branch / PR | `Quantum-L9/.github` `agent/claude-code/sv-admission` — Quantum-L9/.github#222 (targets `main`; #218 merged, merge after #219 and the v3.29.0/v3.30.0 admissions) |
+| Admission base (fetched `origin/main`) | `b085dba0533b22be24eebef80c99d8b520268afa` |
+| Branch history | `f589e10` semantics and RC-033 on `9488d8f`; `7d9ca47` release record; `eeba4a1` RC-033 split for SonarCloud S3776; `5ec8d2d` merge of `main` after #218 landed (v3.30.0 / ADR-027; only `docs/adr/README.md` conflicted); `7f277aa` + `daca00e` release record regenerated from the refreshed merged state. Evidence first produced at `7d9ca47` and `eeba4a1` was regenerated at `daca00e` with identical results. The pack applier, re-pinned to `b085dba`, reproduces this `semantics/` tree byte for byte. |
+| **Qualified candidate revision** | `daca00e0d03c2205ef1bf51753dff539093d3999` |
+| `semantics/` tree at that revision | `f3c9c624db0905bd627a6a685eb5aa85477b981c` |
+| Release candidate / ADR (provisional) | `v3.32.0` / `ADR-029`, selected by `tools/prepare_successor_release.py` from merged state at `b085dba` (next would be `v3.31.0` / `ADR-028`) skipping the claim of open #219; at `9488d8f` it skipped #218's and #219's |
 | Producer | Quantum-L9/l9-semantic-compiler-engine#33, `agent/claude-code/required-provenance-criteria` at `33e4c5832bf73c7d9b0b70854af011e9582f1ab2` (base `18215ae`, version label 0.9.3) |
 
 ## Owner decisions realized
@@ -29,9 +29,9 @@
   - Compiler: evaluates only catalog-declared criteria. An undefined token stays unresolved, and an unknown language, criterion or parameter fails closed. Each criterion re-derives its fact from the verified components, the profile record and the authority revision.
 - **D3.** On the freshly pinned base, `capabilities.yaml`, `lifecycle.yaml` and `receipt_catalog.yaml` changed only in derivation `sha256` and `item_count` (invariants 31→33, contracts 26→27). Native SC-004, RC-001, RC-002 and RC-011 pass.
 - **D4.** An independent successor release, numbered from merged state by the tool and never typed in. Predecessor releases are byte-identical (checked by the tool and SC-008).
-- **D5.** Merge order: v3.29.0 admission, #218 (v3.30.0), #219 (v3.31.0), then SV, then GT core (#216), then the GT+SV dependent contract.
+- **D5.** Merge order: v3.29.0 admission, #218 (v3.30.0, **merged 2026-11-08** as candidate; admission pending), #219 (v3.31.0, open), then SV, then GT core (#216), then the GT+SV dependent contract.
 
-## Qualification at `eeba4a1` with compiler `33e4c58` (`qualification-eeba4a1/`)
+## Qualification at `daca00e` with compiler `33e4c58` (`qualification-daca00e/`)
 
 | Check | Result |
 | --- | --- |
@@ -53,12 +53,12 @@ Residual (not provenance): `l9.compose/stage-context@1` over the GAR projection 
 | # | Item | State |
 | --- | --- | --- |
 | 1 | Composition provenance native criterion resolved | **DONE** (R2: catalog declaration + compiler criteria + RC-033) |
-| 2 | Real composition receipt reports PASS | **DONE** at `eeba4a1` |
+| 2 | Real composition receipt reports PASS | **DONE** at `daca00e` |
 | 3 | SV-001 final wording approved and frozen | **DONE** (D1 Option B) |
 | 4 | Eight dispositions authorized at exact digest | **APPROVED** (owner-decision.yaml; ADR-029 binds the final tree) |
 | 5 | PR #215 merged into its staging branch | PENDING review (#220 stacks on it) |
-| 6 | Overlay applied to freshly resolved main | **DONE** (`9488d8f`; rehearsal and admission branch byte-identical) |
-| 7 | Registry overlaps reconciled | **DONE** for merged state; #218/#219 reconcile at refresh (D5) |
+| 6 | Overlay applied to freshly resolved main | **DONE** (`9488d8f`, then refreshed by merge to `b085dba`; applier re-pinned output and admission branch byte-identical) |
+| 7 | Registry overlaps reconciled | **DONE** through #218 (merge refresh at `5ec8d2d`); #219 reconciles at its refresh (D5) |
 | 8 | Successor release manifest and hash inventory | **DONE**, provisional identity v3.32.0 / ADR-029 |
 | 9 | Native validation, five projections and composition PASS | **DONE** |
 | 10 | Determinism and negative controls at final revision | **DONE** |
@@ -68,7 +68,7 @@ Residual (not provenance): `l9.compose/stage-context@1` over the GAR projection 
 ## Shortest remaining path to merge
 
 1. Merge the compiler PR (`required-provenance-criteria`) and, ideally, cut a compiler version. The final receipts pin the revision `33e4c58`.
-2. Admit or withdraw v3.29.0, then land #218 and #219 in order.
+2. Admit or withdraw v3.29.0 and v3.30.0 (#218 is merged as a candidate), then land #219.
 3. Refresh the admission branch from `main` and re-run `apply_to_pinned_checkout.py` (re-pin through its guard). Then run `tools/prepare_successor_release.py` with no remaining `--queued` claims. It re-selects the release and ADR identity from the new merged state.
 4. Re-run `tools/run_producer_qualification.py` twice, the verifier and the negative controls at the refreshed revision. Every coordinate changes, so this evidence must be regenerated.
 5. Owner admits: ADR status `Accepted`, the release status line flips to ADMITTED, and the hashes are regenerated (the ADR-025 precedent). Then merge to `main`.

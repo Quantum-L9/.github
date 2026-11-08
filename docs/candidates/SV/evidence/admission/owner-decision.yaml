@@ -20,11 +20,11 @@ subject:
   repository: Quantum-L9/.github
   candidate_pr: 215
   candidate_pack_pr: 220
-  candidate_revision: eeba4a152268d929dcc191da5f4eacdee22d2fcd
-  candidate_semantics_tree: de6d21719ecc4ca8ccb8bf2f769ddb344413b904
+  candidate_revision: daca00e0d03c2205ef1bf51753dff539093d3999
+  candidate_semantics_tree: f3c9c624db0905bd627a6a685eb5aa85477b981c
   candidate_revision_note: >-
     One decision binds all eight dispositions. Qualified subject: admission branch agent/claude-code/sv-admission at
-    the revision and semantics tree above (base 9488d8f), producer l9-semantic-compiler-engine@33e4c58. Refreshing the
+    the revision and semantics tree above (refreshed onto main b085dba), producer l9-semantic-compiler-engine@33e4c58. Refreshing the
     branch after the D5 queue lands changes the subject; the ADR then binds the refreshed tree.
 target:
   authority_class: canonical

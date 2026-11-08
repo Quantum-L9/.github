@@ -5,6 +5,11 @@
 		"tried": [
 			{
 				"adr": null,
+				"release": "v3.30.0",
+				"release_status": "CANDIDATE"
+			},
+			{
+				"adr": null,
 				"release": "v3.29.0",
 				"release_status": "CANDIDATE"
 			},
@@ -132,9 +137,9 @@
 			}
 		]
 	},
-	"head": "eeba4a152268d929dcc191da5f4eacdee22d2fcd",
+	"head": "daca00e0d03c2205ef1bf51753dff539093d3999",
 	"main_ref": "origin/main",
-	"main_revision": "f8e7bde12192c5191f8b84ecfd2a73c1c86e6bce",
+	"main_revision": "b085dba0533b22be24eebef80c99d8b520268afa",
 	"registration": {
 		"gaps": [],
 		"status": "pass"

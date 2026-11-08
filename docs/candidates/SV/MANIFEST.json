@@ -3,7 +3,7 @@
 	"status": "TWO_INVARIANT_CANDIDATE_OWNER_APPROVED_QUALIFIED_NOT_ADMITTED",
 	"pack_id": "SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1",
 	"base_repo": "Quantum-L9/.github",
-	"base_sha": "9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88",
+	"base_sha": "b085dba0533b22be24eebef80c99d8b520268afa",
 	"source_pr": 212,
 	"source_candidate_sha": "85531616cee2da94bbb7154418a78537549a4d76",
 	"donor": "Quantum-L9/l9-wip#6",
@@ -32,7 +32,7 @@
 	"independent_review": "SEPARATE_AGENT_REVIEW_NOT_HUMAN_OR_OWNER",
 	"native_schema_qualification": "PASS_26_CHECKS_COMPILER_3bf1a82",
 	"five_source_compilation": "PASS_AGAINST_LOCAL_REHEARSAL_REVISION_0b50cf7_TREE_bb07371",
-	"composition": "PASS_AT_eeba4a1_WITH_COMPILER_33e4c58_R2",
+	"composition": "PASS_AT_daca00e_WITH_COMPILER_33e4c58_R2",
 	"native_semantic_validation": "ORDINARY_CHECKS_PASS_SC008_SC010_FAIL_SUCCESSOR_RELEASE_INVENTORY_REQUIRED",
 	"canonical_admission": "NOT_PERFORMED",
 	"remote_mutation": "candidate-pack PR only; no canonical semantics, release, merge or admission",
@@ -64,8 +64,8 @@
 		},
 		{
 			"path": "README.md",
-			"bytes": 12293,
-			"sha256": "9b2f719efa21ae4fe38bfb861d77d732dd1d5b2ed02953613ee8ac4d01684fcb"
+			"bytes": 12360,
+			"sha256": "d317d8e66b17df7673ff8761edadfa0c9c916147d0979531846d003af864a0b2"
 		},
 		{
 			"path": "SCHEMA_QUALIFICATION_REVIEW.md",
@@ -75,7 +75,7 @@
 		{
 			"path": "apply_to_pinned_checkout.py",
 			"bytes": 29587,
-			"sha256": "9d3fec93a69d50f5d202f67c72602e62c3a9e3531e35b4c8eddaa1044a4ea266"
+			"sha256": "81e7ac6723dca84dce00ffb91b2ad6cf19694002c60aa59707aeb9d36e868787"
 		},
 		{
 			"path": "evidence/SV015_falsification.json",
@@ -114,8 +114,8 @@
 		},
 		{
 			"path": "evidence/admission/ADMISSION_CLOSEOUT.md",
-			"bytes": 7848,
-			"sha256": "86eae2fc3a2f1a0baa02387f24cd336195acb711b4ccdfb963780c84186905f1"
+			"bytes": 8336,
+			"sha256": "f9d18690d3875feb0420d4f0073b6bdcfdf25d4fd33486235a3859a5b83f7fd5"
 		},
 		{
 			"path": "evidence/admission/composition-provenance-equivalence.json",
@@ -124,48 +124,48 @@
 		},
 		{
 			"path": "evidence/admission/owner-decision.yaml",
-			"bytes": 6457,
-			"sha256": "67140fbd82e0341e916fb817bfc94bf4947c6fe44ce6c26dd6ccb455eec1e33d"
+			"bytes": 6472,
+			"sha256": "6d285c6ce344b70aa8e1a5d99736c953043ea55125fb2853cd30157f34276bd5"
 		},
 		{
-			"path": "evidence/admission/qualification-eeba4a1/admission-closure-gate.json",
-			"bytes": 3977,
-			"sha256": "d16e9c382aceb7ab9bc26c198f1517c65a51ab86f5ec7caacdf3cb7e129919e5"
+			"path": "evidence/admission/qualification-daca00e/admission-closure-gate.json",
+			"bytes": 4065,
+			"sha256": "d098d9df9076615447cd3abccdb3ddd37f8c8e4c0aca61d2f0f15c5244809c7c"
 		},
 		{
-			"path": "evidence/admission/qualification-eeba4a1/determinism.json",
+			"path": "evidence/admission/qualification-daca00e/determinism.json",
 			"bytes": 7913,
-			"sha256": "a33edbcc9f82be9ed02e5fb422b91dcc41a245621aefe1b24bb1ed1e6c8fbf99"
+			"sha256": "13dc39d89804dbd100ad61d50199311bd0b65276ebeb7467384cdb9cda4c086f"
 		},
 		{
-			"path": "evidence/admission/qualification-eeba4a1/native-schema-qualification.json",
+			"path": "evidence/admission/qualification-daca00e/native-schema-qualification.json",
 			"bytes": 5729,
 			"sha256": "20f7a60cb95009906bdad53e0a9f74d619bb6c92ca547a913930d96501a22c7a"
 		},
 		{
-			"path": "evidence/admission/qualification-eeba4a1/producer-negative-controls.json",
+			"path": "evidence/admission/qualification-daca00e/producer-negative-controls.json",
 			"bytes": 12703,
-			"sha256": "5b1c6d438683af5b9d94872226bc0441d18952cf600a7b7ee5a77dfa8c6f01f5"
+			"sha256": "81c838e186e5e1d267a757b78f0555567b0fd823a7f1054da0d10be55548cdd1"
 		},
 		{
-			"path": "evidence/admission/qualification-eeba4a1/producer-run1.tar",
+			"path": "evidence/admission/qualification-daca00e/producer-run1.tar",
 			"bytes": 522240,
-			"sha256": "d9ef524df2a9b1ae984e47232aebf43298cbd7340fa4c82c05491b078c86eadc"
+			"sha256": "7cd74ed7bcfcadeb97a30064b5e4f4cf800c353a5a10e63cb4e17d7366944db0"
 		},
 		{
-			"path": "evidence/admission/qualification-eeba4a1/producer-run2.tar",
+			"path": "evidence/admission/qualification-daca00e/producer-run2.tar",
 			"bytes": 522240,
-			"sha256": "c4ee1dd76be70ec33222a585687d5ed77fe88c0496b6212f87cb5d2b8b8d6208"
+			"sha256": "fae7f68738e01342da1ea922e092684e5a68e3d850224fedda4101194d994400"
 		},
 		{
-			"path": "evidence/admission/qualification-eeba4a1/producer-summary.json",
+			"path": "evidence/admission/qualification-daca00e/producer-summary.json",
 			"bytes": 2325,
-			"sha256": "ed62bb280033061de09b64a9383e15834d34c3b24a67e3ec2a9984330329b23c"
+			"sha256": "0970361dfe77f78ab89002ed12c9dc6df81f35e6969d354052081951611b03e0"
 		},
 		{
-			"path": "evidence/admission/qualification-eeba4a1/provenance-verifier.json",
+			"path": "evidence/admission/qualification-daca00e/provenance-verifier.json",
 			"bytes": 2542,
-			"sha256": "415fa104ece61d1cb4a1242a1e22e0d64ecba3461f079048e2f76e775e97279d"
+			"sha256": "57d434d376abe0b309aff30f877bbe9d27944768c0518a8a7f3707fa602be5c2"
 		},
 		{
 			"path": "evidence/native_schema_gate.json",
@@ -189,8 +189,8 @@
 		},
 		{
 			"path": "evidence/reduction-v1/admission-readiness.json",
-			"bytes": 4491,
-			"sha256": "b63bd7666989f82a9ca75102c2f6a3de7e9dfc266a142aa56789e2f249425f9a"
+			"bytes": 4520,
+			"sha256": "1165d7f51c5bd9987760100cccc874da416416b910c77175a1db9838d5c59505"
 		},
 		{
 			"path": "evidence/reduction-v1/authority-resolution.json",
@@ -470,7 +470,7 @@
 		{
 			"path": "tests/test_alignment.py",
 			"bytes": 4671,
-			"sha256": "2a7da84d41151d263da9cc4536ac2e795d36af13b31da209c414112a32404955"
+			"sha256": "7182e3223c97d59a44cc27a1a935c9670041ae552dd66969a6c1e8f707e91bcf"
 		},
 		{
 			"path": "tests/test_candidate.py",
@@ -560,7 +560,7 @@
 		"record": "evidence/admission/ADMISSION_CLOSEOUT.md",
 		"owner_decision_scaffold": "evidence/admission/owner-decision.yaml",
 		"owner_decision_status": "PENDING_UNTIL_AUTHORIZED",
-		"main_at_resolution": "9488d8f"
+		"main_at_resolution": "b085dba"
 	},
 	"previous_base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
 	"owner_decision": {
@@ -570,12 +570,12 @@
 	},
 	"canonical_admission_candidate": {
 		"branch": "agent/claude-code/sv-admission",
-		"base": "9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88",
-		"revision": "eeba4a152268d929dcc191da5f4eacdee22d2fcd",
-		"semantics_tree": "de6d21719ecc4ca8ccb8bf2f769ddb344413b904",
+		"base": "b085dba0533b22be24eebef80c99d8b520268afa",
+		"revision": "daca00e0d03c2205ef1bf51753dff539093d3999",
+		"semantics_tree": "f3c9c624db0905bd627a6a685eb5aa85477b981c",
 		"release_provisional": "v3.32.0",
 		"adr_provisional": "ADR-029",
 		"producer_revision": "33e4c5832bf73c7d9b0b70854af011e9582f1ab2",
-		"evidence": "evidence/admission/qualification-eeba4a1/"
+		"evidence": "evidence/admission/qualification-daca00e/"
 	}
 }

@@ -1,6 +1,6 @@
 # Strategic Value @1: two-invariant `.github` admission candidate
 
-**Status:** LOCAL CANDIDATE, not canonically admitted (`LOCAL_CANDIDATE_NOT_CANONICALLY_ADMITTED`). **Target:** `Quantum-L9/.github@9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88` (re-pinned from `020a94b` on 2026-11-08), exact pinned revision. **Source candidate:** PR #212 at `85531616cee2da94bbb7154418a78537549a4d76`. **Reduction:** `SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1`. **Donor:** `Quantum-L9/l9-wip#6@fb0ae95620cea0dc3f48aa009056ddb755d69640`.
+**Status:** LOCAL CANDIDATE, not canonically admitted (`LOCAL_CANDIDATE_NOT_CANONICALLY_ADMITTED`). **Target:** `Quantum-L9/.github@b085dba0533b22be24eebef80c99d8b520268afa` (re-pinned from `020a94b` on 2026-11-08), exact pinned revision. **Source candidate:** PR #212 at `85531616cee2da94bbb7154418a78537549a4d76`. **Reduction:** `SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1`. **Donor:** `Quantum-L9/l9-wip#6@fb0ae95620cea0dc3f48aa009056ddb755d69640`.
 
 ## Decision realized in this package
 
@@ -24,7 +24,7 @@ The mathematical accounting identity is unchanged:
 | Kind | IDs |
 | --- | --- |
 | New (proposed) | `L9-SV-001`, `L9-SV-002` |
-| Existing (resolved at `9488d8f`; `invariants.yaml` unchanged since `020a94b`) | `L9-AUTH-001`, `L9-AUTH-002`, `L9-HARD-001`, `L9-UNKNOWN-001`, `L9-STRATEGY-001`, `L9-PROJECTION-001`, `L9-PROV-001`, `L9-EVIDENCE-001`, `L9-ASSURANCE-001`, `L9-COORD-001` |
+| Existing (resolved at `b085dba`; `invariants.yaml` unchanged since `020a94b`) | `L9-AUTH-001`, `L9-AUTH-002`, `L9-HARD-001`, `L9-UNKNOWN-001`, `L9-STRATEGY-001`, `L9-PROJECTION-001`, `L9-PROV-001`, `L9-EVIDENCE-001`, `L9-ASSURANCE-001`, `L9-COORD-001` |
 
 The model's `governed_by.invariants`, the contract's `source_invariants`, the profile's invariant selectors and both payload-schema enums are exactly this set of twelve, each once. The real compiler's invariants projection selected the same twelve.
 
@@ -78,7 +78,7 @@ The local tests prove asserted candidate semantics, exact ID closure and finite 
 ## Apply only in a clean, pinned, disposable checkout
 
 ```bash
-git clone /path/to/Quantum-L9/.github /tmp/sv-rehearsal && git -C /tmp/sv-rehearsal checkout 9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88
+git clone /path/to/Quantum-L9/.github /tmp/sv-rehearsal && git -C /tmp/sv-rehearsal checkout b085dba0533b22be24eebef80c99d8b520268afa
 python apply_to_pinned_checkout.py --checkout /tmp/sv-rehearsal                       # dry run
 python apply_to_pinned_checkout.py --checkout /tmp/sv-rehearsal --apply --disposable
 ```
@@ -100,11 +100,11 @@ Evidence lives in `evidence/reduction-v1/`; `admission-readiness.json` lists eve
 
 ## Admission candidate (2026-11-08)
 
-The owner approved D1-D5. The candidate is applied on `Quantum-L9/.github` branch `agent/claude-code/sv-admission` at `eeba4a152268d929dcc191da5f4eacdee22d2fcd` (base `9488d8f`). It carries a provisional successor release, v3.32.0 / ADR-029, which `tools/prepare_successor_release.py` selected from merged state. It is qualified with `l9-semantic-compiler-engine@33e4c58`. Results: five projections PASS; composition PASS with all four `required_provenance` criteria verified; determinism and 18/18 producer controls pass; native validation exits 0. See `evidence/admission/ADMISSION_CLOSEOUT.md`. Not admitted: admission waits on the release queue (D5).
+The owner approved D1-D5. The candidate is applied on `Quantum-L9/.github` branch `agent/claude-code/sv-admission` at `daca00e0d03c2205ef1bf51753dff539093d3999` (merge-refreshed onto `main` `b085dba` after #218). It carries a provisional successor release, v3.32.0 / ADR-029, which `tools/prepare_successor_release.py` selected from merged state. It is qualified with `l9-semantic-compiler-engine@33e4c58`. Results: five projections PASS; composition PASS with all four `required_provenance` criteria verified; determinism and 18/18 producer controls pass; native validation exits 0. See `evidence/admission/ADMISSION_CLOSEOUT.md`. Not admitted: admission waits on the release queue (D5).
 
 ## Gates still requiring the authorized canonical owner
 
-The admission closeout (`evidence/admission/ADMISSION_CLOSEOUT.md`) re-resolves the target against current `main` (`9488d8f`: v3.28.0 admitted, v3.29.0 an open candidate) and tracks the 12-item checklist. The decisions below are scaffolded as D1–D5 in `evidence/admission/owner-decision.yaml`. That record is PENDING, and every authority reference in it is null.
+The admission closeout (`evidence/admission/ADMISSION_CLOSEOUT.md`) re-resolves the target against current `main` (`b085dba`: v3.28.0 admitted; v3.29.0 and v3.30.0 merged candidates; #219 claims v3.31.0) and tracks the 12-item checklist. The decisions below are scaffolded as D1–D5 in `evidence/admission/owner-decision.yaml`. That record is PENDING, and every authority reference in it is null.
 
 1. Record real owner decisions for all eight dispositions, including the amended `L9-SV-001` wording.
 2. Decide whether `required_provenance` stays on `l9.compose/strategic-planner-value@1` (composition remains `unknown` under compiler 0.9.3) or is dropped in line with the `pr-audit` and `architecture-intelligence` composition profiles. This pack does not drop a declared constraint to obtain a PASS.
