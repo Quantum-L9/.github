@@ -1,0 +1,41 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/capability-resolution@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: capability_resolution
+source_ref: l9.source/capability-resolution@1
+source_path: semantics/capability_resolution.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:7063ca77d6fa9253cd1a71839f50960d2109d6afb32dda1c609b057008e36954
+applies_to_selectors:
+- $.governed_by
+- $.inputs
+- $.resolution_order
+- $.outputs
+- $.rules
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        contracts:
+          type: string_list
+    inputs:
+      type: string_list
+    resolution_order:
+      type: string_list
+    outputs:
+      type: object
+      additional_properties: true
+      fields:
+        capability_closure_ir:
+          type: string
+        unresolved_capability_refs:
+          type: string
+    rules:
+      type: string_list

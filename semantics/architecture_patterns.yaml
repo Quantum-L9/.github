@@ -229,9 +229,10 @@ patterns:
       to: candidate_implementation
     - from: conformance_runner
       relation: compares
-      to:
-      - reference_model
-      - candidate_implementation
+      to: reference_model
+    - from: conformance_runner
+      relation: compares
+      to: candidate_implementation
   preconditions:
   - independent_semantic_contract_exists
   - comparable_observable_behavior_exists
@@ -365,11 +366,12 @@ patterns:
 
     '
   lifecycle:
-  - candidate
-  - admission_evaluated
-  - awaiting_authority
-  - admitted
-  - published
+    stages:
+    - candidate
+    - admission_evaluated
+    - awaiting_authority
+    - admitted
+    - published
   admission_rule:
     expression: 'Admit(candidate) iff AuthorityValid ∧ CandidateDigestMatches ∧ AdmissionChecksPass
 
