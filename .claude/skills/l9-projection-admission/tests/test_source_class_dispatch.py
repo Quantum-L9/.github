@@ -9,8 +9,8 @@ move one fact at a time; the legacy fixture stays covered by the other modules.
 import json
 import sys
 import unittest
+import unittest.mock
 from pathlib import Path
-from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -231,7 +231,7 @@ class DownstreamDispatch(unittest.TestCase):
             calls.extend(batch)
             return [[] for _ in batch]
 
-        with mock.patch.object(vae, "native_strict_violations", fake):
+        with unittest.mock.patch.object(vae, "native_strict_violations", fake):
             gaps = vae._schema_gaps("ref", payload, schema, Path("/c"), source=source)
         return gaps, calls
 
@@ -261,7 +261,7 @@ class DownstreamDispatch(unittest.TestCase):
         def fake(compiler_src, batch):
             return [["STRUCTURAL_VALIDATION_FAILED: mismatch"] for _ in batch]
 
-        with mock.patch.object(vae, "native_strict_violations", fake):
+        with unittest.mock.patch.object(vae, "native_strict_violations", fake):
             gaps = vae._schema_gaps(
                 "ref",
                 {"value": "x"},
