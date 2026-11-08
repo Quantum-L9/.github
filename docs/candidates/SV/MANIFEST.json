@@ -3,7 +3,7 @@
 	"status": "TWO_INVARIANT_REDUCTION_LOCAL_PASS_COMPOSITION_UNKNOWN_NOT_ADMITTED",
 	"pack_id": "SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1",
 	"base_repo": "Quantum-L9/.github",
-	"base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"base_sha": "9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88",
 	"source_pr": 212,
 	"source_candidate_sha": "85531616cee2da94bbb7154418a78537549a4d76",
 	"donor": "Quantum-L9/l9-wip#6",
@@ -64,8 +64,8 @@
 		},
 		{
 			"path": "README.md",
-			"bytes": 11514,
-			"sha256": "a36f9ce9cc0638144875ac0555fbe1d75871817fdde3e994f2c45a980b59c534"
+			"bytes": 11600,
+			"sha256": "e97951eb44312c096c06bc79555039828b6946382426f6bc4d168ad3a2eec72d"
 		},
 		{
 			"path": "SCHEMA_QUALIFICATION_REVIEW.md",
@@ -74,8 +74,8 @@
 		},
 		{
 			"path": "apply_to_pinned_checkout.py",
-			"bytes": 27695,
-			"sha256": "7208096e14f670746caa8945a93534367458efab10c0ca668e4f923fcd5ded04"
+			"bytes": 29415,
+			"sha256": "ac3427379662a5cf302ac28aede18cd749d16bfcb68e1018da83884b868eccdc"
 		},
 		{
 			"path": "evidence/SV015_falsification.json",
@@ -283,6 +283,11 @@
 			"sha256": "789826d08b1489d2b999f6974e6b28591c177f0897c52b93678edcf3b10df106"
 		},
 		{
+			"path": "overlays/composition_provenance_constraints.yaml",
+			"bytes": 405,
+			"sha256": "f06dd0d1a38802a64ee1746418af3e4fb1af782cad35bea99d7ba0445bebb5aa"
+		},
+		{
 			"path": "overlays/contracts_additions.yaml",
 			"bytes": 6181,
 			"sha256": "dcae0ce039f4277a44442436da0907a41ec8bace98f9aaa4fa594c57dcc41e8f"
@@ -425,12 +430,12 @@
 		{
 			"path": "tests/test_alignment.py",
 			"bytes": 4671,
-			"sha256": "514fbb52efcac3289d31eb357c545770d58c3df406301356c8a134b69c013003"
+			"sha256": "2a7da84d41151d263da9cc4536ac2e795d36af13b31da209c414112a32404955"
 		},
 		{
 			"path": "tests/test_candidate.py",
-			"bytes": 13353,
-			"sha256": "81c880c1f19583a3a86ed5754d87cac027ac764850c5684ab91263cdb70f2e92"
+			"bytes": 14521,
+			"sha256": "e70aac3f1ceae264f28678fd29fc29b0f5c524690280ea47bf896cf450d8e772"
 		},
 		{
 			"path": "tests/test_composition_provenance_equivalence.py",
@@ -501,5 +506,6 @@
 		"owner_decision_scaffold": "evidence/admission/owner-decision.yaml",
 		"owner_decision_status": "PENDING_UNTIL_AUTHORIZED",
 		"main_at_resolution": "9488d8f"
-	}
+	},
+	"previous_base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397"
 }

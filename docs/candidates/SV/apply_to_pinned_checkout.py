@@ -20,7 +20,10 @@ from pathlib import Path
 
 import yaml
 
-BASE_SHA = "020a94bea86e7c5c5e4107da7014ec259508f397"
+BASE_SHA = "9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88"
+PROVENANCE_RULE = (
+    "required_provenance_is_evaluated_only_through_declared_provenance_constraints"
+)
 ROOT = Path(__file__).resolve().parent
 
 MODEL_ARTIFACT_ID = "l9.strategic.value@1"
@@ -408,6 +411,18 @@ def verify_assembled(changed):
         )
     if selected[0]["output"]["schema"] != COMPOSITION_OUTPUT:
         raise ValueError("composition output schema mismatch")
+    declared = yaml.safe_load(raw("overlays/composition_provenance_constraints.yaml"))
+    if composer.get("provenance_constraints") != declared["provenance_constraints"]:
+        raise ValueError("assembled provenance_constraints differ from the overlay")
+    if composer["global_rules"].get(PROVENANCE_RULE) is not True:
+        raise ValueError("provenance evaluation rule missing from global_rules")
+    definitions = declared["provenance_constraints"]["definitions"]
+    for profile_record in composer["profiles"]:
+        for token in profile_record.get("required_provenance") or []:
+            if token not in definitions:
+                raise ValueError(
+                    f"{profile_record['id']}: required_provenance {token} has no declared criterion"
+                )
 
     sources = yaml.safe_load(changed["semantics/canonical_sources.yaml"])["sources"]
     if [s["id"] for s in sources].count(SOURCE_ID) != 1:
@@ -616,6 +631,30 @@ def generate(checkout):
         + "\n"
         + "\n".join("  " + line if line else line for line in comp_block.splitlines())
         + "\n"
+    )
+    # D2/R2: the four required_provenance tokens become mechanically evaluable only
+    # through a criterion the canonical catalog declares (as forbidden_constraints does
+    # for projections). The compiler adds no authority of its own.
+    if "provenance_constraints" in comp:
+        raise ValueError(
+            "provenance_constraints already declared; re-resolve current authority"
+        )
+    new_comp = one(
+        new_comp,
+        "\nprofiles:\n",
+        "\n"
+        + raw("overlays/composition_provenance_constraints.yaml").rstrip()
+        + "\nprofiles:\n",
+        p,
+    )
+    new_comp = one(
+        new_comp,
+        "  composition_does_not_create_authority: true\n",
+        "  composition_does_not_create_authority: true\n"
+        + "  "
+        + PROVENANCE_RULE
+        + ": true\n",
+        p,
     )
     changed[p] = new_comp
 

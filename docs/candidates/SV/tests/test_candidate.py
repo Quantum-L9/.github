@@ -60,7 +60,7 @@ class CandidateTests(unittest.TestCase):
             "canonical_sources.yaml": "sources:\n- id: l9.source/authority-model@1\n  path: semantics/authority_model.yaml\nrules:\n  canonical_sources_must_be_registered: true\n",
             "projection_profiles.yaml": "source_classes:\n  vocabulary:\n    canonical_artifact: vocabulary.yaml\n  invariants:\n    canonical_artifact: invariants.yaml\n  contracts:\n    canonical_artifact: contracts.yaml\n  authority_model:\n    canonical_artifact: authority_model.yaml\nprojection_profiles:\n- id: l9.projection/example@1\n  class: consumer\n  consumer: example\nprojection_engine_contract_ref:\n  artifact: projection_engine_contract.yaml\n",
             "generic_compiler_manifest.yaml": "requires:\n  semantic_catalogs:\n  - strategic_plan_model.yaml\n  - vocabulary.yaml\n  artifact_schemas:\n  - pr_audit_composition.schema.yaml\n",
-            "composition_profiles.yaml": "schema: l9.composition-profiles/v1\nprofiles:\n  - id: l9.compose/example@1\n    purpose: fixture\n",
+            "composition_profiles.yaml": "schema: l9.composition-profiles/v1\nglobal_rules:\n  composed_artifacts_are_derived: true\n  source_projection_provenance_required: true\n  conflicts_fail_closed: true\n  silent_precedence_is_forbidden: true\n  composition_does_not_create_authority: true\nprofiles:\n  - id: l9.compose/example@1\n    purpose: fixture\n",
         }
         originals["capabilities.yaml"] = (
             "schema: l9.capabilities/v1\nderivation:\n  source_artifacts:\n"
@@ -120,7 +120,7 @@ class CandidateTests(unittest.TestCase):
                 mod.generate.rebound,
                 {"semantics/capabilities.yaml": ["invariants.yaml", "contracts.yaml"]},
             )
-            for path, content in changes.items():
+            for content in changes.values():
                 self.assertIsInstance(yaml.safe_load(content), dict)
             self.assertIn(
                 "l9.strategic.value@1", changes["semantics/strategic_value_model.yaml"]
@@ -136,6 +136,27 @@ class CandidateTests(unittest.TestCase):
             self.assertIn(
                 "l9.compose/strategic-planner-value@1",
                 changes["semantics/composition_profiles.yaml"],
+            )
+            composer = yaml.safe_load(changes["semantics/composition_profiles.yaml"])
+            definitions = composer["provenance_constraints"]["definitions"]
+            self.assertEqual(
+                composer["provenance_constraints"]["criterion_language"],
+                {"name": "l9.provenance-constraint", "version": 1},
+            )
+            sv = next(
+                x
+                for x in composer["profiles"]
+                if x["id"] == "l9.compose/strategic-planner-value@1"
+            )
+            self.assertTrue(set(sv["required_provenance"]) <= set(definitions))
+            self.assertIs(
+                composer["global_rules"][
+                    "required_provenance_is_evaluated_only_through_declared_provenance_constraints"
+                ],
+                True,
+            )
+            self.assertIs(
+                composer["global_rules"]["source_projection_provenance_required"], True
             )
             self.assertIn(
                 "strategic_planner_value_projection.schema.yaml",
@@ -164,20 +185,20 @@ class CandidateTests(unittest.TestCase):
             )
             self.assertIn("nonanticipativity", model["evaluation_integrity"])
             profile = yaml.safe_load(changes["semantics/projection_profiles.yaml"])
-            current = [
+            current = next(
                 x
                 for x in profile["projection_profiles"]
                 if x["id"] == "l9.projection/strategic-planner-value@1"
-            ][0]
+            )
             selectors = current["sources"]["strategic_value_model"]["selectors"]
             self.assertIn("$.counterfactual_mathematics", selectors)
             self.assertIn("$.strategic_interaction_lookahead", selectors)
             contract = yaml.safe_load(changes["semantics/contracts.yaml"])
-            value_contract = [
+            value_contract = next(
                 x
                 for x in contract["contracts"]
                 if x["id"] == "l9.contract/strategic-value-assessment@1"
-            ][0]
+            )
             self.assertIn(
                 "complete_probability_mass_when_probabilistic_method_applies_or_explicit_unresolved_missing_mass",
                 value_contract["requires"],

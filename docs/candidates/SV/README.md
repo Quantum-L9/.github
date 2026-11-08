@@ -1,6 +1,6 @@
 # Strategic Value @1: two-invariant `.github` admission candidate
 
-**Status:** LOCAL CANDIDATE, not canonically admitted (`LOCAL_CANDIDATE_NOT_CANONICALLY_ADMITTED`). **Target:** `Quantum-L9/.github@020a94bea86e7c5c5e4107da7014ec259508f397`, exact pinned revision. **Source candidate:** PR #212 at `85531616cee2da94bbb7154418a78537549a4d76`. **Reduction:** `SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1`. **Donor:** `Quantum-L9/l9-wip#6@fb0ae95620cea0dc3f48aa009056ddb755d69640`.
+**Status:** LOCAL CANDIDATE, not canonically admitted (`LOCAL_CANDIDATE_NOT_CANONICALLY_ADMITTED`). **Target:** `Quantum-L9/.github@9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88` (re-pinned from `020a94b` on 2026-11-08), exact pinned revision. **Source candidate:** PR #212 at `85531616cee2da94bbb7154418a78537549a4d76`. **Reduction:** `SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1`. **Donor:** `Quantum-L9/l9-wip#6@fb0ae95620cea0dc3f48aa009056ddb755d69640`.
 
 ## Decision realized in this package
 
@@ -24,7 +24,7 @@ The mathematical accounting identity is unchanged:
 | Kind | IDs |
 | --- | --- |
 | New (proposed) | `L9-SV-001`, `L9-SV-002` |
-| Existing (resolved at `020a94b`) | `L9-AUTH-001`, `L9-AUTH-002`, `L9-HARD-001`, `L9-UNKNOWN-001`, `L9-STRATEGY-001`, `L9-PROJECTION-001`, `L9-PROV-001`, `L9-EVIDENCE-001`, `L9-ASSURANCE-001`, `L9-COORD-001` |
+| Existing (resolved at `9488d8f`; `invariants.yaml` unchanged since `020a94b`) | `L9-AUTH-001`, `L9-AUTH-002`, `L9-HARD-001`, `L9-UNKNOWN-001`, `L9-STRATEGY-001`, `L9-PROJECTION-001`, `L9-PROV-001`, `L9-EVIDENCE-001`, `L9-ASSURANCE-001`, `L9-COORD-001` |
 
 The model's `governed_by.invariants`, the contract's `source_invariants`, the profile's invariant selectors and both payload-schema enums are exactly this set of twelve, each once. The real compiler's invariants projection selected the same twelve.
 
@@ -78,7 +78,7 @@ The local tests prove asserted candidate semantics, exact ID closure and finite 
 ## Apply only in a clean, pinned, disposable checkout
 
 ```bash
-git clone /path/to/Quantum-L9/.github /tmp/sv-rehearsal && git -C /tmp/sv-rehearsal checkout 020a94bea86e7c5c5e4107da7014ec259508f397
+git clone /path/to/Quantum-L9/.github /tmp/sv-rehearsal && git -C /tmp/sv-rehearsal checkout 9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88
 python apply_to_pinned_checkout.py --checkout /tmp/sv-rehearsal                       # dry run
 python apply_to_pinned_checkout.py --checkout /tmp/sv-rehearsal --apply --disposable
 ```
