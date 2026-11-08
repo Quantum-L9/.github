@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Resolve the organization birth profile for a repository class.
@@ -24,8 +24,8 @@
  * automate the contradiction faster.
  */
 
-const DEFAULT_CLASSES_PATH = 'policies/repo-classes.yml';
-const MODES = Object.freeze(['inherit', 'materialize', 'remote_apply']);
+const DEFAULT_CLASSES_PATH = "policies/repo-classes.yml";
+const MODES = Object.freeze(["inherit", "materialize", "remote_apply"]);
 
 /**
  * Parse the JSON-in-YAML class file.
@@ -40,15 +40,15 @@ const MODES = Object.freeze(['inherit', 'materialize', 'remote_apply']);
  * @returns {object}
  */
 function parseJsonInYaml(text) {
-  if (typeof text !== 'string' || !text.trim()) {
-    throw new Error('repo-classes policy is empty');
-  }
-  const stripped = text.replace(/^[ \t]*#.*$/gm, '');
-  try {
-    return JSON.parse(stripped);
-  } catch (err) {
-    throw new Error(`repo-classes policy is not JSON-in-YAML: ${err.message}`);
-  }
+	if (typeof text !== "string" || !text.trim()) {
+		throw new Error("repo-classes policy is empty");
+	}
+	const stripped = text.replace(/^[ \t]*#.*$/gm, "");
+	try {
+		return JSON.parse(stripped);
+	} catch (err) {
+		throw new Error(`repo-classes policy is not JSON-in-YAML: ${err.message}`);
+	}
 }
 
 /**
@@ -57,21 +57,29 @@ function parseJsonInYaml(text) {
  * @returns {object} the parsed policy document
  */
 function loadRepoClasses(fs, path = DEFAULT_CLASSES_PATH) {
-  if (!fs) throw new Error('loadRepoClasses requires fs');
-  if (!fs.existsSync(path)) throw new Error(`repo-classes policy not found: ${path}`);
-  const doc = parseJsonInYaml(fs.readFileSync(path, 'utf8'));
-  if (!doc || typeof doc !== 'object' || !doc.classes || typeof doc.classes !== 'object') {
-    throw new Error(`${path} has no classes map`);
-  }
-  if (!doc.classes[doc.default_class]) {
-    throw new Error(`${path} default_class ${doc.default_class} is not defined`);
-  }
-  for (const [repo, cls] of Object.entries(doc.overrides || {})) {
-    if (!doc.classes[cls]) {
-      throw new Error(`${path} override ${repo} names undefined class ${cls}`);
-    }
-  }
-  return doc;
+	if (!fs) throw new Error("loadRepoClasses requires fs");
+	if (!fs.existsSync(path))
+		throw new Error(`repo-classes policy not found: ${path}`);
+	const doc = parseJsonInYaml(fs.readFileSync(path, "utf8"));
+	if (
+		!doc ||
+		typeof doc !== "object" ||
+		!doc.classes ||
+		typeof doc.classes !== "object"
+	) {
+		throw new Error(`${path} has no classes map`);
+	}
+	if (!doc.classes[doc.default_class]) {
+		throw new Error(
+			`${path} default_class ${doc.default_class} is not defined`,
+		);
+	}
+	for (const [repo, cls] of Object.entries(doc.overrides || {})) {
+		if (!doc.classes[cls]) {
+			throw new Error(`${path} override ${repo} names undefined class ${cls}`);
+		}
+	}
+	return doc;
 }
 
 /**
@@ -86,9 +94,11 @@ function loadRepoClasses(fs, path = DEFAULT_CLASSES_PATH) {
  * @returns {string|null}
  */
 function parseClassMarker(markerText) {
-  if (typeof markerText !== 'string' || !markerText.trim()) return null;
-  const m = markerText.match(/^profile:[ \t]*["']?([A-Za-z0-9_-]+)["']?[ \t]*$/m);
-  return m ? m[1] : null;
+	if (typeof markerText !== "string" || !markerText.trim()) return null;
+	const m = markerText.match(
+		/^profile:[ \t]*["']?([A-Za-z0-9_-]+)["']?[ \t]*$/m,
+	);
+	return m ? m[1] : null;
 }
 
 /**
@@ -103,16 +113,16 @@ function parseClassMarker(markerText) {
  * @returns {string|null} the matching pattern, or null
  */
 function matchPattern(patterns, dest) {
-  if (!Array.isArray(patterns)) return null;
-  for (const pattern of patterns) {
-    if (typeof pattern !== 'string' || !pattern) continue;
-    if (pattern === dest) return pattern;
-    if (pattern.endsWith('/**')) {
-      const prefix = pattern.slice(0, -2); // keep the trailing slash
-      if (dest.startsWith(prefix)) return pattern;
-    }
-  }
-  return null;
+	if (!Array.isArray(patterns)) return null;
+	for (const pattern of patterns) {
+		if (typeof pattern !== "string" || !pattern) continue;
+		if (pattern === dest) return pattern;
+		if (pattern.endsWith("/**")) {
+			const prefix = pattern.slice(0, -2); // keep the trailing slash
+			if (dest.startsWith(prefix)) return pattern;
+		}
+	}
+	return null;
 }
 
 /**
@@ -146,32 +156,32 @@ function matchPattern(patterns, dest) {
  *   must never be treated as "use the default".
  */
 function classForRepo(doc, repoName, markerText) {
-  const hasMarker = typeof markerText === 'string';
-  if (hasMarker) {
-    const declared = parseClassMarker(markerText);
-    if (!declared) {
-      return {
-        name: null,
-        source: 'marker',
-        error: `${doc.marker_path || 'class marker'} is present but declares no parseable profile`,
-      };
-    }
-    if (!doc.classes[declared]) {
-      return {
-        name: null,
-        source: 'marker',
-        error:
-          `${doc.marker_path || 'class marker'} declares unknown class ${declared} ` +
-          `(known: ${Object.keys(doc.classes).join(', ')})`,
-      };
-    }
-    return { name: declared, source: 'marker', error: null };
-  }
-  const overrides = doc.overrides || {};
-  if (repoName && Object.prototype.hasOwnProperty.call(overrides, repoName)) {
-    return { name: overrides[repoName], source: 'org override', error: null };
-  }
-  return { name: null, source: 'default', error: null };
+	const hasMarker = typeof markerText === "string";
+	if (hasMarker) {
+		const declared = parseClassMarker(markerText);
+		if (!declared) {
+			return {
+				name: null,
+				source: "marker",
+				error: `${doc.marker_path || "class marker"} is present but declares no parseable profile`,
+			};
+		}
+		if (!doc.classes[declared]) {
+			return {
+				name: null,
+				source: "marker",
+				error:
+					`${doc.marker_path || "class marker"} declares unknown class ${declared} ` +
+					`(known: ${Object.keys(doc.classes).join(", ")})`,
+			};
+		}
+		return { name: declared, source: "marker", error: null };
+	}
+	const overrides = doc.overrides || {};
+	if (repoName && Object.prototype.hasOwnProperty.call(overrides, repoName)) {
+		return { name: overrides[repoName], source: "org override", error: null };
+	}
+	return { name: null, source: "default", error: null };
 }
 
 /**
@@ -188,34 +198,36 @@ function classForRepo(doc, repoName, markerText) {
  *   mandatory_files_waive: string[], resolved_from: string}}
  */
 function resolveProfile(doc, className, { strict = false } = {}) {
-  const fallback = doc.default_class;
-  let name = className;
-  let resolvedFrom = 'marker';
-  if (!name) {
-    name = fallback;
-    resolvedFrom = 'default (no marker)';
-  } else if (!doc.classes[name]) {
-    if (strict) {
-      throw new Error(
-        `unknown repo class ${className} (known: ${Object.keys(doc.classes).join(', ')})`,
-      );
-    }
-    name = fallback;
-    resolvedFrom = `default (unknown class ${className})`;
-  }
-  const cls = doc.classes[name];
-  return {
-    name,
-    description: cls.description || '',
-    seed_categories: Array.isArray(cls.seed_categories) ? [...cls.seed_categories] : [],
-    inherit: Array.isArray(cls.inherit) ? [...cls.inherit] : [],
-    forbid: Array.isArray(cls.forbid) ? [...cls.forbid] : [],
-    remote_apply: { ...(cls.remote_apply || {}) },
-    mandatory_files_waive: Array.isArray(cls.mandatory_files_waive)
-      ? [...cls.mandatory_files_waive]
-      : [],
-    resolved_from: resolvedFrom,
-  };
+	const fallback = doc.default_class;
+	let name = className;
+	let resolvedFrom = "marker";
+	if (!name) {
+		name = fallback;
+		resolvedFrom = "default (no marker)";
+	} else if (!doc.classes[name]) {
+		if (strict) {
+			throw new Error(
+				`unknown repo class ${className} (known: ${Object.keys(doc.classes).join(", ")})`,
+			);
+		}
+		name = fallback;
+		resolvedFrom = `default (unknown class ${className})`;
+	}
+	const cls = doc.classes[name];
+	return {
+		name,
+		description: cls.description || "",
+		seed_categories: Array.isArray(cls.seed_categories)
+			? [...cls.seed_categories]
+			: [],
+		inherit: Array.isArray(cls.inherit) ? [...cls.inherit] : [],
+		forbid: Array.isArray(cls.forbid) ? [...cls.forbid] : [],
+		remote_apply: { ...(cls.remote_apply || {}) },
+		mandatory_files_waive: Array.isArray(cls.mandatory_files_waive)
+			? [...cls.mandatory_files_waive]
+			: [],
+		resolved_from: resolvedFrom,
+	};
 }
 
 /**
@@ -232,26 +244,26 @@ function resolveProfile(doc, className, { strict = false } = {}) {
  * @returns {{payload: Record<string,string>, inherited: string[]}}
  */
 function applyProfile(payload, profile) {
-  const inherited = [];
-  const violations = [];
-  for (const dest of Object.keys(payload)) {
-    const forbidden = matchPattern(profile.forbid, dest);
-    if (forbidden) {
-      violations.push(`${dest} (forbid ${forbidden})`);
-      continue;
-    }
-    if (matchPattern(profile.inherit, dest)) {
-      inherited.push(dest);
-      delete payload[dest];
-    }
-  }
-  if (violations.length) {
-    throw new Error(
-      `seed payload violates repo class ${profile.name}: ${violations.join(', ')} — ` +
-        'organization CI targeting is not distributed into the repository',
-    );
-  }
-  return { payload, inherited };
+	const inherited = [];
+	const violations = [];
+	for (const dest of Object.keys(payload)) {
+		const forbidden = matchPattern(profile.forbid, dest);
+		if (forbidden) {
+			violations.push(`${dest} (forbid ${forbidden})`);
+			continue;
+		}
+		if (matchPattern(profile.inherit, dest)) {
+			inherited.push(dest);
+			delete payload[dest];
+		}
+	}
+	if (violations.length) {
+		throw new Error(
+			`seed payload violates repo class ${profile.name}: ${violations.join(", ")} — ` +
+				"organization CI targeting is not distributed into the repository",
+		);
+	}
+	return { payload, inherited };
 }
 
 /**
@@ -261,7 +273,7 @@ function applyProfile(payload, profile) {
  * @returns {boolean}
  */
 function waivesMandatoryFile(profile, path) {
-  return matchPattern(profile.mandatory_files_waive, path) != null;
+	return matchPattern(profile.mandatory_files_waive, path) != null;
 }
 
 // ── Read-only mandatory-file coverage (preflight-scheduled.yml) ──────────────
@@ -276,16 +288,16 @@ function waivesMandatoryFile(profile, path) {
 
 // enforce-policies.yml skips a repository carrying this file ("opted out")
 // before any settings or mandatory-file check; only a 404 means absent there.
-const POLICY_OPT_OUT_PATH = '.l9/no-policy-enforcement';
+const POLICY_OPT_OUT_PATH = ".l9/no-policy-enforcement";
 
 const VERDICTS = Object.freeze({
-  PRESENT: 'required-present',
-  MISSING: 'required-missing',
-  WAIVED: 'waived',
-  UNOBSERVED: 'unobserved',
+	PRESENT: "required-present",
+	MISSING: "required-missing",
+	WAIVED: "waived",
+	UNOBSERVED: "unobserved",
 });
 
-const statusOf = (e) => e?.status || 'error';
+const statusOf = (e) => e?.status || "error";
 
 /**
  * Assess one repository's mandatory files against its class.
@@ -302,72 +314,105 @@ const statusOf = (e) => e?.status || 'error';
  *   files: Array<{path: string, verdict: string, detail: string}>}>}
  */
 async function assessMandatoryFiles({ doc, filesPolicy, repoName, readText }) {
-  const files = Array.isArray(filesPolicy?.files) ? filesPolicy.files : null;
-  if (!files?.length || files.some((f) => typeof f?.path !== 'string' || !f.path)) {
-    // A policy that names no paths would make every repository vacuously
-    // compliant; that is an unreadable policy, not an empty obligation.
-    throw new Error('mandatory-files policy declares no readable files list');
-  }
-  const exception = (filesPolicy.exceptions || []).find((e) => e?.repo === repoName);
-  if (exception) {
-    return {
-      repo: repoName,
-      status: 'exempt',
-      className: null,
-      reason: `mandatory-files exception: ${exception.reason || 'no reason recorded'}`,
-      files: files.map((f) => ({ path: f.path, verdict: VERDICTS.WAIVED, detail: 'repo exception' })),
-    };
-  }
-  const unresolved = (reason) => ({
-    repo: repoName,
-    status: 'unresolved',
-    className: null,
-    reason,
-    files: files.map((f) => ({ path: f.path, verdict: VERDICTS.UNOBSERVED, detail: 'class unresolved' })),
-  });
-  // An opted-out repository is outside mandatory-file enforcement, so it is
-  // outside the compliance denominator too. An opt-out nobody could read is
-  // neither: the repository is unobserved, never compliant.
-  let optOut;
-  try {
-    optOut = await readText(POLICY_OPT_OUT_PATH);
-  } catch (e) {
-    return unresolved(`${POLICY_OPT_OUT_PATH} unreadable (${statusOf(e)})`);
-  }
-  if (optOut !== null) {
-    return {
-      repo: repoName,
-      status: 'opted-out',
-      className: null,
-      reason: `${POLICY_OPT_OUT_PATH} present — opted out of policy enforcement`,
-      files: files.map((f) => ({ path: f.path, verdict: VERDICTS.WAIVED, detail: 'policy opt-out' })),
-    };
-  }
-  let markerText;
-  try {
-    markerText = await readText(doc.marker_path);
-  } catch (e) {
-    return unresolved(`${doc.marker_path} unreadable (${statusOf(e)})`);
-  }
-  const decided = classForRepo(doc, repoName, markerText);
-  if (decided.error) return unresolved(decided.error);
-  const profile = resolveProfile(doc, decided.name);
-  const out = [];
-  for (const f of files) {
-    if (waivesMandatoryFile(profile, f.path)) {
-      out.push({ path: f.path, verdict: VERDICTS.WAIVED, detail: `waived by class ${profile.name}` });
-      continue;
-    }
-    try {
-      const text = await readText(f.path);
-      out.push(text === null
-        ? { path: f.path, verdict: VERDICTS.MISSING, detail: '404' }
-        : { path: f.path, verdict: VERDICTS.PRESENT, detail: '' });
-    } catch (e) {
-      out.push({ path: f.path, verdict: VERDICTS.UNOBSERVED, detail: `unreadable (${statusOf(e)})` });
-    }
-  }
-  return { repo: repoName, status: 'assessed', className: profile.name, reason: decided.source, files: out };
+	const files = Array.isArray(filesPolicy?.files) ? filesPolicy.files : null;
+	if (
+		!files?.length ||
+		files.some((f) => typeof f?.path !== "string" || !f.path)
+	) {
+		// A policy that names no paths would make every repository vacuously
+		// compliant; that is an unreadable policy, not an empty obligation.
+		throw new Error("mandatory-files policy declares no readable files list");
+	}
+	const exception = (filesPolicy.exceptions || []).find(
+		(e) => e?.repo === repoName,
+	);
+	if (exception) {
+		return {
+			repo: repoName,
+			status: "exempt",
+			className: null,
+			reason: `mandatory-files exception: ${exception.reason || "no reason recorded"}`,
+			files: files.map((f) => ({
+				path: f.path,
+				verdict: VERDICTS.WAIVED,
+				detail: "repo exception",
+			})),
+		};
+	}
+	const unresolved = (reason) => ({
+		repo: repoName,
+		status: "unresolved",
+		className: null,
+		reason,
+		files: files.map((f) => ({
+			path: f.path,
+			verdict: VERDICTS.UNOBSERVED,
+			detail: "class unresolved",
+		})),
+	});
+	// An opted-out repository is outside mandatory-file enforcement, so it is
+	// outside the compliance denominator too. An opt-out nobody could read is
+	// neither: the repository is unobserved, never compliant.
+	let optOut;
+	try {
+		optOut = await readText(POLICY_OPT_OUT_PATH);
+	} catch (e) {
+		return unresolved(`${POLICY_OPT_OUT_PATH} unreadable (${statusOf(e)})`);
+	}
+	if (optOut !== null) {
+		return {
+			repo: repoName,
+			status: "opted-out",
+			className: null,
+			reason: `${POLICY_OPT_OUT_PATH} present — opted out of policy enforcement`,
+			files: files.map((f) => ({
+				path: f.path,
+				verdict: VERDICTS.WAIVED,
+				detail: "policy opt-out",
+			})),
+		};
+	}
+	let markerText;
+	try {
+		markerText = await readText(doc.marker_path);
+	} catch (e) {
+		return unresolved(`${doc.marker_path} unreadable (${statusOf(e)})`);
+	}
+	const decided = classForRepo(doc, repoName, markerText);
+	if (decided.error) return unresolved(decided.error);
+	const profile = resolveProfile(doc, decided.name);
+	const out = [];
+	for (const f of files) {
+		if (waivesMandatoryFile(profile, f.path)) {
+			out.push({
+				path: f.path,
+				verdict: VERDICTS.WAIVED,
+				detail: `waived by class ${profile.name}`,
+			});
+			continue;
+		}
+		try {
+			const text = await readText(f.path);
+			out.push(
+				text === null
+					? { path: f.path, verdict: VERDICTS.MISSING, detail: "404" }
+					: { path: f.path, verdict: VERDICTS.PRESENT, detail: "" },
+			);
+		} catch (e) {
+			out.push({
+				path: f.path,
+				verdict: VERDICTS.UNOBSERVED,
+				detail: `unreadable (${statusOf(e)})`,
+			});
+		}
+	}
+	return {
+		repo: repoName,
+		status: "assessed",
+		className: profile.name,
+		reason: decided.source,
+		files: out,
+	};
 }
 
 /**
@@ -382,48 +427,63 @@ async function assessMandatoryFiles({ doc, filesPolicy, repoName, readText }) {
  * @param {Array<Awaited<ReturnType<typeof assessMandatoryFiles>>>} assessments
  */
 function summarizeMandatoryCoverage(assessments) {
-  const s = {
-    total: assessments.length,
-    exempt: [],
-    optedOut: [],
-    notApplicable: [],
-    compliant: [],
-    noncompliant: [],
-    unobserved: [],
-    eligible: 0,
-    pct: null,
-  };
-  for (const a of assessments) {
-    if (a.status === 'exempt') {
-      s.exempt.push({ repo: a.repo, reason: a.reason });
-      continue;
-    }
-    if (a.status === 'opted-out') {
-      s.optedOut.push({ repo: a.repo, reason: a.reason });
-      continue;
-    }
-    if (a.status === 'unresolved') {
-      s.unobserved.push({ repo: a.repo, reasons: [a.reason] });
-      continue;
-    }
-    const required = a.files.filter((f) => f.verdict !== VERDICTS.WAIVED);
-    if (!required.length) {
-      s.notApplicable.push({ repo: a.repo, reason: `class ${a.className} waives every mandatory path` });
-      continue;
-    }
-    const missing = required.filter((f) => f.verdict === VERDICTS.MISSING).map((f) => f.path);
-    const unread = required.filter((f) => f.verdict === VERDICTS.UNOBSERVED);
-    if (missing.length) {
-      s.noncompliant.push({ repo: a.repo, className: a.className, missing, unobserved: unread.map((f) => f.path) });
-    } else if (unread.length) {
-      s.unobserved.push({ repo: a.repo, reasons: unread.map((f) => `${f.path} ${f.detail}`) });
-    } else {
-      s.compliant.push(a.repo);
-    }
-  }
-  s.eligible = s.compliant.length + s.noncompliant.length + s.unobserved.length;
-  s.pct = s.eligible ? Math.round((100 * s.compliant.length) / s.eligible) : null;
-  return s;
+	const s = {
+		total: assessments.length,
+		exempt: [],
+		optedOut: [],
+		notApplicable: [],
+		compliant: [],
+		noncompliant: [],
+		unobserved: [],
+		eligible: 0,
+		pct: null,
+	};
+	for (const a of assessments) {
+		if (a.status === "exempt") {
+			s.exempt.push({ repo: a.repo, reason: a.reason });
+			continue;
+		}
+		if (a.status === "opted-out") {
+			s.optedOut.push({ repo: a.repo, reason: a.reason });
+			continue;
+		}
+		if (a.status === "unresolved") {
+			s.unobserved.push({ repo: a.repo, reasons: [a.reason] });
+			continue;
+		}
+		const required = a.files.filter((f) => f.verdict !== VERDICTS.WAIVED);
+		if (!required.length) {
+			s.notApplicable.push({
+				repo: a.repo,
+				reason: `class ${a.className} waives every mandatory path`,
+			});
+			continue;
+		}
+		const missing = required
+			.filter((f) => f.verdict === VERDICTS.MISSING)
+			.map((f) => f.path);
+		const unread = required.filter((f) => f.verdict === VERDICTS.UNOBSERVED);
+		if (missing.length) {
+			s.noncompliant.push({
+				repo: a.repo,
+				className: a.className,
+				missing,
+				unobserved: unread.map((f) => f.path),
+			});
+		} else if (unread.length) {
+			s.unobserved.push({
+				repo: a.repo,
+				reasons: unread.map((f) => `${f.path} ${f.detail}`),
+			});
+		} else {
+			s.compliant.push(a.repo);
+		}
+	}
+	s.eligible = s.compliant.length + s.noncompliant.length + s.unobserved.length;
+	s.pct = s.eligible
+		? Math.round((100 * s.compliant.length) / s.eligible)
+		: null;
+	return s;
 }
 
 /**
@@ -436,52 +496,74 @@ function summarizeMandatoryCoverage(assessments) {
  * @returns {{level: 'info'|'warn', line: string, sections: string[]}}
  */
 function describeMandatoryCoverage(s, { policyError = null } = {}) {
-  if (policyError || !s) {
-    return {
-      level: 'warn',
-      line: `Mandatory-file compliance: UNOBSERVED — policy unreadable (${policyError || 'no summary'}); no repository counted compliant`,
-      sections: [],
-    };
-  }
-  const tail = `${s.noncompliant.length} missing a required file, ${s.unobserved.length} unobserved, ` +
-    `${s.exempt.length} exempt, ${s.notApplicable.length} not applicable` +
-    (s.optedOut.length ? `, ${s.optedOut.length} opted out` : '');
-  const line = s.eligible === 0
-    ? `Mandatory-file compliance: no eligible repositories (${s.total} active; ${tail}) — compliance not computed`
-    : `Mandatory-file compliance: ${s.compliant.length}/${s.eligible} eligible repos (${s.pct}%) — ${tail}`;
-  const level = s.eligible > 0 && s.pct >= 90 && s.unobserved.length === 0 ? 'info' : 'warn';
-  const sections = [];
-  if (s.noncompliant.length) {
-    sections.push(`## Missing required files\n\n${s.noncompliant
-      .map((r) => `- \`${r.repo}\` (class \`${r.className}\`): ${r.missing.map((p) => `\`${p}\``).join(', ')}` +
-        (r.unobserved.length ? `; unobserved: ${r.unobserved.map((p) => `\`${p}\``).join(', ')}` : ''))
-      .join('\n')}`);
-  }
-  if (s.unobserved.length) {
-    sections.push(`## Unobserved — not counted as compliant\n\n${s.unobserved
-      .map((r) => `- \`${r.repo}\`: ${r.reasons.join('; ')}`).join('\n')}`);
-  }
-  if (s.exempt.length || s.optedOut.length || s.notApplicable.length) {
-    sections.push(`## Exempt / not applicable — outside the denominator\n\n${[...s.exempt, ...s.optedOut, ...s.notApplicable]
-      .map((r) => `- \`${r.repo}\`: ${r.reason}`).join('\n')}`);
-  }
-  return { level, line, sections };
+	if (policyError || !s) {
+		return {
+			level: "warn",
+			line: `Mandatory-file compliance: UNOBSERVED — policy unreadable (${policyError || "no summary"}); no repository counted compliant`,
+			sections: [],
+		};
+	}
+	const tail =
+		`${s.noncompliant.length} missing a required file, ${s.unobserved.length} unobserved, ` +
+		`${s.exempt.length} exempt, ${s.notApplicable.length} not applicable` +
+		(s.optedOut.length ? `, ${s.optedOut.length} opted out` : "");
+	const line =
+		s.eligible === 0
+			? `Mandatory-file compliance: no eligible repositories (${s.total} active; ${tail}) — compliance not computed`
+			: `Mandatory-file compliance: ${s.compliant.length}/${s.eligible} eligible repos (${s.pct}%) — ${tail}`;
+	const level =
+		s.eligible > 0 && s.pct >= 90 && s.unobserved.length === 0
+			? "info"
+			: "warn";
+	const sections = [];
+	if (s.noncompliant.length) {
+		sections.push(
+			`## Missing required files\n\n${s.noncompliant
+				.map(
+					(r) =>
+						`- \`${r.repo}\` (class \`${r.className}\`): ${r.missing.map((p) => `\`${p}\``).join(", ")}` +
+						(r.unobserved.length
+							? `; unobserved: ${r.unobserved.map((p) => `\`${p}\``).join(", ")}`
+							: ""),
+				)
+				.join("\n")}`,
+		);
+	}
+	if (s.unobserved.length) {
+		sections.push(
+			`## Unobserved — not counted as compliant\n\n${s.unobserved
+				.map((r) => `- \`${r.repo}\`: ${r.reasons.join("; ")}`)
+				.join("\n")}`,
+		);
+	}
+	if (s.exempt.length || s.optedOut.length || s.notApplicable.length) {
+		sections.push(
+			`## Exempt / not applicable — outside the denominator\n\n${[
+				...s.exempt,
+				...s.optedOut,
+				...s.notApplicable,
+			]
+				.map((r) => `- \`${r.repo}\`: ${r.reason}`)
+				.join("\n")}`,
+		);
+	}
+	return { level, line, sections };
 }
 
 module.exports = {
-  DEFAULT_CLASSES_PATH,
-  MODES,
-  parseJsonInYaml,
-  loadRepoClasses,
-  parseClassMarker,
-  classForRepo,
-  matchPattern,
-  resolveProfile,
-  applyProfile,
-  waivesMandatoryFile,
-  POLICY_OPT_OUT_PATH,
-  VERDICTS,
-  assessMandatoryFiles,
-  summarizeMandatoryCoverage,
-  describeMandatoryCoverage,
+	DEFAULT_CLASSES_PATH,
+	MODES,
+	parseJsonInYaml,
+	loadRepoClasses,
+	parseClassMarker,
+	classForRepo,
+	matchPattern,
+	resolveProfile,
+	applyProfile,
+	waivesMandatoryFile,
+	POLICY_OPT_OUT_PATH,
+	VERDICTS,
+	assessMandatoryFiles,
+	summarizeMandatoryCoverage,
+	describeMandatoryCoverage,
 };
