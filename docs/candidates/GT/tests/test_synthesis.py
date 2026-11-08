@@ -4,8 +4,8 @@ These do not re-run the compiler (``tools/synthesize_candidate_schemas.py
 --check`` does that). They prove the committed outputs are internally bound:
 extracted schemas equal the compiler candidate, digests verify under the
 compiler's declared basis, the run receipt records success and candidate-only
-status, the governance documents are candidates, and the rehearsal used exactly
-the SV #215 pack pinned by the GT binding.
+status, the governance documents are candidates, and the rehearsal is GT core on the
+admitted SV foundation pinned by the GT binding.
 """
 
 import hashlib
@@ -124,13 +124,22 @@ class RunReceipt(unittest.TestCase):
             r"^sha256:[0-9a-f]{64}$",
         )
 
-    def test_rehearsal_used_exactly_the_pinned_sv_pack(self):
-        sv = self.receipt["sv_pack"]
-        self.assertEqual(sv["pr"], BINDING["sv_candidate"]["pr"])
-        self.assertEqual(sv["binding_head"], BINDING["sv_candidate"]["head"])
+    def test_rehearsal_is_gt_core_on_the_admitted_sv_foundation(self):
+        sv = self.receipt["sv_admitted"]
+        self.assertEqual(sv["release"], BINDING["sv_admitted"]["release"])
         self.assertEqual(
-            sv["verified_pack_blobs"], BINDING["sv_candidate"]["pack_blobs"]
+            sv["admission_merge_commit"],
+            BINDING["sv_admitted"]["admission_merge_commit"],
         )
+        self.assertEqual(
+            self.receipt["authority_semantics_tree_before_gt"],
+            BINDING["canonical_target_semantics_tree"],
+        )
+        self.assertEqual(
+            self.receipt["compiler"]["revision"],
+            BINDING["sv_admitted"]["compiler_pinned_by_admission"],
+        )
+        self.assertNotIn("sv_pack", self.receipt)
 
     def test_request_pins_gt_profiles_and_sources(self):
         request = load("request.json")

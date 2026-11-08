@@ -9,7 +9,7 @@
 		"owner_identity_basis": "caller_asserted_not_independently_verified",
 		"path": "docs/candidates/GT/synthesis/governance/dialect.yaml",
 		"ref": "l9.schema-dialect/candidate-v2@1",
-		"revision": "d8fbba57ba93cb0ea9ff7cf3d555d372f16295d2"
+		"revision": "232920c2cfc2b2cfe6a3eea6b23b2039e91d0075"
 	},
 	"document_kind": "projection_schema_candidate",
 	"schema_id": "l9.projection.strategic-planner-interaction/v1",

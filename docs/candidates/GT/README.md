@@ -1,6 +1,6 @@
-# Game Theory (GT) `.github` candidate, aligned to the reduced Strategic Value candidate
+# Game Theory (GT) `.github` candidate, aligned to the admitted Strategic Value foundation
 
-**Status:** LOCAL CANDIDATE, not canonically admitted. **Canonical target:** `Quantum-L9/.github@020a94bea86e7c5c5e4107da7014ec259508f397`. **SV dependency:** PR #215 at `a64d05a152b5920dad577cead26618a6f05fef09`, the two-invariant reduction (`L9-SV-001`, `L9-SV-002`) of PR #212. **Remediation record:** `REMEDIATION_LEDGER.md`.
+**Status:** LOCAL CANDIDATE, not canonically admitted. **Canonical target:** `Quantum-L9/.github@c9bbfaf61bd0f7444b1a617876a031c2fba75406` (`main`), carrying the **admitted** SV foundation v3.32.0 (ADR-029, #222). **SV dependency:** `L9-SV-001`, `L9-SV-002`, `l9.contract/strategic-value-assessment@1` and `l9.strategic.value@1` as admitted. **Alignment record:** `SV_ALIGNMENT.md`. **Remediation record:** `REMEDIATION_LEDGER.md`.
 
 GT governs conditional strategic interaction. SV governs value. Numerical Reasoning evaluates. Strategic Authority decides. This pack makes GT's actor-response semantics valid without SV, and shows that a GT result can be an input to exactly one canonical SV assessment, never an additive uplift.
 
@@ -22,36 +22,36 @@ The GT and SV compositions stay separate (three and five sources). The consumer 
 ## Runnable checks
 
 ```bash
-python -m unittest discover -s tests -v     # 91 local tests (PyYAML, jsonschema)
-python apply_to_pinned_checkout.py --checkout <clone at 020a94b with SV #215 applied>   # dry run
+python -m unittest discover -s tests -v     # 94 local tests (PyYAML, jsonschema)
+python apply_to_pinned_checkout.py --checkout <clean clone at c9bbfaf>   # dry run
 ```
 
 ## Integrated rehearsal (how the evidence was produced)
 
 ```bash
-git clone https://github.com/Quantum-L9/.github reh              # HEAD 020a94b
-python <SV pack @ a64d05a>/apply_to_pinned_checkout.py --checkout reh --apply --disposable
+git clone https://github.com/Quantum-L9/.github reh && git -C reh checkout c9bbfaf   # admitted SV v3.32.0
 python apply_to_pinned_checkout.py --checkout reh --apply --disposable
 git -C reh add -- semantics && git -C reh commit -m REHEARSAL      # local only, never pushed
 python reh/scripts/validate-semantics.py
 python tools/run_integrated_qualification.py --authority-root reh --revision <commit> \
-    --compiler-src <l9-semantic-compiler-engine>/src --out <dir>
+    --compiler-src <l9-semantic-compiler-engine@33e4c58>/src --out <dir>
 python tools/gt_producer_negative_controls.py --authority-root reh --revision <commit> \
-    --compiler-src <engine>/src --run1 <dir>/run1 --out controls.json
+    --compiler-src <engine@33e4c58>/src --run1 <dir>/run1 --out controls.json
 ```
 
-The core stage refuses unless HEAD is `020a94b` and the dirty paths are exactly the thirteen SV-applied files with their pinned digests. The dependent stage refuses until `admitted_foundation_revision` is recorded in `evidence/sv_alignment_binding.json` by a reviewed commit.
+The core stage refuses unless HEAD is `c9bbfaf` and the tree is clean, the `semantics/` tree is the ADR-029 admitted tree, and the SV-owned files match their pinned digests. The dependent stage refuses until `admitted_foundation_revision` is recorded in `evidence/sv_alignment_binding.json` by a reviewed commit.
 
-## Qualification status (`evidence/integration-v1/`)
+## Qualification status (`evidence/integration-v2/`, on the admitted SV foundation)
 
-- Native `.github` validator on the integrated candidate: 54 checks pass. Only SC-008 and SC-010 fail, because the v3.27.0 release inventory does not list the new files. That needs a successor release record, which this pack does not invent.
-- Real compiler `3bf1a82` (0.9.3): GT three projections and the composition **pass**; SV five projections **pass**; SV composition **unknown**, because its four `required_provenance` declarations have no mechanical criterion (owner decision recorded in #215). Two runs were byte-identical.
+- Native `.github` validator on GT core over `c9bbfaf`: 56 checks pass. Only SC-008 and SC-010 fail, because the v3.32.0 release inventory does not list GT's files. That needs GT's own successor release record, which this pack does not invent.
+- Real compiler `33e4c58` (the revision ADR-029 pins): GT's three projections and composition **pass**, and SV's five projections and composition **pass**, with all four `required_provenance` criteria now verified. All ten results are unconditional passes. Two runs were byte-identical.
+- `evidence/integration-v1/` is the superseded record against the unadmitted SV #215 candidate on `020a94b`.
 - The forbidden criterion was evaluated against 11 vocabulary, 2 invariant and 1 contract selections, and passed.
 - 19 GT producer controls each produced their asserted exit code, typed failure and criterion.
 
 ## Compiler-generated candidate schemas (`synthesis/`)
 
-`tools/synthesize_candidate_schemas.py` runs the real compiler's `schema-synthesize` (`l9-semantic-compiler-engine@18215ae`) on the integrated rehearsal (`020a94b` + SV #215 + GT core). It emits:
+`tools/synthesize_candidate_schemas.py` runs the real compiler's `schema-synthesize` (`l9-semantic-compiler-engine@33e4c58`) on GT core over the admitted SV foundation (`c9bbfaf`). It emits:
 
 - `synthesis/generated/strategic_planner_interaction_projection.candidate.schema.json`
 - `synthesis/generated/strategic_planner_interaction_composition.candidate.schema.json`

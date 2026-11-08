@@ -4,7 +4,7 @@ The synthetic target is NOT the canonical repository. It carries only the
 structure the GT applier reads (ledgers, profile catalogs, manifest, one derived
 ledger) so the applier's checks can be exercised without network or the real
 SV pack. Real-target behaviour is evidenced separately in
-``evidence/integration-v1`` (native validator + real compiler).
+``evidence/integration-v2`` (native validator + real compiler on the admitted SV foundation).
 """
 
 import json
@@ -15,7 +15,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "evidence" / "integration-v1"
+EVIDENCE = ROOT / "evidence" / "integration-v2"
 
 GOVERNING = [
     "L9-GT-001",

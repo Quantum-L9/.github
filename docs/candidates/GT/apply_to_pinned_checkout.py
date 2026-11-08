@@ -1,22 +1,24 @@
 #!/usr/bin/env python3
-"""Prepare the GT canonical candidate files on top of the exact SV #215 candidate.
+"""Prepare the GT canonical candidate files on top of the admitted SV foundation.
 
-Two stages, never combined:
+Strategic Value is admitted on main as Semantic Foundation v3.32.0 (ADR-029,
+Quantum-L9/.github#222). Per ADR-029 D5 GT follows in two stages, never combined:
 
-* ``--stage core`` (default; successor release A). The target is a disposable
-  clone at ``canonical_target`` on which the SV candidate applier from PR #215
-  at its pinned head has already been run. Every SV-applied file must match the
-  digest recorded in ``evidence/sv_alignment_binding.json``; nothing else may be
-  dirty. GT core is then layered on: L9-GT-001, the GT core contract, twelve GT
-  terms, the GT projection profile and its forbidden-constraint definition, the
-  GT composition profile, both payload schemas and their manifest registration.
-  The GT+SV dependent contract is NOT applied in this stage.
+* ``--stage core`` (default; the GT core successor release). The target is a
+  clean disposable clone at exactly ``canonical_target`` whose ``semantics/``
+  tree equals ``canonical_target_semantics_tree`` (the tree ADR-029 admits),
+  with the admitted SV-owned files at their pinned digests, all recorded in
+  ``evidence/sv_alignment_binding.json``. GT core is then layered on: L9-GT-001,
+  the GT core contract, twelve GT terms, the GT projection profile and its
+  forbidden-constraint definition, the GT composition profile, both payload
+  schemas and their manifest registration. The GT+SV dependent contract is NOT
+  applied in this stage.
 
-* ``--stage dependent`` (successor release B). Refuses unless the binding file
-  records ``admitted_foundation_revision`` (set only by a reviewed commit after
-  SV and GT core are admitted at one canonical revision), the checkout is clean
-  at exactly that revision, and that revision carries the admitted SV model,
-  SV contract, both SV invariants and the GT core. No flag bypasses this.
+* ``--stage dependent`` (the following release). Refuses unless the binding
+  file records ``admitted_foundation_revision`` (set only by a reviewed commit
+  after GT core is admitted on top of the admitted SV foundation), the checkout
+  is clean at exactly that revision, and that revision carries the admitted SV
+  model, SV contract, both SV invariants and the GT core. No flag bypasses this.
 
 Dry-run by default. ``--apply --disposable`` writes local files only and refuses
 the checkout that carries this pack. Every check runs on the fully assembled
@@ -41,8 +43,9 @@ BINDING = json.loads(
 )
 
 CANONICAL_TARGET = BINDING["canonical_target"]
-SV_CANDIDATE_HEAD = BINDING["sv_candidate"]["head"]
-SV_APPLIED_SHA256 = BINDING["sv_applied_target_sha256"]
+CANONICAL_TREE = BINDING["canonical_target_semantics_tree"]
+SV_ADMITTED = BINDING["sv_admitted"]
+SV_OWNED_SHA256 = SV_ADMITTED["sv_owned_files_sha256"]
 ADMITTED_FOUNDATION_REVISION = BINDING["admitted_foundation_revision"]
 
 SV_NEW_INVARIANTS = frozenset(BINDING["sv_new_invariants"])
@@ -296,26 +299,27 @@ def dirty_paths(checkout):
     return {line[3:] for line in out.splitlines() if line.strip()}
 
 
-def verify_sv_applied_target(checkout):
-    """The checkout must be canonical_target plus exactly the pinned SV application."""
+def verify_admitted_sv_target(checkout):
+    """The checkout must be clean at canonical_target on the admitted SV tree."""
     head = git(checkout, "rev-parse", "HEAD").strip()
     if head != CANONICAL_TARGET:
         raise ValueError(f"wrong target HEAD {head}; expected {CANONICAL_TARGET}")
     dirty = dirty_paths(checkout)
-    if dirty != set(SV_APPLIED_SHA256):
+    if dirty:
+        raise ValueError(f"target checkout is not clean: {sorted(dirty)}")
+    tree = git(checkout, "rev-parse", "HEAD:semantics").strip()
+    if tree != CANONICAL_TREE:
         raise ValueError(
-            "dirty paths are not exactly the SV #215 application: "
-            f"missing={sorted(set(SV_APPLIED_SHA256) - dirty)} "
-            f"extra={sorted(dirty - set(SV_APPLIED_SHA256))}"
+            f"semantics tree {tree} != admitted SV foundation tree {CANONICAL_TREE}"
         )
-    for rel, expected in SV_APPLIED_SHA256.items():
+    for rel, expected in SV_OWNED_SHA256.items():
         actual = hashlib.sha256((checkout / rel).read_bytes()).hexdigest()
         if actual != expected:
-            raise ValueError(f"{rel}: SV-applied digest {actual} != pinned {expected}")
+            raise ValueError(f"{rel}: digest {actual} != admitted SV pin {expected}")
 
 
 def verify_sv_core_present(docs):
-    """Assert the SV candidate semantics GT depends on are present and reduced."""
+    """Assert the admitted SV semantics (v3.32.0) GT depends on are present."""
     inv_ids = {r["id"] for r in docs["invariants"]["invariants"]}
     sv_ids = {i for i in inv_ids if i.startswith("L9-SV-")}
     if sv_ids != SV_NEW_INVARIANTS:
@@ -738,7 +742,7 @@ def main(argv=None):
     checkout = Path(args.checkout).resolve()
     try:
         if args.stage == "core":
-            verify_sv_applied_target(checkout)
+            verify_admitted_sv_target(checkout)
             proposed, count, rebound, resolved = generate_core(checkout)
         else:
             proposed, count, rebound, resolved = generate_dependent(checkout)
@@ -752,7 +756,12 @@ def main(argv=None):
         )
         print("STAGE=" + args.stage)
         print("CANONICAL_TARGET=" + CANONICAL_TARGET)
-        print("SV_CANDIDATE_HEAD=" + SV_CANDIDATE_HEAD)
+        print(
+            "SV_ADMITTED="
+            + SV_ADMITTED["release"]
+            + "@"
+            + SV_ADMITTED["admission_merge_commit"]
+        )
         print("INVARIANT_COUNT=" + str(count))
         for path in sorted(proposed):
             print("PATH=" + path)

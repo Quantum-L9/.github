@@ -13,8 +13,9 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from fixtures import GOVERNING, ROOT, git, init_repo, synthetic_sv_applied
+
 import apply_to_pinned_checkout as applier
-from fixtures import GOVERNING, ROOT, init_repo, synthetic_sv_applied
 
 
 class CoreStageOnSyntheticTarget(unittest.TestCase):
@@ -201,57 +202,86 @@ class CoreStageOnSyntheticTarget(unittest.TestCase):
 
 
 class TargetPinning(unittest.TestCase):
-    """verify_sv_applied_target binds HEAD plus exactly the pinned SV application."""
+    """verify_admitted_sv_target binds a clean HEAD on the admitted SV tree."""
+
+    MODEL = "semantics/strategic_value_model.yaml"
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name) / "repo"
         (self.root / "semantics").mkdir(parents=True)
         (self.root / "semantics/a.yaml").write_text("a: 1\n")
+        (self.root / self.MODEL).write_text("artifact_id: l9.strategic.value@1\n")
         self.head = init_repo(self.root)
-        (self.root / "semantics/a.yaml").write_text("a: 2\n")
-        (self.root / "semantics/new.yaml").write_text("n: 1\n")
+        self.tree = git(self.root, "rev-parse", "HEAD:semantics").strip()
         self.pins = {
-            p: hashlib.sha256((self.root / p).read_bytes()).hexdigest()
-            for p in ("semantics/a.yaml", "semantics/new.yaml")
+            self.MODEL: hashlib.sha256(
+                (self.root / self.MODEL).read_bytes()
+            ).hexdigest()
         }
 
     def tearDown(self):
         self.tmp.cleanup()
 
-    def check(self, head=None, pins=None):
+    def check(self, head=None, tree=None, pins=None):
         with (
             mock.patch.object(applier, "CANONICAL_TARGET", head or self.head),
-            mock.patch.object(applier, "SV_APPLIED_SHA256", pins or self.pins),
+            mock.patch.object(applier, "CANONICAL_TREE", tree or self.tree),
+            mock.patch.object(applier, "SV_OWNED_SHA256", pins or self.pins),
         ):
-            applier.verify_sv_applied_target(self.root)
+            applier.verify_admitted_sv_target(self.root)
 
-    def test_exact_application_passes(self):
+    def test_clean_admitted_target_passes(self):
         self.check()
 
     def test_wrong_head_fails(self):
         with self.assertRaisesRegex(ValueError, "wrong target HEAD"):
             self.check(head="0" * 40)
 
-    def test_changed_byte_fails(self):
-        (self.root / "semantics/new.yaml").write_text("n: 2\n")
-        with self.assertRaisesRegex(ValueError, "SV-applied digest"):
-            self.check()
-
-    def test_extra_dirty_path_fails(self):
+    def test_dirty_target_fails(self):
         (self.root / "semantics/extra.yaml").write_text("e: 1\n")
-        with self.assertRaisesRegex(ValueError, "extra="):
+        with self.assertRaisesRegex(ValueError, "not clean"):
             self.check()
 
-    def test_binding_pins_are_the_recorded_sv_215_application(self):
+    def test_modified_tracked_file_fails(self):
+        (self.root / "semantics/a.yaml").write_text("a: 2\n")
+        with self.assertRaisesRegex(ValueError, "not clean"):
+            self.check()
+
+    def test_wrong_semantics_tree_fails(self):
+        with self.assertRaisesRegex(ValueError, "admitted SV foundation tree"):
+            self.check(tree="0" * 40)
+
+    def test_sv_owned_digest_mismatch_fails(self):
+        with self.assertRaisesRegex(ValueError, "admitted SV pin"):
+            self.check(pins={self.MODEL: "0" * 64})
+
+    def test_binding_pins_the_admitted_sv_foundation(self):
         binding = applier.BINDING
+        self.assertEqual(binding["schema"], "l9.gt.sv-alignment-binding/v3")
         self.assertEqual(
-            applier.CANONICAL_TARGET, "020a94bea86e7c5c5e4107da7014ec259508f397"
+            applier.CANONICAL_TARGET, "c9bbfaf61bd0f7444b1a617876a031c2fba75406"
         )
         self.assertEqual(
-            applier.SV_CANDIDATE_HEAD, "a64d05a152b5920dad577cead26618a6f05fef09"
+            applier.CANONICAL_TREE, "251bb3d9238f93f0207b1f8443c80359e034595b"
         )
-        self.assertEqual(len(binding["sv_applied_target_sha256"]), 13)
+        admitted = binding["sv_admitted"]
+        self.assertEqual(admitted["release"], "v3.32.0")
+        self.assertEqual(admitted["admission_pr"], 222)
+        self.assertEqual(
+            admitted["admission_merge_commit"],
+            "64d8b8598300f94c3201f26866f73be6895dab60",
+        )
+        self.assertEqual(admitted["admitted_semantics_tree"], applier.CANONICAL_TREE)
+        self.assertEqual(len(applier.SV_OWNED_SHA256), 3)
+        self.assertEqual(binding["sv_authority_status"], "admitted_v3.32.0")
+        old = binding["superseded_bindings"][0]
+        self.assertEqual(
+            old["canonical_target"], "020a94bea86e7c5c5e4107da7014ec259508f397"
+        )
+        self.assertEqual(
+            old["sv_candidate"]["head"], "a64d05a152b5920dad577cead26618a6f05fef09"
+        )
 
 
 class DependentStage(unittest.TestCase):
@@ -365,7 +395,7 @@ class ApplyGuards(unittest.TestCase):
     def _main_with(self, root, *flags):
         proposed = {"semantics/a.yaml": "a: 2\n", "semantics/b.yaml": "b: 2\n"}
         with (
-            mock.patch.object(applier, "verify_sv_applied_target", return_value=None),
+            mock.patch.object(applier, "verify_admitted_sv_target", return_value=None),
             mock.patch.object(
                 applier, "generate_core", return_value=(proposed, 0, {}, {})
             ),

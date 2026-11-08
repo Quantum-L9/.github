@@ -1,4 +1,4 @@
-"""Cross-pack alignment with the reduced SV candidate (PR #215 @ a64d05a) and its evidence."""
+"""Cross-pack alignment with the admitted SV foundation (v3.32.0, ADR-029) and its evidence."""
 
 import sys
 import tarfile
@@ -10,28 +10,35 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from fixtures import EVIDENCE, GOVERNING, ROOT, read
 
 
-class ReducedSvBinding(unittest.TestCase):
+class AdmittedSvBinding(unittest.TestCase):
     def setUp(self):
         self.b = read("evidence/sv_alignment_binding.json")
 
-    def test_exact_successor_coordinates(self):
-        self.assertEqual(self.b["sv_candidate"]["pr"], 215)
+    def test_exact_admitted_coordinates(self):
+        admitted = self.b["sv_admitted"]
+        self.assertEqual(admitted["release"], "v3.32.0")
+        self.assertEqual(admitted["admission_pr"], 222)
         self.assertEqual(
-            self.b["sv_candidate"]["head"], "a64d05a152b5920dad577cead26618a6f05fef09"
+            admitted["admission_merge_commit"],
+            "64d8b8598300f94c3201f26866f73be6895dab60",
         )
-        self.assertEqual(self.b["sv_candidate"]["stacked_on_pr"], 212)
+        self.assertTrue(admitted["adr"].startswith("docs/adr/ADR-029-"))
         self.assertEqual(
-            self.b["sv_candidate"]["stacked_on_head"],
-            "85531616cee2da94bbb7154418a78537549a4d76",
+            self.b["canonical_target"], "c9bbfaf61bd0f7444b1a617876a031c2fba75406"
         )
         self.assertEqual(
-            self.b["canonical_target"], "020a94bea86e7c5c5e4107da7014ec259508f397"
+            self.b["canonical_target_semantics_tree"],
+            admitted["admitted_semantics_tree"],
         )
-        for value in (self.b["sv_candidate"]["head"], self.b["canonical_target"]):
+        for value in (
+            self.b["canonical_target"],
+            self.b["canonical_target_semantics_tree"],
+            admitted["admission_merge_commit"],
+            admitted["compiler_pinned_by_admission"],
+        ):
             self.assertRegex(value, r"^[0-9a-f]{40}$")
-        self.assertNotIn(
-            "main", (self.b["sv_candidate"]["head"], self.b["canonical_target"])
-        )
+        self.assertIn("D1", admitted["owner_decisions"])
+        self.assertIn("verbatim", admitted["owner_decisions"]["D1"])
 
     def test_reduced_sv_law_and_terms(self):
         self.assertEqual(set(self.b["sv_new_invariants"]), {"L9-SV-001", "L9-SV-002"})
@@ -68,22 +75,29 @@ class ReducedSvBinding(unittest.TestCase):
         self.assertFalse((ROOT / "evidence/pr212_alignment_binding.json").exists())
         self.assertNotIn("sv_invariants_proposed", self.b)
 
-    def test_authority_status_is_candidate_and_stage_b_closed(self):
-        self.assertEqual(self.b["sv_authority_status"], "candidate_not_admitted")
+    def test_authority_status_and_stage_b_closed(self):
+        self.assertEqual(self.b["sv_authority_status"], "admitted_v3.32.0")
         self.assertEqual(self.b["gt_authority_status"], "candidate_not_admitted")
         self.assertIsNone(self.b["admitted_foundation_revision"])
 
-    def test_pinned_sv_application_and_pack_identities(self):
-        self.assertEqual(len(self.b["sv_candidate"]["pack_blobs"]), 10)
-        self.assertTrue(
-            all(
-                p.startswith("docs/candidates/SV/")
-                for p in self.b["sv_candidate"]["pack_blobs"]
-            )
+    def test_pinned_admitted_sv_files_and_superseded_candidate_record(self):
+        owned = self.b["sv_admitted"]["sv_owned_files_sha256"]
+        self.assertEqual(
+            set(owned),
+            {
+                "semantics/strategic_value_model.yaml",
+                "semantics/strategic_planner_value_projection.schema.yaml",
+                "semantics/strategic_planner_value_composition.schema.yaml",
+            },
         )
-        applied = self.b["sv_applied_target_sha256"]
-        self.assertEqual(len(applied), 13)
-        self.assertTrue(all(len(v) == 64 for v in applied.values()))
+        self.assertTrue(all(len(v) == 64 for v in owned.values()))
+        old = self.b["superseded_bindings"][0]
+        self.assertEqual(old["sv_candidate"]["pr"], 215)
+        self.assertEqual(len(old["sv_candidate"]["pack_blobs"]), 10)
+        self.assertEqual(len(old["sv_applied_target_sha256"]), 13)
+        # The admitted SV-owned files are byte-identical to the #215 candidate's.
+        for rel, digest in owned.items():
+            self.assertEqual(old["sv_applied_target_sha256"][rel], digest, rel)
 
     def test_gt_terms_and_invariants_disjoint_from_sv(self):
         gt_terms = read("overlays/vocabulary_additions.yaml")["terms"]
@@ -98,38 +112,29 @@ class ReducedSvBinding(unittest.TestCase):
 
 class IntegratedQualificationEvidence(unittest.TestCase):
     def setUp(self):
-        self.summary = read("evidence/integration-v1/qualification-summary.json")
-        self.rehearsal = read("evidence/integration-v1/rehearsal.json")
+        self.summary = read("evidence/integration-v2/qualification-summary.json")
+        self.rehearsal = read("evidence/integration-v2/rehearsal.json")
         self.binding = read("evidence/sv_alignment_binding.json")
 
-    def test_rehearsal_reproduces_pinned_sv_application(self):
-        self.assertEqual(
-            self.rehearsal["sv_candidate_head"], self.binding["sv_candidate"]["head"]
-        )
+    def test_rehearsal_is_gt_core_on_the_admitted_foundation(self):
         self.assertEqual(
             self.rehearsal["canonical_target"], self.binding["canonical_target"]
         )
+        self.assertEqual(
+            self.rehearsal["canonical_target_semantics_tree"],
+            self.binding["canonical_target_semantics_tree"],
+        )
+        self.assertEqual(
+            self.rehearsal["sv_admitted"]["admission_merge_commit"],
+            self.binding["sv_admitted"]["admission_merge_commit"],
+        )
         self.assertFalse(self.rehearsal["rehearsal_commit_pushed"])
         changed = self.rehearsal["changed_canonical_paths_vs_target"]
-        self.assertEqual(len(changed), 15)
-        sv_only = set(self.binding["sv_applied_target_sha256"]) - {
-            "semantics/" + n
-            for n in (
-                "invariants.yaml",
-                "contracts.yaml",
-                "vocabulary.yaml",
-                "projection_profiles.yaml",
-                "composition_profiles.yaml",
-                "generic_compiler_manifest.yaml",
-                "capabilities.yaml",
-                "lifecycle.yaml",
-                "receipt_catalog.yaml",
-            )
-        }
-        for rel in sv_only:
-            self.assertEqual(
-                changed[rel], self.binding["sv_applied_target_sha256"][rel], rel
-            )
+        # GT core only: eleven files, and no admitted SV-owned file is touched.
+        self.assertEqual(len(changed), 11)
+        self.assertFalse(
+            set(changed) & set(self.binding["sv_admitted"]["sv_owned_files_sha256"])
+        )
         for name in (
             "strategic_interaction_projection",
             "strategic_interaction_composition",
@@ -142,23 +147,11 @@ class IntegratedQualificationEvidence(unittest.TestCase):
         sv = [k for k in run if k.startswith("sv:")]
         self.assertEqual(len(gt), 4)
         self.assertEqual(len(sv), 6)
-        for key in gt + [k for k in sv if k != "sv:compose"]:
+        for key in gt + sv:
             self.assertEqual(
                 (run[key]["exit_code"], run[key]["result"]), (0, "pass"), key
             )
-        self.assertEqual(run["sv:compose"]["result"], "unknown")
-        self.assertEqual(
-            sorted(run["sv:compose"]["artifacts"][0]["unresolved_criteria"]),
-            sorted(
-                "declared_constraint:required_provenance:" + x
-                for x in (
-                    "composition_profile_digest",
-                    "composition_profile_ref",
-                    "source_projection_digests",
-                    "source_projection_refs",
-                )
-            ),
-        )
+            self.assertFalse(run[key]["artifacts"][0]["unresolved_criteria"], key)
         self.assertEqual(run["gt:compose"]["component_count"], 3)
         self.assertEqual(run["sv:compose"]["component_count"], 5)
         self.assertTrue(self.summary["run2_equal_results"])
@@ -190,6 +183,10 @@ class IntegratedQualificationEvidence(unittest.TestCase):
             "declared_constraint:other"
         )
         self.assertTrue(acceptance(sv_extra))
+        # The pre-admission SV deviation (unknown on required_provenance) is gone.
+        sv_unknown = copy.deepcopy(run)
+        sv_unknown["sv:compose"].update(exit_code=3, result="unknown")
+        self.assertTrue(acceptance(sv_unknown))
         missing = {k: v for k, v in run.items() if k != "gt:contracts"}
         self.assertTrue(acceptance(missing))
 
@@ -205,7 +202,7 @@ class IntegratedQualificationEvidence(unittest.TestCase):
                     )
 
     def test_producer_negative_controls_all_matched(self):
-        controls = read("evidence/integration-v1/producer-negative-controls.json")
+        controls = read("evidence/integration-v2/producer-negative-controls.json")
         self.assertTrue(controls["all_matched"])
         self.assertEqual(controls["count"], 19)
         self.assertEqual(
@@ -231,7 +228,7 @@ class IntegratedQualificationEvidence(unittest.TestCase):
         self.assertIn(
             "SC-010", next(line for line in log if line.startswith("FAIL semantic"))
         )
-        self.assertGreaterEqual(sum(line.startswith("PASS") for line in log), 54)
+        self.assertGreaterEqual(sum(line.startswith("PASS") for line in log), 56)
 
     def test_forbidden_criterion_evaluated_by_producer(self):
         import json

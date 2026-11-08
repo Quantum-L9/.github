@@ -8,12 +8,12 @@ bindings:
 - source_class: vocabulary
   source_ref: l9.source/vocabulary@1
   source_path: semantics/vocabulary.yaml
-  source_revision: 36cb17a474350e5a66a45f7a625ddd4fbe66ea20
+  source_revision: 4049c6df88d3feb09e640b82603cea2749f9ac8e
   source_digest: sha256:89a211d232322d6f2189e8b2475e44ba9e4b8af922ecf62fed2254f1ae44c7ef
   grammar_ref: l9.grammar/strategic-planner-interaction-vocabulary-candidate@1
   grammar_path: docs/candidates/GT/synthesis/governance/grammars/vocabulary.yaml
-  grammar_revision: 9a75f5bd3b7ac79ceec268b6f7108aa3656f657e
-  grammar_digest: sha256:fc896e208a0a5574c077cc541fc7ecbb6bae2b6293879c93f26b04855bb8b4b4
+  grammar_revision: 02d33b3786e1e3285db8802e4e1676ca3ae27835
+  grammar_digest: sha256:d49dc2fd5dbd9ff10d4ca20705f81a063e810e0e744aa761979ae01d847ac505
   grammar_owner: Quantum-L9/.github
   applies_to_selectors:
   - $.terms.strategic_interaction
@@ -32,12 +32,12 @@ bindings:
 - source_class: invariants
   source_ref: l9.source/invariants@1
   source_path: semantics/invariants.yaml
-  source_revision: 36cb17a474350e5a66a45f7a625ddd4fbe66ea20
-  source_digest: sha256:877fe9f8e127ccee99dd37b42d0b6c214ddb12169703a6cecb8a4f3efa1f5b79
+  source_revision: 4049c6df88d3feb09e640b82603cea2749f9ac8e
+  source_digest: sha256:2928b1206020490e80b18de3becfde0a2fbcd934b6e967a2c550be9c67c733aa
   grammar_ref: l9.grammar/strategic-planner-interaction-invariants-candidate@1
   grammar_path: docs/candidates/GT/synthesis/governance/grammars/invariants.yaml
-  grammar_revision: 9a75f5bd3b7ac79ceec268b6f7108aa3656f657e
-  grammar_digest: sha256:0eb068414d8c716a29e316443a81ffbf6451473badc88c57254a86269d3af1b3
+  grammar_revision: 02d33b3786e1e3285db8802e4e1676ca3ae27835
+  grammar_digest: sha256:22aa3f2fa1be611aebe53798a7dc90eee3476d0956c3d72d3000ce4d0ad3de96
   grammar_owner: Quantum-L9/.github
   applies_to_selectors:
   - $.invariants[?(@.id=="L9-GT-001")]
@@ -50,12 +50,12 @@ bindings:
 - source_class: contracts
   source_ref: l9.source/contracts@1
   source_path: semantics/contracts.yaml
-  source_revision: 36cb17a474350e5a66a45f7a625ddd4fbe66ea20
-  source_digest: sha256:cd7767e6693f439ed27ff36f3b85259c9d230d7edea4a6e0cd0afdef381b4f3a
+  source_revision: 4049c6df88d3feb09e640b82603cea2749f9ac8e
+  source_digest: sha256:25d4e2a0ce47c37961ec9edbb959d2accdebd9216f716daeb18df47ff1a7a566
   grammar_ref: l9.grammar/strategic-planner-interaction-contracts-candidate@1
   grammar_path: docs/candidates/GT/synthesis/governance/grammars/contracts.yaml
-  grammar_revision: 9a75f5bd3b7ac79ceec268b6f7108aa3656f657e
-  grammar_digest: sha256:17bcf46746811c213a73ea69d2ffa47e41d7c0ec790810013adca4467104934f
+  grammar_revision: 02d33b3786e1e3285db8802e4e1676ca3ae27835
+  grammar_digest: sha256:e8b5ad19d1e3c4437466e546ca5b20afc3de99a8de6561e4248e859ed7d9ea18
   grammar_owner: Quantum-L9/.github
   applies_to_selectors:
   - $.contracts[?(@.id=="l9.contract/strategic-interaction-assessment@1")]

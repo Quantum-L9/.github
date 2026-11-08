@@ -3,7 +3,7 @@
 The numerical cases are SYNTHETIC reference checks of the candidate contract's
 claims, not a GT solver, a Numerical Reasoning implementation, or a receipt.
 The consumer-envelope cases run the candidate verifier against the REAL producer
-receipts archived in evidence/integration-v1.
+receipts archived in evidence/integration-v2.
 """
 
 import copy
@@ -225,15 +225,17 @@ class ConsumerEnvelopeAgainstRealReceipts(unittest.TestCase):
             "authority_effect": "none",
         }
 
-    def test_real_gt_composition_passes_and_sv_composition_is_unknown(self):
+    def test_real_gt_and_admitted_sv_compositions_both_pass(self):
+        # Since SV v3.32.0 (ADR-029 D2) required_provenance is evaluated, so the
+        # real SV composition receipt is an unconditional pass.
         self.assertEqual(self.receipts[self.gt]["result"], "pass")
-        self.assertEqual(self.receipts[self.sv]["result"], "unknown")
+        self.assertEqual(self.receipts[self.sv]["result"], "pass")
 
-    def test_evaluated_envelope_is_refused_while_sv_composition_is_unknown(self):
-        receipts = dict(
-            self.receipts,
-            **{self.num: self.numerical, self.acct: {"output": {"digest": self.acct}}},
-        )
+    def test_evaluated_envelope_is_refused_when_sv_composition_is_unknown(self):
+        receipts = copy.deepcopy(self.receipts)
+        receipts[self.sv]["result"] = "unknown"  # counterfactual: pre-admission state
+        receipts[self.num] = self.numerical
+        receipts[self.acct] = {"output": {"digest": self.acct}}
         verdict, failures = verify(self.envelope, receipts)
         self.assertEqual(verdict, "refused")
         self.assertEqual(
@@ -241,10 +243,7 @@ class ConsumerEnvelopeAgainstRealReceipts(unittest.TestCase):
         )
 
     def test_verified_when_both_views_pass_and_numeric_evidence_binds_them(self):
-        receipts = copy.deepcopy(self.receipts)
-        receipts[self.sv]["result"] = (
-            "pass"  # counterfactual: owner resolves required_provenance
-        )
+        receipts = copy.deepcopy(self.receipts)  # real receipts: both views pass
         receipts[self.num] = self.numerical
         receipts[self.acct] = {"output": {"digest": self.acct}}
         self.assertEqual(verify(self.envelope, receipts), ("verified", []))
@@ -337,7 +336,7 @@ class StaleCoordinatesInProducerEvidence(unittest.TestCase):
     def test_changed_source_or_profile_digest_invalidates_projection(self):
         controls = {
             c["control"]: c
-            for c in read("evidence/integration-v1/producer-negative-controls.json")[
+            for c in read("evidence/integration-v2/producer-negative-controls.json")[
                 "controls"
             ]
         }

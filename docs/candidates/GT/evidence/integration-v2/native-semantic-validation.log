@@ -1,0 +1,71 @@
+PASS SC-001 88 canonical semantic sources parse as YAML mappings
+PASS SC-002 45 registered canonical sources resolve to existing files with unique ids and paths
+PASS RC-007 every registered path resolves to a canonical ledger (RC-008 uniqueness is SC-002)
+PASS SC-003 88 artifact_id values are present and unique
+PASS SC-004 contracts.yaml derivation matches semantics/invariants.yaml (artifact_id=l9.invariants/global@1, sha256=2928b1206020…, invariants=34)
+PASS SC-005 capability model closed: 0 admitted capabilities, typed capability references resolve, traits are not resolved as capabilities
+PASS SC-006 5 binding technology targets resolve to registered technologies
+PASS SC-007 5 binding identifiers present and unique; no registered ledger declares a canonical binding-ID grammar, so grammar conformance is not enforced
+PASS RC-001 semantics/capabilities.yaml derivation matches the bytes of its 2 declared sources
+PASS RC-002 semantics/lifecycle.yaml derivation matches the bytes of its 3 declared sources
+PASS RC-011 semantics/receipt_catalog.yaml derivation matches the bytes of its 3 declared sources
+PASS RC-003 43 projection profile classes resolve to the 6 declared profile_classes
+PASS RC-004 276 projection source references across 43 profiles resolve to source_classes
+PASS RC-005 identity projection uses source-local selectors; 16 stage profiles bind to declared semantic_build_stages
+PASS RC-006 registry equals the 45 semantic catalogs of the generic compiler manifest; the other 87 ledgers are classified exactly once (the manifest itself is exempt)
+PASS RC-009 ProductManifest declares 16 required fields with no duplicates
+PASS RC-012 12 architecture obligations typed as architecture_obligations; 4 profiles select them; no required_capabilities field or selector remains
+PASS RC-013 vocabulary.semantic_build_stages equals the 15-stage canonical profile l9.compilation/product-build@1: ids, order, ordinals, consumes, operations, and produces agree
+PASS RC-014 identity registries closed: 6 actors with 2 typed aliases, 11 surfaces with 5 typed aliases; no cross-dimension ownership field, no runtime-resolution structure; 2 strings legally shared across dimensions ['claude-code-desktop', 'claude-code-mobile']
+PASS RC-015 repository operations IR, Python pyproject binding, Makefile v1 binding, target technologies, and consumer projection are structurally closed
+PASS RC-015-NEG 7 repository-operations negative cases fail closed
+PASS RC-016 Strategic Cognition ledger, invariant, Plan Keeper / Strategic Plan Metacognitive Reasoner authority separation, Current Meta View projection reuse, and Reasoning Plane boundary are structurally closed
+PASS RC-016-NEG 9 Strategic Cognition negative cases fail closed for their intended reason
+PASS RC-017 validation-and-correctness contract binds satisfied to complete evaluation of every applicable required criterion, routes unavailable, unreadable, unexecuted, or unresolved required criteria to unresolved, forbids silent skip, default success, and partial coverage reported as complete, and the Cursor-Governance operating-plane projection carries operative contract semantics with the global invariants, and every declared invariant a contract cites is inside that global selection
+PASS RC-017-NEG 23 validation-completeness negative cases fail closed for their intended reason
+PASS RC-018 Strategic Plan ledger declares exactly four Plan-owned primitives, five strategic relations with supersession reused from lifecycle, and Affected Strategic Closure; it anchors to the existing Strategic Plan concept and Plan Keeper authority, reuses objective and Strategic Intent without owning them, and carries no representation
+PASS RC-018-NEG 20 Strategic Plan negative cases fail closed for their intended reason
+PASS RC-019 l9.projection/cursor-governance-identity@1 exists once as a Cursor-Governance consumer profile, projects the canonical actor and surface entries and typed aliases from the two canonical registries only, emits l9.projection.cursor-governance-identity/v1, and declares its ownership boundaries
+PASS RC-019-NEG 12 identity projection negative cases fail closed for their intended reason
+PASS RC-020 graphiti-mcp and zep are each registered exactly once with every pinned registration field, a class and target roles admitted before this registration, the admitted class datastore, capability claims and target roles that retain the admitted facts, and semantic_ownership exactly {implied: false}
+PASS RC-020-NEG 20 Graphiti/Zep technology admission negative cases fail closed at their intended field with their intended reason
+PASS RC-021 l9.authority/product-admission resolves exactly once to semantics/authority_model.yaml#product_admission_authority and is otherwise only referenced exactly; the declaration, the admission and escalation law it inherits, the product_admission term, and the admission receipt owner match their pinned bytes: decided by applicable_target_class_authority, no self-admission, and no implied publication, runtime admission, runtime availability, capability invocation, implementation conformance, or consumer compatibility; l9.projection/stage-product-topology@1 projects the declaration and the law it inherits
+PASS RC-021-NEG 49 product admission authority negative cases fail closed at their intended field
+PASS RC-022 l9.contract/admission-and-promotion@1 exists exactly once and its base requires equals semantics/authority_model.yaml#admission_rules.global_requirements as an exact sequence; the stale reusing_a_prior_decision spelling and the unconditional cross-domain witness are absent; the recurrence guarantees, recurrence prohibitions, and L9-GLOBALIZATION-001 citation that keep cross-domain evidence conditional stay declared
+PASS RC-022-NEG 27 admission contract requirement-closure negative cases fail closed at their intended field
+PASS RC-023 l9.repository-class/l9@1 is the single admitted repository class and its whole declaration matches the pinned bytes (current, memory namespace l9, membership required from the resolved class, projection obligation naming no profile or compiler receipt); l9.repository-view/memory-namespace-l9@1 selects it over current/superseded/retired and derives namespace l9 preserving id, coordinate, lifecycle, class_ref with no consumer membership expansion or removal; the registry holds exactly the 33 admitted repositories with unique ids and unique case-sensitive github/Quantum-L9 coordinates, every one current and assigned that class
+PASS RC-023-NEG 57 repository class / registry closure negative cases fail closed at their intended field
+PASS RC-024 Strategy is a non-circular semantic root and Intent, Plan, Authority, Plan content, and vocabulary resolve through it without strategic-direction ghosts
+PASS RC-024-NEG 5 Strategy semantic-root negative cases fail closed for their intended reason
+PASS RC-025 federated authority graphs preserve independent ownership and Strategic Plan Graph v1 admits only the minimal 4-node / 5-relation representation with authority, reference, causal-attribution, revision, and compiler-registration closure
+PASS RC-025-NEG 16 federation / Strategic Plan Graph negative cases fail closed for their intended reason
+PASS RC-026 Planner / Meta-Planner cognitive interfaces preserve exact source coordinates, workspace/Strategy separation, candidate admission binding, Meta-Planner advisory authority, semantic-owner anchors, and compiler/registry closure
+PASS RC-026-NEG 20 Strategic Planning cognition negative cases fail closed for their intended reason
+PASS RC-027 262 typed cross-ledger references resolve: every contracts[*].source_invariants entry names a declared invariant and every governed_by.contracts / governed_by.invariants entry names a declared contract or invariant
+PASS RC-027-NEG 8 cross-ledger reference negative cases fail closed at their intended field
+PASS RC-028 l9.projection/coding-agent-execution@1 exists once as a Cursor-Governance runtime profile, selects exactly 19 global invariants, 10 global contracts closed over their source_invariants, and 4 authority_model sections by exact id from registered projectable ledgers, emits l9.projection.coding-agent-execution/v1, declares its boundaries, and names no skill
+PASS RC-028-NEG 34 coding-agent execution projection negative cases fail closed at their intended field, ledger-side and closure cases for their stated reason
+PASS RC-029 l9.product-kind-exception/memory-hosted-service@1 is the single admitted product-kind exception, pinned field by field and by canonical digest, bound to l9-graphiti-memory:product/l9-graphite-memory at Quantum-L9/l9-graphiti-memory; its 20 departures resolve to unprotected Dependency law, every ledger stating kind law carries the exact-product qualifier, and the ordinary Node, ordinary Dependency, and exact Memory hosted-service witnesses resolve under l9.contract/product-kind@1
+PASS RC-029-NEG 87 product-kind exception negative cases fail closed at their intended field; malformed or unauthorized exceptions unbind Memory while ordinary witnesses keep their outcome
+PASS RC-030 l9.projection/architecture-intelligence@1 and l9.compose/architecture-intelligence@1 exist once at their pinned digests; l9.projection.architecture-intelligence/v1 and l9.composed-projection.architecture-intelligence/v1 are each defined by one registered schema at its pinned digest; the composed schema names exactly one namespace per declared source class with exactly its selected sections; every forbidden category has a declared criterion; every composition profile selects exactly one declared placement strategy
+PASS RC-030-NEG 20 architecture-intelligence negative cases fail closed at their intended field
+PASS RC-032 l9.projection/pr-audit@1 exists once as the l9-pr-audit consumer profile at its pinned digest, selects 24 global invariants, 16 global contracts closed over their source_invariants, and whole sections from 11 further registered projectable ledgers, overlaps no forbidden exclusion, names no skill; l9.compose/pr-audit@1 composes it under source_class_namespace at its pinned digest; l9.projection.pr-audit/v1 and l9.composed-projection.pr-audit/v1 are each defined by one registered schema at its pinned digest, and the composed schema names exactly one namespace per declared source class with exactly its selected sections
+PASS RC-032-NEG 36 pr-audit projection negative cases fail closed at their intended field
+PASS RC-033 every required_provenance token of ['l9.compose/stage-context@1', 'l9.compose/strategic-planner-value@1'] is defined once in provenance_constraints in l9.provenance-constraint@1 with one of 4 implemented criteria; source projection provenance stays required and the evaluation rule is declared
+PASS RC-033-NEG 8 provenance-constraint negative cases fail closed at their intended field
+PASS SC-009 validation was observational: 447 candidate files under semantics/ and docs/ are byte-identical before and after
+FAIL SC-008 docs/semantic-foundation/v3.32.0/MANIFEST.md install surface='semantics/strategic_interaction_composition.schema.yaml': canonical source is not listed in the manifest
+FAIL SC-008 docs/semantic-foundation/v3.32.0/MANIFEST.md install surface='semantics/strategic_interaction_projection.schema.yaml': canonical source is not listed in the manifest
+FAIL SC-008 docs/semantic-foundation/v3.32.0/MANIFEST.md install surface count=86: semantics/ holds 88 canonical YAML files
+FAIL SC-008 docs/semantic-foundation/v3.32.0/HASHES.sha256 inventory='./semantics/strategic_interaction_composition.schema.yaml': release hash inventory omits this file
+FAIL SC-008 docs/semantic-foundation/v3.32.0/HASHES.sha256 inventory='./semantics/strategic_interaction_projection.schema.yaml': release hash inventory omits this file
+FAIL SC-008 docs/semantic-foundation/v3.32.0/HASHES.sha256 ./semantics/capabilities.yaml='be197d791d10f2aee69a63c010057651ca0134ee110b095ab441432f7c6246e6': delivered bytes hash to 10a2ec85305e0949bf1e3af0f464e827254287b13123a50e0b39bc8307a16b75
+FAIL SC-008 docs/semantic-foundation/v3.32.0/HASHES.sha256 ./semantics/composition_profiles.yaml='8420476c43895834dfe58844e8cff62dcef25d550486dab8802cf0217c7c8ebc': delivered bytes hash to c44e109f73b8bc572da3046417ca3f78a27d271bed1b7b0d375970e43cfe2f67
+FAIL SC-008 docs/semantic-foundation/v3.32.0/HASHES.sha256 ./semantics/contracts.yaml='fcd31cb45a68d234449951ec28a26fa03eb5ff15035243f3dcdcd07440b7bc5b': delivered bytes hash to 25d4e2a0ce47c37961ec9edbb959d2accdebd9216f716daeb18df47ff1a7a566
+FAIL SC-008 docs/semantic-foundation/v3.32.0/HASHES.sha256 ./semantics/generic_compiler_manifest.yaml='4780d0b098ec510cea698d8e184e4e04dea11cde6cb54866b4cd090d38319f6b': delivered bytes hash to 028e7ca0ceb09c1a7c06e4bfa57f53b6f46fa2f32fd11cca5f9bd4e0bd7d7a76
+FAIL SC-008 docs/semantic-foundation/v3.32.0/HASHES.sha256 ./semantics/invariants.yaml='9558c947e2538d77b634ee4448e5ce8791ff121ce3afbb6ecb0a2debd8c8256b': delivered bytes hash to 2928b1206020490e80b18de3becfde0a2fbcd934b6e967a2c550be9c67c733aa
+FAIL SC-008 docs/semantic-foundation/v3.32.0/HASHES.sha256 ./semantics/lifecycle.yaml='b79ef6a11825524c1e8dee563f5ee3c99c092bf42735a18ee8ed0a4ddf8a7e19': delivered bytes hash to da5ff6f0b1d8e5f5f1f31768bc2e5ef9770171147926d9e726c0942b25ca4e74
+FAIL SC-008 docs/semantic-foundation/v3.32.0/HASHES.sha256 ./semantics/projection_profiles.yaml='8f5a45895ff64b706df1dd153d9d8eb819158572aa8824f2ddf72177246ab98a': delivered bytes hash to fd9787f577f743a4e1a0cbd64cdd2d8392f0448b04e0a4359f8cac42aa773de4
+FAIL SC-008 docs/semantic-foundation/v3.32.0/HASHES.sha256 ./semantics/receipt_catalog.yaml='8e7321be45be77d25ee8ca115161ca05908b6a7db7a7be18463dad5471cfcf42': delivered bytes hash to 0f7c63cf99bac3f169debcd53de17806c793b6daabc674d7e5537b4a53c2805d
+FAIL SC-008 docs/semantic-foundation/v3.32.0/HASHES.sha256 ./semantics/vocabulary.yaml='db0491ac7b8e2892e3eaddce0c4e2fa277ce4f2247017c48727b34d7f90e8bc2': delivered bytes hash to 89a211d232322d6f2189e8b2475e44ba9e4b8af922ecf62fed2254f1ae44c7ef
+FAIL semantic-foundation closure: 14 unresolved (SC-010 fail-closed)
