@@ -1,6 +1,6 @@
 # Semantic Foundation v3.32.0
 
-Status: **ADDITIVE SUCCESSOR CANDIDATE**
+Status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-029, 2026-11-08).
 
 v3.32.0 admits the Strategic Value foundation as two global invariants with a claim-scoped assessment contract, one value model, one consumer projection profile and its source-namespaced composition. Every `required_provenance` token becomes mechanically verifiable through criteria the composition catalog declares.
 
@@ -24,4 +24,4 @@ Owner decisions D1-D5: Quantum-L9/.github#220 `docs/candidates/SV/evidence/admis
 
 ## Authority
 
-`Quantum-L9/.github` owns these ledgers. Valuation is derived and non-authoritative: it grants no plan admission, strategic commitment, execution, publication, merge, admission or deployment authority. This candidate does not admit itself.
+`Quantum-L9/.github` owns these ledgers. Valuation is derived and non-authoritative: it grants no plan admission, strategic commitment, execution, publication, merge, admission or deployment authority. ADR-029 admits the v3.32.0 delta; the earlier candidate deltas are not admitted by it.

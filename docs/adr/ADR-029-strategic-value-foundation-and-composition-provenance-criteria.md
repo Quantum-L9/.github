@@ -1,6 +1,28 @@
 # ADR-029 — Strategic Value Foundation and Catalog-Declared Composition Provenance Criteria
 
-**Status:** Candidate for semantic-foundation v3.32.0. The repository owner approved decisions D1-D5 on 2026-11-08 as an explicit instruction in governed Claude Code session `session_017xwbxytavCYavKdhRr9a6n`. Owner approval of the decisions is not admission. Admission of v3.32.0 is the acceptance gate, after the preceding numbered releases (none) are admitted; this record does not admit itself.
+**Status:** Accepted for semantic-foundation v3.32.0. The repository owner admitted v3.32.0 on 2026-11-08. The decision was given as an explicit instruction in a governed Claude Code session (`session_017xwbxytavCYavKdhRr9a6n`: "I approve. Admit formally and close it out"), which also directed the merge of Quantum-L9/.github#222 into `main`. It follows the owner's approval of decisions D1-D5 in the same session. This record is the explicit decision record that `semantics/authority_model.yaml#admission_rules` requires. It takes effect when #222 merges into `main`.
+
+## Subject
+
+| Item | Value |
+|---|---|
+| Release | Semantic Foundation **v3.32.0**, additive successor to v3.31.0 |
+| Pull request | Quantum-L9/.github#222. The candidate pack and its evidence were merged through #220 → #215 → #212 (`92c037a`); the compiler criteria through Quantum-L9/l9-semantic-compiler-engine#33 (`9ca8d0e`). |
+| Approved semantic tree | `semantics/` tree `251bb3d9238f93f0207b1f8443c80359e034595b`. It is identical at the qualified authority commit `c4c4a1dd7275f50e8249168fc86aa5c5d1b14ee7` and at #222's head, which differs from `c4c4a1d` only in this ADR and the four v3.32.0 release documents. |
+| Target class and authority | Canonical global semantics. `Quantum-L9/.github` owns them, and its repository owner holds `target_class_authority`. |
+| Effective revision | The `main` commit that merges #222. It is recorded on the merged pull request; it cannot be recorded inside the hashed bytes it admits. |
+
+Admitted definitions:
+
+- Invariants `L9-SV-001` (the original SV-001 statement followed by the original SV-015 statement, verbatim) and `L9-SV-002` in `semantics/invariants.yaml`. No other `L9-SV-*` identity is admitted; SV-003..SV-014 and SV-015..SV-020 remain model and contract text with their lineage.
+- `l9.contract/strategic-value-assessment@1` in `semantics/contracts.yaml`.
+- `l9.strategic.value@1` (`semantics/strategic_value_model.yaml`), its canonical source `l9.source/strategic-value-model@1` and source class `strategic_value_model`.
+- Eleven vocabulary terms in `semantics/vocabulary.yaml`.
+- `l9.projection/strategic-planner-value@1`, `l9.compose/strategic-planner-value@1` and their payload schemas `l9.projection.strategic-planner-value/v1` and `l9.composed-projection.strategic-planner-value/v1`.
+- `semantics/composition_profiles.yaml#provenance_constraints` (`l9.provenance-constraint` v1) and the global rule `required_provenance_is_evaluated_only_through_declared_provenance_constraints`, with validator RC-033.
+- The derivation-coordinate rebinding of `capabilities.yaml`, `lifecycle.yaml` and `receipt_catalog.yaml`.
+
+Admission is scoped to the v3.32.0 delta. The v3.29.0, v3.30.0 and v3.31.0 deltas, merged to `main` as candidates before it, are not admitted by this record.
 
 ## Context
 
@@ -31,6 +53,12 @@ Its composition profile declares four `required_provenance` tokens. The Semantic
 - `l9.compose/stage-context@1` gains the same mechanical evaluation.
 - Consumers bind only through their own release process after admission and trusted replay.
 
-## Evidence
+## Evidence relied on
 
-See `docs/semantic-foundation/v3.32.0/RELEASE_VALIDATION.md` and the candidate pack evidence on Quantum-L9/.github#220 (`docs/candidates/SV/evidence/admission/`).
+Producer qualification at the approved semantic tree, `l9-semantic-compiler-engine@33e4c5832bf73c7d9b0b70854af011e9582f1ab2` (on that repository's `main` through #33): five source projections pass, the composition passes with all four `required_provenance` criteria verified and no unresolved criterion, two runs reproduce 29 artifact, receipt and summary files byte for byte, 18 of 18 producer negative controls behave as intended, the compiler's 20 composition-provenance tests (tamper and fail-closed cases) pass at `33e4c58`, and native validation exits 0. See `docs/semantic-foundation/v3.32.0/RELEASE_VALIDATION.md` and the candidate pack evidence on Quantum-L9/.github#220 (`docs/candidates/SV/evidence/admission/`).
+
+## What admission does not establish
+
+- Independent consumer replay or consumer binding. Consumers bind through their own release process after trusted replay.
+- Admission of the v3.29.0, v3.30.0 or v3.31.0 deltas.
+- Any numerical result, strategic commitment, plan admission, execution, publication or deployment authority. Valuation stays derived and non-authoritative.

@@ -1,6 +1,6 @@
 # Semantic Foundation Manifest v3.32.0
 
-Release status: **ADDITIVE SUCCESSOR CANDIDATE**
+Release status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-029, 2026-11-08)
 
 ## Install surface
 
@@ -98,7 +98,7 @@ The v3.31.0 inventory is preserved. Three files are added: `semantics/strategic_
 
 The release contains **29** accepted ADRs plus the ADR index under `docs/adr/`.
 
-v3.32.0 adds ADR-029 (strategic value foundation and catalog-declared composition provenance criteria), a candidate for this release; admission of the release is its acceptance gate.
+v3.32.0 adds ADR-029, the owner's admission decision for this release. Admission is scoped to the v3.32.0 delta.
 
 ## Semantic changes
 
