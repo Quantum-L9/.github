@@ -154,10 +154,10 @@ try {
 		categories: ["community-health"],
 		repository: "Quantum-L9/example",
 	})["SECURITY.md"];
-	assert.ok(
-		security.includes(
-			"https://github.com/Quantum-L9/example/security/advisories/new",
-		),
+	// Anchored to the exact generated line, so no other host or path can satisfy it.
+	assert.match(
+		security,
+		/^Report privately via \[this repository's Security Advisory form\]\(https:\/\/github\.com\/Quantum-L9\/example\/security\/advisories\/new\)\.$/m,
 	);
 	assert.doesNotMatch(
 		security,
@@ -169,10 +169,9 @@ try {
 		categories: ["issue-templates"],
 		repository: "Quantum-L9/example",
 	})[".github/ISSUE_TEMPLATE/config.yml"];
-	assert.ok(
-		cfg.includes(
-			"https://github.com/Quantum-L9/example/security/advisories/new",
-		),
+	assert.match(
+		cfg,
+		/^\s+url: https:\/\/github\.com\/Quantum-L9\/example\/security\/advisories\/new$/m,
 	);
 
 	// The default payload's dependabot.yml is the github-actions-only golden,

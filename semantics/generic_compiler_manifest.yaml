@@ -96,6 +96,8 @@ requires:
   - strategic_metacognition_projection.schema.yaml
   - strategic_planning_context_projection.schema.yaml
   - implementation_ir.schema.yaml
+  - strategic_interaction_projection.schema.yaml
+  - strategic_interaction_composition.schema.yaml
 capabilities:
 - canonical_source_resolution
 - profile_resolution
