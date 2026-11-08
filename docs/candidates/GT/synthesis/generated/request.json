@@ -1,0 +1,96 @@
+{
+	"authority": {
+		"repository": "Quantum-L9/.github",
+		"revision": "36cb17a474350e5a66a45f7a625ddd4fbe66ea20",
+		"root": "<authority rehearsal store rebuilt by this tool>"
+	},
+	"compiler": {
+		"executable_digest": "sha256:6f37429d108a8922add28cdf77ad2c86461f37a75077c96bd6003a80a45353d4",
+		"repository": "Quantum-L9/l9-semantic-compiler-engine",
+		"revision": "18215ae2cd948ff8c9cc8992785d2f72f8b53310"
+	},
+	"composition_profile": {
+		"digest": "sha256:6ed9e074ab773c0b0b426c0ef5d380c1e3568b701a7cc4487f16079dc949e0ed",
+		"ref": "l9.compose/strategic-planner-interaction@1"
+	},
+	"governance": {
+		"bindings": {
+			"digest": "sha256:c58747d6e784a26e76afaf301f4aae7633ef3d2926976f47c2ee5c3b21174690",
+			"owner": "Quantum-L9/.github",
+			"path": "docs/candidates/GT/synthesis/governance/bindings.yaml",
+			"ref": "l9.binding/strategic-planner-interaction-grammar-catalog-candidate@1"
+		},
+		"dialect": {
+			"digest": "sha256:4f92df3139085e6066b21bc0fd6a381a33fe4d398dd6160b8af19f2dfd215058",
+			"owner": "Quantum-L9/.github",
+			"path": "docs/candidates/GT/synthesis/governance/dialect.yaml",
+			"ref": "l9.schema-dialect/candidate-v2@1"
+		},
+		"grammars": [
+			{
+				"digest": "sha256:fc896e208a0a5574c077cc541fc7ecbb6bae2b6293879c93f26b04855bb8b4b4",
+				"owner": "Quantum-L9/.github",
+				"path": "docs/candidates/GT/synthesis/governance/grammars/vocabulary.yaml",
+				"ref": "l9.grammar/strategic-planner-interaction-vocabulary-candidate@1",
+				"revision": "9a75f5bd3b7ac79ceec268b6f7108aa3656f657e"
+			},
+			{
+				"digest": "sha256:0eb068414d8c716a29e316443a81ffbf6451473badc88c57254a86269d3af1b3",
+				"owner": "Quantum-L9/.github",
+				"path": "docs/candidates/GT/synthesis/governance/grammars/invariants.yaml",
+				"ref": "l9.grammar/strategic-planner-interaction-invariants-candidate@1",
+				"revision": "9a75f5bd3b7ac79ceec268b6f7108aa3656f657e"
+			},
+			{
+				"digest": "sha256:17bcf46746811c213a73ea69d2ffa47e41d7c0ec790810013adca4467104934f",
+				"owner": "Quantum-L9/.github",
+				"path": "docs/candidates/GT/synthesis/governance/grammars/contracts.yaml",
+				"ref": "l9.grammar/strategic-planner-interaction-contracts-candidate@1",
+				"revision": "9a75f5bd3b7ac79ceec268b6f7108aa3656f657e"
+			}
+		],
+		"operation": {
+			"digest": "sha256:04cfbb99018f88459bbcfac77b1b741dee92d2a461d04758c785adccd870b33c",
+			"owner": "Quantum-L9/.github",
+			"path": "docs/candidates/GT/synthesis/governance/operation.yaml",
+			"ref": "l9.operation/strategic-planner-interaction-schema-synthesis-candidate@1"
+		},
+		"repository": "Quantum-L9/.github",
+		"revision": "d8fbba57ba93cb0ea9ff7cf3d555d372f16295d2",
+		"root": "<governance store rebuilt by this tool>"
+	},
+	"mode": "candidate",
+	"projection_profile": {
+		"digest": "sha256:b73fcb6270f1ea0ee824341d967f8514d3de773834a55b55cc66d4fb38cd8919",
+		"ref": "l9.projection/strategic-planner-interaction@1"
+	},
+	"selector_model": {
+		"digest": "sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56",
+		"path": "semantics/selector_model.yaml",
+		"ref": "l9.selector-model/global@1"
+	},
+	"source_order": ["vocabulary", "invariants", "contracts"],
+	"sources": [
+		{
+			"digest": "sha256:89a211d232322d6f2189e8b2475e44ba9e4b8af922ecf62fed2254f1ae44c7ef",
+			"path": "semantics/vocabulary.yaml",
+			"ref": "l9.source/vocabulary@1",
+			"revision": "36cb17a474350e5a66a45f7a625ddd4fbe66ea20",
+			"source_class": "vocabulary"
+		},
+		{
+			"digest": "sha256:877fe9f8e127ccee99dd37b42d0b6c214ddb12169703a6cecb8a4f3efa1f5b79",
+			"path": "semantics/invariants.yaml",
+			"ref": "l9.source/invariants@1",
+			"revision": "36cb17a474350e5a66a45f7a625ddd4fbe66ea20",
+			"source_class": "invariants"
+		},
+		{
+			"digest": "sha256:cd7767e6693f439ed27ff36f3b85259c9d230d7edea4a6e0cd0afdef381b4f3a",
+			"path": "semantics/contracts.yaml",
+			"ref": "l9.source/contracts@1",
+			"revision": "36cb17a474350e5a66a45f7a625ddd4fbe66ea20",
+			"source_class": "contracts"
+		}
+	]
+}

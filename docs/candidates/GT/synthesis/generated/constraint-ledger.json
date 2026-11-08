@@ -1,0 +1,827 @@
+{
+	"entries": [
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.strategic_interaction",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategic_interaction.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategic_interaction.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.strategic_game_model",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategic_game_model.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategic_game_model.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.actor_response_model",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.actor_response_model.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.actor_response_model.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.strategy_profile",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategy_profile.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategy_profile.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.conditional_best_response",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.conditional_best_response.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.conditional_best_response.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.equilibrium_assessment",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.equilibrium_assessment.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.equilibrium_assessment.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.deviation_gain",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.deviation_gain.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.deviation_gain.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.incentive_bearing_commitment",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.incentive_bearing_commitment.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.incentive_bearing_commitment.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.information_disclosure_decision",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.information_disclosure_decision.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.information_disclosure_decision.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.policy_exploitability",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.policy_exploitability.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.policy_exploitability.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.incentive_compatibility",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.incentive_compatibility.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.incentive_compatibility.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms.strategic_interaction_assessment",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategic_interaction_assessment.semantic_class",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategic_interaction_assessment.definition",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.terms",
+			"reason": "v1_objects_always_open",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategic_interaction",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategic_game_model",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.actor_response_model",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategy_profile",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.conditional_best_response",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.equilibrium_assessment",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.deviation_gain",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.incentive_bearing_commitment",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.information_disclosure_decision",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.policy_exploitability",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.incentive_compatibility",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.terms.strategic_interaction_assessment",
+			"source_class": "vocabulary"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$",
+			"reason": "v1_objects_always_open; unselected source fields remain outside the projection",
+			"source_class": "vocabulary",
+			"value": true
+		},
+		{
+			"action": "not_carried",
+			"constraint": "enum",
+			"path": "$.invariants[].id",
+			"reason": "false_of_source",
+			"source_class": "invariants",
+			"value": [
+				"L9-GT-001",
+				"L9-AUTH-002",
+				"L9-HARD-001",
+				"L9-UNKNOWN-001",
+				"L9-EVIDENCE-001",
+				"L9-ASSURANCE-001"
+			]
+		},
+		{
+			"action": "not_carried",
+			"constraint": "const",
+			"path": "$.invariants[].scope",
+			"reason": "false_of_source",
+			"source_class": "invariants",
+			"value": "global"
+		},
+		{
+			"action": "carried",
+			"constraint": "const",
+			"path": "$.invariants[].owner",
+			"source_class": "invariants",
+			"value": "Quantum-L9/.github"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.invariants[].severity",
+			"source_class": "invariants"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.invariants[]",
+			"reason": "v1_objects_always_open",
+			"source_class": "invariants",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.invariants[].id",
+			"source_class": "invariants"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.invariants[].statement",
+			"source_class": "invariants"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.invariants[].scope",
+			"source_class": "invariants"
+		},
+		{
+			"action": "not_carried",
+			"constraint": "required",
+			"path": "$.invariants[].owner",
+			"reason": "false_of_source",
+			"source_class": "invariants"
+		},
+		{
+			"action": "carried",
+			"constraint": "min_items",
+			"path": "$.invariants",
+			"source_class": "invariants",
+			"value": 6
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$",
+			"reason": "v1_objects_always_open; unselected source fields remain outside the projection",
+			"source_class": "invariants",
+			"value": true
+		},
+		{
+			"action": "not_carried",
+			"constraint": "const",
+			"path": "$.contracts[].id",
+			"reason": "false_of_source",
+			"source_class": "contracts",
+			"value": "l9.contract/strategic-interaction-assessment@1"
+		},
+		{
+			"action": "carried",
+			"constraint": "const",
+			"path": "$.contracts[].scope",
+			"source_class": "contracts",
+			"value": "global"
+		},
+		{
+			"action": "carried",
+			"constraint": "const",
+			"path": "$.contracts[].owner",
+			"source_class": "contracts",
+			"value": "Quantum-L9/.github"
+		},
+		{
+			"action": "carried",
+			"constraint": "min_items",
+			"path": "$.contracts[].source_invariants",
+			"source_class": "contracts",
+			"value": 1
+		},
+		{
+			"action": "carried",
+			"constraint": "min_items",
+			"path": "$.contracts[].applies_to",
+			"source_class": "contracts",
+			"value": 1
+		},
+		{
+			"action": "carried",
+			"constraint": "min_items",
+			"path": "$.contracts[].requires",
+			"source_class": "contracts",
+			"value": 1
+		},
+		{
+			"action": "carried",
+			"constraint": "min_items",
+			"path": "$.contracts[].guarantees",
+			"source_class": "contracts",
+			"value": 1
+		},
+		{
+			"action": "carried",
+			"constraint": "min_items",
+			"path": "$.contracts[].forbidden",
+			"source_class": "contracts",
+			"value": 1
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.admitted",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.refused",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.new_decision_required",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.attested",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.unverified",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.invalid_binding",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.supported",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.unsupported",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.resolved",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.admissible",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.inadmissible",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.current",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.non_current",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.compatible",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.incompatible",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.preserved",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.successor_required",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.valid_projection",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.invalid_projection",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.rejected",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.invocable",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.not_invocable",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.invalid",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.unsat",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.ambiguous",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.blocked",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.unknown",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.valid",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].outcomes.new_candidate_required",
+			"source_class": "contracts"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.contracts[].outcomes",
+			"reason": "v1_objects_always_open",
+			"source_class": "contracts",
+			"value": true
+		},
+		{
+			"action": "not_carried",
+			"constraint": "required",
+			"path": "$.contracts[].outcomes.satisfied",
+			"reason": "false_of_source",
+			"source_class": "contracts"
+		},
+		{
+			"action": "not_carried",
+			"constraint": "required",
+			"path": "$.contracts[].outcomes.violated",
+			"reason": "false_of_source",
+			"source_class": "contracts"
+		},
+		{
+			"action": "not_carried",
+			"constraint": "required",
+			"path": "$.contracts[].outcomes.unresolved",
+			"reason": "false_of_source",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "min_items",
+			"path": "$.contracts[].applicability.does_not_apply_to",
+			"source_class": "contracts",
+			"value": 1
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].applicability.method_conditional",
+			"source_class": "contracts"
+		},
+		{
+			"action": "structural_fill",
+			"constraint": "type",
+			"path": "$.contracts[].applicability.unavailable_claim",
+			"source_class": "contracts"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.contracts[].applicability",
+			"reason": "v1_objects_always_open",
+			"source_class": "contracts",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].applicability.trigger",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].applicability.does_not_apply_to",
+			"source_class": "contracts"
+		},
+		{
+			"action": "not_carried",
+			"constraint": "required",
+			"path": "$.contracts[].applicability.sv_dependency",
+			"reason": "false_of_source",
+			"source_class": "contracts"
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$.contracts[]",
+			"reason": "v1_objects_always_open",
+			"source_class": "contracts",
+			"value": true
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].id",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].purpose",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].scope",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].owner",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].source_invariants",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].applies_to",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].requires",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].guarantees",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].forbidden",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "required",
+			"path": "$.contracts[].outcomes",
+			"source_class": "contracts"
+		},
+		{
+			"action": "carried",
+			"constraint": "min_items",
+			"path": "$.contracts",
+			"source_class": "contracts",
+			"value": 1
+		},
+		{
+			"action": "v1_semantics",
+			"constraint": "additional_properties",
+			"path": "$",
+			"reason": "v1_objects_always_open; unselected source fields remain outside the projection",
+			"source_class": "contracts",
+			"value": true
+		}
+	],
+	"hand_schema": "semantics/strategic_interaction_projection.schema.yaml",
+	"schema": "l9.gt.grammar-translation-ledger/v1",
+	"summary": {
+		"contracts": {
+			"carried": 21,
+			"not_carried": 5,
+			"structural_fill": 31,
+			"v1_semantics": 4
+		},
+		"invariants": {
+			"carried": 5,
+			"not_carried": 3,
+			"structural_fill": 1,
+			"v1_semantics": 2
+		},
+		"vocabulary": {
+			"carried": 36,
+			"not_carried": 0,
+			"structural_fill": 0,
+			"v1_semantics": 14
+		}
+	}
+}

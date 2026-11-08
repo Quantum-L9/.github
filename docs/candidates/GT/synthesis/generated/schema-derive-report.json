@@ -1,0 +1,27 @@
+{
+	"normative": false,
+	"observations": {
+		"path": "observations.json",
+		"sha256": "sha256:f01de70acc341ebcd951ffe5c43fcf7ad11a194601b983df9671c67521faa60c"
+	},
+	"reason": "normative constraints need a governing source-field grammar; use schema-synthesize with pinned grammars",
+	"schemas_emitted": [],
+	"status": "unknown",
+	"unresolved": [
+		{
+			"field_path": "$.terms",
+			"reason": "governing_source_field_grammar_not_supplied",
+			"source_class": "vocabulary"
+		},
+		{
+			"field_path": "$.invariants",
+			"reason": "governing_source_field_grammar_not_supplied",
+			"source_class": "invariants"
+		},
+		{
+			"field_path": "$.contracts",
+			"reason": "governing_source_field_grammar_not_supplied",
+			"source_class": "contracts"
+		}
+	]
+}

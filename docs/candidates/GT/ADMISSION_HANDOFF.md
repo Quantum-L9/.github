@@ -17,6 +17,7 @@ Gates the canonical owner must close:
 3. Confirm that the three derived ledgers need digest rebinding only.
 4. Prepare a successor semantic-foundation release record so SC-008 and SC-010 pass. The version is not chosen here.
 5. Re-run the integrated rehearsal at the exact successor revision, and replay it under trust.
+6. Review the compiler-generated candidate schemas and their drafted grammars in `synthesis/` (`schema-synthesize` at `18215ae`, exit 0, deterministic). Approve, amend or reject the grammars, and decide whether the candidate schemas replace or accompany `semantics/strategic_interaction_*.schema.yaml`. Then re-run `tools/synthesize_candidate_schemas.py` against the admitted revision with the approved grammars.
 
 ## Successor release B — GT+SV cross-boundary contract
 

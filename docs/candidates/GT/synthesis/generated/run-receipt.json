@@ -1,0 +1,90 @@
+{
+	"admission": "not_granted",
+	"authority_base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"authority_rehearsal_applies": [
+		"SV #215 pack (docs/candidates/SV/apply_to_pinned_checkout.py)",
+		"GT pack core stage (docs/candidates/GT/apply_to_pinned_checkout.py)"
+	],
+	"authority_rehearsal_pushed": false,
+	"authority_rehearsal_revision": "36cb17a474350e5a66a45f7a625ddd4fbe66ea20",
+	"authority_repository": "Quantum-L9/.github",
+	"candidate_json_compiler_bytes_sha256": "sha256:38bdde76a17739931671d0e5566dd6e309a4e70f4f20995e8ce4888193f202d4",
+	"compiler": {
+		"executable_digest": "sha256:6f37429d108a8922add28cdf77ad2c86461f37a75077c96bd6003a80a45353d4",
+		"repository": "Quantum-L9/l9-semantic-compiler-engine",
+		"revision": "18215ae2cd948ff8c9cc8992785d2f72f8b53310"
+	},
+	"deterministic_replay": true,
+	"governance_catalog_revision": "d8fbba57ba93cb0ea9ff7cf3d555d372f16295d2",
+	"governance_grammar_revision": "9a75f5bd3b7ac79ceec268b6f7108aa3656f657e",
+	"governance_store": "local, rebuilt by this tool from synthesis/governance/ (never pushed)",
+	"grammar_summary": {
+		"contracts": {
+			"carried": 21,
+			"not_carried": 5,
+			"structural_fill": 31,
+			"v1_semantics": 4
+		},
+		"invariants": {
+			"carried": 5,
+			"not_carried": 3,
+			"structural_fill": 1,
+			"v1_semantics": 2
+		},
+		"vocabulary": {
+			"carried": 36,
+			"not_carried": 0,
+			"structural_fill": 0,
+			"v1_semantics": 14
+		}
+	},
+	"output_digests": {
+		"composition_schema": "sha256:82eb68a7a72aa32044f7bc170c90cb5035930c553245e56876fcdfd18aea6fe7",
+		"digest_basis": "canonical_json_utf8_sorted_keys_with_newline",
+		"projection_schema": "sha256:657e80e1761c5699fdb702762dc71abef921f022383a67ef90325a7f1c93016e",
+		"provenance": "sha256:e6722d5703fca6a111b10f920154047acb7272305ea33874fd0e7793f52c5025"
+	},
+	"outputs": {
+		"composition_schema": {
+			"path": "strategic_planner_interaction_composition.candidate.schema.json",
+			"sha256": "sha256:82eb68a7a72aa32044f7bc170c90cb5035930c553245e56876fcdfd18aea6fe7"
+		},
+		"projection_schema": {
+			"path": "strategic_planner_interaction_projection.candidate.schema.json",
+			"sha256": "sha256:657e80e1761c5699fdb702762dc71abef921f022383a67ef90325a7f1c93016e"
+		},
+		"provenance": {
+			"path": "candidate.json#/provenance",
+			"sha256": "sha256:e6722d5703fca6a111b10f920154047acb7272305ea33874fd0e7793f52c5025"
+		}
+	},
+	"owner_review": "not_performed",
+	"schema": "l9.gt.candidate-schema-synthesis-run/v1",
+	"schema_candidate_check": {
+		"admission": "not_granted",
+		"authenticity": "not_established",
+		"canonical": false,
+		"producer_consumer_qualification": "not_evaluated",
+		"status": "candidate_digests_consistent"
+	},
+	"schema_candidate_check_exit_code": 0,
+	"schema_derive_exit_code": 3,
+	"schema_synthesize_exit_codes": [0, 0],
+	"status": "candidate_not_admitted",
+	"sv_pack": {
+		"binding_head": "a64d05a152b5920dad577cead26618a6f05fef09",
+		"pr": 215,
+		"verified_pack_blobs": {
+			"docs/candidates/SV/README.md": "0e5bacfa408c635199da764eaf29071eae49bd7a",
+			"docs/candidates/SV/apply_to_pinned_checkout.py": "fe88e3ac88c367d4d457f88b0226c30bd4d03ba0",
+			"docs/candidates/SV/overlays/composition_profile_additions.yaml": "c14c27b842ef02e0abe965d4d2bbf1095629e9f8",
+			"docs/candidates/SV/overlays/contracts_additions.yaml": "ab5776f45b0c8c538fd210b37f6dc0a430518a46",
+			"docs/candidates/SV/overlays/invariants_additions.yaml": "7ba0f97e4683caaf8ad9beda0c11ad3f451d8f00",
+			"docs/candidates/SV/overlays/projection_profile_additions.yaml": "81523b86d1bbc23d0b6832731666054eb938e3d1",
+			"docs/candidates/SV/overlays/vocabulary_additions.yaml": "c5f19da2b80e9f4991a158b6f1171851192429fa",
+			"docs/candidates/SV/semantics/strategic_planner_value_composition.schema.yaml": "d76e680d3752d0087cc5bd24557e053eaf595382",
+			"docs/candidates/SV/semantics/strategic_planner_value_projection.schema.yaml": "052e1dacee5efb61d76cad1388a64187ae3caa38",
+			"docs/candidates/SV/semantics/strategic_value_model.yaml": "dbc6bc424b11a68dbf33321751bde48c33546fec"
+		}
+	}
+}

@@ -22,7 +22,7 @@ The GT and SV compositions stay separate (three and five sources). The consumer 
 ## Runnable checks
 
 ```bash
-python -m unittest discover -s tests -v     # 77 local tests (PyYAML, jsonschema)
+python -m unittest discover -s tests -v     # 89 local tests (PyYAML, jsonschema)
 python apply_to_pinned_checkout.py --checkout <clone at 020a94b with SV #215 applied>   # dry run
 ```
 
@@ -48,5 +48,14 @@ The core stage refuses unless HEAD is `020a94b` and the dirty paths are exactly 
 - Real compiler `3bf1a82` (0.9.3): GT three projections and the composition **pass**; SV five projections **pass**; SV composition **unknown**, because its four `required_provenance` declarations have no mechanical criterion (owner decision recorded in #215). Two runs were byte-identical.
 - The forbidden criterion was evaluated against 11 vocabulary, 2 invariant and 1 contract selections, and passed.
 - 19 GT producer controls each produced their asserted exit code, typed failure and criterion.
+
+## Compiler-generated candidate schemas (`synthesis/`)
+
+`tools/synthesize_candidate_schemas.py` runs the real compiler's `schema-synthesize` (`l9-semantic-compiler-engine@18215ae`) on the integrated rehearsal (`020a94b` + SV #215 + GT core). It emits:
+
+- `synthesis/generated/strategic_planner_interaction_projection.candidate.schema.json`
+- `synthesis/generated/strategic_planner_interaction_composition.candidate.schema.json`
+
+On two runs the compiler exited 0 with byte-identical output, and `schema-candidate-check` reported `candidate_digests_consistent`. The drafted source-field grammars are candidates for owner review. `--check` reproduces every output. See `synthesis/README.md`.
 
 **No canonical admission, merge, release, canonical producer receipt or consumer binding is claimed.** Producer receipts bind to a local rehearsal commit that was never pushed. `PR212_*.md` and the `evidence/prior_*`, `pr212_*` and `authority_binding.json` files are the historical PR #212 record, left unchanged.
