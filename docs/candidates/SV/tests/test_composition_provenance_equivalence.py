@@ -45,7 +45,10 @@ class PositiveControls(_RunFixture):
     def test_rehearsal_run1_passes_every_check(self):
         report = vcp.verify(self.run, REVISION)
         self.assertEqual(report["result"], "PASS", report["failed_checks"])
-        self.assertEqual(set(report["required_provenance_tokens"]), set(vcp.REQUIRED_PROVENANCE_TOKENS))
+        self.assertEqual(
+            set(report["required_provenance_tokens"]),
+            set(vcp.REQUIRED_PROVENANCE_TOKENS),
+        )
         for token in report["required_provenance_tokens"].values():
             self.assertEqual(token["status"], "pass")
 
@@ -54,7 +57,10 @@ class PositiveControls(_RunFixture):
         self.assertEqual(report["compiler_reported_result"], "unknown")
         self.assertEqual(
             report["compiler_unresolved_criteria"],
-            sorted(f"declared_constraint:required_provenance:{t}" for t in vcp.REQUIRED_PROVENANCE_TOKENS),
+            sorted(
+                f"declared_constraint:required_provenance:{t}"
+                for t in vcp.REQUIRED_PROVENANCE_TOKENS
+            ),
         )
 
     def test_five_projection_receipts_pass_at_one_revision(self):
@@ -69,9 +75,12 @@ class PositiveControls(_RunFixture):
 
     def test_committed_result_matches_a_fresh_run(self):
         committed = json.loads(
-            (vcp.PACK / "evidence" / "admission" / "composition-provenance-equivalence.json").read_text(
-                encoding="utf-8"
-            )
+            (
+                vcp.PACK
+                / "evidence"
+                / "admission"
+                / "composition-provenance-equivalence.json"
+            ).read_text(encoding="utf-8")
         )
         fresh = vcp.verify(self.run, REVISION)
         self.assertEqual(committed["runs"]["projection-run1.tar"], fresh)
@@ -82,11 +91,16 @@ class PositiveControlsRun2(PositiveControls):
 
     def test_committed_result_matches_a_fresh_run(self):
         committed = json.loads(
-            (vcp.PACK / "evidence" / "admission" / "composition-provenance-equivalence.json").read_text(
-                encoding="utf-8"
-            )
+            (
+                vcp.PACK
+                / "evidence"
+                / "admission"
+                / "composition-provenance-equivalence.json"
+            ).read_text(encoding="utf-8")
         )
-        self.assertEqual(committed["runs"]["projection-run2.tar"], vcp.verify(self.run, REVISION))
+        self.assertEqual(
+            committed["runs"]["projection-run2.tar"], vcp.verify(self.run, REVISION)
+        )
 
 
 class NegativeControls(_RunFixture):
@@ -114,7 +128,9 @@ class NegativeControls(_RunFixture):
     def test_foreign_projection_reference_fails(self):
         run = copy.deepcopy(self.run)
         comp = run["composed"]["components"][2]
-        comp["projection_ref"] = comp["projection_ref"].replace(vcp.PROJECTION_PROFILE_REF, "l9.projection/other@1")
+        comp["projection_ref"] = comp["projection_ref"].replace(
+            vcp.PROJECTION_PROFILE_REF, "l9.projection/other@1"
+        )
         _reseal_composed(run)
         self.assertIn("component_refs", self.failed(run))
 
@@ -136,7 +152,9 @@ class NegativeControls(_RunFixture):
         real = vcp.candidate_profiles()
         edited = copy.deepcopy(real[0])
         edited["merge_strategy"]["duplicate_source"] = "merge"
-        with mock.patch.object(vcp, "candidate_profiles", return_value=(edited, real[1])):
+        with mock.patch.object(
+            vcp, "candidate_profiles", return_value=(edited, real[1])
+        ):
             self.assertIn("composition_profile_digest", self.failed())
 
     def test_relabelled_source_classes_fail(self):
@@ -145,7 +163,10 @@ class NegativeControls(_RunFixture):
         run = copy.deepcopy(self.run)
         a, b = run["composed"]["components"][0], run["composed"]["components"][1]
         payload = run["composed"]["payload"]
-        payload[a["source_class"]], payload[b["source_class"]] = payload[b["source_class"]], payload[a["source_class"]]
+        payload[a["source_class"]], payload[b["source_class"]] = (
+            payload[b["source_class"]],
+            payload[a["source_class"]],
+        )
         a["source_class"], b["source_class"] = b["source_class"], a["source_class"]
         _reseal_composed(run)
         failed = self.failed(run)
@@ -157,10 +178,15 @@ class NegativeControls(_RunFixture):
         import yaml
 
         overlay = yaml.safe_load(
-            (vcp.PACK / "overlays" / "projection_profile_additions.yaml").read_text(encoding="utf-8")
+            (vcp.PACK / "overlays" / "projection_profile_additions.yaml").read_text(
+                encoding="utf-8"
+            )
         )
         for cls, record in overlay["source_classes"].items():
-            self.assertEqual(vcp.SOURCE_CLASS_ARTIFACTS[cls], "semantics/" + record["canonical_artifact"])
+            self.assertEqual(
+                vcp.SOURCE_CLASS_ARTIFACTS[cls],
+                "semantics/" + record["canonical_artifact"],
+            )
 
     def test_duplicated_source_fails(self):
         run = copy.deepcopy(self.run)
@@ -200,7 +226,9 @@ class NegativeControls(_RunFixture):
         for _, receipt in run["receipts"]:
             if receipt.get("operation") == "composition":
                 receipt["inputs"] = receipt["inputs"][:-1]
-                receipt["receipt_digest"] = vcp.envelope_digest(receipt, "receipt_digest")
+                receipt["receipt_digest"] = vcp.envelope_digest(
+                    receipt, "receipt_digest"
+                )
         self.assertIn("receipt_binding", self.failed(run))
 
     def test_unsealed_receipt_fails(self):
@@ -214,7 +242,9 @@ class NegativeControls(_RunFixture):
 
     def test_missing_projection_receipt_fails(self):
         run = copy.deepcopy(self.run)
-        projection = [r for r in run["receipts"] if r[1].get("operation") == "projection"]
+        projection = [
+            r for r in run["receipts"] if r[1].get("operation") == "projection"
+        ]
         run["receipts"].remove(projection[0])
         self.assertIn("receipt_binding", self.failed(run))
 
@@ -227,7 +257,9 @@ class OwnerDecisionScaffold(unittest.TestCase):
 
         self.yaml = yaml
         self.doc = yaml.safe_load(
-            (vcp.PACK / "evidence" / "admission" / "owner-decision.yaml").read_text(encoding="utf-8")
+            (vcp.PACK / "evidence" / "admission" / "owner-decision.yaml").read_text(
+                encoding="utf-8"
+            )
         )
 
     def _statements(self, rel):
@@ -249,9 +281,13 @@ class OwnerDecisionScaffold(unittest.TestCase):
 
     def test_sv001_options_are_exact_source_texts(self):
         options = self.doc["decisions_required"][0]["options"]
-        donor = self._statements("evidence/reduction-v1/donor/invariants_additions.yaml")
+        donor = self._statements(
+            "evidence/reduction-v1/donor/invariants_additions.yaml"
+        )
         overlay = self._statements("overlays/invariants_additions.yaml")
-        self.assertEqual(options["A-development-pack"]["statement"].strip(), overlay["L9-SV-001"])
+        self.assertEqual(
+            options["A-development-pack"]["statement"].strip(), overlay["L9-SV-001"]
+        )
         self.assertEqual(
             options["B-non-weakening"]["statement"].strip(),
             f"{donor['L9-SV-001']} {donor['L9-SV-015']}",

@@ -434,8 +434,8 @@
 		},
 		{
 			"path": "tests/test_composition_provenance_equivalence.py",
-			"bytes": 11808,
-			"sha256": "46e77012e781030365a2b0649e74c206211f5ed831fb1c9bee43cfc04b497fe0"
+			"bytes": 12299,
+			"sha256": "8e91794447ccdebbf3dad507c051bc48970680b5f24c5f754a1fd498a9fef460"
 		},
 		{
 			"path": "tests/test_irreducibility.py",
@@ -474,8 +474,8 @@
 		},
 		{
 			"path": "tests/verify_composition_provenance.py",
-			"bytes": 16256,
-			"sha256": "675767cce7942e8cd11ebd16de7db4cb3db3472e2904f787c201f78b8e705b2d"
+			"bytes": 16744,
+			"sha256": "f29aa29ef3d472d90c64a5b8bc0ce15390f34ee4063a0e6608ccc40addb133cc"
 		},
 		{
 			"path": "tools/reduce_to_two_invariants.py",

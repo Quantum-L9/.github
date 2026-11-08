@@ -61,7 +61,12 @@ REQUIRED_PROVENANCE_TOKENS = (
 # criterion that already enforces the same fact on every composition.
 TOKEN_EQUIVALENCE = {
     "source_projection_refs": {
-        "verifier_checks": ["component_refs", "coverage", "source_class_binding", "receipt_binding"],
+        "verifier_checks": [
+            "component_refs",
+            "coverage",
+            "source_class_binding",
+            "receipt_binding",
+        ],
         "compiler_always_on": ["component_provenance", "composition_equivalence"],
     },
     "source_projection_digests": {
@@ -108,9 +113,15 @@ def _profile_record(overlay: str, key: str, ref: str) -> dict[str, Any]:
         doc = yaml.safe_load(path.read_text(encoding="utf-8"))
     except (OSError, yaml.YAMLError) as exc:
         raise InputError(f"unreadable profile overlay {overlay}: {exc}") from exc
-    matches = [p for p in (doc or {}).get(key) or [] if isinstance(p, dict) and p.get("id") == ref]
+    matches = [
+        p
+        for p in (doc or {}).get(key) or []
+        if isinstance(p, dict) and p.get("id") == ref
+    ]
     if len(matches) != 1:
-        raise InputError(f"{overlay} must define {ref} exactly once (found {len(matches)})")
+        raise InputError(
+            f"{overlay} must define {ref} exactly once (found {len(matches)})"
+        )
     return matches[0]
 
 
@@ -119,7 +130,9 @@ def candidate_profiles() -> tuple[dict[str, Any], dict[str, Any]]:
         "composition_profile_additions.yaml", "profiles", COMPOSITION_PROFILE_REF
     )
     projection = _profile_record(
-        "projection_profile_additions.yaml", "projection_profiles", PROJECTION_PROFILE_REF
+        "projection_profile_additions.yaml",
+        "projection_profiles",
+        PROJECTION_PROFILE_REF,
     )
     return composition, projection
 
@@ -127,7 +140,9 @@ def candidate_profiles() -> tuple[dict[str, Any], dict[str, Any]]:
 def load_run(run_dir: Path) -> dict[str, Any]:
     composed = sorted((run_dir / "composed").glob("*.composed.json"))
     if len(composed) != 1:
-        raise InputError(f"expected exactly one composed artifact, found {len(composed)}")
+        raise InputError(
+            f"expected exactly one composed artifact, found {len(composed)}"
+        )
     projections = sorted(run_dir.glob("*/*.projection.json"))
     if not projections:
         raise InputError("no component projection artifacts found")
@@ -205,23 +220,32 @@ def verify(run: dict[str, Any], revision: str | None = None) -> dict[str, Any]:
             digest_errors.append(f"{c.get('projection_ref')}: no artifact")
             continue
         if c.get("projection_digest") != envelope_digest(art, "projection_digest"):
-            digest_errors.append(f"{c.get('projection_ref')}: projection_digest mismatch")
+            digest_errors.append(
+                f"{c.get('projection_ref')}: projection_digest mismatch"
+            )
         if c.get("source_digest") != art.get("source_digest"):
             digest_errors.append(f"{c.get('projection_ref')}: source_digest mismatch")
-    checks["component_digests"] = _check(bool(components) and not digest_errors, errors=digest_errors)
+    checks["component_digests"] = _check(
+        bool(components) and not digest_errors, errors=digest_errors
+    )
 
     checks["composition_digest"] = _check(
-        envelope_digest(composed, "composition_digest") == composed.get("composition_digest"),
+        envelope_digest(composed, "composition_digest")
+        == composed.get("composition_digest"),
         observed=composed.get("composition_digest"),
     )
 
     classes = [c.get("source_class") for c in components if isinstance(c, dict)]
-    payload = composed.get("payload") if isinstance(composed.get("payload"), dict) else {}
+    payload = (
+        composed.get("payload") if isinstance(composed.get("payload"), dict) else {}
+    )
     placement_errors = []
     for c in components:
         art = artifacts.get(c.get("projection_ref"))
         if art is None or payload.get(c.get("source_class")) != art.get("payload"):
-            placement_errors.append(f"{c.get('source_class')}: payload is not the whole component payload")
+            placement_errors.append(
+                f"{c.get('source_class')}: payload is not the whole component payload"
+            )
     checks["coverage"] = _check(
         sorted(classes) == list(REQUIRED_SOURCE_CLASSES)
         and len(set(refs)) == len(refs) == len(REQUIRED_SOURCE_CLASSES)
@@ -253,7 +277,9 @@ def verify(run: dict[str, Any], revision: str | None = None) -> dict[str, Any]:
         "checks": checks,
         "required_provenance_tokens": tokens,
         "compiler_reported_result": checks["receipt_binding"].get("compiler_result"),
-        "compiler_unresolved_criteria": checks["receipt_binding"].get("compiler_unresolved"),
+        "compiler_unresolved_criteria": checks["receipt_binding"].get(
+            "compiler_unresolved"
+        ),
     }
 
 
@@ -272,19 +298,29 @@ def _receipt_binding(run, composed, artifacts, revision) -> dict[str, Any]:
         return _check(False, errors=errors)
     rc = compositions[0]
     coords = rc.get("governing_coordinates") or {}
-    revisions = {(r.get("governing_coordinates") or {}).get("revision") for _, r in run["receipts"]}
+    revisions = {
+        (r.get("governing_coordinates") or {}).get("revision")
+        for _, r in run["receipts"]
+    }
     if len(revisions) != 1:
         errors.append(f"receipts bind {len(revisions)} authority revisions")
     if revision is not None and coords.get("revision") != revision:
-        errors.append(f"authority revision {coords.get('revision')} != expected {revision}")
+        errors.append(
+            f"authority revision {coords.get('revision')} != expected {revision}"
+        )
     if rc.get("profile") != composed.get("composition_profile"):
         errors.append("composition receipt profile differs from composed artifact")
     if (rc.get("output") or {}).get("digest") != composed.get("composition_digest"):
-        errors.append("composition receipt output digest differs from composed artifact")
+        errors.append(
+            "composition receipt output digest differs from composed artifact"
+        )
     expected_inputs = sorted(
-        (c.get("projection_ref"), c.get("projection_digest")) for c in composed.get("components") or []
+        (c.get("projection_ref"), c.get("projection_digest"))
+        for c in composed.get("components") or []
     )
-    observed_inputs = sorted((i.get("ref"), i.get("digest")) for i in rc.get("inputs") or [])
+    observed_inputs = sorted(
+        (i.get("ref"), i.get("digest")) for i in rc.get("inputs") or []
+    )
     if observed_inputs != expected_inputs:
         errors.append("composition receipt inputs differ from composed components")
     projection_outputs = {}
@@ -301,7 +337,9 @@ def _receipt_binding(run, composed, artifacts, revision) -> dict[str, Any]:
         errors=errors,
         authority_revision=coords.get("revision"),
         authority_repository=coords.get("repository"),
-        projection_receipts_pass=sum(1 for d, res in projection_outputs.values() if res == "pass"),
+        projection_receipts_pass=sum(
+            1 for d, res in projection_outputs.values() if res == "pass"
+        ),
         compiler_result=rc.get("result"),
         compiler_unresolved=sorted(basis.get("unresolved_criteria") or []),
     )
@@ -313,7 +351,9 @@ def _source_class_binding(run, components) -> dict[str, Any]:
     for _, receipt in run["receipts"]:
         if receipt.get("operation") == "projection":
             ref = (receipt.get("output") or {}).get("ref")
-            compiled_from[ref] = sorted(str(i.get("path")) for i in receipt.get("inputs") or [])
+            compiled_from[ref] = sorted(
+                str(i.get("path")) for i in receipt.get("inputs") or []
+            )
     errors = []
     for c in components:
         expected = SOURCE_CLASS_ARTIFACTS.get(c.get("source_class"))
@@ -328,7 +368,11 @@ def _source_class_binding(run, components) -> dict[str, Any]:
 def _run_from_archive(archive: Path, workdir: Path) -> Path:
     with tarfile.open(archive) as tar:
         for member in tar.getmembers():
-            if not (member.isfile() or member.isdir()) or member.name.startswith("/") or ".." in Path(member.name).parts:
+            if (
+                not (member.isfile() or member.isdir())
+                or member.name.startswith("/")
+                or ".." in Path(member.name).parts
+            ):
                 raise InputError(f"refusing archive member {member.name}")
         tar.extractall(workdir, filter="data")
     return workdir
@@ -339,7 +383,9 @@ def main(argv: list[str] | None = None) -> int:
     src = parser.add_mutually_exclusive_group(required=True)
     src.add_argument("--run-dir", type=Path)
     src.add_argument("--archive", type=Path)
-    parser.add_argument("--revision", help="expected authority revision bound by every receipt")
+    parser.add_argument(
+        "--revision", help="expected authority revision bound by every receipt"
+    )
     parser.add_argument("--out", type=Path)
     args = parser.parse_args(argv)
     try:
