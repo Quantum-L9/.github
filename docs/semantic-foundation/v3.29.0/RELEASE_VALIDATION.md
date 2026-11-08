@@ -17,7 +17,7 @@ Candidate status: **additive successor candidate**.
   - The new `entry_shapes` block and the three new topology rules, including the form, confinement and symbol rules of `implementation_ref`. The Semantic Compiler at `3bf1a82` enforces the port and adapter resolution law that the shapes record; it does not yet check the coordinate.
 - **SC-008** proves this release record:
   - the manifest lists all **82** canonical sources;
-  - the ADR count is **25**;
+  - the ADR count is **26**;
   - `HASHES.sha256` inventories every canonical source, every ADR plus the index, and this release's Markdown.
 
 ## Existing closure

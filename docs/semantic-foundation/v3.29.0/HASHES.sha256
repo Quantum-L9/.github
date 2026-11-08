@@ -1,6 +1,6 @@
-f44fa1e6571cc94dd2dfe3ddb64f6f02136366573410840ba0f5e315c9716009  ./MANIFEST.md
-7d71c100db467b6ae33989645a8764bf8b5e71eb9fe131bc662a54d05f651302  ./README.md
-35e0625968c4acfe98be0d05f54d9289107d47221b5b68ba8ab1edd982c604e8  ./RELEASE_VALIDATION.md
+6904e577dfdc759ae73fae2156ad317ca161c6e8ec5227870468349afd5a6ba8  ./MANIFEST.md
+6ff3c8b34322d8f660898d863497c3088a7bcfd5ee5429e34b5c661fb180792e  ./README.md
+dad47938be36c940712c5a434910f68035954b841c63dea9ff3c7a1f989a875a  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -25,8 +25,9 @@ f853a6bd29ccd7c07fcbf8837489436f22e680b3255d6b872fd3fb1e23ac0c87  ./docs/adr/ADR
 9823ea123ba605a3e1007f2f71e950b4fb6c86b4010955f26830e73487860708  ./docs/adr/ADR-022-pr-audit-projection-composition-schemas-and-closure.md
 35f22e9b5ae3c10a29ce81055fe58df2b5c116fad086e4f5520f82b06a004c3a  ./docs/adr/ADR-023-operating-plane-v2-major-successor-and-declared-selection-removal.md
 1f7417bc76c83e7e7080eb35531d9907b0fc3eae174effa26cc851fe836d93d6  ./docs/adr/ADR-024-artifact-header-field-semantics.md
-25275ca3247c9a1947866b7b18a9434856a97a25865d69a1ece9fed033a4d6d0  ./docs/adr/ADR-025-manifest-interface-surface-and-python-gate-node-binding.md
-415238bf1db999ae27705e6b6859ab6f977f4a4a9b60167bf01c91b0296df8df  ./docs/adr/README.md
+71cd8caa69bccb6ab45129d15b6c1d4932acb0d6c7027198c16410c92312b0b9  ./docs/adr/ADR-025-admission-of-v3.28.0-projection-and-composition-profile-pairs.md
+b532a79cff7a8fb43e0407c3917cd73c00e9d4cb759ee86aa9cf3a1f9dbfb501  ./docs/adr/ADR-026-manifest-interface-surface-and-python-gate-node-binding.md
+e3917251fde63f601366dd6188682d9ad9d0ef5b433b6d9add0d3c6221e0f26a  ./docs/adr/README.md
 34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f  ./semantics/actor_registry.yaml
 09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4  ./semantics/affected_strategic_closure.schema.yaml
 d6d81cb1a804b1e957d064790bcf70d855ece0b58f82522863a9e55159761694  ./semantics/architecture_break_test_composition.schema.yaml

@@ -6,7 +6,7 @@ v3.29.0 lets a compiler lower a resolved Node manifest to a Gate-routed Python N
 
 ## Bounded delta
 
-Stacked on the v3.28.0 candidate (Quantum-L9/.github#214); no file that v3.28.0 changes is touched here.
+Successor to v3.28.0, which ADR-025 admitted; no file that v3.28.0 changes is touched here.
 
 
 - `semantics/product_manifest.schema.yaml`:
@@ -23,7 +23,7 @@ Stacked on the v3.28.0 candidate (Quantum-L9/.github#214); no file that v3.28.0 
   - It admits the optional `implementation_ref` source coordinate (`<path>[::<symbol>]`, relative to the RepositorySpec directory, never escaping it). The binding binds existing code through this coordinate.
   - The coordinate is a declared source location: it creates no code, carries no semantic authority, and never makes an entry resolve.
   - The manifest preserves it exactly.
-- ADR-025.
+- ADR-026.
 
 ## Evidence
 

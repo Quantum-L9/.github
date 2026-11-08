@@ -92,9 +92,9 @@ The v3.28.0 inventory is preserved. No ledger is added, removed or renamed.
 
 ## Architecture decision records
 
-The release contains **25** accepted ADRs plus the ADR index under `docs/adr/`.
+The release contains **26** accepted ADRs plus the ADR index under `docs/adr/`.
 
-v3.29.0 adds ADR-025 (manifest interface surface and the Python Gate Node target binding), a candidate for this release; admission of the release is its acceptance gate.
+v3.29.0 adds ADR-026 (manifest interface surface and the Python Gate Node target binding), a candidate for this release; admission of the release is its acceptance gate.
 
 ## Semantic changes
 
@@ -116,7 +116,7 @@ v3.29.0 adds ADR-025 (manifest interface surface and the Python Gate Node target
   - It defines `implementation_source_coordinate` (`<repository-relative POSIX path>[::<top-level symbol>]`) for the optional `implementation_ref` field.
   - Three semantic rules are added: `port_and_adapter_entries_follow_entry_shapes`, `implementation_ref_is_an_optional_declared_source_coordinate_not_semantic_authority` and `implementation_ref_never_makes_a_port_or_adapter_resolve`.
   - The `required` list, `kind_resolution` and the product fields are unchanged.
-- `docs/adr/README.md`: indexes ADR-025.
+- `docs/adr/README.md`: indexes ADR-026.
 
 No other ledger, rule, profile, criterion, contract or invariant changes.
 

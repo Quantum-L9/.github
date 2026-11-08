@@ -1,6 +1,6 @@
-d8bb26d2a2877c1262511d4f2a96489d11842351d20b17b1f6b0edbedc14004c  ./MANIFEST.md
-581a2e4b8c049ee85aeddde9bad34145d958d1be707987ce420934bbe420c16e  ./README.md
-2973d863df28788bf0c5db92580da581179c0c06fde09242223aff8d8743f51f  ./RELEASE_VALIDATION.md
+3f9798ef30834cb853404256cfba26e230c32f5fa6adc4848a540717dc839870  ./MANIFEST.md
+8644d0e929d7b7527498243c0a898674f311ea93bfe8507b15dd1940fb9a05f5  ./README.md
+0757ef713385308228b03cb1d1431b612d7bf2271ba3407671d8985856f80072  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -25,7 +25,8 @@ f853a6bd29ccd7c07fcbf8837489436f22e680b3255d6b872fd3fb1e23ac0c87  ./docs/adr/ADR
 9823ea123ba605a3e1007f2f71e950b4fb6c86b4010955f26830e73487860708  ./docs/adr/ADR-022-pr-audit-projection-composition-schemas-and-closure.md
 35f22e9b5ae3c10a29ce81055fe58df2b5c116fad086e4f5520f82b06a004c3a  ./docs/adr/ADR-023-operating-plane-v2-major-successor-and-declared-selection-removal.md
 1f7417bc76c83e7e7080eb35531d9907b0fc3eae174effa26cc851fe836d93d6  ./docs/adr/ADR-024-artifact-header-field-semantics.md
-09eb671f407fd9548db71e1646c1ac3da7c024b6b5232f5f22fe8abf8a5bef36  ./docs/adr/README.md
+71cd8caa69bccb6ab45129d15b6c1d4932acb0d6c7027198c16410c92312b0b9  ./docs/adr/ADR-025-admission-of-v3.28.0-projection-and-composition-profile-pairs.md
+1e6b166ea5b60131e391880781dc9e05f7ccf853a234dd38503d3f4659a4cd4f  ./docs/adr/README.md
 34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f  ./semantics/actor_registry.yaml
 09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4  ./semantics/affected_strategic_closure.schema.yaml
 d6d81cb1a804b1e957d064790bcf70d855ece0b58f82522863a9e55159761694  ./semantics/architecture_break_test_composition.schema.yaml

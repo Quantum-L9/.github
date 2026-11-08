@@ -1,6 +1,6 @@
 # Semantic Foundation Manifest v3.28.0
 
-Release status: **ADDITIVE SUCCESSOR CANDIDATE**
+Release status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-025, 2026-11-08)
 
 ## Install surface
 
@@ -92,9 +92,9 @@ The v3.27.0 inventory is preserved. 20 payload schemas are added: two hand-autho
 
 ## Architecture decision records
 
-The release contains **24** accepted ADRs plus the ADR index under `docs/adr/`.
+The release contains **25** accepted ADRs plus the ADR index under `docs/adr/`.
 
-v3.28.0 adds no ADR.
+v3.28.0 adds ADR-025, the owner's admission decision for this release.
 
 ## Semantic changes
 
@@ -122,10 +122,11 @@ v3.28.0 adds no ADR.
   - `semantics/strategic_planning_context_projection.schema.yaml`
   - `semantics/work_state_continuity_composition.schema.yaml`
   - `semantics/work_state_continuity_projection.schema.yaml`
+- `docs/adr/ADR-025-admission-of-v3.28.0-projection-and-composition-profile-pairs.md`: the admission decision; `docs/adr/README.md` indexes it.
 
 No other ledger, rule, profile, criterion, contract or invariant changes.
 
-The release record documents are `README.md`, `MANIFEST.md`, `RELEASE_VALIDATION.md` and `HASHES.sha256`. The release proposes these profiles for admission and admits none of them.
+The release record documents are `README.md`, `MANIFEST.md`, `RELEASE_VALIDATION.md` and `HASHES.sha256`. ADR-025 admits these ten profile pairs and twenty payload schemas. Their pinned-snapshot constraints are revision-bound, and independent consumer replay is not established.
 
 ## Replacement basis
 
