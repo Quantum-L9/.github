@@ -2,19 +2,20 @@
 	"admission": "not_granted",
 	"base": {
 		"repository": "Quantum-L9/.github",
-		"revision": "c9bbfaf61bd0f7444b1a617876a031c2fba75406"
+		"revision": "535400e8c4fb89771c9f08136b4c0309bb5f2a1d"
 	},
 	"commits": {
-		"A_overlays_applied": "a9d012bc1d297c7f7757ae41379db60dc682ea7d",
-		"G1_grammars": "cc277315cad3e53ab4abc06453db4b283adb78c6",
-		"G2_catalog": "5e13c6916446bf28f72d6db7c831cf37a421ec43",
-		"R_registrations": "b295e49325320a786fab2d765ef5453289c6a197"
+		"A_overlays_applied": "d5a656c89a4a2265b5571e317c71e0d46fe695c0",
+		"G1_grammars": "6a70a5c78e665878d3e84679ee1302c03af37830",
+		"G2_catalog": "40a01f64dedc1422ba74b4bd0c2536ec610a9d79",
+		"R_registrations": "916b1f30c34304529658737a0be556054073de98"
 	},
 	"compiler": {
-		"executable_digest": "sha256:20d7909c9dfc9ea555248506cd94210821b3b4adf13563c497ea6f637f3be4c1",
+		"executable_digest": "sha256:1f4716c5b2eafd39aff0374f433f289d61e1c260540b5c3de3c441ebef67217f",
 		"executable_digest_basis": "sha256 of git archive <revision> src",
+		"executed_module": "src/l9_semantic_compiler/__init__.py",
 		"repository": "Quantum-L9/l9-semantic-compiler-engine",
-		"revision": "4c9f5d33eb51d1a4068ecc8677b499dd76916290"
+		"revision": "d5ce17d01de72c8017e4021fbe43f9eaed2b69de"
 	},
 	"pairs": {
 		"identity-assurance": {
@@ -199,22 +200,123 @@
 			"grammars_exit": 0,
 			"grammars_written": 9,
 			"inexpressible": [],
-			"synthesis": "BLOCKED",
-			"synthesis_diagnostic": {
-				"admission": "not_granted",
-				"canonical": false,
-				"error": {
-					"code": "UNKNOWN_SEMANTIC_OPERATOR",
-					"diagnostics": {
-						"context": "candidate_output",
-						"reason": "candidate_pair_exceeds_size_limit"
+			"producer": {
+				"compose_exit": 0,
+				"project_exit": 0,
+				"receipts": {
+					"l9.compose/strategic-planning-context@2#l9.projection/strategic-planning-context@2": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "composition",
+						"payload_schema": "pass",
+						"payload_schema_id": "l9.composed-projection.strategic-planning-context/v2",
+						"result": "pass",
+						"selection_equivalence": null,
+						"unresolved_criteria": []
 					},
-					"message": "candidate schema synthesis cannot be established"
-				},
-				"schemas_emitted": [],
-				"status": "unknown"
+					"l9.projection/strategic-planning-context@2#l9.source/affected-strategic-closure-schema@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"payload_schema_field": "l9.schema-definition/v1",
+						"payload_schema_id": "l9.projection.strategic-planning-context/v2",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-planning-context@2#l9.source/authority-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"payload_schema_field": null,
+						"payload_schema_id": "l9.projection.strategic-planning-context/v2",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-planning-context@2#l9.source/contracts@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"payload_schema_field": null,
+						"payload_schema_id": "l9.projection.strategic-planning-context/v2",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-planning-context@2#l9.source/invariants@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"payload_schema_field": null,
+						"payload_schema_id": "l9.projection.strategic-planning-context/v2",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-planning-context@2#l9.source/strategic-cognition-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"payload_schema_field": null,
+						"payload_schema_id": "l9.projection.strategic-planning-context/v2",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-planning-context@2#l9.source/strategic-plan-graph-schema@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"payload_schema_field": "l9.schema-definition/v1",
+						"payload_schema_id": "l9.projection.strategic-planning-context/v2",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-planning-context@2#l9.source/strategic-plan-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"payload_schema_field": null,
+						"payload_schema_id": "l9.projection.strategic-planning-context/v2",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-planning-context@2#l9.source/strategic-plan-revision-candidate-schema@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"payload_schema_field": "l9.schema-definition/v1",
+						"payload_schema_id": "l9.projection.strategic-planning-context/v2",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-planning-context@2#l9.source/strategic-planning-episode-schema@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"payload_schema_field": "l9.schema-definition/v1",
+						"payload_schema_id": "l9.projection.strategic-planning-context/v2",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					}
+				}
 			},
-			"synthesis_exit": 3
+			"synthesis": "candidate_pair_produced",
+			"synthesis_exit": 0
 		}
 	},
 	"producer_archive": "evidence/producer.tar.gz",

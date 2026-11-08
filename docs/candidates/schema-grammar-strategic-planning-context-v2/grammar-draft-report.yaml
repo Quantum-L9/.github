@@ -1,43 +1,43 @@
 authority_repository: Quantum-L9/.github
-authority_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+authority_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
 projection_profile: l9.projection/strategic-planning-context@2
 composition_profile: l9.compose/strategic-planning-context@2
 written:
 - source_class: invariants
   path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/invariants.yaml
-  digest: sha256:0653a0b976054e07034397f700595f3b866eff956ffb7a45f6bf8c9f3d525105
+  digest: sha256:7095af4546b2628f54a9753e5661d24454e5f3e7a731fff08a7d805445c67939
   normative_overlay: []
 - source_class: contracts
   path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/contracts.yaml
-  digest: sha256:c29f182b1c2e4bba44c20c2cc0cd5615c7f18145478217d2455edf8dea5ca915
+  digest: sha256:bed466581a1d49400ff3db253940157bcdf6a9021b55c80b01da4dcb3c6d11fa
   normative_overlay: []
 - source_class: authority_model
   path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/authority_model.yaml
-  digest: sha256:0bf724ce0757515d7134a5d45e7084f7e7461260b73e66ef2d6f8fd6e75d38ac
+  digest: sha256:d6a2820d01cd96575b85d4cc49ea3833003bada1798710acdd5d1b4270719538
   normative_overlay: []
 - source_class: strategic_cognition_model
   path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/strategic_cognition_model.yaml
-  digest: sha256:eb426800966e6b43812715e9f4f254884240a6cbe012e3e137d7a4298303ef71
+  digest: sha256:a00e8bfdd8931126bb1c3ebdefdf44461a201c9c80af75e93c31a4cbe0f05de8
   normative_overlay: []
 - source_class: strategic_plan_model
   path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/strategic_plan_model.yaml
-  digest: sha256:f6a5bee8dcc346e1ad017c9cf9ad1ec82f39888f258756f82a8b6122c7021517
+  digest: sha256:a5a3d21d7badbb553bc604a8e5f92867d49a29da33f4422c93928002717e5745
   normative_overlay: []
 - source_class: strategic_plan_graph_schema
   path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/strategic_plan_graph_schema.yaml
-  digest: sha256:5792b1ab02c2903f0e54bf00326c4cb4e8fc4a088f0013a8bd83ec481677755c
+  digest: sha256:153bf82d8a6e9ccafd4f242c9d4c7065dc22afe3167202917b521ed176f3af99
   normative_overlay: []
 - source_class: affected_strategic_closure_schema
   path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/affected_strategic_closure_schema.yaml
-  digest: sha256:0231d1475e0e840a47ba6615c3e40c90c9816d978f08959294a75481c4d2a505
+  digest: sha256:21191aa9ba705f4468c3e8fd4fc87b3418880cf5d5c69fbf319ebb80522cef75
   normative_overlay: []
 - source_class: strategic_planning_episode_schema
   path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/strategic_planning_episode_schema.yaml
-  digest: sha256:fdd8d63713563bcfb4fad667aac0c20b2a8f83f7a8e22e9ce1e3d49fbb16e980
+  digest: sha256:d27c6d5e91324b69726bed581eb419b209b291158519e0eb665a1324621a06d4
   normative_overlay: []
 - source_class: strategic_plan_revision_candidate_schema
   path: docs/candidates/schema-grammar-strategic-planning-context-v2/grammars/strategic_plan_revision_candidate_schema.yaml
-  digest: sha256:760f612e2cf94186fc2212a2752814c0d9173f45f0e357206b4490dc3a06a3d6
+  digest: sha256:5e791794968358397a2195bbefa1f68062f922a4ea168cb09402e5a246d07913
   normative_overlay: []
 inexpressible: []
 pack_dir: docs/candidates/schema-grammar-strategic-planning-context-v2

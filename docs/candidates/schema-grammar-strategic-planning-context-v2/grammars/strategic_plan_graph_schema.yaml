@@ -7,7 +7,7 @@ admission: not_granted
 source_class: strategic_plan_graph_schema
 source_ref: l9.source/strategic-plan-graph-schema@1
 source_path: semantics/strategic_plan_graph.schema.yaml
-source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
 source_digest: sha256:76bbf51d9233452d3e83e8bf4148a27eb6b8e29ff3126777c6c28d818ce1a885
 applies_to_selectors:
 - $.artifact_id

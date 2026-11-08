@@ -49,9 +49,15 @@ source_shapes:
                   type: string_list
                 method_conditional:
                   type: string
+                qv:
+                  type: string
+                sv_dependency:
+                  type: string
                 trigger:
                   type: string
                 unavailable_claim:
+                  type: string
+                unknown_resolution:
                   type: string
               type: object
             applies_to:
@@ -651,5 +657,5 @@ source_shapes:
     type: object
 derivation:
   method: l9.schema-candidate-synthesis
-  candidate_digest: sha256:802b4448f5600d25b91aea7a76c272b73d225e3c5963e5f920090dc6bd44d15b
+  candidate_digest: sha256:946e115d3f97a72fca0e97daa8e9187084ec266816f144884c4344824d1079cf
 admission: not_granted

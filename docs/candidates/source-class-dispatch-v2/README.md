@@ -2,8 +2,8 @@
 
 **Status:** LOCAL CANDIDATE, not admitted (`CANDIDATE_NOT_ADMITTED`). Nothing under `semantics/` changes, no release directory is cut and no ADR is written. The owner directed: candidate only, do not admit anything.
 
-**Target:** `Quantum-L9/.github@c9bbfaf61bd0f7444b1a617876a031c2fba75406`, exact pinned revision.
-**Compiler:** `Quantum-L9/l9-semantic-compiler-engine@4c9f5d33eb51d1a4068ecc8677b499dd76916290` (PR #35: grammar builder for any pair; source-class dispatch from PR #30).
+**Target:** `Quantum-L9/.github@535400e8c4fb89771c9f08136b4c0309bb5f2a1d`, exact pinned revision. The three @1 records are identical at this revision and at the first pin, `c9bbfaf`. Re-basing past the v3.33.0 and v3.34.0 admissions refreshed the source digests of `invariants` and `contracts`.
+**Compiler:** `Quantum-L9/l9-semantic-compiler-engine@d5ce17d01de72c8017e4021fbe43f9eaed2b69de` (merged `main`). It carries the grammar builder for any pair (#35), source-class dispatch (#30) and the B2/B3 synthesis fixes (#34).
 
 ## What this proposes
 
@@ -32,19 +32,13 @@
 | --- | --- | --- | --- |
 | `identity-assurance@2` | 6, 0 inexpressible | candidate pair produced | 7 receipts PASS, coverage complete; `actor_registry` and `surface_registry` keep `schema` |
 | `strategic-metacognition@2` | 6, 0 inexpressible | candidate pair produced | 7 receipts PASS, coverage complete; the restored source keeps `schema: l9.schema-definition/v1` |
-| `strategic-planning-context@2` | 9, 0 inexpressible | **BLOCKED** | not run |
+| `strategic-planning-context@2` | 9, 0 inexpressible | candidate pair produced (453,301 bytes) | 10 receipts PASS, coverage complete; the four restored sources keep `schema: l9.schema-definition/v1` |
 
 Every PASS receipt reports `payload_schema: pass` with `dispatch_basis: verified_profile_output_schema_and_verified_source_class`: the output schema comes from the verified profile and source class, never from a payload field.
 
-### Blocker: `strategic-planning-context@2`
+### Formerly blocked: `strategic-planning-context@2`
 
-`schema-synthesize` exits 3 with `UNKNOWN_SEMANTIC_OPERATOR` / `candidate_pair_exceeds_size_limit`. The candidate pair (projection and composition schemas, which carry the same nine source shapes, four of them whole schema-definition documents) exceeds the compiler's fixed 2,000,000-byte pair cap. The grammars and catalog for this pair are compiled and committed; only synthesis is blocked. The owner can:
-
-- raise or restructure the cap in the compiler (a bounds decision);
-- have the composition schema reference the projection's source shapes instead of duplicating them (a compiler protocol change);
-- narrow the pair.
-
-Until one of these is decided this pair has no registered schema, and it is reported as blocked, never as pass.
+The first rehearsal reported `candidate_pair_exceeds_size_limit` for this pair. That came from compiler code that predated #34; its B3 fix shares trace provenance and brings the pair to 453,301 bytes, about 23% of the 2,000,000-byte cap. No cap was raised. That first rehearsal also exposed a defect, now fixed: `rehearse.py` ran whichever compiler its interpreter had installed. It now imports only from `--compiler-root` and refuses to run otherwise, and it records the module that executed in `evidence/rehearsal.json` (`compiler.executed_module`).
 
 ## Reproduce
 
@@ -56,9 +50,9 @@ python3 docs/candidates/source-class-dispatch-v2/rehearse.py \
 python3 -m unittest discover -s docs/candidates/source-class-dispatch-v2/tests
 ```
 
-The compiler checkout's HEAD must equal the pinned revision. When it has moved on, clone it at that revision and pass `--compiler-root <clone> --compiler-python <an environment with the compiler installed>`.
+The compiler checkout's HEAD must equal the pinned revision. When it has moved on, clone it at that revision and pass `--compiler-root <clone> --compiler-python <an environment with the compiler's dependencies>`. The compiler code is always imported from `--compiler-root`, never from that environment.
 
-`rehearse.py` clones this repository into the disposable directory, pins `c9bbfaf` and commits the rehearsal steps A (overlays), G1 (grammars), G2 (catalog) and R (registrations) with a fixed identity and dates. Two fresh clones produced the same four commit ids (`a9d012b`, `cc27731`, `5e13c69`, `b295e49`) and the same 40 files. The grammar packs' pins name those rehearsal commits, which exist only in a rehearsal clone. `rehearse.py` never pushes, never opens a pull request and grants no admission.
+`rehearse.py` clones this repository into the disposable directory, pins `535400e` and commits the rehearsal steps A (overlays), G1 (grammars), G2 (catalog) and R (registrations) with a fixed identity and dates. Two fresh clones produced the same four commit ids (`d5a656c`, `6a70a5c`, `40a01f6`, `916b1f3`) and the same 42 files. The grammar packs' pins name those rehearsal commits, which exist only in a rehearsal clone. `rehearse.py` never pushes, never opens a pull request and grants no admission.
 
 ## Proposed destinations, on a future admission (not done here)
 

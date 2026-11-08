@@ -25,9 +25,13 @@ REPO = PACK.parents[2]
 SEMANTICS = REPO / "semantics"
 PROTOCOL = {"protocol": "l9.payload-validation/source-class-dispatch@1"}
 PAIRS = ("identity-assurance", "strategic-planning-context", "strategic-metacognition")
-SYNTHESIZED = ("identity-assurance", "strategic-metacognition")
+SYNTHESIZED = PAIRS
 INFERRED = {"required", "const", "enum", "min_items"}
 LEGACY_GRAMMAR = {"type", "properties", "fields", "required", "items", "const", "enum"}
+
+
+def _manifest() -> dict:
+    return json.loads((PACK / "MANIFEST.json").read_text("utf-8"))
 
 
 def _load(path: Path):
@@ -197,10 +201,14 @@ class RegisteredSchemas(unittest.TestCase):
                     [s["source_class"] for s in document["source_shapes"]], classes
                 )
 
-    def test_blocked_pair_has_no_registration(self) -> None:
+    def test_every_pair_has_both_registrations(self) -> None:
         names = {p.name for p in (PACK / "overlays/registered_schemas").glob("*.yaml")}
-        self.assertFalse(any(n.startswith("strategic_planning_context") for n in names))
-        self.assertEqual(len(names), 4)
+        expected = {
+            f"{n.replace('-', '_')}_{kind}_v2.schema.yaml"
+            for n in PAIRS
+            for kind in ("projection", "composition")
+        }
+        self.assertEqual(names, expected)
 
     def test_semantics_manifest_names_no_candidate_registration(self) -> None:
         manifest = _load(SEMANTICS / "generic_compiler_manifest.yaml")
@@ -244,15 +252,25 @@ class Evidence(unittest.TestCase):
         ]
         self.assertEqual(len(kept), sum(len(restored[n]) for n in SYNTHESIZED))
 
-    def test_blocked_pair_is_reported_blocked_never_pass(self) -> None:
-        pair = self.report["pairs"]["strategic-planning-context"]
-        self.assertEqual(pair["synthesis"], "BLOCKED")
-        self.assertNotIn("producer", pair)
-        error = pair["synthesis_diagnostic"]["error"]
-        self.assertEqual(error["code"], "UNKNOWN_SEMANTIC_OPERATOR")
+    def test_every_pair_synthesized_without_a_diagnostic(self) -> None:
+        for name in PAIRS:
+            pair = self.report["pairs"][name]
+            self.assertEqual(pair["synthesis"], "candidate_pair_produced", name)
+            self.assertEqual(pair["synthesis_exit"], 0, name)
+            self.assertNotIn("synthesis_diagnostic", pair)
+
+    def test_rehearsal_executed_the_pinned_compiler(self) -> None:
+        compiler = self.report["compiler"]
+        self.assertEqual(compiler["revision"], _manifest()["compiler"]["revision"])
+        # rehearse.py refuses to run unless this module came from --compiler-root.
         self.assertEqual(
-            error["diagnostics"]["reason"], "candidate_pair_exceeds_size_limit"
+            compiler["executed_module"], "src/l9_semantic_compiler/__init__.py"
         )
+
+    def test_evidence_base_matches_the_pack_base(self) -> None:
+        self.assertEqual(self.report["base"]["revision"], _manifest()["base_sha"])
+        for name in ("projection_profile_additions.yaml", "vocabulary_additions.yaml"):
+            self.assertEqual(_overlay(name)["base_sha"], _manifest()["base_sha"])
 
     def test_every_pack_grammar_compiled(self) -> None:
         written = {n: self.report["pairs"][n]["grammars_written"] for n in PAIRS}

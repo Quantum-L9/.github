@@ -7,8 +7,8 @@ admission: not_granted
 source_class: contracts
 source_ref: l9.source/contracts@1
 source_path: semantics/contracts.yaml
-source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
-source_digest: sha256:fcd31cb45a68d234449951ec28a26fa03eb5ff15035243f3dcdcd07440b7bc5b
+source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
+source_digest: sha256:86f6df1466e7e47f5e7e8a438c62ffdcf2a97835e9e49ecd4a4eb2dec88be0e7
 applies_to_selectors:
 - $.contracts[?(@.id=="l9.contract/identity-topology@1")]
 - $.contracts[?(@.id=="l9.contract/identity-resolution@1")]
@@ -121,4 +121,10 @@ grammar:
               method_conditional:
                 type: string
               unavailable_claim:
+                type: string
+              sv_dependency:
+                type: string
+              qv:
+                type: string
+              unknown_resolution:
                 type: string

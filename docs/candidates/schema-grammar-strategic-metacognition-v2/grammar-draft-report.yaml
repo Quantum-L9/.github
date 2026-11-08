@@ -1,31 +1,31 @@
 authority_repository: Quantum-L9/.github
-authority_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+authority_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
 projection_profile: l9.projection/strategic-metacognition@2
 composition_profile: l9.compose/strategic-metacognition@2
 written:
 - source_class: invariants
   path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/invariants.yaml
-  digest: sha256:3171e72dc95f6a419f9a984555b83f102742eae46f88981aac808c3fd21fa16e
+  digest: sha256:f094dda19b0859fdb4cf3502b059dcc2b52981be782c100276391021718c072c
   normative_overlay: []
 - source_class: contracts
   path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/contracts.yaml
-  digest: sha256:1f3bf4f09864d557de27e5c4ee432299186fc4f820621cb01e69a9df1f0aadd0
+  digest: sha256:73df6f9609e19c0d6d3342e8c293d8a41f8edcdc127bc47ee9e83554f8d883a3
   normative_overlay: []
 - source_class: authority_model
   path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/authority_model.yaml
-  digest: sha256:d889efa43c3291d0ea8afce7409562a454624868d9abca7ee7066d47780f4716
+  digest: sha256:321245f160aec125f98a9d5a4528cdf6e18caec0978e5c195da208790cf98f11
   normative_overlay: []
 - source_class: strategic_cognition_model
   path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/strategic_cognition_model.yaml
-  digest: sha256:35a8a9d8cf86fee73f8fba6cae1af7fc7aaa57b792cc66d059e11dcc809bfdf2
+  digest: sha256:752937ba31a76f0ffbb6df9923ef90d8852699c804822556f961789a94e33e76
   normative_overlay: []
 - source_class: strategic_plan_model
   path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/strategic_plan_model.yaml
-  digest: sha256:4af637461fc7943ea7f956376f35ddbeb9da94888d2705d33eedb7546a6cc3c9
+  digest: sha256:00615b802e75eaa62ddb9e353862588d9421bceea8122219ddb29a26979b5fa8
   normative_overlay: []
 - source_class: strategic_plan_metacognitive_analysis_schema
   path: docs/candidates/schema-grammar-strategic-metacognition-v2/grammars/strategic_plan_metacognitive_analysis_schema.yaml
-  digest: sha256:b0ab252162059b31d23da3ccd27aa79c8879ce2f2532cf04052cb8610e364de5
+  digest: sha256:d0dd287616eabf07ac110cf0270ef8fe92dbd70fce0ef87b1a0c8edd47c9e64a
   normative_overlay: []
 inexpressible: []
 pack_dir: docs/candidates/schema-grammar-strategic-metacognition-v2

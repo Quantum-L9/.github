@@ -8,12 +8,12 @@ bindings:
 - source_class: invariants
   source_ref: l9.source/invariants@1
   source_path: semantics/invariants.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
-  source_digest: sha256:9558c947e2538d77b634ee4448e5ce8791ff121ce3afbb6ecb0a2debd8c8256b
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
+  source_digest: sha256:2928b1206020490e80b18de3becfde0a2fbcd934b6e967a2c550be9c67c733aa
   grammar_ref: l9.candidate.schema-synthesis/identity-assurance-v2/grammar/invariants@1
   grammar_path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/invariants.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:6344ffa2affd0f3f5adf88126ec5c1569faed9325ec5add07bd18d24fc537734
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:722cb8b5c2255004c63730a93c552a11896223e198810fd26c2ba90a06a9d364
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.invariants[?(@.id=="L9-IDENTITY-002")]
@@ -32,12 +32,12 @@ bindings:
 - source_class: contracts
   source_ref: l9.source/contracts@1
   source_path: semantics/contracts.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
-  source_digest: sha256:fcd31cb45a68d234449951ec28a26fa03eb5ff15035243f3dcdcd07440b7bc5b
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
+  source_digest: sha256:86f6df1466e7e47f5e7e8a438c62ffdcf2a97835e9e49ecd4a4eb2dec88be0e7
   grammar_ref: l9.candidate.schema-synthesis/identity-assurance-v2/grammar/contracts@1
   grammar_path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/contracts.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:426a6ac47bbabb78920c2b0dac8271873f4096138d78bad8bcb2dc4b7c888ae8
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:7bbbf214bd2b10d4c24c6fdb0f279d2dc3d74997351e026442daa2a3f6750c66
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.contracts[?(@.id=="l9.contract/identity-topology@1")]
@@ -48,12 +48,12 @@ bindings:
 - source_class: identity_model
   source_ref: l9.source/identity-model@1
   source_path: semantics/identity_model.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:b9245eca99501a38976e909e1d151942c1253b2eee2bd6bab9c6382687db4288
   grammar_ref: l9.candidate.schema-synthesis/identity-assurance-v2/grammar/identity-model@1
   grammar_path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/identity_model.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:71318aff3c877705c8b999c1400030ea752e1f46e08c947176b19aea99b9d87d
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:e9f30ed94fd0ccce7ee60601625bb0afaef8af466cfe4accb162242c2b821def
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.global_rules
@@ -67,12 +67,12 @@ bindings:
 - source_class: authority_model
   source_ref: l9.source/authority-model@1
   source_path: semantics/authority_model.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
   grammar_ref: l9.candidate.schema-synthesis/identity-assurance-v2/grammar/authority-model@1
   grammar_path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/authority_model.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:124ee1f9cfbc48537a23526305ef8d6bb93a98c1ded8e13871873a3b6df28834
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:f1d0b74f087ec4b3ce3289afbf8460830c54a8ffa05cc7fbb129d2585b700e2d
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.identity_authority
@@ -80,12 +80,12 @@ bindings:
 - source_class: actor_registry
   source_ref: l9.source/actor-registry@1
   source_path: semantics/actor_registry.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f
   grammar_ref: l9.candidate.schema-synthesis/identity-assurance-v2/grammar/actor-registry@1
   grammar_path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/actor_registry.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:9d20f4874c8f0ade0d7a41372b3de1299ee94bee322ebf1b873f54790ee2e9f3
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:47d54f30b27fda8d8d150f1f7fd3b672bbdad0a36ea88b944f6f258d6902877b
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.artifact_id
@@ -109,12 +109,12 @@ bindings:
 - source_class: surface_registry
   source_ref: l9.source/surface-registry@1
   source_path: semantics/surface_registry.yaml
-  source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+  source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
   source_digest: sha256:d7200409ff02141a274ff8c9221d31429f6a6fae27539e6d9c8d20f1a6eba988
   grammar_ref: l9.candidate.schema-synthesis/identity-assurance-v2/grammar/surface-registry@1
   grammar_path: docs/candidates/schema-grammar-identity-assurance-v2/grammars/surface_registry.yaml
-  grammar_revision: cc277315cad3e53ab4abc06453db4b283adb78c6
-  grammar_digest: sha256:36038a9e71be14929252b244032c06899bbca7f6bf4c56cc6f67f38aa4fd7da1
+  grammar_revision: 6a70a5c78e665878d3e84679ee1302c03af37830
+  grammar_digest: sha256:bc502a22107a3f89f1070ecca7f1012ba21758a31b03055fa2daa01cdf7271a5
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.artifact_id

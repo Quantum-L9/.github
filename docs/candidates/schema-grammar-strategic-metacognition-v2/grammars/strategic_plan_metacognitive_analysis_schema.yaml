@@ -7,7 +7,7 @@ admission: not_granted
 source_class: strategic_plan_metacognitive_analysis_schema
 source_ref: l9.source/strategic-plan-metacognitive-analysis-schema@1
 source_path: semantics/strategic_plan_metacognitive_analysis.schema.yaml
-source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
 source_digest: sha256:ae0f69362f82548968dab60b999ddd074c244ad9e6c78520ea9d653cfa1dc349
 applies_to_selectors:
 - $.artifact_id

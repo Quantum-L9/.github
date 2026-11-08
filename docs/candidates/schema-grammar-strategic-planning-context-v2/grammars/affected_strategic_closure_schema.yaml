@@ -7,7 +7,7 @@ admission: not_granted
 source_class: affected_strategic_closure_schema
 source_ref: l9.source/affected-strategic-closure-schema@1
 source_path: semantics/affected_strategic_closure.schema.yaml
-source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_revision: d5a656c89a4a2265b5571e317c71e0d46fe695c0
 source_digest: sha256:09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4
 applies_to_selectors:
 - $.artifact_id

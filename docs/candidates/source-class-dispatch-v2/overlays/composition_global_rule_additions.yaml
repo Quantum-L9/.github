@@ -2,7 +2,7 @@ candidate: source-class-dispatch-v2
 status: candidate
 admission: not_granted
 base_repository: Quantum-L9/.github
-base_sha: c9bbfaf61bd0f7444b1a617876a031c2fba75406
+base_sha: 535400e8c4fb89771c9f08136b4c0309bb5f2a1d
 target: semantics/composition_profiles.yaml#global_rules
 records:
   source_class_dispatch_composition_is_source_namespaced_and_declares_the_protocol_of_its_projection_profile: true
