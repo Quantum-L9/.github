@@ -10,8 +10,8 @@ import json
 import tarfile
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
-from unittest import mock
 
 import verify_composition_provenance as vcp
 
@@ -152,7 +152,7 @@ class NegativeControls(_RunFixture):
         real = vcp.candidate_profiles()
         edited = copy.deepcopy(real[0])
         edited["merge_strategy"]["duplicate_source"] = "merge"
-        with mock.patch.object(
+        with unittest.mock.patch.object(
             vcp, "candidate_profiles", return_value=(edited, real[1])
         ):
             self.assertIn("composition_profile_digest", self.failed())

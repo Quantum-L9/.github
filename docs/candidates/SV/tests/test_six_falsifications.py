@@ -70,7 +70,9 @@ class IndependentlyExecutableFalsifiers(unittest.TestCase):
             self.assertEqual(
                 receipt["negative_result"], row["expected_negative_result"]
             )
-            self.assertTrue(set(receipt["governing_invariants"]) <= exp["selected_ids"])
+            self.assertLessEqual(
+                set(receipt["governing_invariants"]), exp["selected_ids"]
+            )
             self.assertNotIn(origin, exp["selected_ids"])
 
     def test_mutated_invalid_case_is_detectable(self):

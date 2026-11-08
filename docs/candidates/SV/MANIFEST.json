@@ -469,8 +469,8 @@
 		},
 		{
 			"path": "tests/test_alignment.py",
-			"bytes": 4671,
-			"sha256": "5a0ae942d95fa3563b298cf4bb5cd687da728996c5daf7e32d7e1db8220741bf"
+			"bytes": 4679,
+			"sha256": "a3b343e5ad54128d64eff0b96053b3a17eadfd0da30debab57640dcfe05472c8"
 		},
 		{
 			"path": "tests/test_candidate.py",
@@ -479,13 +479,13 @@
 		},
 		{
 			"path": "tests/test_composition_provenance_equivalence.py",
-			"bytes": 13359,
-			"sha256": "57d867df61daf0ccebe4c3de2a0751e36bec733e32c11c003ac63095a4b39245"
+			"bytes": 13363,
+			"sha256": "dbb5fce348a2b8630abc3ac9da3df1c528f683a6de68cc4a527b2330e55ac0ce"
 		},
 		{
 			"path": "tests/test_irreducibility.py",
-			"bytes": 5858,
-			"sha256": "b7f4019973d04bf8b359474575ce7dd04e9bc09b4dbedcc85fc42886eb8d758c"
+			"bytes": 5845,
+			"sha256": "24d00b55149970a12d578229dd149fd82e0bd4105aa0d067f48b49bb88439e3b"
 		},
 		{
 			"path": "tests/test_new_invariants.py",
@@ -494,13 +494,13 @@
 		},
 		{
 			"path": "tests/test_partition_method_alignment.py",
-			"bytes": 7633,
-			"sha256": "59b4d5e8fe233e4e429842798ae1fdd36d442e145fe609d7d60490096f7be64e"
+			"bytes": 7637,
+			"sha256": "77e057b9a4a611eeea4b297a1a9048783f69931e2c97fd2e89bed3d1c868546e"
 		},
 		{
 			"path": "tests/test_projection_composition_schema.py",
-			"bytes": 8920,
-			"sha256": "93a3f802caaa8a7d904059d29dc2d5b7381cdb9bceb72a6db95bf99d8b53e6a2"
+			"bytes": 8923,
+			"sha256": "a16e388cf626c2f0cfd7a8e7fe1b646b304bcf051ae0836ec654d54675fab801"
 		},
 		{
 			"path": "tests/test_reduction_closure.py",
@@ -514,8 +514,8 @@
 		},
 		{
 			"path": "tests/test_six_falsifications.py",
-			"bytes": 3124,
-			"sha256": "b3b95c575f503a9b73bbca0f9c9dbf5e00ffaa1226a4e0133b0ca5d88e6846da"
+			"bytes": 3157,
+			"sha256": "9503e27276c975dc12a61e7d7953edf0849c9d15a2b0d19c9c2ea5959756e2bb"
 		},
 		{
 			"path": "tests/test_successor_release.py",

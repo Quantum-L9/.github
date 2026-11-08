@@ -68,7 +68,7 @@ class AlignmentClosure(unittest.TestCase):
             "strategic_value_model.yaml",
         )
         selectors = set(self.profile["sources"]["strategic_value_model"]["selectors"])
-        self.assertTrue(
+        self.assertLessEqual(
             {
                 "$.authority",
                 "$.canonical_source",
@@ -81,17 +81,17 @@ class AlignmentClosure(unittest.TestCase):
                 "$.assessment_applicability",
                 "$.retained_former_candidate_semantics",
                 "$.relocated_additional_candidate_semantics",
-            }
-            <= selectors
+            },
+            selectors,
         )
         declared_global = {
             ref
             for ref in self.model["governed_by"]["invariants"]
             if not ref.startswith("L9-SV-")
         }
-        self.assertTrue(
-            {f'$.invariants[?(@.id=="{ref}")]' for ref in declared_global}
-            <= set(self.profile["sources"]["invariants"]["selectors"])
+        self.assertLessEqual(
+            {f'$.invariants[?(@.id=="{ref}")]' for ref in declared_global},
+            set(self.profile["sources"]["invariants"]["selectors"]),
         )
         for ref in self.model["governed_by"]["contracts"]:
             self.assertIn(
