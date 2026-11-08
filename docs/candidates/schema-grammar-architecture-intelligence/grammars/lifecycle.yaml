@@ -1,0 +1,261 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/lifecycle@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: lifecycle
+source_ref: l9.source/lifecycle@1
+source_path: semantics/lifecycle.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:65285d583154cefa1623f9a93061a3413cef2d1dd26349accb80225ce866b1b5
+applies_to_selectors:
+- $.lifecycles.architecture_pattern
+- $.lifecycles.globalization_candidate
+- $.lifecycles.harvest_packet
+- $.global_rules
+- $.state_semantics
+- $.lifecycles.product_topology
+- $.lifecycles.product_manifest
+- $.lifecycles.identity_assertion
+- $.lifecycles.profile
+- $.lifecycles.published_artifact
+- $.lifecycle_relations
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    lifecycles:
+      type: object
+      additional_properties: true
+      fields:
+        architecture_pattern:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            branches:
+              type: object
+              additional_properties: true
+              fields:
+                admitted_global_pattern:
+                  type: string
+                domain_pattern:
+                  type: string
+                rejected:
+                  type: string
+                unresolved:
+                  type: string
+            rules:
+              type: string_list
+        globalization_candidate:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            terminal_resolutions:
+              type: string_list
+            rules:
+              type: string_list
+        harvest_packet:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            artifact_state:
+              type: string
+            stages:
+              type: string_list
+            rules:
+              type: string_list
+        product_topology:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            branches:
+              type: object
+              additional_properties: true
+              fields:
+                rejected:
+                  type: string
+                unresolved:
+                  type: string
+            rules:
+              type: string_list
+        product_manifest:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            branches:
+              type: object
+              additional_properties: true
+              fields:
+                blocked:
+                  type: string
+                unresolved:
+                  type: string
+            rules:
+              type: string_list
+        identity_assertion:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            branches:
+              type: object
+              additional_properties: true
+              fields:
+                unknown:
+                  type: string
+                ambiguous:
+                  type: string
+                invalid:
+                  type: string
+            rules:
+              type: string_list
+        profile:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            rules:
+              type: string_list
+        published_artifact:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            publication_gate:
+              type: object
+              additional_properties: true
+              fields:
+                all_of:
+                  type: string_list
+                when_applicable:
+                  type: string_list
+            rules:
+              type: string_list
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        lifecycles_are_typed_not_universal:
+          type: boolean
+        lifecycle_state_does_not_create_authority:
+          type: boolean
+        transition_authority_must_be_explicit_when_transition_requires_authority:
+          type: boolean
+        admission_binds_exact_subject_revision_or_digest:
+          type: boolean
+        admitted_revision_content_is_immutable:
+          type: boolean
+        material_semantic_change_creates_successor_or_supersession:
+          type: boolean
+        prior_revisions_remain_addressable:
+          type: boolean
+        unknown_or_unresolved_state_remains_explicit:
+          type: boolean
+        derived_currentness_is_not_authority:
+          type: boolean
+        capability_state_dimensions_are_not_lifecycle_states:
+          type: boolean
+        lifecycle_transition_does_not_imply_capability_authorization:
+          type: boolean
+        receipt_emission_does_not_imply_subject_admission_or_authorization:
+          type: boolean
+        published_is_stronger_than_file_presence:
+          type: boolean
+    state_semantics:
+      type: object
+      additional_properties: true
+      fields:
+        candidate:
+          type: string
+        admission_evaluated:
+          type: string
+        awaiting_authority:
+          type: string
+        admitted:
+          type: string
+        published:
+          type: string
+        resolvable:
+          type: string
+        executed:
+          type: string
+        receipted:
+          type: string
+        current:
+          type: string
+        non_current:
+          type: string
+        superseded:
+          type: string
+        retired:
+          type: string
+        rejected:
+          type: string
+        unresolved:
+          type: string
+    lifecycle_relations:
+      type: object
+      additional_properties: true
+      fields:
+        successor_of:
+          type: object
+          additional_properties: true
+          fields:
+            semantics:
+              type: string
+        supersedes:
+          type: object
+          additional_properties: true
+          fields:
+            semantics:
+              type: string
+        current_for:
+          type: object
+          additional_properties: true
+          fields:
+            semantics:
+              type: string

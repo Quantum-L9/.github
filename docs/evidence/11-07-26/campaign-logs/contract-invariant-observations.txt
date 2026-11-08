@@ -1,0 +1,48 @@
+l9.projection/authority-resolution@1
+  l9.contract/semantic-ownership@1: L9-SEM-001, L9-SCOPE-001
+  l9.contract/admission-and-promotion@1: L9-GLOBALIZATION-001, L9-DERIVED-001
+  l9.contract/unknown-and-degradation@1: L9-DEGRADE-001, L9-COMPAT-001
+
+l9.projection/evidence-assessment@1
+  l9.contract/evidence-and-receipt@1: L9-PROV-001, L9-ADMISSION-001
+  l9.contract/provenance-and-coordinate@1: L9-PROV-001, L9-REVISION-001
+
+l9.projection/semantic-change-context@1
+  l9.contract/revision-and-supersession@1: L9-ADMISSION-001
+  l9.contract/derived-artifact@1: L9-AUTH-001
+  l9.contract/projection@1: L9-AUTH-001
+
+l9.projection/architecture-break-test@1
+  l9.contract/unknown-and-degradation@1: L9-AUTH-001
+  l9.contract/semantic-identity-and-compatibility@1: L9-IDENTITY-001, L9-SEM-001
+  l9.contract/validation-and-correctness@1: L9-VALIDATION-001, L9-EVIDENCE-001, L9-ASSURANCE-001
+
+l9.projection/globalization-assessment@1
+  l9.contract/admission-and-promotion@1: L9-DERIVED-001
+  l9.contract/semantic-ownership@1: L9-SEM-001
+  l9.contract/authority-boundary@1: L9-AUTH-001, L9-AUTH-002
+
+l9.projection/work-state-continuity@1
+  l9.contract/provenance-and-coordinate@1: L9-PROV-001
+  l9.contract/unknown-and-degradation@1: L9-DEGRADE-001, L9-COMPAT-001, L9-AUTH-001
+  l9.contract/evidence-and-receipt@1: L9-ASSURANCE-001, L9-PROV-001
+
+l9.projection/strategic-planning-context@1
+  l9.contract/authority-boundary@1: L9-AUTH-002
+  l9.contract/semantic-ownership@1: L9-SEM-001, L9-SCOPE-001
+  l9.contract/projection@1: L9-DERIVED-001, L9-PROV-001
+
+l9.projection/strategic-metacognition@1
+  l9.contract/authority-boundary@1: L9-AUTH-002
+  l9.contract/semantic-ownership@1: L9-SEM-001, L9-SCOPE-001
+  l9.contract/projection@1: L9-DERIVED-001, L9-PROV-001
+
+l9.projection/identity-assurance@1
+  l9.contract/identity-topology@1: L9-IDENTITY-001, L9-OWNER-001, L9-AUTH-001
+  l9.contract/identity-assertion@1: L9-COORD-001
+  l9.contract/provenance-and-coordinate@1: L9-COORD-001, L9-REVISION-001
+
+l9.projection/hard-constraint-context@1
+  l9.contract/unknown-and-degradation@1: L9-AUTH-001
+  l9.contract/semantic-identity-and-compatibility@1: L9-IDENTITY-001, L9-SEM-001
+

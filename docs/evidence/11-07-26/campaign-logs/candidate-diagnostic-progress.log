@@ -1,0 +1,22 @@
+authority-resolution run=1 coordinates_rc=0 project_rc=3 project_result=unknown components=4 compose_attempted=True compose_rc=3 compose_result=unknown
+authority-resolution run=2 coordinates_rc=0 project_rc=3 project_result=unknown components=4 compose_attempted=True compose_rc=3 compose_result=unknown
+evidence-assessment run=1 coordinates_rc=0 project_rc=3 project_result=unknown components=4 compose_attempted=True compose_rc=3 compose_result=unknown
+evidence-assessment run=2 coordinates_rc=0 project_rc=3 project_result=unknown components=4 compose_attempted=True compose_rc=3 compose_result=unknown
+semantic-change-context run=1 coordinates_rc=0 project_rc=3 project_result=unknown components=4 compose_attempted=True compose_rc=3 compose_result=unknown
+semantic-change-context run=2 coordinates_rc=0 project_rc=3 project_result=unknown components=4 compose_attempted=True compose_rc=3 compose_result=unknown
+architecture-break-test run=1 coordinates_rc=0 project_rc=3 project_result=unknown components=5 compose_attempted=True compose_rc=3 compose_result=unknown
+architecture-break-test run=2 coordinates_rc=0 project_rc=3 project_result=unknown components=5 compose_attempted=True compose_rc=3 compose_result=unknown
+globalization-assessment run=1 coordinates_rc=0 project_rc=3 project_result=unknown components=5 compose_attempted=True compose_rc=3 compose_result=unknown
+globalization-assessment run=2 coordinates_rc=0 project_rc=3 project_result=unknown components=5 compose_attempted=True compose_rc=3 compose_result=unknown
+work-state-continuity run=1 coordinates_rc=0 project_rc=3 project_result=unknown components=6 compose_attempted=True compose_rc=3 compose_result=unknown
+work-state-continuity run=2 coordinates_rc=0 project_rc=3 project_result=unknown components=6 compose_attempted=True compose_rc=3 compose_result=unknown
+strategic-planning-context run=1 coordinates_rc=0 project_rc=3 project_result=unknown components=9 compose_attempted=True compose_rc=3 compose_result=unknown
+strategic-planning-context run=2 coordinates_rc=0 project_rc=3 project_result=unknown components=9 compose_attempted=True compose_rc=3 compose_result=unknown
+strategic-metacognition run=1 coordinates_rc=0 project_rc=3 project_result=unknown components=6 compose_attempted=True compose_rc=3 compose_result=unknown
+strategic-metacognition run=2 coordinates_rc=0 project_rc=3 project_result=unknown components=6 compose_attempted=True compose_rc=3 compose_result=unknown
+identity-assurance run=1 coordinates_rc=0 project_rc=3 project_result=unknown components=6 compose_attempted=True compose_rc=3 compose_result=unknown
+identity-assurance run=2 coordinates_rc=0 project_rc=3 project_result=unknown components=6 compose_attempted=True compose_rc=3 compose_result=unknown
+hard-constraint-context run=1 coordinates_rc=0 project_rc=3 project_result=unknown components=4 compose_attempted=True compose_rc=3 compose_result=unknown
+hard-constraint-context run=2 coordinates_rc=0 project_rc=3 project_result=unknown components=4 compose_attempted=True compose_rc=3 compose_result=unknown
+SUMMARY {"all_actual_compose_attempted": true, "composition": {"attempted": 20, "not_attempted": 0, "results": {"unknown": 20}, "return_codes": {"3": 20}}, "coordinates": {"attempted": 20, "not_attempted": 0, "results": {"None": 20}, "return_codes": {"0": 20}}, "determinism_by_profile": {"composition_artifacts": {"different": 0, "equal": 10, "not_produced": 0}, "composition_receipts": {"different": 0, "equal": 10, "not_produced": 0}, "projection_artifacts": {"different": 0, "equal": 10, "not_produced": 0}, "projection_receipts": {"different": 0, "equal": 10, "not_produced": 0}}, "harness_run_errors": 0, "profile_helper_errors": 0, "profiles": 10, "projection": {"attempted": 20, "not_attempted": 0, "results": {"unknown": 20}, "return_codes": {"3": 20}}, "projection_artifacts_total": 106, "projection_artifacts_unknown": 106, "projection_unresolved_criteria": ["payload_schema"], "runs": 20}
+Full machine-readable results: /home/ubuntu/l9-projection-campaign/candidate-diagnostic/results.json

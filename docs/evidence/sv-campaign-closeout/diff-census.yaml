@@ -1,0 +1,29 @@
+schema: l9.sv-campaign-diff-census/v1
+range: 92c037a6ec8a17185841cfd60214a69873ae2501..64d8b8598300f94c3201f26866f73be6895dab60
+meaning: 'everything #222 brought to main'
+totals: {files: 20, added: 4168, deleted: 13}
+predecessor_release_records_changed: 0
+adr_files_changed_other_than_ADR-029_and_index: 0
+semantics_tree_at_merge: 251bb3d9238f93f0207b1f8443c80359e034595b
+admission_commit_delta: 5c7fcc5 changed only ADR-029 and v3.32.0 MANIFEST, README, RELEASE_VALIDATION, HASHES (4 hash entries); semantics/ untouched
+files:
+  - {path: docs/adr/ADR-029-strategic-value-foundation-and-composition-provenance-criteria.md, added: 64, deleted: 0}
+  - {path: docs/adr/README.md, added: 2, deleted: 1}
+  - {path: docs/semantic-foundation/v3.32.0/HASHES.sha256, added: 119, deleted: 0}
+  - {path: docs/semantic-foundation/v3.32.0/MANIFEST.md, added: 120, deleted: 0}
+  - {path: docs/semantic-foundation/v3.32.0/README.md, added: 27, deleted: 0}
+  - {path: docs/semantic-foundation/v3.32.0/RELEASE_VALIDATION.md, added: 23, deleted: 0}
+  - {path: scripts/validate-semantics.py, added: 201, deleted: 0}
+  - {path: semantics/canonical_sources.yaml, added: 6, deleted: 0}
+  - {path: semantics/capabilities.yaml, added: 4, deleted: 4}
+  - {path: semantics/composition_profiles.yaml, added: 39, deleted: 0}
+  - {path: semantics/contracts.yaml, added: 101, deleted: 2}
+  - {path: semantics/generic_compiler_manifest.yaml, added: 3, deleted: 0}
+  - {path: semantics/invariants.yaml, added: 14, deleted: 0}
+  - {path: semantics/lifecycle.yaml, added: 3, deleted: 3}
+  - {path: semantics/projection_profiles.yaml, added: 74, deleted: 0}
+  - {path: semantics/receipt_catalog.yaml, added: 3, deleted: 3}
+  - {path: semantics/strategic_planner_value_composition.schema.yaml, added: 1451, deleted: 0}
+  - {path: semantics/strategic_planner_value_projection.schema.yaml, added: 1398, deleted: 0}
+  - {path: semantics/strategic_value_model.yaml, added: 480, deleted: 0}
+  - {path: semantics/vocabulary.yaml, added: 36, deleted: 0}

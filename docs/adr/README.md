@@ -45,8 +45,13 @@ ProductTopology
 - ADR-022: PR-audit projection, source-namespaced composition, payload schemas, and validator closure
 - ADR-023: Operating-plane @2 as a declared major-version successor, and PROJECTION-014 exact selection removal
 - ADR-024: Artifact header field semantics as source declarations
+- ADR-025: Admission of the v3.28.0 projection and composition profile pairs
+- ADR-026: Manifest interface surface and the Python Gate Node target binding
+- ADR-027: Structural contract for l9.implementation-ir/v1
+- ADR-028: Single-kind architecture pattern fields
+- ADR-029: Strategic Value Foundation and Catalog-Declared Composition Provenance Criteria
 
-ADR-001 through ADR-024 are the global semantic decisions. They live in this
+ADR-001 through ADR-029 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions

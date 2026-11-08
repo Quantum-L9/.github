@@ -1,0 +1,146 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.grammar/strategic-planner-value-contracts-candidate@1
+owner: Quantum-L9/.github
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: contracts
+source_ref: l9.source/contracts@1
+source_path: semantics/contracts.yaml
+source_revision: d6f4db8b9689eb97a825e6184e2b346bf27eeebf
+source_digest: sha256:99b4d35d02ca978b381b363a330e5721a458eeb97eab492f0596f6f0a8b42459
+applies_to_selectors:
+- $.contracts[?(@.id=="l9.contract/strategic-value-assessment@1")]
+- $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
+- $.contracts[?(@.id=="l9.contract/projection@1")]
+- $.contracts[?(@.id=="l9.contract/hard-constraint@1")]
+grammar:
+  type: object
+  fields:
+    contracts:
+      type: array
+      items:
+        type: object
+        fields:
+          id:
+            type: string
+          purpose:
+            type: string
+          scope:
+            type: string
+            const: global
+          owner:
+            type: string
+            const: Quantum-L9/.github
+          source_invariants:
+            type: array
+            items:
+              type: string
+            min_items: 1
+          applies_to:
+            type: array
+            items:
+              type: string
+            min_items: 1
+          requires:
+            type: string_list
+          guarantees:
+            type: string_list
+          forbidden:
+            type: string_list
+          outcomes:
+            type: object
+            fields:
+              satisfied:
+                type: string
+              violated:
+                type: string
+              unresolved:
+                type: string
+              admitted:
+                type: string
+              refused:
+                type: string
+              new_decision_required:
+                type: string
+              attested:
+                type: string
+              unverified:
+                type: string
+              invalid_binding:
+                type: string
+              supported:
+                type: string
+              unsupported:
+                type: string
+              resolved:
+                type: string
+              admissible:
+                type: string
+              inadmissible:
+                type: string
+              current:
+                type: string
+              non_current:
+                type: string
+              compatible:
+                type: string
+              incompatible:
+                type: string
+              preserved:
+                type: string
+              successor_required:
+                type: string
+              valid_projection:
+                type: string
+              invalid_projection:
+                type: string
+              rejected:
+                type: string
+              invocable:
+                type: string
+              not_invocable:
+                type: string
+              invalid:
+                type: string
+              unsat:
+                type: string
+              ambiguous:
+                type: string
+              blocked:
+                type: string
+              unknown:
+                type: string
+              valid:
+                type: string
+              new_candidate_required:
+                type: string
+            additional_properties: true
+          applicability:
+            type: object
+            fields:
+              trigger:
+                type: string
+              does_not_apply_to:
+                type: array
+                items:
+                  type: string
+              method_conditional:
+                type: string
+              unavailable_claim:
+                type: string
+            additional_properties: true
+        additional_properties: true
+        required:
+        - id
+        - purpose
+        - scope
+        - owner
+        - source_invariants
+        - applies_to
+        - requires
+        - guarantees
+        - forbidden
+        - outcomes
+      min_items: 4
+  additional_properties: true

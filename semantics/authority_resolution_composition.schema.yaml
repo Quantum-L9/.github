@@ -1,0 +1,281 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_authority_resolution_composed_payload_schema
+artifact_id: l9.schema/authority-resolution-composition@1
+canonical_source:
+  format: yaml
+  artifact: authority_resolution_composition.schema.yaml
+governed_by:
+  composition_profile_ref: l9.compose/authority-resolution@1
+  projection_profile_ref: l9.projection/authority-resolution@1
+purpose: Exact four-source authority-resolution composition. Each required namespace preserves its source-class
+  identity and source-specific semantic constraints.
+type: object
+required:
+- invariants
+- contracts
+- authority_model
+- artifact_model
+properties:
+  schema:
+    const: l9.composed-projection.authority-resolution/v1
+  invariants:
+    type: object
+    required:
+    - invariants
+    properties:
+      invariants:
+        type: array
+        min_items: 12
+        items:
+          type: object
+          required:
+          - id
+          - owner
+          - scope
+          - statement
+          properties:
+            id:
+              enum:
+              - L9-AUTH-001
+              - L9-AUTH-002
+              - L9-OWNER-001
+              - L9-PROMOTION-001
+              - L9-ADMISSION-001
+              - L9-UNKNOWN-001
+              - L9-COMPAT-001
+              - L9-DEGRADE-001
+              - L9-DERIVED-001
+              - L9-GLOBALIZATION-001
+              - L9-SCOPE-001
+              - L9-SEM-001
+            owner:
+              const: Quantum-L9/.github
+            scope:
+              const: global
+            statement:
+              type: string
+  contracts:
+    type: object
+    required:
+    - contracts
+    properties:
+      contracts:
+        type: array
+        min_items: 4
+        items:
+          type: object
+          required:
+          - id
+          - purpose
+          - scope
+          - owner
+          - source_invariants
+          - requires
+          - guarantees
+          - forbidden
+          - outcomes
+          properties:
+            id:
+              enum:
+              - l9.contract/authority-boundary@1
+              - l9.contract/semantic-ownership@1
+              - l9.contract/admission-and-promotion@1
+              - l9.contract/unknown-and-degradation@1
+            purpose:
+              type: string
+            scope:
+              const: global
+            owner:
+              const: Quantum-L9/.github
+            source_invariants:
+              type: string_list
+            requires:
+              type: string_list
+            guarantees:
+              type: string_list
+            forbidden:
+              type: string_list
+            outcomes:
+              type: object
+  authority_model:
+    type: object
+    required:
+    - authority_classes
+    - admission_rules
+    - global_admission_rules
+    - agent_authority
+    - human_authority
+    - escalation_rules
+    properties:
+      authority_classes:
+        type: object
+        required:
+        - global_governance
+        - canonical
+        - derived
+        - candidate
+        - evidence
+        properties:
+          global_governance:
+            type: object
+            required:
+            - owner
+            - roles
+            - does_not_own
+            properties:
+              owner:
+                const: Quantum-L9/.github
+              roles:
+                type: string_list
+              does_not_own:
+                type: string_list
+          canonical:
+            type: object
+            required:
+            - implicit_derivation_allowed
+            properties:
+              implicit_derivation_allowed:
+                const: false
+          derived:
+            type: object
+            required:
+            - may_self_promote
+            properties:
+              may_self_promote:
+                const: false
+          candidate:
+            type: object
+            required:
+            - authoritative
+            properties:
+              authoritative:
+                const: false
+          evidence:
+            type: object
+            required:
+            - grants_authority
+            properties:
+              grants_authority:
+                const: false
+      admission_rules:
+        type: object
+        required:
+        - global_requirements
+        - candidate_generation_is_not_admission
+        - self_admission_without_target_class_authority_forbidden
+        - changed_material_subject_requires_new_decision_unless_compatibility_preserves_it
+        properties:
+          global_requirements:
+            type: string_list
+          candidate_generation_is_not_admission:
+            const: true
+          self_admission_without_target_class_authority_forbidden:
+            const: true
+          changed_material_subject_requires_new_decision_unless_compatibility_preserves_it:
+            const: true
+      global_admission_rules:
+        type: object
+        required:
+        - requirements
+        - requires_global_authority
+        - candidate_generation_is_not_admission
+        properties:
+          requirements:
+            type: string_list
+          requires_global_authority:
+            const: true
+          candidate_generation_is_not_admission:
+            const: true
+      agent_authority:
+        type: object
+        required:
+        - rules
+        properties:
+          rules:
+            type: string_list
+      human_authority:
+        type: object
+        required:
+        - rules
+        properties:
+          rules:
+            type: string_list
+      escalation_rules:
+        type: object
+        required:
+        - authority_missing
+        - semantic_conflict
+        - unknown
+        - changed_candidate_after_decision
+        properties:
+          authority_missing:
+            const: block
+          semantic_conflict:
+            const: block
+          unknown:
+            const: remain_unknown
+          changed_candidate_after_decision:
+            const: require_new_decision
+  artifact_model:
+    type: object
+    required:
+    - authority_classes
+    properties:
+      authority_classes:
+        type: object
+        required:
+        - canonical
+        - derived
+        - candidate
+        - evidence
+        properties:
+          canonical:
+            type: object
+            required:
+            - authoritative
+            - implicit_derivation
+            properties:
+              authoritative:
+                const: true
+              implicit_derivation:
+                const: false
+          derived:
+            type: object
+            required:
+            - authoritative
+            - authority_expansion_allowed
+            - implicit_promotion_forbidden
+            properties:
+              authoritative:
+                const: false
+              authority_expansion_allowed:
+                const: false
+              implicit_promotion_forbidden:
+                const: true
+          candidate:
+            type: object
+            required:
+            - authoritative
+            - requires_validation_and_admission
+            properties:
+              authoritative:
+                const: false
+              requires_validation_and_admission:
+                const: true
+          evidence:
+            type: object
+            required:
+            - authoritative
+            - attests_declared_observation_or_outcome
+            - grants_authority
+            properties:
+              authoritative:
+                const: false
+              attests_declared_observation_or_outcome:
+                const: true
+              grants_authority:
+                const: false

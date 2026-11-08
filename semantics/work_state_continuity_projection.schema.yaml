@@ -1,0 +1,482 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_work_state_continuity_projection_payload_schema
+artifact_id: l9.schema/work-state-continuity-projection@1
+canonical_source:
+  format: yaml
+  artifact: work_state_continuity_projection.schema.yaml
+governed_by:
+  projection_profile_ref: l9.projection/work-state-continuity@1
+purpose: Typed per-source payload of l9.projection/work-state-continuity@1, derived from the payloads
+  its selectors produce at the recorded authority revision. Exact selected membership is independently
+  governed by selector equivalence; the schema adds no authority.
+derivation:
+  method: l9.schema-derivation/selected-payload@1
+  basis: selected_payload_observation_at_authority_revision
+  authority_repository: Quantum-L9/.github
+  authority_revision: 290bcd90378577392640cea9c6053c178423f0da
+  projection_profile:
+    ref: l9.projection/work-state-continuity@1
+    digest: sha256:053d23787baa62020ec31976a7bd08893c95b4bfbd8558edb677ebc4fba2bb40
+  composition_profile:
+    ref: l9.compose/work-state-continuity@1
+    digest: sha256:37b7a42ab086334ee35ace3eb177370deecca4d1842c653547b0ab030a750cce
+  selector_model:
+    ref: l9.selector-model/global@1
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+  sources:
+  - source_class: invariants
+    source_ref: l9.source/invariants@1
+    source_path: semantics/invariants.yaml
+    source_digest: sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a
+  - source_class: contracts
+    source_ref: l9.source/contracts@1
+    source_path: semantics/contracts.yaml
+    source_digest: sha256:f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79
+  - source_class: packet_catalog
+    source_ref: l9.source/packet-catalog@1
+    source_path: semantics/packet_catalog.yaml
+    source_digest: sha256:3a1fea5eed1ee1b43e16f0adabefd8ef5151702ed5b9dc14801d642183b41017
+  - source_class: receipt_catalog
+    source_ref: l9.source/receipt-catalog@1
+    source_path: semantics/receipt_catalog.yaml
+    source_digest: sha256:0dc3a305a53cbd6f2f1e0cba440d21cf7b3c6b241285a15be8bdb185babc1c84
+  - source_class: lifecycle
+    source_ref: l9.source/lifecycle@1
+    source_path: semantics/lifecycle.yaml
+    source_digest: sha256:65285d583154cefa1623f9a93061a3413cef2d1dd26349accb80225ce866b1b5
+  - source_class: semantic_dependency_model
+    source_ref: l9.source/semantic-dependency-model@1
+    source_path: semantics/semantic_dependency_model.yaml
+    source_digest: sha256:d48ad347e3c39c33274017ccca30843b4a11f5339c519cc957aaa057f0440a14
+type: object
+properties:
+  schema:
+    const: l9.projection.work-state-continuity/v1
+  invariants:
+    type: array
+    min_items: 10
+    items:
+      type: object
+      required:
+      - id
+      - statement
+      - scope
+      - owner
+      properties:
+        id:
+          type: string
+          enum:
+          - L9-AUTH-001
+          - L9-EVIDENCE-001
+          - L9-ASSURANCE-001
+          - L9-UNKNOWN-001
+          - L9-DEGRADE-001
+          - L9-PROV-001
+          - L9-COORD-001
+          - L9-COMPAT-001
+          - L9-REVISION-001
+          - L9-ADMISSION-001
+        statement:
+          type: string
+        scope:
+          type: string
+          const: global
+        owner:
+          type: string
+          const: Quantum-L9/.github
+  contracts:
+    type: array
+    min_items: 4
+    items:
+      type: object
+      required:
+      - id
+      - purpose
+      - scope
+      - owner
+      - source_invariants
+      - applies_to
+      - requires
+      - guarantees
+      - forbidden
+      - outcomes
+      properties:
+        id:
+          type: string
+          enum:
+          - l9.contract/evidence-and-receipt@1
+          - l9.contract/unknown-and-degradation@1
+          - l9.contract/provenance-and-coordinate@1
+          - l9.contract/revision-and-supersession@1
+        purpose:
+          type: string
+        scope:
+          type: string
+          const: global
+        owner:
+          type: string
+          const: Quantum-L9/.github
+        source_invariants:
+          type: string_list
+        applies_to:
+          type: string_list
+        requires:
+          type: string_list
+        guarantees:
+          type: string_list
+        forbidden:
+          type: string_list
+        outcomes:
+          type: object
+          properties:
+            attested:
+              type: string
+              const: claim_is_bound_and_independently_verifiable
+            unverified:
+              type: string
+              const: required_evidence_or_binding_is_missing_stale_or_unverifiable
+            invalid_binding:
+              type: string
+              const: claim_does_not_bind_the_subject_or_coordinates_it_asserts
+            resolved:
+              type: string
+              const: required_semantics_are_known_or_validly_substituted_or_conflict_is_authoritatively_resolved
+            unresolved:
+              type: string
+            refused:
+              type: string
+              const: requested_substitution_lacks_compatibility_or_authority
+            current:
+              type: string
+              const: declared_coordinates_match_or_compatibility_is_proven
+            non_current:
+              type: string
+              const: a_material_governing_coordinate_changed_without_compatibility_proof
+            preserved:
+              type: string
+              const: revision_semantics_are_unchanged
+            successor_required:
+              type: string
+              const: material_semantic_change_requires_new_revision_identity
+            violated:
+              type: string
+              const: admitted_history_was_rewritten_or_reused_for_changed_meaning
+  global_rules:
+    type: object
+    properties:
+      packet_is_bounded_transferable_unit:
+        type: boolean
+        const: true
+      packet_does_not_create_authority:
+        type: boolean
+        const: true
+      transport_envelope_is_not_preferred_l9_vocabulary:
+        type: boolean
+        const: true
+      receipt_is_evidence:
+        type: boolean
+        const: true
+      receipt_does_not_grant_semantic_authority:
+        type: boolean
+        const: true
+      receipt_does_not_grant_execution_authority:
+        type: boolean
+        const: true
+      receipt_claim_scope_must_be_explicit:
+        type: boolean
+        const: true
+      exact_subject_binding_is_required:
+        type: boolean
+        const: true
+      materially_governing_coordinates_must_be_bound:
+        type: boolean
+        const: true
+      declared_observation_or_outcome_is_required:
+        type: boolean
+        const: true
+      verification_must_not_depend_only_on_the_recorded_verdict:
+        type: boolean
+        const: true
+      receipt_digest_is_required:
+        type: boolean
+        const: true
+      receipt_content_is_immutable_by_digest:
+        type: boolean
+        const: true
+      material_subject_change_makes_prior_receipt_non_current_unless_compatibility_preserves_it:
+        type: boolean
+        const: true
+      result_semantics_remain_owned_by_the_applicable_contract_or_taxonomy:
+        type: boolean
+        const: true
+      receipt_family_registration_does_not_transfer_domain_semantic_ownership:
+        type: boolean
+        const: true
+      receipt_presence_does_not_imply_capability_admission_availability_authorization_or_invocability:
+        type: boolean
+        const: true
+      receipt_lifecycle_is_defined_separately:
+        type: boolean
+        const: true
+      lifecycles_are_typed_not_universal:
+        type: boolean
+        const: true
+      lifecycle_state_does_not_create_authority:
+        type: boolean
+        const: true
+      transition_authority_must_be_explicit_when_transition_requires_authority:
+        type: boolean
+        const: true
+      admission_binds_exact_subject_revision_or_digest:
+        type: boolean
+        const: true
+      admitted_revision_content_is_immutable:
+        type: boolean
+        const: true
+      material_semantic_change_creates_successor_or_supersession:
+        type: boolean
+        const: true
+      prior_revisions_remain_addressable:
+        type: boolean
+        const: true
+      unknown_or_unresolved_state_remains_explicit:
+        type: boolean
+        const: true
+      derived_currentness_is_not_authority:
+        type: boolean
+        const: true
+      capability_state_dimensions_are_not_lifecycle_states:
+        type: boolean
+        const: true
+      lifecycle_transition_does_not_imply_capability_authorization:
+        type: boolean
+        const: true
+      receipt_emission_does_not_imply_subject_admission_or_authorization:
+        type: boolean
+        const: true
+      published_is_stronger_than_file_presence:
+        type: boolean
+        const: true
+  packets:
+    type: object
+    required:
+    - state_change
+    properties:
+      state_change:
+        type: object
+        required:
+        - canonical_name
+        - purpose
+        - required_semantics
+        properties:
+          canonical_name:
+            type: string
+            const: StateChangePacket
+          purpose:
+            type: string
+          required_semantics:
+            type: string_list
+  receipt_kernel:
+    type: object
+    required:
+    - required_semantics
+    - field_semantics
+    - authority
+    - currentness
+    - forbidden
+    properties:
+      required_semantics:
+        type: string_list
+      field_semantics:
+        type: object
+        required:
+        - receipt_type
+        - receipt_identity
+        - exact_subject_ref
+        - claim
+        - governing_coordinates
+        - observation_or_outcome
+        - verification_basis
+        - producer_identity
+        - receipt_digest
+        properties:
+          receipt_type:
+            type: string
+          receipt_identity:
+            type: string
+          exact_subject_ref:
+            type: string
+          claim:
+            type: string
+          governing_coordinates:
+            type: string
+          observation_or_outcome:
+            type: string
+          verification_basis:
+            type: string
+          producer_identity:
+            type: string
+          receipt_digest:
+            type: string
+      authority:
+        type: object
+        required:
+        - class
+        - grants_semantic_authority
+        - grants_execution_authority
+        - may_replace_admission_decision
+        properties:
+          class:
+            type: string
+            const: evidence
+          grants_semantic_authority:
+            type: boolean
+            const: false
+          grants_execution_authority:
+            type: boolean
+            const: false
+          may_replace_admission_decision:
+            type: boolean
+            const: false
+      currentness:
+        type: object
+        required:
+        - rule
+        - currentness_is_authority
+        properties:
+          rule:
+            type: string
+          currentness_is_authority:
+            type: boolean
+            const: false
+      forbidden:
+        type: string_list
+  state_semantics:
+    type: object
+    required:
+    - candidate
+    - admission_evaluated
+    - awaiting_authority
+    - admitted
+    - published
+    - resolvable
+    - executed
+    - receipted
+    - current
+    - non_current
+    - superseded
+    - retired
+    - rejected
+    - unresolved
+    properties:
+      candidate:
+        type: string
+        const: proposed_subject_not_yet_admitted
+      admission_evaluated:
+        type: string
+        const: mechanical_or_contractual_admission_evaluation_completed
+      awaiting_authority:
+        type: string
+        const: evaluation_complete_but_required_authority_decision_not_yet_bound
+      admitted:
+        type: string
+        const: exact_subject_accepted_by_applicable_admission_authority
+      published:
+        type: string
+        const: admitted_subject_satisfies_its_semantic_owner_defined_canonical_publication_contract
+      resolvable:
+        type: string
+        const: consumers_can_resolve_exact_identity_and_digest
+      executed:
+        type: string
+      receipted:
+        type: string
+        const: execution_or_evaluation_has_bound_evidence_receipt
+      current:
+        type: string
+        const: declared_material_coordinates_still_match_or_compatibility_preserves_applicability
+      non_current:
+        type: string
+        const: one_or_more_material_coordinates_changed_without_compatibility_preservation
+      superseded:
+        type: string
+        const: newer_authoritative_revision_or_version_replaces_current_use_without_rewriting_history
+      retired:
+        type: string
+        const: authoritative_owner_has_ended_future_use_while_preserving_history
+      rejected:
+        type: string
+        const: applicable_authority_or_mechanical_gate_refused_admission_or_progression
+      unresolved:
+        type: string
+  lifecycle_relations:
+    type: object
+    required:
+    - successor_of
+    - supersedes
+    - current_for
+    properties:
+      successor_of:
+        type: object
+        required:
+        - semantics
+        properties:
+          semantics:
+            type: string
+            const: new_authoritative_revision_or_version_preserves_history_while_replacing_future_current_use
+      supersedes:
+        type: object
+        required:
+        - semantics
+        properties:
+          semantics:
+            type: string
+            const: newer_authoritative_subject_displaces_prior_subject_for_current_use_without_rewriting_prior_meaning
+      current_for:
+        type: object
+        required:
+        - semantics
+        properties:
+          semantics:
+            type: string
+            const: subject_remains_applicable_to_exact_declared_material_coordinates
+  invalidation_rules:
+    type: object
+    required:
+    - source_digest_change
+    - profile_digest_change
+    - upstream_revision_change
+    - historical_artifacts_are_immutable
+    - repair_default
+    - upstream_conflict
+    - affected_expression
+    - silent_consumption_of_stale_input_forbidden
+    properties:
+      source_digest_change:
+        type: string
+        const: mark_transitive_dependents_stale
+      profile_digest_change:
+        type: string
+        const: mark_profile_dependents_stale
+      upstream_revision_change:
+        type: string
+        const: evaluate_dependency_impact
+      historical_artifacts_are_immutable:
+        type: boolean
+        const: true
+      repair_default:
+        type: string
+        const: repair_current_stage_when_upstream_assumptions_remain_valid
+      upstream_conflict:
+        type: string
+        const: create_new_upstream_revision_then_invalidate_transitive_dependents
+      affected_expression:
+        type: string
+      silent_consumption_of_stale_input_forbidden:
+        type: boolean
+        const: true

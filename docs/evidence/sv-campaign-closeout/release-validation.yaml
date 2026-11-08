@@ -1,0 +1,15 @@
+schema: l9.sv-campaign-release-validation/v1
+release: v3.32.0
+adr: ADR-029
+selected_by: docs/candidates/SV/tools/prepare_successor_release.py from merged state (no --queued claims), never hand-typed (D4)
+release_status_at_main: ADMITTED ADDITIVE SUCCESSOR (ADR-029, 2026-11-08)
+hash_inventory:
+  file: docs/semantic-foundation/v3.32.0/HASHES.sha256
+  entries: 119
+  verified_at: 64d8b8598300f94c3201f26866f73be6895dab60
+  result: 119 OK, 0 mismatched (sha256sum -c, paths rooted at the repository)
+native_validation_at_main:
+  scripts/validate-semantics.py: {exit: 0, pass_lines: 59, fail_lines: 0, log: post-merge-replay/validate-semantics.log}
+  make validate: 0
+  make check: 0
+predecessors: no file under docs/semantic-foundation/ outside v3.32.0 changed in the census range (SC-008 also passes)

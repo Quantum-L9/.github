@@ -1,0 +1,177 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/artifact-model@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: artifact_model
+source_ref: l9.source/artifact-model@1
+source_path: semantics/artifact_model.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:21f8bb783d7611ae1b3c60474c6ca31f6096f29d7ef0e94ef81f12e6d2defe09
+applies_to_selectors:
+- $.artifacts.canonical_artifact
+- $.artifacts.projection_artifact
+- $.artifacts.composed_projection
+- $.artifacts.derived_artifact
+- $.artifacts.candidate_artifact
+- $.artifacts.published_profile
+- $.artifacts.distribution_packet
+- $.artifacts.product_topology
+- $.artifacts.product_manifest
+- $.artifacts.identity_assertion
+- $.artifacts.receipt
+- $.authority_classes
+- $.derivation_rules
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    artifacts:
+      type: object
+      additional_properties: true
+      fields:
+        canonical_artifact:
+          type: object
+          additional_properties: true
+          fields:
+            authority_class:
+              type: string
+            immutable_by_digest:
+              type: boolean
+        projection_artifact:
+          type: object
+          additional_properties: true
+          fields:
+            authority_class:
+              type: string
+            required:
+              type: string_list
+        composed_projection:
+          type: object
+          additional_properties: true
+          fields:
+            authority_class:
+              type: string
+            required:
+              type: string_list
+        derived_artifact:
+          type: object
+          additional_properties: true
+          fields:
+            authority_class:
+              type: string
+            required:
+              type: string_list
+        candidate_artifact:
+          type: object
+          additional_properties: true
+          fields:
+            authority_class:
+              type: string
+            required:
+              type: string_list
+        published_profile:
+          type: object
+          additional_properties: true
+          fields:
+            authority_class:
+              type: string
+            required:
+              type: string_list
+        distribution_packet:
+          type: object
+          additional_properties: true
+          fields:
+            authority_class:
+              type: string
+            required:
+              type: string_list
+        product_topology:
+          type: object
+          additional_properties: true
+          fields:
+            authority_class:
+              type: string
+            schema_ref:
+              type: string
+            required:
+              type: string_list
+            rules:
+              type: string_list
+        product_manifest:
+          type: object
+          additional_properties: true
+          fields:
+            authority_class:
+              type: string
+            schema_ref:
+              type: string
+            required:
+              type: string_list
+            rules:
+              type: string_list
+        identity_assertion:
+          type: object
+          additional_properties: true
+          fields:
+            authority_class:
+              type: string
+            schema_ref:
+              type: string
+            required:
+              type: string_list
+            rules:
+              type: string_list
+        receipt:
+          type: object
+          additional_properties: true
+          fields:
+            authority_class:
+              type: string
+            semantics_source:
+              type: string
+            required:
+              type: string_list
+    authority_classes:
+      type: object
+      additional_properties: true
+      fields:
+        canonical:
+          type: object
+          additional_properties: true
+          fields:
+            authoritative:
+              type: boolean
+            implicit_derivation:
+              type: boolean
+        derived:
+          type: object
+          additional_properties: true
+          fields:
+            authoritative:
+              type: boolean
+            authority_expansion_allowed:
+              type: boolean
+            implicit_promotion_forbidden:
+              type: boolean
+        candidate:
+          type: object
+          additional_properties: true
+          fields:
+            authoritative:
+              type: boolean
+            requires_validation_and_admission:
+              type: boolean
+        evidence:
+          type: object
+          additional_properties: true
+          fields:
+            authoritative:
+              type: boolean
+            attests_declared_observation_or_outcome:
+              type: boolean
+            grants_authority:
+              type: boolean
+    derivation_rules:
+      type: string_list

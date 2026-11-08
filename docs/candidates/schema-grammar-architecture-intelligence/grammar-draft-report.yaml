@@ -1,0 +1,121 @@
+authority_repository: Quantum-L9/.github
+authority_revision: f9db38b1035870c0c271249712f2324fff7e0046
+projection_profile: l9.projection/architecture-intelligence@1
+composition_profile: l9.compose/architecture-intelligence@1
+written:
+- source_class: vocabulary
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/vocabulary.yaml
+  digest: sha256:3b29675cc1ec996ce8a72382e80ae4ae0bef9df5e10047e2d937b465a95dd994
+  normative_overlay: []
+- source_class: invariants
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/invariants.yaml
+  digest: sha256:a582557fa1001a9380a465e65e67d11b41bf58c8fda5a01d58953721bd7853a6
+  normative_overlay: []
+- source_class: contracts
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/contracts.yaml
+  digest: sha256:86909ce03294c018d1fde22c98239bda725ec86ae1c4ed7a6d8a3d992e7e24e9
+  normative_overlay: []
+- source_class: requirement_model
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/requirement_model.yaml
+  digest: sha256:65fe2d41a158d257b3d517e6fe3c7b13f35f26715458fce5c6ab144ee8dcacbc
+  normative_overlay: []
+- source_class: resolution_model
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/resolution_model.yaml
+  digest: sha256:5e61e37ce515fa373fc4e370b17505f65223a89052694d9886a3b35d168ef4ce
+  normative_overlay: []
+- source_class: architecture_rules
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/architecture_rules.yaml
+  digest: sha256:b7ec1ed22f1782dd0ba62d07f67cd7f3f6058a2d5bd359eb683848f6df3d38a8
+  normative_overlay: []
+- source_class: product_topology
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/product_topology.yaml
+  digest: sha256:401ee04d8d22466201232da918fab17c1ef7ae3780afe469b04ad0e40a7b8399
+  normative_overlay: []
+- source_class: product_kinds
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/product_kinds.yaml
+  digest: sha256:db0d27f05ac167373d2158374bbc1c4ad708bec235d42956a6fb428a3c49e310
+  normative_overlay: []
+- source_class: node_archetypes
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/node_archetypes.yaml
+  digest: sha256:c7cb58e8108f8faf490cee693c63db81d0e5ced27a08d8e5613875dd19d36b09
+  normative_overlay: []
+- source_class: dependency_archetypes
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/dependency_archetypes.yaml
+  digest: sha256:5a11db36a3ca00e311a54164b2bfd1332bb0d108026b1f2d02e5c4c8426bc062
+  normative_overlay: []
+- source_class: identity_model
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/identity_model.yaml
+  digest: sha256:8b8b8488edc5e50a888c2fa57646623a24c29bdb55b659f9f4abf624f0864549
+  normative_overlay: []
+- source_class: architecture_patterns
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/architecture_patterns.yaml
+  digest: sha256:10047261b36bcc58e4e6a68dbdc969f86980decf279d1b428b98a085d729acd3
+  normative_overlay: []
+- source_class: port_catalog
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/port_catalog.yaml
+  digest: sha256:45862cd613d716516a4bb990102cc69187e3d291e1f2ebb43db83508025e7701
+  normative_overlay: []
+- source_class: capabilities
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/capabilities.yaml
+  digest: sha256:161e7b420b7d84188ee17a8ff902c958f574d16bbb25a32d8a972995d3511bcb
+  normative_overlay: []
+- source_class: capability_resolution
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/capability_resolution.yaml
+  digest: sha256:e62509c881cd6ce38df3dcc5262b8ac3df2d0de5f35d27afdde75bb2a75147bc
+  normative_overlay: []
+- source_class: technology_profiles
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/technology_profiles.yaml
+  digest: sha256:e63b5e07f731c9c318a9916c7d108b7e2665fba283b54db4374e7749f1014146
+  normative_overlay: []
+- source_class: technology_capabilities
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/technology_capabilities.yaml
+  digest: sha256:8c15b18e367ab2a5987eed75f771066e8ba3f883e073d5a403a0b607b6bdf1b8
+  normative_overlay: []
+- source_class: binding_catalog
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/binding_catalog.yaml
+  digest: sha256:56a1cacd9bf1e247e5292da8e8b8432bea0440688cfd3236b4592118a66e3464
+  normative_overlay: []
+- source_class: repository_registry
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/repository_registry.yaml
+  digest: sha256:13cbb9cc3907e65dfc7833c842620e75bfa47f41cefe7eb4015755f8dcc75ea8
+  normative_overlay: []
+- source_class: artifact_model
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/artifact_model.yaml
+  digest: sha256:0dde9113e850bae110de4942cb3f905c923be2549157f23992779d1742e5b7dc
+  normative_overlay: []
+- source_class: product_manifest
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/product_manifest.yaml
+  digest: sha256:b8cbfb006178254a03f881d140a9d5eb6de42a0787c446be8a548669afd5f29e
+  normative_overlay:
+  - descriptor_path: $.properties
+    keyword: required
+    value:
+    - interfaces
+    - effects
+    citation: 'Quantum-L9/.github docs/adr/ADR-026-manifest-interface-surface-and-python-gate-node-binding.md
+      (v3.29.0, merged as 9488d8f); semantics/product_manifest.schema.yaml: properties.interfaces and
+      properties.effects are admitted manifest properties'
+  - descriptor_path: $.properties.interfaces.type
+    keyword: const
+    value: object
+    citation: 'Quantum-L9/.github docs/adr/ADR-026-manifest-interface-surface-and-python-gate-node-binding.md
+      (v3.29.0, merged as 9488d8f); semantics/product_manifest.schema.yaml: properties.interfaces.type:
+      object'
+  - descriptor_path: $.properties.effects.type
+    keyword: const
+    value: object
+    citation: 'Quantum-L9/.github docs/adr/ADR-026-manifest-interface-surface-and-python-gate-node-binding.md
+      (v3.29.0, merged as 9488d8f); semantics/product_manifest.schema.yaml: properties.effects.type: object'
+- source_class: authority_model
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/authority_model.yaml
+  digest: sha256:d282ededf11fdeb06b44478df2c4044767bbfb975cf0824f5bc82c0a08df63f9
+  normative_overlay: []
+- source_class: lifecycle
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/lifecycle.yaml
+  digest: sha256:17b220b03b069b5a0b497b04cfe1615077c963989f660d624789981947e233b2
+  normative_overlay: []
+- source_class: semantic_dependency_model
+  path: docs/candidates/schema-grammar-architecture-intelligence/grammars/semantic_dependency_model.yaml
+  digest: sha256:d40cf5118380fe2e8a99f028837f0de972d047edf0be4340829d17c265b31eb0
+  normative_overlay: []
+inexpressible: []

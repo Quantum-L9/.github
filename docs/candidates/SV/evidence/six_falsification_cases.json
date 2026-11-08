@@ -1,0 +1,55 @@
+{
+  "schema": "l9.strategic-value-falsification-result/v1",
+  "assurance": "LOCAL_CONTRACT_FALSIFICATION_ONLY_NOT_NUMERICAL_VALIDATION",
+  "result": "PASS",
+  "cases": [
+    {
+      "case_id": "SV015",
+      "source_invariant": "L9-SV-015",
+      "negative_result": "UNIDENTIFIED_COUNTERFACTUAL",
+      "expected_failure": "UNIDENTIFIED_COUNTERFACTUAL",
+      "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+      "pass": true
+    },
+    {
+      "case_id": "SV016",
+      "source_invariant": "L9-SV-016",
+      "negative_result": "UNAUTHORIZED_ACTOR_AGGREGATION",
+      "expected_failure": "UNAUTHORIZED_ACTOR_AGGREGATION",
+      "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+      "pass": true
+    },
+    {
+      "case_id": "SV017",
+      "source_invariant": "L9-SV-017",
+      "negative_result": "FUTURE_OBSERVATION_LEAK",
+      "expected_failure": "FUTURE_OBSERVATION_LEAK",
+      "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+      "pass": true
+    },
+    {
+      "case_id": "SV018",
+      "source_invariant": "L9-SV-018",
+      "negative_result": "UNJUSTIFIED_JOINT_ADDITIVITY",
+      "expected_failure": "UNJUSTIFIED_JOINT_ADDITIVITY",
+      "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+      "pass": true
+    },
+    {
+      "case_id": "SV019",
+      "source_invariant": "L9-SV-019",
+      "negative_result": "UNSUPPORTED_PRECISE_WINNER",
+      "expected_failure": "UNSUPPORTED_PRECISE_WINNER",
+      "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+      "pass": true
+    },
+    {
+      "case_id": "SV020",
+      "source_invariant": "L9-SV-020",
+      "negative_result": "UNSUPPORTED_VERIFIED_METHOD_CLAIM",
+      "expected_failure": "UNSUPPORTED_VERIFIED_METHOD_CLAIM",
+      "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+      "pass": true
+    }
+  ]
+}

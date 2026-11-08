@@ -13367,6 +13367,206 @@ def check_rc032(docs: dict[str, dict], report: Report) -> None:
         _check_rc032_negative_cases(docs, report)
 
 
+# RC-033 Composition provenance-constraint closure (Strategic Value admission candidate,
+# owner decision D2/R2). A composition profile's required_provenance token is evaluated
+# only through a criterion the composition catalog declares in provenance_constraints, in
+# the language the Semantic Compiler implements; a token left undefined stays unresolved
+# there, so here every declared token must be defined. The catalog states that law as a
+# global rule, and keeps source projection provenance required.
+PROVENANCE_LANGUAGE = {"name": "l9.provenance-constraint", "version": 1}
+PROVENANCE_CRITERIA = frozenset(
+    {
+        "component_projection_refs",
+        "component_projection_digests",
+        "composition_profile_ref",
+        "composition_profile_digest",
+    }
+)
+PROVENANCE_RULE = (
+    "required_provenance_is_evaluated_only_through_declared_provenance_constraints"
+)
+
+
+def _rc033_fail(field: str, value: object, message: str, report: Report) -> None:
+    report.fail("RC-033", COMPOSITION_PROFILES_PATH, field, value, message)
+
+
+def _rc033_rules(catalog: dict, report: Report) -> None:
+    rules = _mapping(catalog.get("global_rules"))
+    for rule in ("source_projection_provenance_required", PROVENANCE_RULE):
+        if rules.get(rule) is not True:
+            _rc033_fail(f"global_rules.{rule}", rules.get(rule), "must be true", report)
+
+
+def _rc033_declared_tokens(catalog: dict, report: Report) -> dict[str, list[str]]:
+    """Every required_provenance token, mapped to the profiles that declare it."""
+    tokens: dict[str, list[str]] = {}
+    for profile in catalog.get("profiles") or []:
+        record = _mapping(profile)
+        declared = record.get("required_provenance")
+        if declared is None:
+            continue
+        if not isinstance(declared, list) or not all(
+            isinstance(t, str) for t in declared
+        ):
+            _rc033_fail(
+                f"profiles[{record.get('id')}].required_provenance",
+                declared,
+                "must be a list of token names",
+                report,
+            )
+            continue
+        for token in declared:
+            tokens.setdefault(token, []).append(str(record.get("id")))
+    return tokens
+
+
+def _rc033_definitions(
+    constraints: dict, tokens: dict[str, list[str]], report: Report
+) -> None:
+    if constraints["criterion_language"] != PROVENANCE_LANGUAGE:
+        _rc033_fail(
+            "provenance_constraints.criterion_language",
+            constraints["criterion_language"],
+            f"must be {PROVENANCE_LANGUAGE}",
+            report,
+        )
+    definitions = _mapping(constraints["definitions"])
+    for token, definition in sorted(definitions.items()):
+        well_formed = isinstance(definition, dict) and set(definition) == {"criterion"}
+        if not well_formed or definition.get("criterion") not in PROVENANCE_CRITERIA:
+            _rc033_fail(
+                f"provenance_constraints.definitions.{token}",
+                definition,
+                f"must be exactly one criterion from {sorted(PROVENANCE_CRITERIA)}",
+                report,
+            )
+    for token, profiles in sorted(tokens.items()):
+        if token not in definitions:
+            _rc033_fail(
+                f"provenance_constraints.definitions.{token}",
+                None,
+                f"required by {sorted(profiles)} but declares no criterion",
+                report,
+            )
+
+
+def _evaluate_rc033(docs: dict[str, dict], report: Report) -> None:
+    catalog = _mapping(docs.get(COMPOSITION_PROFILES_PATH))
+    _rc033_rules(catalog, report)
+    tokens = _rc033_declared_tokens(catalog, report)
+    constraints = catalog.get("provenance_constraints")
+    if not tokens and constraints is None:
+        return
+    if not isinstance(constraints, dict) or set(constraints) != {
+        "criterion_language",
+        "definitions",
+    }:
+        _rc033_fail(
+            "provenance_constraints",
+            sorted(constraints) if isinstance(constraints, dict) else constraints,
+            "must declare exactly criterion_language and definitions",
+            report,
+        )
+        return
+    _rc033_definitions(constraints, tokens, report)
+
+
+def _check_rc033_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    def defs(d: dict) -> dict:
+        return d["provenance_constraints"]["definitions"]
+
+    cases = [
+        (
+            "block removed",
+            lambda d: d.pop("provenance_constraints"),
+            "provenance_constraints",
+        ),
+        (
+            "extra block key",
+            lambda d: d["provenance_constraints"].update(rule="x"),
+            "provenance_constraints",
+        ),
+        (
+            "language version changed",
+            lambda d: d["provenance_constraints"]["criterion_language"].update(
+                version=2
+            ),
+            "provenance_constraints.criterion_language",
+        ),
+        (
+            "token definition removed",
+            lambda d: defs(d).pop("source_projection_digests"),
+            "provenance_constraints.definitions.source_projection_digests",
+        ),
+        (
+            "unknown criterion",
+            lambda d: defs(d).update(source_projection_refs={"criterion": "trusted"}),
+            "provenance_constraints.definitions.source_projection_refs",
+        ),
+        (
+            "criterion parameter added",
+            lambda d: defs(d)["composition_profile_ref"].update(strict=True),
+            "provenance_constraints.definitions.composition_profile_ref",
+        ),
+        (
+            "evaluation rule removed",
+            lambda d: d["global_rules"].pop(PROVENANCE_RULE),
+            f"global_rules.{PROVENANCE_RULE}",
+        ),
+        (
+            "provenance obligation dropped",
+            lambda d: d["global_rules"].update(
+                source_projection_provenance_required=False
+            ),
+            "global_rules.source_projection_provenance_required",
+        ),
+    ]
+    for label, mutate, field in cases:
+        candidate = copy.deepcopy(docs)
+        mutate(candidate[COMPOSITION_PROFILES_PATH])
+        candidate_report = Report()
+        _evaluate_rc033(candidate, candidate_report)
+        prefix = f"FAIL RC-033 {COMPOSITION_PROFILES_PATH} {field}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-033",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {field}",
+            )
+    if not any(
+        f.startswith(f"FAIL RC-033 {VALIDATOR_PATH} negative_case")
+        for f in report.failures
+    ):
+        report.ok(
+            "RC-033-NEG",
+            f"{len(cases)} provenance-constraint negative cases fail closed at their intended field",
+        )
+
+
+def check_rc033(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _evaluate_rc033(docs, report)
+    if len(report.failures) == before:
+        catalog = _mapping(docs.get(COMPOSITION_PROFILES_PATH))
+        declaring = sorted(
+            str(p.get("id"))
+            for p in catalog.get("profiles") or []
+            if isinstance(p, dict) and "required_provenance" in p
+        )
+        report.ok(
+            "RC-033",
+            f"every required_provenance token of {declaring} is defined once in "
+            f"provenance_constraints in {PROVENANCE_LANGUAGE['name']}@{PROVENANCE_LANGUAGE['version']} "
+            f"with one of {len(PROVENANCE_CRITERIA)} implemented criteria; source projection "
+            "provenance stays required and the evaluation rule is declared",
+        )
+        if "provenance_constraints" in catalog:
+            _check_rc033_negative_cases(docs, report)
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -13429,6 +13629,7 @@ def main(argv: list[str]) -> int:
     check_rc029(root, docs, report)
     check_rc030(docs, report)
     check_rc032(docs, report)
+    check_rc033(docs, report)
     check_sc009(observed, root, report)
     for line in report.passes:
         print(line)

@@ -1,0 +1,310 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/capabilities@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: capabilities
+source_ref: l9.source/capabilities@1
+source_path: semantics/capabilities.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:531e140166ed9efc44e74a7c9365d9b0f6f13a1bd91c9f87cd47167ec64fef71
+applies_to_selectors:
+- $.global_rules
+- $.capability_entry_contract
+- $.capability_state_dimensions
+- $.invocability_contract
+- $.capability_relations
+- $.capabilities[*].id
+- $.capabilities[*].semantic_owner
+- $.capabilities[*].effect_class
+- $.capabilities[*].requires
+- $.derivation
+- $.catalog_authority_boundaries
+- $.requirement_model
+- $.effect_class_model
+- $.state_dimension_rules
+- $.provider_realization_model
+- $.catalog_registration_contract
+- $.capabilities
+- $.catalog_status
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        capability_identity_is_semantic:
+          type: boolean
+        capability_identity_is_not_provider_identity:
+          type: boolean
+        semantic_owner_must_be_explicit:
+          type: boolean
+        semantic_scope_must_be_explicit:
+          type: boolean
+        effect_class_must_be_explicit:
+          type: boolean
+        effect_class_does_not_grant_authority:
+          type: boolean
+        declaration_admission_availability_authorization_and_invocability_are_distinct:
+          type: boolean
+        state_dimensions_do_not_imply_a_lifecycle_order:
+          type: boolean
+        invocability_is_derived_not_self_granted:
+          type: boolean
+        unknown_state_must_remain_explicit:
+          type: boolean
+        requirements_must_be_declared:
+          type: boolean
+        provider_realization_is_separate_from_semantic_capability_identity:
+          type: boolean
+        provider_realization_does_not_transfer_semantic_ownership:
+          type: boolean
+        technology_registration_does_not_authorize_capability_use:
+          type: boolean
+        component_capabilities_are_not_globalized_by_recurrence:
+          type: boolean
+        catalog_registration_does_not_expand_authority:
+          type: boolean
+    capability_entry_contract:
+      type: object
+      additional_properties: true
+      fields:
+        required_fields:
+          type: string_list
+        field_semantics:
+          type: object
+          additional_properties: true
+          fields:
+            id:
+              type: string
+            semantic_owner:
+              type: string
+            semantic_scope:
+              type: string
+            purpose:
+              type: string
+            effect_class:
+              type: string
+            requires:
+              type: string
+            authorization_requirements:
+              type: string
+        prohibited_fields:
+          type: string_list
+    capability_state_dimensions:
+      type: object
+      additional_properties: true
+      fields:
+        declared:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+            authority_source:
+              type: string
+            implies:
+              type: string_list
+        admitted:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+            authority_source:
+              type: string
+            implies:
+              type: string_list
+        available:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+            authority_source:
+              type: string
+            implies:
+              type: string_list
+        authorized:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+            authority_source:
+              type: string
+            implies:
+              type: string_list
+        invocable:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+            authority_source:
+              type: string
+            implies:
+              type: string_list
+            derived:
+              type: boolean
+    invocability_contract:
+      type: object
+      additional_properties: true
+      fields:
+        kind:
+          type: string
+        rule:
+          type: string
+        forbidden:
+          type: string_list
+    capability_relations:
+      type: object
+      additional_properties: true
+      fields:
+        requires:
+          type: object
+          additional_properties: true
+          fields:
+            subject:
+              type: string
+            object:
+              type: string
+            semantics:
+              type: string
+            authority_implication:
+              type: string
+            state_implication:
+              type: string
+        realized_by:
+          type: object
+          additional_properties: true
+          fields:
+            subject:
+              type: string
+            object:
+              type: string
+            semantics:
+              type: string
+            authority_implication:
+              type: string
+            ownership_implication:
+              type: string
+        compatible_with:
+          type: object
+          additional_properties: true
+          fields:
+            subject:
+              type: string
+            object:
+              type: string
+            semantics:
+              type: string
+            authority_implication:
+              type: string
+    capabilities:
+      type: string_list
+    derivation:
+      type: object
+      additional_properties: true
+      fields:
+        source_artifacts:
+          type: array
+          items:
+            type: object
+            additional_properties: true
+            fields:
+              artifact:
+                type: string
+              artifact_id:
+                type: string
+              sha256:
+                type: string
+              item_count:
+                type: integer
+              admission:
+                type: string
+        rule:
+          type: string
+    catalog_authority_boundaries:
+      type: object
+      additional_properties: true
+      fields:
+        owns:
+          type: string_list
+        does_not_own:
+          type: string_list
+    requirement_model:
+      type: object
+      additional_properties: true
+      fields:
+        requires_shape:
+          type: object
+          additional_properties: true
+          fields:
+            capabilities:
+              type: string
+            contracts:
+              type: string
+        authorization_requirements_shape:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            item:
+              type: string
+            rule:
+              type: string
+        unknown_requirement_rule:
+          type: string
+    effect_class_model:
+      type: object
+      additional_properties: true
+      fields:
+        definition:
+          type: string
+        rules:
+          type: string_list
+        admitted_global_classes:
+          type: string_list
+        admission_note:
+          type: string
+    state_dimension_rules:
+      type: string_list
+    provider_realization_model:
+      type: object
+      additional_properties: true
+      fields:
+        semantic_capability_source:
+          type: string
+        provider_capability_fact_source:
+          type: string
+        provider_binding_source:
+          type: string
+        rules:
+          type: string_list
+        does_not_define:
+          type: string_list
+    catalog_registration_contract:
+      type: object
+      additional_properties: true
+      fields:
+        admission_subject:
+          type: string
+        requirements:
+          type: string_list
+        guarantees:
+          type: string_list
+        material_change_rule:
+          type: string
+    catalog_status:
+      type: object
+      additional_properties: true
+      fields:
+        admitted_capability_count:
+          type: integer
+        reason:
+          type: string

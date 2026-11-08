@@ -1,0 +1,176 @@
+{
+	"schema": "l9.strategic-value-falsification-result/v1",
+	"assurance": "LOCAL_CONTRACT_FALSIFICATION_ONLY_NOT_NUMERICAL_VALIDATION",
+	"result": "PASS",
+	"cases": [
+		{
+			"case_id": "SV015",
+			"origin_candidate_id": "L9-SV-015",
+			"disposition": "MERGE",
+			"governing_invariants": ["L9-SV-001"],
+			"contract_obligation": "counterfactual_worlds_share_defensible_initial_conditions_time_basis_and_identification_assumptions",
+			"negative_result": "UNIDENTIFIED_COUNTERFACTUAL",
+			"expected_failure": "UNIDENTIFIED_COUNTERFACTUAL",
+			"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+			"pass": true
+		},
+		{
+			"case_id": "SV016",
+			"origin_candidate_id": "L9-SV-016",
+			"disposition": "CONTRACT",
+			"governing_invariants": ["L9-SV-001", "L9-SV-002", "L9-AUTH-001"],
+			"contract_obligation": "beneficiary_scope_and_welfare_aggregation_when_cross_actor_effects_material",
+			"negative_result": "UNAUTHORIZED_ACTOR_AGGREGATION",
+			"expected_failure": "UNAUTHORIZED_ACTOR_AGGREGATION",
+			"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+			"pass": true
+		},
+		{
+			"case_id": "SV017",
+			"origin_candidate_id": "L9-SV-017",
+			"disposition": "CONTRACT",
+			"governing_invariants": ["L9-SV-001", "L9-PROV-001"],
+			"contract_obligation": "nonanticipative_conditional_policies_when_sequential_actions_are_evaluated",
+			"negative_result": "FUTURE_OBSERVATION_LEAK",
+			"expected_failure": "FUTURE_OBSERVATION_LEAK",
+			"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+			"pass": true
+		},
+		{
+			"case_id": "SV018",
+			"origin_candidate_id": "L9-SV-018",
+			"disposition": "CONTRACT",
+			"governing_invariants": ["L9-SV-002", "L9-HARD-001"],
+			"contract_obligation": "joint_portfolio_counterfactual_and_resource_interactions_for_nonadditive_actions",
+			"negative_result": "UNJUSTIFIED_JOINT_ADDITIVITY",
+			"expected_failure": "UNJUSTIFIED_JOINT_ADDITIVITY",
+			"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+			"pass": true
+		},
+		{
+			"case_id": "SV019",
+			"origin_candidate_id": "L9-SV-019",
+			"disposition": "REUSE",
+			"governing_invariants": ["L9-UNKNOWN-001", "L9-SV-001"],
+			"contract_obligation": "uncertainty_sensitivity_or_conditional_frontier_when_preference_can_flip",
+			"negative_result": "UNSUPPORTED_PRECISE_WINNER",
+			"expected_failure": "UNSUPPORTED_PRECISE_WINNER",
+			"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+			"pass": true
+		},
+		{
+			"case_id": "SV020",
+			"origin_candidate_id": "L9-SV-020",
+			"disposition": "REUSE",
+			"governing_invariants": [
+				"L9-EVIDENCE-001",
+				"L9-ASSURANCE-001",
+				"L9-PROV-001",
+				"L9-COORD-001"
+			],
+			"contract_obligation": "method_identity_input_lineage_executed_method_evidence_and_applicable_independently_reviewable_model_validation_evidence_for_strong_numerical_claims",
+			"negative_result": "UNSUPPORTED_VERIFIED_METHOD_CLAIM",
+			"expected_failure": "UNSUPPORTED_VERIFIED_METHOD_CLAIM",
+			"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+			"pass": true
+		}
+	],
+	"per_case_cli_runs": {
+		"SV015": {
+			"exit_code": 0,
+			"result": "PASS",
+			"case": {
+				"case_id": "SV015",
+				"origin_candidate_id": "L9-SV-015",
+				"disposition": "MERGE",
+				"governing_invariants": ["L9-SV-001"],
+				"contract_obligation": "counterfactual_worlds_share_defensible_initial_conditions_time_basis_and_identification_assumptions",
+				"negative_result": "UNIDENTIFIED_COUNTERFACTUAL",
+				"expected_failure": "UNIDENTIFIED_COUNTERFACTUAL",
+				"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+				"pass": true
+			}
+		},
+		"SV016": {
+			"exit_code": 0,
+			"result": "PASS",
+			"case": {
+				"case_id": "SV016",
+				"origin_candidate_id": "L9-SV-016",
+				"disposition": "CONTRACT",
+				"governing_invariants": ["L9-SV-001", "L9-SV-002", "L9-AUTH-001"],
+				"contract_obligation": "beneficiary_scope_and_welfare_aggregation_when_cross_actor_effects_material",
+				"negative_result": "UNAUTHORIZED_ACTOR_AGGREGATION",
+				"expected_failure": "UNAUTHORIZED_ACTOR_AGGREGATION",
+				"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+				"pass": true
+			}
+		},
+		"SV017": {
+			"exit_code": 0,
+			"result": "PASS",
+			"case": {
+				"case_id": "SV017",
+				"origin_candidate_id": "L9-SV-017",
+				"disposition": "CONTRACT",
+				"governing_invariants": ["L9-SV-001", "L9-PROV-001"],
+				"contract_obligation": "nonanticipative_conditional_policies_when_sequential_actions_are_evaluated",
+				"negative_result": "FUTURE_OBSERVATION_LEAK",
+				"expected_failure": "FUTURE_OBSERVATION_LEAK",
+				"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+				"pass": true
+			}
+		},
+		"SV018": {
+			"exit_code": 0,
+			"result": "PASS",
+			"case": {
+				"case_id": "SV018",
+				"origin_candidate_id": "L9-SV-018",
+				"disposition": "CONTRACT",
+				"governing_invariants": ["L9-SV-002", "L9-HARD-001"],
+				"contract_obligation": "joint_portfolio_counterfactual_and_resource_interactions_for_nonadditive_actions",
+				"negative_result": "UNJUSTIFIED_JOINT_ADDITIVITY",
+				"expected_failure": "UNJUSTIFIED_JOINT_ADDITIVITY",
+				"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+				"pass": true
+			}
+		},
+		"SV019": {
+			"exit_code": 0,
+			"result": "PASS",
+			"case": {
+				"case_id": "SV019",
+				"origin_candidate_id": "L9-SV-019",
+				"disposition": "REUSE",
+				"governing_invariants": ["L9-UNKNOWN-001", "L9-SV-001"],
+				"contract_obligation": "uncertainty_sensitivity_or_conditional_frontier_when_preference_can_flip",
+				"negative_result": "UNSUPPORTED_PRECISE_WINNER",
+				"expected_failure": "UNSUPPORTED_PRECISE_WINNER",
+				"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+				"pass": true
+			}
+		},
+		"SV020": {
+			"exit_code": 0,
+			"result": "PASS",
+			"case": {
+				"case_id": "SV020",
+				"origin_candidate_id": "L9-SV-020",
+				"disposition": "REUSE",
+				"governing_invariants": [
+					"L9-EVIDENCE-001",
+					"L9-ASSURANCE-001",
+					"L9-PROV-001",
+					"L9-COORD-001"
+				],
+				"contract_obligation": "method_identity_input_lineage_executed_method_evidence_and_applicable_independently_reviewable_model_validation_evidence_for_strong_numerical_claims",
+				"negative_result": "UNSUPPORTED_VERIFIED_METHOD_CLAIM",
+				"expected_failure": "UNSUPPORTED_VERIFIED_METHOD_CLAIM",
+				"positive_control_result": "DECLARATION_NOT_FALSIFIED",
+				"pass": true
+			}
+		}
+	},
+	"note": "Successor evidence for the reduced candidate. Historical evidence/SV0xx_falsification.json files are the PR #212 runs and are left unchanged."
+}

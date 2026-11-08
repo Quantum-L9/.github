@@ -129,6 +129,15 @@ dependency_rules:
     - compilation_profile
     - compiler_coordinates
     change_effect: implementation_and_target_artifacts_stale
+  implementation_ir:
+    depends_on:
+    - product_manifest
+    - authority_revision
+    - target_binding
+    - behavior_contract_refs
+    - behavior_contract_digests
+    - compiler_coordinates
+    change_effect: implementation_ir_and_target_artifacts_stale
   product_kind_resolution:
     depends_on:
     - product_topology

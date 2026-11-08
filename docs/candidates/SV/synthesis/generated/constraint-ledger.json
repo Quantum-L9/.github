@@ -1,0 +1,3785 @@
+{
+  "entries": [
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.artifact_id",
+      "source_class": "strategic_value_model",
+      "value": "l9.strategic.value@1"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.authority",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority.owner",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority.scope",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority.authority_class",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.canonical_source",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.canonical_source.format",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.canonical_source.artifact",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "enum",
+      "path": "$.governed_by.invariants[]",
+      "source_class": "strategic_value_model",
+      "value": [
+        "L9-SV-001",
+        "L9-SV-002",
+        "L9-AUTH-001",
+        "L9-AUTH-002",
+        "L9-HARD-001",
+        "L9-UNKNOWN-001",
+        "L9-STRATEGY-001",
+        "L9-PROJECTION-001",
+        "L9-PROV-001",
+        "L9-EVIDENCE-001",
+        "L9-ASSURANCE-001",
+        "L9-COORD-001"
+      ]
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.governed_by.invariants",
+      "source_class": "strategic_value_model",
+      "value": 12
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.governed_by.contracts",
+      "source_class": "strategic_value_model",
+      "value": 3
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.governed_by",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.governed_by.invariants",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.governed_by.contracts",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.identity",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.identity.semantic_ref",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.identity.canonical_term_ref",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.identity.related_term_ref",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.identity.assessment_contract_ref",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.identity.numerical_owner",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.identity.strategic_plan_owner_ref",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.valuation.requires_declared",
+      "source_class": "strategic_value_model",
+      "value": 8
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.valuation.explanatory_dimensions",
+      "source_class": "strategic_value_model",
+      "value": 9
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.valuation.accounting_partition_contract.representation_modes",
+      "source_class": "strategic_value_model",
+      "value": 2
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.valuation.accounting_partition_contract.required_component_buckets",
+      "source_class": "strategic_value_model",
+      "value": 5
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.mutually_exclusive_booking",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.exhaustive_material_consequence_coverage",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.each_effect_requires_stable_causal_and_period_identity",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.each_effect_requires_one_accounting_home_after_reconciliation",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.shared_or_overlapping_effects_require_explicit_attribution_and_exclusion",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.common_utility_units_time_basis_and_discount_treatment_required",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.losses_and_costs_already_reflected_in_utility_flows_cannot_be_subtracted_again",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.unknown_effect_booking_never_defaults_to_zero",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.valuation.accounting_partition_contract.normative_partition",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.mutually_exclusive_booking",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.exhaustive_material_consequence_coverage",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.each_effect_requires_stable_causal_and_period_identity",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.each_effect_requires_one_accounting_home_after_reconciliation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.shared_or_overlapping_effects_require_explicit_attribution_and_exclusion",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.common_utility_units_time_basis_and_discount_treatment_required",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.losses_and_costs_already_reflected_in_utility_flows_cannot_be_subtracted_again",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.normative_partition.unknown_effect_booking_never_defaults_to_zero",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.valuation.accounting_partition_contract.component_coverage_ledger.required_per_material_effect",
+      "source_class": "strategic_value_model",
+      "value": 6
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.valuation.accounting_partition_contract.component_coverage_ledger",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.component_coverage_ledger.required_per_material_effect",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.component_coverage_ledger.embedded_cost_handling",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.component_coverage_ledger.zero_bucket_semantics",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.component_coverage_ledger.incomplete_coverage_result",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.valuation.accounting_partition_contract.sign_and_expectation_discipline",
+      "source_class": "strategic_value_model",
+      "value": 4
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.valuation.accounting_partition_contract.example_equivalence",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.example_equivalence.gross",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.example_equivalence.reconciled_net",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.example_equivalence.invalid",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.valuation.accounting_partition_contract.negative_witnesses",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.negative_witnesses.embedded_DC_subtracted_again",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.negative_witnesses.embedded_expected_risk_loss_subtracted_again",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.negative_witnesses.embedded_opportunity_cost_subtracted_again",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.negative_witnesses.unclassified_material_consequence",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.negative_witnesses.zero_subtraction_without_ledger_basis",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.negative_witnesses.same_effect_in_mutually_exclusive_scenarios",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.negative_witnesses.genuinely_distinct_recurring_period_effects",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.valuation.accounting_partition_contract",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.status",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.scope",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.representation_modes",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.required_component_buckets",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.normative_partition",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.component_coverage_ledger",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.sign_and_expectation_discipline",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.example_equivalence",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract.negative_witnesses",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.valuation",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.conceptual_decomposition",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.semantic_class",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.requires_declared",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.systemic_future_value_definition",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.explanatory_dimensions",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.rule",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.valuation.accounting_partition_contract",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.counterfactual_mathematics.expectation_semantics",
+      "source_class": "strategic_value_model",
+      "value": 6
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.counterfactual_mathematics.utility_accounting",
+      "source_class": "strategic_value_model",
+      "value": 10
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.counterfactual_mathematics",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.counterfactual_mathematics.normative_meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.counterfactual_mathematics.bounded_expression",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.counterfactual_mathematics.geometric_discount_special_case",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.counterfactual_mathematics.expectation_semantics",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.counterfactual_mathematics.utility_accounting",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.counterfactual_mathematics.numerical_owner",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.counterfactual_mathematics.consumer_behavior",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.strategic_interaction_lookahead.supported_method_families",
+      "source_class": "strategic_value_model",
+      "value": 4
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.strategic_interaction_lookahead.selection_requirements",
+      "source_class": "strategic_value_model",
+      "value": 5
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.strategic_interaction_lookahead.qv_only_required_model_coordinates",
+      "source_class": "strategic_value_model",
+      "value": 7
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.strategic_interaction_lookahead.qv_only_stopping_conditions",
+      "source_class": "strategic_value_model",
+      "value": 6
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.strategic_interaction_lookahead.ownership",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.ownership.formal_admissibility",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.ownership.belief_and_response_uncertainty",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.ownership.objective_utility_and_lookahead_valuation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.ownership.available_actions_and_execution_authority",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.strategic_interaction_lookahead",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.applies_when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.method_policy",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.supported_method_families",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.selection_requirements",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.bounded_recurrence",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.qv_only_required_model_coordinates",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.qv_only_stopping_conditions",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.ownership",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_interaction_lookahead.rule",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.assessment_claim_levels",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.assessment_claim_levels.declared_aggregate",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.assessment_claim_levels.supplied_trajectory_calculation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.assessment_claim_levels.independently_verified_numerical_assessment",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.assessment_claim_levels.unknown_or_degraded",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.evaluation_integrity.counterfactual_identification",
+      "source_class": "strategic_value_model",
+      "value": 3
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.evaluation_integrity.beneficiary_scope",
+      "source_class": "strategic_value_model",
+      "value": 3
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.evaluation_integrity.nonanticipativity",
+      "source_class": "strategic_value_model",
+      "value": 3
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.evaluation_integrity.joint_portfolio_valuation",
+      "source_class": "strategic_value_model",
+      "value": 3
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.evaluation_integrity.uncertainty_aware_selection",
+      "source_class": "strategic_value_model",
+      "value": 3
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.evaluation_integrity.independent_method_assurance",
+      "source_class": "strategic_value_model",
+      "value": 8
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.evaluation_integrity",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.evaluation_integrity.counterfactual_identification",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.evaluation_integrity.beneficiary_scope",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.evaluation_integrity.nonanticipativity",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.evaluation_integrity.joint_portfolio_valuation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.evaluation_integrity.uncertainty_aware_selection",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.evaluation_integrity.independent_method_assurance",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.causal_accounting.stable_effect_identity_required",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.causal_accounting.shared_state_delta_booked_once",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.causal_accounting.explicit_attribution_and_overlap_required",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.causal_accounting.loops_unrolled_through_time",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.causal_accounting.topology_kinds",
+      "source_class": "strategic_value_model",
+      "value": 4
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.causal_accounting.negative_drag_and_coordination_costs_preserved",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.causal_accounting",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.causal_accounting.stable_effect_identity_required",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.causal_accounting.shared_state_delta_booked_once",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.causal_accounting.explicit_attribution_and_overlap_required",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.causal_accounting.loops_unrolled_through_time",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.causal_accounting.unchanged_echo_incremental_value",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.causal_accounting.topology_kinds",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.causal_accounting.negative_drag_and_coordination_costs_preserved",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.causal_accounting.conditional_relevance",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.forecast_and_realization.realization_never_retroactively_proves_ex_ante_forecast",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.forecast_and_realization",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.forecast_and_realization.predicted_value_is",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.forecast_and_realization.realized_value_is",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.forecast_and_realization.realization_never_retroactively_proves_ex_ante_forecast",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.comparisons.compatible_objective_and_units_required",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.comparisons.may_return",
+      "source_class": "strategic_value_model",
+      "value": 5
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.comparisons.relevant_meta_action_kinds",
+      "source_class": "strategic_value_model",
+      "value": 5
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.comparisons.unknown_is_not_zero",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.comparisons.valuation_does_not_override_mandatory_constraints",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.comparisons.output_is_not_authorization",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.comparisons.output_is_not_strategic_plan_graph_content",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.comparisons.output_is_not_strategic_commitment",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.comparisons.stale_model_or_evidence_invalidates_affected_assessment",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.comparisons",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.comparisons.compatible_objective_and_units_required",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.comparisons.may_return",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.comparisons.relevant_meta_action_kinds",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.comparisons.unknown_is_not_zero",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.comparisons.valuation_does_not_override_mandatory_constraints",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.comparisons.output_is_not_authorization",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.comparisons.output_is_not_strategic_plan_graph_content",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.comparisons.output_is_not_strategic_commitment",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.comparisons.stale_model_or_evidence_invalidates_affected_assessment",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.explicit_non_ownership",
+      "source_class": "strategic_value_model",
+      "value": 8
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.assessment_applicability.does_not_govern",
+      "source_class": "strategic_value_model",
+      "value": 3
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.assessment_applicability",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.assessment_applicability.claim_gate",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.assessment_applicability.does_not_govern",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.assessment_applicability.method_applicability",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.assessment_applicability.non_claim",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.assessment_applicability.unsupported_claim",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-003",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-003.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-003.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-003.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-003.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-003.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-003.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-004",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-004.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-004.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-004.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-004.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-004.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-004.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-005",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-005.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-005.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-005.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-005.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-005.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-005.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-006",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-006.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-006.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-006.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-006.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-006.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-006.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-007",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-007.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-007.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-007.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-007.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-007.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-007.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-008",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-008.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-008.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-008.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-008.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-008.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-008.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-009",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-009.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-009.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-009.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-009.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-009.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-009.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-010",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-010.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-010.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-010.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-010.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-010.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-010.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-011",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-011.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-011.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-011.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-011.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-011.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-011.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-012",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-012.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-012.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-012.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-012.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-012.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-012.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-013",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-013.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-013.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-013.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-013.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-013.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-013.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics.L9-SV-014",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-014.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-014.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-014.governing_layer",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-014.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-014.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-014.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.retained_former_candidate_semantics",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-003",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-004",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-005",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-006",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-007",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-008",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-009",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-010",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-011",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-012",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-013",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.retained_former_candidate_semantics.L9-SV-014",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.source_candidate_id",
+      "source_class": "strategic_value_model",
+      "value": "L9-SV-015"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.meaning",
+      "source_class": "strategic_value_model",
+      "value": "For a Strategic Value claim, a counterfactual comparison must identify the same decision-relevant initial conditions, utility measure, exogenous context and time basis across intervention and baseline worlds, or explicitly quantify their divergence. A convenient scenario pairing or historical correlation is not evidence of an identifiable causal intervention effect."
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.disposition",
+      "source_class": "strategic_value_model",
+      "value": "MERGE"
+    },
+    {
+      "action": "carried",
+      "constraint": "enum",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.governing_invariants[]",
+      "source_class": "strategic_value_model",
+      "value": [
+        "L9-SV-001",
+        "L9-SV-002",
+        "L9-AUTH-001",
+        "L9-AUTH-002",
+        "L9-HARD-001",
+        "L9-UNKNOWN-001",
+        "L9-STRATEGY-001",
+        "L9-PROJECTION-001",
+        "L9-PROV-001",
+        "L9-EVIDENCE-001",
+        "L9-ASSURANCE-001",
+        "L9-COORD-001"
+      ]
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.governing_invariants",
+      "source_class": "strategic_value_model",
+      "value": 1
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.model_section",
+      "source_class": "strategic_value_model",
+      "value": "evaluation_integrity.counterfactual_identification"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.contract_obligation",
+      "source_class": "strategic_value_model",
+      "value": "counterfactual_worlds_share_defensible_initial_conditions_time_basis_and_identification_assumptions"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.when",
+      "source_class": "strategic_value_model",
+      "value": "causal_intervention_effect_is_claimed"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.authority_status",
+      "source_class": "strategic_value_model",
+      "value": "not_admitted_as_independent_invariant"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.disposition",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.governing_invariants",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015.authority_status",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.source_candidate_id",
+      "source_class": "strategic_value_model",
+      "value": "L9-SV-016"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.meaning",
+      "source_class": "strategic_value_model",
+      "value": "For a Strategic Value claim, the assessment must declare the focal beneficiary or authorized social-welfare aggregation before combining outcomes across actors. Benefits to counterparties, externalities, transfers and costs cannot be credited to the focal objective twice or silently converted between actors with incompatible utilities."
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.disposition",
+      "source_class": "strategic_value_model",
+      "value": "CONTRACT"
+    },
+    {
+      "action": "carried",
+      "constraint": "enum",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.governing_invariants[]",
+      "source_class": "strategic_value_model",
+      "value": [
+        "L9-SV-001",
+        "L9-SV-002",
+        "L9-AUTH-001",
+        "L9-AUTH-002",
+        "L9-HARD-001",
+        "L9-UNKNOWN-001",
+        "L9-STRATEGY-001",
+        "L9-PROJECTION-001",
+        "L9-PROV-001",
+        "L9-EVIDENCE-001",
+        "L9-ASSURANCE-001",
+        "L9-COORD-001"
+      ]
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.governing_invariants",
+      "source_class": "strategic_value_model",
+      "value": 1
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.model_section",
+      "source_class": "strategic_value_model",
+      "value": "evaluation_integrity.beneficiary_scope"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.contract_obligation",
+      "source_class": "strategic_value_model",
+      "value": "beneficiary_scope_and_welfare_aggregation_when_cross_actor_effects_material"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.when",
+      "source_class": "strategic_value_model",
+      "value": "material_cross_actor_valuation"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.authority_status",
+      "source_class": "strategic_value_model",
+      "value": "not_admitted_as_independent_invariant"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.disposition",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.governing_invariants",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016.authority_status",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.source_candidate_id",
+      "source_class": "strategic_value_model",
+      "value": "L9-SV-017"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.meaning",
+      "source_class": "strategic_value_model",
+      "value": "When a Strategic Value claim evaluates a sequential decision policy, the policy may condition each action only on observations and information available at the time of that action. A lookahead ranking must not exploit hindsight, future responses or post-action evidence as if they were known at decision time; posterior updates must preserve observation provenance."
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.disposition",
+      "source_class": "strategic_value_model",
+      "value": "CONTRACT"
+    },
+    {
+      "action": "carried",
+      "constraint": "enum",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.governing_invariants[]",
+      "source_class": "strategic_value_model",
+      "value": [
+        "L9-SV-001",
+        "L9-SV-002",
+        "L9-AUTH-001",
+        "L9-AUTH-002",
+        "L9-HARD-001",
+        "L9-UNKNOWN-001",
+        "L9-STRATEGY-001",
+        "L9-PROJECTION-001",
+        "L9-PROV-001",
+        "L9-EVIDENCE-001",
+        "L9-ASSURANCE-001",
+        "L9-COORD-001"
+      ]
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.governing_invariants",
+      "source_class": "strategic_value_model",
+      "value": 1
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.model_section",
+      "source_class": "strategic_value_model",
+      "value": "evaluation_integrity.nonanticipativity"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.contract_obligation",
+      "source_class": "strategic_value_model",
+      "value": "nonanticipative_conditional_policies_when_sequential_actions_are_evaluated"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.when",
+      "source_class": "strategic_value_model",
+      "value": "sequential_policy_value_claimed"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.authority_status",
+      "source_class": "strategic_value_model",
+      "value": "not_admitted_as_independent_invariant"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.disposition",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.governing_invariants",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017.authority_status",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.source_candidate_id",
+      "source_class": "strategic_value_model",
+      "value": "L9-SV-018"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.meaning",
+      "source_class": "strategic_value_model",
+      "value": "For a Strategic Value claim about a portfolio or joint intervention, its value is evaluated against the joint feasible counterfactual and shared resource constraints. Standalone action values may be summed only with evidence of additive independence; shared dependencies, synergies, substitution, resource collision and cannibalization must be represented or remain unresolved."
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.disposition",
+      "source_class": "strategic_value_model",
+      "value": "CONTRACT"
+    },
+    {
+      "action": "carried",
+      "constraint": "enum",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.governing_invariants[]",
+      "source_class": "strategic_value_model",
+      "value": [
+        "L9-SV-001",
+        "L9-SV-002",
+        "L9-AUTH-001",
+        "L9-AUTH-002",
+        "L9-HARD-001",
+        "L9-UNKNOWN-001",
+        "L9-STRATEGY-001",
+        "L9-PROJECTION-001",
+        "L9-PROV-001",
+        "L9-EVIDENCE-001",
+        "L9-ASSURANCE-001",
+        "L9-COORD-001"
+      ]
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.governing_invariants",
+      "source_class": "strategic_value_model",
+      "value": 1
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.model_section",
+      "source_class": "strategic_value_model",
+      "value": "evaluation_integrity.joint_portfolio_valuation"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.contract_obligation",
+      "source_class": "strategic_value_model",
+      "value": "joint_portfolio_counterfactual_and_resource_interactions_for_nonadditive_actions"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.when",
+      "source_class": "strategic_value_model",
+      "value": "joint_or_portfolio_value_claimed"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.authority_status",
+      "source_class": "strategic_value_model",
+      "value": "not_admitted_as_independent_invariant"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.disposition",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.governing_invariants",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018.authority_status",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.source_candidate_id",
+      "source_class": "strategic_value_model",
+      "value": "L9-SV-019"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.meaning",
+      "source_class": "strategic_value_model",
+      "value": "When uncertainty can change preference in a Strategic Value comparison, the evaluation must expose a bounded sensitivity or uncertainty result and conditional decision boundary, not an unjustified precise winner. A robustness claim requires declared uncertainty sets, bounds or probability models and an applicable comparison method."
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.disposition",
+      "source_class": "strategic_value_model",
+      "value": "REUSE"
+    },
+    {
+      "action": "carried",
+      "constraint": "enum",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.governing_invariants[]",
+      "source_class": "strategic_value_model",
+      "value": [
+        "L9-SV-001",
+        "L9-SV-002",
+        "L9-AUTH-001",
+        "L9-AUTH-002",
+        "L9-HARD-001",
+        "L9-UNKNOWN-001",
+        "L9-STRATEGY-001",
+        "L9-PROJECTION-001",
+        "L9-PROV-001",
+        "L9-EVIDENCE-001",
+        "L9-ASSURANCE-001",
+        "L9-COORD-001"
+      ]
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.governing_invariants",
+      "source_class": "strategic_value_model",
+      "value": 1
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.model_section",
+      "source_class": "strategic_value_model",
+      "value": "evaluation_integrity.uncertainty_aware_selection"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.contract_obligation",
+      "source_class": "strategic_value_model",
+      "value": "uncertainty_sensitivity_or_conditional_frontier_when_preference_can_flip"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.when",
+      "source_class": "strategic_value_model",
+      "value": "material_preference_sensitive_uncertainty"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.authority_status",
+      "source_class": "strategic_value_model",
+      "value": "not_admitted_as_independent_invariant"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.disposition",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.governing_invariants",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019.authority_status",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.source_candidate_id",
+      "source_class": "strategic_value_model",
+      "value": "L9-SV-020"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.meaning",
+      "source_class": "strategic_value_model",
+      "value": "Claims of model-derived or independently verified Strategic Value require version-bound numerical method identity, input/assumption lineage, execution provenance and applicable, independently reviewable model-validation evidence appropriate to the claim. Empirical forecast validity may be supported by calibration, backtesting, sensitivity or out-of-sample evaluation where applicable, not presumed mathematical proof of general real-world adequacy. Arithmetic, projection receipts and model-validation evidence establish different things and cannot substitute for one another."
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.disposition",
+      "source_class": "strategic_value_model",
+      "value": "REUSE"
+    },
+    {
+      "action": "carried",
+      "constraint": "enum",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.governing_invariants[]",
+      "source_class": "strategic_value_model",
+      "value": [
+        "L9-SV-001",
+        "L9-SV-002",
+        "L9-AUTH-001",
+        "L9-AUTH-002",
+        "L9-HARD-001",
+        "L9-UNKNOWN-001",
+        "L9-STRATEGY-001",
+        "L9-PROJECTION-001",
+        "L9-PROV-001",
+        "L9-EVIDENCE-001",
+        "L9-ASSURANCE-001",
+        "L9-COORD-001"
+      ]
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.governing_invariants",
+      "source_class": "strategic_value_model",
+      "value": 1
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.model_section",
+      "source_class": "strategic_value_model",
+      "value": "evaluation_integrity.independent_method_assurance"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.contract_obligation",
+      "source_class": "strategic_value_model",
+      "value": "method_identity_input_lineage_executed_method_evidence_and_applicable_independently_reviewable_model_validation_evidence_for_strong_numerical_claims"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.when",
+      "source_class": "strategic_value_model",
+      "value": "model_derived_or_independently_verified_claim"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.authority_status",
+      "source_class": "strategic_value_model",
+      "value": "not_admitted_as_independent_invariant"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.source_candidate_id",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.meaning",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.disposition",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.governing_invariants",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.model_section",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.contract_obligation",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.when",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020.authority_status",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.relocated_additional_candidate_semantics",
+      "reason": "v1_objects_always_open",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-015",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-016",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-017",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-018",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-019",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.relocated_additional_candidate_semantics.L9-SV-020",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$",
+      "reason": "v1_objects_always_open; unselected source fields remain outside the projection",
+      "source_class": "strategic_value_model",
+      "value": true
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.terms.strategic_value.artifact_id",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.terms.strategic_value.detailed_model",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms.strategic_value",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.strategic_value.semantic_class",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.strategic_value.definition",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.terms.systemic_future_value.detailed_model",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms.systemic_future_value",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.systemic_future_value.semantic_class",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.systemic_future_value.definition",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms.strategic_value_assessment",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.strategic_value_assessment.semantic_class",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.strategic_value_assessment.definition",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms.counterfactual_baseline",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.counterfactual_baseline.semantic_class",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.counterfactual_baseline.definition",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms.future_effect_identity",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.future_effect_identity.semantic_class",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.future_effect_identity.definition",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms.bidirectional_value_propagation",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.bidirectional_value_propagation.semantic_class",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.bidirectional_value_propagation.definition",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms.value_propagation_mesh",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.value_propagation_mesh.semantic_class",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.value_propagation_mesh.definition",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms.future_work_elimination",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.future_work_elimination.semantic_class",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.future_work_elimination.definition",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms.capability_unlock",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.capability_unlock.semantic_class",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.capability_unlock.definition",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms.decision_relevant_information_value",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.decision_relevant_information_value.semantic_class",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.decision_relevant_information_value.definition",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms.decision_boundary",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.decision_boundary.semantic_class",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.decision_boundary.definition",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.terms",
+      "reason": "v1_objects_always_open",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.strategic_value",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.systemic_future_value",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.strategic_value_assessment",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.counterfactual_baseline",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.future_effect_identity",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.bidirectional_value_propagation",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.value_propagation_mesh",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.future_work_elimination",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.capability_unlock",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.decision_relevant_information_value",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.terms.decision_boundary",
+      "source_class": "vocabulary"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$",
+      "reason": "v1_objects_always_open; unselected source fields remain outside the projection",
+      "source_class": "vocabulary",
+      "value": true
+    },
+    {
+      "action": "not_carried",
+      "constraint": "enum",
+      "path": "$.invariants[].id",
+      "reason": "false_of_source",
+      "source_class": "invariants",
+      "value": [
+        "L9-SV-001",
+        "L9-SV-002",
+        "L9-AUTH-001",
+        "L9-AUTH-002",
+        "L9-HARD-001",
+        "L9-UNKNOWN-001",
+        "L9-STRATEGY-001",
+        "L9-PROJECTION-001",
+        "L9-PROV-001",
+        "L9-EVIDENCE-001",
+        "L9-ASSURANCE-001",
+        "L9-COORD-001"
+      ]
+    },
+    {
+      "action": "not_carried",
+      "constraint": "const",
+      "path": "$.invariants[].scope",
+      "reason": "false_of_source",
+      "source_class": "invariants",
+      "value": "global"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.invariants[].owner",
+      "source_class": "invariants",
+      "value": "Quantum-L9/.github"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.invariants[].severity",
+      "source_class": "invariants"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.invariants[]",
+      "reason": "v1_objects_always_open",
+      "source_class": "invariants",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.invariants[].id",
+      "source_class": "invariants"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.invariants[].statement",
+      "source_class": "invariants"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.invariants[].scope",
+      "source_class": "invariants"
+    },
+    {
+      "action": "not_carried",
+      "constraint": "required",
+      "path": "$.invariants[].owner",
+      "reason": "false_of_source",
+      "source_class": "invariants"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.invariants",
+      "source_class": "invariants",
+      "value": 12
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$",
+      "reason": "v1_objects_always_open; unselected source fields remain outside the projection",
+      "source_class": "invariants",
+      "value": true
+    },
+    {
+      "action": "not_carried",
+      "constraint": "enum",
+      "path": "$.contracts[].id",
+      "reason": "false_of_source",
+      "source_class": "contracts",
+      "value": [
+        "l9.contract/strategic-value-assessment@1",
+        "l9.contract/authority-boundary@1",
+        "l9.contract/projection@1",
+        "l9.contract/hard-constraint@1"
+      ]
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.contracts[].scope",
+      "source_class": "contracts",
+      "value": "global"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.contracts[].owner",
+      "source_class": "contracts",
+      "value": "Quantum-L9/.github"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.contracts[].source_invariants",
+      "source_class": "contracts",
+      "value": 1
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.contracts[].applies_to",
+      "source_class": "contracts",
+      "value": 1
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.satisfied",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.violated",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.unresolved",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.admitted",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.refused",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.new_decision_required",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.attested",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.unverified",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.invalid_binding",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.supported",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.unsupported",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.resolved",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.admissible",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.inadmissible",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.current",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.non_current",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.compatible",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.incompatible",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.preserved",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.successor_required",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.valid_projection",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.invalid_projection",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.rejected",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.invocable",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.not_invocable",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.invalid",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.unsat",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.ambiguous",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.blocked",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.unknown",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.valid",
+      "source_class": "contracts"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].outcomes.new_candidate_required",
+      "source_class": "contracts"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.contracts[].outcomes",
+      "reason": "v1_objects_always_open",
+      "source_class": "contracts",
+      "value": true
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.contracts[].applicability",
+      "source_class": "contracts"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.contracts[].applicability",
+      "reason": "v1_objects_always_open",
+      "source_class": "contracts",
+      "value": true
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.contracts[]",
+      "reason": "v1_objects_always_open",
+      "source_class": "contracts",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.contracts[].id",
+      "source_class": "contracts"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.contracts[].purpose",
+      "source_class": "contracts"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.contracts[].scope",
+      "source_class": "contracts"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.contracts[].owner",
+      "source_class": "contracts"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.contracts[].source_invariants",
+      "source_class": "contracts"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.contracts[].applies_to",
+      "source_class": "contracts"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.contracts[].requires",
+      "source_class": "contracts"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.contracts[].guarantees",
+      "source_class": "contracts"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.contracts[].forbidden",
+      "source_class": "contracts"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.contracts[].outcomes",
+      "source_class": "contracts"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.contracts",
+      "source_class": "contracts",
+      "value": 4
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$",
+      "reason": "v1_objects_always_open; unselected source fields remain outside the projection",
+      "source_class": "contracts",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.authority_classes.canonical.implicit_derivation_allowed",
+      "source_class": "authority_model",
+      "value": false
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.authority_classes.canonical.meaning",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.authority_classes.canonical",
+      "reason": "v1_objects_always_open",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority_classes.canonical.meaning",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority_classes.canonical.implicit_derivation_allowed",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.authority_classes.derived.may_self_promote",
+      "source_class": "authority_model",
+      "value": false
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.authority_classes.derived.meaning",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.authority_classes.derived",
+      "reason": "v1_objects_always_open",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority_classes.derived.may_self_promote",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.authority_classes.candidate.authoritative",
+      "source_class": "authority_model",
+      "value": false
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.authority_classes.candidate.meaning",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.authority_classes.candidate",
+      "reason": "v1_objects_always_open",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority_classes.candidate.authoritative",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.authority_classes.evidence.grants_authority",
+      "source_class": "authority_model",
+      "value": false
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.authority_classes.evidence.meaning",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.authority_classes.evidence",
+      "reason": "v1_objects_always_open",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority_classes.evidence.grants_authority",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.authority_classes.global_governance",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.authority_classes.global_governance",
+      "reason": "v1_objects_always_open",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.authority_classes",
+      "reason": "v1_objects_always_open",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority_classes.global_governance",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority_classes.canonical",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority_classes.derived",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority_classes.candidate",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.authority_classes.evidence",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.admission_rules.global_requirements",
+      "source_class": "authority_model",
+      "value": 1
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.admission_rules.candidate_generation_is_not_admission",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.admission_rules.self_admission_without_target_class_authority_forbidden",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.admission_rules.changed_material_subject_requires_new_decision_unless_compatibility_preserves_it",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.admission_rules",
+      "reason": "v1_objects_always_open",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.admission_rules.global_requirements",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.admission_rules.candidate_generation_is_not_admission",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.admission_rules.self_admission_without_target_class_authority_forbidden",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.promotion_rules.sequence",
+      "source_class": "authority_model",
+      "value": 1
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.promotion_rules.globalization_candidate_is_not_global_authority",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.promotion_rules.authorized_global_state_change_required",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.promotion_rules",
+      "reason": "v1_objects_always_open",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.promotion_rules.sequence",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.promotion_rules.globalization_candidate_is_not_global_authority",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.promotion_rules.authorized_global_state_change_required",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.strategic_authority.grant_must_be_explicit",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.strategic_authority.may_not_be_inferred_from",
+      "source_class": "authority_model",
+      "value": 1
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.strategic_authority.strategy_concept_ref",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.strategic_authority",
+      "reason": "v1_objects_always_open",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_authority.definition",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_authority.grant_must_be_explicit",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_authority.may_not_be_inferred_from",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.strategic_cognition_authority.global_semantics_owner",
+      "source_class": "authority_model",
+      "value": "Quantum-L9/.github"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.strategic_cognition_authority.strategic_plan_owner",
+      "source_class": "authority_model",
+      "value": "plan_keeper"
+    },
+    {
+      "action": "carried",
+      "constraint": "const",
+      "path": "$.strategic_cognition_authority.strategic_plan_reasoning_analysis_owner",
+      "source_class": "authority_model",
+      "value": "strategic_plan_metacognitive_reasoner"
+    },
+    {
+      "action": "carried",
+      "constraint": "min_items",
+      "path": "$.strategic_cognition_authority.rules",
+      "source_class": "authority_model",
+      "value": 1
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.strategic_cognition_authority.detailed_model",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.strategic_cognition_authority.invariant_ref",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.strategic_cognition_authority.strategic_plan_authority_source",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.strategic_cognition_authority.metacognition_denied",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "structural_fill",
+      "constraint": "type",
+      "path": "$.strategic_cognition_authority.roles_are_actor_identities",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$.strategic_cognition_authority",
+      "reason": "v1_objects_always_open",
+      "source_class": "authority_model",
+      "value": true
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_cognition_authority.global_semantics_owner",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_cognition_authority.strategic_plan_owner",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_cognition_authority.strategic_plan_reasoning_analysis_owner",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "carried",
+      "constraint": "required",
+      "path": "$.strategic_cognition_authority.rules",
+      "source_class": "authority_model"
+    },
+    {
+      "action": "v1_semantics",
+      "constraint": "additional_properties",
+      "path": "$",
+      "reason": "v1_objects_always_open; unselected source fields remain outside the projection",
+      "source_class": "authority_model",
+      "value": true
+    }
+  ],
+  "hand_schema": "semantics/strategic_planner_value_projection.schema.yaml",
+  "schema": "l9.sv.grammar-translation-ledger/v1",
+  "summary": {
+    "authority_model": {
+      "carried": 39,
+      "not_carried": 0,
+      "structural_fill": 12,
+      "v1_semantics": 11
+    },
+    "contracts": {
+      "carried": 15,
+      "not_carried": 1,
+      "structural_fill": 33,
+      "v1_semantics": 4
+    },
+    "invariants": {
+      "carried": 5,
+      "not_carried": 3,
+      "structural_fill": 1,
+      "v1_semantics": 2
+    },
+    "strategic_value_model": {
+      "carried": 346,
+      "not_carried": 0,
+      "structural_fill": 0,
+      "v1_semantics": 40
+    },
+    "vocabulary": {
+      "carried": 33,
+      "not_carried": 0,
+      "structural_fill": 3,
+      "v1_semantics": 13
+    }
+  }
+}

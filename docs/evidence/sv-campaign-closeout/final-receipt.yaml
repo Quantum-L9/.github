@@ -1,0 +1,48 @@
+schema: l9.sv-campaign-final-receipt/v1
+contract: L9-SV-CAMPAIGN-CLOSEOUT-CONTRACT/v1
+terminal_state: SV_CANONICALLY_ADMITTED_AND_VERIFIED
+statuses:
+  CANDIDATE_PREPARED:
+    state: reached
+    evidence: "Quantum-L9/.github#212, #215, #220 (merged as candidates)"
+  TECHNICALLY_QUALIFIED:
+    state: reached
+    evidence: "qualification.yaml (c4c4a1d, producer 33e4c58)"
+  ADMISSION_AUTHORIZED:
+    state: reached
+    evidence: "authority-resolution.md (owner instruction, session_017xwbxytavCYavKdhRr9a6n, 2026-11-08)"
+  CANONICALLY_ADMITTED:
+    state: reached
+    evidence: "ADR-029 Accepted; v3.32.0 ADMITTED; effective at 64d8b8598300f94c3201f26866f73be6895dab60"
+  POST_MERGE_VERIFIED:
+    state: reached
+    evidence: "post-merge-replay/ (DOWNSTREAM_USABLE)"
+admitted:
+  release: v3.32.0
+  adr: ADR-029
+  repository: Quantum-L9/.github
+  effective_revision: 64d8b8598300f94c3201f26866f73be6895dab60
+  tree: 98d078d804b5aa8ac06b719a797a5e055ff6579d
+  semantics_tree: 251bb3d9238f93f0207b1f8443c80359e034595b
+  identities:
+    invariants: [L9-SV-001, L9-SV-002]
+    contract: l9.contract/strategic-value-assessment@1
+    model: l9.strategic.value@1
+    canonical_source: l9.source/strategic-value-model@1
+    source_class: strategic_value_model
+    projection_profile: l9.projection/strategic-planner-value@1
+    composition_profile: l9.compose/strategic-planner-value@1
+    payload_schemas: [l9.projection.strategic-planner-value/v1, l9.composed-projection.strategic-planner-value/v1]
+    vocabulary_terms: 11
+    provenance_constraint_language: l9.provenance-constraint v1
+    validator_rule: RC-033
+producer: Quantum-L9/l9-semantic-compiler-engine@33e4c5832bf73c7d9b0b70854af011e9582f1ab2
+not_established:
+- consumer binding or consumer trusted replay
+- admission of the v3.29.0, v3.30.0 or v3.31.0 deltas
+- a registered payload schema for l9.compose/stage-context@1 (its overall result stays unknown)
+- any numerical valuation, plan admission, execution, publication or deployment authority
+remaining_dependencies:
+- owner admission decisions for v3.29.0, v3.30.0 and v3.31.0 (merged candidates)
+- 'GT core on the remediated #216 candidate, then the GT+SV dependent contract (D5)'
+- consumers re-pin to 64d8b85 and replay through their own release process

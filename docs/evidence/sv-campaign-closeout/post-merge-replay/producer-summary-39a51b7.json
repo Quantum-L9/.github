@@ -1,0 +1,90 @@
+{
+	"authority": {
+		"repository": "Quantum-L9/.github",
+		"revision": "64d8b8598300f94c3201f26866f73be6895dab60",
+		"root": null
+	},
+	"compiler_revision": "da407fc6fd802da2ccecefd39ab02dcb9d0a4b7e",
+	"composition": {
+		"digest": [
+			"sha256:7e93f3afe35bc5d628ac716952088bf02ddb1bef0c32fc6a1528f915108e38e7"
+		],
+		"exit": 0,
+		"required_provenance": {
+			"composition_profile_digest": "pass",
+			"composition_profile_ref": "pass",
+			"source_projection_digests": "pass",
+			"source_projection_refs": "pass"
+		},
+		"result": "pass"
+	},
+	"projections": {
+		"authority_model": {
+			"artifacts": [
+				{
+					"digest": "sha256:9de2c2f140c2a709cee4eb098cd9f8f8fa42544d507ee1a35fd28cdf1082070e",
+					"ref": "l9.projection/strategic-planner-value@1#l9.source/authority-model@1",
+					"result": "pass"
+				}
+			],
+			"exit": 0,
+			"result": "pass"
+		},
+		"contracts": {
+			"artifacts": [
+				{
+					"digest": "sha256:7b100a7b5314130901faa964e71a76a9c9d3c2d9f6f0f98831bab954ab13887e",
+					"ref": "l9.projection/strategic-planner-value@1#l9.source/contracts@1",
+					"result": "pass"
+				}
+			],
+			"exit": 0,
+			"result": "pass"
+		},
+		"invariants": {
+			"artifacts": [
+				{
+					"digest": "sha256:bbcfd561f7fb691a917250d181b38e93ba8642fd296f04154d649e4a2c5947e5",
+					"ref": "l9.projection/strategic-planner-value@1#l9.source/invariants@1",
+					"result": "pass"
+				}
+			],
+			"exit": 0,
+			"result": "pass"
+		},
+		"strategic_value_model": {
+			"artifacts": [
+				{
+					"digest": "sha256:19562c93cb676476929d49560cd0a0f1ea36c57ebbc125e6a605fa629a55f3f4",
+					"ref": "l9.projection/strategic-planner-value@1#l9.source/strategic-value-model@1",
+					"result": "pass"
+				}
+			],
+			"exit": 0,
+			"result": "pass"
+		},
+		"vocabulary": {
+			"artifacts": [
+				{
+					"digest": "sha256:b7b11fb6a37bd3a444d06db287d158214fea5c3cc6e1f29a5c6d43fe4bc1ac3e",
+					"ref": "l9.projection/strategic-planner-value@1#l9.source/vocabulary@1",
+					"result": "pass"
+				}
+			],
+			"exit": 0,
+			"result": "pass"
+		}
+	},
+	"result": "PASS",
+	"schema": "l9.sv-producer-qualification/v1",
+	"stage_context_regression": {
+		"exit": 3,
+		"required_provenance": {
+			"composition_profile_digest": "pass",
+			"composition_profile_ref": "pass",
+			"source_projection_digests": "pass",
+			"source_projection_refs": "pass"
+		},
+		"result": "unknown"
+	}
+}

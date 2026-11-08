@@ -1,0 +1,68 @@
+{
+	"schema": "l9.sv-reduction-authority-resolution/v1",
+	"resolved_at": "2026-11-07",
+	"source_pr": {
+		"number": 212,
+		"base": "main",
+		"head": "docs/candidates-strategic-value-sv1",
+		"mergeable_state": "clean",
+		"sha": "85531616cee2da94bbb7154418a78537549a4d76",
+		"state": "open"
+	},
+	"source_candidate_sha": "85531616cee2da94bbb7154418a78537549a4d76",
+	"protected_main_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"beneficiary_baseline": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"main_equals_baseline": true,
+	"governing_semantic_release": {
+		"record": "docs/semantic-foundation/v3.27.0",
+		"version": "v3.27.0"
+	},
+	"pr211": {
+		"number": 211,
+		"base": "main",
+		"draft": true,
+		"head": "campaign/projection-candidates-authority-resolution-2026-11-07",
+		"sha": "290bcd90378577392640cea9c6053c178423f0da",
+		"state": "open",
+		"touches": [
+			"semantics/authority_resolution_composition.schema.yaml",
+			"semantics/authority_resolution_projection.schema.yaml",
+			"semantics/composition_profiles.yaml",
+			"semantics/generic_compiler_manifest.yaml",
+			"semantics/projection_profiles.yaml"
+		]
+	},
+	"existing_governing_ids_at_baseline": {
+		"L9-AUTH-001": true,
+		"L9-AUTH-002": true,
+		"L9-HARD-001": true,
+		"L9-UNKNOWN-001": true,
+		"L9-STRATEGY-001": true,
+		"L9-PROJECTION-001": true,
+		"L9-PROV-001": true,
+		"L9-EVIDENCE-001": true,
+		"L9-ASSURANCE-001": true,
+		"L9-COORD-001": true
+	},
+	"new_ids_absent_at_baseline": {
+		"L9-SV-001": true,
+		"L9-SV-002": true
+	},
+	"source_model_absent_at_baseline": true,
+	"schemas_absent_at_baseline": {
+		"strategic_planner_value_projection.schema.yaml": true,
+		"strategic_planner_value_composition.schema.yaml": true
+	},
+	"baseline_invariant_count": 31,
+	"pr211_overlap": {
+		"shared_destination_files": [
+			"semantics/composition_profiles.yaml",
+			"semantics/generic_compiler_manifest.yaml",
+			"semantics/projection_profiles.yaml"
+		],
+		"applier_generate_on_pr211_tree": "COMPATIBLE: all anchors unique, no ID collisions, 13 paths generated (rehearsed in a scratch clone at 290bcd9)",
+		"reconciliation": "Not merged or rebased; PR #211 candidates untouched. Re-run the applier against whichever tree is the admitted target."
+	},
+	"pin_decision": "BASE_SHA kept at 020a94bea86e7c5c5e4107da7014ec259508f397 (equals protected main at resolution time); no unreviewed pin change.",
+	"result": "AUTHORITY_RESOLVED_FOR_DEVELOPMENT_NOT_ADMISSION"
+}

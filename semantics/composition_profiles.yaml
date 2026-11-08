@@ -11,6 +11,20 @@ global_rules:
   conflicts_fail_closed: true
   silent_precedence_is_forbidden: true
   composition_does_not_create_authority: true
+  required_provenance_is_evaluated_only_through_declared_provenance_constraints: true
+provenance_constraints:
+  criterion_language:
+    name: l9.provenance-constraint
+    version: 1
+  definitions:
+    source_projection_refs:
+      criterion: component_projection_refs
+    source_projection_digests:
+      criterion: component_projection_digests
+    composition_profile_ref:
+      criterion: composition_profile_ref
+    composition_profile_digest:
+      criterion: composition_profile_digest
 profiles:
   - id: l9.compose/stage-context@1
     purpose: >
@@ -80,3 +94,168 @@ profiles:
     conflict_result: invalid
     output:
       schema: l9.composed-projection.pr-audit/v1
+  - id: l9.compose/authority-resolution@1
+    purpose: Compose exact source projections for l9.projection/authority-resolution@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/authority-resolution@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.authority-resolution/v1
+  - id: l9.compose/evidence-assessment@1
+    purpose: Compose exact source projections for l9.projection/evidence-assessment@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/evidence-assessment@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.evidence-assessment/v1
+  - id: l9.compose/semantic-change-context@1
+    purpose: Compose exact source projections for l9.projection/semantic-change-context@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/semantic-change-context@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.semantic-change-context/v1
+  - id: l9.compose/architecture-break-test@1
+    purpose: Compose exact source projections for l9.projection/architecture-break-test@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/architecture-break-test@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.architecture-break-test/v1
+  - id: l9.compose/globalization-assessment@1
+    purpose: Compose exact source projections for l9.projection/globalization-assessment@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/globalization-assessment@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.globalization-assessment/v1
+  - id: l9.compose/work-state-continuity@1
+    purpose: Compose exact source projections for l9.projection/work-state-continuity@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/work-state-continuity@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.work-state-continuity/v1
+  - id: l9.compose/strategic-planning-context@1
+    purpose: Compose exact source projections for l9.projection/strategic-planning-context@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/strategic-planning-context@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.strategic-planning-context/v1
+  - id: l9.compose/strategic-metacognition@1
+    purpose: Compose exact source projections for l9.projection/strategic-metacognition@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/strategic-metacognition@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.strategic-metacognition/v1
+  - id: l9.compose/identity-assurance@1
+    purpose: Compose exact source projections for l9.projection/identity-assurance@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/identity-assurance@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.identity-assurance/v1
+  - id: l9.compose/hard-constraint-context@1
+    purpose: Compose exact source projections for l9.projection/hard-constraint-context@1.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/hard-constraint-context@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.hard-constraint-context/v1
+  - id: l9.compose/strategic-planner-value@1
+    purpose: >-
+      Compose the five independently produced canonical-source projections under
+      l9.projection/strategic-planner-value@1 into one derived, versioned,
+      non-authoritative consumer view. Preserve each source payload whole under
+      its source-class identity, detect missing/duplicate sources and conflicting
+      identities, and prohibit interpretation or numerical evaluation during
+      composition.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/strategic-planner-value@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.strategic-planner-value/v1
+    required_provenance:
+    - source_projection_refs
+    - source_projection_digests
+    - composition_profile_ref
+    - composition_profile_digest
