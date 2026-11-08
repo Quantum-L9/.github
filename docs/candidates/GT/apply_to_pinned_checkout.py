@@ -296,7 +296,9 @@ def rebind_derived_ledgers(checkout, changed):
 
 
 def git(checkout, *cmd):
-    return subprocess.run(
+    # S6350: argv list, no shell. Every revision read from a file passes
+    # full_sha() (40-hex commit) before it reaches an argument here.
+    return subprocess.run(  # NOSONAR
         ["git", "-C", str(checkout), *cmd], capture_output=True, text=True, check=True
     ).stdout
 
@@ -500,7 +502,8 @@ def verify_admitted_sv_base(checkout, ab):
     if dirty_paths(checkout):
         raise ValueError("checkout not clean")
     revision = full_sha(admitted["effective_revision"], "effective_revision")
-    ancestor = subprocess.run(
+    # S6350: argv list, no shell; revision and head are 40-hex commits (full_sha).
+    ancestor = subprocess.run(  # NOSONAR
         ["git", "-C", str(checkout), "merge-base", "--is-ancestor", revision, head],
         capture_output=True,
         check=False,
