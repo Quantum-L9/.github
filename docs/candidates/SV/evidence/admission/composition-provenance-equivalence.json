@@ -1,0 +1,257 @@
+{
+  "archives": {
+    "projection-run1.tar": "sha256:32f62fd7c84ccd300bd8467b2c91de3edbac349b42d99ddaef235b948f25bfd6",
+    "projection-run2.tar": "sha256:1b9c7fe508fd33969a6c13615b1543b00cad8a9168c149fe1c98e5ee82707a83"
+  },
+  "authority_revision": "0b50cf7a09c96986d2fcd46130032224ad7104a0",
+  "authority_revision_note": "local rehearsal revision of the applied candidate on 020a94b; not a canonical revision",
+  "canonical_precedent": "On origin/main 9488d8f, semantics/composition_profiles.yaml declares the same four tokens on l9.compose/stage-context@1; global_rules.source_projection_provenance_required is true but unread by the compiler. Removing the stanza from the SV profile would diverge from that precedent; implementing the four criteria in the compiler would resolve both profiles.",
+  "does_not_establish": [
+    "a compiler PASS receipt",
+    "an owner decision",
+    "admission",
+    "equivalence at a canonical revision"
+  ],
+  "finding": "Every fact the four required_provenance tokens name is present in the composed artifact and re-derives independently; the compiler's always-on criteria (component_provenance, composition_equivalence, composition_profile_currentness, envelope_schema) already enforce the same facts on every composition. The UNKNOWN result comes only from compiler 0.9.3 having no evaluator for required_provenance (passes/projection.py _declared_constraints marks every declared value unresolved).",
+  "negative_controls": "tests/test_composition_provenance_equivalence.py (NegativeControls, UnreadableInputs)",
+  "runs": {
+    "projection-run1.tar": {
+      "checks": {
+        "component_digests": {
+          "errors": [],
+          "status": "pass"
+        },
+        "component_refs": {
+          "artifact_errors": [],
+          "status": "pass",
+          "unmatched_or_inconsistent": []
+        },
+        "composition_digest": {
+          "observed": "sha256:7cc133cbd83e79882e06b22f58e9d5cc535f8d05a14ca25967afd6b01cd5ad63",
+          "status": "pass"
+        },
+        "composition_profile_digest": {
+          "expected": "sha256:d2227cf302c5c12fc2ba360d5fb4f1304eb9bf35d6312986c50736b06b00fd14",
+          "observed": "sha256:d2227cf302c5c12fc2ba360d5fb4f1304eb9bf35d6312986c50736b06b00fd14",
+          "status": "pass"
+        },
+        "composition_profile_ref": {
+          "expected": "l9.compose/strategic-planner-value@1",
+          "observed": "l9.compose/strategic-planner-value@1",
+          "status": "pass"
+        },
+        "coverage": {
+          "placement_errors": [],
+          "required": [
+            "authority_model",
+            "contracts",
+            "invariants",
+            "strategic_value_model",
+            "vocabulary"
+          ],
+          "source_classes": [
+            "authority_model",
+            "contracts",
+            "invariants",
+            "strategic_value_model",
+            "vocabulary"
+          ],
+          "status": "pass"
+        },
+        "receipt_binding": {
+          "authority_repository": "Quantum-L9/.github",
+          "authority_revision": "0b50cf7a09c96986d2fcd46130032224ad7104a0",
+          "compiler_result": "unknown",
+          "compiler_unresolved": [
+            "declared_constraint:required_provenance:composition_profile_digest",
+            "declared_constraint:required_provenance:composition_profile_ref",
+            "declared_constraint:required_provenance:source_projection_digests",
+            "declared_constraint:required_provenance:source_projection_refs"
+          ],
+          "errors": [],
+          "projection_receipts_pass": 5,
+          "status": "pass"
+        }
+      },
+      "compiler_reported_result": "unknown",
+      "compiler_unresolved_criteria": [
+        "declared_constraint:required_provenance:composition_profile_digest",
+        "declared_constraint:required_provenance:composition_profile_ref",
+        "declared_constraint:required_provenance:source_projection_digests",
+        "declared_constraint:required_provenance:source_projection_refs"
+      ],
+      "failed_checks": [],
+      "required_provenance_tokens": {
+        "composition_profile_digest": {
+          "compiler_always_on": [
+            "composition_profile_currentness"
+          ],
+          "status": "pass",
+          "verifier_checks": [
+            "composition_profile_digest",
+            "receipt_binding"
+          ]
+        },
+        "composition_profile_ref": {
+          "compiler_always_on": [
+            "composition_profile_currentness",
+            "envelope_schema"
+          ],
+          "status": "pass",
+          "verifier_checks": [
+            "composition_profile_ref",
+            "receipt_binding"
+          ]
+        },
+        "source_projection_digests": {
+          "compiler_always_on": [
+            "component_provenance",
+            "composition_equivalence"
+          ],
+          "status": "pass",
+          "verifier_checks": [
+            "component_digests",
+            "receipt_binding"
+          ]
+        },
+        "source_projection_refs": {
+          "compiler_always_on": [
+            "component_provenance",
+            "composition_equivalence"
+          ],
+          "status": "pass",
+          "verifier_checks": [
+            "component_refs",
+            "coverage",
+            "receipt_binding"
+          ]
+        }
+      },
+      "result": "PASS",
+      "schema": "l9.sv-composition-provenance-equivalence/v1",
+      "subject": "l9.compose/strategic-planner-value@1"
+    },
+    "projection-run2.tar": {
+      "checks": {
+        "component_digests": {
+          "errors": [],
+          "status": "pass"
+        },
+        "component_refs": {
+          "artifact_errors": [],
+          "status": "pass",
+          "unmatched_or_inconsistent": []
+        },
+        "composition_digest": {
+          "observed": "sha256:7cc133cbd83e79882e06b22f58e9d5cc535f8d05a14ca25967afd6b01cd5ad63",
+          "status": "pass"
+        },
+        "composition_profile_digest": {
+          "expected": "sha256:d2227cf302c5c12fc2ba360d5fb4f1304eb9bf35d6312986c50736b06b00fd14",
+          "observed": "sha256:d2227cf302c5c12fc2ba360d5fb4f1304eb9bf35d6312986c50736b06b00fd14",
+          "status": "pass"
+        },
+        "composition_profile_ref": {
+          "expected": "l9.compose/strategic-planner-value@1",
+          "observed": "l9.compose/strategic-planner-value@1",
+          "status": "pass"
+        },
+        "coverage": {
+          "placement_errors": [],
+          "required": [
+            "authority_model",
+            "contracts",
+            "invariants",
+            "strategic_value_model",
+            "vocabulary"
+          ],
+          "source_classes": [
+            "authority_model",
+            "contracts",
+            "invariants",
+            "strategic_value_model",
+            "vocabulary"
+          ],
+          "status": "pass"
+        },
+        "receipt_binding": {
+          "authority_repository": "Quantum-L9/.github",
+          "authority_revision": "0b50cf7a09c96986d2fcd46130032224ad7104a0",
+          "compiler_result": "unknown",
+          "compiler_unresolved": [
+            "declared_constraint:required_provenance:composition_profile_digest",
+            "declared_constraint:required_provenance:composition_profile_ref",
+            "declared_constraint:required_provenance:source_projection_digests",
+            "declared_constraint:required_provenance:source_projection_refs"
+          ],
+          "errors": [],
+          "projection_receipts_pass": 5,
+          "status": "pass"
+        }
+      },
+      "compiler_reported_result": "unknown",
+      "compiler_unresolved_criteria": [
+        "declared_constraint:required_provenance:composition_profile_digest",
+        "declared_constraint:required_provenance:composition_profile_ref",
+        "declared_constraint:required_provenance:source_projection_digests",
+        "declared_constraint:required_provenance:source_projection_refs"
+      ],
+      "failed_checks": [],
+      "required_provenance_tokens": {
+        "composition_profile_digest": {
+          "compiler_always_on": [
+            "composition_profile_currentness"
+          ],
+          "status": "pass",
+          "verifier_checks": [
+            "composition_profile_digest",
+            "receipt_binding"
+          ]
+        },
+        "composition_profile_ref": {
+          "compiler_always_on": [
+            "composition_profile_currentness",
+            "envelope_schema"
+          ],
+          "status": "pass",
+          "verifier_checks": [
+            "composition_profile_ref",
+            "receipt_binding"
+          ]
+        },
+        "source_projection_digests": {
+          "compiler_always_on": [
+            "component_provenance",
+            "composition_equivalence"
+          ],
+          "status": "pass",
+          "verifier_checks": [
+            "component_digests",
+            "receipt_binding"
+          ]
+        },
+        "source_projection_refs": {
+          "compiler_always_on": [
+            "component_provenance",
+            "composition_equivalence"
+          ],
+          "status": "pass",
+          "verifier_checks": [
+            "component_refs",
+            "coverage",
+            "receipt_binding"
+          ]
+        }
+      },
+      "result": "PASS",
+      "schema": "l9.sv-composition-provenance-equivalence/v1",
+      "subject": "l9.compose/strategic-planner-value@1"
+    }
+  },
+  "runs_identical": true,
+  "schema": "l9.sv-composition-provenance-equivalence-evidence/v1",
+  "status": "EVIDENCE_FOR_OWNER_DECISION_NOT_A_COMPILER_PASS",
+  "subject": "l9.compose/strategic-planner-value@1",
+  "verifier": "tests/verify_composition_provenance.py",
+  "verifier_independence": "restates the canonical-JSON sha256 digest rule; imports nothing from l9-semantic-compiler-engine"
+}
