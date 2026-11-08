@@ -1,0 +1,7 @@
+document_kind: schema_synthesis_operation_candidate
+artifact_id: l9.candidate.schema-synthesis/identity-assurance-v2/operation@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+dialect_ref: l9.schema-dialect/candidate-v2@1

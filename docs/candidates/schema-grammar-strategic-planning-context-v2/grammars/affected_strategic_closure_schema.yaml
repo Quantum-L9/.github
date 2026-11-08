@@ -1,0 +1,195 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/affected-strategic-closure-schema@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: affected_strategic_closure_schema
+source_ref: l9.source/affected-strategic-closure-schema@1
+source_path: semantics/affected_strategic_closure.schema.yaml
+source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_digest: sha256:09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4
+applies_to_selectors:
+- $.artifact_id
+- $.canonical
+- $.authority
+- $.canonical_source
+- $.governed_by
+- $.purpose
+- $.instance_semantics
+- $.type
+- $.required
+- $.properties
+- $.closure_rules
+- $.semantic_rules
+- $
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    artifact_id:
+      type: string
+    canonical:
+      type: boolean
+    authority:
+      type: object
+      additional_properties: true
+      fields:
+        owner:
+          type: string
+        scope:
+          type: string
+        authority_class:
+          type: string
+    canonical_source:
+      type: object
+      additional_properties: true
+      fields:
+        format:
+          type: string
+        artifact:
+          type: string
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        semantic_model_ref:
+          type: string
+        strategic_plan_graph_schema_ref:
+          type: string
+        strategic_cognition_ref:
+          type: string
+    purpose:
+      type: string
+    instance_semantics:
+      type: object
+      additional_properties: true
+      fields:
+        authority_class:
+          type: string
+        authoritative:
+          type: boolean
+        authority_effect:
+          type: string
+        disposable:
+          type: boolean
+        recomputable:
+          type: boolean
+    type:
+      type: string
+    required:
+      type: string_list
+    properties:
+      type: object
+      additional_properties: true
+      fields:
+        schema:
+          type: object
+          additional_properties: true
+          fields:
+            const:
+              type: string
+        closure_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        plan_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        plan_revision_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        plan_graph_digest:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        trigger_sources:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            min_items:
+              type: integer
+            items:
+              type: object
+              additional_properties: true
+              fields:
+                type:
+                  type: string
+                required:
+                  type: string_list
+                fields:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    digest:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    change_ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+        affected_plan_refs:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        unresolved_refs:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        provenance:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        closure_digest:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+    closure_rules:
+      type: object
+      additional_properties: true
+      fields:
+        affected_refs_must_resolve_to_plan_owned_claims_in_bound_revision:
+          type: boolean
+        empty_closure_is_valid_when_no_plan_owned_claim_materially_depends_on_trigger:
+          type: boolean
+        unresolved_dependency_is_preserved_as_unknown:
+          type: boolean
+        closure_algorithm_is_not_defined_by_this_schema:
+          type: boolean
+        closure_result_is_invalidated_by_bound_plan_revision_or_trigger_digest_change:
+          type: boolean
+    semantic_rules:
+      type: string_list
+    schema:
+      type: string

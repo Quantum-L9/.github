@@ -1,0 +1,487 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/strategic-planning-episode-schema@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: strategic_planning_episode_schema
+source_ref: l9.source/strategic-planning-episode-schema@1
+source_path: semantics/strategic_planning_episode.schema.yaml
+source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_digest: sha256:017931d0f8a07e85124a6492e07f65c7781905ed86042c7978c7451a80ab8513
+applies_to_selectors:
+- $.artifact_id
+- $.canonical
+- $.authority
+- $.canonical_source
+- $.governed_by
+- $.purpose
+- $.instance_semantics
+- $.type
+- $.required
+- $.properties
+- $.workspace_rules
+- $.semantic_rules
+- $
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    artifact_id:
+      type: string
+    canonical:
+      type: boolean
+    authority:
+      type: object
+      additional_properties: true
+      fields:
+        owner:
+          type: string
+        scope:
+          type: string
+        authority_class:
+          type: string
+    canonical_source:
+      type: object
+      additional_properties: true
+      fields:
+        format:
+          type: string
+        artifact:
+          type: string
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        semantic_model_ref:
+          type: string
+        plan_graph_schema_ref:
+          type: string
+        authority_ref:
+          type: string
+    purpose:
+      type: string
+    instance_semantics:
+      type: object
+      additional_properties: true
+      fields:
+        authority_class:
+          type: string
+        authoritative:
+          type: boolean
+        authority_effect:
+          type: string
+        producer_role:
+          type: string
+    type:
+      type: string
+    required:
+      type: string_list
+    properties:
+      type: object
+      additional_properties: true
+      fields:
+        schema:
+          type: object
+          additional_properties: true
+          fields:
+            const:
+              type: string
+        episode_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        plan_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        plan_revision_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        plan_graph_digest:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        strategic_authority_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        strategic_intent_refs:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            min_items:
+              type: integer
+        objective_refs:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        current_meta_view:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                ref:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                digest:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+        affected_closure:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                ref:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                digest:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+        trigger_sources:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            items:
+              type: object
+              additional_properties: true
+              fields:
+                type:
+                  type: string
+                required:
+                  type: string_list
+                fields:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    digest:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    change_ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+        workspace:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                decision_question:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                observations:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                    items:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                        required:
+                          type: string_list
+                        fields:
+                          type: object
+                          additional_properties: true
+                          fields:
+                            ref:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            statement:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            source_refs:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                                min_items:
+                                  type: integer
+                assumptions:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                    items:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                        required:
+                          type: string_list
+                        fields:
+                          type: object
+                          additional_properties: true
+                          fields:
+                            ref:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            statement:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            basis_refs:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            status:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                enum:
+                                  type: string_list
+                candidate_paths:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                    items:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                        required:
+                          type: string_list
+                        fields:
+                          type: object
+                          additional_properties: true
+                          fields:
+                            ref:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            statement:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            rationale_refs:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            disposition:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                enum:
+                                  type: string_list
+                evaluations:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                    items:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                        required:
+                          type: string_list
+                        fields:
+                          type: object
+                          additional_properties: true
+                          fields:
+                            ref:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            subject_ref:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            objective_refs:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            evidence_refs:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                            result:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                enum:
+                                  type: string_list
+                            rationale:
+                              type: object
+                              additional_properties: true
+                              fields:
+                                type:
+                                  type: string
+                material_unknowns:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+        recommendation:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                outcome:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    enum:
+                      type: string_list
+                candidate_path_ref:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                rationale_refs:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                authority_effect:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    const:
+                      type: string
+        provenance:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        episode_digest:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+    workspace_rules:
+      type: object
+      additional_properties: true
+      fields:
+        observations_reference_sources_but_do_not_take_truth_ownership:
+          type: boolean
+        assumptions_are_provisional_reasoning_objects_not_plan_owned_beliefs:
+          type: boolean
+        candidate_paths_are_not_strategic_commitments:
+          type: boolean
+        evaluations_do_not_create_objective_or_evidence_authority:
+          type: boolean
+        recommendation_is_not_a_strategic_decision:
+          type: boolean
+        propose_revision_outcome_requires_separate_revision_candidate_artifact:
+          type: boolean
+        changed_bound_input_digest_invalidates_episode_currentness:
+          type: boolean
+    semantic_rules:
+      type: string_list
+    schema:
+      type: string

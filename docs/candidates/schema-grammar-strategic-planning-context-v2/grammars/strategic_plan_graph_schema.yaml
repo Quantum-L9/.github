@@ -1,0 +1,296 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/strategic-planning-context-v2/grammar/strategic-plan-graph-schema@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: strategic_plan_graph_schema
+source_ref: l9.source/strategic-plan-graph-schema@1
+source_path: semantics/strategic_plan_graph.schema.yaml
+source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_digest: sha256:76bbf51d9233452d3e83e8bf4148a27eb6b8e29ff3126777c6c28d818ce1a885
+applies_to_selectors:
+- $.artifact_id
+- $.canonical
+- $.authority
+- $.canonical_source
+- $.governed_by
+- $.purpose
+- $.type
+- $.required
+- $.properties
+- $.reference_rules
+- $.relation_constraints
+- $.revision_rules
+- $.semantic_rules
+- $
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    artifact_id:
+      type: string
+    canonical:
+      type: boolean
+    authority:
+      type: object
+      additional_properties: true
+      fields:
+        owner:
+          type: string
+        scope:
+          type: string
+        authority_class:
+          type: string
+    canonical_source:
+      type: object
+      additional_properties: true
+      fields:
+        format:
+          type: string
+        artifact:
+          type: string
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        semantic_model_ref:
+          type: string
+        strategic_cognition_ref:
+          type: string
+        authority_ref:
+          type: string
+        lifecycle_ref:
+          type: string
+    purpose:
+      type: string
+    type:
+      type: string
+    required:
+      type: string_list
+    properties:
+      type: object
+      additional_properties: true
+      fields:
+        schema:
+          type: object
+          additional_properties: true
+          fields:
+            const:
+              type: string
+        plan_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        revision_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        predecessor_revision_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        strategic_authority_ref:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        scope:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        strategic_intent_refs:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            min_items:
+              type: integer
+        objective_refs:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        nodes:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            min_items:
+              type: integer
+            items:
+              type: object
+              additional_properties: true
+              fields:
+                type:
+                  type: string
+                required:
+                  type: string_list
+                fields:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    kind:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        enum:
+                          type: string_list
+                    statement:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    evidence_refs:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+        relations:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            items:
+              type: object
+              additional_properties: true
+              fields:
+                type:
+                  type: string
+                required:
+                  type: string_list
+                fields:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    relation:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        enum:
+                          type: string_list
+                    source_ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    target_ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+                    hypothesis_ref:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        type:
+                          type: string
+        provenance:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        graph_digest:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+    reference_rules:
+      type: object
+      additional_properties: true
+      fields:
+        local_node_identity_source:
+          type: string
+        non_local_relation_endpoint_semantics:
+          type: string
+        external_references_remain_externally_owned:
+          type: boolean
+        unresolved_external_reference_result:
+          type: string
+        downstream_references_governing_upstream_subjects:
+          type: boolean
+        upstream_objects_do_not_embed_downstream_consumer_inventories:
+          type: boolean
+        reverse_adjacency_is_derived:
+          type: boolean
+    relation_constraints:
+      type: object
+      additional_properties: true
+      fields:
+        all:
+          type: object
+          additional_properties: true
+          fields:
+            at_least_one_endpoint_must_resolve_to_local_plan_node:
+              type: boolean
+            relation_never_transfers_ownership_or_authority:
+              type: boolean
+        enables:
+          type: object
+          additional_properties: true
+          fields:
+            hypothesis_ref_required:
+              type: boolean
+            hypothesis_ref_must_resolve_to_local_kind:
+              type: string
+        supersedes:
+          type: object
+          additional_properties: true
+          fields:
+            source_must_resolve_to_local_plan_node:
+              type: boolean
+            target_must_resolve_to_same_primitive_kind:
+              type: boolean
+            target_may_resolve_to_prior_revision_same_plan_lineage:
+              type: boolean
+    revision_rules:
+      type: object
+      additional_properties: true
+      fields:
+        graph_represents_exactly_one_plan_revision:
+          type: boolean
+        content_change_requires_new_revision_ref:
+          type: boolean
+        predecessor_when_present_must_reference_prior_revision_same_plan_lineage:
+          type: boolean
+        prior_revisions_remain_addressable:
+          type: boolean
+        historical_revision_content_is_immutable:
+          type: boolean
+        graph_digest_binds_exact_revision_content:
+          type: boolean
+    semantic_rules:
+      type: string_list
+    schema:
+      type: string

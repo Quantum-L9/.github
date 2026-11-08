@@ -1,0 +1,158 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/identity-assurance-v2/grammar/surface-registry@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: surface_registry
+source_ref: l9.source/surface-registry@1
+source_path: semantics/surface_registry.yaml
+source_revision: a9d012bc1d297c7f7757ae41379db60dc682ea7d
+source_digest: sha256:d7200409ff02141a274ff8c9221d31429f6a6fae27539e6d9c8d20f1a6eba988
+applies_to_selectors:
+- $.artifact_id
+- $.canonical
+- $.authority
+- $.canonical_source
+- $.governed_by
+- $.purpose
+- $.identity_dimension
+- $.detailed_model
+- $.global_rules
+- $.does_not_own
+- $.surface_statuses
+- $.surfaces
+- $.aliases
+- $.alias_rules
+- $.downstream_obligations
+- $
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    artifact_id:
+      type: string
+    canonical:
+      type: boolean
+    authority:
+      type: object
+      additional_properties: true
+      fields:
+        owner:
+          type: string
+        scope:
+          type: string
+        authority_class:
+          type: string
+    canonical_source:
+      type: object
+      additional_properties: true
+      fields:
+        format:
+          type: string
+        artifact:
+          type: string
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        contracts:
+          type: string_list
+    purpose:
+      type: string
+    identity_dimension:
+      type: string
+    detailed_model:
+      type: string
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        registry_names_identity_only:
+          type: boolean
+        registry_does_not_interpret_runtime_evidence:
+          type: boolean
+        registry_grants_no_credential_role_or_execution_authority:
+          type: boolean
+        surface_does_not_intrinsically_own_an_actor:
+          type: boolean
+        surface_does_not_intrinsically_select_governance_profile:
+          type: boolean
+        surface_does_not_bind_provider_or_adapter:
+          type: boolean
+        aliases_are_scoped_to_surface_identity:
+          type: boolean
+        equal_strings_in_other_identity_dimensions_are_unrelated:
+          type: boolean
+        one_actor_may_operate_through_many_surfaces:
+          type: boolean
+    does_not_own:
+      type: string_list
+    surface_statuses:
+      type: object
+      additional_properties: true
+      fields:
+        current:
+          type: string
+        superseded:
+          type: string
+        retired:
+          type: string
+    surfaces:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          status:
+            type: string
+          description:
+            type: string
+    aliases:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          alias:
+            type: string
+          canonical:
+            type: string
+          alias_kind:
+            type: string
+    alias_rules:
+      type: object
+      additional_properties: true
+      fields:
+        alias_kinds:
+          type: object
+          additional_properties: true
+          fields:
+            historical_surface_alias:
+              type: string
+        alias_resolves_to_exactly_one_canonical_surface:
+          type: boolean
+        alias_never_targets_another_alias:
+          type: boolean
+        alias_never_shadows_a_canonical_surface:
+          type: boolean
+        alias_meaning_is_bounded_to_surface_identity:
+          type: boolean
+        surface_alias_never_implies_actor_alias:
+          type: boolean
+    downstream_obligations:
+      type: object
+      additional_properties: true
+      fields:
+        resolve_surface_from_runtime_evidence_under:
+          type: string
+        emit_assertion_matching:
+          type: string
+        validate_asserted_surface_against_this_registry:
+          type: boolean
+        concrete_runtime_evidence_interpretation_remains_downstream:
+          type: boolean
+    schema:
+      type: string
