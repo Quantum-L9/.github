@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Asserts the default seed payload MATERIALIZES exactly the repository-local
@@ -7,36 +7,36 @@
  * Run from the Quantum-L9/.github repo root:
  *   node ops/test-build-seed-payload.js
  */
-const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
+const assert = require("assert");
+const fs = require("fs");
+const path = require("path");
 const {
-  buildSeedPayload,
-  classSeedPaths,
-  parseCategories,
-  selectSeedWrites,
-  MANAGED_SEED_PATHS,
-  DEFAULT_CATEGORIES,
-  OPT_IN_CATEGORIES,
-  PYTHON_LINT_DEST,
-  RETIRED_CATEGORIES,
-  ISSUE_TEMPLATES_MATERIALIZED,
-} = require('./build-seed-payload.js');
-const { loadRepoClasses, resolveProfile } = require('./repo-class-profile.js');
-const { shapeFromRoot } = require('./render-dependabot.js');
+	buildSeedPayload,
+	classSeedPaths,
+	parseCategories,
+	selectSeedWrites,
+	MANAGED_SEED_PATHS,
+	DEFAULT_CATEGORIES,
+	OPT_IN_CATEGORIES,
+	PYTHON_LINT_DEST,
+	RETIRED_CATEGORIES,
+	ISSUE_TEMPLATES_MATERIALIZED,
+} = require("./build-seed-payload.js");
+const { loadRepoClasses, resolveProfile } = require("./repo-class-profile.js");
+const { shapeFromRoot } = require("./render-dependabot.js");
 
 // Sets one named property on an Error. Explicit assignment, not Object.assign:
 // Core's Semgrep gate (prototype-pollution) flags every two-argument call.
 const errorWith = (err, key, value) => {
-  err[key] = value;
-  return err;
+	err[key] = value;
+	return err;
 };
 
 // Explicit comparator: a default `.sort()` compares by string conversion,
 // which is an implicit ordering rule one refactor away from being wrong.
 const byName = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(__dirname, "..");
 const origCwd = process.cwd();
 process.chdir(root);
 
@@ -45,281 +45,428 @@ process.chdir(root);
 const ACTIONS_ONLY = shapeFromRoot({ names: [] });
 
 try {
-  // RETIRED: still parses as a name, but building it fails closed and 'all'
-  // never includes it. See RETIRED_CATEGORIES in build-seed-payload.js.
-  assert.deepStrictEqual(parseCategories('all'), [...DEFAULT_CATEGORIES]);
-  assert.ok(!parseCategories('all').includes('labels'));
-  assert.ok(!parseCategories('all').includes('on-org-update'));
-  assert.ok(OPT_IN_CATEGORIES.includes('labels'));
-  assert.ok(RETIRED_CATEGORIES.includes('on-org-update'));
-  assert.ok(RETIRED_CATEGORIES.includes('l9-ci-pack'));
-  assert.throws(
-    () => buildSeedPayload({ fs, categories: ['on-org-update'] }),
-    /RETIRED/,
-    'the receiver for the retired copier must fail closed too',
-  );
-  assert.throws(
-    () => buildSeedPayload({ fs, categories: ['l9-ci-pack'] }),
-    /RETIRED/,
-    'the retired CI pack must fail closed too',
-  );
-  assert.deepStrictEqual(parseCategories('labels'), ['labels']);
+	// RETIRED: still parses as a name, but building it fails closed and 'all'
+	// never includes it. See RETIRED_CATEGORIES in build-seed-payload.js.
+	assert.deepStrictEqual(parseCategories("all"), [...DEFAULT_CATEGORIES]);
+	assert.ok(!parseCategories("all").includes("labels"));
+	assert.ok(!parseCategories("all").includes("on-org-update"));
+	assert.ok(OPT_IN_CATEGORIES.includes("labels"));
+	assert.ok(RETIRED_CATEGORIES.includes("on-org-update"));
+	assert.ok(RETIRED_CATEGORIES.includes("l9-ci-pack"));
+	assert.throws(
+		() => buildSeedPayload({ fs, categories: ["on-org-update"] }),
+		/RETIRED/,
+		"the receiver for the retired copier must fail closed too",
+	);
+	assert.throws(
+		() => buildSeedPayload({ fs, categories: ["l9-ci-pack"] }),
+		/RETIRED/,
+		"the retired CI pack must fail closed too",
+	);
+	assert.deepStrictEqual(parseCategories("labels"), ["labels"]);
 
-  const defaultPayload = buildSeedPayload({ fs, categories: 'all', repoShape: ACTIONS_ONLY });
+	const defaultPayload = buildSeedPayload({
+		fs,
+		categories: "all",
+		repoShape: ACTIONS_ONLY,
+	});
 
-  // MATERIALIZE: every dest a default consumer must carry as local bytes.
-  for (const dest of [
-    'SECURITY.md',
-    '.github/CODEOWNERS',
-    '.github/dependabot.yml',
-    '.github/workflows/governance.yml',
-    '.github/ISSUE_TEMPLATE/1-bug.yml',
-    '.github/ISSUE_TEMPLATE/2-feature.yml',
-    '.github/pull_request_template.md',
-    '.github/PULL_REQUEST_TEMPLATE/release.md',
-  ]) {
-    assert.ok(dest in defaultPayload, `default payload must materialize ${dest}`);
-  }
+	// MATERIALIZE: every dest a default consumer must carry as local bytes.
+	for (const dest of [
+		"SECURITY.md",
+		".github/CODEOWNERS",
+		".github/dependabot.yml",
+		".github/workflows/governance.yml",
+		".github/ISSUE_TEMPLATE/1-bug.yml",
+		".github/ISSUE_TEMPLATE/2-feature.yml",
+		".github/pull_request_template.md",
+		".github/PULL_REQUEST_TEMPLATE/release.md",
+	]) {
+		assert.ok(
+			dest in defaultPayload,
+			`default payload must materialize ${dest}`,
+		);
+	}
 
-  // Never in the payload: INHERIT surfaces GitHub serves org-wide, REMOTE APPLY
-  // state, retired CI, the deleted infra template, and LICENSE.
-  for (const dest of [
-    'LICENSE',
-    'CODE_OF_CONDUCT.md',
-    'CONTRIBUTING.md',
-    'SUPPORT.md',
-    '.github/FUNDING.yml',
-    '.github/VULNERABILITY_REPORT.yml',
-    '.github/PULL_REQUEST_TEMPLATE/infra.md',
-    '.github/labels.yml',
-    '.github/workflows/on-org-update.yml',
-    '.github/workflows/l9-lint-test.yml',
-    '.github/ISSUE_TEMPLATE/bug_report.yml',
-    '.github/ISSUE_TEMPLATE/feature_request.yml',
-    '.github/ISSUE_TEMPLATE/seed-ci-failure.yml',
-    PYTHON_LINT_DEST,
-  ]) {
-    assert.ok(!(dest in defaultPayload), `default payload must omit ${dest}`);
-  }
+	// Never in the payload: INHERIT surfaces GitHub serves org-wide, REMOTE APPLY
+	// state, retired CI, the deleted infra template, and LICENSE.
+	for (const dest of [
+		"LICENSE",
+		"CODE_OF_CONDUCT.md",
+		"CONTRIBUTING.md",
+		"SUPPORT.md",
+		".github/FUNDING.yml",
+		".github/VULNERABILITY_REPORT.yml",
+		".github/PULL_REQUEST_TEMPLATE/infra.md",
+		".github/labels.yml",
+		".github/workflows/on-org-update.yml",
+		".github/workflows/l9-lint-test.yml",
+		".github/ISSUE_TEMPLATE/bug_report.yml",
+		".github/ISSUE_TEMPLATE/feature_request.yml",
+		".github/ISSUE_TEMPLATE/seed-ci-failure.yml",
+		PYTHON_LINT_DEST,
+	]) {
+		assert.ok(!(dest in defaultPayload), `default payload must omit ${dest}`);
+	}
 
-  // community-health is SECURITY.md alone: the one file with consumer-specific
-  // routing. The passive surfaces are INHERIT and never copied.
-  const communityHealth = buildSeedPayload({ fs, categories: ['community-health'] });
-  assert.deepStrictEqual(Object.keys(communityHealth), ['SECURITY.md']);
+	// community-health is SECURITY.md alone: the one file with consumer-specific
+	// routing. The passive surfaces are INHERIT and never copied.
+	const communityHealth = buildSeedPayload({
+		fs,
+		categories: ["community-health"],
+	});
+	assert.deepStrictEqual(Object.keys(communityHealth), ["SECURITY.md"]);
 
-  // pr-templates materializes the human template and the release template,
-  // by name. The deleted infra template must never reappear via a directory
-  // copy.
-  const prTemplates = buildSeedPayload({ fs, categories: ['pr-templates'] });
-  assert.deepStrictEqual(Object.keys(prTemplates).sort(byName), [
-    '.github/PULL_REQUEST_TEMPLATE/release.md',
-    '.github/pull_request_template.md',
-  ]);
-  assert.match(prTemplates['.github/PULL_REQUEST_TEMPLATE/release.md'], /^## Release/);
-  assert.ok(
-    !fs.existsSync('.github/PULL_REQUEST_TEMPLATE/infra.md'),
-    'the infra PR template is deleted, not merely unseeded',
-  );
+	// pr-templates materializes the human template and the release template,
+	// by name. The deleted infra template must never reappear via a directory
+	// copy.
+	const prTemplates = buildSeedPayload({ fs, categories: ["pr-templates"] });
+	assert.deepStrictEqual(Object.keys(prTemplates).sort(byName), [
+		".github/PULL_REQUEST_TEMPLATE/release.md",
+		".github/pull_request_template.md",
+	]);
+	assert.match(
+		prTemplates[".github/PULL_REQUEST_TEMPLATE/release.md"],
+		/^## Release/,
+	);
+	assert.ok(
+		!fs.existsSync(".github/PULL_REQUEST_TEMPLATE/infra.md"),
+		"the infra PR template is deleted, not merely unseeded",
+	);
 
-  // `.github/workflows/l9-lint-test.yml` was the pack's Python lint caller. It
-  // is FORBID in both governed repo classes and is no longer seeded by anything,
-  // so the default payload must omit it at every hasPython setting.
-  assert.ok(
-    !(PYTHON_LINT_DEST in buildSeedPayload({ fs, categories: 'all', repoShape: ACTIONS_ONLY, hasPython: true })),
-    'the retired Python lint caller must not be seeded, even for a Python repo',
-  );
-  const security = buildSeedPayload({
-    fs,
-    categories: ['community-health'],
-    repository: 'Quantum-L9/example',
-  })['SECURITY.md'];
-  assert.match(security, /https:\/\/github\.com\/Quantum-L9\/example\/security\/advisories\/new/);
-  assert.doesNotMatch(security, /Quantum-L9\/\.github\/security\/advisories\/new/);
+	// `.github/workflows/l9-lint-test.yml` was the pack's Python lint caller. It
+	// is FORBID in both governed repo classes and is no longer seeded by anything,
+	// so the default payload must omit it at every hasPython setting.
+	assert.ok(
+		!(
+			PYTHON_LINT_DEST in
+			buildSeedPayload({
+				fs,
+				categories: "all",
+				repoShape: ACTIONS_ONLY,
+				hasPython: true,
+			})
+		),
+		"the retired Python lint caller must not be seeded, even for a Python repo",
+	);
+	const security = buildSeedPayload({
+		fs,
+		categories: ["community-health"],
+		repository: "Quantum-L9/example",
+	})["SECURITY.md"];
+	assert.match(
+		security,
+		/https:\/\/github\.com\/Quantum-L9\/example\/security\/advisories\/new/,
+	);
+	assert.doesNotMatch(
+		security,
+		/Quantum-L9\/\.github\/security\/advisories\/new/,
+	);
 
-  const cfg = buildSeedPayload({
-    fs,
-    categories: ['issue-templates'],
-    repository: 'Quantum-L9/example',
-  })['.github/ISSUE_TEMPLATE/config.yml'];
-  assert.match(cfg, /https:\/\/github\.com\/Quantum-L9\/example\/security\/advisories\/new/);
+	const cfg = buildSeedPayload({
+		fs,
+		categories: ["issue-templates"],
+		repository: "Quantum-L9/example",
+	})[".github/ISSUE_TEMPLATE/config.yml"];
+	assert.match(
+		cfg,
+		/https:\/\/github\.com\/Quantum-L9\/example\/security\/advisories\/new/,
+	);
 
-  // The default payload's dependabot.yml is the github-actions-only golden,
-  // byte for byte; ops/test-render-dependabot.js covers every other shape.
-  const dependabot = defaultPayload['.github/dependabot.yml'];
-  assert.strictEqual(dependabot, fs.readFileSync('ops/fixtures/dependabot/actions-only/expected.yml', 'utf8'));
-  assert.match(dependabot, /open-pull-requests-limit: 2/);
-  assert.doesNotMatch(dependabot, /package-ecosystem: (pip|uv|pre-commit)/);
-  assert.doesNotMatch(dependabot, /labels:/);
-  // No shape, no render: never a silent github-actions-only default.
-  for (const repoShape of [undefined, null]) {
-    assert.throws(
-      () => buildSeedPayload({ fs, categories: ['dependabot'], repoShape }),
-      /seed category dependabot requires repoShape/,
-    );
-  }
-  assert.throws(() => buildSeedPayload({ fs, categories: 'all' }), /requires repoShape/);
-  // A category set without dependabot needs no shape.
-  assert.doesNotThrow(() => buildSeedPayload({ fs, categories: ['codeowners'] }));
+	// The default payload's dependabot.yml is the github-actions-only golden,
+	// byte for byte; ops/test-render-dependabot.js covers every other shape.
+	const dependabot = defaultPayload[".github/dependabot.yml"];
+	assert.strictEqual(
+		dependabot,
+		fs.readFileSync(
+			"ops/fixtures/dependabot/actions-only/expected.yml",
+			"utf8",
+		),
+	);
+	assert.match(dependabot, /open-pull-requests-limit: 2/);
+	assert.doesNotMatch(dependabot, /package-ecosystem: (pip|uv|pre-commit)/);
+	assert.doesNotMatch(dependabot, /labels:/);
+	// No shape, no render: never a silent github-actions-only default.
+	for (const repoShape of [undefined, null]) {
+		assert.throws(
+			() => buildSeedPayload({ fs, categories: ["dependabot"], repoShape }),
+			/seed category dependabot requires repoShape/,
+		);
+	}
+	assert.throws(
+		() => buildSeedPayload({ fs, categories: "all" }),
+		/requires repoShape/,
+	);
+	// A category set without dependabot needs no shape.
+	assert.doesNotThrow(() =>
+		buildSeedPayload({ fs, categories: ["codeowners"] }),
+	);
 
-  const codeowners = defaultPayload['.github/CODEOWNERS'];
-  assert.doesNotMatch(codeowners, /^\*\s+@Quantum-L9\/platform\s*$/m);
-  assert.match(codeowners, /\/\.github\//);
-  assert.match(codeowners, /SECURITY\.md/);
+	const codeowners = defaultPayload[".github/CODEOWNERS"];
+	assert.doesNotMatch(codeowners, /^\*\s+@Quantum-L9\/platform\s*$/m);
+	assert.match(codeowners, /\/\.github\//);
+	assert.match(codeowners, /SECURITY\.md/);
 
-  const caller = defaultPayload['.github/workflows/governance.yml'];
-  assert.match(caller, /permissions:\n\s+contents: read\n\s+pull-requests: write/);
-  assert.match(caller, /permissions:\n\s+contents: read\n\s+issues: write/);
-  assert.doesNotMatch(caller, /^\s+secrets:\s*inherit\s*$/m);
+	const caller = defaultPayload[".github/workflows/governance.yml"];
+	assert.match(
+		caller,
+		/permissions:\n\s+contents: read\n\s+pull-requests: write/,
+	);
+	assert.match(caller, /permissions:\n\s+contents: read\n\s+issues: write/);
+	assert.doesNotMatch(caller, /^\s+secrets:\s*inherit\s*$/m);
 
-  assert.ok(!defaultPayload['.github/PULL_REQUEST_TEMPLATE/agent.md']);
-  assert.ok(!defaultPayload['.github/ISSUE_TEMPLATE/EXAMPLE.md']);
-  assert.ok(defaultPayload['.github/pull_request_template.md']);
-  assert.ok(defaultPayload['.github/ISSUE_TEMPLATE/1-bug.yml']);
-  assert.ok(defaultPayload['.github/ISSUE_TEMPLATE/2-feature.yml']);
+	assert.ok(!defaultPayload[".github/PULL_REQUEST_TEMPLATE/agent.md"]);
+	assert.ok(!defaultPayload[".github/ISSUE_TEMPLATE/EXAMPLE.md"]);
+	assert.ok(defaultPayload[".github/pull_request_template.md"]);
+	assert.ok(defaultPayload[".github/ISSUE_TEMPLATE/1-bug.yml"]);
+	assert.ok(defaultPayload[".github/ISSUE_TEMPLATE/2-feature.yml"]);
 
-  // An existing file is left alone. Canonical CI is l9-ci-core
-  // `.github/workflows/org-ci.yml`, not a file this seeder writes.
-  const ciCaller = '.github/workflows/l9-lint-test-node.yml';
-  const keptPlan = selectSeedWrites(
-    { [ciCaller]: 'name: copied caller\n', 'biome.json': '{"$schema":"pack"}\n' },
-    { [ciCaller]: 'name: already there\n', 'biome.json': '{"$schema":"other"}' },
-  );
-  assert.deepStrictEqual(keptPlan.writes, []);
-  assert.deepStrictEqual(keptPlan.replaced, []);
-  assert.deepStrictEqual(keptPlan.kept, [ciCaller, 'biome.json']);
-  const missingPlan = selectSeedWrites({ 'README.md': 'x' }, { 'README.md': null });
-  assert.deepStrictEqual(missingPlan.writes, ['README.md']);
+	// An existing file is left alone. Canonical CI is l9-ci-core
+	// `.github/workflows/org-ci.yml`, not a file this seeder writes.
+	const ciCaller = ".github/workflows/l9-lint-test-node.yml";
+	const keptPlan = selectSeedWrites(
+		{
+			[ciCaller]: "name: copied caller\n",
+			"biome.json": '{"$schema":"pack"}\n',
+		},
+		{
+			[ciCaller]: "name: already there\n",
+			"biome.json": '{"$schema":"other"}',
+		},
+	);
+	assert.deepStrictEqual(keptPlan.writes, []);
+	assert.deepStrictEqual(keptPlan.replaced, []);
+	assert.deepStrictEqual(keptPlan.kept, [ciCaller, "biome.json"]);
+	const missingPlan = selectSeedWrites(
+		{ "README.md": "x" },
+		{ "README.md": null },
+	);
+	assert.deepStrictEqual(missingPlan.writes, ["README.md"]);
 
-  // Managed: CODEOWNERS (org bytes) and the rendered dependabot.yml (ADR 0019)
-  // are replaced when they differ; an equal one is kept; other files stay
-  // missing-only even when they differ.
-  const DEP = '.github/dependabot.yml';
-  const OWN = '.github/CODEOWNERS';
-  assert.deepStrictEqual(MANAGED_SEED_PATHS, [OWN, DEP]);
-  const ownDrift = selectSeedWrites(
-    { [OWN]: 'org owners\n', 'SECURITY.md': 'org\n' },
-    { [OWN]: '* @old-owner\n', 'SECURITY.md': 'local\n' },
-    { managed: MANAGED_SEED_PATHS },
-  );
-  assert.deepStrictEqual(ownDrift, { writes: [OWN], replaced: [OWN], kept: ['SECURITY.md'] },
-    'an older .github/CODEOWNERS is replaced with the org version');
-  const drift = selectSeedWrites(
-    { [DEP]: 'rendered\n', 'SECURITY.md': 'org\n' },
-    { [DEP]: 'hand-written\n', 'SECURITY.md': 'local\n' },
-    { managed: MANAGED_SEED_PATHS },
-  );
-  assert.deepStrictEqual(drift, { writes: [DEP], replaced: [DEP], kept: ['SECURITY.md'] });
-  const equal = selectSeedWrites({ [DEP]: 'rendered\n' }, { [DEP]: 'rendered\n' }, { managed: MANAGED_SEED_PATHS });
-  assert.deepStrictEqual(equal, { writes: [], replaced: [], kept: [DEP] });
-  const unmanaged = selectSeedWrites({ [DEP]: 'rendered\n' }, { [DEP]: 'hand-written\n' });
-  assert.deepStrictEqual(unmanaged.replaced, [], 'without managed paths the planner stays missing-only');
-  assert.throws(
-    () => selectSeedWrites({ [DEP]: 'rendered\n' }, { [DEP]: true }, { managed: MANAGED_SEED_PATHS }),
-    /current text is required/,
-  );
-  assert.ok(
-    !('.vscode/extensions.json' in defaultPayload),
-    'editor recommendations are no longer seeded into consumer repositories',
-  );
+	// Managed: CODEOWNERS (org bytes) and the rendered dependabot.yml (ADR 0019)
+	// are replaced when they differ; an equal one is kept; other files stay
+	// missing-only even when they differ.
+	const DEP = ".github/dependabot.yml";
+	const OWN = ".github/CODEOWNERS";
+	assert.deepStrictEqual(MANAGED_SEED_PATHS, [OWN, DEP]);
+	const ownDrift = selectSeedWrites(
+		{ [OWN]: "org owners\n", "SECURITY.md": "org\n" },
+		{ [OWN]: "* @old-owner\n", "SECURITY.md": "local\n" },
+		{ managed: MANAGED_SEED_PATHS },
+	);
+	assert.deepStrictEqual(
+		ownDrift,
+		{ writes: [OWN], replaced: [OWN], kept: ["SECURITY.md"] },
+		"an older .github/CODEOWNERS is replaced with the org version",
+	);
+	const drift = selectSeedWrites(
+		{ [DEP]: "rendered\n", "SECURITY.md": "org\n" },
+		{ [DEP]: "hand-written\n", "SECURITY.md": "local\n" },
+		{ managed: MANAGED_SEED_PATHS },
+	);
+	assert.deepStrictEqual(drift, {
+		writes: [DEP],
+		replaced: [DEP],
+		kept: ["SECURITY.md"],
+	});
+	const equal = selectSeedWrites(
+		{ [DEP]: "rendered\n" },
+		{ [DEP]: "rendered\n" },
+		{ managed: MANAGED_SEED_PATHS },
+	);
+	assert.deepStrictEqual(equal, { writes: [], replaced: [], kept: [DEP] });
+	const unmanaged = selectSeedWrites(
+		{ [DEP]: "rendered\n" },
+		{ [DEP]: "hand-written\n" },
+	);
+	assert.deepStrictEqual(
+		unmanaged.replaced,
+		[],
+		"without managed paths the planner stays missing-only",
+	);
+	assert.throws(
+		() =>
+			selectSeedWrites(
+				{ [DEP]: "rendered\n" },
+				{ [DEP]: true },
+				{ managed: MANAGED_SEED_PATHS },
+			),
+		/current text is required/,
+	);
+	assert.ok(
+		!(".vscode/extensions.json" in defaultPayload),
+		"editor recommendations are no longer seeded into consumer repositories",
+	);
 
-  // ── Required sources (G1): a named source that is gone fails the build ────
-  // An fs view over this checkout that hides some paths and adds others, so
-  // the real fixtures are never touched.
-  const enoent = (p) => errorWith(new Error(`ENOENT: no such file, open '${p}'`), 'code', 'ENOENT');
-  const fsWith = ({ hide = [], add = {} } = {}) => ({
-    ...fs,
-    existsSync: (p) => (p in add) || (!hide.includes(p) && fs.existsSync(p)),
-    statSync: (p) => ((p in add) ? { isFile: () => true } : fs.statSync(p)),
-    readFileSync: (p, enc) => {
-      if (p in add) return add[p];
-      if (hide.includes(p)) throw enoent(p);
-      return fs.readFileSync(p, enc);
-    },
-    readdirSync: (p) => {
-      const extra = Object.keys(add).filter((a) => a.startsWith(`${p}/`)).map((a) => a.slice(p.length + 1));
-      return [...fs.readdirSync(p).filter((n) => !hide.includes(`${p}/${n}`)), ...extra];
-    },
-  });
+	// ── Required sources (G1): a named source that is gone fails the build ────
+	// An fs view over this checkout that hides some paths and adds others, so
+	// the real fixtures are never touched.
+	const enoent = (p) =>
+		errorWith(new Error(`ENOENT: no such file, open '${p}'`), "code", "ENOENT");
+	const fsWith = ({ hide = [], add = {} } = {}) => ({
+		...fs,
+		existsSync: (p) => p in add || (!hide.includes(p) && fs.existsSync(p)),
+		statSync: (p) => (p in add ? { isFile: () => true } : fs.statSync(p)),
+		readFileSync: (p, enc) => {
+			if (p in add) return add[p];
+			if (hide.includes(p)) throw enoent(p);
+			return fs.readFileSync(p, enc);
+		},
+		readdirSync: (p) => {
+			const extra = Object.keys(add)
+				.filter((a) => a.startsWith(`${p}/`))
+				.map((a) => a.slice(p.length + 1));
+			return [
+				...fs.readdirSync(p).filter((n) => !hide.includes(`${p}/${n}`)),
+				...extra,
+			];
+		},
+	});
 
-  // V01: the named release template is missing.
-  assert.throws(
-    () => buildSeedPayload({ fs: fsWith({ hide: ['.github/PULL_REQUEST_TEMPLATE/release.md'] }), categories: 'all', repoShape: ACTIONS_ONLY }),
-    /seed source \.github\/PULL_REQUEST_TEMPLATE\/release\.md is missing/,
-    'a missing named PR template must fail the build, not shrink the payload',
-  );
-  // Every activated category's sources are required, not only templates.
-  for (const [cat, src] of [
-    ['codeowners', 'policies/CODEOWNERS'],
-    ['dependabot', 'policies/dependabot/header.yml.tpl'],
-    ['dependabot', 'policies/dependabot/base-actions.yml.tpl'],
-    ['dependabot', 'policies/dependabot/core-owned-tools.source.json'],
-    ['dependabot', 'policies/vendor/l9-ci-core/core-owned-tools.json'],
-    ['governance', 'policies/governance-caller.yml'],
-    ['community-health', 'SECURITY.md'],
-    ['labels', '.github/labels.yml'],
-  ]) {
-    assert.throws(
-      () => buildSeedPayload({ fs: fsWith({ hide: [src] }), categories: [cat], repoShape: ACTIONS_ONLY }),
-      (err) => err.message.includes(`seed source ${src} is missing`),
-      `${cat}: a missing source must throw`,
-    );
-  }
-  // A category not requested does not need its source.
-  assert.doesNotThrow(() => buildSeedPayload({ fs: fsWith({ hide: ['.github/labels.yml'] }), categories: 'all', repoShape: ACTIONS_ONLY }));
+	// V01: the named release template is missing.
+	assert.throws(
+		() =>
+			buildSeedPayload({
+				fs: fsWith({ hide: [".github/PULL_REQUEST_TEMPLATE/release.md"] }),
+				categories: "all",
+				repoShape: ACTIONS_ONLY,
+			}),
+		/seed source \.github\/PULL_REQUEST_TEMPLATE\/release\.md is missing/,
+		"a missing named PR template must fail the build, not shrink the payload",
+	);
+	// Every activated category's sources are required, not only templates.
+	for (const [cat, src] of [
+		["codeowners", "policies/CODEOWNERS"],
+		["dependabot", "policies/dependabot/header.yml.tpl"],
+		["dependabot", "policies/dependabot/base-actions.yml.tpl"],
+		["dependabot", "policies/dependabot/core-owned-tools.source.json"],
+		["dependabot", "policies/vendor/l9-ci-core/core-owned-tools.json"],
+		["governance", "policies/governance-caller.yml"],
+		["community-health", "SECURITY.md"],
+		["labels", ".github/labels.yml"],
+	]) {
+		assert.throws(
+			() =>
+				buildSeedPayload({
+					fs: fsWith({ hide: [src] }),
+					categories: [cat],
+					repoShape: ACTIONS_ONLY,
+				}),
+			(err) => err.message.includes(`seed source ${src} is missing`),
+			`${cat}: a missing source must throw`,
+		);
+	}
+	// A category not requested does not need its source.
+	assert.doesNotThrow(() =>
+		buildSeedPayload({
+			fs: fsWith({ hide: [".github/labels.yml"] }),
+			categories: "all",
+			repoShape: ACTIONS_ONLY,
+		}),
+	);
 
-  // V02: a required issue form is missing → throws; an unnamed new form is
-  // never swept into the payload.
-  assert.throws(
-    () => buildSeedPayload({ fs: fsWith({ hide: ['.github/ISSUE_TEMPLATE/3-task.yml'] }), categories: ['issue-templates'] }),
-    /seed source \.github\/ISSUE_TEMPLATE\/3-task\.yml is missing/,
-  );
-  const withNewForm = buildSeedPayload({
-    fs: fsWith({ add: { '.github/ISSUE_TEMPLATE/9-new.yml': 'name: new\n' } }),
-    categories: ['issue-templates'],
-  });
-  assert.ok(!('.github/ISSUE_TEMPLATE/9-new.yml' in withNewForm), 'an unnamed issue form must not be distributed');
-  assert.deepStrictEqual(Object.keys(withNewForm).sort(byName), [...ISSUE_TEMPLATES_MATERIALIZED].sort(byName));
-  assert.strictEqual(ISSUE_TEMPLATES_MATERIALIZED.length, 7);
+	// V02: a required issue form is missing → throws; an unnamed new form is
+	// never swept into the payload.
+	assert.throws(
+		() =>
+			buildSeedPayload({
+				fs: fsWith({ hide: [".github/ISSUE_TEMPLATE/3-task.yml"] }),
+				categories: ["issue-templates"],
+			}),
+		/seed source \.github\/ISSUE_TEMPLATE\/3-task\.yml is missing/,
+	);
+	const withNewForm = buildSeedPayload({
+		fs: fsWith({ add: { ".github/ISSUE_TEMPLATE/9-new.yml": "name: new\n" } }),
+		categories: ["issue-templates"],
+	});
+	assert.ok(
+		!(".github/ISSUE_TEMPLATE/9-new.yml" in withNewForm),
+		"an unnamed issue form must not be distributed",
+	);
+	assert.deepStrictEqual(
+		Object.keys(withNewForm).sort(byName),
+		[...ISSUE_TEMPLATES_MATERIALIZED].sort(byName),
+	);
+	assert.strictEqual(ISSUE_TEMPLATES_MATERIALIZED.length, 7);
 
-  // Exact class payload sizes (13 / 4 / 1: self_governed carries only CODEOWNERS).
-  const classes = loadRepoClasses(fs);
-  const sizes = Object.fromEntries(['default', 'non_constellation_python', 'self_governed'].map((c) => [
-    c, Object.keys(buildSeedPayload({ fs, profile: resolveProfile(classes, c), repoShape: ACTIONS_ONLY })).length,
-  ]));
-  assert.deepStrictEqual(sizes, { default: 13, non_constellation_python: 4, self_governed: 1 });
+	// Exact class payload sizes (13 / 4 / 1: self_governed carries only CODEOWNERS).
+	const classes = loadRepoClasses(fs);
+	const sizes = Object.fromEntries(
+		["default", "non_constellation_python", "self_governed"].map((c) => [
+			c,
+			Object.keys(
+				buildSeedPayload({
+					fs,
+					profile: resolveProfile(classes, c),
+					repoShape: ACTIONS_ONLY,
+				}),
+			).length,
+		]),
+	);
+	assert.deepStrictEqual(sizes, {
+		default: 13,
+		non_constellation_python: 4,
+		self_governed: 1,
+	});
 
-  // classSeedPaths: every path a class may seed, independent of the run's
-  // subset and of the root shape (the branch gate's unsigned-commit proof).
-  for (const c of ['default', 'non_constellation_python', 'self_governed']) {
-    const profile = resolveProfile(classes, c);
-    const full = Object.keys(buildSeedPayload({ fs, profile, repoShape: ACTIONS_ONLY })).sort(byName);
-    assert.deepStrictEqual(classSeedPaths({ fs, profile }), full, `${c}: class seed paths equal the full class payload`);
-  }
-  {
-    const profile = resolveProfile(classes, 'default');
-    const narrow = Object.keys(buildSeedPayload({ fs, profile, categories: ['codeowners'] }));
-    const all = classSeedPaths({ fs, profile });
-    assert.ok(narrow.every((p) => all.includes(p)) && all.length > narrow.length,
-      'a narrower explicit run must still allow the paths a broader run seeded');
-    assert.ok(all.includes('.github/CODEOWNERS'), 'CODEOWNERS is a seed path of the default class');
-    assert.throws(() => classSeedPaths({ fs }), TypeError);
-  }
+	// classSeedPaths: every path a class may seed, independent of the run's
+	// subset and of the root shape (the branch gate's unsigned-commit proof).
+	for (const c of ["default", "non_constellation_python", "self_governed"]) {
+		const profile = resolveProfile(classes, c);
+		const full = Object.keys(
+			buildSeedPayload({ fs, profile, repoShape: ACTIONS_ONLY }),
+		).sort(byName);
+		assert.deepStrictEqual(
+			classSeedPaths({ fs, profile }),
+			full,
+			`${c}: class seed paths equal the full class payload`,
+		);
+	}
+	{
+		const profile = resolveProfile(classes, "default");
+		const narrow = Object.keys(
+			buildSeedPayload({ fs, profile, categories: ["codeowners"] }),
+		);
+		const all = classSeedPaths({ fs, profile });
+		assert.ok(
+			narrow.every((p) => all.includes(p)) && all.length > narrow.length,
+			"a narrower explicit run must still allow the paths a broader run seeded",
+		);
+		assert.ok(
+			all.includes(".github/CODEOWNERS"),
+			"CODEOWNERS is a seed path of the default class",
+		);
+		assert.throws(() => classSeedPaths({ fs }), TypeError);
+	}
 
-  // V21: every eligible file already present → nothing to write.
-  const present = Object.fromEntries(Object.keys(defaultPayload).map((p) => [p, true]));
-  assert.deepStrictEqual(selectSeedWrites(defaultPayload, present).writes, []);
+	// V21: every eligible file already present → nothing to write.
+	const present = Object.fromEntries(
+		Object.keys(defaultPayload).map((p) => [p, true]),
+	);
+	assert.deepStrictEqual(selectSeedWrites(defaultPayload, present).writes, []);
 
-  // V24: an explicit category the class forbids throws, naming class and path.
-  assert.throws(
-    () => buildSeedPayload({ fs, categories: ['governance'], profile: resolveProfile(classes, 'non_constellation_python') }),
-    /violates repo class non_constellation_python: \.github\/workflows\/governance\.yml/,
-  );
+	// V24: an explicit category the class forbids throws, naming class and path.
+	assert.throws(
+		() =>
+			buildSeedPayload({
+				fs,
+				categories: ["governance"],
+				profile: resolveProfile(classes, "non_constellation_python"),
+			}),
+		/violates repo class non_constellation_python: \.github\/workflows\/governance\.yml/,
+	);
 
-  console.log('ok: default payload materializes SECURITY.md, ownership, governance caller, issue + PR templates');
-  console.log('ok: default payload omits INHERIT surfaces (CoC/CONTRIBUTING/SUPPORT/FUNDING/VULNERABILITY_REPORT), LICENSE, labels, retired CI, infra.md');
-  console.log('ok: community-health is SECURITY.md alone; release.md is materialized by pr-templates');
-  console.log('ok: Python lint dest is not seeded');
-  console.log('ok: existing files are left untouched');
+	console.log(
+		"ok: default payload materializes SECURITY.md, ownership, governance caller, issue + PR templates",
+	);
+	console.log(
+		"ok: default payload omits INHERIT surfaces (CoC/CONTRIBUTING/SUPPORT/FUNDING/VULNERABILITY_REPORT), LICENSE, labels, retired CI, infra.md",
+	);
+	console.log(
+		"ok: community-health is SECURITY.md alone; release.md is materialized by pr-templates",
+	);
+	console.log("ok: Python lint dest is not seeded");
+	console.log("ok: existing files are left untouched");
 } finally {
-  process.chdir(origCwd);
+	process.chdir(origCwd);
 }

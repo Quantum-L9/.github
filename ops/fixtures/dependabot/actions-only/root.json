@@ -1,6 +1,3 @@
 {
-  "names": [
-    "README.md",
-    "Makefile"
-  ]
+	"names": ["README.md", "Makefile"]
 }

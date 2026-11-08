@@ -65,11 +65,42 @@ class CanonicalBoundaryTests(unittest.TestCase):
             "exact_compatible_canonical_authority_coordinates",
         ):
             self.assertEqual(req.count(predicate), 1)
-        self.assertEqual(len(req), 16)
+        self.assertEqual(len(req), 14)
         self.assertIn(
             "claiming_sv_contract_is_admitted_because_a_candidate_is_open_or_candidate_schemas_pass",
             self.sv["forbidden"],
         )
+
+    def test_dependent_contract_reuses_sv_obligations_by_reference(self):
+        """SV assessment obligations are cited, never restated (ADR-029 alignment)."""
+        self.assertIn(
+            "every_requires_entry_of_l9_contract_strategic_value_assessment_at_1_satisfied_by_reference_for_the_one_canonical_sv_claim",
+            self.sv["requires"],
+        )
+        self.assertIn(
+            "every_forbidden_entry_of_l9_contract_strategic_value_assessment_at_1_respected_by_reference",
+            self.sv["forbidden"] + self.sv["requires"],
+        )
+        self.assertIn(
+            "restating_paraphrasing_or_weakening_sv_assessment_contract_obligations_in_gt_contracts",
+            self.sv["forbidden"],
+        )
+        self.assertIn(
+            "sv_five_bucket_partition_and_counterfactual_method_are_reused_by_reference_not_redefined",
+            self.sv["guarantees"],
+        )
+        # Paraphrases of SV-001/015 (counterfactual identification), SV-016
+        # (welfare aggregation), SV-017 (nonanticipativity), SV-002/018 (once-only
+        # weighting) and SV-019 (preference reversal) must not reappear here.
+        text = json.dumps(self.sv)
+        for paraphrase in (
+            "welfare_aggregation",
+            "nonanticipative",
+            "weighted_once",
+            "reversible_preference",
+            "causal_identification",
+        ):
+            self.assertNotIn(paraphrase, text, paraphrase)
 
     def test_gt_only_independent_of_sv(self):
         self.assertEqual(self.c["id"], "l9.contract/strategic-interaction-assessment@1")
