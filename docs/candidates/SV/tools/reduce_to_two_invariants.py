@@ -96,6 +96,25 @@ def load_donor():
     return donor
 
 
+def require_backed_decision(row, decision):
+    """A pending row carries no decision; an approved row must cite the approved record."""
+    status, ref = row["owner_decision_status"], row["owner_decision_ref"]
+    if status == "pending" and ref is None:
+        return
+    backed = (
+        status == "approved"
+        and ref == OWNER_DECISION_REF
+        and decision.get("decision_status") == "OWNER_APPROVED_NOT_ADMITTED"
+        and decision["approved_dispositions"].get(row["candidate_id"])
+        == row["disposition"]
+    )
+    if not backed:
+        raise ValueError(
+            f"{row['candidate_id']}: owner decision {status}/{ref} is not backed by an "
+            "approved owner-decision record for this disposition"
+        )
+
+
 def load_ledger():
     ledger = yaml.safe_load(LEDGER.read_text(encoding="utf-8"))
     ids = [row["candidate_id"] for row in ledger["dispositions"]]
@@ -115,23 +134,8 @@ def load_ledger():
             "ledger selection must be the two kept IDs plus the ten existing IDs"
         )
     decision = yaml.safe_load(OWNER_DECISION.read_text(encoding="utf-8"))
-    approved = decision.get("decision_status") == "OWNER_APPROVED_NOT_ADMITTED"
     for row in ledger["dispositions"]:
-        status, ref = row["owner_decision_status"], row["owner_decision_ref"]
-        if status == "pending" and ref is None:
-            continue
-        # An approved row must cite the approved owner-decision record for the same disposition.
-        if not (
-            status == "approved"
-            and ref == OWNER_DECISION_REF
-            and approved
-            and decision["approved_dispositions"].get(row["candidate_id"])
-            == row["disposition"]
-        ):
-            raise ValueError(
-                f"{row['candidate_id']}: owner decision {status}/{ref} is not backed by an "
-                "approved owner-decision record for this disposition"
-            )
+        require_backed_decision(row, decision)
         for ref in row["governing_invariant_refs"]:
             if ref not in selected:
                 raise ValueError(

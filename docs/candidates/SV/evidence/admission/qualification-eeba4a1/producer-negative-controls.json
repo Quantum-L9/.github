@@ -1,6 +1,6 @@
 {
 	"schema": "l9.sv-reduction-producer-negative-controls/v1",
-	"rehearsal_authority_revision": "7d9ca4757722894aa5ef2a21a4190f9e8dd98c3d",
+	"rehearsal_authority_revision": "eeba4a152268d929dcc191da5f4eacdee22d2fcd",
 	"compiler_revision": "33e4c5832bf73c7d9b0b70854af011e9582f1ab2",
 	"all_mechanisms_matched": true,
 	"controls": [

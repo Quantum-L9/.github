@@ -15,8 +15,8 @@
 | --- | --- |
 | Admission branch / PR | `Quantum-L9/.github` `agent/claude-code/sv-admission` — Quantum-L9/.github#222 (targets `main`; merge after #218, #219) |
 | Admission base (fetched `origin/main`) | `9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88` |
-| Semantic change commit | `f589e10` (overlay applied by `apply_to_pinned_checkout.py`, RC-033) |
-| **Qualified candidate revision** | `7d9ca4757722894aa5ef2a21a4190f9e8dd98c3d` |
+| Semantic change commits | `f589e10` (overlay applied by `apply_to_pinned_checkout.py`, RC-033), `7d9ca47` (release record), `eeba4a1` (RC-033 split into helpers for SonarCloud S3776; behavior unchanged). Evidence first produced at `7d9ca47` was regenerated at `eeba4a1` with identical results. |
+| **Qualified candidate revision** | `eeba4a152268d929dcc191da5f4eacdee22d2fcd` |
 | `semantics/` tree at that revision | `de6d21719ecc4ca8ccb8bf2f769ddb344413b904` |
 | Release candidate / ADR (provisional) | `v3.32.0` / `ADR-029`, selected by `tools/prepare_successor_release.py` from merged state (`v3.30.0` / `ADR-027`) skipping queued claims of #218 and #219 |
 | Producer | Quantum-L9/l9-semantic-compiler-engine#33, `agent/claude-code/required-provenance-criteria` at `33e4c5832bf73c7d9b0b70854af011e9582f1ab2` (base `18215ae`, version label 0.9.3) |
@@ -31,7 +31,7 @@
 - **D4.** An independent successor release, numbered from merged state by the tool and never typed in. Predecessor releases are byte-identical (checked by the tool and SC-008).
 - **D5.** Merge order: v3.29.0 admission, #218 (v3.30.0), #219 (v3.31.0), then SV, then GT core (#216), then the GT+SV dependent contract.
 
-## Qualification at `7d9ca47` with compiler `33e4c58` (`qualification-7d9ca47/`)
+## Qualification at `eeba4a1` with compiler `33e4c58` (`qualification-eeba4a1/`)
 
 | Check | Result |
 | --- | --- |
@@ -53,7 +53,7 @@ Residual (not provenance): `l9.compose/stage-context@1` over the GAR projection 
 | # | Item | State |
 | --- | --- | --- |
 | 1 | Composition provenance native criterion resolved | **DONE** (R2: catalog declaration + compiler criteria + RC-033) |
-| 2 | Real composition receipt reports PASS | **DONE** at `7d9ca47` |
+| 2 | Real composition receipt reports PASS | **DONE** at `eeba4a1` |
 | 3 | SV-001 final wording approved and frozen | **DONE** (D1 Option B) |
 | 4 | Eight dispositions authorized at exact digest | **APPROVED** (owner-decision.yaml; ADR-029 binds the final tree) |
 | 5 | PR #215 merged into its staging branch | PENDING review (#220 stacks on it) |

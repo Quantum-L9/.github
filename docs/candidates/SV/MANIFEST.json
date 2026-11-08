@@ -32,7 +32,7 @@
 	"independent_review": "SEPARATE_AGENT_REVIEW_NOT_HUMAN_OR_OWNER",
 	"native_schema_qualification": "PASS_26_CHECKS_COMPILER_3bf1a82",
 	"five_source_compilation": "PASS_AGAINST_LOCAL_REHEARSAL_REVISION_0b50cf7_TREE_bb07371",
-	"composition": "PASS_AT_7d9ca47_WITH_COMPILER_33e4c58_R2",
+	"composition": "PASS_AT_eeba4a1_WITH_COMPILER_33e4c58_R2",
 	"native_semantic_validation": "ORDINARY_CHECKS_PASS_SC008_SC010_FAIL_SUCCESSOR_RELEASE_INVENTORY_REQUIRED",
 	"canonical_admission": "NOT_PERFORMED",
 	"remote_mutation": "candidate-pack PR only; no canonical semantics, release, merge or admission",
@@ -65,7 +65,7 @@
 		{
 			"path": "README.md",
 			"bytes": 12293,
-			"sha256": "b90a10d18a8c8011588c74b303d9eba9f445b0192403b011788fe27755d44fbb"
+			"sha256": "9b2f719efa21ae4fe38bfb861d77d732dd1d5b2ed02953613ee8ac4d01684fcb"
 		},
 		{
 			"path": "SCHEMA_QUALIFICATION_REVIEW.md",
@@ -74,8 +74,8 @@
 		},
 		{
 			"path": "apply_to_pinned_checkout.py",
-			"bytes": 29415,
-			"sha256": "ac3427379662a5cf302ac28aede18cd749d16bfcb68e1018da83884b868eccdc"
+			"bytes": 29587,
+			"sha256": "9d3fec93a69d50f5d202f67c72602e62c3a9e3531e35b4c8eddaa1044a4ea266"
 		},
 		{
 			"path": "evidence/SV015_falsification.json",
@@ -114,8 +114,8 @@
 		},
 		{
 			"path": "evidence/admission/ADMISSION_CLOSEOUT.md",
-			"bytes": 7648,
-			"sha256": "cf72a2ba979feb7c05fd14075ffd52b929015e741b6d2b2bdbcc636f0bb5af3c"
+			"bytes": 7848,
+			"sha256": "86eae2fc3a2f1a0baa02387f24cd336195acb711b4ccdfb963780c84186905f1"
 		},
 		{
 			"path": "evidence/admission/composition-provenance-equivalence.json",
@@ -125,47 +125,47 @@
 		{
 			"path": "evidence/admission/owner-decision.yaml",
 			"bytes": 6457,
-			"sha256": "61959bf1fc871be13fda94b1756058670d5d3ab8ccd35cd3f2c278dc39ab3489"
+			"sha256": "67140fbd82e0341e916fb817bfc94bf4947c6fe44ce6c26dd6ccb455eec1e33d"
 		},
 		{
-			"path": "evidence/admission/qualification-7d9ca47/admission-closure-gate.json",
+			"path": "evidence/admission/qualification-eeba4a1/admission-closure-gate.json",
 			"bytes": 3977,
-			"sha256": "e7eda2dc495ed10712d1a7bc4e1c7a68329f00b0244a238d09da313042ac0c1a"
+			"sha256": "d16e9c382aceb7ab9bc26c198f1517c65a51ab86f5ec7caacdf3cb7e129919e5"
 		},
 		{
-			"path": "evidence/admission/qualification-7d9ca47/determinism.json",
+			"path": "evidence/admission/qualification-eeba4a1/determinism.json",
 			"bytes": 7913,
-			"sha256": "d301a11addd6f8147e989dea33a205a3630b4dbe55bc35941223331f1de8f815"
+			"sha256": "a33edbcc9f82be9ed02e5fb422b91dcc41a245621aefe1b24bb1ed1e6c8fbf99"
 		},
 		{
-			"path": "evidence/admission/qualification-7d9ca47/native-schema-qualification.json",
+			"path": "evidence/admission/qualification-eeba4a1/native-schema-qualification.json",
 			"bytes": 5729,
 			"sha256": "20f7a60cb95009906bdad53e0a9f74d619bb6c92ca547a913930d96501a22c7a"
 		},
 		{
-			"path": "evidence/admission/qualification-7d9ca47/producer-negative-controls.json",
+			"path": "evidence/admission/qualification-eeba4a1/producer-negative-controls.json",
 			"bytes": 12703,
-			"sha256": "34642e3981ba663bbc941317553d4b318873a0c0f18cfb64f6492c1a70c620dd"
+			"sha256": "5b1c6d438683af5b9d94872226bc0441d18952cf600a7b7ee5a77dfa8c6f01f5"
 		},
 		{
-			"path": "evidence/admission/qualification-7d9ca47/producer-run1.tar",
+			"path": "evidence/admission/qualification-eeba4a1/producer-run1.tar",
 			"bytes": 522240,
-			"sha256": "ce0b9e899c363a56d80e7d621056e05c58a4296a1e2ca121ffe634169bd8b4a0"
+			"sha256": "d9ef524df2a9b1ae984e47232aebf43298cbd7340fa4c82c05491b078c86eadc"
 		},
 		{
-			"path": "evidence/admission/qualification-7d9ca47/producer-run2.tar",
+			"path": "evidence/admission/qualification-eeba4a1/producer-run2.tar",
 			"bytes": 522240,
-			"sha256": "4e9e23bbf05720542620649b4c5e0eef5cd3036cd1e0b9eaa7032563c0ccdefa"
+			"sha256": "c4ee1dd76be70ec33222a585687d5ed77fe88c0496b6212f87cb5d2b8b8d6208"
 		},
 		{
-			"path": "evidence/admission/qualification-7d9ca47/producer-summary.json",
+			"path": "evidence/admission/qualification-eeba4a1/producer-summary.json",
 			"bytes": 2325,
-			"sha256": "dd25451dbd9f3909b290be8f0704bde0a9de652ee0d0c0250798da91e42db9fd"
+			"sha256": "ed62bb280033061de09b64a9383e15834d34c3b24a67e3ec2a9984330329b23c"
 		},
 		{
-			"path": "evidence/admission/qualification-7d9ca47/provenance-verifier.json",
+			"path": "evidence/admission/qualification-eeba4a1/provenance-verifier.json",
 			"bytes": 2542,
-			"sha256": "62d22c9303687573377ce319e31539fcc9d4bc903b21f39114b9b3f356e18eeb"
+			"sha256": "415fa104ece61d1cb4a1242a1e22e0d64ecba3461f079048e2f76e775e97279d"
 		},
 		{
 			"path": "evidence/native_schema_gate.json",
@@ -190,7 +190,7 @@
 		{
 			"path": "evidence/reduction-v1/admission-readiness.json",
 			"bytes": 4491,
-			"sha256": "6d813eb38c85109c87b615efab92ad814479789206f53d4905ad1bccd2aac81c"
+			"sha256": "b63bd7666989f82a9ca75102c2f6a3de7e9dfc266a142aa56789e2f249425f9a"
 		},
 		{
 			"path": "evidence/reduction-v1/authority-resolution.json",
@@ -474,8 +474,8 @@
 		},
 		{
 			"path": "tests/test_candidate.py",
-			"bytes": 14521,
-			"sha256": "e70aac3f1ceae264f28678fd29fc29b0f5c524690280ea47bf896cf450d8e772"
+			"bytes": 14524,
+			"sha256": "f571bd0f31965f224b08116b28308ff8824538c0846daf58bee7c0491ca442ff"
 		},
 		{
 			"path": "tests/test_composition_provenance_equivalence.py",
@@ -519,8 +519,8 @@
 		},
 		{
 			"path": "tests/test_successor_release.py",
-			"bytes": 2302,
-			"sha256": "344071b39cd34ef1c3eae056d983010ac5710cd7136d1e5eb24d32aaaff0bc82"
+			"bytes": 2322,
+			"sha256": "efdc8f25e831eee9506acb3c72005da0186dc912eceb4d921c72646e81dcdc91"
 		},
 		{
 			"path": "tests/verify_composition_provenance.py",
@@ -529,13 +529,13 @@
 		},
 		{
 			"path": "tools/prepare_successor_release.py",
-			"bytes": 22076,
-			"sha256": "76ca28b7c05ed754af89c2d195fe2d1fb503ca7b9796bbbc64db958b6f7408af"
+			"bytes": 22126,
+			"sha256": "276b4dc36477ee4f93e33b9a59bffbd23acff790fc9b80ea7e4481e15f8e288a"
 		},
 		{
 			"path": "tools/reduce_to_two_invariants.py",
-			"bytes": 14943,
-			"sha256": "570e66a0ea87d7964ad6f49f22a66f347b2911f631a7678efbf82b928dce16cb"
+			"bytes": 14969,
+			"sha256": "c950736d91a5e30ee914a9fea571a80628f6f1243313cd2f5a4e62e4a8a52911"
 		},
 		{
 			"path": "tools/run_producer_qualification.py",
@@ -571,11 +571,11 @@
 	"canonical_admission_candidate": {
 		"branch": "agent/claude-code/sv-admission",
 		"base": "9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88",
-		"revision": "7d9ca4757722894aa5ef2a21a4190f9e8dd98c3d",
+		"revision": "eeba4a152268d929dcc191da5f4eacdee22d2fcd",
 		"semantics_tree": "de6d21719ecc4ca8ccb8bf2f769ddb344413b904",
 		"release_provisional": "v3.32.0",
 		"adr_provisional": "ADR-029",
 		"producer_revision": "33e4c5832bf73c7d9b0b70854af011e9582f1ab2",
-		"evidence": "evidence/admission/qualification-7d9ca47/"
+		"evidence": "evidence/admission/qualification-eeba4a1/"
 	}
 }

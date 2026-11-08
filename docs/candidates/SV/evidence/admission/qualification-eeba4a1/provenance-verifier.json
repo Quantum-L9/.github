@@ -43,7 +43,7 @@
 		},
 		"receipt_binding": {
 			"authority_repository": "Quantum-L9/.github",
-			"authority_revision": "7d9ca4757722894aa5ef2a21a4190f9e8dd98c3d",
+			"authority_revision": "eeba4a152268d929dcc191da5f4eacdee22d2fcd",
 			"compiler_result": "pass",
 			"compiler_unresolved": [],
 			"errors": [],

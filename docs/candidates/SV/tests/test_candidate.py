@@ -148,7 +148,7 @@ class CandidateTests(unittest.TestCase):
                 for x in composer["profiles"]
                 if x["id"] == "l9.compose/strategic-planner-value@1"
             )
-            self.assertTrue(set(sv["required_provenance"]) <= set(definitions))
+            self.assertLessEqual(set(sv["required_provenance"]), set(definitions))
             self.assertIs(
                 composer["global_rules"][
                     "required_provenance_is_evaluated_only_through_declared_provenance_constraints"

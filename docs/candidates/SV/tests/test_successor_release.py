@@ -47,8 +47,9 @@ class Selection(unittest.TestCase):
         self.assertEqual(tool.select(merged, [])["adr"], "ADR-029")
 
     def test_malformed_queue_claim_is_refused(self):
+        root = checkout(["v3.29.0"], [1])
         with self.assertRaises(tool.Refused):
-            tool.select(checkout(["v3.29.0"], [1]), ["v3.30.0"])
+            tool.select(root, ["v3.30.0"])
 
     def test_adr_ranges_render_gaps_honestly(self):
         self.assertEqual(tool.adr_ranges([1, 2, 3]), "ADR-001 through ADR-003")

@@ -39,6 +39,8 @@ PACK = Path(__file__).resolve().parents[1]
 RELEASES = "docs/semantic-foundation"
 VERSION = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
 ADR_FILE = re.compile(r"^ADR-(\d{3})-.+\.md$")
+RELEASE_DOCS = ("MANIFEST.md", "README.md", "RELEASE_VALIDATION.md")
+ADR_INDEX = "README.md"
 ADR_SLUG = "strategic-value-foundation-and-composition-provenance-criteria"
 ADR_TITLE = (
     "Strategic Value Foundation and Catalog-Declared Composition Provenance Criteria"
@@ -233,14 +235,14 @@ See `docs/semantic-foundation/{sel["version"]}/RELEASE_VALIDATION.md` and the ca
 
 
 def update_adr_index(checkout: Path, sel: dict) -> None:
-    path = checkout / "docs" / "adr" / "README.md"
+    path = checkout / "docs" / "adr" / ADR_INDEX
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
     last = max(i for i, ln in enumerate(lines) if re.match(r"^- ADR-\d{3}: ", ln))
     lines.insert(last + 1, f"- {sel['adr']}: {ADR_TITLE}\n")
     text = "".join(lines)
     sentence = re.compile(
-        r"^ADR-001 through ADR-\d{3}(?:[^\n]*?)? are the global semantic decisions\.",
+        r"^ADR-001 through ADR-\d{3}[^\n]*? are the global semantic decisions\.",
         re.MULTILINE,
     )
     if len(sentence.findall(text)) != 1:
@@ -299,7 +301,7 @@ Immediate predecessor: `docs/semantic-foundation/{sel["predecessor"]}/`, preserv
 """,
         encoding="utf-8",
     )
-    (root / "README.md").write_text(
+    (root / RELEASE_DOCS[1]).write_text(
         f"""# Semantic Foundation {sel["version"]}
 
 Status: **ADDITIVE SUCCESSOR CANDIDATE**
@@ -369,9 +371,9 @@ def write_hashes(checkout: Path, version: str) -> None:
     for p in sorted((checkout / "docs" / "adr").glob("ADR-*.md")):
         lines.append((f"./docs/adr/{p.name}", sha256(p)))
     lines.append(
-        ("./docs/adr/README.md", sha256(checkout / "docs" / "adr" / "README.md"))
+        (f"./docs/adr/{ADR_INDEX}", sha256(checkout / "docs" / "adr" / ADR_INDEX))
     )
-    for name in ("MANIFEST.md", "README.md", "RELEASE_VALIDATION.md"):
+    for name in RELEASE_DOCS:
         lines.append((f"./{name}", sha256(root / name)))
     lines.sort(key=lambda item: item[0].encode("utf-8"))
     (root / "HASHES.sha256").write_text(

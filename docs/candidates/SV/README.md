@@ -100,7 +100,7 @@ Evidence lives in `evidence/reduction-v1/`; `admission-readiness.json` lists eve
 
 ## Admission candidate (2026-11-08)
 
-The owner approved D1-D5. The candidate is applied on `Quantum-L9/.github` branch `agent/claude-code/sv-admission` at `7d9ca4757722894aa5ef2a21a4190f9e8dd98c3d` (base `9488d8f`). It carries a provisional successor release, v3.32.0 / ADR-029, which `tools/prepare_successor_release.py` selected from merged state. It is qualified with `l9-semantic-compiler-engine@33e4c58`. Results: five projections PASS; composition PASS with all four `required_provenance` criteria verified; determinism and 18/18 producer controls pass; native validation exits 0. See `evidence/admission/ADMISSION_CLOSEOUT.md`. Not admitted: admission waits on the release queue (D5).
+The owner approved D1-D5. The candidate is applied on `Quantum-L9/.github` branch `agent/claude-code/sv-admission` at `eeba4a152268d929dcc191da5f4eacdee22d2fcd` (base `9488d8f`). It carries a provisional successor release, v3.32.0 / ADR-029, which `tools/prepare_successor_release.py` selected from merged state. It is qualified with `l9-semantic-compiler-engine@33e4c58`. Results: five projections PASS; composition PASS with all four `required_provenance` criteria verified; determinism and 18/18 producer controls pass; native validation exits 0. See `evidence/admission/ADMISSION_CLOSEOUT.md`. Not admitted: admission waits on the release queue (D5).
 
 ## Gates still requiring the authorized canonical owner
 
