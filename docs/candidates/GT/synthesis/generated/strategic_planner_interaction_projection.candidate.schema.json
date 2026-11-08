@@ -1,0 +1,295 @@
+{
+	"admission": "not_granted",
+	"canonical": false,
+	"dialect": {
+		"approval_status": "candidate",
+		"approval_status_basis": "document_declared_not_authenticated",
+		"digest": "sha256:4f92df3139085e6066b21bc0fd6a381a33fe4d398dd6160b8af19f2dfd215058",
+		"owner": "Quantum-L9/.github",
+		"owner_identity_basis": "caller_asserted_not_independently_verified",
+		"path": "docs/candidates/GT/synthesis/governance/dialect.yaml",
+		"ref": "l9.schema-dialect/candidate-v2@1",
+		"revision": "d8fbba57ba93cb0ea9ff7cf3d555d372f16295d2"
+	},
+	"document_kind": "projection_schema_candidate",
+	"schema_id": "l9.projection.strategic-planner-interaction/v1",
+	"source_shapes": [
+		{
+			"descriptor": {
+				"additional_properties": true,
+				"fields": {
+					"terms": {
+						"additional_properties": true,
+						"fields": {
+							"actor_response_model": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							},
+							"conditional_best_response": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							},
+							"deviation_gain": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							},
+							"equilibrium_assessment": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							},
+							"incentive_bearing_commitment": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							},
+							"incentive_compatibility": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							},
+							"information_disclosure_decision": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							},
+							"policy_exploitability": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							},
+							"strategic_game_model": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							},
+							"strategic_interaction": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							},
+							"strategic_interaction_assessment": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							},
+							"strategy_profile": {
+								"additional_properties": true,
+								"fields": {
+									"definition": { "type": "string" },
+									"semantic_class": { "type": "string" }
+								},
+								"required": ["semantic_class", "definition"],
+								"type": "object"
+							}
+						},
+						"required": [
+							"strategic_interaction",
+							"strategic_game_model",
+							"actor_response_model",
+							"strategy_profile",
+							"conditional_best_response",
+							"equilibrium_assessment",
+							"deviation_gain",
+							"incentive_bearing_commitment",
+							"information_disclosure_decision",
+							"policy_exploitability",
+							"incentive_compatibility",
+							"strategic_interaction_assessment"
+						],
+						"type": "object"
+					}
+				},
+				"type": "object"
+			},
+			"source_class": "vocabulary",
+			"source_ref": "l9.source/vocabulary@1"
+		},
+		{
+			"descriptor": {
+				"additional_properties": true,
+				"fields": {
+					"invariants": {
+						"items": {
+							"additional_properties": true,
+							"fields": {
+								"id": { "type": "string" },
+								"owner": { "const": "Quantum-L9/.github", "type": "string" },
+								"scope": { "type": "string" },
+								"severity": { "type": "string" },
+								"statement": { "type": "string" }
+							},
+							"required": ["id", "statement", "scope"],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object"
+			},
+			"source_class": "invariants",
+			"source_ref": "l9.source/invariants@1"
+		},
+		{
+			"descriptor": {
+				"additional_properties": true,
+				"fields": {
+					"contracts": {
+						"items": {
+							"additional_properties": true,
+							"fields": {
+								"applicability": {
+									"additional_properties": true,
+									"fields": {
+										"does_not_apply_to": {
+											"items": { "type": "string" },
+											"min_items": 1,
+											"type": "array"
+										},
+										"method_conditional": { "type": "string" },
+										"sv_dependency": { "type": "string" },
+										"trigger": { "type": "string" },
+										"unavailable_claim": { "type": "string" }
+									},
+									"required": ["trigger", "does_not_apply_to"],
+									"type": "object"
+								},
+								"applies_to": {
+									"items": { "type": "string" },
+									"min_items": 1,
+									"type": "array"
+								},
+								"forbidden": {
+									"items": { "type": "string" },
+									"min_items": 1,
+									"type": "array"
+								},
+								"guarantees": {
+									"items": { "type": "string" },
+									"min_items": 1,
+									"type": "array"
+								},
+								"id": { "type": "string" },
+								"outcomes": {
+									"additional_properties": true,
+									"fields": {
+										"admissible": { "type": "string" },
+										"admitted": { "type": "string" },
+										"ambiguous": { "type": "string" },
+										"attested": { "type": "string" },
+										"blocked": { "type": "string" },
+										"compatible": { "type": "string" },
+										"current": { "type": "string" },
+										"inadmissible": { "type": "string" },
+										"incompatible": { "type": "string" },
+										"invalid": { "type": "string" },
+										"invalid_binding": { "type": "string" },
+										"invalid_projection": { "type": "string" },
+										"invocable": { "type": "string" },
+										"new_candidate_required": { "type": "string" },
+										"new_decision_required": { "type": "string" },
+										"non_current": { "type": "string" },
+										"not_invocable": { "type": "string" },
+										"preserved": { "type": "string" },
+										"refused": { "type": "string" },
+										"rejected": { "type": "string" },
+										"resolved": { "type": "string" },
+										"satisfied": { "type": "string" },
+										"successor_required": { "type": "string" },
+										"supported": { "type": "string" },
+										"unknown": { "type": "string" },
+										"unresolved": { "type": "string" },
+										"unsat": { "type": "string" },
+										"unsupported": { "type": "string" },
+										"unverified": { "type": "string" },
+										"valid": { "type": "string" },
+										"valid_projection": { "type": "string" },
+										"violated": { "type": "string" }
+									},
+									"type": "object"
+								},
+								"owner": { "const": "Quantum-L9/.github", "type": "string" },
+								"purpose": { "type": "string" },
+								"requires": {
+									"items": { "type": "string" },
+									"min_items": 1,
+									"type": "array"
+								},
+								"scope": { "const": "global", "type": "string" },
+								"source_invariants": {
+									"items": { "type": "string" },
+									"min_items": 1,
+									"type": "array"
+								}
+							},
+							"required": [
+								"id",
+								"purpose",
+								"scope",
+								"owner",
+								"source_invariants",
+								"applies_to",
+								"requires",
+								"guarantees",
+								"forbidden",
+								"outcomes"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object"
+			},
+			"source_class": "contracts",
+			"source_ref": "l9.source/contracts@1"
+		}
+	]
+}

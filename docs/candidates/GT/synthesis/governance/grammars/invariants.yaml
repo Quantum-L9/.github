@@ -1,0 +1,44 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.grammar/strategic-planner-interaction-invariants-candidate@1
+owner: Quantum-L9/.github
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: invariants
+source_ref: l9.source/invariants@1
+source_path: semantics/invariants.yaml
+source_revision: 36cb17a474350e5a66a45f7a625ddd4fbe66ea20
+source_digest: sha256:877fe9f8e127ccee99dd37b42d0b6c214ddb12169703a6cecb8a4f3efa1f5b79
+applies_to_selectors:
+- $.invariants[?(@.id=="L9-GT-001")]
+- $.invariants[?(@.id=="L9-AUTH-002")]
+- $.invariants[?(@.id=="L9-HARD-001")]
+- $.invariants[?(@.id=="L9-UNKNOWN-001")]
+- $.invariants[?(@.id=="L9-EVIDENCE-001")]
+- $.invariants[?(@.id=="L9-ASSURANCE-001")]
+grammar:
+  type: object
+  fields:
+    invariants:
+      type: array
+      items:
+        type: object
+        fields:
+          id:
+            type: string
+          statement:
+            type: string
+          scope:
+            type: string
+          owner:
+            type: string
+            const: Quantum-L9/.github
+          severity:
+            type: string
+        additional_properties: true
+        required:
+        - id
+        - statement
+        - scope
+      min_items: 6
+  additional_properties: true

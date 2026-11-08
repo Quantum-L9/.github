@@ -1,0 +1,62 @@
+document_kind: source_field_grammar_bindings_candidate
+artifact_id: l9.binding/strategic-planner-interaction-grammar-catalog-candidate@1
+owner: Quantum-L9/.github
+approval_status: candidate
+canonical: false
+admission: not_granted
+bindings:
+- source_class: vocabulary
+  source_ref: l9.source/vocabulary@1
+  source_path: semantics/vocabulary.yaml
+  source_revision: 36cb17a474350e5a66a45f7a625ddd4fbe66ea20
+  source_digest: sha256:89a211d232322d6f2189e8b2475e44ba9e4b8af922ecf62fed2254f1ae44c7ef
+  grammar_ref: l9.grammar/strategic-planner-interaction-vocabulary-candidate@1
+  grammar_path: docs/candidates/GT/synthesis/governance/grammars/vocabulary.yaml
+  grammar_revision: 9a75f5bd3b7ac79ceec268b6f7108aa3656f657e
+  grammar_digest: sha256:fc896e208a0a5574c077cc541fc7ecbb6bae2b6293879c93f26b04855bb8b4b4
+  grammar_owner: Quantum-L9/.github
+  applies_to_selectors:
+  - $.terms.strategic_interaction
+  - $.terms.strategic_game_model
+  - $.terms.actor_response_model
+  - $.terms.strategy_profile
+  - $.terms.conditional_best_response
+  - $.terms.equilibrium_assessment
+  - $.terms.deviation_gain
+  - $.terms.incentive_bearing_commitment
+  - $.terms.information_disclosure_decision
+  - $.terms.policy_exploitability
+  - $.terms.incentive_compatibility
+  - $.terms.strategic_interaction_assessment
+  approval_status: candidate
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  source_path: semantics/invariants.yaml
+  source_revision: 36cb17a474350e5a66a45f7a625ddd4fbe66ea20
+  source_digest: sha256:877fe9f8e127ccee99dd37b42d0b6c214ddb12169703a6cecb8a4f3efa1f5b79
+  grammar_ref: l9.grammar/strategic-planner-interaction-invariants-candidate@1
+  grammar_path: docs/candidates/GT/synthesis/governance/grammars/invariants.yaml
+  grammar_revision: 9a75f5bd3b7ac79ceec268b6f7108aa3656f657e
+  grammar_digest: sha256:0eb068414d8c716a29e316443a81ffbf6451473badc88c57254a86269d3af1b3
+  grammar_owner: Quantum-L9/.github
+  applies_to_selectors:
+  - $.invariants[?(@.id=="L9-GT-001")]
+  - $.invariants[?(@.id=="L9-AUTH-002")]
+  - $.invariants[?(@.id=="L9-HARD-001")]
+  - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+  - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+  - $.invariants[?(@.id=="L9-ASSURANCE-001")]
+  approval_status: candidate
+- source_class: contracts
+  source_ref: l9.source/contracts@1
+  source_path: semantics/contracts.yaml
+  source_revision: 36cb17a474350e5a66a45f7a625ddd4fbe66ea20
+  source_digest: sha256:cd7767e6693f439ed27ff36f3b85259c9d230d7edea4a6e0cd0afdef381b4f3a
+  grammar_ref: l9.grammar/strategic-planner-interaction-contracts-candidate@1
+  grammar_path: docs/candidates/GT/synthesis/governance/grammars/contracts.yaml
+  grammar_revision: 9a75f5bd3b7ac79ceec268b6f7108aa3656f657e
+  grammar_digest: sha256:17bcf46746811c213a73ea69d2ffa47e41d7c0ec790810013adca4467104934f
+  grammar_owner: Quantum-L9/.github
+  applies_to_selectors:
+  - $.contracts[?(@.id=="l9.contract/strategic-interaction-assessment@1")]
+  approval_status: candidate

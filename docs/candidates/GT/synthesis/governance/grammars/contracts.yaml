@@ -1,0 +1,158 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.grammar/strategic-planner-interaction-contracts-candidate@1
+owner: Quantum-L9/.github
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: contracts
+source_ref: l9.source/contracts@1
+source_path: semantics/contracts.yaml
+source_revision: 36cb17a474350e5a66a45f7a625ddd4fbe66ea20
+source_digest: sha256:cd7767e6693f439ed27ff36f3b85259c9d230d7edea4a6e0cd0afdef381b4f3a
+applies_to_selectors:
+- $.contracts[?(@.id=="l9.contract/strategic-interaction-assessment@1")]
+grammar:
+  type: object
+  fields:
+    contracts:
+      type: array
+      items:
+        type: object
+        fields:
+          id:
+            type: string
+          purpose:
+            type: string
+          scope:
+            type: string
+            const: global
+          owner:
+            type: string
+            const: Quantum-L9/.github
+          source_invariants:
+            type: array
+            items:
+              type: string
+            min_items: 1
+          applies_to:
+            type: array
+            items:
+              type: string
+            min_items: 1
+          requires:
+            type: array
+            items:
+              type: string
+            min_items: 1
+          guarantees:
+            type: array
+            items:
+              type: string
+            min_items: 1
+          forbidden:
+            type: array
+            items:
+              type: string
+            min_items: 1
+          outcomes:
+            type: object
+            fields:
+              satisfied:
+                type: string
+              violated:
+                type: string
+              unresolved:
+                type: string
+              admitted:
+                type: string
+              refused:
+                type: string
+              new_decision_required:
+                type: string
+              attested:
+                type: string
+              unverified:
+                type: string
+              invalid_binding:
+                type: string
+              supported:
+                type: string
+              unsupported:
+                type: string
+              resolved:
+                type: string
+              admissible:
+                type: string
+              inadmissible:
+                type: string
+              current:
+                type: string
+              non_current:
+                type: string
+              compatible:
+                type: string
+              incompatible:
+                type: string
+              preserved:
+                type: string
+              successor_required:
+                type: string
+              valid_projection:
+                type: string
+              invalid_projection:
+                type: string
+              rejected:
+                type: string
+              invocable:
+                type: string
+              not_invocable:
+                type: string
+              invalid:
+                type: string
+              unsat:
+                type: string
+              ambiguous:
+                type: string
+              blocked:
+                type: string
+              unknown:
+                type: string
+              valid:
+                type: string
+              new_candidate_required:
+                type: string
+            additional_properties: true
+          applicability:
+            type: object
+            fields:
+              trigger:
+                type: string
+              does_not_apply_to:
+                type: array
+                items:
+                  type: string
+                min_items: 1
+              sv_dependency:
+                type: string
+              method_conditional:
+                type: string
+              unavailable_claim:
+                type: string
+            additional_properties: true
+            required:
+            - trigger
+            - does_not_apply_to
+        additional_properties: true
+        required:
+        - id
+        - purpose
+        - scope
+        - owner
+        - source_invariants
+        - applies_to
+        - requires
+        - guarantees
+        - forbidden
+        - outcomes
+      min_items: 1
+  additional_properties: true

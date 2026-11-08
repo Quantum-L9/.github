@@ -1,0 +1,53 @@
+contracts:
+- id: l9.contract/strategic-interaction-assessment@1
+  purpose: Govern model-conditioned analysis of adaptive actors without creating value semantics, authoritative
+    facts, a fourth reasoning owner or action permission.
+  scope: global
+  owner: Quantum-L9/.github
+  source_invariants:
+  - L9-GT-001
+  - L9-AUTH-002
+  - L9-HARD-001
+  - L9-UNKNOWN-001
+  - L9-EVIDENCE-001
+  - L9-ASSURANCE-001
+  applies_to:
+  - assessments_explicitly_claiming_strategic_actor_response
+  - game_theoretic_method_outputs_asserted_under_their_declared_model
+  requires:
+  - declared_focal_actor_objective_and_admissible_candidate_action_set
+  - declared_other_actors_information_sets_move_order_and_focal_action_conditional_response_paths
+  - model_identity_revision_evidence_lineage_and_declared_reasoning_horizon
+  - focal_action_conditional_response_model_with_joint_dependence_or_explicit_unknown
+  - formal_constraints_are_noncompensable_and_action_feasibility_is_separately_checked
+  - solution_concept_method_identity_and_claim_appropriate_diagnostics_when_equilibrium_or_best_response_is_asserted
+  - bounded_belief_recursion_lookahead_and_calculation_budget_when_performed
+  - separate_observations_hypotheses_forecasts_and_actual_outcomes
+  - explicit_model_limitations_and_failure_status_when_priors_payoffs_or_behavior_are_unverified
+  - consumer_keeps_strategy_policy_permission_and_execution_authority
+  - missing_response_mass_dependence_or_information_is_explicit_unknown_not_implicitly_normalized
+  - claim_specific_diagnostics_must_distinguish_numerical_stability_from_deviation_gain_and_solution_validity
+  guarantees:
+  - interaction_results_are_conditional_advisory_and_revision_bound
+  - probabilistic_and_numerical_methods_remain_owned_by_their_respective_reasoning_owners
+  - passive_response_approximation_is_declared_rather_than_silently_assumed
+  - equilibrium_assessment_is_not_world_prediction_or_policy_authorization
+  - gt_only_assessment_does_not_require_a_strategic_value_projection_or_valuation
+  forbidden:
+  - counterparty_statement_promoted_to_unknown_private_fact
+  - unexplained_perfect_rationality_assumption
+  - iterative_stability_alone_claimed_as_nash_equilibrium_proof
+  - independent_copied_observation_misrepresented_as_independent_evidence
+  - fourth_reasoning_node_created_by_method_complexity_alone
+  - analysis_or_projection_result_promoted_to_action_permission
+  - gt_assessment_silently_imports_sv_five_bucket_semantics_or_claim_scoped_sv_law
+  outcomes:
+    satisfied: conditional_strategic_interaction_assessment_with_provenance_and_declared_limits
+    violated: unsupported_or_overauthoritative_strategic_claim
+    unresolved: insufficient_model_response_evidence_or_solution_specific_assurance
+  applicability:
+    trigger: the_assessment_asserts_an_adaptive_actor_response_or_game_solution_claim
+    does_not_apply_to:
+    - passive_world_assessment_without_strategic_interaction_claim
+    - generic_optimisation_without_strategic_actor_responses
+    sv_dependency: none_for_gt_only

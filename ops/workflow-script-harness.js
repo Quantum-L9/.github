@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Shared harness for testing a workflow's `github-script` body directly.
@@ -15,20 +15,20 @@
  * it. Per-workflow stubs stay in their own files, where they are readable
  * next to the assertions they support.
  */
-const assert = require('node:assert');
-const fs = require('node:fs');
-const os = require('node:os');
-const path = require('node:path');
+const assert = require("node:assert");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 
 // Sets one named property on an Error. Explicit assignment, not Object.assign:
 // Core's Semgrep gate (prototype-pollution) flags every two-argument call.
 const errorWith = (err, key, value) => {
-  err[key] = value;
-  return err;
+	err[key] = value;
+	return err;
 };
 // Sets test environment variables one by one (see errorWith / Core's Semgrep gate).
 const setEnv = (vars) => {
-  for (const [k, v] of Object.entries(vars)) process.env[k] = v;
+	for (const [k, v] of Object.entries(vars)) process.env[k] = v;
 };
 
 /**
@@ -38,17 +38,19 @@ const setEnv = (vars) => {
  * several blocks (0 = first), for a workflow with more than one job script.
  */
 function extractScript(file, nth = 0) {
-  const lines = fs.readFileSync(file, 'utf8').split('\n');
-  const starts = lines.flatMap((l, i) => (/^\s*script:\s*\|\s*$/.test(l) ? [i] : []));
-  const start = nth < starts.length ? starts[nth] : -1;
-  assert.ok(start !== -1, `no "script: |" block #${nth} in ${file}`);
-  const indent = lines[start].match(/^\s*/)[0].length + 2;
-  const body = [];
-  for (const line of lines.slice(start + 1)) {
-    if (line.trim() !== '' && line.match(/^\s*/)[0].length < indent) break;
-    body.push(line.slice(indent));
-  }
-  return body.join('\n');
+	const lines = fs.readFileSync(file, "utf8").split("\n");
+	const starts = lines.flatMap((l, i) =>
+		/^\s*script:\s*\|\s*$/.test(l) ? [i] : [],
+	);
+	const start = nth < starts.length ? starts[nth] : -1;
+	assert.ok(start !== -1, `no "script: |" block #${nth} in ${file}`);
+	const indent = lines[start].match(/^\s*/)[0].length + 2;
+	const body = [];
+	for (const line of lines.slice(start + 1)) {
+		if (line.trim() !== "" && line.match(/^\s*/)[0].length < indent) break;
+		body.push(line.slice(indent));
+	}
+	return body.join("\n");
 }
 
 /**
@@ -63,63 +65,65 @@ function extractScript(file, nth = 0) {
  * @param {number} [nth]     which `script: |` block (0 = first)
  * @returns {(github: object, core: object, context: object, require: Function) => Promise<void>}
  */
-function loadScriptModule(file, tmpTag = 'workflow-script-', nth = 0) {
-  const body = extractScript(file, nth);
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), tmpTag));
-  const mod = path.join(dir, `${path.basename(file, '.yml')}.script.js`);
-  fs.writeFileSync(
-    mod,
-    `'use strict';\nmodule.exports = async (github, core, context, require) => {\n${body}\n};\n`,
-  );
-  try {
-    return require(mod);
-  } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
+function loadScriptModule(file, tmpTag = "workflow-script-", nth = 0) {
+	const body = extractScript(file, nth);
+	const dir = fs.mkdtempSync(path.join(os.tmpdir(), tmpTag));
+	const mod = path.join(dir, `${path.basename(file, ".yml")}.script.js`);
+	fs.writeFileSync(
+		mod,
+		`'use strict';\nmodule.exports = async (github, core, context, require) => {\n${body}\n};\n`,
+	);
+	try {
+		return require(mod);
+	} finally {
+		fs.rmSync(dir, { recursive: true, force: true });
+	}
 }
 
 /** An octokit-shaped 404, which the workflows branch on by `.status`. */
-const notFound = (msg) => errorWith(new Error(msg), 'status', 404);
+const notFound = (msg) => errorWith(new Error(msg), "status", 404);
 
 /**
  * Minimal `core` stub. `setFailed` is captured rather than thrown so a test
  * can assert that leaving a branch alone is NOT reported as a failure.
  */
 function makeCore() {
-  const failures = [];
-  const warnings = [];
-  // Summary tables are captured so a suite can read the per-repo verdict rows
-  // a workflow reports, not only the API calls it made.
-  const tables = [];
-  const summary = {
-    addHeading: () => summary,
-    addRaw: () => summary,
-    addTable: (rows) => {
-      tables.push(rows);
-      return summary;
-    },
-    write: async () => summary,
-  };
-  return {
-    info() {},
-    error() {},
-    warning: (m) => warnings.push(m),
-    setFailed: (m) => failures.push(m),
-    failures,
-    warnings,
-    tables,
-    summary,
-  };
+	const failures = [];
+	const warnings = [];
+	// Summary tables are captured so a suite can read the per-repo verdict rows
+	// a workflow reports, not only the API calls it made.
+	const tables = [];
+	const summary = {
+		addHeading: () => summary,
+		addRaw: () => summary,
+		addTable: (rows) => {
+			tables.push(rows);
+			return summary;
+		},
+		write: async () => summary,
+	};
+	return {
+		info() {},
+		error() {},
+		warning: (m) => warnings.push(m),
+		setFailed: (m) => failures.push(m),
+		failures,
+		warnings,
+		tables,
+		summary,
+	};
 }
 
 /**
  * github-script resolves relative `require()` against the workspace root.
  * Mirror that so a script body can pull in ops/ modules the way it does live.
  */
-const makeScopedRequire = (root, overrides = {}) => (m) => {
-  if (Object.hasOwn(overrides, m)) return overrides[m];
-  return require(m.startsWith('.') ? path.resolve(root, m) : m);
-};
+const makeScopedRequire =
+	(root, overrides = {}) =>
+	(m) => {
+		if (Object.hasOwn(overrides, m)) return overrides[m];
+		return require(m.startsWith(".") ? path.resolve(root, m) : m);
+	};
 
 /**
  * A stand-in for `./ops/seed-pr-body.js` whose renderSeedPrBody records its
@@ -132,18 +136,20 @@ const makeScopedRequire = (root, overrides = {}) => (m) => {
  * composer and proves the rendered body complete.
  */
 function makeRenderRecorder(root) {
-  const real = require(path.resolve(root, 'ops/seed-pr-body.js'));
-  const renders = [];
-  const module = {
-    ...real,
-    renderSeedPrBody: (args) => {
-      renders.push(args);
-      return { body: `<!-- composed seed body for ${args.headSha} -->\n`, handoff: { needs_completion: [] } };
-    },
-  };
-  return { module, renders };
+	const real = require(path.resolve(root, "ops/seed-pr-body.js"));
+	const renders = [];
+	const module = {
+		...real,
+		renderSeedPrBody: (args) => {
+			renders.push(args);
+			return {
+				body: `<!-- composed seed body for ${args.headSha} -->\n`,
+				handoff: { needs_completion: [] },
+			};
+		},
+	};
+	return { module, renders };
 }
-
 
 /**
  * Build the `run()` a branch-guard suite drives its workflow with.
@@ -163,48 +169,67 @@ function makeRenderRecorder(root) {
  * @param {Set<string>} opts.mutations  call names that count as a write
  * @returns {(o?: object) => Promise<{calls, names, state, failures, mutated}>}
  */
-function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations, modules = {} }) {
-  const fn = loadScriptModule(file, tmpTag);
+function makeScriptRunner({
+	file,
+	root,
+	tmpTag,
+	envFor,
+	makeGithub,
+	mutations,
+	modules = {},
+}) {
+	const fn = loadScriptModule(file, tmpTag);
 
-  return async function run({ dry = false, mutateGithub, envExtra = {}, modules: runModules = {}, ...stubOpts } = {}) {
-    // A run without its own renderer gets a fresh recorder, so no suite can
-    // reach the network-bound composer by accident.
-    const recorder = makeRenderRecorder(root);
-    const scopedRequire = makeScopedRequire(root, {
-      './ops/seed-pr-body.js': recorder.module, ...modules, ...runModules,
-    });
-    const prevCwd = process.cwd();
-    const env = { ...envFor(dry), ...envExtra };
-    const prevEnv = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
-    process.chdir(root);
-    setEnv(env);
-    const { github, calls, state } = makeGithub(stubOpts);
-    if (mutateGithub) mutateGithub(github, state);
-    const core = makeCore();
-    try {
-      await fn(github, core, {}, scopedRequire);
-    } finally {
-      process.chdir(prevCwd);
-      for (const [k, v] of Object.entries(prevEnv)) {
-        if (v === undefined) delete process.env[k];
-        else process.env[k] = v;
-      }
-    }
-    const names = calls.map((c) => c.name);
-    return {
-      calls,
-      names,
-      state,
-      failures: core.failures,
-      warnings: core.warnings,
-      // Verdict rows of the last summary table, header row dropped.
-      rows: core.tables.length ? core.tables[core.tables.length - 1].slice(1) : [],
-      mutated: names.some((n) => mutations.has(n)),
-      renders: recorder.renders,
-    };
-  };
+	return async function run({
+		dry = false,
+		mutateGithub,
+		envExtra = {},
+		modules: runModules = {},
+		...stubOpts
+	} = {}) {
+		// A run without its own renderer gets a fresh recorder, so no suite can
+		// reach the network-bound composer by accident.
+		const recorder = makeRenderRecorder(root);
+		const scopedRequire = makeScopedRequire(root, {
+			"./ops/seed-pr-body.js": recorder.module,
+			...modules,
+			...runModules,
+		});
+		const prevCwd = process.cwd();
+		const env = { ...envFor(dry), ...envExtra };
+		const prevEnv = Object.fromEntries(
+			Object.keys(env).map((k) => [k, process.env[k]]),
+		);
+		process.chdir(root);
+		setEnv(env);
+		const { github, calls, state } = makeGithub(stubOpts);
+		if (mutateGithub) mutateGithub(github, state);
+		const core = makeCore();
+		try {
+			await fn(github, core, {}, scopedRequire);
+		} finally {
+			process.chdir(prevCwd);
+			for (const [k, v] of Object.entries(prevEnv)) {
+				if (v === undefined) delete process.env[k];
+				else process.env[k] = v;
+			}
+		}
+		const names = calls.map((c) => c.name);
+		return {
+			calls,
+			names,
+			state,
+			failures: core.failures,
+			warnings: core.warnings,
+			// Verdict rows of the last summary table, header row dropped.
+			rows: core.tables.length
+				? core.tables[core.tables.length - 1].slice(1)
+				: [],
+			mutated: names.some((n) => mutations.has(n)),
+			renders: recorder.renders,
+		};
+	};
 }
-
 
 /**
  * The stub surfaces a branch guard always needs, with identical meaning in
@@ -229,48 +254,68 @@ function makeScriptRunner({ file, root, tmpTag, envFor, makeGithub, mutations, m
  * @param {number} [o.listError]  HTTP status listing all open PRs throws
  * @param {Function} o.record recorder factory from the suite
  */
-function makeBranchStubs({ branch, state, calls, openPRs, otherPRs = [], listError, record }) {
-  const httpError = (status) => errorWith(new Error(`HTTP ${status}`), 'status', status);
-  const pulls = {
-    list: async (args) => {
-      calls.push({ name: 'pulls.list', args });
-      const own = openPRs.map((number) => ({
-        number,
-        head: { ref: branch, repo: { full_name: `${args.owner}/${args.repo}` } },
-      }));
-      // Filtered by head: the guard-branch probe. Unfiltered: every open PR.
-      if (args.head) return { data: own };
-      if (listError) throw httpError(listError);
-      return {
-        data: [...own, ...otherPRs.map((p) => ({
-          number: p.number,
-          head: { ref: p.ref, repo: { full_name: `${args.owner}/${args.repo}` } },
-        }))],
-      };
-    },
-    listFiles: async (args) => {
-      calls.push({ name: 'pulls.listFiles', args });
-      const pr = otherPRs.find((p) => p.number === args.pull_number);
-      if (pr?.filesError) throw httpError(pr.filesError);
-      return { data: pr ? pr.files || [] : [] };
-    },
-    create: record('pulls.create'),
-  };
-  return {
-    pulls,
-    // github.paginate over a pulls endpoint returns the endpoint's rows;
-    // anything else is the suite's org repository listing.
-    paginateWith: (repoRows) => async (fn, args) =>
-      (fn === pulls.list || fn === pulls.listFiles ? (await fn(args)).data : repoRows()),
-    getRef: async (args) => {
-      calls.push({ name: 'git.getRef', args });
-      if (args.ref === `heads/${branch}`) {
-        if (state.sha === null) throw notFound('Branch not found');
-        return { data: { object: { sha: state.sha } } };
-      }
-      return { data: { object: { sha: 'base-sha' } } };
-    },
-  };
+function makeBranchStubs({
+	branch,
+	state,
+	calls,
+	openPRs,
+	otherPRs = [],
+	listError,
+	record,
+}) {
+	const httpError = (status) =>
+		errorWith(new Error(`HTTP ${status}`), "status", status);
+	const pulls = {
+		list: async (args) => {
+			calls.push({ name: "pulls.list", args });
+			const own = openPRs.map((number) => ({
+				number,
+				head: {
+					ref: branch,
+					repo: { full_name: `${args.owner}/${args.repo}` },
+				},
+			}));
+			// Filtered by head: the guard-branch probe. Unfiltered: every open PR.
+			if (args.head) return { data: own };
+			if (listError) throw httpError(listError);
+			return {
+				data: [
+					...own,
+					...otherPRs.map((p) => ({
+						number: p.number,
+						head: {
+							ref: p.ref,
+							repo: { full_name: `${args.owner}/${args.repo}` },
+						},
+					})),
+				],
+			};
+		},
+		listFiles: async (args) => {
+			calls.push({ name: "pulls.listFiles", args });
+			const pr = otherPRs.find((p) => p.number === args.pull_number);
+			if (pr?.filesError) throw httpError(pr.filesError);
+			return { data: pr ? pr.files || [] : [] };
+		},
+		create: record("pulls.create"),
+	};
+	return {
+		pulls,
+		// github.paginate over a pulls endpoint returns the endpoint's rows;
+		// anything else is the suite's org repository listing.
+		paginateWith: (repoRows) => async (fn, args) =>
+			fn === pulls.list || fn === pulls.listFiles
+				? (await fn(args)).data
+				: repoRows(),
+		getRef: async (args) => {
+			calls.push({ name: "git.getRef", args });
+			if (args.ref === `heads/${branch}`) {
+				if (state.sha === null) throw notFound("Branch not found");
+				return { data: { object: { sha: state.sha } } };
+			}
+			return { data: { object: { sha: "base-sha" } } };
+		},
+	};
 }
 
 /**
@@ -285,41 +330,58 @@ function makeBranchStubs({ branch, state, calls, openPRs, otherPRs = [], listErr
  * @returns {(body: string) => Promise<string[]>} the findings; [] = passes
  */
 function loadGovernanceGates(root) {
-  const file = path.join(root, '.github/workflows/governance-pr.yml');
-  // biome-ignore lint/suspicious/noTemplateCurlyInString: the Actions expression, matched literally
-  const body = extractScript(file, 0).split('${{ inputs.strict }}').join('true');
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'governance-gates-'));
-  const mod = path.join(dir, 'governance-gates.script.js');
-  fs.writeFileSync(mod, `'use strict';\nmodule.exports = async (github, core, context, require) => {\n${body}\n};\n`);
-  let fn;
-  try {
-    fn = require(mod);
-  } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
-  return async (prBody) => {
-    const findings = [];
-    const failures = [];
-    const summary = {
-      addHeading: () => summary,
-      addList: (items) => { findings.push(...items); return summary; },
-      write: async () => summary,
-    };
-    const core = { setFailed: (m) => failures.push(m), notice() {}, summary };
-    await fn({}, core, { payload: { pull_request: { body: prBody } } }, require);
-    assert.strictEqual(failures.length > 0, findings.length > 0, 'strict gates fail exactly when they find something');
-    return findings;
-  };
+	const file = path.join(root, ".github/workflows/governance-pr.yml");
+	const body = extractScript(file, 0)
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: the Actions expression, matched literally
+		.split("${{ inputs.strict }}")
+		.join("true");
+	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "governance-gates-"));
+	const mod = path.join(dir, "governance-gates.script.js");
+	fs.writeFileSync(
+		mod,
+		`'use strict';\nmodule.exports = async (github, core, context, require) => {\n${body}\n};\n`,
+	);
+	let fn;
+	try {
+		fn = require(mod);
+	} finally {
+		fs.rmSync(dir, { recursive: true, force: true });
+	}
+	return async (prBody) => {
+		const findings = [];
+		const failures = [];
+		const summary = {
+			addHeading: () => summary,
+			addList: (items) => {
+				findings.push(...items);
+				return summary;
+			},
+			write: async () => summary,
+		};
+		const core = { setFailed: (m) => failures.push(m), notice() {}, summary };
+		await fn(
+			{},
+			core,
+			{ payload: { pull_request: { body: prBody } } },
+			require,
+		);
+		assert.strictEqual(
+			failures.length > 0,
+			findings.length > 0,
+			"strict gates fail exactly when they find something",
+		);
+		return findings;
+	};
 }
 
 module.exports = {
-  makeRenderRecorder,
-  extractScript,
-  loadScriptModule,
-  notFound,
-  makeCore,
-  makeScopedRequire,
-  makeScriptRunner,
-  makeBranchStubs,
-  loadGovernanceGates,
+	makeRenderRecorder,
+	extractScript,
+	loadScriptModule,
+	notFound,
+	makeCore,
+	makeScopedRequire,
+	makeScriptRunner,
+	makeBranchStubs,
+	loadGovernanceGates,
 };

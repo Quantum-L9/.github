@@ -1,0 +1,25 @@
+test_gt_only_independent_of_sv (test_candidate.CanonicalBoundaryTests.test_gt_only_independent_of_sv) ... ok
+test_gt_sv_consumer_envelope_is_by_reference_only (test_candidate.CanonicalBoundaryTests.test_gt_sv_consumer_envelope_is_by_reference_only) ... ok
+test_minimal_nonduplicate_semantics (test_candidate.CanonicalBoundaryTests.test_minimal_nonduplicate_semantics) ... ok
+test_native_manifest_names_not_synthetic_sv_schema (test_candidate.CanonicalBoundaryTests.test_native_manifest_names_not_synthetic_sv_schema) ... ok
+test_no_new_valuer_or_permission (test_candidate.CanonicalBoundaryTests.test_no_new_valuer_or_permission) ... ok
+test_official_schema_candidates_have_existing_shape (test_candidate.CanonicalBoundaryTests.test_official_schema_candidates_have_existing_shape) ... ok
+test_pinned_authority_evidence_is_partial_not_receipt (test_candidate.CanonicalBoundaryTests.test_pinned_authority_evidence_is_partial_not_receipt) ... ok
+test_projection_is_gt_only_and_selector_closed (test_candidate.CanonicalBoundaryTests.test_projection_is_gt_only_and_selector_closed) ... ok
+test_source_local_selector_replay_exact_records_only (test_candidate.CanonicalBoundaryTests.test_source_local_selector_replay_exact_records_only) ... ok
+test_strict_local_schema_accepts_exact_projected_records (test_candidate.CanonicalBoundaryTests.test_strict_local_schema_accepts_exact_projected_records) ... ok
+test_strict_schema_rejects_swapped_sv_and_extra_semantics (test_candidate.CanonicalBoundaryTests.test_strict_schema_rejects_swapped_sv_and_extra_semantics) ... ok
+test_core_script_does_not_hide_override_or_publish (test_candidate.SyntheticApplicationTests.test_core_script_does_not_hide_override_or_publish) ... ok
+test_prepare_synthetic_canonical_shape_without_sv (test_candidate.SyntheticApplicationTests.test_prepare_synthetic_canonical_shape_without_sv) ... ok
+test_gt_response_can_reverse_plan_ranking (test_candidate.SyntheticMathCounterexamples.test_gt_response_can_reverse_plan_ranking) ... ok
+test_joint_correlation_is_not_independent_product_without_evidence (test_candidate.SyntheticMathCounterexamples.test_joint_correlation_is_not_independent_product_without_evidence) ... ok
+test_missing_probability_mass_cannot_be_renormalized_silently (test_candidate.SyntheticMathCounterexamples.test_missing_probability_mass_cannot_be_renormalized_silently) ... ok
+test_no_value_ranking_trumps_hard_infeasibility (test_candidate.SyntheticMathCounterexamples.test_no_value_ranking_trumps_hard_infeasibility) ... ok
+test_one_future_effect_must_not_be_added_twice (test_candidate.SyntheticMathCounterexamples.test_one_future_effect_must_not_be_added_twice) ... ok
+test_passive_world_matches_sv_only (test_candidate.SyntheticMathCounterexamples.test_passive_world_matches_sv_only) ... ok
+test_softmax_fixed_point_is_not_nash_proof (test_candidate.SyntheticMathCounterexamples.test_softmax_fixed_point_is_not_nash_proof) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.325s
+
+OK

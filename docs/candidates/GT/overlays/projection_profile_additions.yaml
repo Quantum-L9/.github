@@ -1,0 +1,36 @@
+projection_profiles:
+- id: l9.projection/strategic-planner-interaction@1
+  class: consumer
+  consumer: strategic-planner
+  purpose: Supply the Strategic Planner with only GT-specific canonical semantics for conditional actor responses
+    and related evidence; leave SV valuations and all plan authority with their existing sources and owners.
+  sources:
+    vocabulary:
+      selectors:
+      - $.terms.strategic_interaction
+      - $.terms.strategic_game_model
+      - $.terms.actor_response_model
+      - $.terms.strategy_profile
+      - $.terms.conditional_best_response
+      - $.terms.equilibrium_assessment
+      - $.terms.deviation_gain
+      - $.terms.incentive_bearing_commitment
+      - $.terms.information_disclosure_decision
+      - $.terms.policy_exploitability
+      - $.terms.incentive_compatibility
+      - $.terms.strategic_interaction_assessment
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-GT-001")]
+      - $.invariants[?(@.id=="L9-AUTH-002")]
+      - $.invariants[?(@.id=="L9-HARD-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+      - $.invariants[?(@.id=="L9-ASSURANCE-001")]
+    contracts:
+      selectors:
+      - $.contracts[?(@.id=="l9.contract/strategic-interaction-assessment@1")]
+  output:
+    schema: l9.projection.strategic-planner-interaction/v1
+  forbidden:
+  - sv_semantic_records_excluded_from_gt_projection
