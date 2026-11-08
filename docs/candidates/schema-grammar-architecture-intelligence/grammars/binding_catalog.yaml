@@ -1,0 +1,44 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/binding-catalog@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: binding_catalog
+source_ref: l9.source/binding-catalog@1
+source_path: semantics/binding_catalog.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:8c9a3cd4370feed7118835cbaffa34f99372f8696ccf07917906501368c65eb9
+applies_to_selectors:
+- $.binding_families.provider
+- $.compatibility
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    binding_families:
+      type: object
+      additional_properties: true
+      fields:
+        provider:
+          type: object
+          additional_properties: true
+          fields:
+            purpose:
+              type: string
+    compatibility:
+      type: object
+      additional_properties: true
+      fields:
+        provider:
+          type: string
+        target:
+          type: string
+        unknown_capability:
+          type: string
+        optimization_permitted_only_after_compatibility:
+          type: boolean
+        provider_does_not_become_semantic_owner:
+          type: boolean
+        binding_selection_does_not_transform_source_ir:
+          type: boolean

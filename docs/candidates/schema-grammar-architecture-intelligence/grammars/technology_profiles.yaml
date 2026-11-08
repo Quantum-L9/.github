@@ -1,0 +1,61 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/technology-profiles@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: technology_profiles
+source_ref: l9.source/technology-profiles@1
+source_path: semantics/technology_profiles.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:423a6da9cbf80f89d40fb3d524a5ee6c9ae7acff360fc89e25bb997014546246
+applies_to_selectors:
+- $.governed_by
+- $.global_rules
+- $.profile_shape
+- $.profiles
+- $.resolution
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        contracts:
+          type: string_list
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        profile_declares_intent_and_constraints_not_provider_semantics:
+          type: boolean
+        provider_facts_come_from_technology_capabilities:
+          type: boolean
+        binding_facts_come_from_binding_catalog:
+          type: boolean
+        unknown_provider_capability_fails_closed:
+          type: boolean
+        technology_profile_does_not_create_semantic_ownership:
+          type: boolean
+    profile_shape:
+      type: object
+      additional_properties: true
+      fields:
+        required:
+          type: string_list
+        optional:
+          type: string_list
+    profiles:
+      type: string_list
+    resolution:
+      type: object
+      additional_properties: true
+      fields:
+        inputs:
+          type: string_list
+        compatibility_rule:
+          type: string
+        optimization_rule:
+          type: string

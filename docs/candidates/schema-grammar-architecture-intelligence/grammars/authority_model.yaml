@@ -1,0 +1,265 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/authority-model@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: authority_model
+source_ref: l9.source/authority-model@1
+source_path: semantics/authority_model.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
+applies_to_selectors:
+- $.authority_classes
+- $.admission_rules
+- $.promotion_rules
+- $.global_admission_rules
+- $.global_promotion
+- $.profile_publication
+- $.compiler_authority
+- $.agent_authority
+- $.human_authority
+- $.escalation_rules
+- $.project_contract_admission
+- $.product_topology_authority
+- $.product_admission_authority
+- $.product_manifest_authority
+- $.identity_authority
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    authority_classes:
+      type: object
+      additional_properties: true
+      fields:
+        global_governance:
+          type: object
+          additional_properties: true
+          fields:
+            owner:
+              type: string
+            roles:
+              type: string_list
+            does_not_own:
+              type: string_list
+        canonical:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            implicit_derivation_allowed:
+              type: boolean
+        derived:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            may_self_promote:
+              type: boolean
+        candidate:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            authoritative:
+              type: boolean
+        evidence:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            grants_authority:
+              type: boolean
+    admission_rules:
+      type: object
+      additional_properties: true
+      fields:
+        global_requirements:
+          type: string_list
+        candidate_generation_is_not_admission:
+          type: boolean
+        self_admission_without_target_class_authority_forbidden:
+          type: boolean
+        changed_material_subject_requires_new_decision_unless_compatibility_preserves_it:
+          type: boolean
+    promotion_rules:
+      type: object
+      additional_properties: true
+      fields:
+        sequence:
+          type: string_list
+        globalization_candidate_is_not_global_authority:
+          type: boolean
+        authorized_global_state_change_required:
+          type: boolean
+    global_admission_rules:
+      type: object
+      additional_properties: true
+      fields:
+        requirements:
+          type: string_list
+        requires_global_authority:
+          type: boolean
+        candidate_generation_is_not_admission:
+          type: boolean
+    global_promotion:
+      type: object
+      additional_properties: true
+      fields:
+        candidate:
+          type: string
+        requires:
+          type: string_list
+        automatic_promotion_forbidden:
+          type: boolean
+    profile_publication:
+      type: object
+      additional_properties: true
+      fields:
+        canonical_identity_required:
+          type: boolean
+        immutable_digest_required:
+          type: boolean
+        catalog_entry_required:
+          type: boolean
+        profile_membership_required:
+          type: boolean
+        distribution_availability_required:
+          type: boolean
+        existing_profile_versions_are_immutable:
+          type: boolean
+    compiler_authority:
+      type: object
+      additional_properties: true
+      fields:
+        semantic_owner:
+          type: string
+        may:
+          type: string_list
+        may_not:
+          type: string_list
+    agent_authority:
+      type: object
+      additional_properties: true
+      fields:
+        rules:
+          type: string_list
+    human_authority:
+      type: object
+      additional_properties: true
+      fields:
+        rules:
+          type: string_list
+    escalation_rules:
+      type: object
+      additional_properties: true
+      fields:
+        authority_missing:
+          type: string
+        semantic_conflict:
+          type: string
+        unknown:
+          type: string
+        changed_candidate_after_decision:
+          type: string
+    project_contract_admission:
+      type: object
+      additional_properties: true
+      fields:
+        requires:
+          type: string_list
+        downstream_use_requires_admission:
+          type: boolean
+    product_topology_authority:
+      type: object
+      additional_properties: true
+      fields:
+        semantic_owner:
+          type: string
+        global_schema_owner:
+          type: string
+        status:
+          type: string
+        compiler_may:
+          type: string_list
+        compiler_may_not:
+          type: string_list
+        rule:
+          type: string
+    product_admission_authority:
+      type: object
+      additional_properties: true
+      fields:
+        id:
+          type: string
+        meaning:
+          type: string
+        global_semantics_owner:
+          type: string
+        decision_authority:
+          type: string
+        operation:
+          type: string
+        subjects:
+          type: string_list
+        inherits_global_requirements:
+          type: string_list
+        inherits_rules:
+          type: string_list
+        candidate_generation_is_not_admission:
+          type: boolean
+        self_admission_without_target_class_authority_forbidden:
+          type: boolean
+        implies:
+          type: object
+          additional_properties: true
+          fields:
+            publication:
+              type: boolean
+            runtime_admission:
+              type: boolean
+            runtime_availability:
+              type: boolean
+            capability_invocation_authorization:
+              type: boolean
+            implementation_conformance:
+              type: boolean
+            consumer_compatibility:
+              type: boolean
+        rules:
+          type: string_list
+    product_manifest_authority:
+      type: object
+      additional_properties: true
+      fields:
+        artifact_class:
+          type: string
+        semantic_owner:
+          type: string
+        product_authority:
+          type: boolean
+        implementation_gate:
+          type: string
+        rule:
+          type: string
+    identity_authority:
+      type: object
+      additional_properties: true
+      fields:
+        global_semantics_owner:
+          type: string
+        product_identity_owner:
+          type: string
+        actor_identity_source:
+          type: string
+        runtime_and_surface_resolution_owner:
+          type: string
+        governance_profile_owner:
+          type: string
+        rules:
+          type: string_list
