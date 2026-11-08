@@ -102,12 +102,16 @@ v3.30.0 adds ADR-027 (structural contract for `l9.implementation-ir/v1`), a cand
 - `semantics/implementation_ir.schema.yaml` (`l9.schema/implementation-ir@1`, `l9.schema-definition/v1`): the structure of `l9.implementation-ir/v1` (`properties.schema.const`).
   - Required sections: `subject`, `authority`, `target`, `interfaces`, `ports`, `adapters`, `composition`, `conformance`, `unresolved` and `provenance`.
   - Every realizable obligation carries one of three dispositions: `generable`, `bound` or `unresolved`.
-  - Sixteen `semantic_rules` state the cross-field obligations, which `enforcement` assigns to `implementation-contract-validator/v1`.
+  - Nineteen `semantic_rules` state the cross-field obligations, which `enforcement` assigns to `implementation-contract-validator/v1`.
+  - `provenance.behavior_contracts` is a deduplicated, digest-bound `{ref, digest}` set for behavior contracts.
+  - `unresolved[].result` takes its value from the `resolution_model.yaml` result domain.
+  - There is no `behavior.operation_ref`.
+- `semantics/semantic_dependency_model.yaml`: adds the `implementation_ir` dependency rule (`change_effect: implementation_ir_and_target_artifacts_stale`). A change to behavior-contract bytes invalidates the IR and its target artifacts.
   - It is governed by `l9.contract/product-manifest@1`, `technology-binding@1`, `derived-artifact@1`, `provenance-and-coordinate@1`, `unknown-and-degradation@1` and `validation-and-correctness@1`.
 - `semantics/generic_compiler_manifest.yaml`: lists `implementation_ir.schema.yaml` under `requires.artifact_schemas`.
 - `docs/adr/README.md`: indexes ADR-027.
 
-No other ledger, rule, profile, criterion, contract or invariant changes. `semantics/ir_catalog.yaml` is unchanged.
+Apart from the `implementation_ir` dependency rule above, no other ledger, rule, profile, criterion, contract or invariant changes. `semantics/ir_catalog.yaml` is unchanged.
 
 ## Replacement basis
 

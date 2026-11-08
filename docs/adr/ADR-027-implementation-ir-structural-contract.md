@@ -59,23 +59,39 @@ Option C.
    - `unresolved`: recorded under `unresolved` and never realized.
 
    No fourth disposition exists.
-4. **Sixteen `semantic_rules`** state the cross-field obligations the shape cannot express:
+4. **Nineteen `semantic_rules`** state the cross-field obligations the shape cannot express:
    - exact action, forbidden-action, port and adapter correspondence with the manifest;
    - consequential iff in `effects.consequential_operations`;
    - digest equality;
    - target applicability;
    - `bound` requires an admitted `implementation_ref`;
    - `generable` requires a determining behavior contract or binding map;
+   - a `behavior_contract_ref` supports `generable` only when it resolves to an admitted behavior contract listed exactly once in `provenance.behavior_contracts`;
+   - each listed behavior-contract digest equals the digest of that contract's resolved content, and a mismatch makes the IR and its target artifacts stale;
+   - each `unresolved` entry carries a `resolution_model` result other than `resolved`;
    - no invented adapter or provider.
 
    `enforcement` assigns them to `implementation-contract-validator/v1`.
-5. No IR catalog, compilation profile, solver, binding, manifest or topology change, and no RC check, is part of this release.
+5. **Behavior-contract dependency identity.**
+   - `provenance.behavior_contracts` is a deduplicated set of `{ref, digest}`. An action's `behavior` carries only `behavior_contract_ref`, so each contract's digest has exactly one source in the IR, and two actions sharing a contract cannot record disagreeing digests.
+   - `semantic_dependency_model.yaml` adds the `implementation_ir` dependency rule: product manifest, authority revision, target binding, behavior-contract refs and digests, and compiler coordinates, with `change_effect: implementation_ir_and_target_artifacts_stale`.
+   - The existing machinery did not already prove this. The IR pins `manifest_digest`, and `product_manifest` changes invalidate implementation. But no canonical ledger places a behavior contract inside the manifest's digest closure. The Semantic Compiler's own manifest `target_contract_closure_digest` is compiler realization rather than canonical law, and it exposes no per-contract digest. Without this amendment, changed behavior-contract bytes under an unchanged ref would leave a generated-behavior claim apparently current.
+6. **Typed unresolved outcome.**
+   - `unresolved[].result` takes its value directly from the `resolution_model.yaml` result domain: `unresolved`, `incompatible`, `unsat` or `ambiguous`.
+   - `reason` stays free-text explanation.
+   - The three dispositions are unchanged. The disposition says the obligation is not realized; `result` says why, in the shared result algebra (`all_resolvers_share_one_result_algebra`).
+7. **No `operation_ref`.**
+   - The optional `behavior.operation_ref` of the first candidate draft is removed. No ledger, rule, ADR or release record defined it.
+   - The only operation concept it could name, a consequential operation, is an action identity (`effects.consequential_operations` lists action ids). That identity is already carried by `action_ref` together with `consequential`.
+8. No IR catalog, compilation profile, solver, binding, manifest or topology change, and no RC check, is part of this release.
 
 ## Review findings (recorded, not resolved)
 
-- **Shape versus rules.** The v1 interpreter catches 15 of 15 shape-level negative controls. Eight cross-field controls are not shape violations (wrong product identity, non-Node binding selection, undeclared action, unknown technology, invented provider, behavior without contract or binding, manifest digest mismatch, unbound required port). Each maps to a named rule. Until the Semantic Compiler implements `implementation-contract-validator/v1` (unit R4-B), those obligations are declared but not enforced.
+- **Shape versus rules.** The v1 interpreter catches 21 of 21 shape-level negative controls (15 original, 6 for behavior-contract provenance and typed unresolved results). Eight cross-field controls are not shape violations (wrong product identity, non-Node binding selection, undeclared action, unknown technology, invented provider, behavior without contract or binding, manifest digest mismatch, unbound required port). Each maps to a named rule. Until the Semantic Compiler implements `implementation-contract-validator/v1` (unit R4-B), those obligations are declared but not enforced.
 - **No pinned check.** No release check pins this schema or its rules. Authoring one is an owner decision this candidate does not take.
-- **Behavior contracts.** `behavior_contract_ref` names a coordinate kind that no ledger yet defines. Until one is admitted, `generable` behavior can be justified only by a target binding map, such as action registration or composition, and never by product algorithms.
+- **Behavior contracts.**
+  - `behavior_contract_ref` names a coordinate kind that no ledger yet defines. Until one is admitted, every `behavior_contract_ref` is unresolved, and `generable` behavior can be justified only by a target binding map, such as action registration or composition, never by product algorithms.
+  - The behavior-contract digest proof is therefore structural: shape rejects a missing or malformed digest set, and a fixture-level check shows changed contract content fails the digest rule. A live, end-to-end invalidation of generated behavior is blocked until a behavior-contract kind is admitted.
 - **Second Node.** Qualification used the real `l9.state` ProductManifest. No independent second Node instance was constructed for this structural unit; generality is a Stage 14 and Stage 15 acceptance obligation (R4-B to R4-D).
 
 ## Consequences

@@ -17,7 +17,9 @@ This is unit R4-A (`R4-A-IMPLEMENTATION-IR-QUALIFICATION`) of campaign `L9-COMPI
   - `generable`: fully determined, so it may be emitted;
   - `bound`: existing product code named by an admitted `implementation_ref`, verified and never regenerated;
   - `unresolved`: recorded and never realized.
-- Sixteen `semantic_rules` for the cross-field obligations the shape cannot express. They are assigned to `implementation-contract-validator/v1`.
+- Nineteen `semantic_rules` for the cross-field obligations the shape cannot express. They are assigned to `implementation-contract-validator/v1`.
+- Behavior-contract dependency identity: `provenance.behavior_contracts` is a deduplicated, digest-bound `{ref, digest}` set. `semantic_dependency_model.yaml` gains an `implementation_ir` rule, so changed behavior-contract bytes make the IR and its target artifacts stale.
+- `unresolved[].result` records the `resolution_model.yaml` result (`unresolved`, `incompatible`, `unsat` or `ambiguous`). `reason` stays explanatory. The undefined `operation_ref` is removed.
 - ADR-027. `semantics/ir_catalog.yaml` is unchanged.
 
 ## Evidence
@@ -30,7 +32,7 @@ Qualification ran at commit `d9cdb8a5f054a0481ede27a09493b875ecccdfbc` (this cha
 ## Outstanding Unknowns and findings
 
 - **Cross-field rules are declared, not yet enforced.** Eight cross-field negative controls are not shape violations: wrong product identity, non-Node binding selection, undeclared action, unknown technology, invented provider, behavior without contract or binding, manifest digest mismatch, and unbound required port. They are enforced only once the Semantic Compiler implements `implementation-contract-validator/v1` (unit R4-B).
-- `behavior_contract_ref` names a coordinate kind that no ledger defines yet. `generable` therefore covers only target-binding maps, such as registration and composition, never product algorithms.
+- `behavior_contract_ref` names a coordinate kind that no ledger defines yet. Every `behavior_contract_ref` is therefore unresolved today, and `generable` covers only target-binding maps, such as registration and composition, never product algorithms. The behavior-contract invalidation proof is structural. A live end-to-end proof waits on an admitted behavior-contract kind.
 - No release check pins the schema or its rules.
 - No independent second Node instance was constructed at this structural stage.
 - The open findings recorded by v3.29.0 remain open.
