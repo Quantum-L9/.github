@@ -50,8 +50,9 @@ ProductTopology
 - ADR-027: Structural contract for l9.implementation-ir/v1
 - ADR-028: Single-kind architecture pattern fields
 - ADR-029: Strategic Value Foundation and Catalog-Declared Composition Provenance Criteria
+- ADR-030: Game Theory Core: Conditional Strategic Interaction
 
-ADR-001 through ADR-029 are the global semantic decisions. They live in this
+ADR-001 through ADR-030 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions

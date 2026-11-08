@@ -234,3 +234,11 @@ invariants:
     overlaps, attribution and probability weighting; conflicting or missing coverage remains Unknown or conditional, not zero.
   scope: global
   owner: Quantum-L9/.github
+- id: L9-GT-001
+  statement: For an assessment that asserts strategic interaction, model other actors' consequential responses
+    as conditional on the focal action, their information available at each decision point, incentives and
+    version-bound response assumptions, or preserve missing conditional behavior as Unknown. A passive-world
+    approximation is only an explicit model assumption, never silently equivalent to adaptive response. This
+    obligation does not by itself assert a quantified Strategic Value claim.
+  scope: global
+  owner: Quantum-L9/.github

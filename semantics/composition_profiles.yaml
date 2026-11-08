@@ -259,3 +259,18 @@ profiles:
     - source_projection_digests
     - composition_profile_ref
     - composition_profile_digest
+  - id: l9.compose/strategic-planner-interaction@1
+    purpose: Compose only the three GT semantic source projections for strategic-planner-interaction@1, without
+      adding an SV projection or computing a value.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/strategic-planner-interaction@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.strategic-planner-interaction/v1
