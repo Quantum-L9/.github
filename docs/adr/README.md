@@ -52,8 +52,9 @@ ProductTopology
 - ADR-029: Strategic Value Foundation and Catalog-Declared Composition Provenance Criteria
 - ADR-030: Game Theory Core: Conditional Strategic Interaction
 - ADR-031: Strategic Value and Game Theory Interaction Composition Contract
+- ADR-032: Source-Class Payload Dispatch Successors for Three Projection Pairs
 
-ADR-001 through ADR-031 are the global semantic decisions. They live in this
+ADR-001 through ADR-032 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions

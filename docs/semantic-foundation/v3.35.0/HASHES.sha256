@@ -1,6 +1,6 @@
-4f5d067931d7a4bb92a629e0ab833ac75b877c5d79ea104fb232d02548fe00df  ./MANIFEST.md
-0e5d743012da8ace9bfd3eaf4495a198880b16cd25a5347c03a196829e0b5192  ./README.md
-7025e965724072402bef4d8bf8d68c3845d946d019dcdae90cd5d4f74c8f7a8e  ./RELEASE_VALIDATION.md
+b6316b29234a4308423a93afe1b618b1f3dbf3ac86755cc1eaba2a9fa3055cca  ./MANIFEST.md
+ceb4f88a6eed84988c9aeb71234866631501cc2c6b6d12d4d52ec4f1ff80d248  ./README.md
+2e358cc92315d3d11e5ca1d9471ad8a1e648a90fdc2ca3a92c6d1a94b0616190  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -32,7 +32,8 @@ ed874f5daffa93184bd52d92eb434cce2c1eb77fe1c125016ca5a4b6f4a42edd  ./docs/adr/ADR
 87ef6371774ef5e2cdedf6c161d1bd899871d7f1495ae0e961aecf5d8fc0848c  ./docs/adr/ADR-029-strategic-value-foundation-and-composition-provenance-criteria.md
 3a401face3d4b92d130934e515f196ce58225a49a57c7ffbdd02736ca984b236  ./docs/adr/ADR-030-game-theory-core-conditional-strategic-interaction.md
 6fd57bdad6e9d389408a59ab4199274550443c6426801caa84e184718a8ff0ab  ./docs/adr/ADR-031-strategic-value-interaction-composition-contract.md
-a4cd0dc936a02006dd08a7835261236a14678a17c6922b079a0ee54199713ace  ./docs/adr/README.md
+5c681659d28f1c4850b015a8d175343d689c054d8a3efd6384e655e813d9310e  ./docs/adr/ADR-032-source-class-payload-dispatch-successors.md
+c506e61a4611940c88b48aebbcf25616d5ae107b2e732d56fac0a43507690bb0  ./docs/adr/README.md
 34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f  ./semantics/actor_registry.yaml
 09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4  ./semantics/affected_strategic_closure.schema.yaml
 d6d81cb1a804b1e957d064790bcf70d855ece0b58f82522863a9e55159761694  ./semantics/architecture_break_test_composition.schema.yaml

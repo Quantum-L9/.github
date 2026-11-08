@@ -1,8 +1,8 @@
 # Semantic Foundation v3.35.0
 
-Status: **ADDITIVE SUCCESSOR CANDIDATE**.
+Status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-032, 2026-11-08).
 
-v3.35.0 is a candidate. It is not admitted until an accepted ADR names it.
+v3.35.0 carries ADR-032: Source-Class Payload Dispatch Successors for Three Projection Pairs.
 
 ## Bounded delta
 
@@ -28,4 +28,4 @@ Candidate pack and rehearsal: `docs/candidates/source-class-dispatch-v2/` (Quant
 
 ## Authority
 
-`Quantum-L9/.github` owns these ledgers. Nothing here grants plan admission, strategic commitment, execution, publication, merge, admission or deployment authority.
+`Quantum-L9/.github` owns these ledgers. Nothing here grants plan admission, strategic commitment, execution, publication, merge, admission or deployment authority. ADR-032 admits the v3.35.0 delta.

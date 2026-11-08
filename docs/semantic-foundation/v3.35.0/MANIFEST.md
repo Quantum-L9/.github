@@ -1,6 +1,6 @@
 # Semantic Foundation Manifest v3.35.0
 
-Release status: **ADDITIVE SUCCESSOR CANDIDATE**
+Release status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-032, 2026-11-08)
 
 ## Install surface
 
@@ -104,9 +104,9 @@ The v3.34.0 inventory is preserved. Six files are added; no ledger is removed or
 
 ## Architecture decision records
 
-The release contains **31** accepted ADRs plus the ADR index under `docs/adr/`.
+The release contains **32** accepted ADRs plus the ADR index under `docs/adr/`.
 
-v3.35.0 adds no ADR while it is a candidate.
+v3.35.0 adds ADR-032 (Source-Class Payload Dispatch Successors for Three Projection Pairs), the owner's admission decision for this release. Admission is scoped to the v3.35.0 delta.
 
 ## Semantic changes
 
@@ -123,6 +123,7 @@ v3.35.0 adds no ADR while it is a candidate.
 - No derived coordinate moves: no registered source's recorded digest or item count changes.
 
 Withheld by the owner's decision, and still candidates in `docs/candidates/source-class-dispatch-v2/`: the composition global rule `source_class_dispatch_composition_is_source_namespaced_and_declares_the_protocol_of_its_projection_profile`, and the strict descriptor dialect document itself. The @1 profiles stay admitted and unchanged.
+- `docs/adr/README.md`: indexes ADR-032.
 
 No other ledger, rule, profile, criterion, contract or invariant changes.
 
