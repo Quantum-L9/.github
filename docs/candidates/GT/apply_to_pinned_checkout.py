@@ -706,8 +706,22 @@ def write_staged(checkout, proposed):
         for tmp, _ in staged:
             tmp.unlink(missing_ok=True)
         raise
-    for tmp, dst in staged:
-        os.replace(tmp, dst)
+    # Rename into place; if any rename fails, restore every file already
+    # replaced (or remove it if it was new) so no partly written tree remains.
+    replaced = []
+    try:
+        for tmp, dst in staged:
+            replaced.append((dst, dst.read_bytes() if dst.exists() else None))
+            os.replace(tmp, dst)
+    except OSError:
+        for dst, original in reversed(replaced):
+            if original is None:
+                dst.unlink(missing_ok=True)
+            else:
+                dst.write_bytes(original)
+        for tmp, _ in staged:
+            tmp.unlink(missing_ok=True)
+        raise
 
 
 def main(argv=None):

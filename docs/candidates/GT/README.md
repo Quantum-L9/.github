@@ -22,7 +22,7 @@ The GT and SV compositions stay separate (three and five sources). The consumer 
 ## Runnable checks
 
 ```bash
-python -m unittest discover -s tests -v     # 89 local tests (PyYAML, jsonschema)
+python -m unittest discover -s tests -v     # 91 local tests (PyYAML, jsonschema)
 python apply_to_pinned_checkout.py --checkout <clone at 020a94b with SV #215 applied>   # dry run
 ```
 

@@ -13,8 +13,9 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from fixtures import GOVERNING, ROOT, init_repo, synthetic_sv_applied
+
 import apply_to_pinned_checkout as applier
-from fixtures import GOVERNING, ROOT, git, init_repo, synthetic_sv_applied
 
 
 class CoreStageOnSyntheticTarget(unittest.TestCase):
@@ -158,7 +159,12 @@ class CoreStageOnSyntheticTarget(unittest.TestCase):
             )
 
         for mutate in (drop, dup, extra):
-            with self.subTest(mutate=mutate.__name__), self.assertRaises(ValueError):
+            with (
+                self.subTest(mutate=mutate.__name__),
+                self.assertRaisesRegex(
+                    ValueError, "GT invariant selection must equal the core contract"
+                ),
+            ):
                 self._verify_with(mutate)
 
     def test_assembled_rejects_unregistered_forbidden_token(self):
@@ -348,16 +354,68 @@ class DependentStage(unittest.TestCase):
 
 
 class ApplyGuards(unittest.TestCase):
-    def test_apply_requires_disposable_and_refuses_own_checkout(self):
-        self.assertEqual(applier.main(["--checkout", str(ROOT), "--apply"]), 2)
+    @staticmethod
+    def _repo(tmp):
+        root = Path(tmp) / "repo"
+        (root / "semantics").mkdir(parents=True)
+        (root / "semantics/a.yaml").write_text("a: 1\n")
+        (root / "semantics/b.yaml").write_text("b: 1\n")
+        init_repo(root)
+        return root
+
+    def _main_with(self, root, *flags):
+        proposed = {"semantics/a.yaml": "a: 2\n", "semantics/b.yaml": "b: 2\n"}
+        with (
+            mock.patch.object(applier, "verify_sv_applied_target", return_value=None),
+            mock.patch.object(
+                applier, "generate_core", return_value=(proposed, 0, {}, {})
+            ),
+        ):
+            return applier.main(["--checkout", str(root), "--apply", *flags])
+
+    def test_apply_requires_disposable(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp) / "repo"
-            (root / "semantics").mkdir(parents=True)
-            (root / "semantics/a.yaml").write_text("a: 1\n")
-            init_repo(root)
-            git(root, "rev-parse", "HEAD")
-            with self.assertRaisesRegex(ValueError, "refusing --apply"):
-                applier.write_staged(ROOT, {"x": "y"})
+            root = self._repo(tmp)
+            # Verification is stubbed so the guard itself is what is exercised.
+            self.assertEqual(self._main_with(root), 2)
+            self.assertEqual((root / "semantics/a.yaml").read_text(), "a: 1\n")
+            self.assertEqual(self._main_with(root, "--disposable"), 0)
+            self.assertEqual((root / "semantics/a.yaml").read_text(), "a: 2\n")
+            self.assertEqual(list(root.rglob("*.gt-staged")), [])
+
+    def test_refuses_the_checkout_that_carries_the_pack(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._repo(tmp)
+            pack = root / "docs" / "candidates" / "GT"
+            pack.mkdir(parents=True)
+            with (
+                mock.patch.object(applier, "ROOT", pack),
+                self.assertRaisesRegex(ValueError, "refusing --apply"),
+            ):
+                applier.write_staged(root, {"x": "y"})
+            self.assertFalse((root / "x").exists())
+
+    def test_failed_rename_rolls_back_every_replaced_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._repo(tmp)
+            real_replace = applier.os.replace
+            calls = []
+
+            def flaky(src, dst):
+                calls.append(dst)
+                if len(calls) == 2:
+                    raise OSError("simulated rename failure")
+                return real_replace(src, dst)
+
+            proposed = {"semantics/a.yaml": "a: 2\n", "semantics/new.yaml": "n: 1\n"}
+            with (
+                mock.patch.object(applier.os, "replace", side_effect=flaky),
+                self.assertRaisesRegex(OSError, "simulated rename failure"),
+            ):
+                applier.write_staged(root, proposed)
+            self.assertEqual((root / "semantics/a.yaml").read_text(), "a: 1\n")
+            self.assertFalse((root / "semantics/new.yaml").exists())
+            self.assertEqual(list(root.rglob("*.gt-staged")), [])
 
     def test_script_never_publishes(self):
         text = (ROOT / "apply_to_pinned_checkout.py").read_text()

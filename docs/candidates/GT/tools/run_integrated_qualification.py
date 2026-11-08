@@ -259,6 +259,43 @@ def tree_digests(base):
     return digests
 
 
+def compiler_state(compiler_src):
+    """Return the compiler checkout's HEAD; refuse a non-git or modified tree.
+
+    Pathspecs are resolved from the repository root, not the package directory,
+    so a modified ``src/`` is never reported clean (the defect SV #215 fixed in
+    b7bd69f). A dirty compiler would otherwise be recorded as its HEAD revision.
+    """
+    # S8705: argv list, no shell; compiler_src already passed checked_directory().
+    top = subprocess.run(  # NOSONAR
+        ["git", "-C", str(compiler_src), "rev-parse", "--show-toplevel"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if top.returncode != 0:
+        raise ValueError("--compiler-src is not inside a git checkout")
+    root = top.stdout.strip()
+    head = subprocess.run(  # NOSONAR
+        ["git", "-C", root, "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    dirty = subprocess.run(  # NOSONAR
+        ["git", "-C", root, "status", "--porcelain", "--", "src"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    if dirty:
+        raise ValueError(
+            "compiler checkout has uncommitted src/ changes; refusing to record it as "
+            + head
+        )
+    return head
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--authority-root", required=True)
@@ -273,7 +310,8 @@ def main(argv=None):
             args.compiler_src, required=("l9_semantic_compiler",)
         )
         out = confined(args.out)
-    except ValueError as exc:
+        compiler_rev = compiler_state(compiler_src)
+    except (ValueError, subprocess.CalledProcessError) as exc:
         print("BLOCKED=" + str(exc), file=sys.stderr)
         return 2
     if out.exists() and any(out.iterdir()):
@@ -288,18 +326,6 @@ def main(argv=None):
         print("BLOCKED=" + str(exc), file=sys.stderr)
         return 2
     d1, d2 = tree_digests(out / "run1"), tree_digests(out / "run2")
-    compiler_rev = subprocess.run(
-        [
-            "git",
-            "-C",
-            str(compiler_src.parent),
-            "rev-parse",
-            "HEAD",
-        ],
-        capture_output=True,
-        text=True,
-        check=False,
-    ).stdout.strip()
     summary = {
         "schema": "l9.gt.integrated-qualification/v2",
         "authority_revision": revision,
