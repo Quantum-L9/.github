@@ -177,8 +177,8 @@ def _deterministic_tar(members: dict[str, bytes]) -> bytes:
     return out.getvalue()
 
 
-def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[str, Any]:
-    source_repo = _repo_root()
+def _clone_at_base(dest: Path) -> None:
+    source = _repo_root()
     _run(
         [
             "git",
@@ -186,12 +186,15 @@ def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[st
             "-q",
             "--no-checkout",
             "--no-hardlinks",
-            str(source_repo),
+            str(source),
             str(dest),
         ]
     )
     _git(dest, "checkout", "-q", "--detach", BASE_SHA)
-    report: dict[str, Any] = {
+
+
+def _new_report(compiler: Path, revision: str) -> dict[str, Any]:
+    return {
         "schema": "l9.candidate-rehearsal/source-class-dispatch-v2",
         "admission": "not_granted",
         "base": {"repository": REPOSITORY, "revision": BASE_SHA},
@@ -204,11 +207,12 @@ def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[st
         "commits": {},
         "pairs": {},
     }
-    apply_overlays(dest)
-    report["commits"]["A_overlays_applied"] = _commit(
-        dest, "rehearsal A: apply candidate overlays (not admitted)", "semantics"
-    )
-    a = report["commits"]["A_overlays_applied"]
+
+
+def _draft_grammars(
+    dest: Path, compiler: Path, python: Path, authority: str, report: dict[str, Any]
+) -> None:
+    """G1 inputs: one candidate grammar per source class of each pair."""
     for name in PAIRS:
         proc = _tool(
             compiler,
@@ -217,7 +221,7 @@ def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[st
             "--github-root",
             str(dest),
             "--authority-revision",
-            a,
+            authority,
             "--projection",
             f"l9.projection/{name}@2",
             "--composition",
@@ -231,10 +235,10 @@ def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[st
             "inexpressible": draft["inexpressible"],
             "grammars_exit": proc.returncode,
         }
-    report["commits"]["G1_grammars"] = _commit(
-        dest, "rehearsal G1: candidate source-field grammars", "docs/candidates"
-    )
-    g1 = report["commits"]["G1_grammars"]
+
+
+def _write_catalogs(dest: Path, compiler: Path, python: Path, grammars: str) -> None:
+    """G2 inputs: each pack's candidate operation, dialect and binding catalog."""
     for name in PAIRS:
         proc = _tool(
             compiler,
@@ -245,20 +249,38 @@ def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[st
             "--pack-dir",
             _pack_dir(name),
             "--grammar-revision",
-            g1,
+            grammars,
         )
         if proc.returncode:
             raise SystemExit(f"catalog failed for {name}: {proc.stderr[-400:]}")
-    report["commits"]["G2_catalog"] = _commit(
-        dest,
-        "rehearsal G2: candidate operation, dialect and binding catalog",
-        "docs/candidates",
+
+
+def _synthesis_entry(result: subprocess.CompletedProcess[str]) -> dict[str, Any]:
+    if result.returncode == 0:
+        return {"synthesis_exit": 0, "synthesis": "candidate_pair_produced"}
+    diagnostic = (
+        json.loads(result.stdout)
+        if result.stdout.strip().startswith("{")
+        else {"stdout": result.stdout[-2000:], "stderr": result.stderr[-2000:]}
     )
-    g2 = report["commits"]["G2_catalog"]
-    work = dest / ".rehearsal"
-    work.mkdir()
+    return {
+        "synthesis_exit": result.returncode,
+        "synthesis": "BLOCKED",
+        "synthesis_diagnostic": diagnostic,
+    }
+
+
+def _synthesize(
+    dest: Path,
+    compiler: Path,
+    python: Path,
+    governance: str,
+    report: dict[str, Any],
+    work: Path,
+) -> tuple[list[str], dict[str, bytes]]:
+    """S: pinned request and schema-synthesize per pair; a failure is recorded, never hidden."""
     cli = python.parent / "l9-semantic-compiler"
-    synthesis_members: dict[str, bytes] = {}
+    members: dict[str, bytes] = {}
     synthesized: list[str] = []
     for name in PAIRS:
         request = work / f"request-{name}.yaml"
@@ -271,9 +293,9 @@ def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[st
             "--pack-dir",
             _pack_dir(name),
             "--governance-revision",
-            g2,
+            governance,
             "--compiler-revision",
-            revision,
+            report["compiler"]["revision"],
             "--compiler-executable-digest",
             report["compiler"]["executable_digest"],
             "--output",
@@ -282,24 +304,20 @@ def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[st
         if proc.returncode:
             raise SystemExit(f"request failed for {name}: {proc.stderr[-400:]}")
         text = request.read_text("utf-8").replace(str(dest), "<disposable>")
-        synthesis_members[f"request-{name}.yaml"] = text.encode()
+        members[f"request-{name}.yaml"] = text.encode()
         result = _run([str(cli), "schema-synthesize", str(request)], check=False)
-        entry = report["pairs"][name]
-        entry["synthesis_exit"] = result.returncode
+        report["pairs"][name].update(_synthesis_entry(result))
         if result.returncode == 0:
             (work / f"pair-{name}.json").write_text(result.stdout, encoding="utf-8")
-            synthesis_members[f"pair-{name}.json"] = result.stdout.encode()
-            entry["synthesis"] = "candidate_pair_produced"
+            members[f"pair-{name}.json"] = result.stdout.encode()
             synthesized.append(name)
-        else:
-            diagnostic = (
-                json.loads(result.stdout)
-                if result.stdout.strip().startswith("{")
-                else {"stdout": result.stdout[-2000:], "stderr": result.stderr[-2000:]}
-            )
-            entry["synthesis"] = "BLOCKED"
-            entry["synthesis_diagnostic"] = diagnostic
-    report["synthesis_archive"] = "evidence/synthesis.tar.gz"
+    return synthesized, members
+
+
+def _register(
+    dest: Path, compiler: Path, synthesized: list[str], work: Path
+) -> dict[str, bytes]:
+    """R inputs: rendered registrations, registered in the rehearsal clone only."""
     sys.path.insert(0, str(compiler / "src"))
     from l9_semantic_compiler.passes.payload_validation import (
         registered_schema_documents,
@@ -328,14 +346,42 @@ def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[st
             manifest["requires"]["artifact_schemas"].append(filename)
             registered[filename] = raw
     _yaml_dump(manifest_path, manifest)
-    report["commits"]["R_registrations"] = _commit(
+    return registered
+
+
+def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[str, Any]:
+    _clone_at_base(dest)
+    report = _new_report(compiler, revision)
+    commits = report["commits"]
+    apply_overlays(dest)
+    commits["A_overlays_applied"] = _commit(
+        dest, "rehearsal A: apply candidate overlays (not admitted)", "semantics"
+    )
+    _draft_grammars(dest, compiler, python, commits["A_overlays_applied"], report)
+    commits["G1_grammars"] = _commit(
+        dest, "rehearsal G1: candidate source-field grammars", "docs/candidates"
+    )
+    _write_catalogs(dest, compiler, python, commits["G1_grammars"])
+    commits["G2_catalog"] = _commit(
+        dest,
+        "rehearsal G2: candidate operation, dialect and binding catalog",
+        "docs/candidates",
+    )
+    work = dest / ".rehearsal"
+    work.mkdir()
+    synthesized, synthesis_members = _synthesize(
+        dest, compiler, python, commits["G2_catalog"], report, work
+    )
+    report["synthesis_archive"] = "evidence/synthesis.tar.gz"
+    registered = _register(dest, compiler, synthesized, work)
+    commits["R_registrations"] = _commit(
         dest, "rehearsal R: register rendered candidate output schemas", "semantics"
     )
-    r = report["commits"]["R_registrations"]
+    cli = python.parent / "l9-semantic-compiler"
     producer_members: dict[str, bytes] = {}
     for name in synthesized:
         report["pairs"][name]["producer"] = _produce(
-            dest, r, name, cli, work, producer_members
+            dest, commits["R_registrations"], name, cli, work, producer_members
         )
     report["producer_archive"] = "evidence/producer.tar.gz"
     shutil.rmtree(work)
@@ -469,7 +515,7 @@ def _same(rel: str, expected: bytes, observed: bytes) -> bool:
     return expected == observed
 
 
-def main(argv: list[str] | None = None) -> int:
+def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
         "--disposable", type=Path, help="new directory outside this checkout"
@@ -482,19 +528,21 @@ def main(argv: list[str] | None = None) -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--emit", action="store_true")
     mode.add_argument("--check", action="store_true")
-    args = parser.parse_args(argv)
-    if args.disposable is None:
-        print(__doc__)
-        print(f"dry run: base {BASE_SHA}; pairs {', '.join(PAIRS)}; nothing written")
-        return 0
-    repo = _repo_root().resolve()
-    dest = args.disposable.resolve()
+    return parser
+
+
+def _disposable(repo: Path, requested: Path) -> Path:
+    dest = requested.resolve()
     if dest.exists():
         raise SystemExit(f"refusing: {dest} exists; the disposable clone must be new")
     if dest == repo or repo in dest.parents:
         raise SystemExit(
             "refusing: the disposable clone must lie outside this checkout"
         )
+    return dest
+
+
+def _pinned_compiler(args: argparse.Namespace) -> tuple[Path, str, Path]:
     if args.compiler_root is None:
         raise SystemExit("--compiler-root is required")
     compiler = args.compiler_root.resolve()
@@ -506,26 +554,45 @@ def main(argv: list[str] | None = None) -> int:
         )
     # absolute(), not resolve(): resolving the venv symlink would leave the venv.
     python = (args.compiler_python or compiler / ".venv/bin/python").absolute()
+    return compiler, revision, python
+
+
+def _emit(repo: Path, outputs: dict[str, bytes]) -> int:
+    for rel, raw in outputs.items():
+        target = repo / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(raw)
+    print(f"emitted {len(outputs)} files")
+    return 0
+
+
+def _check(repo: Path, outputs: dict[str, bytes]) -> int:
+    differing = [
+        rel
+        for rel, raw in outputs.items()
+        if not (repo / rel).is_file() or not _same(rel, (repo / rel).read_bytes(), raw)
+    ]
+    for rel in differing:
+        print(f"DIFF {rel}")
+    print(f"checked {len(outputs)} files, {len(differing)} differing")
+    return 1 if differing else 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
+    if args.disposable is None:
+        print(__doc__)
+        print(f"dry run: base {BASE_SHA}; pairs {', '.join(PAIRS)}; nothing written")
+        return 0
+    repo = _repo_root().resolve()
+    dest = _disposable(repo, args.disposable)
+    compiler, revision, python = _pinned_compiler(args)
     result = rehearse(dest, compiler, revision, python)
     outputs = _outputs(dest, result)
     if args.emit:
-        for rel, raw in outputs.items():
-            target = repo / rel
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(raw)
-        print(f"emitted {len(outputs)} files")
-        return 0
+        return _emit(repo, outputs)
     if args.check:
-        differing = [
-            rel
-            for rel, raw in outputs.items()
-            if not (repo / rel).is_file()
-            or not _same(rel, (repo / rel).read_bytes(), raw)
-        ]
-        for rel in differing:
-            print(f"DIFF {rel}")
-        print(f"checked {len(outputs)} files, {len(differing)} differing")
-        return 1 if differing else 0
+        return _check(repo, outputs)
     print(json.dumps(result["report"], indent=2, sort_keys=True))
     return 0
 

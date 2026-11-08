@@ -56,6 +56,8 @@ python3 docs/candidates/source-class-dispatch-v2/rehearse.py \
 python3 -m unittest discover -s docs/candidates/source-class-dispatch-v2/tests
 ```
 
+The compiler checkout's HEAD must equal the pinned revision. When it has moved on, clone it at that revision and pass `--compiler-root <clone> --compiler-python <an environment with the compiler installed>`.
+
 `rehearse.py` clones this repository into the disposable directory, pins `c9bbfaf` and commits the rehearsal steps A (overlays), G1 (grammars), G2 (catalog) and R (registrations) with a fixed identity and dates. Two fresh clones produced the same four commit ids (`a9d012b`, `cc27731`, `5e13c69`, `b295e49`) and the same 40 files. The grammar packs' pins name those rehearsal commits, which exist only in a rehearsal clone. `rehearse.py` never pushes, never opens a pull request and grants no admission.
 
 ## Proposed destinations, on a future admission (not done here)
