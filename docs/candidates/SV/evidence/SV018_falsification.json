@@ -1,0 +1,15 @@
+{
+  "schema": "l9.strategic-value-falsification-result/v1",
+  "assurance": "LOCAL_CONTRACT_FALSIFICATION_ONLY_NOT_NUMERICAL_VALIDATION",
+  "result": "PASS",
+  "cases": [
+    {
+      "case_id": "SV018",
+      "source_invariant": "L9-SV-018",
+      "negative_result": "UNJUSTIFIED_JOINT_ADDITIVITY",
+      "expected_failure": "UNJUSTIFIED_JOINT_ADDITIVITY",
+      "positive_control_result": "DECLARATION_NOT_FALSIFIED",
+      "pass": true
+    }
+  ]
+}

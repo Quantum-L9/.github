@@ -1,0 +1,117 @@
+document_kind: source_field_grammar_bindings_candidate
+artifact_id: l9.binding/strategic-planner-value-grammar-catalog-candidate@1
+owner: Quantum-L9/.github
+approval_status: candidate
+canonical: false
+admission: not_granted
+bindings:
+- source_class: strategic_value_model
+  source_ref: l9.source/strategic-value-model@1
+  source_path: semantics/strategic_value_model.yaml
+  source_revision: d6f4db8b9689eb97a825e6184e2b346bf27eeebf
+  source_digest: sha256:28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69
+  grammar_ref: l9.grammar/strategic-planner-value-strategic-value-model-candidate@1
+  grammar_path: docs/candidates/SV/synthesis/governance/grammars/strategic_value_model.yaml
+  grammar_revision: 88b18e382c6003329aec983918c592aa7eee60cf
+  grammar_digest: sha256:6b5e46170dd33871e8b27f2dfff27469c47364ea5c8243b307e38e2849e32fd2
+  grammar_owner: Quantum-L9/.github
+  applies_to_selectors:
+  - $.artifact_id
+  - $.authority
+  - $.canonical_source
+  - $.governed_by
+  - $.purpose
+  - $.identity
+  - $.valuation
+  - $.counterfactual_mathematics
+  - $.strategic_interaction_lookahead
+  - $.assessment_claim_levels
+  - $.evaluation_integrity
+  - $.causal_accounting
+  - $.forecast_and_realization
+  - $.comparisons
+  - $.explicit_non_ownership
+  - $.assessment_applicability
+  - $.retained_former_candidate_semantics
+  - $.relocated_additional_candidate_semantics
+  approval_status: candidate
+- source_class: vocabulary
+  source_ref: l9.source/vocabulary@1
+  source_path: semantics/vocabulary.yaml
+  source_revision: d6f4db8b9689eb97a825e6184e2b346bf27eeebf
+  source_digest: sha256:db0491ac7b8e2892e3eaddce0c4e2fa277ce4f2247017c48727b34d7f90e8bc2
+  grammar_ref: l9.grammar/strategic-planner-value-vocabulary-candidate@1
+  grammar_path: docs/candidates/SV/synthesis/governance/grammars/vocabulary.yaml
+  grammar_revision: 88b18e382c6003329aec983918c592aa7eee60cf
+  grammar_digest: sha256:3034cf135d15b7fefeadf089a0767e7db6bfabb81a217bf570b71f507bd120d2
+  grammar_owner: Quantum-L9/.github
+  applies_to_selectors:
+  - $.terms.strategic_value
+  - $.terms.systemic_future_value
+  - $.terms.strategic_value_assessment
+  - $.terms.counterfactual_baseline
+  - $.terms.future_effect_identity
+  - $.terms.bidirectional_value_propagation
+  - $.terms.value_propagation_mesh
+  - $.terms.future_work_elimination
+  - $.terms.capability_unlock
+  - $.terms.decision_relevant_information_value
+  - $.terms.decision_boundary
+  approval_status: candidate
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  source_path: semantics/invariants.yaml
+  source_revision: d6f4db8b9689eb97a825e6184e2b346bf27eeebf
+  source_digest: sha256:c17b57886f36fd5b1454618fb1f5d84ca5d76e4668079be67e75308f55bc343c
+  grammar_ref: l9.grammar/strategic-planner-value-invariants-candidate@1
+  grammar_path: docs/candidates/SV/synthesis/governance/grammars/invariants.yaml
+  grammar_revision: 88b18e382c6003329aec983918c592aa7eee60cf
+  grammar_digest: sha256:6c9151d6b83a360df762590846435a4fa551db78c0690cefb3cb48514ec44440
+  grammar_owner: Quantum-L9/.github
+  applies_to_selectors:
+  - $.invariants[?(@.id=="L9-SV-001")]
+  - $.invariants[?(@.id=="L9-SV-002")]
+  - $.invariants[?(@.id=="L9-AUTH-001")]
+  - $.invariants[?(@.id=="L9-AUTH-002")]
+  - $.invariants[?(@.id=="L9-HARD-001")]
+  - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+  - $.invariants[?(@.id=="L9-STRATEGY-001")]
+  - $.invariants[?(@.id=="L9-PROJECTION-001")]
+  - $.invariants[?(@.id=="L9-PROV-001")]
+  - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+  - $.invariants[?(@.id=="L9-ASSURANCE-001")]
+  - $.invariants[?(@.id=="L9-COORD-001")]
+  approval_status: candidate
+- source_class: contracts
+  source_ref: l9.source/contracts@1
+  source_path: semantics/contracts.yaml
+  source_revision: d6f4db8b9689eb97a825e6184e2b346bf27eeebf
+  source_digest: sha256:99b4d35d02ca978b381b363a330e5721a458eeb97eab492f0596f6f0a8b42459
+  grammar_ref: l9.grammar/strategic-planner-value-contracts-candidate@1
+  grammar_path: docs/candidates/SV/synthesis/governance/grammars/contracts.yaml
+  grammar_revision: 88b18e382c6003329aec983918c592aa7eee60cf
+  grammar_digest: sha256:7cfe0ae14b3d5f027b1d2a93048ada714c681acc7d84eb26af93ea47778a33f2
+  grammar_owner: Quantum-L9/.github
+  applies_to_selectors:
+  - $.contracts[?(@.id=="l9.contract/strategic-value-assessment@1")]
+  - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
+  - $.contracts[?(@.id=="l9.contract/projection@1")]
+  - $.contracts[?(@.id=="l9.contract/hard-constraint@1")]
+  approval_status: candidate
+- source_class: authority_model
+  source_ref: l9.source/authority-model@1
+  source_path: semantics/authority_model.yaml
+  source_revision: d6f4db8b9689eb97a825e6184e2b346bf27eeebf
+  source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
+  grammar_ref: l9.grammar/strategic-planner-value-authority-model-candidate@1
+  grammar_path: docs/candidates/SV/synthesis/governance/grammars/authority_model.yaml
+  grammar_revision: 88b18e382c6003329aec983918c592aa7eee60cf
+  grammar_digest: sha256:5bc03b4052a322bbef37b4c8937dc3358570624d28aa9018713c7f3b56fe4733
+  grammar_owner: Quantum-L9/.github
+  applies_to_selectors:
+  - $.authority_classes
+  - $.admission_rules
+  - $.promotion_rules
+  - $.strategic_authority
+  - $.strategic_cognition_authority
+  approval_status: candidate

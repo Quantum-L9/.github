@@ -1,0 +1,185 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.grammar/strategic-planner-value-authority-model-candidate@1
+owner: Quantum-L9/.github
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: authority_model
+source_ref: l9.source/authority-model@1
+source_path: semantics/authority_model.yaml
+source_revision: d6f4db8b9689eb97a825e6184e2b346bf27eeebf
+source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
+applies_to_selectors:
+- $.authority_classes
+- $.admission_rules
+- $.promotion_rules
+- $.strategic_authority
+- $.strategic_cognition_authority
+grammar:
+  type: object
+  fields:
+    authority_classes:
+      type: object
+      fields:
+        canonical:
+          type: object
+          fields:
+            implicit_derivation_allowed:
+              type: boolean
+              const: false
+            meaning:
+              type: string
+          additional_properties: true
+          required:
+          - meaning
+          - implicit_derivation_allowed
+        derived:
+          type: object
+          fields:
+            may_self_promote:
+              type: boolean
+              const: false
+            meaning:
+              type: string
+          additional_properties: true
+          required:
+          - may_self_promote
+        candidate:
+          type: object
+          fields:
+            authoritative:
+              type: boolean
+              const: false
+            meaning:
+              type: string
+          additional_properties: true
+          required:
+          - authoritative
+        evidence:
+          type: object
+          fields:
+            grants_authority:
+              type: boolean
+              const: false
+            meaning:
+              type: string
+          additional_properties: true
+          required:
+          - grants_authority
+        global_governance:
+          type: object
+          fields:
+            owner:
+              type: string
+            roles:
+              type: array
+              items:
+                type: string
+            does_not_own:
+              type: array
+              items:
+                type: string
+          additional_properties: true
+      additional_properties: true
+      required:
+      - global_governance
+      - canonical
+      - derived
+      - candidate
+      - evidence
+    admission_rules:
+      type: object
+      fields:
+        global_requirements:
+          type: array
+          items:
+            type: string
+          min_items: 1
+        candidate_generation_is_not_admission:
+          type: boolean
+          const: true
+        self_admission_without_target_class_authority_forbidden:
+          type: boolean
+          const: true
+        changed_material_subject_requires_new_decision_unless_compatibility_preserves_it:
+          type: boolean
+      additional_properties: true
+      required:
+      - global_requirements
+      - candidate_generation_is_not_admission
+      - self_admission_without_target_class_authority_forbidden
+    promotion_rules:
+      type: object
+      fields:
+        sequence:
+          type: array
+          items:
+            type: string
+          min_items: 1
+        globalization_candidate_is_not_global_authority:
+          type: boolean
+          const: true
+        authorized_global_state_change_required:
+          type: boolean
+          const: true
+      additional_properties: true
+      required:
+      - sequence
+      - globalization_candidate_is_not_global_authority
+      - authorized_global_state_change_required
+    strategic_authority:
+      type: object
+      fields:
+        definition:
+          type: string
+        grant_must_be_explicit:
+          type: boolean
+          const: true
+        may_not_be_inferred_from:
+          type: array
+          items:
+            type: string
+          min_items: 1
+        strategy_concept_ref:
+          type: string
+      additional_properties: true
+      required:
+      - definition
+      - grant_must_be_explicit
+      - may_not_be_inferred_from
+    strategic_cognition_authority:
+      type: object
+      fields:
+        global_semantics_owner:
+          type: string
+          const: Quantum-L9/.github
+        strategic_plan_owner:
+          type: string
+          const: plan_keeper
+        strategic_plan_reasoning_analysis_owner:
+          type: string
+          const: strategic_plan_metacognitive_reasoner
+        rules:
+          type: array
+          items:
+            type: string
+          min_items: 1
+        detailed_model:
+          type: string
+        invariant_ref:
+          type: string
+        strategic_plan_authority_source:
+          type: string
+        metacognition_denied:
+          type: array
+          items:
+            type: string
+        roles_are_actor_identities:
+          type: boolean
+      additional_properties: true
+      required:
+      - global_semantics_owner
+      - strategic_plan_owner
+      - strategic_plan_reasoning_analysis_owner
+      - rules
+  additional_properties: true

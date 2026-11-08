@@ -1,0 +1,37 @@
+terms:
+  strategic_value:
+    artifact_id: l9.strategic.value@1
+    semantic_class: optimization
+    definition: Expected net objective-relative utility of an admissible action under a declared DecisionModel, baseline, horizon, compatible units and uncertainty, including mutually exclusive, exhaustively reconciled immediate, future, direct-cost, expected-risk-loss and opportunity-cost effects. Separately subtract only costs and losses not already embedded in net utility flows; evaluation is not authority.
+    detailed_model: strategic_value_model.yaml
+  systemic_future_value:
+    semantic_class: optimization
+    definition: Expected counterfactual change in future reachable utility caused by an intervention relative to an explicit feasible baseline, excluding immediate and already-booked changes, evaluated with a bounded, question-appropriate numerical method, including discounted scenario expectations when applicable, with evidence-based uncertainty and stopping controls.
+    detailed_model: strategic_value_model.yaml
+  strategic_value_assessment:
+    semantic_class: derived_assessment
+    definition: Evidence- and revision-bound quantitative comparison of admissible alternatives under a declared objective and compatible utility unit that preserves uncertainty and separates forecast from realization.
+  counterfactual_baseline:
+    semantic_class: decision_model
+    definition: Explicit feasible reference trajectory used to determine incremental value; it may include waiting or no intervention when feasible.
+  future_effect_identity:
+    semantic_class: evidence_identity
+    definition: Stable causal identity of a material incremental future state delta within a time-indexed scenario; independently realized recurrence requires distinct period episode identities, whereas mutually exclusive scenario branches may reference the same underlying effect without adding their values together.
+  bidirectional_value_propagation:
+    semantic_class: causal_topology
+    definition: Temporally ordered causal effects between participants including a return to an earlier participant whose value may be positive, zero, or negative.
+  value_propagation_mesh:
+    semantic_class: causal_topology
+    definition: Bounded branching, reconvergent or feedback topology whose shared state deltas are valued once with explicit causation, attribution and stopping controls.
+  future_work_elimination:
+    semantic_class: systemic_value_dimension
+    definition: Causally supported future labor or repeated effort avoided relative to a feasible baseline, booked once per underlying state delta.
+  capability_unlock:
+    semantic_class: systemic_value_dimension
+    definition: An intervention enables a previously inaccessible future capability or feasible action with value derived from nonduplicated counterfactual effects.
+  decision_relevant_information_value:
+    semantic_class: decision_valuation
+    definition: Expected improvement in achievable decision utility due to additional evidence, distinct from information gain for its own sake.
+  decision_boundary:
+    semantic_class: decision_analysis
+    definition: Conditions under which the preferred evaluated action changes, not a prediction that the conditions will occur.

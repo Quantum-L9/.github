@@ -1,0 +1,130 @@
+{
+  "authority": {
+    "repository": "Quantum-L9/.github",
+    "revision": "d6f4db8b9689eb97a825e6184e2b346bf27eeebf",
+    "root": "<authority rehearsal store rebuilt by this tool>"
+  },
+  "compiler": {
+    "executable_digest": "sha256:6f37429d108a8922add28cdf77ad2c86461f37a75077c96bd6003a80a45353d4",
+    "repository": "Quantum-L9/l9-semantic-compiler-engine",
+    "revision": "18215ae2cd948ff8c9cc8992785d2f72f8b53310"
+  },
+  "composition_profile": {
+    "digest": "sha256:d2227cf302c5c12fc2ba360d5fb4f1304eb9bf35d6312986c50736b06b00fd14",
+    "ref": "l9.compose/strategic-planner-value@1"
+  },
+  "governance": {
+    "bindings": {
+      "digest": "sha256:1af93e5c0fb82018f5ae60e48f42740760c15af2325a071ddb0aaa4b8dd34c67",
+      "owner": "Quantum-L9/.github",
+      "path": "docs/candidates/SV/synthesis/governance/bindings.yaml",
+      "ref": "l9.binding/strategic-planner-value-grammar-catalog-candidate@1"
+    },
+    "dialect": {
+      "digest": "sha256:4f92df3139085e6066b21bc0fd6a381a33fe4d398dd6160b8af19f2dfd215058",
+      "owner": "Quantum-L9/.github",
+      "path": "docs/candidates/SV/synthesis/governance/dialect.yaml",
+      "ref": "l9.schema-dialect/candidate-v2@1"
+    },
+    "grammars": [
+      {
+        "digest": "sha256:6b5e46170dd33871e8b27f2dfff27469c47364ea5c8243b307e38e2849e32fd2",
+        "owner": "Quantum-L9/.github",
+        "path": "docs/candidates/SV/synthesis/governance/grammars/strategic_value_model.yaml",
+        "ref": "l9.grammar/strategic-planner-value-strategic-value-model-candidate@1",
+        "revision": "88b18e382c6003329aec983918c592aa7eee60cf"
+      },
+      {
+        "digest": "sha256:3034cf135d15b7fefeadf089a0767e7db6bfabb81a217bf570b71f507bd120d2",
+        "owner": "Quantum-L9/.github",
+        "path": "docs/candidates/SV/synthesis/governance/grammars/vocabulary.yaml",
+        "ref": "l9.grammar/strategic-planner-value-vocabulary-candidate@1",
+        "revision": "88b18e382c6003329aec983918c592aa7eee60cf"
+      },
+      {
+        "digest": "sha256:6c9151d6b83a360df762590846435a4fa551db78c0690cefb3cb48514ec44440",
+        "owner": "Quantum-L9/.github",
+        "path": "docs/candidates/SV/synthesis/governance/grammars/invariants.yaml",
+        "ref": "l9.grammar/strategic-planner-value-invariants-candidate@1",
+        "revision": "88b18e382c6003329aec983918c592aa7eee60cf"
+      },
+      {
+        "digest": "sha256:7cfe0ae14b3d5f027b1d2a93048ada714c681acc7d84eb26af93ea47778a33f2",
+        "owner": "Quantum-L9/.github",
+        "path": "docs/candidates/SV/synthesis/governance/grammars/contracts.yaml",
+        "ref": "l9.grammar/strategic-planner-value-contracts-candidate@1",
+        "revision": "88b18e382c6003329aec983918c592aa7eee60cf"
+      },
+      {
+        "digest": "sha256:5bc03b4052a322bbef37b4c8937dc3358570624d28aa9018713c7f3b56fe4733",
+        "owner": "Quantum-L9/.github",
+        "path": "docs/candidates/SV/synthesis/governance/grammars/authority_model.yaml",
+        "ref": "l9.grammar/strategic-planner-value-authority-model-candidate@1",
+        "revision": "88b18e382c6003329aec983918c592aa7eee60cf"
+      }
+    ],
+    "operation": {
+      "digest": "sha256:3abfc485d428d267faec5d75375c6a5719b682a3198afffb3647eb7b9a397c91",
+      "owner": "Quantum-L9/.github",
+      "path": "docs/candidates/SV/synthesis/governance/operation.yaml",
+      "ref": "l9.operation/strategic-planner-value-schema-synthesis-candidate@1"
+    },
+    "repository": "Quantum-L9/.github",
+    "revision": "98576c1bd294bd09152676cb913dc17ec4960ae8",
+    "root": "<governance store rebuilt by this tool>"
+  },
+  "mode": "candidate",
+  "projection_profile": {
+    "digest": "sha256:0ccf2184b5b01f3bb892bf956f5e3d810b1f30073127a0d25b3e6c29f71014a5",
+    "ref": "l9.projection/strategic-planner-value@1"
+  },
+  "selector_model": {
+    "digest": "sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56",
+    "path": "semantics/selector_model.yaml",
+    "ref": "l9.selector-model/global@1"
+  },
+  "source_order": [
+    "strategic_value_model",
+    "vocabulary",
+    "invariants",
+    "contracts",
+    "authority_model"
+  ],
+  "sources": [
+    {
+      "digest": "sha256:28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69",
+      "path": "semantics/strategic_value_model.yaml",
+      "ref": "l9.source/strategic-value-model@1",
+      "revision": "d6f4db8b9689eb97a825e6184e2b346bf27eeebf",
+      "source_class": "strategic_value_model"
+    },
+    {
+      "digest": "sha256:db0491ac7b8e2892e3eaddce0c4e2fa277ce4f2247017c48727b34d7f90e8bc2",
+      "path": "semantics/vocabulary.yaml",
+      "ref": "l9.source/vocabulary@1",
+      "revision": "d6f4db8b9689eb97a825e6184e2b346bf27eeebf",
+      "source_class": "vocabulary"
+    },
+    {
+      "digest": "sha256:c17b57886f36fd5b1454618fb1f5d84ca5d76e4668079be67e75308f55bc343c",
+      "path": "semantics/invariants.yaml",
+      "ref": "l9.source/invariants@1",
+      "revision": "d6f4db8b9689eb97a825e6184e2b346bf27eeebf",
+      "source_class": "invariants"
+    },
+    {
+      "digest": "sha256:99b4d35d02ca978b381b363a330e5721a458eeb97eab492f0596f6f0a8b42459",
+      "path": "semantics/contracts.yaml",
+      "ref": "l9.source/contracts@1",
+      "revision": "d6f4db8b9689eb97a825e6184e2b346bf27eeebf",
+      "source_class": "contracts"
+    },
+    {
+      "digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+      "path": "semantics/authority_model.yaml",
+      "ref": "l9.source/authority-model@1",
+      "revision": "d6f4db8b9689eb97a825e6184e2b346bf27eeebf",
+      "source_class": "authority_model"
+    }
+  ]
+}

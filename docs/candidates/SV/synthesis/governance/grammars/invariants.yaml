@@ -1,0 +1,50 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.grammar/strategic-planner-value-invariants-candidate@1
+owner: Quantum-L9/.github
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: invariants
+source_ref: l9.source/invariants@1
+source_path: semantics/invariants.yaml
+source_revision: d6f4db8b9689eb97a825e6184e2b346bf27eeebf
+source_digest: sha256:c17b57886f36fd5b1454618fb1f5d84ca5d76e4668079be67e75308f55bc343c
+applies_to_selectors:
+- $.invariants[?(@.id=="L9-SV-001")]
+- $.invariants[?(@.id=="L9-SV-002")]
+- $.invariants[?(@.id=="L9-AUTH-001")]
+- $.invariants[?(@.id=="L9-AUTH-002")]
+- $.invariants[?(@.id=="L9-HARD-001")]
+- $.invariants[?(@.id=="L9-UNKNOWN-001")]
+- $.invariants[?(@.id=="L9-STRATEGY-001")]
+- $.invariants[?(@.id=="L9-PROJECTION-001")]
+- $.invariants[?(@.id=="L9-PROV-001")]
+- $.invariants[?(@.id=="L9-EVIDENCE-001")]
+- $.invariants[?(@.id=="L9-ASSURANCE-001")]
+- $.invariants[?(@.id=="L9-COORD-001")]
+grammar:
+  type: object
+  fields:
+    invariants:
+      type: array
+      items:
+        type: object
+        fields:
+          id:
+            type: string
+          statement:
+            type: string
+          scope:
+            type: string
+          owner:
+            type: string
+            const: Quantum-L9/.github
+          severity:
+            type: string
+        additional_properties: true
+        required:
+        - id
+        - statement
+        - scope
+      min_items: 12
+  additional_properties: true
