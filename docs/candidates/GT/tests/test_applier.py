@@ -2,6 +2,7 @@
 
 import hashlib
 import inspect
+import json
 import sys
 import tempfile
 import unittest
@@ -14,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import apply_to_pinned_checkout as applier
-from fixtures import GOVERNING, ROOT, init_repo, synthetic_sv_applied
+from fixtures import GOVERNING, ROOT, git, init_repo, synthetic_sv_applied
 
 
 class CoreStageOnSyntheticTarget(unittest.TestCase):
@@ -434,3 +435,141 @@ class ApplyGuards(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AdmittedCoreStage(unittest.TestCase):
+    """--stage admitted-core: a clean target that carries the admitted SV unchanged."""
+
+    ADR = "docs/adr/ADR-029-sv.md"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = synthetic_sv_applied(Path(self.tmp.name) / "repo")
+        rel = self.root / "docs/semantic-foundation/v3.32.0"
+        rel.mkdir(parents=True)
+        (rel / "README.md").write_text(
+            "# v3.32.0\n\nStatus: **ADMITTED ADDITIVE SUCCESSOR** (ADR-029).\n"
+        )
+        (rel / "MANIFEST.md").write_text(
+            "# v3.32.0\n\nRelease status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-029)\n"
+        )
+        (self.root / "docs/adr").mkdir(parents=True)
+        (self.root / self.ADR).write_text(
+            "# ADR-029\n\n**Status:** Accepted for v3.32.0.\n"
+        )
+        self.admitted = init_repo(self.root)
+        (self.root / "README.md").write_text("later unrelated change\n")
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-q", "-m", "later")
+        self.head = git(self.root, "rev-parse", "HEAD")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def binding(self, **over):
+        ab = {
+            "target_revision": self.head,
+            "admitted_sv": {
+                "release": "v3.32.0",
+                "adr": self.ADR,
+                "effective_revision": self.admitted,
+                "identities": {k: applier.BINDING[k] for k in applier.SV_IDENTITY_KEYS},
+            },
+        }
+        ab.update(over)
+        return ab
+
+    def verify(self, ab=None):
+        applier.verify_admitted_sv_base(self.root, ab or self.binding())
+
+    def commit(self, message="change"):
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-q", "-m", message)
+        return git(self.root, "rev-parse", "HEAD")
+
+    def test_exact_admitted_base_passes_and_assembles_gt(self):
+        self.verify()
+        changed, count, rebound, resolved = applier.generate_core(self.root)
+        self.assertEqual(count, 13)
+        self.assertIn("semantics/lifecycle.yaml", rebound)
+        self.assertEqual(len(resolved), 2)
+
+    def test_wrong_head_fails(self):
+        with self.assertRaisesRegex(ValueError, "wrong target HEAD"):
+            self.verify(self.binding(target_revision="0" * 40))
+
+    def test_dirty_target_fails(self):
+        (self.root / "README.md").write_text("dirty\n")
+        with self.assertRaisesRegex(ValueError, "not clean"):
+            self.verify()
+
+    def test_admitted_revision_must_be_an_ancestor(self):
+        ab = self.binding()
+        ab["admitted_sv"]["effective_revision"] = "f" * 40
+        with self.assertRaisesRegex(ValueError, "not an ancestor"):
+            self.verify(ab)
+
+    def test_sv_owned_file_changed_since_admission_fails(self):
+        (self.root / "semantics/strategic_value_model.yaml").write_text(
+            f"artifact_id: {applier.SV_MODEL_ID}\nextra: drift\n"
+        )
+        head = self.commit()
+        with self.assertRaisesRegex(ValueError, "differs from its admitted bytes"):
+            self.verify(self.binding(target_revision=head))
+
+    def test_sv_record_changed_in_shared_ledger_fails(self):
+        path = self.root / "semantics/invariants.yaml"
+        path.write_text(
+            path.read_text().replace(
+                "statement: existing L9-SV-001", "statement: drift"
+            )
+        )
+        head = self.commit()
+        with self.assertRaisesRegex(ValueError, "SV records in the shared ledgers"):
+            self.verify(self.binding(target_revision=head))
+
+    def test_unadmitted_release_record_fails(self):
+        readme = self.root / "docs/semantic-foundation/v3.32.0/README.md"
+        readme.write_text("# v3.32.0\n\nStatus: **ADDITIVE SUCCESSOR CANDIDATE**\n")
+        head = self.commit()
+        with self.assertRaisesRegex(ValueError, "README is not marked admitted"):
+            self.verify(self.binding(target_revision=head))
+
+    def test_adr_not_accepted_fails(self):
+        (self.root / self.ADR).write_text("# ADR-029\n\n**Status:** Candidate.\n")
+        head = self.commit()
+        with self.assertRaisesRegex(ValueError, "is not Accepted"):
+            self.verify(self.binding(target_revision=head))
+
+    def test_gt_already_present_fails(self):
+        changed, *_ = applier.generate_core(self.root)
+        for rel, text in changed.items():
+            (self.root / rel).write_text(text)
+        head = self.commit("gt applied")
+        with self.assertRaisesRegex(ValueError, "GT additions already present"):
+            self.verify(self.binding(target_revision=head))
+
+    def test_identities_differing_from_aligned_sv_are_refused(self):
+        ab = self.binding()
+        ab["admitted_sv"]["identities"]["sv_contract"] = "l9.contract/other@1"
+        with (
+            mock.patch.object(
+                applier, "ADMITTED_SV_BINDING", Path(self.tmp.name) / "ab.json"
+            ),
+        ):
+            (Path(self.tmp.name) / "ab.json").write_text(json.dumps(ab))
+            with self.assertRaisesRegex(ValueError, "sv_contract differs"):
+                applier.load_admitted_sv_binding()
+
+    def test_recorded_binding_names_the_admitted_sv(self):
+        ab = applier.load_admitted_sv_binding()
+        self.assertEqual(
+            ab["admitted_sv"]["effective_revision"],
+            "64d8b8598300f94c3201f26866f73be6895dab60",
+        )
+        self.assertEqual(ab["admitted_sv"]["release"], "v3.32.0")
+        self.assertEqual(
+            applier.BINDING["admitted_foundation_revision"],
+            None,
+            "the historical binding stays unchanged",
+        )

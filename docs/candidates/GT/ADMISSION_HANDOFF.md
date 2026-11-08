@@ -19,6 +19,18 @@ Gates the canonical owner must close:
 5. Re-run the integrated rehearsal at the exact successor revision, and replay it under trust.
 6. Review the compiler-generated candidate schemas and their drafted grammars in `synthesis/` (`schema-synthesize` at `18215ae`, exit 0, deterministic). Approve, amend or reject the grammars, and decide whether the candidate schemas replace or accompany `semantics/strategic_interaction_*.schema.yaml`. Then re-run `tools/synthesize_candidate_schemas.py` against the admitted revision with the approved grammars.
 
+## Release A after SV admission (2026-11-08)
+
+SV was admitted on its own first: Semantic Foundation v3.32.0 / ADR-029, effective at `64d8b85` (Quantum-L9/.github#222). Release A is therefore **GT core only**. `apply_to_pinned_checkout.py --stage admitted-core` applies it to a clean checkout at the `target_revision` recorded in `evidence/admitted_sv_binding.json`, a reviewed successor binding. The stage re-verifies the following before any byte is written:
+
+- the admitted SV revision is an ancestor of the target;
+- the SV-owned files equal their admitted bytes;
+- every SV record in a shared ledger equals its admitted record;
+- the v3.32.0 release and ADR-029 record the admission;
+- no GT record exists yet.
+
+Against `main` `c9bbfaf` it touches **11** canonical paths, not 15: the four SV-owned files are already admitted. The paths are `invariants.yaml`, `contracts.yaml`, `vocabulary.yaml`, `projection_profiles.yaml`, `composition_profiles.yaml`, `generic_compiler_manifest.yaml`, both GT schemas, and the derived `capabilities.yaml`, `lifecycle.yaml` and `receipt_catalog.yaml`. `evidence/sv_alignment_binding.json` stays the unchanged historical record of the SV #215 overlay rehearsal.
+
 ## Successor release B — GT+SV cross-boundary contract
 
 1. Record the admitted release-A revision in `evidence/sv_alignment_binding.json#admitted_foundation_revision` through a reviewed commit.

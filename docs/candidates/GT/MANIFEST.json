@@ -29,8 +29,8 @@
 	"files": [
 		{
 			"path": "ADMISSION_HANDOFF.md",
-			"bytes": 3768,
-			"sha256": "b6a3546c210c61d6d0911a7005434ee8ed76ad6ed9cc29bdb781570d87ffc491"
+			"bytes": 4968,
+			"sha256": "4c6a891c5743dd212cd54b825a44399b18b717f084b74fc6a2265ea5e51e18e6"
 		},
 		{
 			"path": "COMPOSITION_MATH_AND_CASES.md",
@@ -74,8 +74,13 @@
 		},
 		{
 			"path": "apply_to_pinned_checkout.py",
-			"bytes": 32178,
-			"sha256": "6e4063cffdff4e0448930c4e0218323be0d65b872b71fcb98929652c511b93f8"
+			"bytes": 39660,
+			"sha256": "b8d1bb03150d6d03e66d9a24db64b090c7955715d8b06676352c1ca43f7a620c"
+		},
+		{
+			"path": "evidence/admitted_sv_binding.json",
+			"bytes": 2111,
+			"sha256": "d8d8775ea1a66e163294e40fd4e05fe9b50acd7070c79df55abf20812793c667"
 		},
 		{
 			"path": "evidence/authority_binding.json",
@@ -294,8 +299,8 @@
 		},
 		{
 			"path": "tests/test_applier.py",
-			"bytes": 18346,
-			"sha256": "8a8b6c50c6ef8c3006c7b28f7f2a1380eabbf5919595b5fe7b61972757f7f7fb"
+			"bytes": 23996,
+			"sha256": "34d571157eb8334cbd327793c1f9750787e44ee217f1afb48ee370f9152a6d5c"
 		},
 		{
 			"path": "tests/test_candidate.py",
