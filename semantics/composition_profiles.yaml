@@ -12,7 +12,6 @@ global_rules:
   silent_precedence_is_forbidden: true
   composition_does_not_create_authority: true
   required_provenance_is_evaluated_only_through_declared_provenance_constraints: true
-  source_class_dispatch_composition_is_source_namespaced_and_declares_the_protocol_of_its_projection_profile: true
 provenance_constraints:
   criterion_language:
     name: l9.provenance-constraint
