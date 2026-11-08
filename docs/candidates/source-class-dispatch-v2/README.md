@@ -2,6 +2,8 @@
 
 **Status:** LOCAL CANDIDATE, not admitted (`CANDIDATE_NOT_ADMITTED`). Nothing under `semantics/` changes, no release directory is cut and no ADR is written. The owner directed: candidate only, do not admit anything.
 
+**Admission outcome (v3.35.0, ADR-032):** the owner later granted an explicit admission decision for this subject. Semantic Foundation v3.35.0 admits the three @2 projection and composition pairs, their six registered schemas, `PROJECTION-017` and the three vocabulary terms exactly as the overlays state them. By the owner's decision it does **not** admit `overlays/composition_global_rule_additions.yaml`, which stays a candidate here. The dialect also stays a candidate. The pack below is unchanged candidate evidence; `MANIFEST.json` records the pack as it was built.
+
 **Target:** `Quantum-L9/.github@535400e8c4fb89771c9f08136b4c0309bb5f2a1d`, exact pinned revision. The three @1 records are identical at this revision and at the first pin, `c9bbfaf`. Re-basing past the v3.33.0 and v3.34.0 admissions refreshed the source digests of `invariants` and `contracts`.
 **Compiler:** `Quantum-L9/l9-semantic-compiler-engine@d5ce17d01de72c8017e4021fbe43f9eaed2b69de` (merged `main`). It carries the grammar builder for any pair (#35), source-class dispatch (#30) and the B2/B3 synthesis fixes (#34).
 

@@ -1,11 +1,14 @@
-"""Structural tests for the source-class dispatch candidate pack. Candidate only.
+"""Structural tests for the source-class dispatch candidate pack.
+
+v3.35.0 (ADR-032) admitted the pack's subject except the composition global rule; the
+pack itself stays the candidate evidence it was, and these tests bind it to semantics/.
 
 Run from the repository root:
 
     python3 -m unittest discover -s docs/candidates/source-class-dispatch-v2/tests
 
-The @1 records are read from this branch's semantics/, which the pack never
-changes, so the tests need no git history.
+The @1 and admitted @2 records are read from this branch's semantics/, so the
+tests need no git history.
 """
 
 from __future__ import annotations
@@ -118,12 +121,34 @@ class ProfileOverlays(unittest.TestCase):
             )
             self.assertEqual(rebuilt, v1, name)
 
-    def test_successors_are_absent_from_semantics(self) -> None:
-        text = (SEMANTICS / "projection_profiles.yaml").read_text("utf-8")
-        text += (SEMANTICS / "composition_profiles.yaml").read_text("utf-8")
-        self.assertNotIn("payload_validation", text)
-        for name in PAIRS:
-            self.assertNotIn(f"l9.projection/{name}@2", text)
+    def test_admitted_successors_are_the_overlay_records(self) -> None:
+        # v3.35.0 (ADR-032) admitted the pairs; semantics/ carries them byte-for-meaning.
+        projections = {
+            r["id"]: r
+            for r in _load(SEMANTICS / "projection_profiles.yaml")[
+                "projection_profiles"
+            ]
+        }
+        compositions = {
+            r["id"]: r
+            for r in _load(SEMANTICS / "composition_profiles.yaml")["profiles"]
+        }
+        for ident, record in self.projections.items():
+            self.assertEqual(projections[ident], record, ident)
+        for ident, record in self.compositions.items():
+            self.assertEqual(compositions[ident], record, ident)
+        rules = _load(SEMANTICS / "projection_profiles.yaml")["validation_rules"]
+        for rule in _overlay("projection_rule_additions.yaml")["records"]:
+            self.assertIn(rule, rules)
+        terms = _load(SEMANTICS / "vocabulary.yaml")["terms"]
+        for key, term in _overlay("vocabulary_additions.yaml")["records"].items():
+            self.assertEqual(terms[key], term, key)
+
+    def test_composition_global_rule_was_not_admitted(self) -> None:
+        # The owner admitted the subject without it; it stays a candidate in this pack.
+        rules = _load(SEMANTICS / "composition_profiles.yaml")["global_rules"]
+        for key in _overlay("composition_global_rule_additions.yaml")["records"]:
+            self.assertNotIn(key, rules)
 
 
 class CandidateStatus(unittest.TestCase):
@@ -210,13 +235,16 @@ class RegisteredSchemas(unittest.TestCase):
         }
         self.assertEqual(names, expected)
 
-    def test_semantics_manifest_names_no_candidate_registration(self) -> None:
+    def test_admitted_registrations_are_the_overlay_documents(self) -> None:
         manifest = _load(SEMANTICS / "generic_compiler_manifest.yaml")
         registered = set(manifest["requires"]["artifact_schemas"])
-        candidates = {
-            p.name for p in (PACK / "overlays/registered_schemas").glob("*.yaml")
-        }
-        self.assertFalse(registered & candidates)
+        for path in sorted((PACK / "overlays/registered_schemas").glob("*.yaml")):
+            self.assertIn(path.name, registered)
+            candidate = _load(path)
+            candidate.pop(
+                "admission"
+            )  # ADR-032 admits them; the marker does not carry over
+            self.assertEqual(_load(SEMANTICS / path.name), candidate, path.name)
 
 
 class Evidence(unittest.TestCase):

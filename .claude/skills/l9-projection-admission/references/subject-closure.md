@@ -17,6 +17,14 @@ A release admits its whole approved `semantics/` tree, so its subject must name 
 
 If no release verifies, the base is empty and every identity is new. Any exact ref may be given with `--base <ref>`. The candidate is the working tree, or `--candidate <ref>`. The report names both resolved commits.
 
+`--admitted-base <version>` (in this script and in `check_admission_closure.py`) measures from a release that main admitted but whose decision record the current verifier rejects, for instance one recorded before the verifier required a field. Without it the default skips that release, measures from an older one, and pulls that release's own admitted identities into the new subject. The option is bounded and waives nothing:
+
+- the release must be `ADMITTED` on main, by a commit that flips it;
+- it must not be older than the base the default verifies;
+- every gap the verifier finds stays in the report as `admitted_base.verification_gaps`.
+
+v3.34.0 is the first case: ADR-031 has no target-class row.
+
 ## Identity census (per tree)
 
 | Kind | Identity | Record compared |

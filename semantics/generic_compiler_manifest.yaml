@@ -98,6 +98,12 @@ requires:
   - implementation_ir.schema.yaml
   - strategic_interaction_projection.schema.yaml
   - strategic_interaction_composition.schema.yaml
+  - identity_assurance_composition_v2.schema.yaml
+  - identity_assurance_projection_v2.schema.yaml
+  - strategic_metacognition_composition_v2.schema.yaml
+  - strategic_metacognition_projection_v2.schema.yaml
+  - strategic_planning_context_composition_v2.schema.yaml
+  - strategic_planning_context_projection_v2.schema.yaml
 capabilities:
 - canonical_source_resolution
 - profile_resolution
