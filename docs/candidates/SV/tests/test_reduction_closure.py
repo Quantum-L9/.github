@@ -104,30 +104,43 @@ class LosslessAgainstDonor(unittest.TestCase):
                 rec["authority_status"], "not_admitted_as_independent_invariant"
             )
 
-    def test_sv001_amendment_is_ledgered_with_its_weakening_points(self):
-        """The amended SV-001 is NOT lossless; the ledger must say so explicitly."""
+    def test_sv001_is_the_owner_approved_verbatim_merge(self):
+        """D1 Option B: donor SV-001 then donor SV-015, verbatim, with nothing narrowed."""
         led = yaml.safe_load(
             (REDUCTION_EVIDENCE / "owner-disposition-ledger.yaml").read_text()
         )
         rows = {r["candidate_id"]: r for r in led["dispositions"]}
-        points = " ".join(rows["L9-SV-001"]["owner_review_points"])
-        for phrase in (
-            "causally attributed",
-            "quantify",
-            "When causal intervention effects are claimed",
-            "quantified",
-        ):
-            self.assertIn(phrase, points)
+        statements = donor_statements()
+        approved = f"{statements['L9-SV-001']} {statements['L9-SV-015']}"
+        overlay = {r["id"]: r["statement"] for r in self.src["invariants"]}
+        self.assertEqual(overlay["L9-SV-001"], approved)
+        self.assertEqual(
+            rows["L9-SV-001"]["statement_change"],
+            "VERBATIM_CONCATENATION_OF_DONOR_SV001_AND_SV015_OWNER_APPROVED_D1",
+        )
         self.assertEqual(
             rows["L9-SV-015"]["meaning_preservation"],
-            "MERGE_WITH_WEAKENING_REQUIRES_OWNER_DECISION",
+            "MERGE_VERBATIM_OWNER_APPROVED_D1",
         )
-        original = donor_statements()["L9-SV-001"]
-        amended = {r["id"]: r["statement"] for r in self.src["invariants"]}["L9-SV-001"]
-        self.assertIn("cannot establish a complete Strategic Value ranking", original)
-        self.assertNotIn("cannot establish a complete Strategic Value ranking", amended)
+        for phrase in (
+            "cannot establish a complete Strategic Value ranking",
+            "For a Strategic Value claim, a counterfactual comparison must identify",
+            "explicitly quantify their divergence",
+        ):
+            self.assertIn(phrase, overlay["L9-SV-001"])
+        for narrowed in (
+            "causally attributed",
+            "identified and justified",
+            "When causal",
+        ):
+            self.assertNotIn(narrowed, overlay["L9-SV-001"])
+        # The superseded development text stays on record, and only there.
+        self.assertIn(
+            "causally attributed",
+            rows["L9-SV-001"]["superseded_development_statement"],
+        )
 
-    def test_sv002_statement_unchanged_and_sv001_amendment_is_the_ledgered_text(self):
+    def test_sv002_statement_unchanged_and_sv001_is_the_ledgered_text(self):
         statements = donor_statements()
         overlay = {r["id"]: r["statement"] for r in self.src["invariants"]}
         self.assertEqual(overlay["L9-SV-002"], statements["L9-SV-002"])
@@ -139,17 +152,7 @@ class LosslessAgainstDonor(unittest.TestCase):
             if r["candidate_id"] == "L9-SV-001"
         )
         self.assertEqual(overlay["L9-SV-001"], sv001["amended_statement"].strip())
-        self.assertEqual(
-            sv001["statement_change"],
-            "AMENDED_MATERIAL_SEMANTIC_CHANGE_REQUIRES_OWNER_REVIEW",
-        )
-        for phrase in (
-            "When causal intervention effects are claimed",
-            "defensibly comparable",
-            "Convenient scenario pairing or historical correlation alone does not establish",
-            "materially unidentified inputs",
-        ):
-            self.assertIn(phrase, overlay["L9-SV-001"])
+        self.assertEqual(set(overlay), {"L9-SV-001", "L9-SV-002"})
 
     def test_contract_obligations_are_not_more_permissive(self):
         donor = read_yaml("contracts_additions.yaml", DONOR)["contracts"][0]
@@ -442,3 +445,53 @@ class DigestAndProvenanceGates(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OwnerDecisionGuard(unittest.TestCase):
+    """The reduction refuses an approval that the owner-decision record does not back."""
+
+    def _load(self, ledger_edit=None, decision_edit=None):
+        import importlib.util
+        import tempfile
+
+        spec = importlib.util.spec_from_file_location(
+            "reduce_tool", ROOT / "tools" / "reduce_to_two_invariants.py"
+        )
+        tool = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(tool)
+        ledger = yaml.safe_load(tool.LEDGER.read_text(encoding="utf-8"))
+        decision = yaml.safe_load(tool.OWNER_DECISION.read_text(encoding="utf-8"))
+        if ledger_edit:
+            ledger_edit(ledger)
+        if decision_edit:
+            decision_edit(decision)
+        with tempfile.TemporaryDirectory() as tmp:
+            lp, dp = Path(tmp) / "ledger.yaml", Path(tmp) / "decision.yaml"
+            lp.write_text(yaml.safe_dump(ledger), encoding="utf-8")
+            dp.write_text(yaml.safe_dump(decision), encoding="utf-8")
+            tool.LEDGER, tool.OWNER_DECISION = lp, dp
+            return tool.load_ledger()
+
+    def test_committed_approval_is_accepted(self):
+        self.assertEqual(len(self._load()["dispositions"]), 8)
+
+    def test_approval_without_an_approved_record_is_refused(self):
+        def unapprove(d):
+            d["decision_status"] = "PENDING_UNTIL_AUTHORIZED"
+
+        with self.assertRaises(ValueError):
+            self._load(decision_edit=unapprove)
+
+    def test_approval_citing_another_record_is_refused(self):
+        def reroute(led):
+            led["dispositions"][3]["owner_decision_ref"] = "elsewhere.yaml"
+
+        with self.assertRaises(ValueError):
+            self._load(ledger_edit=reroute)
+
+    def test_disposition_differing_from_the_approved_one_is_refused(self):
+        def flip(d):
+            d["approved_dispositions"]["L9-SV-019"] = "CONTRACT"
+
+        with self.assertRaises(ValueError):
+            self._load(decision_edit=flip)

@@ -1,30 +1,34 @@
 schema: l9.sv-admission-owner-decision/v1
 schema_note: >-
-  Proposed record format, not an existing canonical schema. The binding record must follow the admission
-  mechanism the repository already uses: semantics/authority_model.yaml admission_rules (exact subject identity,
-  exact revision or digest, target class, target-class authority, explicit decision record) as realized by
-  docs/adr/ADR-025 for v3.28.0. This file is a scaffold for that decision. It is not one.
-decision_status: PENDING_UNTIL_AUTHORIZED
-not_claimed:
-- owner decision
-- admission
-- approval of any disposition, wording or provenance route
+  Candidate-pack record format, not a canonical schema. It records the owner's decisions for the exact subject the
+  admission mechanism (semantics/authority_model.yaml admission_rules, realized by an ADR as ADR-025 did for v3.28.0)
+  then binds. Owner approval of these decisions is not canonical admission: admission is the ADR plus the release
+  status flip merged to main after the preceding releases (D5).
+decision_status: OWNER_APPROVED_NOT_ADMITTED
+statuses:
+  owner_approval: APPROVED
+  implementation: see ADMISSION_CLOSEOUT.md
+  canonical_admission: NOT_ADMITTED
+  post_merge_trusted_replay: NOT_RUN
+authorized_decider_ref: >-
+  Repository owner of Quantum-L9/.github, explicit written instruction in governed Claude Code session
+  session_017xwbxytavCYavKdhRr9a6n on 2026-11-08 ("Proceed with the following decisions for the SV admission
+  closeout", D1-D5 approved).
+decision_evidence_ref: https://claude.ai/code/session_017xwbxytavCYavKdhRr9a6n
+decided_on: '2026-11-08'
 subject:
   repository: Quantum-L9/.github
   candidate_pr: 215
+  candidate_pack_pr: 220
   candidate_revision: null
   candidate_revision_note: >-
-    The exact final candidate SHA is fixed only after the owner selects the SV-001 wording and the provenance
-    route, since either choice changes the subject. Bind it then; never to an intermediate head.
-  candidate_digest: null
+    One decision binds all eight dispositions. The exact final subject (admission-branch revision and semantics tree
+    hash) is recorded in ADMISSION_CLOSEOUT.md once qualified; the decision applies to that subject because D1 and D2
+    are realized there unchanged.
 target:
   authority_class: canonical
   semantic_owner: Quantum-L9/.github
-  admission_base: null
-  admission_base_note: >-
-    Re-resolve from freshly fetched origin/main at admission time. At this scaffold origin/main is 9488d8f, not the
-    pack pin 020a94b; see ADMISSION_CLOSEOUT.md.
-proposed_dispositions:
+approved_dispositions:
   L9-SV-001: KEEP
   L9-SV-002: KEEP
   L9-SV-015: MERGE
@@ -33,14 +37,26 @@ proposed_dispositions:
   L9-SV-018: CONTRACT
   L9-SV-019: REUSE
   L9-SV-020: REUSE
-proposed_dispositions_ref: ../reduction-v1/owner-disposition-ledger.yaml
-decisions_required:
+approved_dispositions_ref: ../reduction-v1/owner-disposition-ledger.yaml
+decisions:
 - id: D1-sv001-wording
-  question: Which L9-SV-001 statement is admitted?
-  options:
+  decision: APPROVED
+  selected: B-non-weakening
+  ruling: >-
+    Admit the original SV-001 wording followed by the original SV-015 wording, both verbatim, as one consolidated
+    L9-SV-001. L9-SV-002 stays the second and only other new SV invariant. Preserve the six relocated safeguards, the
+    twelve earlier relocated meanings, their lineage and contract obligations.
+  approved_statement: >-
+    For an assessment asserting quantified Strategic Value, declare the objective, compatible utility units,
+    feasible counterfactual baseline, bounded horizon, applicable discount and utility-flow basis,
+    model/evidence coordinates and material uncertainty. Unknown or incompatible inputs cannot establish a
+    complete Strategic Value ranking. For a Strategic Value claim, a counterfactual comparison must identify the
+    same decision-relevant initial conditions, utility measure, exogenous context and time basis across
+    intervention and baseline worlds, or explicitly quantify their divergence. A convenient scenario pairing or
+    historical correlation is not evidence of an identifiable causal intervention effect.
+  rejected:
     A-development-pack:
-      status: in the pack today (overlays/invariants_additions.yaml)
-      classification: independent review findings 1-2 classify it as a weakening of SV-001 and SV-015
+      reason: independent review findings 1-2 classify it as a weakening of SV-001 and SV-015
       statement: >-
         For an assessment asserting quantified Strategic Value, declare the objective, compatible utility units,
         feasible counterfactual baseline, bounded horizon, applicable discount and utility-flow basis, model/evidence
@@ -50,68 +66,39 @@ decisions_required:
         and justified under the selected method. Convenient scenario pairing or historical correlation alone does
         not establish a causal intervention effect. Unknown, incompatible, or materially unidentified inputs cannot
         establish a complete causally attributed Strategic Value ranking.
-    B-non-weakening:
-      status: not applied; the operator brief recommends it
-      classification: >-
-        original SV-001 (donor) verbatim followed by original SV-015 (donor) verbatim; keeps the unqualified ranking
-        consequence, the claim-wide scope and "explicitly quantify their divergence"
-      statement: >-
-        For an assessment asserting quantified Strategic Value, declare the objective, compatible utility units,
-        feasible counterfactual baseline, bounded horizon, applicable discount and utility-flow basis,
-        model/evidence coordinates and material uncertainty. Unknown or incompatible inputs cannot establish a
-        complete Strategic Value ranking. For a Strategic Value claim, a counterfactual comparison must identify the
-        same decision-relevant initial conditions, utility measure, exogenous context and time basis across
-        intervention and baseline worlds, or explicitly quantify their divergence. A convenient scenario pairing or
-        historical correlation is not evidence of an identifiable causal intervention effect.
-      consequences_if_selected:
-      - rewrite overlays/invariants_additions.yaml L9-SV-001 and the SV-015 lineage meaning_preservation
-      - update owner-disposition-ledger.yaml statement_change and the SV-015 MERGE record
-      - regenerate both candidate schemas (synthesis/) and re-pin tests that freeze the statement
-      - discard all projection evidence bound to the old text; rerun the producer at the new subject
-  selected: null
 - id: D2-composition-provenance
-  question: How does l9.compose/strategic-planner-value@1 reach a genuine composition PASS?
-  evidence: composition-provenance-equivalence.json
-  options:
-    R1-remove-redundant-stanza:
-      effect: >-
-        Drop the profile-local required_provenance list; the general composed-projection contract and the
-        compiler's always-on criteria still enforce the same facts (proved independently, both runs, 17 negative
-        controls).
-      caution: >-
-        Precedent on main is mixed: l9.compose/stage-context@1 declares the same four tokens; the other thirteen
-        composition profiles (including pr-audit and architecture-intelligence) declare none. Requires an owner
-        finding that the profile-local declarations are not independently normative.
-    R2-implement-compiler-criteria:
-      effect: >-
-        Keep all four declarations and give l9-semantic-compiler-engine a mechanical criterion for each token,
-        mapped onto component_provenance, composition_equivalence and composition_profile_currentness.
-      caution: >-
-        Separate compiler change and release; also resolves stage-context, which would hit the same UNKNOWN. Treat
-        the declarations as normative.
-  selected: null
+  decision: APPROVED
+  selected: R2-implement-compiler-criteria
+  ruling: >-
+    Keep the four required_provenance declarations and make them mechanically verified. Establish the governing
+    source of each requirement and whether a governed .github criterion is needed in addition to compiler
+    enforcement; never invent authority in the compiler or mark an unsupported criterion satisfied. Bind components
+    to exact source artifacts, composition profile and revision; keep tamper controls; cover
+    l9.compose/stage-context@1; pin the exact compiler revision behind the final receipts.
+  contingency: >-
+    R1 only if R2 has a demonstrated authority or implementation dependency that would unnecessarily delay SV, with
+    an owner-reviewed equivalence finding, independent verification of all four requirements, passing tamper
+    controls, the global provenance obligation preserved, and the residual stage-context issue recorded. Never a
+    silent switch.
 - id: D3-derived-ledger-rebinding
-  question: >-
-    Confirm capabilities.yaml, lifecycle.yaml and receipt_catalog.yaml need only derivation-digest rebinding.
-  selected: null
+  decision: APPROVED_SUBJECT_TO_VERIFICATION
+  ruling: >-
+    capabilities.yaml, lifecycle.yaml and receipt_catalog.yaml take derivation-coordinate updates only, provided the
+    freshly pinned source and native validation confirm no substantive change; fail closed on any mismatch.
 - id: D4-successor-release
-  question: Which semantic-foundation release carries SV?
-  facts:
-  - v3.28.0 is admitted (ADR-025); the version the brief proposed is therefore taken.
-  - v3.29.0 is an unadmitted candidate on main (ADR-026); validate-semantics.py SC-008 checks the highest numeric release
-    directory regardless of admission status.
-  options:
-    V1: new successor v3.30.0 after v3.29.0 is admitted or withdrawn
-    V2: fold SV into the v3.29.0 candidate before its admission
-  selected: null
+  decision: APPROVED
+  ruling: >-
+    Independent successor release numbered at admission. Do not fold into v3.29.0, reserve v3.30.0 or v3.31.0, or
+    hardcode v3.32.0. Select release number and ADR identity from the authoritative merged state when the admission
+    branch is cut; preserve predecessor releases and hashes.
 - id: D5-merge-order
-  question: Order of SV admission relative to the open v3.29.0 candidate (ADR-026).
-  selected: null
-approved_sv001_statement_ref: null
-authorized_decider_ref: null
-decision_evidence_ref: null
+  decision: APPROVED
+  ruling: >-
+    Sequential admission in actual merge order: preceding numbered releases first, then SV in its own successor
+    release, then GT core on the remediated #216 candidate and the admitted SV foundation, then the GT+SV dependent
+    contract once its dependencies are satisfied. SV is not coupled to unrelated GT work; SV/GT compatibility is
+    preserved.
 decision_record_ref: null
 decision_record_ref_note: >-
-  Expected to be an ADR under docs/adr/ (next free number at admission time), naming the owner's instruction, the
-  approved semantics tree hash and the qualified commit, as ADR-025 does. One properly scoped decision may bind all
-  eight dispositions; do not manufacture eight approvals.
+  The canonical decision record is the ADR in the admission PR (identity selected from merged state at admission,
+  D4). It quotes this ruling and binds the final semantics tree hash.

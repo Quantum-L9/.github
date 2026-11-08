@@ -249,8 +249,8 @@ class NegativeControls(_RunFixture):
         self.assertIn("receipt_binding", self.failed(run))
 
 
-class OwnerDecisionScaffold(unittest.TestCase):
-    """The scaffold must never read as a decision, and its option texts must be exact."""
+class OwnerDecisionRecord(unittest.TestCase):
+    """The owner's D1-D5 decisions: approved, bound to the ledger, and never read as admission."""
 
     def setUp(self):
         import yaml
@@ -261,44 +261,66 @@ class OwnerDecisionScaffold(unittest.TestCase):
                 encoding="utf-8"
             )
         )
+        self.ledger = yaml.safe_load(
+            (EVIDENCE / "owner-disposition-ledger.yaml").read_text(encoding="utf-8")
+        )
 
     def _statements(self, rel):
         data = self.yaml.safe_load((vcp.PACK / rel).read_text(encoding="utf-8"))
         return {r["id"]: r["statement"] for r in data["invariants"]}
 
-    def test_no_authority_reference_or_selection_is_present(self):
-        self.assertEqual(self.doc["decision_status"], "PENDING_UNTIL_AUTHORIZED")
-        for key in (
-            "approved_sv001_statement_ref",
-            "authorized_decider_ref",
-            "decision_evidence_ref",
-            "decision_record_ref",
-        ):
-            self.assertIsNone(self.doc[key], key)
-        self.assertIsNone(self.doc["subject"]["candidate_revision"])
-        for decision in self.doc["decisions_required"]:
-            self.assertIsNone(decision["selected"], decision["id"])
+    def test_approval_is_recorded_and_is_not_admission(self):
+        self.assertEqual(self.doc["decision_status"], "OWNER_APPROVED_NOT_ADMITTED")
+        self.assertEqual(self.doc["statuses"]["owner_approval"], "APPROVED")
+        self.assertEqual(self.doc["statuses"]["canonical_admission"], "NOT_ADMITTED")
+        self.assertEqual(self.doc["statuses"]["post_merge_trusted_replay"], "NOT_RUN")
+        self.assertIn(
+            "session_017xwbxytavCYavKdhRr9a6n", self.doc["authorized_decider_ref"]
+        )
+        decisions = {d["id"]: d for d in self.doc["decisions"]}
+        self.assertEqual(
+            sorted(decisions),
+            [
+                "D1-sv001-wording",
+                "D2-composition-provenance",
+                "D3-derived-ledger-rebinding",
+                "D4-successor-release",
+                "D5-merge-order",
+            ],
+        )
+        self.assertEqual(decisions["D1-sv001-wording"]["selected"], "B-non-weakening")
+        self.assertEqual(
+            decisions["D2-composition-provenance"]["selected"],
+            "R2-implement-compiler-criteria",
+        )
 
-    def test_sv001_options_are_exact_source_texts(self):
-        options = self.doc["decisions_required"][0]["options"]
+    def test_approved_and_rejected_texts_are_exact(self):
+        d1 = next(d for d in self.doc["decisions"] if d["id"] == "D1-sv001-wording")
         donor = self._statements(
             "evidence/reduction-v1/donor/invariants_additions.yaml"
         )
         overlay = self._statements("overlays/invariants_additions.yaml")
+        approved = f"{donor['L9-SV-001']} {donor['L9-SV-015']}"
+        self.assertEqual(d1["approved_statement"].strip(), approved)
+        self.assertEqual(overlay["L9-SV-001"], approved)
+        rows = {r["candidate_id"]: r for r in self.ledger["dispositions"]}
         self.assertEqual(
-            options["A-development-pack"]["statement"].strip(), overlay["L9-SV-001"]
-        )
-        self.assertEqual(
-            options["B-non-weakening"]["statement"].strip(),
-            f"{donor['L9-SV-001']} {donor['L9-SV-015']}",
+            d1["rejected"]["A-development-pack"]["statement"].strip(),
+            rows["L9-SV-001"]["superseded_development_statement"].strip(),
         )
 
-    def test_proposed_dispositions_match_the_ledger(self):
-        ledger = self.yaml.safe_load(
-            (EVIDENCE / "owner-disposition-ledger.yaml").read_text(encoding="utf-8")
-        )
-        expected = {d["candidate_id"]: d["disposition"] for d in ledger["dispositions"]}
-        self.assertEqual(self.doc["proposed_dispositions"], expected)
+    def test_every_ledger_row_is_bound_to_this_approval(self):
+        expected = {
+            d["candidate_id"]: d["disposition"] for d in self.ledger["dispositions"]
+        }
+        self.assertEqual(self.doc["approved_dispositions"], expected)
+        for row in self.ledger["dispositions"]:
+            self.assertEqual(
+                row["owner_decision_status"], "approved", row["candidate_id"]
+            )
+            self.assertEqual(
+                row["owner_decision_ref"], "evidence/admission/owner-decision.yaml"
+            )
 
 
 class UnreadableInputs(unittest.TestCase):

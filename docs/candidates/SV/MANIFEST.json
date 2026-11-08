@@ -64,8 +64,8 @@
 		},
 		{
 			"path": "README.md",
-			"bytes": 11299,
-			"sha256": "46559557f34071de485894fbe1221888bc17dbac4294d948d363734a4cc4f265"
+			"bytes": 11514,
+			"sha256": "a36f9ce9cc0638144875ac0555fbe1d75871817fdde3e994f2c45a980b59c534"
 		},
 		{
 			"path": "SCHEMA_QUALIFICATION_REVIEW.md",
@@ -124,8 +124,8 @@
 		},
 		{
 			"path": "evidence/admission/owner-decision.yaml",
-			"bytes": 6732,
-			"sha256": "f0e81a3b6deda73e823f7737d8b68884dbb6847b820793b15bfb5eebed150512"
+			"bytes": 6289,
+			"sha256": "2b9a40e1700e4e300ba95c258694e61196c2a36b76257f95cf83c7723acd2955"
 		},
 		{
 			"path": "evidence/native_schema_gate.json",
@@ -234,8 +234,8 @@
 		},
 		{
 			"path": "evidence/reduction-v1/owner-disposition-ledger.yaml",
-			"bytes": 9988,
-			"sha256": "705ddf50502058c059f44cebdb4c39f2b3973c09aa1e0175ca3b2cd32051e762"
+			"bytes": 10071,
+			"sha256": "ce25c10910df47b432988ee2f7a5c658dd2cc02aab6ce99604a5a69d0b9c4a68"
 		},
 		{
 			"path": "evidence/reduction-v1/producer-negative-controls.json",
@@ -289,8 +289,8 @@
 		},
 		{
 			"path": "overlays/invariants_additions.yaml",
-			"bytes": 1415,
-			"sha256": "d649596ab3f0649446e4e6d825d0f842b40ef29a7f2b2f85fbd8ac5060481ef6"
+			"bytes": 1312,
+			"sha256": "14832f76eeec42b1015194eaa8796b837d48dd4ab4b3991ce905a7e908702ec1"
 		},
 		{
 			"path": "overlays/projection_profile_additions.yaml",
@@ -434,8 +434,8 @@
 		},
 		{
 			"path": "tests/test_composition_provenance_equivalence.py",
-			"bytes": 12299,
-			"sha256": "8e91794447ccdebbf3dad507c051bc48970680b5f24c5f754a1fd498a9fef460"
+			"bytes": 13359,
+			"sha256": "57d867df61daf0ccebe4c3de2a0751e36bec733e32c11c003ac63095a4b39245"
 		},
 		{
 			"path": "tests/test_irreducibility.py",
@@ -459,8 +459,8 @@
 		},
 		{
 			"path": "tests/test_reduction_closure.py",
-			"bytes": 17701,
-			"sha256": "34a7f9df1318b73f16900f622f739226d39f5e14c97896b92bc1a97663cdef8e"
+			"bytes": 19765,
+			"sha256": "1121c9a70f1660633222996018d2ca8e3bd82f69833f9e48438ba6e9a875e19c"
 		},
 		{
 			"path": "tests/test_schema_hardening.py",
@@ -479,8 +479,8 @@
 		},
 		{
 			"path": "tools/reduce_to_two_invariants.py",
-			"bytes": 14263,
-			"sha256": "332b850688119691ca99d5ede0c253f978720b9230bf629a7537700f7448b8c8"
+			"bytes": 14943,
+			"sha256": "570e66a0ea87d7964ad6f49f22a66f347b2911f631a7678efbf82b928dce16cb"
 		},
 		{
 			"path": "tools/synthesize_candidate_schemas.py",
