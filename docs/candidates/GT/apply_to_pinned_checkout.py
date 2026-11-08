@@ -986,6 +986,9 @@ def main(argv=None):
             proposed, count, rebound, resolved = generate_core(checkout)
         else:
             proposed, count, rebound, resolved = generate_dependent(checkout)
+            foundation = load_admitted_foundation_binding()
+            if foundation:
+                target = foundation["admitted_foundation_revision"]
         if args.apply:
             if not args.disposable:
                 raise ValueError("--apply requires --disposable")
@@ -1000,6 +1003,8 @@ def main(argv=None):
             print(
                 "ADMITTED_SV_REVISION=" + admitted["admitted_sv"]["effective_revision"]
             )
+        elif args.stage == "dependent" and target != CANONICAL_TARGET:
+            print("ADMITTED_FOUNDATION_REVISION=" + target)
         else:
             print("SV_CANDIDATE_HEAD=" + SV_CANDIDATE_HEAD)
         print("INVARIANT_COUNT=" + str(count))

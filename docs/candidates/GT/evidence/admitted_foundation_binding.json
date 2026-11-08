@@ -1,0 +1,29 @@
+{
+	"schema": "l9.gt-admitted-foundation-binding/v1",
+	"repository": "Quantum-L9/.github",
+	"purpose": "Successor binding for release B (l9.contract/strategic-value-interaction-composition@1). Read only by apply_to_pinned_checkout.py --stage dependent.",
+	"historical_binding": {
+		"path": "evidence/sv_alignment_binding.json",
+		"meaning": "Keeps admitted_foundation_revision null as the historical candidate record; this file supersedes it for release B."
+	},
+	"admitted_foundation_revision": "a4bb4618d51632028264ce894a5992b379876e8f",
+	"admitted_sv": {
+		"release": "v3.32.0",
+		"adr": "docs/adr/ADR-029-strategic-value-foundation-and-composition-provenance-criteria.md",
+		"admission_pr": "Quantum-L9/.github#222",
+		"effective_revision": "64d8b8598300f94c3201f26866f73be6895dab60",
+		"post_merge_verification": "docs/evidence/sv-campaign-closeout/ (DOWNSTREAM_USABLE)"
+	},
+	"admitted_gt_core": {
+		"release": "v3.33.0",
+		"adr": "docs/adr/ADR-030-game-theory-core-conditional-strategic-interaction.md",
+		"admission_pr": "Quantum-L9/.github#225",
+		"effective_revision": "a4bb4618d51632028264ce894a5992b379876e8f",
+		"semantics_tree": "3ce1adaf6da7f5eea8c47414bffc86145906505c",
+		"post_merge_verification": "check_admission_closure --require downstream: DOWNSTREAM_USABLE at a4bb461"
+	},
+	"dependent_contract": "l9.contract/strategic-value-interaction-composition@1",
+	"dependent_contract_text": "overlays/contracts_sv_dependent.yaml as aligned in Quantum-L9/.github#226 (SV obligations applied by reference)",
+	"owner_decision": "evidence/admission/gt-owner-decision.yaml#G4-gt-sv-contract",
+	"target_rule": "The dependent stage applies only to a clean checkout at exactly admitted_foundation_revision, with both foundations' admission records verified on every run."
+}
