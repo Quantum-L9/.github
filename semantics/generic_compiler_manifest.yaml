@@ -48,6 +48,7 @@ requires:
   - repository_classes.yaml
   - strategic_cognition_model.yaml
   - strategic_plan_model.yaml
+  - strategic_value_model.yaml
   - strategic_plan_graph.schema.yaml
   - affected_strategic_closure.schema.yaml
   - strategic_planning_episode.schema.yaml
@@ -72,6 +73,8 @@ requires:
   - cursor_governance_operating_plane_v2_projection.schema.yaml
   - pr_audit_projection.schema.yaml
   - pr_audit_composition.schema.yaml
+  - strategic_planner_value_projection.schema.yaml
+  - strategic_planner_value_composition.schema.yaml
   - authority_resolution_projection.schema.yaml
   - authority_resolution_composition.schema.yaml
   - architecture_break_test_composition.schema.yaml

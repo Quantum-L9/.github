@@ -16,15 +16,15 @@ derivation:
   source_artifacts:
     - artifact: invariants.yaml
       artifact_id: l9.invariants/global@1
-      sha256: 771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a
+      sha256: 9558c947e2538d77b634ee4448e5ce8791ff121ce3afbb6ecb0a2debd8c8256b
       admission: canonical_active
     - artifact: contracts.yaml
       artifact_id: l9.contracts/global@1
-      sha256: f1fcc979534d0aa34783710657ae36d765f7078e6ab20dc3b11a31d576539d79
+      sha256: fcd31cb45a68d234449951ec28a26fa03eb5ff15035243f3dcdcd07440b7bc5b
       admission: canonical_active
     - artifact: capabilities.yaml
       artifact_id: l9.capabilities/global@1
-      sha256: 531e140166ed9efc44e74a7c9365d9b0f6f13a1bd91c9f87cd47167ec64fef71
+      sha256: be197d791d10f2aee69a63c010057651ca0134ee110b095ab441432f7c6246e6
       admission: canonical_active
   rule: >
     Define one global receipt kernel and a bounded family registry without
