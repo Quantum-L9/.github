@@ -103,6 +103,111 @@
 			"sha256": "55e57af5ec7fd031bbe055f340b021474322ffcdabebc5041b4b9574fe0ef9aa"
 		},
 		{
+			"path": "evidence/campaign-closeout/README.md",
+			"bytes": 2617,
+			"sha256": "5785be30b71a8b33a4a2fc8e27b59161f67f931cebd3331239d602f8f7babc20"
+		},
+		{
+			"path": "evidence/campaign-closeout/authority-resolution.json",
+			"bytes": 1955,
+			"sha256": "1f34d9e36ba5ba5f1579caec76c577371f30c7dd3d1b683d0720b6917a3c8adb"
+		},
+		{
+			"path": "evidence/campaign-closeout/campaign-final-receipt.json",
+			"bytes": 4009,
+			"sha256": "ec8a17f9a75ab7cf4caa356360debbe6d25e6b2061d39c65a4b83fff04432f4e"
+		},
+		{
+			"path": "evidence/campaign-closeout/canonical-diff-census.json",
+			"bytes": 3147,
+			"sha256": "7e6fcf8141732280e11827fe8d60152ad80531cc59b1da7813aaf138f1b1779d"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-core/admission-closure-at-05031a2.json",
+			"bytes": 3985,
+			"sha256": "a214e7bdcdc49025ae53111eda7a500022a4cd6c4b3ad5db1a45edc34835ff82"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-core/negative-controls-f03f859.json",
+			"bytes": 11854,
+			"sha256": "3a3ec20c3b8d943b1280790435ed1fff3c8811f8ecbfa2e1e44a168fe8bf2649"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-core/post-merge-admission-closure-a4bb461.json",
+			"bytes": 3945,
+			"sha256": "32ec4a19f4579461c8adde32cbd9d2f84fc942a3a79acfabd5cd956446b1fa6f"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-core/post-merge-native-validation-a4bb461.log",
+			"bytes": 11173,
+			"sha256": "c4f4d42dc58f50117505b44eeb991283374fa7ae3658af0937bebe07de4f198b"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-core/post-merge-negative-controls-a4bb461.json",
+			"bytes": 11854,
+			"sha256": "bcd55cc435d3a7bb2c5662a873f9659e5a35f02233a629670d87ef950661027f"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-core/post-merge-producer-a4bb461.json",
+			"bytes": 7346,
+			"sha256": "6df735c223c7a697a79d8c920f3fab335eef748bd0c4b122f7809d15caac4e67"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-core/producer-qualification-f03f859.json",
+			"bytes": 7346,
+			"sha256": "dc915d4e8ffcef2a8f56f691bb42798d4a4742d27fcc9a42b1e2f0c030c840b4"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-sv/consumer-envelope-evidence-b091628.json",
+			"bytes": 1588,
+			"sha256": "2c84bce2c3b28cb0b823a2532285e0c522b7fa3a0b560b77e89614260939f6a2"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-sv/negative-controls-b091628.json",
+			"bytes": 11854,
+			"sha256": "bfcab034bd744f15d2cb65dad9a044016384545d70bbf8f1175cec09903ce0d9"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-sv/post-merge-admission-closure-05031a2.json",
+			"bytes": 1690,
+			"sha256": "4ea849544e450e2c1be1eb3a471af2f00acad5a0fdd8f4186635b27f4a1bf48b"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-sv/post-merge-native-validation-05031a2.log",
+			"bytes": 11173,
+			"sha256": "b094d827c52952c49ac6a5c680340d7591c4a51c77867b34f9198b04dbbcb912"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-sv/post-merge-negative-controls-05031a2.json",
+			"bytes": 11854,
+			"sha256": "d1e433cd1bdd4f806c88811477f3a018811f13055045c89c592ea0b28d3c3459"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-sv/post-merge-producer-05031a2.json",
+			"bytes": 7346,
+			"sha256": "1d476b028ce0d4cb56a612fbe07c6f4c1c7e12eb961bce0a57b23e997767d77b"
+		},
+		{
+			"path": "evidence/campaign-closeout/gt-sv/producer-qualification-b091628.json",
+			"bytes": 7346,
+			"sha256": "f5c3bb60a08c86ef364f73f449b6540603986bbc257302e3e31dbe22be0fbb78"
+		},
+		{
+			"path": "evidence/campaign-closeout/negative-controls-matrix.json",
+			"bytes": 4809,
+			"sha256": "249ac556009406f4676e36d58029d77ee891c6f95348b3942502be7e4249f856"
+		},
+		{
+			"path": "evidence/campaign-closeout/pr-merge-ledger.json",
+			"bytes": 2087,
+			"sha256": "18290a09d692b363187f8c0f4bd9e745c4c5076d374e972d8e6e948b8e779e0e"
+		},
+		{
+			"path": "evidence/campaign-closeout/schema-authority-disposition.json",
+			"bytes": 809,
+			"sha256": "c986a14207ced9765f16880c8e970a2bcea620563a36669629b77fbfdad0395a"
+		},
+		{
 			"path": "evidence/integration-v1/native-semantic-validation.log",
 			"bytes": 14979,
 			"sha256": "2880da9b50fe2d057513f847557cf80438b68e69657d3a059b1f15ddde725dea"

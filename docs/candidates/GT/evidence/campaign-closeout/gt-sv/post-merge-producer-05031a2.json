@@ -1,0 +1,175 @@
+{
+	"acceptance_failures": [],
+	"authority_revision": "05031a2d9ddbc086c6839f563831855ef7804bcf",
+	"authority_tree": "9454f0eb3f697e5fee18c667cd76212d33fe71f4",
+	"byte_identical_outputs": true,
+	"compiler_revision": "39a51b76057f6d950877ffe1c2c87c4cb6d4a891",
+	"run1": {
+		"gt:compose": {
+			"artifacts": [
+				{
+					"digest": "sha256:b82356a770fa68341f7fd049078c1e6d93cd7cab7c463a0c3dcceea61d7b1904",
+					"ref": "l9.compose/strategic-planner-interaction@1#l9.projection/strategic-planner-interaction@1",
+					"result": "pass",
+					"unresolved_criteria": []
+				}
+			],
+			"component_count": 3,
+			"exit_code": 0,
+			"result": "pass",
+			"status": "succeeded",
+			"stderr_tail": ""
+		},
+		"gt:contracts": {
+			"artifacts": [
+				{
+					"digest": "sha256:5baed4aeaf4fc93a628cfb5ae71f4c178c90799e7987d151e11e2b36b2d6ea3a",
+					"ref": "l9.projection/strategic-planner-interaction@1#l9.source/contracts@1",
+					"result": "pass",
+					"unresolved_criteria": []
+				}
+			],
+			"exit_code": 0,
+			"result": "pass",
+			"status": "succeeded",
+			"stderr_tail": ""
+		},
+		"gt:invariants": {
+			"artifacts": [
+				{
+					"digest": "sha256:26ac09ad4c159754989cf12c258bb930169ddbb8c04427910c73ef1f9034dccf",
+					"ref": "l9.projection/strategic-planner-interaction@1#l9.source/invariants@1",
+					"result": "pass",
+					"unresolved_criteria": []
+				}
+			],
+			"exit_code": 0,
+			"result": "pass",
+			"status": "succeeded",
+			"stderr_tail": ""
+		},
+		"gt:vocabulary": {
+			"artifacts": [
+				{
+					"digest": "sha256:1008ecc1f933574e55e77db09a946996591ba517cf43f225b48809e9c09751ed",
+					"ref": "l9.projection/strategic-planner-interaction@1#l9.source/vocabulary@1",
+					"result": "pass",
+					"unresolved_criteria": []
+				}
+			],
+			"exit_code": 0,
+			"result": "pass",
+			"status": "succeeded",
+			"stderr_tail": ""
+		},
+		"sv:authority_model": {
+			"artifacts": [
+				{
+					"digest": "sha256:9de2c2f140c2a709cee4eb098cd9f8f8fa42544d507ee1a35fd28cdf1082070e",
+					"ref": "l9.projection/strategic-planner-value@1#l9.source/authority-model@1",
+					"result": "pass",
+					"unresolved_criteria": []
+				}
+			],
+			"exit_code": 0,
+			"result": "pass",
+			"status": "succeeded",
+			"stderr_tail": ""
+		},
+		"sv:compose": {
+			"artifacts": [
+				{
+					"digest": "sha256:c1d538b0f1e4943935cb019df16f09137496b14263499665b50938edad304dc7",
+					"ref": "l9.compose/strategic-planner-value@1#l9.projection/strategic-planner-value@1",
+					"result": "pass",
+					"unresolved_criteria": []
+				}
+			],
+			"component_count": 5,
+			"exit_code": 0,
+			"result": "pass",
+			"status": "succeeded",
+			"stderr_tail": ""
+		},
+		"sv:contracts": {
+			"artifacts": [
+				{
+					"digest": "sha256:8d87c56ee57b7d3cadd16039135fb46e6343d08a07b47a987458aeba9ff217cf",
+					"ref": "l9.projection/strategic-planner-value@1#l9.source/contracts@1",
+					"result": "pass",
+					"unresolved_criteria": []
+				}
+			],
+			"exit_code": 0,
+			"result": "pass",
+			"status": "succeeded",
+			"stderr_tail": ""
+		},
+		"sv:invariants": {
+			"artifacts": [
+				{
+					"digest": "sha256:b39cfe130a530ed82a4a6c0364423281fbf699e977e63e375d63c49c8555edb2",
+					"ref": "l9.projection/strategic-planner-value@1#l9.source/invariants@1",
+					"result": "pass",
+					"unresolved_criteria": []
+				}
+			],
+			"exit_code": 0,
+			"result": "pass",
+			"status": "succeeded",
+			"stderr_tail": ""
+		},
+		"sv:strategic_value_model": {
+			"artifacts": [
+				{
+					"digest": "sha256:19562c93cb676476929d49560cd0a0f1ea36c57ebbc125e6a605fa629a55f3f4",
+					"ref": "l9.projection/strategic-planner-value@1#l9.source/strategic-value-model@1",
+					"result": "pass",
+					"unresolved_criteria": []
+				}
+			],
+			"exit_code": 0,
+			"result": "pass",
+			"status": "succeeded",
+			"stderr_tail": ""
+		},
+		"sv:vocabulary": {
+			"artifacts": [
+				{
+					"digest": "sha256:c8ffdaf2a640ce711b95f3fcae848d83fd56ff35a47f333073417a992621b082",
+					"ref": "l9.projection/strategic-planner-value@1#l9.source/vocabulary@1",
+					"result": "pass",
+					"unresolved_criteria": []
+				}
+			],
+			"exit_code": 0,
+			"result": "pass",
+			"status": "succeeded",
+			"stderr_tail": ""
+		}
+	},
+	"run1_output_digests": {
+		"composed/l9.compose_strategic-planner-interaction_1_l9.projection_strategic-planner-interaction_1.composed.json": "83bae6bb587a3509d9c4c08e424032bff3e94aa0ad82c8f082d8134abf3cad76",
+		"composed/l9.compose_strategic-planner-value_1_l9.projection_strategic-planner-value_1.composed.json": "52a65c13e5aed0cf94368311d5a302a6fb0fb7612aea9696c9132e64c8616a70",
+		"l9.projection_strategic-planner-interaction_1/l9.source_contracts_1.projection.json": "006ddd65a52ee6fe445ee3599fe698f200ebdf963bc6e5e1cfb23e80034d2f0c",
+		"l9.projection_strategic-planner-interaction_1/l9.source_invariants_1.projection.json": "0a35f31ab57f6567f5129beb247f73a47e9b8737bee6b926e810ff63ff3a9ebc",
+		"l9.projection_strategic-planner-interaction_1/l9.source_vocabulary_1.projection.json": "8db2ed2d6a06f487c816a26c73e93317ceb95aa5152db12088859d0726eac240",
+		"l9.projection_strategic-planner-value_1/l9.source_authority-model_1.projection.json": "d4d8df85c5733a960f0e8a01f26e261c052f6fd4352682a19341c885852dd725",
+		"l9.projection_strategic-planner-value_1/l9.source_contracts_1.projection.json": "0ffa19947ac8b8eb14145d63ad5ec66a8798b4d42a5789d852c4def55d358149",
+		"l9.projection_strategic-planner-value_1/l9.source_invariants_1.projection.json": "2986280be536f94a7c212a5cf58eef431fcca48904386572d6ba88608de0a6a9",
+		"l9.projection_strategic-planner-value_1/l9.source_strategic-value-model_1.projection.json": "2460f1dd1860c72d6c9a11d5400543209c5283b887d00216bd886a501c29c8b6",
+		"l9.projection_strategic-planner-value_1/l9.source_vocabulary_1.projection.json": "a3c71725d77df89244dd2f97781665bbba479e597840fbb7b886adc33342f65c",
+		"receipts/41621cb589f2030a106106edf8941aa3d6b370081fed1946c74430cd56532b65.json": "f464e69c4dd066f7afe159f136dc3f985c06992e6fce519c791f9d8305d41a80",
+		"receipts/70950c300aea09273017176a42207ed5400f51e857b45bcf80fd7ab5229bf0e3.json": "3de35ca6779eb188813c784e3c86a3e637abd2b27a5199a27732a911ed0464f3",
+		"receipts/732ddd2df1612dcc96b2a954abd266aa45745d171f90425be7455d59d2d969bd.json": "8c911e7514fd99c2dad8a26dec35a7814a1095c6c931f4421aa80b38f1bffbea",
+		"receipts/9899afd69fbeb43cc4d8ef3a45d6a5083dff22c072c5f15fc4ff472f1db09b0a.json": "77c782834b2dc3b04a78b3a54fcd05a8e7ddcd1521daae972b728ccc36bb15ba",
+		"receipts/a3369034ac4083bbab030a7f6da89aba0b104041f456cd2333bc16e675b403ab.json": "6745ac21d0c5b11ea3a7420a304755214686cd215ce9fc61c150c5172dc98dd2",
+		"receipts/ac8e4e5ecf6eff350009601dc04702aef5cbcb47fa3d1740e9fc17eefe4c861a.json": "31ad46b275f25821125409b5cc2d392359549f3d8e394b542a3e673dcbcac156",
+		"receipts/b61accc61b991e8cfda63df358be53d02255edfadd98dba173c8c5f3cc74e06f.json": "0716ad25723ac16696285e94a812372be49b0adaff53e54bf62d7c05c37896f0",
+		"receipts/c4a692dc724db3309053a180168736f9dbbf2e984823a27b3192f1e9dcfe4807.json": "236fc51d04a0f89231ee97c53f93e6a2ded7fe43fea3ef2682c18eefbbfeebd2",
+		"receipts/cf7917c0c06463d9747d7b6809a8ad786b32027cabec02e9ab4c5cad0957b3af.json": "c493ac49047649ac0c7fe834deb8d6c8523bcb671399f37a4058f8994bba8413",
+		"receipts/dd34c7d31f2eda918709aaf9a6e545cbcd585cb3c33140020dfb5ad8cbacd7b0.json": "13c1269603c1bfe0c70265cff9920ce152d158efe8d029ed00508b0a467a1731"
+	},
+	"run2_equal_results": true,
+	"schema": "l9.gt.integrated-qualification/v2"
+}

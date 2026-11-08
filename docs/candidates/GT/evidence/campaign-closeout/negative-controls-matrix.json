@@ -1,0 +1,108 @@
+{
+	"schema": "l9.gt-campaign-negative-controls/v1",
+	"producer_controls": {
+		"count": 19,
+		"all_matched_at": [
+			"f03f859 (gt-core/negative-controls-f03f859.json)",
+			"a4bb461 (gt-core/post-merge-negative-controls-a4bb461.json)",
+			"b091628 (gt-sv/negative-controls-b091628.json)",
+			"05031a2 (gt-sv/post-merge-negative-controls-05031a2.json)"
+		]
+	},
+	"article_9_cases": [
+		{
+			"case": "GT projection selects an SV term",
+			"mechanism": "producer control profile_selects_sv_vocabulary_term (source exclusion)",
+			"kind": "producer"
+		},
+		{
+			"case": "GT projection selects an SV invariant",
+			"mechanism": "producer controls profile_selects_sv_invariant, profile_selects_sv_invariant_with_schema_widened",
+			"kind": "producer"
+		},
+		{
+			"case": "GT projection selects the SV assessment contract",
+			"mechanism": "producer controls profile_selects_sv_contract, profile_selects_sv_contract_with_schema_widened",
+			"kind": "producer"
+		},
+		{
+			"case": "Missing one of six GT governing invariants",
+			"mechanism": "producer control profile_drops_one_governing_invariant; test_assembled_rejects_missing_or_extra_governing_selection",
+			"kind": "producer+applier"
+		},
+		{
+			"case": "Duplicate GT source namespace",
+			"mechanism": "producer control composition_duplicate_source (AMBIGUOUS_SEMANTICS)",
+			"kind": "producer"
+		},
+		{
+			"case": "Schema discriminator missing",
+			"mechanism": "producer control projection_schema_discriminator_removed; test_assembled_rejects_missing_schema_discriminator",
+			"kind": "producer+applier"
+		},
+		{
+			"case": "Unregistered forbidden criterion",
+			"mechanism": "producer control profile_reverts_to_unregistered_forbidden_tokens; test_assembled_rejects_unregistered_forbidden_token",
+			"kind": "producer+applier"
+		},
+		{
+			"case": "Unverified private actor intention asserted as fact",
+			"mechanism": "admitted GT core contract forbids counterparty_statement_promoted_to_unknown_private_fact (pinned by test_candidate)",
+			"kind": "contract obligation; no GT assessment runtime exists to execute it"
+		},
+		{
+			"case": "Passive-world assumption treated as adaptive-response proof",
+			"mechanism": "L9-GT-001 and contract requirement passive_response_approximation_is_declared_rather_than_silently_assumed; test_gt_conditioning_may_raise_lower_or_leave_value",
+			"kind": "contract obligation + arithmetic test"
+		},
+		{
+			"case": "Later observation used by an earlier decision",
+			"mechanism": "test_earlier_action_conditioned_on_later_observation_is_rejected",
+			"kind": "pack test"
+		},
+		{
+			"case": "Joint actor responses treated as independent",
+			"mechanism": "test_correlated_responses_are_not_silently_multiplied",
+			"kind": "pack test"
+		},
+		{
+			"case": "Stable numerical iteration asserted as Nash proof",
+			"mechanism": "test_stable_iterate_with_profitable_deviation_is_not_certified; test_contract_distinguishes_stability_from_solution_validity",
+			"kind": "pack test"
+		},
+		{
+			"case": "GT value added as a separate SV bonus",
+			"mechanism": "test_contract_forbids_uplift_and_summing; test_response_conditioned_value_is_not_a_sixth_bucket",
+			"kind": "pack test"
+		},
+		{
+			"case": "Projection receipt presented as numerical execution proof",
+			"mechanism": "verify_consumer_envelope refuses (gt-sv/consumer-envelope-evidence-b091628.json); test_projection_receipt_cannot_certify_numerical_or_solver_execution",
+			"kind": "consumer verifier, real receipts"
+		},
+		{
+			"case": "Stale actor model or source revision",
+			"mechanism": "producer control source_digest_mutated; test_stale_numerical_coordinates_are_refused; test_views_at_different_revisions_are_refused",
+			"kind": "producer+consumer"
+		},
+		{
+			"case": "Dependent contract applied before both foundations are admitted",
+			"mechanism": "test_refuses_without_admitted_foundation; test_gt_release_not_admitted_is_refused; test_refuses_foundation_without_gt_core",
+			"kind": "applier"
+		},
+		{
+			"case": "Fabricated admitted foundation revision",
+			"mechanism": "test_other_head_is_refused; test_foundation_that_is_not_an_ancestor_is_refused; test_option_shaped_revision_is_refused",
+			"kind": "applier"
+		},
+		{
+			"case": "Evaluated consumer envelope without a genuine numerical receipt",
+			"mechanism": "verify_consumer_envelope refuses (consumer-envelope-evidence case evaluated_without_numerical_receipt)",
+			"kind": "consumer verifier, real receipts"
+		}
+	],
+	"new_controls_this_campaign": [
+		"admitted-core stage: 12 tests (wrong head, dirty, non-ancestor, SV bytes/records drift, unadmitted release, ADR not accepted, GT present, identity mismatch, option-shaped revision)",
+		"dependent stage: 8 tests (other head, GT release unadmitted, non-ancestor, option-shaped revision, missing release/ADR, contract already present)"
+	]
+}
