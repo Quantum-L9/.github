@@ -25,7 +25,7 @@
 	},
 	"remote_mutation": false,
 	"no_skills": true,
-	"candidate_revision": "sha256:d92025969c2431aabe1b4a6fe79b3c402af156a2e4fec13808aec488ce8fdbf4",
+	"candidate_revision": "sha256:2dd936ea56894df8302f2926d1188fed98db76218d18d58cf980a078fb40594d",
 	"files": [
 		{
 			"path": "ADMISSION_HANDOFF.md",
@@ -59,8 +59,8 @@
 		},
 		{
 			"path": "REMEDIATION_LEDGER.md",
-			"bytes": 5230,
-			"sha256": "c456b83db80f524884b0621d9fdb5b32d4e74f1b0a725ec2b38e548e688ce393"
+			"bytes": 5857,
+			"sha256": "5bed469d3dc23fabdaf281c2ea0ed4f28fad91e673a77b7b41992162f8d261b9"
 		},
 		{
 			"path": "SOURCE_AND_PLACEMENT.md",
@@ -174,8 +174,8 @@
 		},
 		{
 			"path": "overlays/contracts_sv_dependent.yaml",
-			"bytes": 4518,
-			"sha256": "94ad4b9cf0f6e8853ce0bbc5063393a0cebcd2b617b048e4ef2938bff85d11af"
+			"bytes": 4174,
+			"sha256": "cb326b6a8b3a86fd4bded29d40e1735bc32567e97d386a1f1055f5a04c2c7823"
 		},
 		{
 			"path": "overlays/invariants_additions.yaml",
@@ -309,8 +309,8 @@
 		},
 		{
 			"path": "tests/test_candidate.py",
-			"bytes": 14122,
-			"sha256": "58f931c347f736c0bc57479b10bca3616e5a95e473b68bbd4958ff6dd4eb3ae8"
+			"bytes": 15563,
+			"sha256": "c02d933176154197cff31c1b6bfdd9544fe230550b320e39b91c10dc9ff7e985"
 		},
 		{
 			"path": "tests/test_gt_sv_boundaries.py",

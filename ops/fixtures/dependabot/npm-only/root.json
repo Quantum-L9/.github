@@ -1,7 +1,3 @@
 {
-  "names": [
-    "package.json",
-    "package-lock.json",
-    "README.md"
-  ]
+	"names": ["package.json", "package-lock.json", "README.md"]
 }

@@ -1,7 +1,3 @@
 {
-  "names": [
-    "requirements.txt",
-    "requirements-ci.txt",
-    "README.md"
-  ]
+	"names": ["requirements.txt", "requirements-ci.txt", "README.md"]
 }
