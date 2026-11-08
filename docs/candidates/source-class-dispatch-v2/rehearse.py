@@ -356,9 +356,7 @@ def _synthesize(
     return synthesized, members
 
 
-def _register(
-    dest: Path, compiler: Path, synthesized: list[str], work: Path
-) -> dict[str, bytes]:
+def _register(dest: Path, synthesized: list[str], work: Path) -> dict[str, bytes]:
     """R inputs: rendered registrations, registered in the rehearsal clone only."""
     from l9_semantic_compiler.passes.payload_validation import (
         registered_schema_documents,
@@ -416,7 +414,7 @@ def rehearse(dest: Path, compiler: Path, revision: str, python: Path) -> dict[st
         dest, compiler, python, commits["G2_catalog"], report, work
     )
     report["synthesis_archive"] = "evidence/synthesis.tar.gz"
-    registered = _register(dest, compiler, synthesized, work)
+    registered = _register(dest, synthesized, work)
     commits["R_registrations"] = _commit(
         dest, "rehearsal R: register rendered candidate output schemas", "semantics"
     )
