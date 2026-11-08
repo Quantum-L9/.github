@@ -8,7 +8,7 @@
 |---|---|
 | Release | Semantic Foundation **v3.35.0**, additive successor to v3.34.0 |
 | Pull request | The Quantum-L9/.github pull request from `claude-mobile/relaxed-newton-tlo2ma` that carries this record. The candidate pack reached `main` through Quantum-L9/.github#227 and #231. |
-| Approved semantic tree | `semantics/` tree `de268117ff9eab3d9efe8fa5ae54702ce67649fb`. It is identical at the qualified candidate commit `451a87c2649a2e01f27371e3ec2ebdae5a9c2dd2` and at the pull request's head; the later commits change only this ADR, its index and the v3.35.0 release documents. |
+| Approved semantic tree | `semantics/` tree `de268117ff9eab3d9efe8fa5ae54702ce67649fb`. It is identical at the qualified candidate commit `451a87c2649a2e01f27371e3ec2ebdae5a9c2dd2` and at the pull request's head. No later commit changes `semantics/`: they add this ADR, its index, the v3.35.0 release documents, a test-only import fix in the admission skill and the session handoff reports. |
 | Producer | `Quantum-L9/l9-semantic-compiler-engine@d5ce17d01de72c8017e4021fbe43f9eaed2b69de` (`main`) |
 | Target class and authority | Canonical global semantics. `Quantum-L9/.github` owns them, and its repository owner holds `target_class_authority`. |
 | Effective revision | The `main` commit that merges this record. It is recorded on the merged pull request; it cannot be recorded inside the hashed bytes it admits. |
