@@ -309,7 +309,7 @@ def _covering_names(
         names |= profile_names(ident)
     elif kind == "schema":
         doc = reg.schemas["docs"].get(ident) or {}
-        const = ((doc.get("properties") or {}).get("schema") or {}).get("const")
+        const = cac.schema_identity(doc)
         names |= {doc.get("artifact_id"), const} - {None}
         for ref, profile in now.items():
             if (
@@ -371,6 +371,103 @@ _NATIVE = (
     "batch = json.load(sys.stdin)\n"
     "print(json.dumps([schema_violations(i['value'], i['schema']) for i in batch]))\n"
 )
+
+
+_NATIVE_STRICT = (
+    "import json, sys\n"
+    "from l9_semantic_compiler.engine.errors import SemanticCompilerError\n"
+    "from l9_semantic_compiler.passes.schema_candidate_v2 import validate_descriptor_payload\n"
+    "out = []\n"
+    "for i in json.load(sys.stdin):\n"
+    "    try:\n"
+    "        validate_descriptor_payload(i['descriptor'], i['value'])\n"
+    "        out.append([])\n"
+    "    except SemanticCompilerError as exc:\n"
+    "        out.append([f'{exc.code}: {exc} {exc.diagnostics}'])\n"
+    "print(json.dumps(out))\n"
+)
+
+
+def native_strict_violations(
+    compiler_src: Path, batch: list[tuple[Any, Any]]
+) -> list[list[str]]:
+    """The compiler's strict single-descriptor interpreter over (value, descriptor) pairs.
+
+    A compiler that predates the source-class dispatch protocol has no such interpreter:
+    the import fails and the run is unresolved, never a pass.
+    """
+    if not batch:
+        return []
+    done = subprocess.run(
+        [sys.executable, "-c", _NATIVE_STRICT],
+        input=json.dumps([{"value": v, "descriptor": d} for v, d in batch]),
+        capture_output=True,
+        text=True,
+        env=dict(os.environ, PYTHONPATH=str(compiler_src / "src")),
+        check=False,
+    )
+    try:
+        result = json.loads(done.stdout)
+    except ValueError:
+        result = None
+    if (
+        done.returncode != 0
+        or not isinstance(result, list)
+        or len(result) != len(batch)
+    ):
+        raise cac.InputError(
+            "the compiler's strict descriptor interpreter could not run: "
+            + done.stderr.strip()[-300:]
+        )
+    return result
+
+
+def source_class_schema_gaps(
+    ref: str,
+    payload: Any,
+    schema: dict[str, Any],
+    compiler_src: Path,
+    *,
+    source: tuple[Any, Any] | None,
+) -> list[str]:
+    """Dispatch by the verified source class (projection) or exact namespaces (composition).
+
+    `source` is the (source class, source ref) the authority binds a projection's source
+    to. For a composition it is None and every namespace is checked by its own shape.
+    No field of the payload chooses the descriptor.
+    """
+    shapes = {
+        s.get("source_class"): s
+        for s in schema.get("source_shapes") or []
+        if isinstance(s, dict)
+    }
+    if source is not None:
+        cls, source_ref = source
+        shape = shapes.get(cls)
+        if shape is None or shape.get("source_ref") != source_ref:
+            return [
+                (
+                    f"{ref}: source {source_ref} ({cls}) is not a source shape of its "
+                    "registered output schema"
+                )
+            ]
+        pairs = [(cls, payload, shape.get("descriptor"))]
+    else:
+        if not isinstance(payload, dict) or set(payload) != set(shapes):
+            observed = sorted(payload) if isinstance(payload, dict) else None
+            return [
+                (
+                    f"{ref}: payload namespaces {observed} are not exactly the "
+                    f"schema's source classes {sorted(map(str, shapes))}"
+                )
+            ]
+        pairs = [(cls, payload[cls], shapes[cls].get("descriptor")) for cls in shapes]
+    results = native_strict_violations(compiler_src, [(v, d) for _, v, d in pairs])
+    return [
+        f"{ref}: payload schema (native strict, {cls}): {violation}"
+        for (cls, _, _), found in zip(pairs, results)
+        for violation in found
+    ]
 
 
 def native_schema_violations(
@@ -584,15 +681,32 @@ def check_projection(
             f"{ref}: payload is not exactly the declared selection of {source['path']} "
             f"(missing {missing}, extra {extra}, differing {differing})"
         )
-    gaps += _schema_gaps(ref, payload, ctx.schema, compiler_src)
+    gaps += _schema_gaps(
+        ref,
+        payload,
+        ctx.schema,
+        compiler_src,
+        source=(source["class"], doc.get("source_ref")),
+    )
     return gaps
 
 
-def _schema_gaps(ref: str, payload: Any, schema: Any, compiler_src: Path) -> list[str]:
+def _schema_gaps(
+    ref: str,
+    payload: Any,
+    schema: Any,
+    compiler_src: Path,
+    *,
+    source: tuple[Any, Any] | None = None,
+) -> list[str]:
     if schema is None:
         return [
             f"{ref}: the profile's output schema does not resolve to one registered schema"
         ]
+    if isinstance(schema, dict) and schema.get("schema") == cac.SOURCE_CLASS_SCHEMA:
+        return source_class_schema_gaps(
+            ref, payload, schema, compiler_src, source=source
+        )
     gaps = [
         f"{ref}: payload schema: {v}" for v in strict_const_violations(payload, schema)
     ]

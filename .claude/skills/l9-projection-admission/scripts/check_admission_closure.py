@@ -110,7 +110,26 @@ PROJECTION_ID = re.compile(r"^l9\.projection/[a-z0-9][a-z0-9.-]*@([1-9]\d*)$")
 COMPOSITION_ID = re.compile(r"^l9\.compose/[a-z0-9][a-z0-9.-]*@([1-9]\d*)$")
 CONTRACT_ID = re.compile(r"^l9\.contract/[a-z0-9][a-z0-9.-]*@[1-9]\d*$")
 SCHEMA_DEFINITION = "l9.schema-definition/v1"
-# Profile fields compiler 0.9.3 evaluates mechanically, and fields it can only report as
+# A registered payload schema of the source-class dispatch protocol (compiler 0.10.0,
+# l9_semantic_compiler/passes/payload_validation.py). Its identity is its own `schema_id`,
+# never a `properties.schema.const` marker, and it carries one descriptor per source class.
+SOURCE_CLASS_SCHEMA = "l9.source-class-payload-schema/v1"
+SOURCE_CLASS_DISPATCH = {"protocol": "l9.payload-validation/source-class-dispatch@1"}
+SOURCE_CLASS_KINDS = {
+    "projection": "projection_payload_schema",
+    "composition": "composition_payload_schema",
+}
+# Keys of the legacy union grammar a source-class registration must not carry.
+LEGACY_GRAMMAR_KEYS = {
+    "type",
+    "properties",
+    "fields",
+    "required",
+    "items",
+    "const",
+    "enum",
+}
+# Profile fields compiler 0.10.0 evaluates mechanically, and fields it can only report as
 # unresolved (l9_semantic_compiler/passes/projection.py _PROJECTION_*, _COMPOSITION_*).
 PROJECTION_FIELDS = {
     "id",
@@ -121,6 +140,7 @@ PROJECTION_FIELDS = {
     "output",
     "successor_of",
     "breaking_changes",
+    "payload_validation",
     "forbidden",
     "rules",
 }
@@ -132,6 +152,7 @@ COMPOSITION_FIELDS = {
     "merge_strategy",
     "conflict_result",
     "output",
+    "payload_validation",
     "required_provenance",
 }
 NAMESPACED_MERGE = {
@@ -531,8 +552,8 @@ def schema_registry(tree: Tree) -> dict[str, Any]:
         if not isinstance(doc, dict):
             raise InputError(f"{tree.label()}:semantics/{name} is not a mapping")
         docs[name] = doc
-        const = ((doc.get("properties") or {}).get("schema") or {}).get("const")
-        if isinstance(const, str):
+        const = schema_identity(doc)
+        if const is not None:
             consts.setdefault(const, []).append(name)
     for const, names in sorted(consts.items()):
         if len(names) > 1:
@@ -547,6 +568,21 @@ def schema_registry(tree: Tree) -> dict[str, Any]:
         "catalogs": set(requires.get("semantic_catalogs") or []),
         "problems": problems,
     }
+
+
+def schema_identity(doc: Any) -> str | None:
+    """The output-schema identity a registered payload schema declares.
+
+    A source-class registration names itself with `schema_id`; a schema-definition
+    document is identified by its `properties.schema.const` marker.
+    """
+    if not isinstance(doc, dict):
+        return None
+    if doc.get("schema") == SOURCE_CLASS_SCHEMA:
+        sid = doc.get("schema_id")
+        return sid if isinstance(sid, str) and sid.strip() else None
+    const = ((doc.get("properties") or {}).get("schema") or {}).get("const")
+    return const if isinstance(const, str) else None
 
 
 def _schema_consts(tree: Tree, artifact_schemas: list[str]) -> dict[str, str]:
@@ -597,7 +633,7 @@ class Registration:
 
     ``records`` captures what admission must keep identical: each item's record and the bytes
     of each file that is itself a subject item (model ledgers, schemas). ``unresolvable``
-    lists declarations compiler 0.9.3 can only report as unresolved: they do not block
+    lists declarations compiler 0.10.0 can only report as unresolved: they do not block
     registration, but they keep a profile's downstream result `unknown`, never PASS.
     """
 
@@ -854,7 +890,9 @@ class Registration:
             sources = {}
         for cls, spec in sources.items():
             self._profile_source(who, cls, spec)
-        self.output_schema(who, profile)
+        self.payload_validation(
+            who, profile, "projection", self.output_schema(who, profile)
+        )
         self.projection_dependencies(profile)
         for token in profile.get("forbidden") or []:
             if token not in self.forbidden_defs:
@@ -941,11 +979,126 @@ class Registration:
             composed = next(p for p in self.projections if p.get("id") == composes)
             self.records[f"dep:projection profile:{composes}"] = composed
             self.projection_dependencies(composed)
-        self.output_schema(who, profile)
+        self.payload_validation(
+            who, profile, "composition", self.output_schema(who, profile)
+        )
         for value in profile.get("required_provenance") or []:
             self.unresolvable.append(
-                f"{who}: required_provenance {value} has no criterion in compiler 0.9.3"
+                f"{who}: required_provenance {value} has no criterion in compiler 0.10.0"
             )
+
+    def payload_validation(
+        self, who: str, profile: dict[str, Any], kind: str, name: str | None
+    ) -> None:
+        """Source-class dispatch is declared exactly when the output schema realizes it."""
+        declared = profile.get("payload_validation")
+        doc = self.schemas["docs"].get(name) if name else None
+        realizes = isinstance(doc, dict) and doc.get("schema") == SOURCE_CLASS_SCHEMA
+        if declared is None:
+            if realizes:
+                self.gaps.append(
+                    f"{who}: output schema {name} is a source-class registration, but the "
+                    "profile declares no payload_validation"
+                )
+            return
+        if declared != SOURCE_CLASS_DISPATCH:
+            self.gaps.append(
+                f"{who}: payload_validation {declared} is not a protocol compiler 0.10.0 "
+                f"realizes ({SOURCE_CLASS_DISPATCH})"
+            )
+            return
+        if doc is None:
+            return  # the unresolved output schema is already a gap
+        if not realizes:
+            self.gaps.append(
+                f"{who}: declares source-class dispatch, but its output schema {name} is "
+                f"not a {SOURCE_CLASS_SCHEMA} registration"
+            )
+            return
+        if doc.get("document_kind") != SOURCE_CLASS_KINDS[kind]:
+            self.gaps.append(
+                f"{who}: output schema {name} is a {doc.get('document_kind')}, not a "
+                f"{SOURCE_CLASS_KINDS[kind]}"
+            )
+        target = profile
+        if kind == "composition":
+            composes = (profile.get("composes") or {}).get("projection_profile")
+            found = [p for p in self.projections if p.get("id") == composes]
+            if len(found) != 1:
+                return  # already reported by the composition check
+            target = found[0]
+            if target.get("payload_validation") != SOURCE_CLASS_DISPATCH:
+                self.gaps.append(
+                    f"{who}: composes {composes}, which does not declare the same "
+                    "payload_validation protocol"
+                )
+        shapes = [s for s in doc.get("source_shapes") or [] if isinstance(s, dict)]
+        classes = list(target.get("sources") or {})
+        if [s.get("source_class") for s in shapes] != classes:
+            self.gaps.append(
+                f"{who}: output schema {name} covers source classes "
+                f"{[s.get('source_class') for s in shapes]}, not exactly {classes} in order"
+            )
+            return
+        for shape in shapes:
+            artifact = (self.classes.get(shape["source_class"]) or {}).get(
+                "canonical_artifact"
+            )
+            owners = [
+                e.get("id")
+                for e in self.sources.values()
+                if e.get("path") == f"semantics/{artifact}"
+            ]
+            if owners != [shape.get("source_ref")]:
+                self.gaps.append(
+                    f"{who}: output schema {name} binds source class "
+                    f"{shape['source_class']} to {shape.get('source_ref')}, not the "
+                    f"registered source {owners}"
+                )
+
+    def _source_class_schema(self, name: str, doc: dict[str, Any]) -> None:
+        legacy = sorted(set(doc) & LEGACY_GRAMMAR_KEYS)
+        if legacy:
+            self.gaps.append(
+                f"schema {name}: a source-class registration carries the legacy union "
+                f"grammar keys {legacy}"
+            )
+        if doc.get("payload_validation") != SOURCE_CLASS_DISPATCH:
+            self.gaps.append(
+                f"schema {name}: payload_validation is not {SOURCE_CLASS_DISPATCH}"
+            )
+        if doc.get("document_kind") not in SOURCE_CLASS_KINDS.values():
+            self.gaps.append(
+                f"schema {name}: document_kind {doc.get('document_kind')} is not one of "
+                f"{sorted(SOURCE_CLASS_KINDS.values())}"
+            )
+        governed = doc.get("governed_by")
+        if not isinstance(governed, dict) or len(governed) != 1:
+            self.gaps.append(
+                f"schema {name}: governed_by must name exactly one profile"
+            )
+        if not _nonempty_str(doc.get("descriptor_dialect")):
+            self.gaps.append(f"schema {name}: no descriptor_dialect")
+        shapes = doc.get("source_shapes")
+        if not isinstance(shapes, list) or not shapes:
+            self.gaps.append(f"schema {name}: source_shapes is not a non-empty list")
+            return
+        seen: set[Any] = set()
+        for index, shape in enumerate(shapes):
+            if (
+                not isinstance(shape, dict)
+                or set(shape) != {"source_class", "source_ref", "descriptor"}
+                or not _nonempty_str(shape.get("source_class"))
+                or not _nonempty_str(shape.get("source_ref"))
+                or not isinstance(shape.get("descriptor"), dict)
+            ):
+                self.gaps.append(f"schema {name}: source_shapes[{index}] is malformed")
+                continue
+            if shape["source_class"] in seen:
+                self.gaps.append(
+                    f"schema {name}: source class {shape['source_class']} appears twice"
+                )
+            seen.add(shape["source_class"])
 
     def schema(self, name: str) -> None:
         files = self.schemas["files"]
@@ -959,13 +1112,19 @@ class Registration:
         doc = self.schemas["docs"].get(name)
         if doc is None:
             return
-        if doc.get("schema") != SCHEMA_DEFINITION:
+        if doc.get("schema") == SOURCE_CLASS_SCHEMA:
+            self._source_class_schema(name, doc)
+        elif doc.get("schema") != SCHEMA_DEFINITION:
             self.gaps.append(f"schema {name}: schema is not {SCHEMA_DEFINITION}")
         if not _nonempty_str(doc.get("artifact_id")):
             self.gaps.append(f"schema {name}: no artifact_id")
-        const = ((doc.get("properties") or {}).get("schema") or {}).get("const")
-        if not isinstance(const, str):
-            self.gaps.append(f"schema {name}: no properties.schema.const declared")
+        const = schema_identity(doc)
+        if const is None:
+            self.gaps.append(
+                f"schema {name}: no schema_id declared"
+                if doc.get("schema") == SOURCE_CLASS_SCHEMA
+                else f"schema {name}: no properties.schema.const declared"
+            )
             return
         outputs = [
             p.get("id")
