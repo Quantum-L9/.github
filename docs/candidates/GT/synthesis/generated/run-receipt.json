@@ -1,22 +1,22 @@
 {
 	"admission": "not_granted",
-	"authority_base_sha": "c9bbfaf61bd0f7444b1a617876a031c2fba75406",
+	"authority_base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
 	"authority_rehearsal_applies": [
+		"SV #215 pack (docs/candidates/SV/apply_to_pinned_checkout.py)",
 		"GT pack core stage (docs/candidates/GT/apply_to_pinned_checkout.py)"
 	],
 	"authority_rehearsal_pushed": false,
-	"authority_rehearsal_revision": "4049c6df88d3feb09e640b82603cea2749f9ac8e",
+	"authority_rehearsal_revision": "36cb17a474350e5a66a45f7a625ddd4fbe66ea20",
 	"authority_repository": "Quantum-L9/.github",
-	"authority_semantics_tree_before_gt": "251bb3d9238f93f0207b1f8443c80359e034595b",
-	"candidate_json_compiler_bytes_sha256": "sha256:fbb15a65e040aba16bb9dcee1e65d49451c48e93a69a2f549c92a1f6b48a8ca1",
+	"candidate_json_compiler_bytes_sha256": "sha256:38bdde76a17739931671d0e5566dd6e309a4e70f4f20995e8ce4888193f202d4",
 	"compiler": {
-		"executable_digest": "sha256:ba8a20a5b54f52901a5320bd815ab0b7f9d550ab114b91146980b9c1ec9f5a8f",
+		"executable_digest": "sha256:6f37429d108a8922add28cdf77ad2c86461f37a75077c96bd6003a80a45353d4",
 		"repository": "Quantum-L9/l9-semantic-compiler-engine",
-		"revision": "33e4c5832bf73c7d9b0b70854af011e9582f1ab2"
+		"revision": "18215ae2cd948ff8c9cc8992785d2f72f8b53310"
 	},
 	"deterministic_replay": true,
-	"governance_catalog_revision": "232920c2cfc2b2cfe6a3eea6b23b2039e91d0075",
-	"governance_grammar_revision": "02d33b3786e1e3285db8802e4e1676ca3ae27835",
+	"governance_catalog_revision": "d8fbba57ba93cb0ea9ff7cf3d555d372f16295d2",
+	"governance_grammar_revision": "9a75f5bd3b7ac79ceec268b6f7108aa3656f657e",
 	"governance_store": "local, rebuilt by this tool from synthesis/governance/ (never pushed)",
 	"grammar_summary": {
 		"contracts": {
@@ -39,23 +39,23 @@
 		}
 	},
 	"output_digests": {
-		"composition_schema": "sha256:3a827f48f9a8e94d013664922112aaa0050231af74b9ae9bd508f2f46246b12e",
+		"composition_schema": "sha256:82eb68a7a72aa32044f7bc170c90cb5035930c553245e56876fcdfd18aea6fe7",
 		"digest_basis": "canonical_json_utf8_sorted_keys_with_newline",
-		"projection_schema": "sha256:8cd3e446bd70a3f058d4ff2124b1820fa53b33f845a1c9092f9ab2d8fd191435",
-		"provenance": "sha256:e121f845ae4337516c74946334cdc820509c3dca71abdc5538ffce94171b31f5"
+		"projection_schema": "sha256:657e80e1761c5699fdb702762dc71abef921f022383a67ef90325a7f1c93016e",
+		"provenance": "sha256:e6722d5703fca6a111b10f920154047acb7272305ea33874fd0e7793f52c5025"
 	},
 	"outputs": {
 		"composition_schema": {
 			"path": "strategic_planner_interaction_composition.candidate.schema.json",
-			"sha256": "sha256:3a827f48f9a8e94d013664922112aaa0050231af74b9ae9bd508f2f46246b12e"
+			"sha256": "sha256:82eb68a7a72aa32044f7bc170c90cb5035930c553245e56876fcdfd18aea6fe7"
 		},
 		"projection_schema": {
 			"path": "strategic_planner_interaction_projection.candidate.schema.json",
-			"sha256": "sha256:8cd3e446bd70a3f058d4ff2124b1820fa53b33f845a1c9092f9ab2d8fd191435"
+			"sha256": "sha256:657e80e1761c5699fdb702762dc71abef921f022383a67ef90325a7f1c93016e"
 		},
 		"provenance": {
 			"path": "candidate.json#/provenance",
-			"sha256": "sha256:e121f845ae4337516c74946334cdc820509c3dca71abdc5538ffce94171b31f5"
+			"sha256": "sha256:e6722d5703fca6a111b10f920154047acb7272305ea33874fd0e7793f52c5025"
 		}
 	},
 	"owner_review": "not_performed",
@@ -71,9 +71,20 @@
 	"schema_derive_exit_code": 3,
 	"schema_synthesize_exit_codes": [0, 0],
 	"status": "candidate_not_admitted",
-	"sv_admitted": {
-		"admission_merge_commit": "64d8b8598300f94c3201f26866f73be6895dab60",
-		"admitted_semantics_tree": "251bb3d9238f93f0207b1f8443c80359e034595b",
-		"release": "v3.32.0"
+	"sv_pack": {
+		"binding_head": "a64d05a152b5920dad577cead26618a6f05fef09",
+		"pr": 215,
+		"verified_pack_blobs": {
+			"docs/candidates/SV/README.md": "0e5bacfa408c635199da764eaf29071eae49bd7a",
+			"docs/candidates/SV/apply_to_pinned_checkout.py": "fe88e3ac88c367d4d457f88b0226c30bd4d03ba0",
+			"docs/candidates/SV/overlays/composition_profile_additions.yaml": "c14c27b842ef02e0abe965d4d2bbf1095629e9f8",
+			"docs/candidates/SV/overlays/contracts_additions.yaml": "ab5776f45b0c8c538fd210b37f6dc0a430518a46",
+			"docs/candidates/SV/overlays/invariants_additions.yaml": "7ba0f97e4683caaf8ad9beda0c11ad3f451d8f00",
+			"docs/candidates/SV/overlays/projection_profile_additions.yaml": "81523b86d1bbc23d0b6832731666054eb938e3d1",
+			"docs/candidates/SV/overlays/vocabulary_additions.yaml": "c5f19da2b80e9f4991a158b6f1171851192429fa",
+			"docs/candidates/SV/semantics/strategic_planner_value_composition.schema.yaml": "d76e680d3752d0087cc5bd24557e053eaf595382",
+			"docs/candidates/SV/semantics/strategic_planner_value_projection.schema.yaml": "052e1dacee5efb61d76cad1388a64187ae3caa38",
+			"docs/candidates/SV/semantics/strategic_value_model.yaml": "dbc6bc424b11a68dbf33321751bde48c33546fec"
+		}
 	}
 }

@@ -207,18 +207,34 @@ def composition_digest(root, revision, ref):
     return profile_digest(rows[0])
 
 
-def acceptance(results):
-    """Every projection and both compositions must pass unconditionally, exit 0.
+EXPECTED_SV_COMPOSITION_UNRESOLVED = frozenset(
+    "declared_constraint:required_provenance:" + name
+    for name in (
+        "composition_profile_digest",
+        "composition_profile_ref",
+        "source_projection_digests",
+        "source_projection_refs",
+    )
+)
 
-    The SV composition's four ``required_provenance`` declarations are evaluated
-    through ``composition_profiles.yaml#provenance_constraints`` since the SV
-    foundation was admitted (v3.32.0, ADR-029 D2), so no deviation is admitted:
-    an ``unknown`` or unresolved criterion anywhere is a qualification failure.
+
+def acceptance(results):
+    """Every projection and the GT composition must pass with exit 0.
+
+    The one admitted deviation is the SV composition returning ``unknown``
+    (exit 3) on exactly its four ``required_provenance`` declarations, an open
+    owner decision in PR #215. Anything else is a qualification failure.
     """
     failures = []
     for key, row in sorted(results.items()):
         artifacts = row["artifacts"]
         unresolved = {c for a in artifacts for c in (a["unresolved_criteria"] or [])}
+        if key == "sv:compose" and (row["exit_code"], row["result"]) == (3, "unknown"):
+            if unresolved != EXPECTED_SV_COMPOSITION_UNRESOLVED:
+                failures.append(
+                    f"{key}: unknown on unexpected criteria {sorted(unresolved)}"
+                )
+            continue
         if (row["exit_code"], row["status"], row["result"]) != (0, "succeeded", "pass"):
             failures.append(
                 f"{key}: exit={row['exit_code']} status={row['status']} result={row['result']}"

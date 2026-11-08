@@ -1,0 +1,66 @@
+schema: l9.gt-admission-owner-decision/v1
+schema_note: >-
+  Candidate-pack record format, not a canonical schema. It records the owner's decisions for the exact subject that the
+  admission mechanism (semantics/authority_model.yaml admission_rules, realized by an ADR as ADR-025 and ADR-029 did)
+  then binds. The ADR plus the release status flip merged to main is the admission; this file is its decision input.
+authorized_decider_ref: >-
+  Repository owner of Quantum-L9/.github, explicit written instructions in governed Claude Code session
+  session_017xwbxytavCYavKdhRr9a6n on 2026-11-08.
+decision_evidence_ref: https://claude.ai/code/session_017xwbxytavCYavKdhRr9a6n
+decided_on: '2026-11-08'
+instructions:
+- quote: >-
+    L9-GT-SEAM-CAMPAIGN-CLOSEOUT-CONTRACT/v1 ... Objective: Complete GT core admission, then admit the GT×SV dependent
+    contract, verify both and close the campaign.
+  role: campaign mandate (Articles 3, 4, 7 and 8 define the subjects, the recommended L9-GT-001 disposition KEEP and the
+    preferred native-schema route)
+- quote: "Wait. The GT candidate IS to be admitted that’s the point of this close out"
+  role: admission instruction, given after the agent paused to request the L9-GT-001 owner determination
+decisions:
+- id: G1-gt001-disposition
+  subject: L9-GT-001
+  decision: APPROVED
+  disposition: KEEP
+  approved_statement: >-
+    For an assessment that asserts strategic interaction, model other actors' consequential responses as conditional on
+    the focal action, their information available at each decision point, incentives and version-bound response
+    assumptions, or preserve missing conditional behavior as Unknown. A passive-world approximation is only an
+    explicit model assumption, never silently equivalent to adaptive response. This obligation does not by itself assert
+    a quantified Strategic Value claim.
+  target_class: canonical global invariant, owner Quantum-L9/.github
+  irreducibility: >-
+    No admitted invariant states conditional modeling of other actors' responses. L9-UNKNOWN-001 governs how Unknown is
+    carried, not when adaptive response must be modeled. L9-SV-001 governs counterfactual comparability for value
+    claims, not actor response; the L9-IDENTITY-* invariants that mention actors govern identity, not behavior
+    (checked against main c9bbfaf, 33 invariants). docs/candidates/GT/evidence/sv_collision_report.json records zero shared GT/SV terms,
+    invariant, contract and profile IDs; docs/candidates/GT/evidence/pr212_break_test.json records LOCAL_FALSIFICATION_SURVIVED.
+- id: G2-gt-core-subject
+  decision: APPROVED
+  subject:
+    contract: l9.contract/strategic-interaction-assessment@1 (six governing invariants)
+    vocabulary_terms: 12
+    projection_profile: l9.projection/strategic-planner-interaction@1 (vocabulary, invariants, contracts)
+    composition_profile: l9.compose/strategic-planner-interaction@1
+    forbidden_criterion: sv_semantic_records_excluded_from_gt_projection (payload_excludes)
+    payload_schemas:
+    - strategic_interaction_projection.schema.yaml
+    - strategic_interaction_composition.schema.yaml
+- id: G3-schema-disposition
+  decision: RETAIN_NATIVE_YAML
+  ruling: >-
+    The native YAML payload schemas that pass the real producer and the 19 controls are the admitted descriptors. The
+    compiler-generated JSON candidates and drafted grammars under docs/candidates/GT/synthesis/ stay supporting evidence and are not
+    admitted (campaign contract Article 4, preferred route).
+- id: G4-gt-sv-contract
+  subject: l9.contract/strategic-value-interaction-composition@1
+  decision: APPROVED_FOR_SEPARATE_ADMISSION
+  ruling: >-
+    Admitted only in its own successor release after GT core is admitted, bound to the revision carrying both
+    foundations. A consumer envelope may claim an evaluated result only with a genuine Numerical Reasoning receipt;
+    none is admitted, so evaluated consumer mode stays unavailable.
+bound_subject:
+  candidate_revision: f03f85981a7bd8249bc5998ee04535f53608fd73
+  semantics_tree: 3ce1adaf6da7f5eea8c47414bffc86145906505c
+  base: c9bbfaf61bd0f7444b1a617876a031c2fba75406
+  producer: Quantum-L9/l9-semantic-compiler-engine@39a51b76057f6d950877ffe1c2c87c4cb6d4a891
+  note: the ADR binds the final semantics tree; the release record commit does not change semantics/

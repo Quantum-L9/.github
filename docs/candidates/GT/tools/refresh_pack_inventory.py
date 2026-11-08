@@ -58,10 +58,10 @@ def candidate_revision():
 def render():
     binding = json.loads((ROOT / "evidence/sv_alignment_binding.json").read_text())
     summary = json.loads(
-        (ROOT / "evidence/integration-v2/qualification-summary.json").read_text()
+        (ROOT / "evidence/integration-v1/qualification-summary.json").read_text()
     )
     controls = json.loads(
-        (ROOT / "evidence/integration-v2/producer-negative-controls.json").read_text()
+        (ROOT / "evidence/integration-v1/producer-negative-controls.json").read_text()
     )
     files = pack_files()
     revision = candidate_revision()
@@ -70,9 +70,8 @@ def render():
         "status": "CANDIDATE_ONLY_NOT_CANONICAL",
         "target": "Quantum-L9/.github",
         "canonical_target": binding["canonical_target"],
-        "canonical_target_semantics_tree": binding["canonical_target_semantics_tree"],
-        "sv_admitted_release": binding["sv_admitted"]["release"],
-        "sv_admission_merge_commit": binding["sv_admitted"]["admission_merge_commit"],
+        "sv_candidate_pr": binding["sv_candidate"]["pr"],
+        "sv_candidate_head": binding["sv_candidate"]["head"],
         "reviewed_gt_head": "d9292f2440808fecb71539ef0de6d8474dfe384b",
         "gt_core": "LOCAL_REHEARSAL_QUALIFIED_NOT_ADMITTED",
         "gt_sv_dependent": "BLOCKED_UNTIL_ADMITTED_FOUNDATION_RECORDED",
@@ -82,7 +81,7 @@ def render():
         "gt_source_projection_classes": 3,
         "sv_source_projection_classes": len(binding["sv_source_classes"]),
         "local_test_command": "python -m unittest discover -s tests",
-        "native_validator": "56 PASS; SC-008/SC-010 release inventory FAIL",
+        "native_validator": "54 PASS; SC-008/SC-010 release inventory FAIL",
         "producer": {
             "compiler_revision": summary["compiler_revision"],
             "rehearsal_revision": summary["authority_revision"],
@@ -104,9 +103,7 @@ def render():
         "sha256": revision,
         "paths": list(NORMATIVE),
         "notes": "locally computed digest over ordered path\\0bytes\\0; not canonical git/admission or compiler digest",
-        "sv_admitted": binding["sv_admitted"]["release"]
-        + "@"
-        + binding["sv_admitted"]["admission_merge_commit"],
+        "sv_candidate_head": binding["sv_candidate"]["head"],
         "canonical_target": binding["canonical_target"],
     }
     # Tab indentation is Biome's JSON format, the repository formatter for JSON.

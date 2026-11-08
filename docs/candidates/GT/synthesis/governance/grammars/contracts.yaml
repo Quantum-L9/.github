@@ -7,8 +7,8 @@ admission: not_granted
 source_class: contracts
 source_ref: l9.source/contracts@1
 source_path: semantics/contracts.yaml
-source_revision: 4049c6df88d3feb09e640b82603cea2749f9ac8e
-source_digest: sha256:25d4e2a0ce47c37961ec9edbb959d2accdebd9216f716daeb18df47ff1a7a566
+source_revision: 36cb17a474350e5a66a45f7a625ddd4fbe66ea20
+source_digest: sha256:cd7767e6693f439ed27ff36f3b85259c9d230d7edea4a6e0cd0afdef381b4f3a
 applies_to_selectors:
 - $.contracts[?(@.id=="l9.contract/strategic-interaction-assessment@1")]
 grammar:

@@ -1,0 +1,47 @@
+{
+	"schema": "l9.gt-admitted-sv-binding/v1",
+	"repository": "Quantum-L9/.github",
+	"purpose": "Successor binding for GT core (release A) after Strategic Value was canonically admitted. Read only by apply_to_pinned_checkout.py --stage admitted-core.",
+	"historical_binding": {
+		"path": "evidence/sv_alignment_binding.json",
+		"meaning": "The SV #215 candidate overlay on 020a94b that the GT pack was aligned and rehearsed against. Retained unchanged; it is history, not an admission coordinate."
+	},
+	"admitted_sv": {
+		"release": "v3.32.0",
+		"adr": "docs/adr/ADR-029-strategic-value-foundation-and-composition-provenance-criteria.md",
+		"admission_pr": "Quantum-L9/.github#222",
+		"effective_revision": "64d8b8598300f94c3201f26866f73be6895dab60",
+		"semantics_tree": "251bb3d9238f93f0207b1f8443c80359e034595b",
+		"post_merge_verification": "docs/evidence/sv-campaign-closeout/ (Quantum-L9/.github#224, DOWNSTREAM_USABLE)",
+		"identities": {
+			"sv_new_invariants": ["L9-SV-001", "L9-SV-002"],
+			"sv_vocabulary_terms": [
+				"strategic_value",
+				"systemic_future_value",
+				"strategic_value_assessment",
+				"counterfactual_baseline",
+				"future_effect_identity",
+				"bidirectional_value_propagation",
+				"value_propagation_mesh",
+				"future_work_elimination",
+				"capability_unlock",
+				"decision_relevant_information_value",
+				"decision_boundary"
+			],
+			"sv_model": "l9.strategic.value@1",
+			"sv_contract": "l9.contract/strategic-value-assessment@1",
+			"sv_projection": "l9.projection/strategic-planner-value@1",
+			"sv_composition": "l9.compose/strategic-planner-value@1",
+			"sv_source_classes": [
+				"strategic_value_model",
+				"vocabulary",
+				"invariants",
+				"contracts",
+				"authority_model"
+			]
+		}
+	},
+	"target_revision": "c9bbfaf61bd0f7444b1a617876a031c2fba75406",
+	"target_rule": "The admitted-core stage applies only to a clean checkout at exactly target_revision. Moving it is a reviewed change to this file, and the stage still re-verifies the admitted SV content against effective_revision on every run.",
+	"gt_authority_status": "candidate, not admitted"
+}

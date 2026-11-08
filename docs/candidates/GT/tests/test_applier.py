@@ -2,6 +2,7 @@
 
 import hashlib
 import inspect
+import json
 import sys
 import tempfile
 import unittest
@@ -201,86 +202,57 @@ class CoreStageOnSyntheticTarget(unittest.TestCase):
 
 
 class TargetPinning(unittest.TestCase):
-    """verify_admitted_sv_target binds a clean HEAD on the admitted SV tree."""
-
-    MODEL = "semantics/strategic_value_model.yaml"
+    """verify_sv_applied_target binds HEAD plus exactly the pinned SV application."""
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name) / "repo"
         (self.root / "semantics").mkdir(parents=True)
         (self.root / "semantics/a.yaml").write_text("a: 1\n")
-        (self.root / self.MODEL).write_text("artifact_id: l9.strategic.value@1\n")
         self.head = init_repo(self.root)
-        self.tree = git(self.root, "rev-parse", "HEAD:semantics").strip()
+        (self.root / "semantics/a.yaml").write_text("a: 2\n")
+        (self.root / "semantics/new.yaml").write_text("n: 1\n")
         self.pins = {
-            self.MODEL: hashlib.sha256(
-                (self.root / self.MODEL).read_bytes()
-            ).hexdigest()
+            p: hashlib.sha256((self.root / p).read_bytes()).hexdigest()
+            for p in ("semantics/a.yaml", "semantics/new.yaml")
         }
 
     def tearDown(self):
         self.tmp.cleanup()
 
-    def check(self, head=None, tree=None, pins=None):
+    def check(self, head=None, pins=None):
         with (
             mock.patch.object(applier, "CANONICAL_TARGET", head or self.head),
-            mock.patch.object(applier, "CANONICAL_TREE", tree or self.tree),
-            mock.patch.object(applier, "SV_OWNED_SHA256", pins or self.pins),
+            mock.patch.object(applier, "SV_APPLIED_SHA256", pins or self.pins),
         ):
-            applier.verify_admitted_sv_target(self.root)
+            applier.verify_sv_applied_target(self.root)
 
-    def test_clean_admitted_target_passes(self):
+    def test_exact_application_passes(self):
         self.check()
 
     def test_wrong_head_fails(self):
         with self.assertRaisesRegex(ValueError, "wrong target HEAD"):
             self.check(head="0" * 40)
 
-    def test_dirty_target_fails(self):
+    def test_changed_byte_fails(self):
+        (self.root / "semantics/new.yaml").write_text("n: 2\n")
+        with self.assertRaisesRegex(ValueError, "SV-applied digest"):
+            self.check()
+
+    def test_extra_dirty_path_fails(self):
         (self.root / "semantics/extra.yaml").write_text("e: 1\n")
-        with self.assertRaisesRegex(ValueError, "not clean"):
+        with self.assertRaisesRegex(ValueError, "extra="):
             self.check()
 
-    def test_modified_tracked_file_fails(self):
-        (self.root / "semantics/a.yaml").write_text("a: 2\n")
-        with self.assertRaisesRegex(ValueError, "not clean"):
-            self.check()
-
-    def test_wrong_semantics_tree_fails(self):
-        with self.assertRaisesRegex(ValueError, "admitted SV foundation tree"):
-            self.check(tree="0" * 40)
-
-    def test_sv_owned_digest_mismatch_fails(self):
-        with self.assertRaisesRegex(ValueError, "admitted SV pin"):
-            self.check(pins={self.MODEL: "0" * 64})
-
-    def test_binding_pins_the_admitted_sv_foundation(self):
+    def test_binding_pins_are_the_recorded_sv_215_application(self):
         binding = applier.BINDING
-        self.assertEqual(binding["schema"], "l9.gt.sv-alignment-binding/v3")
         self.assertEqual(
-            applier.CANONICAL_TARGET, "c9bbfaf61bd0f7444b1a617876a031c2fba75406"
+            applier.CANONICAL_TARGET, "020a94bea86e7c5c5e4107da7014ec259508f397"
         )
         self.assertEqual(
-            applier.CANONICAL_TREE, "251bb3d9238f93f0207b1f8443c80359e034595b"
+            applier.SV_CANDIDATE_HEAD, "a64d05a152b5920dad577cead26618a6f05fef09"
         )
-        admitted = binding["sv_admitted"]
-        self.assertEqual(admitted["release"], "v3.32.0")
-        self.assertEqual(admitted["admission_pr"], 222)
-        self.assertEqual(
-            admitted["admission_merge_commit"],
-            "64d8b8598300f94c3201f26866f73be6895dab60",
-        )
-        self.assertEqual(admitted["admitted_semantics_tree"], applier.CANONICAL_TREE)
-        self.assertEqual(len(applier.SV_OWNED_SHA256), 3)
-        self.assertEqual(binding["sv_authority_status"], "admitted_v3.32.0")
-        old = binding["superseded_bindings"][0]
-        self.assertEqual(
-            old["canonical_target"], "020a94bea86e7c5c5e4107da7014ec259508f397"
-        )
-        self.assertEqual(
-            old["sv_candidate"]["head"], "a64d05a152b5920dad577cead26618a6f05fef09"
-        )
+        self.assertEqual(len(binding["sv_applied_target_sha256"]), 13)
 
 
 class DependentStage(unittest.TestCase):
@@ -394,7 +366,7 @@ class ApplyGuards(unittest.TestCase):
     def _main_with(self, root, *flags):
         proposed = {"semantics/a.yaml": "a: 2\n", "semantics/b.yaml": "b: 2\n"}
         with (
-            mock.patch.object(applier, "verify_admitted_sv_target", return_value=None),
+            mock.patch.object(applier, "verify_sv_applied_target", return_value=None),
             mock.patch.object(
                 applier, "generate_core", return_value=(proposed, 0, {}, {})
             ),
@@ -463,3 +435,152 @@ class ApplyGuards(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AdmittedCoreStage(unittest.TestCase):
+    """--stage admitted-core: a clean target that carries the admitted SV unchanged."""
+
+    ADR = "docs/adr/ADR-029-sv.md"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = synthetic_sv_applied(Path(self.tmp.name) / "repo")
+        rel = self.root / "docs/semantic-foundation/v3.32.0"
+        rel.mkdir(parents=True)
+        (rel / "README.md").write_text(
+            "# v3.32.0\n\nStatus: **ADMITTED ADDITIVE SUCCESSOR** (ADR-029).\n"
+        )
+        (rel / "MANIFEST.md").write_text(
+            "# v3.32.0\n\nRelease status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-029)\n"
+        )
+        (self.root / "docs/adr").mkdir(parents=True)
+        (self.root / self.ADR).write_text(
+            "# ADR-029\n\n**Status:** Accepted for v3.32.0.\n"
+        )
+        self.admitted = init_repo(self.root)
+        (self.root / "README.md").write_text("later unrelated change\n")
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-q", "-m", "later")
+        self.head = git(self.root, "rev-parse", "HEAD")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def binding(self, **over):
+        ab = {
+            "target_revision": self.head,
+            "admitted_sv": {
+                "release": "v3.32.0",
+                "adr": self.ADR,
+                "effective_revision": self.admitted,
+                "identities": {k: applier.BINDING[k] for k in applier.SV_IDENTITY_KEYS},
+            },
+        }
+        ab.update(over)
+        return ab
+
+    def verify(self, ab=None):
+        applier.verify_admitted_sv_base(self.root, ab or self.binding())
+
+    def commit(self, message="change"):
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-q", "-m", message)
+        return git(self.root, "rev-parse", "HEAD")
+
+    def test_exact_admitted_base_passes_and_assembles_gt(self):
+        self.verify()
+        changed, count, rebound, resolved = applier.generate_core(self.root)
+        self.assertEqual(count, 13)
+        self.assertIn("semantics/lifecycle.yaml", rebound)
+        self.assertEqual(len(resolved), 2)
+
+    def test_wrong_head_fails(self):
+        ab = self.binding(target_revision="0" * 40)
+        with self.assertRaisesRegex(ValueError, "wrong target HEAD"):
+            self.verify(ab)
+
+    def test_dirty_target_fails(self):
+        (self.root / "README.md").write_text("dirty\n")
+        with self.assertRaisesRegex(ValueError, "not clean"):
+            self.verify()
+
+    def test_admitted_revision_must_be_an_ancestor(self):
+        ab = self.binding()
+        ab["admitted_sv"]["effective_revision"] = "f" * 40
+        with self.assertRaisesRegex(ValueError, "not an ancestor"):
+            self.verify(ab)
+
+    def test_sv_owned_file_changed_since_admission_fails(self):
+        (self.root / "semantics/strategic_value_model.yaml").write_text(
+            f"artifact_id: {applier.SV_MODEL_ID}\nextra: drift\n"
+        )
+        head = self.commit()
+        ab = self.binding(target_revision=head)
+        with self.assertRaisesRegex(ValueError, "differs from its admitted bytes"):
+            self.verify(ab)
+
+    def test_sv_record_changed_in_shared_ledger_fails(self):
+        path = self.root / "semantics/invariants.yaml"
+        path.write_text(
+            path.read_text().replace(
+                "statement: existing L9-SV-001", "statement: drift"
+            )
+        )
+        head = self.commit()
+        ab = self.binding(target_revision=head)
+        with self.assertRaisesRegex(ValueError, "SV records in the shared ledgers"):
+            self.verify(ab)
+
+    def test_unadmitted_release_record_fails(self):
+        readme = self.root / "docs/semantic-foundation/v3.32.0/README.md"
+        readme.write_text("# v3.32.0\n\nStatus: **ADDITIVE SUCCESSOR CANDIDATE**\n")
+        head = self.commit()
+        ab = self.binding(target_revision=head)
+        with self.assertRaisesRegex(ValueError, "README is not marked admitted"):
+            self.verify(ab)
+
+    def test_adr_not_accepted_fails(self):
+        (self.root / self.ADR).write_text("# ADR-029\n\n**Status:** Candidate.\n")
+        head = self.commit()
+        ab = self.binding(target_revision=head)
+        with self.assertRaisesRegex(ValueError, "is not Accepted"):
+            self.verify(ab)
+
+    def test_gt_already_present_fails(self):
+        changed, *_ = applier.generate_core(self.root)
+        for rel, text in changed.items():
+            (self.root / rel).write_text(text)
+        head = self.commit("gt applied")
+        ab = self.binding(target_revision=head)
+        with self.assertRaisesRegex(ValueError, "GT additions already present"):
+            self.verify(ab)
+
+    def test_option_shaped_revision_is_refused_before_git(self):
+        ab = self.binding()
+        ab["admitted_sv"]["effective_revision"] = "--output=/tmp/x"
+        with self.assertRaisesRegex(ValueError, "40-hex commit SHA"):
+            self.verify(ab)
+
+    def test_identities_differing_from_aligned_sv_are_refused(self):
+        ab = self.binding()
+        ab["admitted_sv"]["identities"]["sv_contract"] = "l9.contract/other@1"
+        with (
+            mock.patch.object(
+                applier, "ADMITTED_SV_BINDING", Path(self.tmp.name) / "ab.json"
+            ),
+        ):
+            (Path(self.tmp.name) / "ab.json").write_text(json.dumps(ab))
+            with self.assertRaisesRegex(ValueError, "sv_contract differs"):
+                applier.load_admitted_sv_binding()
+
+    def test_recorded_binding_names_the_admitted_sv(self):
+        ab = applier.load_admitted_sv_binding()
+        self.assertEqual(
+            ab["admitted_sv"]["effective_revision"],
+            "64d8b8598300f94c3201f26866f73be6895dab60",
+        )
+        self.assertEqual(ab["admitted_sv"]["release"], "v3.32.0")
+        self.assertIsNone(
+            applier.BINDING["admitted_foundation_revision"],
+            "the historical binding stays unchanged",
+        )

@@ -3,12 +3,13 @@
 
 What this does, end to end:
 
-1. Rebuilds the disposable authority rehearsal: clones ``--target-store`` at
-   the binding's ``canonical_target`` (main, carrying the admitted SV foundation
-   v3.32.0; the GT applier verifies the clean admitted semantics tree and the
-   pinned SV-owned files), applies this GT pack's core stage with
-   ``--apply --disposable``, and commits the result with a fixed identity and
-   date, so the authority revision is reproducible.
+1. Rebuilds the disposable integrated authority rehearsal: verifies that
+   ``--sv-pack`` holds exactly the SV #215 pack files pinned in
+   ``evidence/sv_alignment_binding.json`` (git blob ids), clones
+   ``--target-store`` at the binding's ``canonical_target``, applies the SV pack
+   and then this GT pack (core stage), each with ``--apply --disposable``, and
+   commits the result with a fixed identity and date, so the authority revision
+   is reproducible.
 2. Drafts one ``source_field_grammar_candidate`` per source class by
    *translating* the pack's hand-authored payload schema
    (``semantics/strategic_interaction_projection.schema.yaml``) into the
@@ -52,6 +53,7 @@ Usage (paths are illustrative):
 
     python tools/synthesize_candidate_schemas.py \
         --target-store /path/to/Quantum-L9/.github \
+        --sv-pack /path/to/<SV #215 checkout>/docs/candidates/SV \
         --compiler-root /path/to/l9-semantic-compiler-engine \
         [--check]
 
@@ -181,6 +183,31 @@ def show(root: Path, rev: str, path: str) -> bytes:
 # --------------------------------------------------------- 1. rehearsal
 
 
+def verify_sv_pack(sv_pack: Path) -> dict[str, str]:
+    """Refuse any SV pack whose pinned files differ from the binding's blob ids."""
+    pinned = BINDING["sv_candidate"]["pack_blobs"]
+    prefix = "docs/candidates/SV/"
+    seen = {}
+    for rel, blob in pinned.items():
+        if not rel.startswith(prefix):
+            raise SynthesisError(f"binding pins a path outside the SV pack: {rel}")
+        path = sv_pack / rel[len(prefix) :]
+        if not path.is_file():
+            raise SynthesisError(f"SV pack is missing pinned file {rel}")
+        actual = subprocess.run(
+            ["git", "hash-object", "--no-filters", str(path)],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        if actual != blob:
+            raise SynthesisError(
+                f"SV pack file {rel} is blob {actual}, binding pins {blob}"
+            )
+        seen[rel] = actual
+    return seen
+
+
 def _apply(applier: Path, root: Path) -> None:
     proc = subprocess.run(
         [
@@ -200,7 +227,7 @@ def _apply(applier: Path, root: Path) -> None:
         raise SynthesisError(f"{applier} failed: {proc.stderr.strip()[-600:]}")
 
 
-def build_authority(target_store: Path, work: Path) -> tuple[Path, str]:
+def build_authority(target_store: Path, sv_pack: Path, work: Path) -> tuple[Path, str]:
     base = BINDING["canonical_target"]
     if not re.fullmatch(r"[0-9a-f]{40}", base):
         raise SynthesisError("binding canonical_target is not a full commit id")
@@ -210,6 +237,7 @@ def build_authority(target_store: Path, work: Path) -> tuple[Path, str]:
         check=True,
     )
     git(root, "checkout", "-q", "--detach", base)
+    _apply(sv_pack / "apply_to_pinned_checkout.py", root)
     _apply(PACK / "apply_to_pinned_checkout.py", root)
     git(root, "add", "--", "semantics")
     git(
@@ -217,7 +245,7 @@ def build_authority(target_store: Path, work: Path) -> tuple[Path, str]:
         "commit",
         "-q",
         "-m",
-        "rehearsal: apply GT core on the admitted SV foundation (local only, never pushed)",
+        "rehearsal: apply SV #215 then GT candidate packs (local only, never pushed)",
     )
     return root, git(root, "rev-parse", "HEAD")
 
@@ -610,9 +638,10 @@ def run_cli(compiler_root: Path, *args: str) -> tuple[int, bytes, bytes]:
 
 
 def generate(
-    target_store: Path, compiler_root: Path, out: Path, work: Path
+    target_store: Path, sv_pack: Path, compiler_root: Path, out: Path, work: Path
 ) -> dict[str, Any]:
-    authority, rev = build_authority(target_store, work)
+    sv_blobs = verify_sv_pack(sv_pack)
+    authority, rev = build_authority(target_store, sv_pack, work)
 
     def ydoc(path: str) -> Any:
         return yaml.safe_load(show(authority, rev, path))
@@ -805,17 +834,13 @@ def generate(
         "authority_rehearsal_revision": rev,
         "authority_rehearsal_pushed": False,
         "authority_rehearsal_applies": [
+            "SV #215 pack (docs/candidates/SV/apply_to_pinned_checkout.py)",
             "GT pack core stage (docs/candidates/GT/apply_to_pinned_checkout.py)",
         ],
-        "authority_semantics_tree_before_gt": git(
-            authority, "rev-parse", "HEAD~1:semantics"
-        ),
-        "sv_admitted": {
-            "release": BINDING["sv_admitted"]["release"],
-            "admission_merge_commit": BINDING["sv_admitted"]["admission_merge_commit"],
-            "admitted_semantics_tree": BINDING["sv_admitted"][
-                "admitted_semantics_tree"
-            ],
+        "sv_pack": {
+            "pr": BINDING["sv_candidate"]["pr"],
+            "binding_head": BINDING["sv_candidate"]["head"],
+            "verified_pack_blobs": sv_blobs,
         },
         "governance_grammar_revision": g1,
         "governance_catalog_revision": g2,
@@ -923,6 +948,12 @@ def _same(name: Path, committed: bytes | None, fresh: bytes | None) -> bool:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--target-store", required=True, type=Path)
+    ap.add_argument(
+        "--sv-pack",
+        required=True,
+        type=Path,
+        help="docs/candidates/SV of a PR #215 checkout whose pinned files match the binding",
+    )
     ap.add_argument("--compiler-root", required=True, type=Path)
     ap.add_argument(
         "--check",
@@ -937,6 +968,7 @@ def main() -> int:
         try:
             receipt = generate(
                 args.target_store.resolve(),
+                args.sv_pack.resolve(),
                 args.compiler_root.resolve(),
                 out,
                 work,

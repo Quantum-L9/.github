@@ -1,13 +1,13 @@
 {
 	"authority": {
 		"repository": "Quantum-L9/.github",
-		"revision": "4049c6df88d3feb09e640b82603cea2749f9ac8e",
+		"revision": "36cb17a474350e5a66a45f7a625ddd4fbe66ea20",
 		"root": "<authority rehearsal store rebuilt by this tool>"
 	},
 	"compiler": {
-		"executable_digest": "sha256:ba8a20a5b54f52901a5320bd815ab0b7f9d550ab114b91146980b9c1ec9f5a8f",
+		"executable_digest": "sha256:6f37429d108a8922add28cdf77ad2c86461f37a75077c96bd6003a80a45353d4",
 		"repository": "Quantum-L9/l9-semantic-compiler-engine",
-		"revision": "33e4c5832bf73c7d9b0b70854af011e9582f1ab2"
+		"revision": "18215ae2cd948ff8c9cc8992785d2f72f8b53310"
 	},
 	"composition_profile": {
 		"digest": "sha256:6ed9e074ab773c0b0b426c0ef5d380c1e3568b701a7cc4487f16079dc949e0ed",
@@ -15,7 +15,7 @@
 	},
 	"governance": {
 		"bindings": {
-			"digest": "sha256:a823d71d4662fb666aef92656401aef521374c27fd0d79873925c861f4cb6078",
+			"digest": "sha256:c58747d6e784a26e76afaf301f4aae7633ef3d2926976f47c2ee5c3b21174690",
 			"owner": "Quantum-L9/.github",
 			"path": "docs/candidates/GT/synthesis/governance/bindings.yaml",
 			"ref": "l9.binding/strategic-planner-interaction-grammar-catalog-candidate@1"
@@ -28,25 +28,25 @@
 		},
 		"grammars": [
 			{
-				"digest": "sha256:d49dc2fd5dbd9ff10d4ca20705f81a063e810e0e744aa761979ae01d847ac505",
+				"digest": "sha256:fc896e208a0a5574c077cc541fc7ecbb6bae2b6293879c93f26b04855bb8b4b4",
 				"owner": "Quantum-L9/.github",
 				"path": "docs/candidates/GT/synthesis/governance/grammars/vocabulary.yaml",
 				"ref": "l9.grammar/strategic-planner-interaction-vocabulary-candidate@1",
-				"revision": "02d33b3786e1e3285db8802e4e1676ca3ae27835"
+				"revision": "9a75f5bd3b7ac79ceec268b6f7108aa3656f657e"
 			},
 			{
-				"digest": "sha256:22aa3f2fa1be611aebe53798a7dc90eee3476d0956c3d72d3000ce4d0ad3de96",
+				"digest": "sha256:0eb068414d8c716a29e316443a81ffbf6451473badc88c57254a86269d3af1b3",
 				"owner": "Quantum-L9/.github",
 				"path": "docs/candidates/GT/synthesis/governance/grammars/invariants.yaml",
 				"ref": "l9.grammar/strategic-planner-interaction-invariants-candidate@1",
-				"revision": "02d33b3786e1e3285db8802e4e1676ca3ae27835"
+				"revision": "9a75f5bd3b7ac79ceec268b6f7108aa3656f657e"
 			},
 			{
-				"digest": "sha256:e8b5ad19d1e3c4437466e546ca5b20afc3de99a8de6561e4248e859ed7d9ea18",
+				"digest": "sha256:17bcf46746811c213a73ea69d2ffa47e41d7c0ec790810013adca4467104934f",
 				"owner": "Quantum-L9/.github",
 				"path": "docs/candidates/GT/synthesis/governance/grammars/contracts.yaml",
 				"ref": "l9.grammar/strategic-planner-interaction-contracts-candidate@1",
-				"revision": "02d33b3786e1e3285db8802e4e1676ca3ae27835"
+				"revision": "9a75f5bd3b7ac79ceec268b6f7108aa3656f657e"
 			}
 		],
 		"operation": {
@@ -56,7 +56,7 @@
 			"ref": "l9.operation/strategic-planner-interaction-schema-synthesis-candidate@1"
 		},
 		"repository": "Quantum-L9/.github",
-		"revision": "232920c2cfc2b2cfe6a3eea6b23b2039e91d0075",
+		"revision": "d8fbba57ba93cb0ea9ff7cf3d555d372f16295d2",
 		"root": "<governance store rebuilt by this tool>"
 	},
 	"mode": "candidate",
@@ -75,21 +75,21 @@
 			"digest": "sha256:89a211d232322d6f2189e8b2475e44ba9e4b8af922ecf62fed2254f1ae44c7ef",
 			"path": "semantics/vocabulary.yaml",
 			"ref": "l9.source/vocabulary@1",
-			"revision": "4049c6df88d3feb09e640b82603cea2749f9ac8e",
+			"revision": "36cb17a474350e5a66a45f7a625ddd4fbe66ea20",
 			"source_class": "vocabulary"
 		},
 		{
-			"digest": "sha256:2928b1206020490e80b18de3becfde0a2fbcd934b6e967a2c550be9c67c733aa",
+			"digest": "sha256:877fe9f8e127ccee99dd37b42d0b6c214ddb12169703a6cecb8a4f3efa1f5b79",
 			"path": "semantics/invariants.yaml",
 			"ref": "l9.source/invariants@1",
-			"revision": "4049c6df88d3feb09e640b82603cea2749f9ac8e",
+			"revision": "36cb17a474350e5a66a45f7a625ddd4fbe66ea20",
 			"source_class": "invariants"
 		},
 		{
-			"digest": "sha256:25d4e2a0ce47c37961ec9edbb959d2accdebd9216f716daeb18df47ff1a7a566",
+			"digest": "sha256:cd7767e6693f439ed27ff36f3b85259c9d230d7edea4a6e0cd0afdef381b4f3a",
 			"path": "semantics/contracts.yaml",
 			"ref": "l9.source/contracts@1",
-			"revision": "4049c6df88d3feb09e640b82603cea2749f9ac8e",
+			"revision": "36cb17a474350e5a66a45f7a625ddd4fbe66ea20",
 			"source_class": "contracts"
 		}
 	]

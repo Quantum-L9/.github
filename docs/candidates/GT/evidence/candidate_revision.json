@@ -13,6 +13,6 @@
 		"schemas/gt_sv_consumer_assessment.candidate.schema.json"
 	],
 	"notes": "locally computed digest over ordered path\\0bytes\\0; not canonical git/admission or compiler digest",
-	"sv_admitted": "v3.32.0@64d8b8598300f94c3201f26866f73be6895dab60",
-	"canonical_target": "c9bbfaf61bd0f7444b1a617876a031c2fba75406"
+	"sv_candidate_head": "a64d05a152b5920dad577cead26618a6f05fef09",
+	"canonical_target": "020a94bea86e7c5c5e4107da7014ec259508f397"
 }

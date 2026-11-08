@@ -1,24 +1,30 @@
 #!/usr/bin/env python3
-"""Prepare the GT canonical candidate files on top of the admitted SV foundation.
+"""Prepare the GT canonical candidate files on top of the exact SV #215 candidate.
 
-Strategic Value is admitted on main as Semantic Foundation v3.32.0 (ADR-029,
-Quantum-L9/.github#222). Per ADR-029 D5 GT follows in two stages, never combined:
+Two stages, never combined:
 
-* ``--stage core`` (default; the GT core successor release). The target is a
-  clean disposable clone at exactly ``canonical_target`` whose ``semantics/``
-  tree equals ``canonical_target_semantics_tree`` (the tree ADR-029 admits),
-  with the admitted SV-owned files at their pinned digests, all recorded in
-  ``evidence/sv_alignment_binding.json``. GT core is then layered on: L9-GT-001,
-  the GT core contract, twelve GT terms, the GT projection profile and its
-  forbidden-constraint definition, the GT composition profile, both payload
-  schemas and their manifest registration. The GT+SV dependent contract is NOT
-  applied in this stage.
+* ``--stage core`` (default; successor release A). The target is a disposable
+  clone at ``canonical_target`` on which the SV candidate applier from PR #215
+  at its pinned head has already been run. Every SV-applied file must match the
+  digest recorded in ``evidence/sv_alignment_binding.json``; nothing else may be
+  dirty. GT core is then layered on: L9-GT-001, the GT core contract, twelve GT
+  terms, the GT projection profile and its forbidden-constraint definition, the
+  GT composition profile, both payload schemas and their manifest registration.
+  The GT+SV dependent contract is NOT applied in this stage.
 
-* ``--stage dependent`` (the following release). Refuses unless the binding
-  file records ``admitted_foundation_revision`` (set only by a reviewed commit
-  after GT core is admitted on top of the admitted SV foundation), the checkout
-  is clean at exactly that revision, and that revision carries the admitted SV
-  model, SV contract, both SV invariants and the GT core. No flag bypasses this.
+* ``--stage admitted-core`` (release A after SV admission). The target is a
+  clean checkout at exactly ``target_revision`` in the reviewed successor
+  binding ``evidence/admitted_sv_binding.json``. The admitted SV revision must
+  be an ancestor, the SV-owned files and every SV record in a shared ledger
+  must equal their admitted bytes and records, the SV release and ADR must
+  record the admission, and no GT record may exist yet. The same GT core is
+  then assembled as in ``--stage core``. The dependent contract is not applied.
+
+* ``--stage dependent`` (successor release B). Refuses unless the binding file
+  records ``admitted_foundation_revision`` (set only by a reviewed commit after
+  SV and GT core are admitted at one canonical revision), the checkout is clean
+  at exactly that revision, and that revision carries the admitted SV model,
+  SV contract, both SV invariants and the GT core. No flag bypasses this.
 
 Dry-run by default. ``--apply --disposable`` writes local files only and refuses
 the checkout that carries this pack. Every check runs on the fully assembled
@@ -43,9 +49,8 @@ BINDING = json.loads(
 )
 
 CANONICAL_TARGET = BINDING["canonical_target"]
-CANONICAL_TREE = BINDING["canonical_target_semantics_tree"]
-SV_ADMITTED = BINDING["sv_admitted"]
-SV_OWNED_SHA256 = SV_ADMITTED["sv_owned_files_sha256"]
+SV_CANDIDATE_HEAD = BINDING["sv_candidate"]["head"]
+SV_APPLIED_SHA256 = BINDING["sv_applied_target_sha256"]
 ADMITTED_FOUNDATION_REVISION = BINDING["admitted_foundation_revision"]
 
 SV_NEW_INVARIANTS = frozenset(BINDING["sv_new_invariants"])
@@ -97,6 +102,8 @@ LEDGERS = {
     "model": VALUE_MODEL,
 }
 FORBIDDEN_OVERLAY = "overlays/projection_forbidden_constraint_additions.yaml"
+VOCABULARY_OVERLAY = "overlays/vocabulary_additions.yaml"
+FULL_SHA = re.compile(r"[0-9a-f]{40}")
 INVARIANT_SELECTOR = re.compile(r'^\$\.invariants\[\?\(@\.id=="([^"]+)"\)\]$')
 CONTRACT_SELECTOR = re.compile(r'^\$\.contracts\[\?\(@\.id=="([^"]+)"\)\]$')
 
@@ -299,27 +306,26 @@ def dirty_paths(checkout):
     return {line[3:] for line in out.splitlines() if line.strip()}
 
 
-def verify_admitted_sv_target(checkout):
-    """The checkout must be clean at canonical_target on the admitted SV tree."""
+def verify_sv_applied_target(checkout):
+    """The checkout must be canonical_target plus exactly the pinned SV application."""
     head = git(checkout, "rev-parse", "HEAD").strip()
     if head != CANONICAL_TARGET:
         raise ValueError(f"wrong target HEAD {head}; expected {CANONICAL_TARGET}")
     dirty = dirty_paths(checkout)
-    if dirty:
-        raise ValueError(f"target checkout is not clean: {sorted(dirty)}")
-    tree = git(checkout, "rev-parse", "HEAD:semantics").strip()
-    if tree != CANONICAL_TREE:
+    if dirty != set(SV_APPLIED_SHA256):
         raise ValueError(
-            f"semantics tree {tree} != admitted SV foundation tree {CANONICAL_TREE}"
+            "dirty paths are not exactly the SV #215 application: "
+            f"missing={sorted(set(SV_APPLIED_SHA256) - dirty)} "
+            f"extra={sorted(dirty - set(SV_APPLIED_SHA256))}"
         )
-    for rel, expected in SV_OWNED_SHA256.items():
+    for rel, expected in SV_APPLIED_SHA256.items():
         actual = hashlib.sha256((checkout / rel).read_bytes()).hexdigest()
         if actual != expected:
-            raise ValueError(f"{rel}: digest {actual} != admitted SV pin {expected}")
+            raise ValueError(f"{rel}: SV-applied digest {actual} != pinned {expected}")
 
 
 def verify_sv_core_present(docs):
-    """Assert the admitted SV semantics (v3.32.0) GT depends on are present."""
+    """Assert the SV candidate semantics GT depends on are present and reduced."""
     inv_ids = {r["id"] for r in docs["invariants"]["invariants"]}
     sv_ids = {i for i in inv_ids if i.startswith("L9-SV-")}
     if sv_ids != SV_NEW_INVARIANTS:
@@ -343,6 +349,184 @@ def verify_sv_core_present(docs):
         SV_COMPOSITION_ID
     ) != 1:
         raise ValueError("SV composition profile missing")
+
+
+ADMITTED_SV_BINDING = ROOT / "evidence/admitted_sv_binding.json"
+SV_IDENTITY_KEYS = (
+    "sv_new_invariants",
+    "sv_vocabulary_terms",
+    "sv_model",
+    "sv_contract",
+    "sv_projection",
+    "sv_composition",
+    "sv_source_classes",
+)
+SV_OWNED_FILES = ("semantics/strategic_value_model.yaml",) + tuple(
+    "semantics/" + name for name in SV_SCHEMA_FILES
+)
+
+
+def load_admitted_sv_binding():
+    """Load the reviewed successor binding for the admitted-SV base (release A).
+
+    It does not replace evidence/sv_alignment_binding.json, which stays the
+    historical record of the SV #215 overlay rehearsal. Its SV identities must
+    equal that record's, so the admitted foundation is the one GT was aligned to.
+    """
+    if not ADMITTED_SV_BINDING.is_file():
+        raise ValueError(
+            "no reviewed admitted-SV binding (evidence/admitted_sv_binding.json)"
+        )
+    ab = json.loads(ADMITTED_SV_BINDING.read_text(encoding="utf-8"))
+    identities = ab["admitted_sv"]["identities"]
+    for key in SV_IDENTITY_KEYS:
+        if identities[key] != BINDING[key]:
+            raise ValueError(f"admitted SV {key} differs from the aligned SV candidate")
+    full_sha(ab.get("target_revision"), "target_revision")
+    full_sha(ab["admitted_sv"].get("effective_revision"), "effective_revision")
+    return ab
+
+
+def full_sha(value, label):
+    """A revision read from a file must be one full commit SHA, never an option."""
+    if not isinstance(value, str) or FULL_SHA.fullmatch(value) is None:
+        raise ValueError(f"{label} must be a 40-hex commit SHA, got {value!r}")
+    return value
+
+
+def _show(checkout, revision, rel):
+    return git(checkout, "show", f"{full_sha(revision, 'revision')}:{rel}")
+
+
+def _sv_records(docs):
+    """Every SV-owned record in the shared ledgers, by identity."""
+    pick = {
+        "invariants": [
+            r for r in docs["invariants"]["invariants"] if r["id"] in SV_NEW_INVARIANTS
+        ],
+        "contracts": [
+            c for c in docs["contracts"]["contracts"] if c["id"] == SV_CONTRACT_ID
+        ],
+        "terms": {t: docs["vocabulary"]["terms"].get(t) for t in SV_TERMS},
+        "projection": [
+            p
+            for p in docs["projection_profiles"]["projection_profiles"]
+            if p["id"] == SV_PROFILE_ID
+        ],
+        "composition": [
+            p
+            for p in docs["composition_profiles"]["profiles"]
+            if p["id"] == SV_COMPOSITION_ID
+        ],
+    }
+    return pick
+
+
+def _status_line(text, prefix):
+    lines = [line for line in text.splitlines() if line.startswith(prefix)]
+    return lines[0] if len(lines) == 1 else None
+
+
+def _verify_admission_record(checkout, admitted):
+    release = admitted["release"]
+    readme = checkout / f"docs/semantic-foundation/{release}/README.md"
+    manifest = checkout / f"docs/semantic-foundation/{release}/MANIFEST.md"
+    adr = checkout / admitted["adr"]
+    for path in (readme, manifest, adr):
+        if not path.is_file():
+            raise ValueError(f"admission record missing: {path.relative_to(checkout)}")
+    status = _status_line(readme.read_text(encoding="utf-8"), "Status:")
+    release_status = _status_line(
+        manifest.read_text(encoding="utf-8"), "Release status:"
+    )
+    if not status or "**ADMITTED" not in status:
+        raise ValueError(f"{release} README is not marked admitted")
+    if not release_status or "**ADMITTED" not in release_status:
+        raise ValueError(f"{release} MANIFEST is not marked admitted")
+    adr_status = _status_line(adr.read_text(encoding="utf-8"), "**Status:**")
+    if not adr_status or not adr_status.startswith("**Status:** Accepted"):
+        raise ValueError(f"{admitted['adr']} is not Accepted")
+
+
+def _verify_gt_absent(docs, checkout):
+    inv_ids = {r["id"] for r in docs["invariants"]["invariants"]}
+    contract_ids = {c["id"] for c in docs["contracts"]["contracts"]}
+    present = sorted(
+        [GT_INVARIANT] * (GT_INVARIANT in inv_ids)
+        + [
+            c
+            for c in (GT_CORE_CONTRACT_ID, GT_DEPENDENT_CONTRACT_ID)
+            if c in contract_ids
+        ]
+        + [
+            p["id"]
+            for p in docs["projection_profiles"]["projection_profiles"]
+            if p["id"] == GT_PROFILE_ID
+        ]
+        + [
+            p["id"]
+            for p in docs["composition_profiles"]["profiles"]
+            if p["id"] == GT_COMPOSITION_ID
+        ]
+        + [
+            t
+            for t in overlay(VOCABULARY_OVERLAY)["terms"]
+            if t in docs["vocabulary"]["terms"]
+        ]
+        + [n for n in GT_SCHEMA_FILES if (checkout / "semantics" / n).exists()]
+    )
+    if (
+        GT_FORBIDDEN
+        in docs["projection_profiles"]["forbidden_constraints"]["definitions"]
+    ):
+        present.append(GT_FORBIDDEN)
+    if present:
+        raise ValueError(f"GT additions already present at the target: {present}")
+
+
+def verify_admitted_sv_base(checkout, ab):
+    """Require the reviewed target, clean, carrying the admitted SV unchanged.
+
+    The pin alone is not trusted: the admitted revision must be an ancestor, the
+    SV-owned files must equal their admitted bytes, every SV record in a shared
+    ledger must equal its admitted record, the release and ADR must record the
+    admission, and no GT record may already exist.
+    """
+    target = full_sha(ab["target_revision"], "target_revision")
+    admitted = ab["admitted_sv"]
+    head = git(checkout, "rev-parse", "HEAD").strip()
+    if head != target:
+        raise ValueError(f"wrong target HEAD {head}; expected {target}")
+    if dirty_paths(checkout):
+        raise ValueError("checkout not clean")
+    revision = full_sha(admitted["effective_revision"], "effective_revision")
+    ancestor = subprocess.run(
+        ["git", "-C", str(checkout), "merge-base", "--is-ancestor", revision, head],
+        capture_output=True,
+        check=False,
+    )
+    if ancestor.returncode != 0:
+        raise ValueError(
+            f"admitted SV revision {revision} is not an ancestor of {head}"
+        )
+    for rel in SV_OWNED_FILES:
+        if (checkout / rel).read_text(encoding="utf-8") != _show(
+            checkout, revision, rel
+        ):
+            raise ValueError(f"{rel} differs from its admitted bytes at {revision}")
+    now = {
+        key: yaml.safe_load((checkout / rel).read_text(encoding="utf-8"))
+        for key, rel in LEDGERS.items()
+    }
+    then = {
+        key: yaml.safe_load(_show(checkout, revision, rel))
+        for key, rel in LEDGERS.items()
+    }
+    verify_sv_core_present(now)
+    if _sv_records(now) != _sv_records(then):
+        raise ValueError(f"SV records in the shared ledgers changed since {revision}")
+    _verify_admission_record(checkout, admitted)
+    _verify_gt_absent(now, checkout)
 
 
 def _gt_profile(doc):
@@ -375,7 +559,7 @@ def _verify_gt_law(docs):
         raise ValueError(
             "GT core source_invariants must be exactly the six governing IDs"
         )
-    gt_terms = list(overlay("overlays/vocabulary_additions.yaml")["terms"])
+    gt_terms = list(overlay(VOCABULARY_OVERLAY)["terms"])
     if len(gt_terms) != 12 or set(gt_terms) & set(SV_TERMS):
         raise ValueError("GT must add twelve terms disjoint from SV terms")
     return sources, gt_terms
@@ -550,11 +734,11 @@ def generate_core(checkout):
 
     p = VOCABULARY
     v = current(p)
-    incoming = overlay("overlays/vocabulary_additions.yaml")["terms"]
+    incoming = overlay(VOCABULARY_OVERLAY)["terms"]
     clash = set(yaml.safe_load(v)["terms"]) & set(incoming)
     if clash:
         raise ValueError(f"vocabulary term collision: {sorted(clash)}")
-    block = raw("overlays/vocabulary_additions.yaml").split("terms:\n", 1)[1]
+    block = raw(VOCABULARY_OVERLAY).split("terms:\n", 1)[1]
     changed[p] = one(
         v, "\nrelationships:\n", "\n" + block.rstrip() + "\nrelationships:\n", p
     )
@@ -731,7 +915,9 @@ def write_staged(checkout, proposed):
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkout", required=True)
-    parser.add_argument("--stage", choices=("core", "dependent"), default="core")
+    parser.add_argument(
+        "--stage", choices=("core", "admitted-core", "dependent"), default="core"
+    )
     parser.add_argument("--apply", action="store_true")
     parser.add_argument(
         "--disposable",
@@ -741,8 +927,14 @@ def main(argv=None):
     args = parser.parse_args(argv)
     checkout = Path(args.checkout).resolve()
     try:
+        target = CANONICAL_TARGET
         if args.stage == "core":
-            verify_admitted_sv_target(checkout)
+            verify_sv_applied_target(checkout)
+            proposed, count, rebound, resolved = generate_core(checkout)
+        elif args.stage == "admitted-core":
+            admitted = load_admitted_sv_binding()
+            verify_admitted_sv_base(checkout, admitted)
+            target = admitted["target_revision"]
             proposed, count, rebound, resolved = generate_core(checkout)
         else:
             proposed, count, rebound, resolved = generate_dependent(checkout)
@@ -755,13 +947,13 @@ def main(argv=None):
             + ("LOCAL_FILES_WRITTEN_NOT_ADMITTED" if args.apply else "DRY_RUN_ONLY")
         )
         print("STAGE=" + args.stage)
-        print("CANONICAL_TARGET=" + CANONICAL_TARGET)
-        print(
-            "SV_ADMITTED="
-            + SV_ADMITTED["release"]
-            + "@"
-            + SV_ADMITTED["admission_merge_commit"]
-        )
+        print("CANONICAL_TARGET=" + target)
+        if args.stage == "admitted-core":
+            print(
+                "ADMITTED_SV_REVISION=" + admitted["admitted_sv"]["effective_revision"]
+            )
+        else:
+            print("SV_CANDIDATE_HEAD=" + SV_CANDIDATE_HEAD)
         print("INVARIANT_COUNT=" + str(count))
         for path in sorted(proposed):
             print("PATH=" + path)
@@ -769,7 +961,7 @@ def main(argv=None):
             print(f"DERIVATION_REBOUND={path}:{','.join(names)}")
         for output_id, name in sorted(resolved.items()):
             print(f"SCHEMA_RESOLVED={output_id}:{name}")
-        if args.stage == "core":
+        if args.stage in ("core", "admitted-core"):
             print(
                 "DEPENDENT_GT_SV_CONTRACT=NOT_APPLIED_STAGE_B_REQUIRES_ADMITTED_FOUNDATION"
             )

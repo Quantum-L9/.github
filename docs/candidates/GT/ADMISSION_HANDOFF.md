@@ -2,27 +2,38 @@
 
 **This pack is a candidate. It makes no canonical change and admits nothing.**
 
-## Done: Strategic Value admitted (v3.32.0)
+## Successor release A — SV + GT core
 
-SV was admitted on its own as Semantic Foundation v3.32.0 (ADR-029, #222, `64d8b85`), following ADR-029 D5's sequential order. GT is now bound to that admitted foundation (`SV_ALIGNMENT.md`, `evidence/sv_alignment_binding.json` v3). The superseded plan to admit SV and GT core together as "release A" no longer applies.
+Contents: the reduced SV candidate (PR #215) plus `L9-GT-001`, twelve GT terms, the GT core contract, the GT projection and composition profiles, the GT forbidden-criterion definition, and both GT payload schemas with their manifest registration. The GT+SV dependent contract is **not** in release A.
 
-## Next successor release — GT core on the admitted SV foundation
+Canonical destination paths, as derived from the resolved target (`evidence/integration-v1/rehearsal.json`), are **15**, not the 12 the remediation spec estimated. The extra three are the derived ledgers `capabilities.yaml`, `lifecycle.yaml` and `receipt_catalog.yaml`, whose recorded digests of `invariants.yaml` and `contracts.yaml` must be rebound (as Semantic Foundation v3.8.0 did in `2ae5dfa`):
 
-Contents: `L9-GT-001`, twelve GT terms, the GT core contract, the GT projection and composition profiles, the GT forbidden-criterion definition, and both GT payload schemas with their manifest registration. The GT+SV dependent contract is **not** in this release.
-
-Canonical destination paths on `c9bbfaf`, derived from the rehearsal (`evidence/integration-v2/rehearsal.json`): **11**. These are `invariants.yaml`, `contracts.yaml`, `vocabulary.yaml`, `projection_profiles.yaml`, `composition_profiles.yaml`, `generic_compiler_manifest.yaml`, `strategic_interaction_projection.schema.yaml` and `strategic_interaction_composition.schema.yaml`, plus the derived ledgers `capabilities.yaml`, `lifecycle.yaml` and `receipt_catalog.yaml`, whose recorded digests are rebound. No admitted SV-owned file changes.
+`invariants.yaml`, `contracts.yaml`, `vocabulary.yaml`, `canonical_sources.yaml`, `projection_profiles.yaml`, `composition_profiles.yaml`, `generic_compiler_manifest.yaml`, `strategic_value_model.yaml`, `strategic_planner_value_projection.schema.yaml`, `strategic_planner_value_composition.schema.yaml`, `strategic_interaction_projection.schema.yaml`, `strategic_interaction_composition.schema.yaml`, `capabilities.yaml`, `lifecycle.yaml`, `receipt_catalog.yaml`.
 
 Gates the canonical owner must close:
 
-1. Adjudicate `L9-GT-001` independently: it must not duplicate an existing global meaning. Independent review recommends moving it into the GT core contract, governed by `L9-UNKNOWN-001`, `L9-EVIDENCE-001` and `L9-ASSURANCE-001`, the same test SV applied to SV-015..020. This is not done here.
-2. Confirm that the three derived ledgers need digest rebinding only, as ADR-029 D3 did for SV.
-3. Prepare a successor semantic-foundation release record so SC-008 and SC-010 pass. Number it from the merged state, as ADR-029 D4 does; the version is not chosen here.
-4. Re-run the rehearsal at the exact successor revision, and replay it under trust.
-5. Review the compiler-generated candidate schemas and their drafted grammars in `synthesis/` (`schema-synthesize` at `33e4c58`, exit 0, deterministic). Approve, amend or reject the grammars, and decide whether the candidate schemas replace or accompany `semantics/strategic_interaction_*.schema.yaml`. Then re-run `tools/synthesize_candidate_schemas.py` against the admitted revision with the approved grammars.
+1. Adjudicate `L9-GT-001` independently: it must not duplicate an existing global meaning. This is not done here.
+2. Close the SV owner decisions listed in #215, including the amended `L9-SV-001` wording and whether `required_provenance` stays on `l9.compose/strategic-planner-value@1`. While it stays, the SV composition is `unknown` under compiler 0.9.3, so no GT+SV result can be evaluated.
+3. Confirm that the three derived ledgers need digest rebinding only.
+4. Prepare a successor semantic-foundation release record so SC-008 and SC-010 pass. The version is not chosen here.
+5. Re-run the integrated rehearsal at the exact successor revision, and replay it under trust.
+6. Review the compiler-generated candidate schemas and their drafted grammars in `synthesis/` (`schema-synthesize` at `18215ae`, exit 0, deterministic). Approve, amend or reject the grammars, and decide whether the candidate schemas replace or accompany `semantics/strategic_interaction_*.schema.yaml`. Then re-run `tools/synthesize_candidate_schemas.py` against the admitted revision with the approved grammars.
 
-## The release after — GT+SV cross-boundary contract
+## Release A after SV admission (2026-11-08)
 
-1. Record the revision that admits GT core in `evidence/sv_alignment_binding.json#admitted_foundation_revision` through a reviewed commit.
+SV was admitted on its own first: Semantic Foundation v3.32.0 / ADR-029, effective at `64d8b85` (Quantum-L9/.github#222). Release A is therefore **GT core only**. `apply_to_pinned_checkout.py --stage admitted-core` applies it to a clean checkout at the `target_revision` recorded in `evidence/admitted_sv_binding.json`, a reviewed successor binding. The stage re-verifies the following before any byte is written:
+
+- the admitted SV revision is an ancestor of the target;
+- the SV-owned files equal their admitted bytes;
+- every SV record in a shared ledger equals its admitted record;
+- the v3.32.0 release and ADR-029 record the admission;
+- no GT record exists yet.
+
+Against `main` `c9bbfaf` it touches **11** canonical paths, not 15: the four SV-owned files are already admitted. The paths are `invariants.yaml`, `contracts.yaml`, `vocabulary.yaml`, `projection_profiles.yaml`, `composition_profiles.yaml`, `generic_compiler_manifest.yaml`, both GT schemas, and the derived `capabilities.yaml`, `lifecycle.yaml` and `receipt_catalog.yaml`. `evidence/sv_alignment_binding.json` stays the unchanged historical record of the SV #215 overlay rehearsal.
+
+## Successor release B — GT+SV cross-boundary contract
+
+1. Record the admitted release-A revision in `evidence/sv_alignment_binding.json#admitted_foundation_revision` through a reviewed commit.
 2. Run `apply_to_pinned_checkout.py --stage dependent` on a clean checkout at exactly that revision. It refuses otherwise, and checks that the admitted SV model, SV contract, both SV invariants and GT core are present.
 3. Separately authorize admission of `l9.contract/strategic-value-interaction-composition@1`.
 4. Verify the combined Numerical Reasoning and consumer contract. `tools/verify_consumer_envelope.py` accepts an evaluated envelope only with receipt-backed view digests at equal coordinates and a numerical-evaluation receipt over both views. No Numerical Reasoning receipt type is admitted yet, so that part remains Unknown.
