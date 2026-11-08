@@ -47,7 +47,7 @@ ADR-026 shows the opposite case: a candidate release whose ADR says it "does not
 | Field | How it is established |
 | --- | --- |
 | `admission_release` | A release on main with the ADMITTED status line and an ADR that accepts exactly that version, not a candidate of it |
-| `admission_commit` | The oldest commit on main whose release README carries the ADMITTED status line. The release directory must be unedited after it, and its full SC-008 inventory must verify at that commit. |
+| `admission_commit` | The oldest commit on main's first-parent mainline whose release README carries the ADMITTED status line. For a pull request, squashed or merged, that is the commit that lands it: the PR's own commits were never on `main`, and the ADR takes effect when the PR merges. The release directory and the ADR must be unedited on the mainline after it, and the full SC-008 inventory must verify at that commit. |
 | `adr` | Existed and accepted the version **at the admission commit**: its status line accepts exactly that version and does not call itself a candidate, pending, withdrawn or self-denying. It is listed in the ADR index there, hashed by the release at its bytes, and unedited or not removed on main since. |
 | `admitted_semantics_tree` | The first 40-hex value in the ADR's `Approved semantic tree` row. It must equal `git rev-parse <admission_commit>:semantics`. |
 | `candidate_revision` | Further 40-hex commits in that row. Each one that resolves must carry the approved tree. |

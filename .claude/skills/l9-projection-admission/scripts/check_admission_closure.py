@@ -1364,10 +1364,16 @@ def release_sequence(head: Tree, main: Tree) -> dict[str, Any]:
 
 
 def admission_commit(repo: Path, main: str, version: str) -> str | None:
-    """The oldest commit on main whose release README carries the ADMITTED status line."""
+    """The oldest commit on main's mainline whose release README is ADMITTED.
+
+    Mainline is the first-parent history: what `main` itself recorded, one commit per
+    landing. A pull request's own commits were never on `main`; its admission takes
+    effect at the commit that lands it, whether that is a squash or a merge commit.
+    """
     log = git_out(
         repo,
         "log",
+        "--first-parent",
         "--format=%H",
         "--reverse",
         main,
