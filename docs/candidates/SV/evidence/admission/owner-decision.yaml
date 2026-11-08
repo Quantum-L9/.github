@@ -20,11 +20,12 @@ subject:
   repository: Quantum-L9/.github
   candidate_pr: 215
   candidate_pack_pr: 220
-  candidate_revision: null
+  candidate_revision: 7d9ca4757722894aa5ef2a21a4190f9e8dd98c3d
+  candidate_semantics_tree: de6d21719ecc4ca8ccb8bf2f769ddb344413b904
   candidate_revision_note: >-
-    One decision binds all eight dispositions. The exact final subject (admission-branch revision and semantics tree
-    hash) is recorded in ADMISSION_CLOSEOUT.md once qualified; the decision applies to that subject because D1 and D2
-    are realized there unchanged.
+    One decision binds all eight dispositions. Qualified subject: admission branch agent/claude-code/sv-admission at
+    the revision and semantics tree above (base 9488d8f), producer l9-semantic-compiler-engine@33e4c58. Refreshing the
+    branch after the D5 queue lands changes the subject; the ADR then binds the refreshed tree.
 target:
   authority_class: canonical
   semantic_owner: Quantum-L9/.github

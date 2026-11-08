@@ -45,13 +45,17 @@ RUN1 = _required_dir("SV_RUN1")
 COMPILER = _required_dir("SV_COMPILER_SRC")
 ENV = dict(os.environ, PYTHONPATH=str(COMPILER / "src"))
 REV = subprocess.run(
-    ["git", "-C", str(AUTH), "rev-parse", "HEAD"], capture_output=True, text=True
+    ["git", "-C", str(AUTH), "rev-parse", "HEAD"],
+    capture_output=True,
+    text=True,
+    check=True,
 ).stdout.strip()
 
 
 def cli(*args):
     p = subprocess.run(
         [sys.executable, "-m", "l9_semantic_compiler", *args],
+        check=False,
         capture_output=True,
         text=True,
         env=ENV,
@@ -62,7 +66,7 @@ def cli(*args):
 def summarize(out):
     try:
         d = yaml.safe_load(out)
-    except Exception:
+    except yaml.YAMLError:
         return {"raw": out[-300:]}
     if not isinstance(d, dict):
         return {"raw": str(d)[-300:]}
@@ -231,6 +235,7 @@ record("revision_without_candidate_profile", "profile_resolution", *project(r, "
 def commit_with(path, transform, msg):
     blob_src = subprocess.run(
         ["git", "-C", str(AUTH), "show", f"{REV}:{path}"],
+        check=True,
         capture_output=True,
         text=True,
     ).stdout
@@ -399,6 +404,7 @@ with tempfile.TemporaryDirectory() as t:
     rev_digest = [a.get("digest") for a in d.get("artifacts") or []]
 canon = yaml.safe_load(_confined(RUN1, "requests", "compose.result.yaml").read_text())
 canon_digest = [a.get("digest") for a in canon.get("artifacts") or []]
+canon_rc = {"pass": 0, "unknown": 3}.get(canon.get("result"), -1)
 results.append(
     {
         "control": "composition_component_order_reversed",
@@ -406,8 +412,11 @@ results.append(
         "exit_code": rc,
         "composed_digest": rev_digest,
         "canonical_order_composed_digest": canon_digest,
-        "expected": "identical composed digest and the same exit code 3 (unknown) as canonical order",
-        "mechanism_matched": rc == 3
+        # Under owner decision D2/R2 the canonical composition passes (exit 0); before R2 it was
+        # unknown (exit 3). Either way the reversed order must reproduce it exactly.
+        "expected": "identical composed digest and the same exit code as canonical order",
+        "canonical_order_exit_code": canon_rc,
+        "mechanism_matched": rc == canon_rc
         and rev_digest == canon_digest
         and bool(canon_digest),
     }
@@ -496,6 +505,7 @@ print(
                     "rev-parse",
                     "HEAD",
                 ],
+                check=True,
                 capture_output=True,
                 text=True,
             ).stdout.strip(),

@@ -1,6 +1,6 @@
 {
 	"schema": "l9.strategic-value-dotgithub-qualification-candidate/v3",
-	"status": "TWO_INVARIANT_REDUCTION_LOCAL_PASS_COMPOSITION_UNKNOWN_NOT_ADMITTED",
+	"status": "TWO_INVARIANT_CANDIDATE_OWNER_APPROVED_QUALIFIED_NOT_ADMITTED",
 	"pack_id": "SV-CONSTITUTIONAL-REDUCTION-DEV-PACK-v1",
 	"base_repo": "Quantum-L9/.github",
 	"base_sha": "9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88",
@@ -32,7 +32,7 @@
 	"independent_review": "SEPARATE_AGENT_REVIEW_NOT_HUMAN_OR_OWNER",
 	"native_schema_qualification": "PASS_26_CHECKS_COMPILER_3bf1a82",
 	"five_source_compilation": "PASS_AGAINST_LOCAL_REHEARSAL_REVISION_0b50cf7_TREE_bb07371",
-	"composition": "UNKNOWN_REQUIRED_PROVENANCE_DECLARED_CONSTRAINTS_UNRESOLVED",
+	"composition": "PASS_AT_7d9ca47_WITH_COMPILER_33e4c58_R2",
 	"native_semantic_validation": "ORDINARY_CHECKS_PASS_SC008_SC010_FAIL_SUCCESSOR_RELEASE_INVENTORY_REQUIRED",
 	"canonical_admission": "NOT_PERFORMED",
 	"remote_mutation": "candidate-pack PR only; no canonical semantics, release, merge or admission",
@@ -64,8 +64,8 @@
 		},
 		{
 			"path": "README.md",
-			"bytes": 11600,
-			"sha256": "e97951eb44312c096c06bc79555039828b6946382426f6bc4d168ad3a2eec72d"
+			"bytes": 12293,
+			"sha256": "b90a10d18a8c8011588c74b303d9eba9f445b0192403b011788fe27755d44fbb"
 		},
 		{
 			"path": "SCHEMA_QUALIFICATION_REVIEW.md",
@@ -114,8 +114,8 @@
 		},
 		{
 			"path": "evidence/admission/ADMISSION_CLOSEOUT.md",
-			"bytes": 5797,
-			"sha256": "4d47af844588c163e8c38cde9c1e3140790694e206bb09906cf61d56026222ed"
+			"bytes": 7573,
+			"sha256": "80b2b399edc24ce22371a2c495f13521d80d0c0467dddc4fcced0bfc6f67a5c7"
 		},
 		{
 			"path": "evidence/admission/composition-provenance-equivalence.json",
@@ -124,8 +124,48 @@
 		},
 		{
 			"path": "evidence/admission/owner-decision.yaml",
-			"bytes": 6289,
-			"sha256": "2b9a40e1700e4e300ba95c258694e61196c2a36b76257f95cf83c7723acd2955"
+			"bytes": 6457,
+			"sha256": "61959bf1fc871be13fda94b1756058670d5d3ab8ccd35cd3f2c278dc39ab3489"
+		},
+		{
+			"path": "evidence/admission/qualification-7d9ca47/admission-closure-gate.json",
+			"bytes": 3977,
+			"sha256": "e7eda2dc495ed10712d1a7bc4e1c7a68329f00b0244a238d09da313042ac0c1a"
+		},
+		{
+			"path": "evidence/admission/qualification-7d9ca47/determinism.json",
+			"bytes": 7913,
+			"sha256": "d301a11addd6f8147e989dea33a205a3630b4dbe55bc35941223331f1de8f815"
+		},
+		{
+			"path": "evidence/admission/qualification-7d9ca47/native-schema-qualification.json",
+			"bytes": 5729,
+			"sha256": "20f7a60cb95009906bdad53e0a9f74d619bb6c92ca547a913930d96501a22c7a"
+		},
+		{
+			"path": "evidence/admission/qualification-7d9ca47/producer-negative-controls.json",
+			"bytes": 12703,
+			"sha256": "34642e3981ba663bbc941317553d4b318873a0c0f18cfb64f6492c1a70c620dd"
+		},
+		{
+			"path": "evidence/admission/qualification-7d9ca47/producer-run1.tar",
+			"bytes": 522240,
+			"sha256": "ce0b9e899c363a56d80e7d621056e05c58a4296a1e2ca121ffe634169bd8b4a0"
+		},
+		{
+			"path": "evidence/admission/qualification-7d9ca47/producer-run2.tar",
+			"bytes": 522240,
+			"sha256": "4e9e23bbf05720542620649b4c5e0eef5cd3036cd1e0b9eaa7032563c0ccdefa"
+		},
+		{
+			"path": "evidence/admission/qualification-7d9ca47/producer-summary.json",
+			"bytes": 2325,
+			"sha256": "dd25451dbd9f3909b290be8f0704bde0a9de652ee0d0c0250798da91e42db9fd"
+		},
+		{
+			"path": "evidence/admission/qualification-7d9ca47/provenance-verifier.json",
+			"bytes": 2542,
+			"sha256": "62d22c9303687573377ce319e31539fcc9d4bc903b21f39114b9b3f356e18eeb"
 		},
 		{
 			"path": "evidence/native_schema_gate.json",
@@ -149,8 +189,8 @@
 		},
 		{
 			"path": "evidence/reduction-v1/admission-readiness.json",
-			"bytes": 5765,
-			"sha256": "78ef39d5ad8249cf5c47c132722b2cc4a9fdc927d18b15cb8bfa5376448a7bc6"
+			"bytes": 4491,
+			"sha256": "6d813eb38c85109c87b615efab92ad814479789206f53d4905ad1bccd2aac81c"
 		},
 		{
 			"path": "evidence/reduction-v1/authority-resolution.json",
@@ -244,8 +284,8 @@
 		},
 		{
 			"path": "evidence/reduction-v1/producer_negative_controls.py",
-			"bytes": 15642,
-			"sha256": "12118a36318be65bdd02c1cde1819d7070d99d607bc46477aadeef9f2949f31a"
+			"bytes": 16031,
+			"sha256": "fc8f2d90dcdbb865da4bb240a394288fa9b86f04e2d95a2a2776b7afb9753d09"
 		},
 		{
 			"path": "evidence/reduction-v1/projection-run1.tar",
@@ -478,14 +518,29 @@
 			"sha256": "b3b95c575f503a9b73bbca0f9c9dbf5e00ffaa1226a4e0133b0ca5d88e6846da"
 		},
 		{
+			"path": "tests/test_successor_release.py",
+			"bytes": 2302,
+			"sha256": "344071b39cd34ef1c3eae056d983010ac5710cd7136d1e5eb24d32aaaff0bc82"
+		},
+		{
 			"path": "tests/verify_composition_provenance.py",
 			"bytes": 16744,
 			"sha256": "f29aa29ef3d472d90c64a5b8bc0ce15390f34ee4063a0e6608ccc40addb133cc"
 		},
 		{
+			"path": "tools/prepare_successor_release.py",
+			"bytes": 22076,
+			"sha256": "76ca28b7c05ed754af89c2d195fe2d1fb503ca7b9796bbbc64db958b6f7408af"
+		},
+		{
 			"path": "tools/reduce_to_two_invariants.py",
 			"bytes": 14943,
 			"sha256": "570e66a0ea87d7964ad6f49f22a66f347b2911f631a7678efbf82b928dce16cb"
+		},
+		{
+			"path": "tools/run_producer_qualification.py",
+			"bytes": 10680,
+			"sha256": "89548c2907abcd85c455abfecd6bb366c7dd5064e25e18d2a03e10b91aa2396c"
 		},
 		{
 			"path": "tools/synthesize_candidate_schemas.py",
@@ -507,5 +562,20 @@
 		"owner_decision_status": "PENDING_UNTIL_AUTHORIZED",
 		"main_at_resolution": "9488d8f"
 	},
-	"previous_base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397"
+	"previous_base_sha": "020a94bea86e7c5c5e4107da7014ec259508f397",
+	"owner_decision": {
+		"record": "evidence/admission/owner-decision.yaml",
+		"status": "OWNER_APPROVED_NOT_ADMITTED",
+		"decided_on": "2026-11-08"
+	},
+	"canonical_admission_candidate": {
+		"branch": "agent/claude-code/sv-admission",
+		"base": "9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88",
+		"revision": "7d9ca4757722894aa5ef2a21a4190f9e8dd98c3d",
+		"semantics_tree": "de6d21719ecc4ca8ccb8bf2f769ddb344413b904",
+		"release_provisional": "v3.32.0",
+		"adr_provisional": "ADR-029",
+		"producer_revision": "33e4c5832bf73c7d9b0b70854af011e9582f1ab2",
+		"evidence": "evidence/admission/qualification-7d9ca47/"
+	}
 }

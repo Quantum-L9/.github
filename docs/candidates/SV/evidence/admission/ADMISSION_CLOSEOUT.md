@@ -1,66 +1,75 @@
 # Strategic Value admission closeout
 
-**Status:** candidate-side closeout prepared, **not admitted**. No owner decision exists, so nothing below is
-approved. The remaining steps need the owner's authority or a canonical base, and an agent can't supply either.
+## Statuses (kept separate)
 
-## What this change establishes
-
-| Item | Result | Evidence |
+| Status | State | Record |
 | --- | --- | --- |
-| Why the composition result is UNKNOWN | Compiler 0.9.3 has no evaluator for `required_provenance`. `passes/projection.py::_declared_constraints` marks every declared value `unresolved` without reading it, and any unresolved criterion makes the result `unknown`. | `composition-provenance-equivalence.json` (`finding`) |
-| The four declared facts hold | PASS on both rehearsal runs, with identical reports. Profile ref and digest, five component refs and digests, composition digest, exact five-class coverage with whole-payload placement, and receipt binding (5 PASS projection receipts, 1 composition receipt, one revision, sealed digests) all re-derive without compiler code. | `tests/verify_composition_provenance.py` |
-| Fails closed | 17 negative controls fail on the intended check: corrupted component or source digest, swapped or foreign ref, relabelled source classes, changed profile digest or ref, edited profile record, duplicated or missing source, payload drift, unsealed artifact, tampered projection, wrong revision, receipt input mismatch, UNKNOWN forged to PASS, missing projection receipt. Unreadable input returns `UNRESOLVED` (exit 2), never PASS. | `tests/test_composition_provenance_equivalence.py` |
-| Canonical precedent | Mixed. On `main`, `l9.compose/stage-context@1` declares the same four tokens, and the other 13 composition profiles declare none. `global_rules.source_projection_provenance_required: true` is not read by the compiler. | `semantics/composition_profiles.yaml` at `9488d8f` |
-| Owner-decision scaffold | Five decisions (D1–D5) carry exact option texts. Every authority reference is `null`. | `owner-decision.yaml` |
+| Implementation | **COMPLETE** for the admission candidate | this file |
+| Owner approval | **APPROVED** D1-D5, 2026-11-08 | `owner-decision.yaml` |
+| Canonical admission | **NOT ADMITTED** — waits on the release queue (D5) | — |
+| Post-merge trusted replay | **NOT RUN** — only possible after admission | — |
 
-The verifier result is **evidence for decision D2**. It is not a compiler PASS receipt, and the composition result
-stays `unknown` until D2 is decided and the producer is rerun.
+## Exact coordinates
 
-## Admission target, re-resolved 2026-11-08
+| Coordinate | Value |
+| --- | --- |
+| Admission branch | `Quantum-L9/.github` `agent/claude-code/sv-admission` |
+| Admission base (fetched `origin/main`) | `9488d8f31a5ddbde8f1d3c3aaf57d17f21f62b88` |
+| Semantic change commit | `f589e10` (overlay applied by `apply_to_pinned_checkout.py`, RC-033) |
+| **Qualified candidate revision** | `7d9ca4757722894aa5ef2a21a4190f9e8dd98c3d` |
+| `semantics/` tree at that revision | `de6d21719ecc4ca8ccb8bf2f769ddb344413b904` |
+| Release candidate / ADR (provisional) | `v3.32.0` / `ADR-029`, selected by `tools/prepare_successor_release.py` from merged state (`v3.30.0` / `ADR-027`) skipping queued claims of #218 and #219 |
+| Producer | `Quantum-L9/l9-semantic-compiler-engine` `agent/claude-code/required-provenance-criteria` at `33e4c5832bf73c7d9b0b70854af011e9582f1ab2` (base `18215ae`, version label 0.9.3) |
 
-The pack was built against `020a94b`. `origin/main` has since moved to `9488d8f`:
+## Owner decisions realized
 
-- **v3.28.0 is admitted** (ADR-025, PR #211). The successor version the brief proposed is taken.
-- **v3.29.0 is an open candidate** (ADR-026, PR #217). `scripts/validate-semantics.py` SC-008 validates the
-  highest numeric release directory whether or not it is admitted. SV therefore lands in v3.30.0 or is folded into
-  v3.29.0 before that release is admitted (decision D4).
-- Unchanged since the pin: `invariants`, `contracts`, `vocabulary`, `canonical_sources`, `capabilities`,
-  `lifecycle`, `receipt_catalog`.
-- Changed since the pin, all additive: `projection_profiles.yaml` (+532), `composition_profiles.yaml` (+140) and
-  `generic_compiler_manifest.yaml` (+20). The new entries sit at exactly the anchors the SV applier writes to. Each
-  anchor is still unique, so the merge logic should hold. That is inferred, not run.
-- `apply_to_pinned_checkout.py` refuses because HEAD is not `020a94b`. Re-pinning means updating `BASE_SHA` and
-  the authority resolution, then rehearsing on `9488d8f` or later. Do not override the SHA guard.
+- **D1 (Option B).** `L9-SV-001` is the donor SV-001 statement followed by the donor SV-015 statement, both verbatim. `L9-SV-002` is unchanged. The six relocated safeguards and twelve earlier meanings keep their lineage and contract obligations. The regenerated outputs changed only `overlays/invariants_additions.yaml`. The two payload schemas carry no SV-001 text, so they are byte-identical, and the projection profile digest is unchanged (`sha256:0ccf2184…`).
+- **D2 (R2).** Authority finding: the governing sources of the four tokens are `composition_profiles.yaml#global_rules.source_projection_provenance_required`, `composed_projection.schema.yaml` (`components[].projection_ref`, `projection_digest`; `composition_profile.ref`, `digest`) and `composition_engine_contract.yaml` (inputs `composition_profile_ref`, `composition_profile_digest`; guarantee `component_provenance_preserved`). By the established `forbidden_constraints` pattern, a declared constraint becomes mechanically evaluable only through a criterion its catalog declares. So R2 needs **both** a governed `.github` declaration and compiler enforcement:
+  - `.github`: `composition_profiles.yaml#provenance_constraints` (`l9.provenance-constraint` v1, one criterion per token), the global rule `required_provenance_is_evaluated_only_through_declared_provenance_constraints`, and validator RC-033 with 8 negative cases. These ride in the SV successor release, so the authority dependency adds no delay. The R1 contingency was not invoked.
+  - Compiler: evaluates only catalog-declared criteria. An undefined token stays unresolved, and an unknown language, criterion or parameter fails closed. Each criterion re-derives its fact from the verified components, the profile record and the authority revision.
+- **D3.** On the freshly pinned base, `capabilities.yaml`, `lifecycle.yaml` and `receipt_catalog.yaml` changed only in derivation `sha256` and `item_count` (invariants 31→33, contracts 26→27). Native SC-004, RC-001, RC-002 and RC-011 pass.
+- **D4.** An independent successor release, numbered from merged state by the tool and never typed in. Predecessor releases are byte-identical (checked by the tool and SC-008).
+- **D5.** Merge order: v3.29.0 admission, #218 (v3.30.0), #219 (v3.31.0), then SV, then GT core (#216), then the GT+SV dependent contract.
 
-## Closeout checklist (0 / 12 admitted)
+## Qualification at `7d9ca47` with compiler `33e4c58` (`qualification-7d9ca47/`)
 
-| # | Item | State | Blocker |
-| --- | --- | --- | --- |
-| 1 | Composition provenance equivalence or native criterion resolved | Equivalence **proved**; route not chosen | Owner decision D2 |
-| 2 | Real composition receipt reports PASS | UNMET | D2, then producer rerun |
-| 3 | SV-001 final wording approved and frozen | UNMET (options A/B recorded verbatim) | Owner decision D1 |
-| 4 | Eight dispositions authorized at exact digest | UNMET | Owner decision record (ADR) |
-| 5 | PR #215 merged into `docs/candidates-strategic-value-sv1` | PENDING | Review |
-| 6 | Thirteen-path overlay applied to freshly resolved `main` | UNMET | Re-pin from `020a94b` to current `main` |
-| 7 | PR #211 and v3.28.0/v3.29.0 registry overlaps reconciled | PARTIAL: #211 is merged, and the anchors survive by inspection | Rehearsal on the new base, plus D5 |
-| 8 | Successor release manifest and hash inventory | UNMET | D4 |
-| 9 | Native validation, five projections and composition PASS | UNMET | Items 2, 6 and 8 |
-| 10 | Determinism and negative controls at the final revision | Reusable assets exist (82 + 32 tests, 18 producer controls, this verifier) | Final subject |
-| 11 | Canonical admission PR approved and merged | UNMET | Items 1–10 |
-| 12 | Admitted `main` read back and consumer replay verified | UNMET | Item 11 |
+| Check | Result |
+| --- | --- |
+| `make validate` / `make check` on the admission branch | exit 0 / exit 0; validator 59 PASS, no FAIL (SC-001..SC-010, RC-001..RC-033 incl. negative batches) |
+| Five SV source projections | 5/5 **PASS** (`producer-summary.json`) |
+| SV composition `l9.compose/strategic-planner-value@1` | **PASS**, exit 0, digest `sha256:7e93f3afe35bc5d628ac716952088bf02ddb1bef0c32fc6a1528f915108e38e7`; all 4 `required_provenance` criteria `pass` |
+| Independent provenance verifier (no compiler imports) | **PASS**: all 8 checks; compiler result `pass`, no unresolved criteria; 5 PASS projection receipts at one revision (`provenance-verifier.json`) |
+| Deterministic repeat | two runs, 29 artifact/composed/receipt/summary files byte-identical (`determinism.json`, `producer-run{1,2}.tar`) |
+| Producer negative controls | 18/18 typed mechanisms matched: 16 negatives fail as asserted, 2 positives pass, order invariance holds (`producer-negative-controls.json`) |
+| Native schema interpreter | 26/26 (`native-schema-qualification.json`) |
+| Falsifiers, pack tests | pass |
+| `l9.compose/stage-context@1` regression | all 4 `required_provenance` criteria `pass` (were `unresolved`) |
+| `l9-projection-admission` gate (Quantum-L9/.github#221) | `RELEASED_CANDIDATE`: registration, validator and release coverage pass; not admitted, as expected |
 
-## Next actions, in order
+Residual (not provenance): `l9.compose/stage-context@1` over the GAR projection still composes to `unknown` because of 8 `payload_schema` criteria. Neither the GAR components nor the stage-context output has a registered payload schema. This predates SV and is outside D2.
 
-1. **Owner:** decide D1 (SV-001 wording) and D2 (provenance route). Either choice changes the subject, so freeze
-   both before any final producer run.
-2. **Owner:** decide D4 and D5 (release vehicle and order relative to v3.29.0).
-3. **Agent:** apply D1 and D2 in the pack. Regenerate the schemas, tests, ledgers and checksums. Re-pin the applier
-   to current `main` and rehearse. Rerun the five projections and the composition at the rehearsal revision, plus
-   this verifier.
-4. **Owner:** record one scoped decision (an ADR, following ADR-025) that binds the eight dispositions to the
-   exact final subject digest.
-5. **Agent:** open the admission branch from freshly fetched `main`. Apply the 13 paths, add the successor release
-   (MANIFEST, README, RELEASE_VALIDATION, HASHES) without touching earlier releases, and run
-   `make validate check test`. Rerun the producer at the admission revision, then open the PR to `main`.
-6. **Owner:** approve and merge. Then read back `main` and replay the consumer bundle as post-admission trusted
-   replay.
+## Closeout checklist
+
+| # | Item | State |
+| --- | --- | --- |
+| 1 | Composition provenance native criterion resolved | **DONE** (R2: catalog declaration + compiler criteria + RC-033) |
+| 2 | Real composition receipt reports PASS | **DONE** at `7d9ca47` |
+| 3 | SV-001 final wording approved and frozen | **DONE** (D1 Option B) |
+| 4 | Eight dispositions authorized at exact digest | **APPROVED** (owner-decision.yaml; ADR-029 binds the final tree) |
+| 5 | PR #215 merged into its staging branch | PENDING review (#220 stacks on it) |
+| 6 | Overlay applied to freshly resolved main | **DONE** (`9488d8f`; rehearsal and admission branch byte-identical) |
+| 7 | Registry overlaps reconciled | **DONE** for merged state; #218/#219 reconcile at refresh (D5) |
+| 8 | Successor release manifest and hash inventory | **DONE**, provisional identity v3.32.0 / ADR-029 |
+| 9 | Native validation, five projections and composition PASS | **DONE** |
+| 10 | Determinism and negative controls at final revision | **DONE** |
+| 11 | Canonical admission PR approved and merged | OPEN — waits on D5 queue and owner merge |
+| 12 | Admitted main read back and consumer replay | NOT RUN — after 11 |
+
+## Shortest remaining path to merge
+
+1. Merge the compiler PR (`required-provenance-criteria`) and, ideally, cut a compiler version. The final receipts pin the revision `33e4c58`.
+2. Admit or withdraw v3.29.0, then land #218 and #219 in order.
+3. Refresh the admission branch from `main` and re-run `apply_to_pinned_checkout.py` (re-pin through its guard). Then run `tools/prepare_successor_release.py` with no remaining `--queued` claims. It re-selects the release and ADR identity from the new merged state.
+4. Re-run `tools/run_producer_qualification.py` twice, the verifier and the negative controls at the refreshed revision. Every coordinate changes, so this evidence must be regenerated.
+5. Owner admits: ADR status `Accepted`, the release status line flips to ADMITTED, and the hashes are regenerated (the ADR-025 precedent). Then merge to `main`.
+6. Post-merge: run `l9-projection-admission` `--require downstream` on a clean `main` checkout, then consumer trusted replay.
