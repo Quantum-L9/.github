@@ -49,8 +49,9 @@ ProductTopology
 - ADR-026: Manifest interface surface and the Python Gate Node target binding
 - ADR-027: Structural contract for l9.implementation-ir/v1
 - ADR-028: Single-kind architecture pattern fields
+- ADR-029: Strategic Value Foundation and Catalog-Declared Composition Provenance Criteria
 
-ADR-001 through ADR-028 are the global semantic decisions. They live in this
+ADR-001 through ADR-029 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions
