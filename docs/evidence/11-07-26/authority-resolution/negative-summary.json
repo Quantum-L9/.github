@@ -1,0 +1,502 @@
+{
+  "authority_revision": "290bcd90378577392640cea9c6053c178423f0da",
+  "cases": {
+    "01_missing_source_pin": {
+      "context": {
+        "removed_pin": {
+          "digest": "sha256:771e3509703ea7d177a4bbac965e126f77f390ec359d1544854d95ec4374082a",
+          "ref": "l9.source/invariants@1"
+        },
+        "source_path": "semantics/invariants.yaml"
+      },
+      "diagnostic_checks": {
+        "canonical_source_file_exists": true,
+        "criterion": true,
+        "exactly_one_real_pin_missing": true,
+        "no_extra_pins": true,
+        "typed_code": true,
+        "typed_ref": true
+      },
+      "expected": {
+        "code": "INVALID_REQUEST",
+        "criterion": null
+      },
+      "expected_typed_rejection_matches": true,
+      "observed": {
+        "code": "INVALID_REQUEST",
+        "criterion": null,
+        "diagnostics": {
+          "declared": [
+            "l9.source/invariants@1",
+            "l9.source/contracts@1",
+            "l9.source/authority-model@1",
+            "l9.source/artifact-model@1"
+          ],
+          "pinned": [
+            "l9.source/artifact-model@1",
+            "l9.source/authority-model@1",
+            "l9.source/contracts@1"
+          ],
+          "source_classes": [
+            "invariants",
+            "contracts",
+            "authority_model",
+            "artifact_model"
+          ]
+        },
+        "first_divergence": null,
+        "message": "source pins must name exactly the profile-declared sources the request covers",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 200, in negative\n    got = invoke()\n          ^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 231, in <lambda>\n    negative('01_missing_source_pin', lambda:project(mreq), lambda e:{\n                                             ^^^^^^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 220, in project\n    def project(request): return compiler.project(ProjectionRequest.from_dict(request))\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/engine/compiler.py\", line 559, in project\n    artifacts = project_profile(\n                ^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 875, in project_profile\n    raise InvalidRequest(\nl9_semantic_compiler.engine.errors.InvalidRequest: source pins must name exactly the profile-declared sources the request covers\n",
+        "type": "InvalidRequest",
+        "typed_ref": "l9.semantic-compiler.error/INVALID_REQUEST"
+      },
+      "status": "PASS"
+    },
+    "02_wrong_profile_digest": {
+      "context": {
+        "request": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/inputs/02_wrong_profile_digest-request.json"
+      },
+      "diagnostic_checks": {
+        "criterion": true,
+        "current_digest": true,
+        "ref": true,
+        "supplied_bad_digest": true,
+        "typed_code": true,
+        "typed_ref": true
+      },
+      "expected": {
+        "code": "REVISION_MISMATCH",
+        "criterion": "profile_digest"
+      },
+      "expected_typed_rejection_matches": true,
+      "observed": {
+        "code": "REVISION_MISMATCH",
+        "criterion": "profile_digest",
+        "diagnostics": {
+          "criterion": "profile_digest",
+          "expected_digest": "sha256:7cfc37826814a450ceb9cd50fb75d55ed09520c72015eba01e9a7ca9f53d32e0",
+          "observed_digest": "sha256:7cfc37826814a450ceb9cd50fb75d55ed09520c72015eba01e9a7ca9f53d32ea",
+          "ref": "l9.projection/authority-resolution@1"
+        },
+        "first_divergence": null,
+        "message": "profile digest mismatch for l9.projection/authority-resolution@1",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 200, in negative\n    got = invoke()\n          ^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 238, in <lambda>\n    negative('02_wrong_profile_digest', lambda:project(preq), lambda e:{\n                                               ^^^^^^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 220, in project\n    def project(request): return compiler.project(ProjectionRequest.from_dict(request))\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/engine/compiler.py\", line 559, in project\n    artifacts = project_profile(\n                ^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 865, in project_profile\n    _verify_pin(\"profile\", profile_ref, profile_digest, profile.digest)\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 836, in _verify_pin\n    raise RevisionMismatch(\nl9_semantic_compiler.engine.errors.RevisionMismatch: profile digest mismatch for l9.projection/authority-resolution@1\n",
+        "type": "RevisionMismatch",
+        "typed_ref": "l9.semantic-compiler.error/REVISION_MISMATCH"
+      },
+      "status": "PASS"
+    },
+    "03_payload_without_redigest": {
+      "context": {
+        "altered_copy": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/inputs/03_payload_without_redigest.json",
+        "computed_digest": "sha256:9e2905b4c35fc009a339a955ac3d35ded1b608a4580f2aea45c70dfa687e7027",
+        "original": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/l9.projection_authority-resolution_1/l9.source_invariants_1.projection.json",
+        "redigest_function": "computed but not written"
+      },
+      "diagnostic_checks": {
+        "criterion": true,
+        "producer_recomputed_digest_differs": true,
+        "reported_expected_recomputed": true,
+        "reported_observed_original": true,
+        "retained_original_digest": true,
+        "typed_code": true,
+        "typed_ref": true
+      },
+      "expected": {
+        "code": "REVISION_MISMATCH",
+        "criterion": "projection_digest"
+      },
+      "expected_typed_rejection_matches": true,
+      "observed": {
+        "code": "REVISION_MISMATCH",
+        "criterion": "projection_digest",
+        "diagnostics": {
+          "criterion": "projection_digest",
+          "expected_digest": "sha256:9e2905b4c35fc009a339a955ac3d35ded1b608a4580f2aea45c70dfa687e7027",
+          "observed_digest": "sha256:edc5bcbffe7515122689c399e8ef692bc8407c8d4965ce6eba3f5e1c4bc56541"
+        },
+        "first_divergence": null,
+        "message": "projection digest does not bind the artifact content",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 200, in negative\n    got = invoke()\n          ^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 257, in <lambda>\n    negative(case,lambda r=r:compose(r),checks,{'original':original_path,'altered_copy':str(path),'computed_digest':computed,\n                             ^^^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 221, in compose\n    def compose(request): return compiler.compose(CompositionRequest.from_dict(request))\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/engine/compiler.py\", line 626, in compose\n    composed, _ = compose_projections(\n                  ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 1257, in compose_projections\n    report = verify_projection_artifact(authority, component)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 931, in verify_projection_artifact\n    raise RevisionMismatch(\nl9_semantic_compiler.engine.errors.RevisionMismatch: projection digest does not bind the artifact content\n",
+        "type": "RevisionMismatch",
+        "typed_ref": "l9.semantic-compiler.error/REVISION_MISMATCH"
+      },
+      "status": "PASS"
+    },
+    "04_payload_with_producer_redigest": {
+      "context": {
+        "altered_copy": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/inputs/04_payload_with_producer_redigest.json",
+        "computed_digest": "sha256:9e2905b4c35fc009a339a955ac3d35ded1b608a4580f2aea45c70dfa687e7027",
+        "original": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/l9.projection_authority-resolution_1/l9.source_invariants_1.projection.json",
+        "redigest_function": "l9_semantic_compiler.passes.projection.envelope_digest"
+      },
+      "diagnostic_checks": {
+        "correct_source_ref": true,
+        "criterion": true,
+        "digest_changed": true,
+        "divergence_identified": true,
+        "real_producer_redigest": true,
+        "typed_code": true,
+        "typed_ref": true
+      },
+      "expected": {
+        "code": "SEMANTIC_DIVERGENCE",
+        "criterion": "selection_equivalence"
+      },
+      "expected_typed_rejection_matches": true,
+      "observed": {
+        "code": "SEMANTIC_DIVERGENCE",
+        "criterion": "selection_equivalence",
+        "diagnostics": {
+          "criterion": "selection_equivalence",
+          "source_ref": "l9.source/invariants@1"
+        },
+        "first_divergence": {
+          "expected": null,
+          "kind": "unexpected_key",
+          "observed": "changed copy only",
+          "path": "$.__negative_control__"
+        },
+        "message": "projected payload is not the declared selection of the canonical source",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 200, in negative\n    got = invoke()\n          ^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 257, in <lambda>\n    negative(case,lambda r=r:compose(r),checks,{'original':original_path,'altered_copy':str(path),'computed_digest':computed,\n                             ^^^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 221, in compose\n    def compose(request): return compiler.compose(CompositionRequest.from_dict(request))\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/engine/compiler.py\", line 626, in compose\n    composed, _ = compose_projections(\n                  ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 1257, in compose_projections\n    report = verify_projection_artifact(authority, component)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 1008, in verify_projection_artifact\n    raise SemanticDivergence(\nl9_semantic_compiler.engine.errors.SemanticDivergence: projected payload is not the declared selection of the canonical source\n",
+        "type": "SemanticDivergence",
+        "typed_ref": "l9.semantic-compiler.error/SEMANTIC_DIVERGENCE"
+      },
+      "status": "PASS"
+    },
+    "05_missing_source_component": {
+      "context": {
+        "omitted_component": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/l9.projection_authority-resolution_1/l9.source_invariants_1.projection.json",
+        "source_class": "invariants"
+      },
+      "diagnostic_checks": {
+        "criterion": true,
+        "exact_missing_source_class": true,
+        "typed_code": true,
+        "typed_ref": true
+      },
+      "expected": {
+        "code": "INVALID_REQUEST",
+        "criterion": "source_coverage"
+      },
+      "expected_typed_rejection_matches": true,
+      "observed": {
+        "code": "INVALID_REQUEST",
+        "criterion": "source_coverage",
+        "diagnostics": {
+          "criterion": "source_coverage",
+          "missing_source_classes": [
+            "invariants"
+          ]
+        },
+        "first_divergence": null,
+        "message": "composition must cover exactly the source classes the projection profile declares",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 200, in negative\n    got = invoke()\n          ^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 261, in <lambda>\n    negative('05_missing_source_component',lambda:compose(miss),lambda e:{'exact_missing_source_class':e.diagnostics.get('missing_source_classes')==[source_map[original['source_ref']]]},\n                                                  ^^^^^^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 221, in compose\n    def compose(request): return compiler.compose(CompositionRequest.from_dict(request))\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/engine/compiler.py\", line 626, in compose\n    composed, _ = compose_projections(\n                  ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 1285, in compose_projections\n    payload, component_refs = _namespace_components(authority, profile, verified)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 1198, in _namespace_components\n    raise InvalidRequest(\nl9_semantic_compiler.engine.errors.InvalidRequest: composition must cover exactly the source classes the projection profile declares\n",
+        "type": "InvalidRequest",
+        "typed_ref": "l9.semantic-compiler.error/INVALID_REQUEST"
+      },
+      "status": "PASS"
+    },
+    "06_duplicate_component": {
+      "context": {
+        "duplicated_component": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/l9.projection_authority-resolution_1/l9.source_invariants_1.projection.json"
+      },
+      "diagnostic_checks": {
+        "criterion": true,
+        "exact_duplicate_ref": true,
+        "typed_code": true,
+        "typed_ref": true
+      },
+      "expected": {
+        "code": "AMBIGUOUS_SEMANTICS",
+        "criterion": "duplicate_source"
+      },
+      "expected_typed_rejection_matches": true,
+      "observed": {
+        "code": "AMBIGUOUS_SEMANTICS",
+        "criterion": "duplicate_source",
+        "diagnostics": {
+          "criterion": "duplicate_source",
+          "projection_refs": [
+            "l9.projection/authority-resolution@1#l9.source/invariants@1"
+          ]
+        },
+        "first_divergence": null,
+        "message": "a source projection may be composed once; duplicate components conflict",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 200, in negative\n    got = invoke()\n          ^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 264, in <lambda>\n    negative('06_duplicate_component',lambda:compose(dup),lambda e:{'exact_duplicate_ref':e.diagnostics.get('projection_refs')==[projected.artifacts[0].ref]},\n                                             ^^^^^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 221, in compose\n    def compose(request): return compiler.compose(CompositionRequest.from_dict(request))\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/engine/compiler.py\", line 626, in compose\n    composed, _ = compose_projections(\n                  ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 1278, in compose_projections\n    raise AmbiguousSemantics(\nl9_semantic_compiler.engine.errors.AmbiguousSemantics: a source projection may be composed once; duplicate components conflict\n",
+        "type": "AmbiguousSemantics",
+        "typed_ref": "l9.semantic-compiler.error/AMBIGUOUS_SEMANTICS"
+      },
+      "status": "PASS"
+    },
+    "07_wrong_composition_pin": {
+      "context": {
+        "request": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/inputs/07_wrong_composition_pin-request.json"
+      },
+      "diagnostic_checks": {
+        "criterion": true,
+        "current_digest": true,
+        "ref": true,
+        "supplied_bad_digest": true,
+        "typed_code": true,
+        "typed_ref": true
+      },
+      "expected": {
+        "code": "REVISION_MISMATCH",
+        "criterion": "composition_profile_digest"
+      },
+      "expected_typed_rejection_matches": true,
+      "observed": {
+        "code": "REVISION_MISMATCH",
+        "criterion": "composition_profile_digest",
+        "diagnostics": {
+          "criterion": "composition_profile_digest",
+          "expected_digest": "sha256:d7d5a565b94588c8acf70c737d1a24e61967f183a96f3af2e89e1a2b4f78f340",
+          "observed_digest": "sha256:d7d5a565b94588c8acf70c737d1a24e61967f183a96f3af2e89e1a2b4f78f34b",
+          "ref": "l9.compose/authority-resolution@1"
+        },
+        "first_divergence": null,
+        "message": "composition_profile digest mismatch for l9.compose/authority-resolution@1",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 200, in negative\n    got = invoke()\n          ^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 267, in <lambda>\n    negative('07_wrong_composition_pin',lambda:compose(cp),lambda e:{'ref':e.diagnostics.get('ref')==COMPOSE,\n                                               ^^^^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 221, in compose\n    def compose(request): return compiler.compose(CompositionRequest.from_dict(request))\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/engine/compiler.py\", line 626, in compose\n    composed, _ = compose_projections(\n                  ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 1275, in compose_projections\n    _verify_pin(\"composition_profile\", profile_ref, profile_digest, profile.digest)\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 836, in _verify_pin\n    raise RevisionMismatch(\nl9_semantic_compiler.engine.errors.RevisionMismatch: composition_profile digest mismatch for l9.compose/authority-resolution@1\n",
+        "type": "RevisionMismatch",
+        "typed_ref": "l9.semantic-compiler.error/REVISION_MISMATCH"
+      },
+      "status": "PASS"
+    },
+    "08_receipt_tamper_without_redigest": {
+      "context": {
+        "copy": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/inputs/08_receipt_tamper_without_redigest.json",
+        "method": "producer validate_receipt_document; not an independent consumer",
+        "original": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/receipts/30ac872890e14bae46551d050701f1eff045bcbad5a11fff5533148ed98a095c.json"
+      },
+      "diagnostic_checks": {
+        "computed_digest_differs": true,
+        "criterion": true,
+        "message": true,
+        "reported_original_digest": true,
+        "result_unchanged": true,
+        "typed_code": true,
+        "typed_ref": true,
+        "unchanged_receipt_digest": true
+      },
+      "expected": {
+        "code": "INVALID_REQUEST",
+        "criterion": null
+      },
+      "expected_typed_rejection_matches": true,
+      "observed": {
+        "code": "INVALID_REQUEST",
+        "criterion": null,
+        "diagnostics": {
+          "expected_digest": "sha256:09929fed506f4af79cd43c6be6b115b697989b2daf448c48237a555344c5516a",
+          "observed_digest": "sha256:33ef217495e314f4c52950a82885c9313b304fbe2de708dc7b53248123d8fe14"
+        },
+        "first_divergence": null,
+        "message": "prior compilation receipt digest mismatch",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 200, in negative\n    got = invoke()\n          ^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 272, in <lambda>\n    negative('08_receipt_tamper_without_redigest',lambda:validate_receipt_document(load_artifact_file(receipt_path),expected_subject_ref=projected.artifacts[0].ref),\n                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/engine/receipts.py\", line 95, in validate_receipt_document\n    raise InvalidRequest(\nl9_semantic_compiler.engine.errors.InvalidRequest: prior compilation receipt digest mismatch\n",
+        "type": "InvalidRequest",
+        "typed_ref": "l9.semantic-compiler.error/INVALID_REQUEST"
+      },
+      "status": "PASS"
+    },
+    "09_omitted_namespace_redigested_verify": {
+      "context": {
+        "copy": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/inputs/09_omitted_namespace_redigested_verify.json",
+        "method": "verify_composed_projection(authority, redigested copy, all four genuine components)"
+      },
+      "diagnostic_checks": {
+        "criterion": true,
+        "digest_changed": true,
+        "divergence_identified": true,
+        "four_original_components_unchanged": true,
+        "namespace_absent": true,
+        "producer_redigest": true,
+        "typed_code": true,
+        "typed_ref": true
+      },
+      "expected": {
+        "code": "SEMANTIC_DIVERGENCE",
+        "criterion": "composition_equivalence"
+      },
+      "expected_typed_rejection_matches": true,
+      "observed": {
+        "code": "SEMANTIC_DIVERGENCE",
+        "criterion": "composition_equivalence",
+        "diagnostics": {
+          "criterion": "composition_equivalence"
+        },
+        "first_divergence": {
+          "expected": "sha256:44f261d080addf9570950682392d6801d64ce648976488cd67333b7c33ed459b",
+          "kind": "value_mismatch",
+          "observed": "sha256:ced25f8eb4fa33a10b184665f7a89a60c012adb21c0b0af8152a61cab2195994",
+          "path": "$.composition_digest"
+        },
+        "message": "composed projection is not the composition of its declared components",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 200, in negative\n    got = invoke()\n          ^^^^^^^^\n  File \"/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/qualify.py\", line 281, in <lambda>\n    negative('09_omitted_namespace_redigested_verify',lambda:verify_composed_projection(authority,load_artifact_file(omit_path),components),\n                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/passes/projection.py\", line 1360, in verify_composed_projection\n    raise SemanticDivergence(\nl9_semantic_compiler.engine.errors.SemanticDivergence: composed projection is not the composition of its declared components\n",
+        "type": "SemanticDivergence",
+        "typed_ref": "l9.semantic-compiler.error/SEMANTIC_DIVERGENCE"
+      },
+      "status": "PASS"
+    },
+    "10_missing_namespace_direct_schema": {
+      "context": {
+        "method": "pinned producer schema_violations on payload, not envelope",
+        "payload_copy": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/inputs/09_omitted_namespace_redigested_verify.json",
+        "schema": "semantics/authority_resolution_composition.schema.yaml"
+      },
+      "diagnostic_checks": {
+        "exact_missing_field_violation": true,
+        "valid_payload_has_no_violations": true
+      },
+      "expected": {
+        "code": "SCHEMA_VIOLATION",
+        "criterion": "$.artifact_model: required field missing"
+      },
+      "expected_typed_rejection_matches": true,
+      "observed": {
+        "valid_payload_violations": [],
+        "violations": [
+          "$.artifact_model: required field missing"
+        ]
+      },
+      "status": "PASS"
+    }
+  },
+  "checkout_unchanged": {
+    "authority": true,
+    "compiler": true
+  },
+  "compiler_revision": "943db9a462d35ba66771a700ece77c746295f591",
+  "completed_utc": "2026-11-07T16:59:15.759916+00:00",
+  "diagnostic_match_count": 10,
+  "diagnostic_mismatch_count": 0,
+  "errors": [],
+  "negative_counts": {
+    "PASS": 10
+  },
+  "original_emissions_unchanged": true,
+  "positive_controls": {
+    "composition": {
+      "artifact_path": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/composition/composed/l9.compose_authority-resolution_1_l9.projection_authority-resolution_1.composed.json",
+      "checks": {
+        "actual_payload_schema_pass": true,
+        "exact_four_namespaces": true,
+        "four_component_inputs": true,
+        "no_unresolved_criteria": true,
+        "producer_and_receipt_and_reverification_result_PASS": true,
+        "producer_operation_succeeded": true,
+        "receipt_binds_output": true,
+        "receipt_digest_subject_valid": true
+      },
+      "producer_status": "succeeded",
+      "receipt_path": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/composition/receipts/ab7916bb2c02b449d75dc9dcfeb9426cd01b24cdb54d0c079714a630771ba55f.json",
+      "receipt_result": "pass",
+      "result": "pass",
+      "status": "PASS",
+      "unresolved_criteria": [],
+      "verification_result": "pass"
+    },
+    "projection:artifact_model": {
+      "artifact_path": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/l9.projection_authority-resolution_1/l9.source_artifact-model_1.projection.json",
+      "checks": {
+        "actual_payload_schema_pass": true,
+        "no_unresolved_criteria": true,
+        "producer_and_receipt_and_reverification_result_PASS": true,
+        "producer_operation_succeeded": true,
+        "receipt_binds_authority_revision": true,
+        "receipt_binds_output": true,
+        "receipt_digest_subject_valid": true
+      },
+      "producer_status": "succeeded",
+      "receipt_path": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/receipts/9585093fd7b7c3c7481b538602218005e4784f18261e72f3f88ab35bca716901.json",
+      "receipt_result": "pass",
+      "result": "pass",
+      "status": "PASS",
+      "unresolved_criteria": [],
+      "verification_result": "pass"
+    },
+    "projection:authority_model": {
+      "artifact_path": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/l9.projection_authority-resolution_1/l9.source_authority-model_1.projection.json",
+      "checks": {
+        "actual_payload_schema_pass": true,
+        "no_unresolved_criteria": true,
+        "producer_and_receipt_and_reverification_result_PASS": true,
+        "producer_operation_succeeded": true,
+        "receipt_binds_authority_revision": true,
+        "receipt_binds_output": true,
+        "receipt_digest_subject_valid": true
+      },
+      "producer_status": "succeeded",
+      "receipt_path": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/receipts/2e57d699ed74256e22bead15ec7d7500544bdd91fc5f4dabb1a6f3c5cfb4cff3.json",
+      "receipt_result": "pass",
+      "result": "pass",
+      "status": "PASS",
+      "unresolved_criteria": [],
+      "verification_result": "pass"
+    },
+    "projection:contracts": {
+      "artifact_path": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/l9.projection_authority-resolution_1/l9.source_contracts_1.projection.json",
+      "checks": {
+        "actual_payload_schema_pass": true,
+        "no_unresolved_criteria": true,
+        "producer_and_receipt_and_reverification_result_PASS": true,
+        "producer_operation_succeeded": true,
+        "receipt_binds_authority_revision": true,
+        "receipt_binds_output": true,
+        "receipt_digest_subject_valid": true
+      },
+      "producer_status": "succeeded",
+      "receipt_path": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/receipts/ba68f00d45f111de2bf1da0abec7562db03805f5ee0f22508a74e949a71f6b7e.json",
+      "receipt_result": "pass",
+      "result": "pass",
+      "status": "PASS",
+      "unresolved_criteria": [],
+      "verification_result": "pass"
+    },
+    "projection:invariants": {
+      "artifact_path": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/l9.projection_authority-resolution_1/l9.source_invariants_1.projection.json",
+      "checks": {
+        "actual_payload_schema_pass": true,
+        "no_unresolved_criteria": true,
+        "producer_and_receipt_and_reverification_result_PASS": true,
+        "producer_operation_succeeded": true,
+        "receipt_binds_authority_revision": true,
+        "receipt_binds_output": true,
+        "receipt_digest_subject_valid": true
+      },
+      "producer_status": "succeeded",
+      "receipt_path": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/outputs/projections/receipts/30ac872890e14bae46551d050701f1eff045bcbad5a11fff5533148ed98a095c.json",
+      "receipt_result": "pass",
+      "result": "pass",
+      "status": "PASS",
+      "unresolved_criteria": [],
+      "verification_result": "pass"
+    }
+  },
+  "positive_counts": {
+    "PASS": 5
+  },
+  "positive_gate_passed": true,
+  "producer_module": "/tmp/l9-projection-qa.nBKv8FWo/compiler/src/l9_semantic_compiler/__init__.py",
+  "producer_version": "0.9.3",
+  "python": "/tmp/l9-projection-qa.nBKv8FWo/venv/bin/python",
+  "scope": "actual pinned producer only; no independent candidate-consumer binding or historical staleness claim",
+  "started_utc": "2026-11-07T16:59:10.256474+00:00",
+  "string_list_min_items_capability": {
+    "descriptor": {
+      "min_items": 1,
+      "type": "string_list"
+    },
+    "empty_full_payload_violations": [],
+    "empty_list_violations": [],
+    "expected": "min_items:1 rejects []",
+    "input_copy": "/home/ubuntu/l9-projection-campaign/authority-schema-run/negative/inputs/11_empty_string_list_payload.json",
+    "interpretation": "Known limitation of pinned schema_violations: min_items is checked only for declared type array, not string_list. This is not a passed negative control.",
+    "observed": "accepted []",
+    "schema_path": "semantics/authority_resolution_projection.schema.yaml:properties.contracts.items.properties.source_invariants",
+    "source": "compiler/src/l9_semantic_compiler/passes/validate.py:171-174,225-228",
+    "status": "FAIL",
+    "valid_full_payload_violations": [],
+    "valid_list_violations": []
+  }
+}

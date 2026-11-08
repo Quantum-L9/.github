@@ -1,0 +1,1811 @@
+[
+ {
+  "file": "semantics/authority_resolution_projection.schema.yaml",
+  "removed": 9,
+  "minimums": {
+   "1": 9
+  },
+  "locations": [
+   {
+    "path": "$.contracts[*].source_invariants",
+    "min_items": 1
+   },
+   {
+    "path": "$.contracts[*].guarantees",
+    "min_items": 1
+   },
+   {
+    "path": "$.contracts[*].forbidden",
+    "min_items": 1
+   },
+   {
+    "path": "$.authority_classes.global_governance.roles",
+    "min_items": 1
+   },
+   {
+    "path": "$.authority_classes.global_governance.does_not_own",
+    "min_items": 1
+   },
+   {
+    "path": "$.admission_rules.global_requirements",
+    "min_items": 1
+   },
+   {
+    "path": "$.global_admission_rules.requirements",
+    "min_items": 1
+   },
+   {
+    "path": "$.agent_authority.rules",
+    "min_items": 1
+   },
+   {
+    "path": "$.human_authority.rules",
+    "min_items": 1
+   }
+  ]
+ },
+ {
+  "file": "semantics/authority_resolution_composition.schema.yaml",
+  "removed": 9,
+  "minimums": {
+   "1": 9
+  },
+  "locations": [
+   {
+    "path": "$.contracts.contracts[*].source_invariants",
+    "min_items": 1
+   },
+   {
+    "path": "$.contracts.contracts[*].guarantees",
+    "min_items": 1
+   },
+   {
+    "path": "$.contracts.contracts[*].forbidden",
+    "min_items": 1
+   },
+   {
+    "path": "$.authority_model.authority_classes.global_governance.roles",
+    "min_items": 1
+   },
+   {
+    "path": "$.authority_model.authority_classes.global_governance.does_not_own",
+    "min_items": 1
+   },
+   {
+    "path": "$.authority_model.admission_rules.global_requirements",
+    "min_items": 1
+   },
+   {
+    "path": "$.authority_model.global_admission_rules.requirements",
+    "min_items": 1
+   },
+   {
+    "path": "$.authority_model.agent_authority.rules",
+    "min_items": 1
+   },
+   {
+    "path": "$.authority_model.human_authority.rules",
+    "min_items": 1
+   }
+  ]
+ },
+ {
+  "file": "semantics/architecture_break_test_composition.schema.yaml",
+  "removed": 14,
+  "minimums": {
+   "1": 3,
+   "2": 3,
+   "3": 5,
+   "4": 1,
+   "5": 1,
+   "6": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts.contracts[*].source_invariants",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.requirement_model.requirement_entry_contract.required",
+    "min_items": 5
+   },
+   {
+    "path": "$.requirement_model.requirement_entry_contract.optional",
+    "min_items": 6
+   },
+   {
+    "path": "$.requirement_model.requirement_entry_contract.hardness_domain",
+    "min_items": 2
+   },
+   {
+    "path": "$.requirement_model.closure_rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.resolution_model.selection_rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.architecture_rules.rules[*].derive.architecture_obligations",
+    "min_items": 1
+   },
+   {
+    "path": "$.architecture_rules.rules[*].requires_patterns",
+    "min_items": 1
+   },
+   {
+    "path": "$.architecture_rules.rules[*].source_refs",
+    "min_items": 3
+   },
+   {
+    "path": "$.architecture_rules.rules[*].forbid",
+    "min_items": 1
+   }
+  ]
+ },
+ {
+  "file": "semantics/architecture_break_test_projection.schema.yaml",
+  "removed": 14,
+  "minimums": {
+   "1": 3,
+   "2": 3,
+   "3": 5,
+   "4": 1,
+   "5": 1,
+   "6": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts[*].source_invariants",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.requirement_entry_contract.required",
+    "min_items": 5
+   },
+   {
+    "path": "$.requirement_entry_contract.optional",
+    "min_items": 6
+   },
+   {
+    "path": "$.requirement_entry_contract.hardness_domain",
+    "min_items": 2
+   },
+   {
+    "path": "$.closure_rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.selection_rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.rules[*].derive.architecture_obligations",
+    "min_items": 1
+   },
+   {
+    "path": "$.rules[*].requires_patterns",
+    "min_items": 1
+   },
+   {
+    "path": "$.rules[*].source_refs",
+    "min_items": 3
+   },
+   {
+    "path": "$.rules[*].forbid",
+    "min_items": 1
+   }
+  ]
+ },
+ {
+  "file": "semantics/evidence_assessment_composition.schema.yaml",
+  "removed": 28,
+  "minimums": {
+   "2": 5,
+   "3": 13,
+   "4": 1,
+   "5": 3,
+   "6": 4,
+   "8": 1,
+   "9": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts.contracts[*].source_invariants",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].requires",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipt_catalog.receipt_kernel.required_semantics",
+    "min_items": 9
+   },
+   {
+    "path": "$.receipt_catalog.receipt_kernel.forbidden",
+    "min_items": 6
+   },
+   {
+    "path": "$.receipt_catalog.receipts.validation.additional_required_semantics",
+    "min_items": 8
+   },
+   {
+    "path": "$.receipt_catalog.receipts.validation.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipt_catalog.receipts.validation.forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipt_catalog.receipts.compilation.additional_required_semantics",
+    "min_items": 6
+   },
+   {
+    "path": "$.receipt_catalog.receipts.compilation.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipt_catalog.receipts.compilation.forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipt_catalog.receipts.conformance.additional_required_semantics",
+    "min_items": 6
+   },
+   {
+    "path": "$.receipt_catalog.receipts.conformance.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipt_catalog.receipts.conformance.forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipt_catalog.receipts.admission.additional_required_semantics",
+    "min_items": 6
+   },
+   {
+    "path": "$.receipt_catalog.receipts.admission.rules",
+    "min_items": 2
+   },
+   {
+    "path": "$.receipt_catalog.receipts.admission.forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipt_catalog.receipts.distribution.additional_required_semantics",
+    "min_items": 5
+   },
+   {
+    "path": "$.receipt_catalog.receipts.distribution.rules",
+    "min_items": 2
+   },
+   {
+    "path": "$.receipt_catalog.receipts.distribution.forbidden",
+    "min_items": 2
+   },
+   {
+    "path": "$.receipt_catalog.receipts.reconciliation.additional_required_semantics",
+    "min_items": 4
+   },
+   {
+    "path": "$.receipt_catalog.receipts.reconciliation.rules",
+    "min_items": 2
+   },
+   {
+    "path": "$.receipt_catalog.receipts.reconciliation.forbidden",
+    "min_items": 2
+   },
+   {
+    "path": "$.conformance_model.ownership_boundary.l9_conformance_owns",
+    "min_items": 5
+   },
+   {
+    "path": "$.conformance_model.conformance_requirement_shape.required",
+    "min_items": 5
+   },
+   {
+    "path": "$.conformance_model.conformance_requirement_shape.optional",
+    "min_items": 3
+   }
+  ]
+ },
+ {
+  "file": "semantics/evidence_assessment_projection.schema.yaml",
+  "removed": 28,
+  "minimums": {
+   "2": 5,
+   "3": 13,
+   "4": 1,
+   "5": 3,
+   "6": 4,
+   "8": 1,
+   "9": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts[*].source_invariants",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].requires",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipt_kernel.required_semantics",
+    "min_items": 9
+   },
+   {
+    "path": "$.receipt_kernel.forbidden",
+    "min_items": 6
+   },
+   {
+    "path": "$.receipts.validation.additional_required_semantics",
+    "min_items": 8
+   },
+   {
+    "path": "$.receipts.validation.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipts.validation.forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipts.compilation.additional_required_semantics",
+    "min_items": 6
+   },
+   {
+    "path": "$.receipts.compilation.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipts.compilation.forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipts.conformance.additional_required_semantics",
+    "min_items": 6
+   },
+   {
+    "path": "$.receipts.conformance.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipts.conformance.forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipts.admission.additional_required_semantics",
+    "min_items": 6
+   },
+   {
+    "path": "$.receipts.admission.rules",
+    "min_items": 2
+   },
+   {
+    "path": "$.receipts.admission.forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.receipts.distribution.additional_required_semantics",
+    "min_items": 5
+   },
+   {
+    "path": "$.receipts.distribution.rules",
+    "min_items": 2
+   },
+   {
+    "path": "$.receipts.distribution.forbidden",
+    "min_items": 2
+   },
+   {
+    "path": "$.receipts.reconciliation.additional_required_semantics",
+    "min_items": 4
+   },
+   {
+    "path": "$.receipts.reconciliation.rules",
+    "min_items": 2
+   },
+   {
+    "path": "$.receipts.reconciliation.forbidden",
+    "min_items": 2
+   },
+   {
+    "path": "$.ownership_boundary.l9_conformance_owns",
+    "min_items": 5
+   },
+   {
+    "path": "$.conformance_requirement_shape.required",
+    "min_items": 5
+   },
+   {
+    "path": "$.conformance_requirement_shape.optional",
+    "min_items": 3
+   }
+  ]
+ },
+ {
+  "file": "semantics/globalization_assessment_composition.schema.yaml",
+  "removed": 16,
+  "minimums": {
+   "2": 3,
+   "3": 5,
+   "4": 4,
+   "5": 1,
+   "6": 1,
+   "7": 1,
+   "8": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts.contracts[*].source_invariants",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].applies_to",
+    "min_items": 5
+   },
+   {
+    "path": "$.contracts.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].forbidden",
+    "min_items": 4
+   },
+   {
+    "path": "$.authority_model.promotion_rules.sequence",
+    "min_items": 8
+   },
+   {
+    "path": "$.authority_model.global_promotion.requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.authority_model.global_admission_rules.requirements",
+    "min_items": 6
+   },
+   {
+    "path": "$.lifecycle.lifecycles.globalization_candidate.stages",
+    "min_items": 4
+   },
+   {
+    "path": "$.lifecycle.lifecycles.globalization_candidate.terminal_resolutions",
+    "min_items": 4
+   },
+   {
+    "path": "$.lifecycle.lifecycles.globalization_candidate.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.lifecycle.lifecycles.harvest_packet.stages",
+    "min_items": 3
+   },
+   {
+    "path": "$.lifecycle.lifecycles.harvest_packet.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.lifecycle.lifecycles.architecture_pattern.stages",
+    "min_items": 7
+   },
+   {
+    "path": "$.lifecycle.lifecycles.architecture_pattern.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.packet_catalog.packets.fixture_harvest.required_semantics",
+    "min_items": 4
+   }
+  ]
+ },
+ {
+  "file": "semantics/globalization_assessment_projection.schema.yaml",
+  "removed": 16,
+  "minimums": {
+   "2": 3,
+   "3": 5,
+   "4": 4,
+   "5": 1,
+   "6": 1,
+   "7": 1,
+   "8": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts[*].source_invariants",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].applies_to",
+    "min_items": 5
+   },
+   {
+    "path": "$.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].forbidden",
+    "min_items": 4
+   },
+   {
+    "path": "$.promotion_rules.sequence",
+    "min_items": 8
+   },
+   {
+    "path": "$.global_promotion.requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.global_admission_rules.requirements",
+    "min_items": 6
+   },
+   {
+    "path": "$.lifecycles.globalization_candidate.stages",
+    "min_items": 4
+   },
+   {
+    "path": "$.lifecycles.globalization_candidate.terminal_resolutions",
+    "min_items": 4
+   },
+   {
+    "path": "$.lifecycles.globalization_candidate.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.lifecycles.harvest_packet.stages",
+    "min_items": 3
+   },
+   {
+    "path": "$.lifecycles.harvest_packet.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.lifecycles.architecture_pattern.stages",
+    "min_items": 7
+   },
+   {
+    "path": "$.lifecycles.architecture_pattern.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.packets.fixture_harvest.required_semantics",
+    "min_items": 4
+   }
+  ]
+ },
+ {
+  "file": "semantics/hard_constraint_context_composition.schema.yaml",
+  "removed": 10,
+  "minimums": {
+   "2": 3,
+   "3": 4,
+   "4": 1,
+   "5": 1,
+   "6": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts.contracts[*].source_invariants",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.requirement_model.requirement_entry_contract.required",
+    "min_items": 5
+   },
+   {
+    "path": "$.requirement_model.requirement_entry_contract.optional",
+    "min_items": 6
+   },
+   {
+    "path": "$.requirement_model.requirement_entry_contract.hardness_domain",
+    "min_items": 2
+   },
+   {
+    "path": "$.requirement_model.closure_rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.resolution_model.selection_rules",
+    "min_items": 3
+   }
+  ]
+ },
+ {
+  "file": "semantics/hard_constraint_context_projection.schema.yaml",
+  "removed": 10,
+  "minimums": {
+   "2": 3,
+   "3": 4,
+   "4": 1,
+   "5": 1,
+   "6": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts[*].source_invariants",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.requirement_entry_contract.required",
+    "min_items": 5
+   },
+   {
+    "path": "$.requirement_entry_contract.optional",
+    "min_items": 6
+   },
+   {
+    "path": "$.requirement_entry_contract.hardness_domain",
+    "min_items": 2
+   },
+   {
+    "path": "$.closure_rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.selection_rules",
+    "min_items": 3
+   }
+  ]
+ },
+ {
+  "file": "semantics/identity_assurance_composition.schema.yaml",
+  "removed": 21,
+  "minimums": {
+   "12": 1,
+   "13": 1,
+   "2": 3,
+   "3": 8,
+   "4": 5,
+   "5": 1,
+   "8": 1,
+   "9": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts.contracts[*].source_invariants",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].requires",
+    "min_items": 4
+   },
+   {
+    "path": "$.contracts.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.identity_model.identity_binding.allowed_fields",
+    "min_items": 12
+   },
+   {
+    "path": "$.identity_model.identity_binding.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.identity_model.identity_resolution.inputs",
+    "min_items": 4
+   },
+   {
+    "path": "$.identity_model.identity_resolution.result_domain",
+    "min_items": 4
+   },
+   {
+    "path": "$.identity_model.identity_resolution.rules",
+    "min_items": 5
+   },
+   {
+    "path": "$.identity_model.identity_assertion.required",
+    "min_items": 8
+   },
+   {
+    "path": "$.identity_model.identity_assertion.rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.identity_model.consumer_rules.memory",
+    "min_items": 3
+   },
+   {
+    "path": "$.identity_model.consumer_rules.bootstrap",
+    "min_items": 2
+   },
+   {
+    "path": "$.identity_model.consumer_rules.governance",
+    "min_items": 2
+   },
+   {
+    "path": "$.identity_model.consumer_rules.receipts",
+    "min_items": 2
+   },
+   {
+    "path": "$.authority_model.identity_authority.rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.actor_registry.governed_by.contracts",
+    "min_items": 3
+   },
+   {
+    "path": "$.actor_registry.does_not_own",
+    "min_items": 13
+   },
+   {
+    "path": "$.surface_registry.governed_by.contracts",
+    "min_items": 3
+   },
+   {
+    "path": "$.surface_registry.does_not_own",
+    "min_items": 9
+   }
+  ]
+ },
+ {
+  "file": "semantics/identity_assurance_projection.schema.yaml",
+  "removed": 19,
+  "minimums": {
+   "12": 1,
+   "2": 3,
+   "3": 7,
+   "4": 5,
+   "5": 1,
+   "8": 1,
+   "9": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts[*].source_invariants",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].requires",
+    "min_items": 4
+   },
+   {
+    "path": "$.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.identity_binding.allowed_fields",
+    "min_items": 12
+   },
+   {
+    "path": "$.identity_binding.rules",
+    "min_items": 3
+   },
+   {
+    "path": "$.identity_resolution.inputs",
+    "min_items": 4
+   },
+   {
+    "path": "$.identity_resolution.result_domain",
+    "min_items": 4
+   },
+   {
+    "path": "$.identity_resolution.rules",
+    "min_items": 5
+   },
+   {
+    "path": "$.identity_assertion.required",
+    "min_items": 8
+   },
+   {
+    "path": "$.identity_assertion.rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.consumer_rules.memory",
+    "min_items": 3
+   },
+   {
+    "path": "$.consumer_rules.bootstrap",
+    "min_items": 2
+   },
+   {
+    "path": "$.consumer_rules.governance",
+    "min_items": 2
+   },
+   {
+    "path": "$.consumer_rules.receipts",
+    "min_items": 2
+   },
+   {
+    "path": "$.identity_authority.rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.governed_by.contracts",
+    "min_items": 3
+   },
+   {
+    "path": "$.does_not_own",
+    "min_items": 9
+   }
+  ]
+ },
+ {
+  "file": "semantics/semantic_change_context_composition.schema.yaml",
+  "removed": 21,
+  "minimums": {
+   "12": 1,
+   "2": 2,
+   "3": 5,
+   "4": 6,
+   "6": 4,
+   "8": 1,
+   "9": 2
+  },
+  "locations": [
+   {
+    "path": "$.contracts.contracts[*].source_invariants",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.fixture.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.fixture_profile.depends_on",
+    "min_items": 2
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.conformance.depends_on",
+    "min_items": 6
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.capability_declaration.depends_on",
+    "min_items": 6
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.receipt.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.product_topology.depends_on",
+    "min_items": 9
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.requirement_closure.depends_on",
+    "min_items": 9
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.capability_closure.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.architecture_resolution.depends_on",
+    "min_items": 8
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.port_resolution.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.provider_binding_resolution.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.conformance_requirement_resolution.depends_on",
+    "min_items": 6
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.product_manifest.depends_on",
+    "min_items": 12
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.product_kind_resolution.depends_on",
+    "min_items": 3
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.product_archetype_resolution.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.semantic_dependency_model.dependency_rules.identity_topology_resolution.depends_on",
+    "min_items": 6
+   }
+  ]
+ },
+ {
+  "file": "semantics/semantic_change_context_projection.schema.yaml",
+  "removed": 21,
+  "minimums": {
+   "12": 1,
+   "2": 2,
+   "3": 5,
+   "4": 6,
+   "6": 4,
+   "8": 1,
+   "9": 2
+  },
+  "locations": [
+   {
+    "path": "$.contracts[*].source_invariants",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.dependency_rules.fixture.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.dependency_rules.fixture_profile.depends_on",
+    "min_items": 2
+   },
+   {
+    "path": "$.dependency_rules.conformance.depends_on",
+    "min_items": 6
+   },
+   {
+    "path": "$.dependency_rules.capability_declaration.depends_on",
+    "min_items": 6
+   },
+   {
+    "path": "$.dependency_rules.receipt.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.dependency_rules.product_topology.depends_on",
+    "min_items": 9
+   },
+   {
+    "path": "$.dependency_rules.requirement_closure.depends_on",
+    "min_items": 9
+   },
+   {
+    "path": "$.dependency_rules.capability_closure.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.dependency_rules.architecture_resolution.depends_on",
+    "min_items": 8
+   },
+   {
+    "path": "$.dependency_rules.port_resolution.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.dependency_rules.provider_binding_resolution.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.dependency_rules.conformance_requirement_resolution.depends_on",
+    "min_items": 6
+   },
+   {
+    "path": "$.dependency_rules.product_manifest.depends_on",
+    "min_items": 12
+   },
+   {
+    "path": "$.dependency_rules.product_kind_resolution.depends_on",
+    "min_items": 3
+   },
+   {
+    "path": "$.dependency_rules.product_archetype_resolution.depends_on",
+    "min_items": 4
+   },
+   {
+    "path": "$.dependency_rules.identity_topology_resolution.depends_on",
+    "min_items": 6
+   }
+  ]
+ },
+ {
+  "file": "semantics/strategic_metacognition_composition.schema.yaml",
+  "removed": 21,
+  "minimums": {
+   "1": 1,
+   "11": 1,
+   "2": 3,
+   "3": 5,
+   "4": 7,
+   "5": 2,
+   "6": 2
+  },
+  "locations": [
+   {
+    "path": "$.contracts.contracts[*].source_invariants",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].forbidden",
+    "min_items": 4
+   },
+   {
+    "path": "$.authority_model.strategic_authority.may_not_be_inferred_from",
+    "min_items": 3
+   },
+   {
+    "path": "$.authority_model.strategic_cognition_authority.metacognition_denied",
+    "min_items": 3
+   },
+   {
+    "path": "$.authority_model.strategic_cognition_authority.rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_cognition_model.roles.strategic_plan_metacognitive_reasoner.owns",
+    "min_items": 1
+   },
+   {
+    "path": "$.strategic_cognition_model.roles.strategic_plan_metacognitive_reasoner.may",
+    "min_items": 5
+   },
+   {
+    "path": "$.strategic_cognition_model.roles.strategic_plan_metacognitive_reasoner.may_not",
+    "min_items": 6
+   },
+   {
+    "path": "$.strategic_cognition_model.reasoning_artifacts.strategic_plan_metacognitive_analysis.may_not",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_plan_model.reasoning_concepts.affected_strategic_closure.may_not",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_plan_metacognitive_analysis_schema.required",
+    "min_items": 11
+   },
+   {
+    "path": "$.strategic_plan_metacognitive_analysis_schema.properties.subject_episodes.items.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.strategic_plan_metacognitive_analysis_schema.properties.findings.items.required",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_plan_metacognitive_analysis_schema.properties.findings.items.fields.kind.enum",
+    "min_items": 5
+   },
+   {
+    "path": "$.strategic_plan_metacognitive_analysis_schema.properties.patterns.items.required",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_plan_metacognitive_analysis_schema.properties.patterns.items.fields.kind.enum",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_plan_metacognitive_analysis_schema.properties.lessons.items.required",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_plan_metacognitive_analysis_schema.semantic_rules",
+    "min_items": 6
+   }
+  ]
+ },
+ {
+  "file": "semantics/strategic_metacognition_projection.schema.yaml",
+  "removed": 21,
+  "minimums": {
+   "1": 1,
+   "11": 1,
+   "2": 3,
+   "3": 5,
+   "4": 7,
+   "5": 2,
+   "6": 2
+  },
+  "locations": [
+   {
+    "path": "$.contracts[*].source_invariants",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].forbidden",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_authority.may_not_be_inferred_from",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_cognition_authority.metacognition_denied",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_cognition_authority.rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.roles.strategic_plan_metacognitive_reasoner.owns",
+    "min_items": 1
+   },
+   {
+    "path": "$.roles.strategic_plan_metacognitive_reasoner.may",
+    "min_items": 5
+   },
+   {
+    "path": "$.roles.strategic_plan_metacognitive_reasoner.may_not",
+    "min_items": 6
+   },
+   {
+    "path": "$.reasoning_artifacts.strategic_plan_metacognitive_analysis.may_not",
+    "min_items": 3
+   },
+   {
+    "path": "$.reasoning_concepts.affected_strategic_closure.may_not",
+    "min_items": 4
+   },
+   {
+    "path": "$.required",
+    "min_items": 11
+   },
+   {
+    "path": "$.properties.subject_episodes.items.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.properties.findings.items.required",
+    "min_items": 4
+   },
+   {
+    "path": "$.properties.findings.items.fields.kind.enum",
+    "min_items": 5
+   },
+   {
+    "path": "$.properties.patterns.items.required",
+    "min_items": 4
+   },
+   {
+    "path": "$.properties.patterns.items.fields.kind.enum",
+    "min_items": 4
+   },
+   {
+    "path": "$.properties.lessons.items.required",
+    "min_items": 4
+   },
+   {
+    "path": "$.semantic_rules",
+    "min_items": 6
+   }
+  ]
+ },
+ {
+  "file": "semantics/strategic_planning_context_composition.schema.yaml",
+  "removed": 46,
+  "minimums": {
+   "1": 2,
+   "10": 1,
+   "11": 1,
+   "12": 1,
+   "14": 1,
+   "2": 11,
+   "3": 14,
+   "4": 6,
+   "5": 1,
+   "6": 2,
+   "7": 5,
+   "9": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts.contracts[*].source_invariants",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].forbidden",
+    "min_items": 4
+   },
+   {
+    "path": "$.authority_model.strategic_authority.may_not_be_inferred_from",
+    "min_items": 3
+   },
+   {
+    "path": "$.authority_model.strategic_cognition_authority.metacognition_denied",
+    "min_items": 3
+   },
+   {
+    "path": "$.authority_model.strategic_cognition_authority.rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_cognition_model.concepts.strategic_cognition.consumes",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_cognition_model.concepts.strategic_cognition.maintains",
+    "min_items": 1
+   },
+   {
+    "path": "$.strategic_cognition_model.concepts.strategic_cognition.does_not_own",
+    "min_items": 7
+   },
+   {
+    "path": "$.strategic_cognition_model.roles.plan_keeper.owns",
+    "min_items": 1
+   },
+   {
+    "path": "$.strategic_cognition_model.roles.plan_keeper.reasons_over",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_cognition_model.roles.plan_keeper.may",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_cognition_model.roles.plan_keeper.does_not_own",
+    "min_items": 7
+   },
+   {
+    "path": "$.strategic_cognition_model.roles.plan_keeper.may_not",
+    "min_items": 6
+   },
+   {
+    "path": "$.strategic_cognition_model.reasoning_artifacts.strategic_planning_episode.may_not",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_cognition_model.reasoning_artifacts.strategic_plan_revision_candidate.may_not",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_plan_model.reasoning_concepts.affected_strategic_closure.may_not",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_plan_graph_schema.required",
+    "min_items": 11
+   },
+   {
+    "path": "$.strategic_plan_graph_schema.properties.nodes.items.required",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_plan_graph_schema.properties.nodes.items.fields.kind.enum",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_plan_graph_schema.properties.relations.items.required",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_plan_graph_schema.properties.relations.items.fields.relation.enum",
+    "min_items": 5
+   },
+   {
+    "path": "$.strategic_plan_graph_schema.semantic_rules",
+    "min_items": 12
+   },
+   {
+    "path": "$.affected_strategic_closure_schema.required",
+    "min_items": 9
+   },
+   {
+    "path": "$.affected_strategic_closure_schema.properties.trigger_sources.items.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.affected_strategic_closure_schema.semantic_rules",
+    "min_items": 7
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.required",
+    "min_items": 14
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.properties.current_meta_view.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.properties.affected_closure.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.properties.trigger_sources.items.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.properties.workspace.required",
+    "min_items": 6
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.properties.workspace.fields.observations.items.required",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.properties.workspace.fields.assumptions.items.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.properties.workspace.fields.candidate_paths.items.required",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.properties.workspace.fields.evaluations.items.required",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.properties.recommendation.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.properties.recommendation.fields.outcome.enum",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_planning_episode_schema.semantic_rules",
+    "min_items": 7
+   },
+   {
+    "path": "$.strategic_plan_revision_candidate_schema.required",
+    "min_items": 10
+   },
+   {
+    "path": "$.strategic_plan_revision_candidate_schema.properties.predecessor.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.strategic_plan_revision_candidate_schema.properties.proposed_graph.required",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_plan_revision_candidate_schema.properties.reasoning_episode.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.strategic_plan_revision_candidate_schema.properties.affected_closure.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.strategic_plan_revision_candidate_schema.semantic_rules",
+    "min_items": 7
+   }
+  ]
+ },
+ {
+  "file": "semantics/strategic_planning_context_projection.schema.yaml",
+  "removed": 41,
+  "minimums": {
+   "1": 2,
+   "2": 9,
+   "3": 16,
+   "4": 7,
+   "5": 1,
+   "6": 2,
+   "7": 3,
+   "9": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts[*].source_invariants",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].forbidden",
+    "min_items": 4
+   },
+   {
+    "path": "$.strategic_authority.may_not_be_inferred_from",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_cognition_authority.metacognition_denied",
+    "min_items": 3
+   },
+   {
+    "path": "$.strategic_cognition_authority.rules",
+    "min_items": 4
+   },
+   {
+    "path": "$.concepts.strategic_cognition.consumes",
+    "min_items": 3
+   },
+   {
+    "path": "$.concepts.strategic_cognition.maintains",
+    "min_items": 1
+   },
+   {
+    "path": "$.concepts.strategic_cognition.does_not_own",
+    "min_items": 7
+   },
+   {
+    "path": "$.roles.plan_keeper.owns",
+    "min_items": 1
+   },
+   {
+    "path": "$.roles.plan_keeper.reasons_over",
+    "min_items": 3
+   },
+   {
+    "path": "$.roles.plan_keeper.may",
+    "min_items": 4
+   },
+   {
+    "path": "$.roles.plan_keeper.does_not_own",
+    "min_items": 7
+   },
+   {
+    "path": "$.roles.plan_keeper.may_not",
+    "min_items": 6
+   },
+   {
+    "path": "$.reasoning_artifacts.strategic_planning_episode.may_not",
+    "min_items": 3
+   },
+   {
+    "path": "$.reasoning_artifacts.strategic_plan_revision_candidate.may_not",
+    "min_items": 3
+   },
+   {
+    "path": "$.reasoning_concepts.affected_strategic_closure.may_not",
+    "min_items": 4
+   },
+   {
+    "path": "$.required",
+    "min_items": 9
+   },
+   {
+    "path": "$.properties.nodes.items.required",
+    "min_items": 3
+   },
+   {
+    "path": "$.properties.nodes.items.fields.kind.enum",
+    "min_items": 4
+   },
+   {
+    "path": "$.properties.relations.items.required",
+    "min_items": 4
+   },
+   {
+    "path": "$.properties.relations.items.fields.relation.enum",
+    "min_items": 5
+   },
+   {
+    "path": "$.properties.trigger_sources.items.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.properties.current_meta_view.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.properties.affected_closure.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.properties.workspace.required",
+    "min_items": 6
+   },
+   {
+    "path": "$.properties.workspace.fields.observations.items.required",
+    "min_items": 3
+   },
+   {
+    "path": "$.properties.workspace.fields.assumptions.items.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.properties.workspace.fields.assumptions.items.fields.status.enum",
+    "min_items": 3
+   },
+   {
+    "path": "$.properties.workspace.fields.candidate_paths.items.required",
+    "min_items": 3
+   },
+   {
+    "path": "$.properties.workspace.fields.candidate_paths.items.fields.disposition.enum",
+    "min_items": 3
+   },
+   {
+    "path": "$.properties.workspace.fields.evaluations.items.required",
+    "min_items": 3
+   },
+   {
+    "path": "$.properties.workspace.fields.evaluations.items.fields.result.enum",
+    "min_items": 4
+   },
+   {
+    "path": "$.properties.recommendation.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.properties.recommendation.fields.outcome.enum",
+    "min_items": 3
+   },
+   {
+    "path": "$.properties.predecessor.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.properties.proposed_graph.required",
+    "min_items": 3
+   },
+   {
+    "path": "$.properties.reasoning_episode.required",
+    "min_items": 2
+   },
+   {
+    "path": "$.semantic_rules",
+    "min_items": 7
+   }
+  ]
+ },
+ {
+  "file": "semantics/work_state_continuity_composition.schema.yaml",
+  "removed": 8,
+  "minimums": {
+   "2": 1,
+   "3": 4,
+   "6": 1,
+   "7": 1,
+   "9": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts.contracts[*].source_invariants",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.packet_catalog.packets.state_change.required_semantics",
+    "min_items": 7
+   },
+   {
+    "path": "$.receipt_catalog.receipt_kernel.required_semantics",
+    "min_items": 9
+   },
+   {
+    "path": "$.receipt_catalog.receipt_kernel.forbidden",
+    "min_items": 6
+   }
+  ]
+ },
+ {
+  "file": "semantics/work_state_continuity_projection.schema.yaml",
+  "removed": 8,
+  "minimums": {
+   "2": 1,
+   "3": 4,
+   "6": 1,
+   "7": 1,
+   "9": 1
+  },
+  "locations": [
+   {
+    "path": "$.contracts[*].source_invariants",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].applies_to",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].requires",
+    "min_items": 2
+   },
+   {
+    "path": "$.contracts[*].guarantees",
+    "min_items": 3
+   },
+   {
+    "path": "$.contracts[*].forbidden",
+    "min_items": 3
+   },
+   {
+    "path": "$.packets.state_change.required_semantics",
+    "min_items": 7
+   },
+   {
+    "path": "$.receipt_kernel.required_semantics",
+    "min_items": 9
+   },
+   {
+    "path": "$.receipt_kernel.forbidden",
+    "min_items": 6
+   }
+  ]
+ }
+]

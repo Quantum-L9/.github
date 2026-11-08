@@ -1,0 +1,964 @@
+Preparing isolated local-only candidate revision...
+LOCAL_ONLY_CANDIDATE=432788798e06dfedd1f0089a7e2dd4e162d8032f
+Running actual producer and consumer-driver qualification for the ten candidates...
+LOCAL_FAIL authority-resolution: /tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler project /tmp/tmpmlgoe7vo/project.yaml exited 3:
+artifacts:
+- content_digest: sha256:e59d21a945334a416e34e9e9a789e2af7fef1afa92785e2d1eeebaf6b096489d
+  digest: sha256:edc5bcbffe7515122689c399e8ef692bc8407c8d4965ce6eba3f5e1c4bc56541
+  path: /tmp/tmpmlgoe7vo/out/l9.projection_authority-resolution_1/l9.source_invariants_1.projection.json
+  receipt_digest: sha256:ff1faa55d1b83647d64d1c884f1b515ad70ae22f34989730f6597945c06a1440
+  receipt_path: /tmp/tmpmlgoe7vo/out/receipts/a85cda183c2dfc9291b7d4624f2f182f1b1c5c03318d3e2bb76104948775ab98.json
+  ref: l9.projection/authority-resolution@1#l9.source/invariants@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:2085a069ce2b0a11d51d9d556034ce38d308500fe877f7180f2eb9ea24b15e87
+  digest: sha256:b27e0ff446e9155f62efc97c0eef29aa0b615bd00fd02e52ce55622509c66564
+  path: /tmp/tmpmlgoe7vo/out/l9.projection_authority-resolution_1/l9.source_contracts_1.projection.json
+  receipt_digest: sha256:2b72a06b510dcd4ebb054bb19aecb6019936088df81a1bc7e1b583077ee02ac4
+  receipt_path: /tmp/tmpmlgoe7vo/out/receipts/0002ae5ded8b3d30c21e2d2704b5b8d5797c0e6f2e80428bd02ba5b7afdee12a.json
+  ref: l9.projection/authority-resolution@1#l9.source/contracts@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:f6a365c2c25315efd17ea8c83c4999c28d862e35a417d3dc6c78494d6ccac53e
+  digest: sha256:4f2c969ef83b721d300d8073bb05548bd7bea2fef5d3f50813115bee89c784f3
+  path: /tmp/tmpmlgoe7vo/out/l9.projection_authority-resolution_1/l9.source_authority-model_1.projection.json
+  receipt_digest: sha256:e48b8c81c484f027899a36e0d9a0bccf34e922261b635d879ce005876bb3d012
+  receipt_path: /tmp/tmpmlgoe7vo/out/receipts/ffd1ec3d6d9e942906d294307396cb13264516827b2bd84ee7e227c58950d882.json
+  ref: l9.projection/authority-resolution@1#l9.source/authority-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:2301667565e40d3fdb8b10bd9ed8bbee892ea626fa839baa01f9542522b89777
+  digest: sha256:2bcaf00078f8c77dc7c79001a6f366ec6a9f00f269fef2af58ae9c66fac1c511
+  path: /tmp/tmpmlgoe7vo/out/l9.projection_authority-resolution_1/l9.source_artifact-model_1.projection.json
+  receipt_digest: sha256:d408fa75a799622210b3c9ed6f013a7a62017234153216b04a4d2eea93c684a6
+  receipt_path: /tmp/tmpmlgoe7vo/out/receipts/b0fc1465921354fceb2c1018d22393b1707aa7b38501189b4156274e6266bc51.json
+  ref: l9.projection/authority-resolution@1#l9.source/artifact-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+governing_coordinates:
+  artifact_schema:
+    digest: sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e
+    path: semantics/projection_artifact.schema.yaml
+    ref: l9.schema/projection-artifact@1
+  compiler_contract:
+    digest: sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c
+    path: semantics/compiler_contract.yaml
+    ref: l9.compiler/generic@1
+  compiler_manifest:
+    digest: sha256:1e818252a4d19bcdcb50cb7b5d1a03fd1a646aee9e6c0805213ac5289e8097f1
+    path: semantics/generic_compiler_manifest.yaml
+    ref: l9.generic-compiler/global@1
+  engine_contract:
+    digest: sha256:fabe78189f47e7463b99da27b58da1b3d72561b8a8d3913ede06dd821f88e5f1
+    path: semantics/projection_engine_contract.yaml
+    ref: l9.compiler/projection-engine@1
+  profile_catalog:
+    digest: sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd
+    path: semantics/projection_profiles.yaml
+    ref: l9.projection-profile-catalog/global@1
+  receipt_schema:
+    digest: sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626
+    path: semantics/compiler_receipt.schema.yaml
+    ref: l9.schema/compiler-receipt@1
+  repository: Quantum-L9/.github
+  revision: 432788798e06dfedd1f0089a7e2dd4e162d8032f
+  selector_model:
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+    ref: l9.selector-model/global@1
+  source_registry:
+    digest: sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b
+    path: semantics/canonical_sources.yaml
+    ref: l9.canonical-sources/global@1
+operation: projection
+result: unknown
+status: succeeded
+
+
+
+LOCAL_FAIL evidence-assessment: /tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler project /tmp/tmpwyfozezv/project.yaml exited 3:
+artifacts:
+- content_digest: sha256:402a5c8bf217efdaefcfb07c99151c903ca27c831d460f210971ffb3f242aeba
+  digest: sha256:82792f03a16f2b83be6d123114b71e15ea3ce3713873e04c52afa4fd26811149
+  path: /tmp/tmpwyfozezv/out/l9.projection_evidence-assessment_1/l9.source_invariants_1.projection.json
+  receipt_digest: sha256:58bede7876c834e62047d27aca640ddb23750a2ac3606f6c75d8978faa61f8c8
+  receipt_path: /tmp/tmpwyfozezv/out/receipts/bd20ec0d71eea401724cbf04f3e280d3168771c6655d141ed8116cc81d9ba7ef.json
+  ref: l9.projection/evidence-assessment@1#l9.source/invariants@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:7cfbb9067336da91b71b5627d025d27abc896e26863f43cc38d000c3ae7898a7
+  digest: sha256:dda88b69c465e4fa1e8cc652b71a849e0bd719f60fb27ee992d6e27db1055147
+  path: /tmp/tmpwyfozezv/out/l9.projection_evidence-assessment_1/l9.source_contracts_1.projection.json
+  receipt_digest: sha256:5746ab6ac4be5c2609461c7b11140aab493674424c2a1cfd9938a559c378a79d
+  receipt_path: /tmp/tmpwyfozezv/out/receipts/0c5a33954dc6eda76e4f430a7b263749df61d50b3e2ce3b77517dd0ff5dd72e4.json
+  ref: l9.projection/evidence-assessment@1#l9.source/contracts@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:bbe40255a46cbe684f54a1999d2d5e766bc355b18d8a46cdb8294604dc24a7f2
+  digest: sha256:22a21a230a1136fdca27cb07aa87ee4dfbc5b4bec48b48dab9fd25dbff072303
+  path: /tmp/tmpwyfozezv/out/l9.projection_evidence-assessment_1/l9.source_receipt-catalog_1.projection.json
+  receipt_digest: sha256:3008b6ba631639b8622ab57ff8b64d23121b601367a52ff8880e9351b16c1632
+  receipt_path: /tmp/tmpwyfozezv/out/receipts/a611c8ab2fb77cb36bfa739f025e3f511c5920b47567da5706cec35145d80fba.json
+  ref: l9.projection/evidence-assessment@1#l9.source/receipt-catalog@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:5e51fbebe243cefbd2220948757bc8ae97017cd9c86a8a97843f9558b7e459f6
+  digest: sha256:fcdd1d703ca514a835e391cf8411e40d4f33e77729b3109acca00d1531a2381e
+  path: /tmp/tmpwyfozezv/out/l9.projection_evidence-assessment_1/l9.source_conformance-model_1.projection.json
+  receipt_digest: sha256:f346a3f2b587e72d185ebb28189f60b8de25f0e12e504c8a751d3a1e46a4e975
+  receipt_path: /tmp/tmpwyfozezv/out/receipts/3209546b8371a1ba156374f841b234b25646e83ab5002175428adca802dab4d1.json
+  ref: l9.projection/evidence-assessment@1#l9.source/conformance-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+governing_coordinates:
+  artifact_schema:
+    digest: sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e
+    path: semantics/projection_artifact.schema.yaml
+    ref: l9.schema/projection-artifact@1
+  compiler_contract:
+    digest: sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c
+    path: semantics/compiler_contract.yaml
+    ref: l9.compiler/generic@1
+  compiler_manifest:
+    digest: sha256:1e818252a4d19bcdcb50cb7b5d1a03fd1a646aee9e6c0805213ac5289e8097f1
+    path: semantics/generic_compiler_manifest.yaml
+    ref: l9.generic-compiler/global@1
+  engine_contract:
+    digest: sha256:fabe78189f47e7463b99da27b58da1b3d72561b8a8d3913ede06dd821f88e5f1
+    path: semantics/projection_engine_contract.yaml
+    ref: l9.compiler/projection-engine@1
+  profile_catalog:
+    digest: sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd
+    path: semantics/projection_profiles.yaml
+    ref: l9.projection-profile-catalog/global@1
+  receipt_schema:
+    digest: sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626
+    path: semantics/compiler_receipt.schema.yaml
+    ref: l9.schema/compiler-receipt@1
+  repository: Quantum-L9/.github
+  revision: 432788798e06dfedd1f0089a7e2dd4e162d8032f
+  selector_model:
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+    ref: l9.selector-model/global@1
+  source_registry:
+    digest: sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b
+    path: semantics/canonical_sources.yaml
+    ref: l9.canonical-sources/global@1
+operation: projection
+result: unknown
+status: succeeded
+
+
+
+LOCAL_FAIL semantic-change-context: /tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler project /tmp/tmpsgbvsse6/project.yaml exited 3:
+artifacts:
+- content_digest: sha256:be1454afa987442014e0e1ca65d0bbb571396363b55bb4849e7339d07785f878
+  digest: sha256:b482279711048c873f6f5e604e005b6f61a41208b309f6379c36ec2d6d0f1291
+  path: /tmp/tmpsgbvsse6/out/l9.projection_semantic-change-context_1/l9.source_invariants_1.projection.json
+  receipt_digest: sha256:0b4ca89031051414dd628869263d7fc390825bedeb2ea02904379083a3126d55
+  receipt_path: /tmp/tmpsgbvsse6/out/receipts/5a99b27ba612cb9b6b061c5cfecc29409e9c0c878df348bb18fc10580772ac3a.json
+  ref: l9.projection/semantic-change-context@1#l9.source/invariants@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:1676e824bcf9faf5728c3d009a56852357a92626003873cfd9ec8e6857616b58
+  digest: sha256:d5855c33ba1d479015eb4b5a431809d7f08f2fa9b2b4456202b4b2db7f74ece2
+  path: /tmp/tmpsgbvsse6/out/l9.projection_semantic-change-context_1/l9.source_contracts_1.projection.json
+  receipt_digest: sha256:395554ec65c64899fbae675025556b1ddcf5a55ecdcf79eafb135974e21ecd2d
+  receipt_path: /tmp/tmpsgbvsse6/out/receipts/f70902f15f8d2d145a84713cb57f7e75e5b13f04375d3758345ef07869852211.json
+  ref: l9.projection/semantic-change-context@1#l9.source/contracts@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:bbf00fcfccdcd4a11d3f3340bd8c342c2134c43fbea458b0ba2b3a5ace73f793
+  digest: sha256:f5a4dc4fa6db44bd22effa8951ff834f4126dca8f2e74de9eeadf866f8b2b0c5
+  path: /tmp/tmpsgbvsse6/out/l9.projection_semantic-change-context_1/l9.source_semantic-dependency-model_1.projection.json
+  receipt_digest: sha256:769da19f14de01ceee5151d8f4c5d4f0183b180b2223154bf8f4c7a34593669a
+  receipt_path: /tmp/tmpsgbvsse6/out/receipts/bea951c6577a18e248bcdc876ae3389bf8d468b1339cbe98532ad480468812e1.json
+  ref: l9.projection/semantic-change-context@1#l9.source/semantic-dependency-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:030947996bd7913de99613ccb7db3062ade12b7d2bd4b4f8c0228396f941a811
+  digest: sha256:75606e63a3d7688328c4b4a100d3f6d6af7c18947c3a82bcdf8e8ddb00368028
+  path: /tmp/tmpsgbvsse6/out/l9.projection_semantic-change-context_1/l9.source_lifecycle_1.projection.json
+  receipt_digest: sha256:7d61802afce8792f606c49fb6c51b7983617f599cf8b3bb18af671b61d909cc9
+  receipt_path: /tmp/tmpsgbvsse6/out/receipts/43320d51ed23d8258e9efa264fbe0e58e66cb38e567ddba41455ffb638a40efb.json
+  ref: l9.projection/semantic-change-context@1#l9.source/lifecycle@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+governing_coordinates:
+  artifact_schema:
+    digest: sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e
+    path: semantics/projection_artifact.schema.yaml
+    ref: l9.schema/projection-artifact@1
+  compiler_contract:
+    digest: sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c
+    path: semantics/compiler_contract.yaml
+    ref: l9.compiler/generic@1
+  compiler_manifest:
+    digest: sha256:1e818252a4d19bcdcb50cb7b5d1a03fd1a646aee9e6c0805213ac5289e8097f1
+    path: semantics/generic_compiler_manifest.yaml
+    ref: l9.generic-compiler/global@1
+  engine_contract:
+    digest: sha256:fabe78189f47e7463b99da27b58da1b3d72561b8a8d3913ede06dd821f88e5f1
+    path: semantics/projection_engine_contract.yaml
+    ref: l9.compiler/projection-engine@1
+  profile_catalog:
+    digest: sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd
+    path: semantics/projection_profiles.yaml
+    ref: l9.projection-profile-catalog/global@1
+  receipt_schema:
+    digest: sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626
+    path: semantics/compiler_receipt.schema.yaml
+    ref: l9.schema/compiler-receipt@1
+  repository: Quantum-L9/.github
+  revision: 432788798e06dfedd1f0089a7e2dd4e162d8032f
+  selector_model:
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+    ref: l9.selector-model/global@1
+  source_registry:
+    digest: sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b
+    path: semantics/canonical_sources.yaml
+    ref: l9.canonical-sources/global@1
+operation: projection
+result: unknown
+status: succeeded
+
+
+
+LOCAL_FAIL architecture-break-test: /tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler project /tmp/tmpv0e9a0j0/project.yaml exited 3:
+artifacts:
+- content_digest: sha256:01af7a704a306bfa333fcd59ebeafe7511ee05e798e310a67647664684360e21
+  digest: sha256:856476eba47892f12b0c5a5ea9038c56488685f1c29af51912c82b2902951c3c
+  path: /tmp/tmpv0e9a0j0/out/l9.projection_architecture-break-test_1/l9.source_invariants_1.projection.json
+  receipt_digest: sha256:93cdb3fb44c2f70a39f9f5a7108228496056ebc0fbc9fee7c8e115a205458da3
+  receipt_path: /tmp/tmpv0e9a0j0/out/receipts/680f1c77e3839c080d9326d595cbda40cb4afc8edc37d8932e4378a0e306b0de.json
+  ref: l9.projection/architecture-break-test@1#l9.source/invariants@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:9f9f3ca4c0716f4e44a447c999406a50fd5898e91e44fd1bb802ad0a1edfe786
+  digest: sha256:f1004d3f569af054f36f3fb5d700b3a3260e635ecde872c05803b94ad016af28
+  path: /tmp/tmpv0e9a0j0/out/l9.projection_architecture-break-test_1/l9.source_contracts_1.projection.json
+  receipt_digest: sha256:b3cb03d50c6700c9660e33e2da18a933cfaf1dadb06eefc69e30be89854f2d67
+  receipt_path: /tmp/tmpv0e9a0j0/out/receipts/126b2ecfed9e46225c5269d3e0784ea5348b507627ae7b621eafa6f35754e20c.json
+  ref: l9.projection/architecture-break-test@1#l9.source/contracts@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:53a8cffab1bc5c9df5fb8e51a83fee9cbe00f02604d4e0c2aa2a10a1695947e8
+  digest: sha256:3de08abc15a585f0ea908220de7273f0067dac59229fb725bafc391d3e4d1892
+  path: /tmp/tmpv0e9a0j0/out/l9.projection_architecture-break-test_1/l9.source_requirement-model_1.projection.json
+  receipt_digest: sha256:fddf3d9970c1d4afd6b600e83bfc0f1ccbbf465fbb0559edca6da90bf2aebcfa
+  receipt_path: /tmp/tmpv0e9a0j0/out/receipts/143a6c6aed80c2ec9b54167b58b6e7aa62d75965a7145ec39962bda7c56d960a.json
+  ref: l9.projection/architecture-break-test@1#l9.source/requirement-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:bf1f2dac17b741c6122a6b62dbc97161f671d6fbe99e438e2b37be39034ebf6f
+  digest: sha256:b08643ce4a7cd6c1ea1e4748c0ed073967b1e0fde0547d142b869aa8d6762c4e
+  path: /tmp/tmpv0e9a0j0/out/l9.projection_architecture-break-test_1/l9.source_resolution-model_1.projection.json
+  receipt_digest: sha256:890be27372525f76c4d96c02dcde4e790a6e4066e36f2d25d0980057bd4c1eaa
+  receipt_path: /tmp/tmpv0e9a0j0/out/receipts/dd44280bf48841782e236ccbf451d59880cd1602c69c5cd7e97dc71738d6a36b.json
+  ref: l9.projection/architecture-break-test@1#l9.source/resolution-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:56052c895c0c11a9d8d674860e120c0cf2b553e86df1c5f3b8cc5398fd9fdf5e
+  digest: sha256:f2a91fd1d4fb86406516700f39d05067bab622b9de8d4b2464bbaf8e35a8c04f
+  path: /tmp/tmpv0e9a0j0/out/l9.projection_architecture-break-test_1/l9.source_architecture-rules_1.projection.json
+  receipt_digest: sha256:bc136e3160437f106e7b1a660e3a81031413f613cd20bb23248be26155af5e12
+  receipt_path: /tmp/tmpv0e9a0j0/out/receipts/235e85e9d202ee3bd3100a2542333a619edd957773f3d17725ab49c71183797b.json
+  ref: l9.projection/architecture-break-test@1#l9.source/architecture-rules@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+governing_coordinates:
+  artifact_schema:
+    digest: sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e
+    path: semantics/projection_artifact.schema.yaml
+    ref: l9.schema/projection-artifact@1
+  compiler_contract:
+    digest: sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c
+    path: semantics/compiler_contract.yaml
+    ref: l9.compiler/generic@1
+  compiler_manifest:
+    digest: sha256:1e818252a4d19bcdcb50cb7b5d1a03fd1a646aee9e6c0805213ac5289e8097f1
+    path: semantics/generic_compiler_manifest.yaml
+    ref: l9.generic-compiler/global@1
+  engine_contract:
+    digest: sha256:fabe78189f47e7463b99da27b58da1b3d72561b8a8d3913ede06dd821f88e5f1
+    path: semantics/projection_engine_contract.yaml
+    ref: l9.compiler/projection-engine@1
+  profile_catalog:
+    digest: sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd
+    path: semantics/projection_profiles.yaml
+    ref: l9.projection-profile-catalog/global@1
+  receipt_schema:
+    digest: sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626
+    path: semantics/compiler_receipt.schema.yaml
+    ref: l9.schema/compiler-receipt@1
+  repository: Quantum-L9/.github
+  revision: 432788798e06dfedd1f0089a7e2dd4e162d8032f
+  selector_model:
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+    ref: l9.selector-model/global@1
+  source_registry:
+    digest: sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b
+    path: semantics/canonical_sources.yaml
+    ref: l9.canonical-sources/global@1
+operation: projection
+result: unknown
+status: succeeded
+
+
+
+LOCAL_FAIL globalization-assessment: /tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler project /tmp/tmpim7zmfms/project.yaml exited 3:
+artifacts:
+- content_digest: sha256:3594e861a32e041526e4afddaef9b0a57ca57b17def8e0752fb4f47c01f7703f
+  digest: sha256:c0aca547ed92e991f9521ac1935e8c7326161174c82fffe491ed69c94f69cbf1
+  path: /tmp/tmpim7zmfms/out/l9.projection_globalization-assessment_1/l9.source_invariants_1.projection.json
+  receipt_digest: sha256:7692c0c32b43d564f436550d1259f04f8d083127d020b3b6e6a734f3cf804601
+  receipt_path: /tmp/tmpim7zmfms/out/receipts/367f08bf7c4fb792c8200da8fb9cd1b38821d545d3042e75d67c5b479439f702.json
+  ref: l9.projection/globalization-assessment@1#l9.source/invariants@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:c80565bea938219a83e7fd77821a8c6877508fc33ee16342030dad4f0438027a
+  digest: sha256:7f89cfa6a8fd159c6ebb276cf7cdad8e6a1d7a6baa792f7515427e2a1c2601ee
+  path: /tmp/tmpim7zmfms/out/l9.projection_globalization-assessment_1/l9.source_contracts_1.projection.json
+  receipt_digest: sha256:1a919b7b6effd7cd15bfffbe9edbec57956330b627f1dbf2c45fa09a8d717384
+  receipt_path: /tmp/tmpim7zmfms/out/receipts/e7dc8ea08ad68276a3713666a501df5e113426ad3624a8db63e2215bdda40afb.json
+  ref: l9.projection/globalization-assessment@1#l9.source/contracts@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:ae6f023e681e3bd406df6eff31289c27630ac34ef86149dd552e094003f6f27a
+  digest: sha256:a3212a133fe34a2f919b1824b80a930977cf19a3607af18bb861b751c0e960df
+  path: /tmp/tmpim7zmfms/out/l9.projection_globalization-assessment_1/l9.source_authority-model_1.projection.json
+  receipt_digest: sha256:eeeaf2f8c584a428eb63b92f7f3ddd212c68020eea2118cb820ce1541772dc86
+  receipt_path: /tmp/tmpim7zmfms/out/receipts/a88c880f0eecd0a742a7f824c7ebd6afb24322afc481d4d5e8b6a195a9572aa1.json
+  ref: l9.projection/globalization-assessment@1#l9.source/authority-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:3737c2c2d9d091cae353c52958ded072ef3931cd4b0a018b7cce33382fe9ca32
+  digest: sha256:a0106013a079a8ad3491a3a8a5f986404fba030406fa78d00f55cf9d8bc38ec5
+  path: /tmp/tmpim7zmfms/out/l9.projection_globalization-assessment_1/l9.source_lifecycle_1.projection.json
+  receipt_digest: sha256:37c611a7618902c86541deca8d3a5477e3de9e31f56ccce1c69e250f5c1edd7e
+  receipt_path: /tmp/tmpim7zmfms/out/receipts/1d48538256158eee0294a6067f874185fcf91ef8f2c1b6a46fa6124ab3d1cc90.json
+  ref: l9.projection/globalization-assessment@1#l9.source/lifecycle@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:43abc7de9b1d4697efa55b4a2f1885563148bcdc4062b701c1cc067f8f349688
+  digest: sha256:dd89b67fa4964241d98dda62f0f6f9e73f03da0b551d1b5eb77c2a99122f7fdf
+  path: /tmp/tmpim7zmfms/out/l9.projection_globalization-assessment_1/l9.source_packet-catalog_1.projection.json
+  receipt_digest: sha256:30d08f5eea1215f4f6cbe6d9388ad97935386370e2f54c4a2c27efce1b1ef4d4
+  receipt_path: /tmp/tmpim7zmfms/out/receipts/8918f1e7153521d1eb6c580ff3ebc34dfef1cbaf4e3895e80d8b4a87ac105ae5.json
+  ref: l9.projection/globalization-assessment@1#l9.source/packet-catalog@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+governing_coordinates:
+  artifact_schema:
+    digest: sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e
+    path: semantics/projection_artifact.schema.yaml
+    ref: l9.schema/projection-artifact@1
+  compiler_contract:
+    digest: sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c
+    path: semantics/compiler_contract.yaml
+    ref: l9.compiler/generic@1
+  compiler_manifest:
+    digest: sha256:1e818252a4d19bcdcb50cb7b5d1a03fd1a646aee9e6c0805213ac5289e8097f1
+    path: semantics/generic_compiler_manifest.yaml
+    ref: l9.generic-compiler/global@1
+  engine_contract:
+    digest: sha256:fabe78189f47e7463b99da27b58da1b3d72561b8a8d3913ede06dd821f88e5f1
+    path: semantics/projection_engine_contract.yaml
+    ref: l9.compiler/projection-engine@1
+  profile_catalog:
+    digest: sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd
+    path: semantics/projection_profiles.yaml
+    ref: l9.projection-profile-catalog/global@1
+  receipt_schema:
+    digest: sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626
+    path: semantics/compiler_receipt.schema.yaml
+    ref: l9.schema/compiler-receipt@1
+  repository: Quantum-L9/.github
+  revision: 432788798e06dfedd1f0089a7e2dd4e162d8032f
+  selector_model:
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+    ref: l9.selector-model/global@1
+  source_registry:
+    digest: sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b
+    path: semantics/canonical_sources.yaml
+    ref: l9.canonical-sources/global@1
+operation: projection
+result: unknown
+status: succeeded
+
+
+
+LOCAL_FAIL work-state-continuity: /tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler project /tmp/tmp4zwt4n0u/project.yaml exited 3:
+artifacts:
+- content_digest: sha256:b0ffb35448faacbd029cc037f3c15fcb1d8c3880e83b348729718f389a640913
+  digest: sha256:81c4ebab2cb71114fc5145dd799b804f3fd280d7a63b32ee4651447bb258098c
+  path: /tmp/tmp4zwt4n0u/out/l9.projection_work-state-continuity_1/l9.source_invariants_1.projection.json
+  receipt_digest: sha256:110f10127ca8d154bb4e13bccd8718c5acdcfb19c5f294276bebaa1957c9928c
+  receipt_path: /tmp/tmp4zwt4n0u/out/receipts/cbeab4a19da9ee44eda2593e33fb5bc7d282357ab89922b8b3fd51567b836373.json
+  ref: l9.projection/work-state-continuity@1#l9.source/invariants@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:fe14921b15caabed01d03f32dd206b13d04e1380ecbf3a913fc9b1a60a8281f0
+  digest: sha256:7f085109adb4e85c9cbbc513e5e932276a13ccd81beabe57cf8f2644f66a082e
+  path: /tmp/tmp4zwt4n0u/out/l9.projection_work-state-continuity_1/l9.source_contracts_1.projection.json
+  receipt_digest: sha256:aeaac15820917eefbec2ca22095047036f525526283ffe1864d44fbefb097452
+  receipt_path: /tmp/tmp4zwt4n0u/out/receipts/927a2aaf9b8bb9c59d1af1855ca280144c642ffd8af9b1e2531c2e38bcdc8c88.json
+  ref: l9.projection/work-state-continuity@1#l9.source/contracts@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:12cb075ff70f56f979c545243b94872bb79003e23d065903b2cdff947d49a3d5
+  digest: sha256:00d906bac2eadf8e14bb5c49483375255868aec308c94bd773bbedc8271902b7
+  path: /tmp/tmp4zwt4n0u/out/l9.projection_work-state-continuity_1/l9.source_packet-catalog_1.projection.json
+  receipt_digest: sha256:a81de746520f06932ac8d9b3f0fa961cfc582022b70e87cf0134502a14ca73a4
+  receipt_path: /tmp/tmp4zwt4n0u/out/receipts/6c5df874f24af9ee99971a5d8a803898cbdd3b0af5b59f17e2d2c3c7f055d704.json
+  ref: l9.projection/work-state-continuity@1#l9.source/packet-catalog@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:43a883037bfda02b86e2fd3dc276e065b8d6a00b173bef0a4bdb5a04aed20e0b
+  digest: sha256:a15785428b04178e428b504c168a4065d04bdb1e0f41921d9f66fca80a682571
+  path: /tmp/tmp4zwt4n0u/out/l9.projection_work-state-continuity_1/l9.source_receipt-catalog_1.projection.json
+  receipt_digest: sha256:b93a48db330ce83722626f9428438e45ba9f9684860ed0f3028c1f69d6bc5eac
+  receipt_path: /tmp/tmp4zwt4n0u/out/receipts/6be17cd1ae24d68078e6615f2d70cb66f8a096c31a51a6c947b9fd81dbc20207.json
+  ref: l9.projection/work-state-continuity@1#l9.source/receipt-catalog@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:842f8b5bf5d65d9117503d52593f003ff997fc0e5b8cdfa16be4cfe5e6062b65
+  digest: sha256:2bbc5ea94d9c90ae895c639869b3f81243b63b4c8e15313324d16eed59453ca6
+  path: /tmp/tmp4zwt4n0u/out/l9.projection_work-state-continuity_1/l9.source_lifecycle_1.projection.json
+  receipt_digest: sha256:b64d3f4638f434f5e22ad9ce21f9b8954c9cd68617ed285668dbdd878e3690f3
+  receipt_path: /tmp/tmp4zwt4n0u/out/receipts/c16b19bcd6cb1fff94860c96bdf1c9e8aad095072a77a57cc06042121f85b53d.json
+  ref: l9.projection/work-state-continuity@1#l9.source/lifecycle@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:0f46b11a73d4fac1f5243c6963dba25dbb8324357c0d48465e5e11d7e497b8ed
+  digest: sha256:62f4141a6d7391990d663a5e4c58bef3139b7fdd72b108ea1fb51e782fc22c93
+  path: /tmp/tmp4zwt4n0u/out/l9.projection_work-state-continuity_1/l9.source_semantic-dependency-model_1.projection.json
+  receipt_digest: sha256:e9fa16bf07d8c28442fa68ae2a78101442b4615071324edeefade5621f8d99b2
+  receipt_path: /tmp/tmp4zwt4n0u/out/receipts/4f811ab8e0bd1c22bb451a0bc467bb504edbc82ab51958b733bdb5a1f55f8c68.json
+  ref: l9.projection/work-state-continuity@1#l9.source/semantic-dependency-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+governing_coordinates:
+  artifact_schema:
+    digest: sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e
+    path: semantics/projection_artifact.schema.yaml
+    ref: l9.schema/projection-artifact@1
+  compiler_contract:
+    digest: sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c
+    path: semantics/compiler_contract.yaml
+    ref: l9.compiler/generic@1
+  compiler_manifest:
+    digest: sha256:1e818252a4d19bcdcb50cb7b5d1a03fd1a646aee9e6c0805213ac5289e8097f1
+    path: semantics/generic_compiler_manifest.yaml
+    ref: l9.generic-compiler/global@1
+  engine_contract:
+    digest: sha256:fabe78189f47e7463b99da27b58da1b3d72561b8a8d3913ede06dd821f88e5f1
+    path: semantics/projection_engine_contract.yaml
+    ref: l9.compiler/projection-engine@1
+  profile_catalog:
+    digest: sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd
+    path: semantics/projection_profiles.yaml
+    ref: l9.projection-profile-catalog/global@1
+  receipt_schema:
+    digest: sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626
+    path: semantics/compiler_receipt.schema.yaml
+    ref: l9.schema/compiler-receipt@1
+  repository: Quantum-L9/.github
+  revision: 432788798e06dfedd1f0089a7e2dd4e162d8032f
+  selector_model:
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+    ref: l9.selector-model/global@1
+  source_registry:
+    digest: sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b
+    path: semantics/canonical_sources.yaml
+    ref: l9.canonical-sources/global@1
+operation: projection
+result: unknown
+status: succeeded
+
+
+
+LOCAL_FAIL strategic-planning-context: /tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler project /tmp/tmppztaemqs/project.yaml exited 3:
+artifacts:
+- content_digest: sha256:762d823f0a5c69386257aa43a550c928a581a91eb12a6a6b26ab62f6ae955a68
+  digest: sha256:15e6d42474e7eed75a55e42137ea90a44102b5cca894d1e4f58446e0daaff080
+  path: /tmp/tmppztaemqs/out/l9.projection_strategic-planning-context_1/l9.source_invariants_1.projection.json
+  receipt_digest: sha256:957efd704bd3b876d9c4035aa74c641bbfef6c3fcbf81cc773a5300cfbf37df5
+  receipt_path: /tmp/tmppztaemqs/out/receipts/e4d21c83a53a72aa21920cf5800c346876b3e200052c89f29d1d8e21681440d8.json
+  ref: l9.projection/strategic-planning-context@1#l9.source/invariants@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:ccdedc341481058ff147770b23ecd0473938f4846a8412b26b645a0a0424dfa5
+  digest: sha256:fdcbb2b61fb497a4c79368f93e54821ca9a503901771f4cde51ef40a5bece923
+  path: /tmp/tmppztaemqs/out/l9.projection_strategic-planning-context_1/l9.source_contracts_1.projection.json
+  receipt_digest: sha256:453a1172d6d867e1891be018f492cf2102825928f3f15a720ea85d2208c59919
+  receipt_path: /tmp/tmppztaemqs/out/receipts/3ee659e8e0bfea0904c1b0e079b43f6a5be621813b88ad1efd6315203bef3adb.json
+  ref: l9.projection/strategic-planning-context@1#l9.source/contracts@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:1a044a2c7bd9e5cbb7169d66e8573112f82347bfcf1d3ce3a612cd0e9e8e7a34
+  digest: sha256:333f74dd93815de20d94cdb01f0aaf3ba51b21cc11f627ec2bc5275c135fb756
+  path: /tmp/tmppztaemqs/out/l9.projection_strategic-planning-context_1/l9.source_authority-model_1.projection.json
+  receipt_digest: sha256:6100e64a0d9ad6467184e786728ae22dc63ce49111c892dcfcc270899a5e9e69
+  receipt_path: /tmp/tmppztaemqs/out/receipts/c8a3bf720fec166e46a1fd951473521de6bc8d18efc5d590158c104eb9e7b8f3.json
+  ref: l9.projection/strategic-planning-context@1#l9.source/authority-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:e32387717cbacd8b83eb1b0b9aecd0c8f0e7e9a1d6849d4744b0038a51253ce5
+  digest: sha256:50461ae4e7749c8969bb5e19a1d9fcdea2a07d71bdc016029b96ae731250be72
+  path: /tmp/tmppztaemqs/out/l9.projection_strategic-planning-context_1/l9.source_strategic-cognition-model_1.projection.json
+  receipt_digest: sha256:c395b5d78bde06021f5f49c9ca78a84c2830f335374da943f6da43e2e7eb876e
+  receipt_path: /tmp/tmppztaemqs/out/receipts/a3db95aa23c082b02769c97cd41b6514385f01cdb93f521b9e1d87d453b8ec72.json
+  ref: l9.projection/strategic-planning-context@1#l9.source/strategic-cognition-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:11a790c82e0bad4753b192fae45d0f04ebe887d74bfa6c0f57fcd89797f5e5b5
+  digest: sha256:73dabac492844c3026d56712955fdbcd92fc22e194b286d215fc885a6075f2f4
+  path: /tmp/tmppztaemqs/out/l9.projection_strategic-planning-context_1/l9.source_strategic-plan-model_1.projection.json
+  receipt_digest: sha256:4168c59d9356514afb0d18c253fffc33ab8507612dcccbc498861365542251c9
+  receipt_path: /tmp/tmppztaemqs/out/receipts/cf565b4c36071eeb7915d414c19df4d305f69af3118e70f109523af8d796d0ea.json
+  ref: l9.projection/strategic-planning-context@1#l9.source/strategic-plan-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:1111b1eaf60a9cb20524846806027fd03652f883b43c372546ebdd0c0e7c5a6b
+  digest: sha256:f087184041611ec42191bdcfb1a8c8203b607799bc66ff6c7a3727826876661c
+  path: /tmp/tmppztaemqs/out/l9.projection_strategic-planning-context_1/l9.source_strategic-plan-graph-schema_1.projection.json
+  receipt_digest: sha256:5d271aff235af9eef4a638bfed8a682f5c342decef37b778bf3be55fe56500a1
+  receipt_path: /tmp/tmppztaemqs/out/receipts/c45c6097b4a14584d32654076606cf74ba139c44b3bb0f49fa1bc1a05b524a83.json
+  ref: l9.projection/strategic-planning-context@1#l9.source/strategic-plan-graph-schema@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:f07610f4164810855b296af61a54d2cda974440191e481cff5c5de3960a53e79
+  digest: sha256:afad382059b9eb87a53782545498706761cbc94b4ce1bb624b0a3dd953c6fc3b
+  path: /tmp/tmppztaemqs/out/l9.projection_strategic-planning-context_1/l9.source_affected-strategic-closure-schema_1.projection.json
+  receipt_digest: sha256:eb301be4eb7a6b4f70081d5da02901551eebfe0ae5cb72b34b9010883d7a4363
+  receipt_path: /tmp/tmppztaemqs/out/receipts/c05bba8c6a775cc490f30ca1166cd0c1e2ddaea44eb9d503e947cc83c400e4f9.json
+  ref: l9.projection/strategic-planning-context@1#l9.source/affected-strategic-closure-schema@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:bcd4769bb5c4d3c351b54ef4225b0e13ab7dd84b2c4d0805dca1e7f544aa7972
+  digest: sha256:64b8fb33627512e23453b7382559bde864afbc0706a5cbf1936b4b1b737614de
+  path: /tmp/tmppztaemqs/out/l9.projection_strategic-planning-context_1/l9.source_strategic-planning-episode-schema_1.projection.json
+  receipt_digest: sha256:b9780f4fcc65825e35ad1f4fd97f8acc741373a3985269b1240fe9bceec2958c
+  receipt_path: /tmp/tmppztaemqs/out/receipts/0dd820fa7af7ab4ded3f348df8f179ce51a426253bf844a931cbf5eb4daa2cfb.json
+  ref: l9.projection/strategic-planning-context@1#l9.source/strategic-planning-episode-schema@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:9391023c58ee1e072564e324bf454162ce32856c358b3a60f075e533807b6b2e
+  digest: sha256:858f790f68a57a729adba4923c9466f2d01e3f7a4ad504f7921b48971a17521a
+  path: /tmp/tmppztaemqs/out/l9.projection_strategic-planning-context_1/l9.source_strategic-plan-revision-candidate-schema_1.projection.json
+  receipt_digest: sha256:ab8d38bcc26a9875f05d346cf00ee386c030583b90fc959a96172f10750f766b
+  receipt_path: /tmp/tmppztaemqs/out/receipts/62bae4fea967c8523d9e851683c7f595de9591a501f84b96a04eac69f96bb6e9.json
+  ref: l9.projection/strategic-planning-context@1#l9.source/strategic-plan-revision-candidate-schema@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+governing_coordinates:
+  artifact_schema:
+    digest: sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e
+    path: semantics/projection_artifact.schema.yaml
+    ref: l9.schema/projection-artifact@1
+  compiler_contract:
+    digest: sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c
+    path: semantics/compiler_contract.yaml
+    ref: l9.compiler/generic@1
+  compiler_manifest:
+    digest: sha256:1e818252a4d19bcdcb50cb7b5d1a03fd1a646aee9e6c0805213ac5289e8097f1
+    path: semantics/generic_compiler_manifest.yaml
+    ref: l9.generic-compiler/global@1
+  engine_contract:
+    digest: sha256:fabe78189f47e7463b99da27b58da1b3d72561b8a8d3913ede06dd821f88e5f1
+    path: semantics/projection_engine_contract.yaml
+    ref: l9.compiler/projection-engine@1
+  profile_catalog:
+    digest: sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd
+    path: semantics/projection_profiles.yaml
+    ref: l9.projection-profile-catalog/global@1
+  receipt_schema:
+    digest: sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626
+    path: semantics/compiler_receipt.schema.yaml
+    ref: l9.schema/compiler-receipt@1
+  repository: Quantum-L9/.github
+  revision: 432788798e06dfedd1f0089a7e2dd4e162d8032f
+  selector_model:
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+    ref: l9.selector-model/global@1
+  source_registry:
+    digest: sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b
+    path: semantics/canonical_sources.yaml
+    ref: l9.canonical-sources/global@1
+operation: projection
+result: unknown
+status: succeeded
+
+
+
+LOCAL_FAIL strategic-metacognition: /tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler project /tmp/tmpinb8vmw_/project.yaml exited 3:
+artifacts:
+- content_digest: sha256:ebaec139ca3d304b1098fc3fced4140ee2046095e10052c8041724ca3a8c7d13
+  digest: sha256:04fb52b01f8dce578beb1e8bbdc65197f9f585dca1cfba41a8930f01ab5e4d89
+  path: /tmp/tmpinb8vmw_/out/l9.projection_strategic-metacognition_1/l9.source_invariants_1.projection.json
+  receipt_digest: sha256:94995acf75654ae76431e7c56940e364e1a376ea6bae307f5b96c2a5727e10eb
+  receipt_path: /tmp/tmpinb8vmw_/out/receipts/247f650af8711498cbb006ecfc0f339b89f288c547d1f92a6dc2449ebac23b8f.json
+  ref: l9.projection/strategic-metacognition@1#l9.source/invariants@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:c678862bee44accccd36def2dcdf34a4847b84a6042aaf2b3eaf3c1837ae6ebe
+  digest: sha256:89d8f79c15274c4cb09718ffdfe012f3bcefc7e2bbcd0c2ae925dda7eb4df1d9
+  path: /tmp/tmpinb8vmw_/out/l9.projection_strategic-metacognition_1/l9.source_contracts_1.projection.json
+  receipt_digest: sha256:78df025b83f2a9221432117b49da326eadfb025ba72e5dff904702758bded71a
+  receipt_path: /tmp/tmpinb8vmw_/out/receipts/964bd714a2c93f2a79fb53e253df6b17ad4da5e83442499f2d7d53999e4a1e92.json
+  ref: l9.projection/strategic-metacognition@1#l9.source/contracts@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:281ff8ede004bbe8343616b20040f275cb3f666972bf66500c8f90de1fbb8952
+  digest: sha256:855705e965b5eb5edaa5e79d44c43a9843a1ed82961b38b55e19c09871054c33
+  path: /tmp/tmpinb8vmw_/out/l9.projection_strategic-metacognition_1/l9.source_authority-model_1.projection.json
+  receipt_digest: sha256:4e8d2c37cf1f37015d8835ea42982a4d1eef392c0b29ebbb49bd775c10837764
+  receipt_path: /tmp/tmpinb8vmw_/out/receipts/02347f600b272b3e195cf25132ecb0869cb0ecd417a4625885505a4cfd62ba68.json
+  ref: l9.projection/strategic-metacognition@1#l9.source/authority-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:0f3ac79fd917c659eb0eb8f8907e10a66cebd4ff14bc330c25bc27437c8fec37
+  digest: sha256:0b7b9b732b48ed777c36a338c92de5be690d3e2e66dcd758b64d8e82f87597e1
+  path: /tmp/tmpinb8vmw_/out/l9.projection_strategic-metacognition_1/l9.source_strategic-cognition-model_1.projection.json
+  receipt_digest: sha256:0901de3e5a3a042c9fdbefa5c35f5050a78b031b23d5501a8f11aaa58d9880e2
+  receipt_path: /tmp/tmpinb8vmw_/out/receipts/9892999a7e9f3f776a3961ff9aad490caa55c23023343e94dcab26a708915982.json
+  ref: l9.projection/strategic-metacognition@1#l9.source/strategic-cognition-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:bab947502c894f369126e2c5910fe9a86c32e42fc4bf791498200536f23a6b22
+  digest: sha256:d2c6e83aa2f0876ddf1890f22e8115488ba47f3c01b0045c0605abab220b374b
+  path: /tmp/tmpinb8vmw_/out/l9.projection_strategic-metacognition_1/l9.source_strategic-plan-model_1.projection.json
+  receipt_digest: sha256:b6762109be01c1297a9e872020fbd6bd2805980b0b53d94714860cb39ce29b46
+  receipt_path: /tmp/tmpinb8vmw_/out/receipts/6f1bdde068602408581c8c9f85d6afb7cd4df2e1e24f968ac9f682d05203e91a.json
+  ref: l9.projection/strategic-metacognition@1#l9.source/strategic-plan-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:da0ba0711d13dcbc508d02cad4da535c2822136f2d0eec3e59c741c288c02e0f
+  digest: sha256:cd1777821f5a1f8d43dcd969577c96d00e6a123be16874dc8425777ba61c8dd5
+  path: /tmp/tmpinb8vmw_/out/l9.projection_strategic-metacognition_1/l9.source_strategic-plan-metacognitive-analysis-schema_1.projection.json
+  receipt_digest: sha256:048052add9034368db1b8291ae9f7b1c0c45dbab6f3c8c9e04f15c5b3727c4ac
+  receipt_path: /tmp/tmpinb8vmw_/out/receipts/0bbe1966f1befd007524b0c49148a059c37f47889936017387eaa30d28aa92f3.json
+  ref: l9.projection/strategic-metacognition@1#l9.source/strategic-plan-metacognitive-analysis-schema@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+governing_coordinates:
+  artifact_schema:
+    digest: sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e
+    path: semantics/projection_artifact.schema.yaml
+    ref: l9.schema/projection-artifact@1
+  compiler_contract:
+    digest: sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c
+    path: semantics/compiler_contract.yaml
+    ref: l9.compiler/generic@1
+  compiler_manifest:
+    digest: sha256:1e818252a4d19bcdcb50cb7b5d1a03fd1a646aee9e6c0805213ac5289e8097f1
+    path: semantics/generic_compiler_manifest.yaml
+    ref: l9.generic-compiler/global@1
+  engine_contract:
+    digest: sha256:fabe78189f47e7463b99da27b58da1b3d72561b8a8d3913ede06dd821f88e5f1
+    path: semantics/projection_engine_contract.yaml
+    ref: l9.compiler/projection-engine@1
+  profile_catalog:
+    digest: sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd
+    path: semantics/projection_profiles.yaml
+    ref: l9.projection-profile-catalog/global@1
+  receipt_schema:
+    digest: sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626
+    path: semantics/compiler_receipt.schema.yaml
+    ref: l9.schema/compiler-receipt@1
+  repository: Quantum-L9/.github
+  revision: 432788798e06dfedd1f0089a7e2dd4e162d8032f
+  selector_model:
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+    ref: l9.selector-model/global@1
+  source_registry:
+    digest: sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b
+    path: semantics/canonical_sources.yaml
+    ref: l9.canonical-sources/global@1
+operation: projection
+result: unknown
+status: succeeded
+
+
+
+LOCAL_FAIL identity-assurance: /tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler project /tmp/tmpf8i1x6pa/project.yaml exited 3:
+artifacts:
+- content_digest: sha256:8a41b19a1db5ea0e68f1230702cecd939444c1f0b71b1ad53a6995ff2eeb40fa
+  digest: sha256:90f52cefde099a06d88f54a993087124f88d5fd526e94b266a0c41cb62e002af
+  path: /tmp/tmpf8i1x6pa/out/l9.projection_identity-assurance_1/l9.source_invariants_1.projection.json
+  receipt_digest: sha256:7c6189548ef669fd6b17ff7ceaec5ae31b66a6a5ba019eebf219e84a14c04db7
+  receipt_path: /tmp/tmpf8i1x6pa/out/receipts/cdd59f7add619e343baf2523931949d9a79d6a94ef6fb2451dfe66e95855554c.json
+  ref: l9.projection/identity-assurance@1#l9.source/invariants@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:c6fddbceec2ee22a6bc24f99a2b15f1746de346d9f7f44f89d2253f7626f441c
+  digest: sha256:8611c7bb2cab9571e58bb7344546c3ddb0ecac2c1f595ee88f03961217e0fb9c
+  path: /tmp/tmpf8i1x6pa/out/l9.projection_identity-assurance_1/l9.source_contracts_1.projection.json
+  receipt_digest: sha256:a45a22fdf92fa7afe2e494e6b6e5b19054ada450e680a4708b8b147e1b4ad6c5
+  receipt_path: /tmp/tmpf8i1x6pa/out/receipts/26993d59b1f80ec416a1f214b44ce1281de7256e085d88494291ced4972cfc56.json
+  ref: l9.projection/identity-assurance@1#l9.source/contracts@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:2116efbaa9f2cacd13b1002b360720ed2fcd3163dc0dc280f27c1668f5faa72d
+  digest: sha256:ad89e7e2b2e4618c7a3106c9b98335fa15e6c87e0db7b9c543cfe691845efea3
+  path: /tmp/tmpf8i1x6pa/out/l9.projection_identity-assurance_1/l9.source_identity-model_1.projection.json
+  receipt_digest: sha256:4c5998b6a5cfddf844765508ed5ea567d97a69f82fba0a771cab516b8a33d330
+  receipt_path: /tmp/tmpf8i1x6pa/out/receipts/7cab7b53e72a95227cb4b121b5bde21d7856bb2010239e756842e2c8f4a4eee0.json
+  ref: l9.projection/identity-assurance@1#l9.source/identity-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:ac6178469338c595acfbcf6a5667dcfbd451547ee98b2c06da755a7ab013069d
+  digest: sha256:c78e6ec45975e56b964feb0a9784e76fa0514f9a1836608d2820ef6f26b1d9ca
+  path: /tmp/tmpf8i1x6pa/out/l9.projection_identity-assurance_1/l9.source_authority-model_1.projection.json
+  receipt_digest: sha256:aecb83b74ce8b6215c2522534aaa0ba0c4143bfa190a751bfa43ba994b0506cd
+  receipt_path: /tmp/tmpf8i1x6pa/out/receipts/1040239c031558714d2be7a46d7bab094c2aa025511795cd556e19c72cdd05d2.json
+  ref: l9.projection/identity-assurance@1#l9.source/authority-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:d9081e783941291f7ce09a60f1009b2567a04ba25dc2d350638ec22c80bcee67
+  digest: sha256:c9ec277cea44d36f543eb29368dc7652d54d31351bb38a3c18f384f616b522c3
+  path: /tmp/tmpf8i1x6pa/out/l9.projection_identity-assurance_1/l9.source_actor-registry_1.projection.json
+  receipt_digest: sha256:041d35507d6ffefa05f0ab37c4bb6ea6f972521f488bb60d193edff6d2520f53
+  receipt_path: /tmp/tmpf8i1x6pa/out/receipts/89c260524acf1c2b18efd520f7e8342021cf543a8c53e5fa1db323d77e613e5e.json
+  ref: l9.projection/identity-assurance@1#l9.source/actor-registry@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:3f5cf42f02b2fa9d70a04853e5f1f4da467e9720aa12dbce345bab52a30134fa
+  digest: sha256:dbb3e00fe7336131f6c03a31faaf48d3d76f63de31cc8b387849ad2e31c51ae4
+  path: /tmp/tmpf8i1x6pa/out/l9.projection_identity-assurance_1/l9.source_surface-registry_1.projection.json
+  receipt_digest: sha256:5ff232de4dd91ed3c7f74c762a5831aab5d1a97625902bbee798030ded6cfd02
+  receipt_path: /tmp/tmpf8i1x6pa/out/receipts/2a4f62675ef4811733b0a89fadb7402cab24342baae2fb178b0f7d5eb9446a92.json
+  ref: l9.projection/identity-assurance@1#l9.source/surface-registry@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+governing_coordinates:
+  artifact_schema:
+    digest: sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e
+    path: semantics/projection_artifact.schema.yaml
+    ref: l9.schema/projection-artifact@1
+  compiler_contract:
+    digest: sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c
+    path: semantics/compiler_contract.yaml
+    ref: l9.compiler/generic@1
+  compiler_manifest:
+    digest: sha256:1e818252a4d19bcdcb50cb7b5d1a03fd1a646aee9e6c0805213ac5289e8097f1
+    path: semantics/generic_compiler_manifest.yaml
+    ref: l9.generic-compiler/global@1
+  engine_contract:
+    digest: sha256:fabe78189f47e7463b99da27b58da1b3d72561b8a8d3913ede06dd821f88e5f1
+    path: semantics/projection_engine_contract.yaml
+    ref: l9.compiler/projection-engine@1
+  profile_catalog:
+    digest: sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd
+    path: semantics/projection_profiles.yaml
+    ref: l9.projection-profile-catalog/global@1
+  receipt_schema:
+    digest: sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626
+    path: semantics/compiler_receipt.schema.yaml
+    ref: l9.schema/compiler-receipt@1
+  repository: Quantum-L9/.github
+  revision: 432788798e06dfedd1f0089a7e2dd4e162d8032f
+  selector_model:
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+    ref: l9.selector-model/global@1
+  source_registry:
+    digest: sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b
+    path: semantics/canonical_sources.yaml
+    ref: l9.canonical-sources/global@1
+operation: projection
+result: unknown
+status: succeeded
+
+
+
+LOCAL_FAIL hard-constraint-context: /tmp/l9-projection-qa.nBKv8FWo/venv/bin/l9-semantic-compiler project /tmp/tmpji4_e79b/project.yaml exited 3:
+artifacts:
+- content_digest: sha256:7ab8f7defa80cd4c556c3c31263c25201a9a72561dc0c16c4cbda77ffae592c9
+  digest: sha256:57f83b10ed6f161b18d5f66213378ac8fd06a53e6351659aec6e3f1a360dbf85
+  path: /tmp/tmpji4_e79b/out/l9.projection_hard-constraint-context_1/l9.source_invariants_1.projection.json
+  receipt_digest: sha256:db2b7799e3b321db1f6e47f507230e49231a427e2dd48595f49ed370301a749f
+  receipt_path: /tmp/tmpji4_e79b/out/receipts/1d42b2dc295cc6c02f05de2691e728ac5688737d0cffb68804ce4a17e4dfcd00.json
+  ref: l9.projection/hard-constraint-context@1#l9.source/invariants@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:9ac0df3a293e0c8c02dfe519fbe19848c19e59a7cf0c425fdf23eb3bba9c547a
+  digest: sha256:33a5a961173ebb2100b4137eefd211eb87ce3a2a338118445aa447e3acd0d74c
+  path: /tmp/tmpji4_e79b/out/l9.projection_hard-constraint-context_1/l9.source_contracts_1.projection.json
+  receipt_digest: sha256:52caf9392e570a10ad1c5b9d4ce2d517b9194501e2ea30256c86f2080377344c
+  receipt_path: /tmp/tmpji4_e79b/out/receipts/f389acede4d7efbdb013fa2ea008b64b20566c97f023c321b4ff3e6be135bbe8.json
+  ref: l9.projection/hard-constraint-context@1#l9.source/contracts@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:0ae8cff60674134b32ff79fd765046daa7540bebf86964f288e5cc6da9d275fd
+  digest: sha256:d77710cf120db653d98608595d924e111f2f2e83c39eef8a9fdb8f7bb88dc441
+  path: /tmp/tmpji4_e79b/out/l9.projection_hard-constraint-context_1/l9.source_requirement-model_1.projection.json
+  receipt_digest: sha256:f20a59ca766932c0a9f724d404cd0ed53f7c0835585671946f855c77022353e2
+  receipt_path: /tmp/tmpji4_e79b/out/receipts/87e843670c3937130750c842a509fc7c4d7777e540e6bbec0707c10ade319481.json
+  ref: l9.projection/hard-constraint-context@1#l9.source/requirement-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+- content_digest: sha256:c0bddf7fd3bb06055036bde6b6e994370d2847e10abd9641cc59e9126617ccde
+  digest: sha256:d54394707ba431e245b1588d96074d9d6bdf80f5c099dcfef58b992286f07a32
+  path: /tmp/tmpji4_e79b/out/l9.projection_hard-constraint-context_1/l9.source_resolution-model_1.projection.json
+  receipt_digest: sha256:481acf75a090ea27b1cfac92682a2a09ecea80678ad86de2ee1b379e6a22487d
+  receipt_path: /tmp/tmpji4_e79b/out/receipts/d44044886cae4b845d1dbc5a0bd79b7e6db7acfe90010bafdfb6c9e37e70795a.json
+  ref: l9.projection/hard-constraint-context@1#l9.source/resolution-model@1
+  result: unknown
+  rewritten: true
+  unresolved_criteria:
+  - payload_schema
+governing_coordinates:
+  artifact_schema:
+    digest: sha256:92661e10377a296dc301e993cb1dd2abd14b3d5f4d2c58c801de6063b9ced25e
+    path: semantics/projection_artifact.schema.yaml
+    ref: l9.schema/projection-artifact@1
+  compiler_contract:
+    digest: sha256:e2e5252d0971aff31ef66e26894b4fcf1b6d0aff4da6d2d242fdea964354d25c
+    path: semantics/compiler_contract.yaml
+    ref: l9.compiler/generic@1
+  compiler_manifest:
+    digest: sha256:1e818252a4d19bcdcb50cb7b5d1a03fd1a646aee9e6c0805213ac5289e8097f1
+    path: semantics/generic_compiler_manifest.yaml
+    ref: l9.generic-compiler/global@1
+  engine_contract:
+    digest: sha256:fabe78189f47e7463b99da27b58da1b3d72561b8a8d3913ede06dd821f88e5f1
+    path: semantics/projection_engine_contract.yaml
+    ref: l9.compiler/projection-engine@1
+  profile_catalog:
+    digest: sha256:18f1858ef36e3672259f90757eacab15a74c94070a2de30ca26b5f06cf4c51dd
+    path: semantics/projection_profiles.yaml
+    ref: l9.projection-profile-catalog/global@1
+  receipt_schema:
+    digest: sha256:4343838434514717a9bbfbfa5a9f933444cc1d801cc579165aabc3afb7633626
+    path: semantics/compiler_receipt.schema.yaml
+    ref: l9.schema/compiler-receipt@1
+  repository: Quantum-L9/.github
+  revision: 432788798e06dfedd1f0089a7e2dd4e162d8032f
+  selector_model:
+    digest: sha256:2c2e221c3e5455f3359723d0e1b4da2cdbd02542782b7cd4bb22bfb7cd5aad56
+    path: semantics/selector_model.yaml
+    ref: l9.selector-model/global@1
+  source_registry:
+    digest: sha256:6c04421ea3ac040737b15b5472262356318f0924239bda89ee6674c563e2b60b
+    path: semantics/canonical_sources.yaml
+    ref: l9.canonical-sources/global@1
+operation: projection
+result: unknown
+status: succeeded
+
+
+
+LOCAL_RESULTS pass=0 fail=10

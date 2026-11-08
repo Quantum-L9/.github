@@ -1,0 +1,276 @@
+[
+ {
+  "profile": "l9.projection/identity-assurance@1",
+  "source_class": "actor_registry",
+  "source_ref": "l9.source/actor-registry@1",
+  "source_path": "semantics/actor_registry.yaml",
+  "original_selection": [
+   "$"
+  ],
+  "current_selection": [
+   "$.artifact_id",
+   "$.canonical",
+   "$.authority",
+   "$.canonical_source",
+   "$.governed_by",
+   "$.purpose",
+   "$.identity_dimension",
+   "$.detailed_model",
+   "$.global_rules",
+   "$.does_not_own",
+   "$.actor_kinds",
+   "$.actor_statuses",
+   "$.actors",
+   "$.aliases",
+   "$.alias_rules",
+   "$.downstream_obligations"
+  ],
+  "excluded_field": "schema",
+  "excluded_value": "l9.actor-registry/v1",
+  "source_top_level_fields": 17,
+  "selected_fields": 16,
+  "all_other_fields_selected_in_source_order": true,
+  "payload_has_schema_field_from_source": false,
+  "payload_schema_value": null,
+  "artifact_source_ref": "l9.source/actor-registry@1",
+  "artifact_source_digest": "sha256:34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f",
+  "receipt_input": {
+   "digest": "sha256:34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f",
+   "path": "semantics/actor_registry.yaml",
+   "ref": "l9.source/actor-registry@1",
+   "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+  }
+ },
+ {
+  "profile": "l9.projection/identity-assurance@1",
+  "source_class": "surface_registry",
+  "source_ref": "l9.source/surface-registry@1",
+  "source_path": "semantics/surface_registry.yaml",
+  "original_selection": [
+   "$"
+  ],
+  "current_selection": [
+   "$.artifact_id",
+   "$.canonical",
+   "$.authority",
+   "$.canonical_source",
+   "$.governed_by",
+   "$.purpose",
+   "$.identity_dimension",
+   "$.detailed_model",
+   "$.global_rules",
+   "$.does_not_own",
+   "$.surface_statuses",
+   "$.surfaces",
+   "$.aliases",
+   "$.alias_rules",
+   "$.downstream_obligations"
+  ],
+  "excluded_field": "schema",
+  "excluded_value": "l9.surface-registry/v1",
+  "source_top_level_fields": 16,
+  "selected_fields": 15,
+  "all_other_fields_selected_in_source_order": true,
+  "payload_has_schema_field_from_source": false,
+  "payload_schema_value": null,
+  "artifact_source_ref": "l9.source/surface-registry@1",
+  "artifact_source_digest": "sha256:d7200409ff02141a274ff8c9221d31429f6a6fae27539e6d9c8d20f1a6eba988",
+  "receipt_input": {
+   "digest": "sha256:d7200409ff02141a274ff8c9221d31429f6a6fae27539e6d9c8d20f1a6eba988",
+   "path": "semantics/surface_registry.yaml",
+   "ref": "l9.source/surface-registry@1",
+   "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+  }
+ },
+ {
+  "profile": "l9.projection/strategic-metacognition@1",
+  "source_class": "strategic_plan_metacognitive_analysis_schema",
+  "source_ref": "l9.source/strategic-plan-metacognitive-analysis-schema@1",
+  "source_path": "semantics/strategic_plan_metacognitive_analysis.schema.yaml",
+  "original_selection": [
+   "$"
+  ],
+  "current_selection": [
+   "$.artifact_id",
+   "$.canonical",
+   "$.authority",
+   "$.canonical_source",
+   "$.governed_by",
+   "$.purpose",
+   "$.instance_semantics",
+   "$.type",
+   "$.required",
+   "$.properties",
+   "$.analysis_rules",
+   "$.semantic_rules"
+  ],
+  "excluded_field": "schema",
+  "excluded_value": "l9.schema-definition/v1",
+  "source_top_level_fields": 13,
+  "selected_fields": 12,
+  "all_other_fields_selected_in_source_order": true,
+  "payload_has_schema_field_from_source": false,
+  "payload_schema_value": null,
+  "artifact_source_ref": "l9.source/strategic-plan-metacognitive-analysis-schema@1",
+  "artifact_source_digest": "sha256:ae0f69362f82548968dab60b999ddd074c244ad9e6c78520ea9d653cfa1dc349",
+  "receipt_input": {
+   "digest": "sha256:ae0f69362f82548968dab60b999ddd074c244ad9e6c78520ea9d653cfa1dc349",
+   "path": "semantics/strategic_plan_metacognitive_analysis.schema.yaml",
+   "ref": "l9.source/strategic-plan-metacognitive-analysis-schema@1",
+   "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+  }
+ },
+ {
+  "profile": "l9.projection/strategic-planning-context@1",
+  "source_class": "strategic_plan_graph_schema",
+  "source_ref": "l9.source/strategic-plan-graph-schema@1",
+  "source_path": "semantics/strategic_plan_graph.schema.yaml",
+  "original_selection": [
+   "$"
+  ],
+  "current_selection": [
+   "$.artifact_id",
+   "$.canonical",
+   "$.authority",
+   "$.canonical_source",
+   "$.governed_by",
+   "$.purpose",
+   "$.type",
+   "$.required",
+   "$.properties",
+   "$.reference_rules",
+   "$.relation_constraints",
+   "$.revision_rules",
+   "$.semantic_rules"
+  ],
+  "excluded_field": "schema",
+  "excluded_value": "l9.schema-definition/v1",
+  "source_top_level_fields": 14,
+  "selected_fields": 13,
+  "all_other_fields_selected_in_source_order": true,
+  "payload_has_schema_field_from_source": false,
+  "payload_schema_value": null,
+  "artifact_source_ref": "l9.source/strategic-plan-graph-schema@1",
+  "artifact_source_digest": "sha256:76bbf51d9233452d3e83e8bf4148a27eb6b8e29ff3126777c6c28d818ce1a885",
+  "receipt_input": {
+   "digest": "sha256:76bbf51d9233452d3e83e8bf4148a27eb6b8e29ff3126777c6c28d818ce1a885",
+   "path": "semantics/strategic_plan_graph.schema.yaml",
+   "ref": "l9.source/strategic-plan-graph-schema@1",
+   "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+  }
+ },
+ {
+  "profile": "l9.projection/strategic-planning-context@1",
+  "source_class": "affected_strategic_closure_schema",
+  "source_ref": "l9.source/affected-strategic-closure-schema@1",
+  "source_path": "semantics/affected_strategic_closure.schema.yaml",
+  "original_selection": [
+   "$"
+  ],
+  "current_selection": [
+   "$.artifact_id",
+   "$.canonical",
+   "$.authority",
+   "$.canonical_source",
+   "$.governed_by",
+   "$.purpose",
+   "$.instance_semantics",
+   "$.type",
+   "$.required",
+   "$.properties",
+   "$.closure_rules",
+   "$.semantic_rules"
+  ],
+  "excluded_field": "schema",
+  "excluded_value": "l9.schema-definition/v1",
+  "source_top_level_fields": 13,
+  "selected_fields": 12,
+  "all_other_fields_selected_in_source_order": true,
+  "payload_has_schema_field_from_source": false,
+  "payload_schema_value": null,
+  "artifact_source_ref": "l9.source/affected-strategic-closure-schema@1",
+  "artifact_source_digest": "sha256:09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4",
+  "receipt_input": {
+   "digest": "sha256:09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4",
+   "path": "semantics/affected_strategic_closure.schema.yaml",
+   "ref": "l9.source/affected-strategic-closure-schema@1",
+   "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+  }
+ },
+ {
+  "profile": "l9.projection/strategic-planning-context@1",
+  "source_class": "strategic_planning_episode_schema",
+  "source_ref": "l9.source/strategic-planning-episode-schema@1",
+  "source_path": "semantics/strategic_planning_episode.schema.yaml",
+  "original_selection": [
+   "$"
+  ],
+  "current_selection": [
+   "$.artifact_id",
+   "$.canonical",
+   "$.authority",
+   "$.canonical_source",
+   "$.governed_by",
+   "$.purpose",
+   "$.instance_semantics",
+   "$.type",
+   "$.required",
+   "$.properties",
+   "$.workspace_rules",
+   "$.semantic_rules"
+  ],
+  "excluded_field": "schema",
+  "excluded_value": "l9.schema-definition/v1",
+  "source_top_level_fields": 13,
+  "selected_fields": 12,
+  "all_other_fields_selected_in_source_order": true,
+  "payload_has_schema_field_from_source": false,
+  "payload_schema_value": null,
+  "artifact_source_ref": "l9.source/strategic-planning-episode-schema@1",
+  "artifact_source_digest": "sha256:017931d0f8a07e85124a6492e07f65c7781905ed86042c7978c7451a80ab8513",
+  "receipt_input": {
+   "digest": "sha256:017931d0f8a07e85124a6492e07f65c7781905ed86042c7978c7451a80ab8513",
+   "path": "semantics/strategic_planning_episode.schema.yaml",
+   "ref": "l9.source/strategic-planning-episode-schema@1",
+   "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+  }
+ },
+ {
+  "profile": "l9.projection/strategic-planning-context@1",
+  "source_class": "strategic_plan_revision_candidate_schema",
+  "source_ref": "l9.source/strategic-plan-revision-candidate-schema@1",
+  "source_path": "semantics/strategic_plan_revision_candidate.schema.yaml",
+  "original_selection": [
+   "$"
+  ],
+  "current_selection": [
+   "$.artifact_id",
+   "$.canonical",
+   "$.authority",
+   "$.canonical_source",
+   "$.governed_by",
+   "$.purpose",
+   "$.instance_semantics",
+   "$.type",
+   "$.required",
+   "$.properties",
+   "$.candidate_rules",
+   "$.semantic_rules"
+  ],
+  "excluded_field": "schema",
+  "excluded_value": "l9.schema-definition/v1",
+  "source_top_level_fields": 13,
+  "selected_fields": 12,
+  "all_other_fields_selected_in_source_order": true,
+  "payload_has_schema_field_from_source": false,
+  "payload_schema_value": null,
+  "artifact_source_ref": "l9.source/strategic-plan-revision-candidate-schema@1",
+  "artifact_source_digest": "sha256:48fdecd1a015f13cd739e718b3ea48948ce7891c2905311201ea90bd7d56c0fc",
+  "receipt_input": {
+   "digest": "sha256:48fdecd1a015f13cd739e718b3ea48948ce7891c2905311201ea90bd7d56c0fc",
+   "path": "semantics/strategic_plan_revision_candidate.schema.yaml",
+   "ref": "l9.source/strategic-plan-revision-candidate-schema@1",
+   "revision": "453701a671b3c9acc3400c47c926d1235adfeffd"
+  }
+ }
+]
