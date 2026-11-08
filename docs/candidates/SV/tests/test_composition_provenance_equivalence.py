@@ -196,6 +196,52 @@ class NegativeControls(_RunFixture):
         self.assertIn("receipt_binding", self.failed(run))
 
 
+class OwnerDecisionScaffold(unittest.TestCase):
+    """The scaffold must never read as a decision, and its option texts must be exact."""
+
+    def setUp(self):
+        import yaml
+
+        self.yaml = yaml
+        self.doc = yaml.safe_load(
+            (vcp.PACK / "evidence" / "admission" / "owner-decision.yaml").read_text(encoding="utf-8")
+        )
+
+    def _statements(self, rel):
+        data = self.yaml.safe_load((vcp.PACK / rel).read_text(encoding="utf-8"))
+        return {r["id"]: r["statement"] for r in data["invariants"]}
+
+    def test_no_authority_reference_or_selection_is_present(self):
+        self.assertEqual(self.doc["decision_status"], "PENDING_UNTIL_AUTHORIZED")
+        for key in (
+            "approved_sv001_statement_ref",
+            "authorized_decider_ref",
+            "decision_evidence_ref",
+            "decision_record_ref",
+        ):
+            self.assertIsNone(self.doc[key], key)
+        self.assertIsNone(self.doc["subject"]["candidate_revision"])
+        for decision in self.doc["decisions_required"]:
+            self.assertIsNone(decision["selected"], decision["id"])
+
+    def test_sv001_options_are_exact_source_texts(self):
+        options = self.doc["decisions_required"][0]["options"]
+        donor = self._statements("evidence/reduction-v1/donor/invariants_additions.yaml")
+        overlay = self._statements("overlays/invariants_additions.yaml")
+        self.assertEqual(options["A-development-pack"]["statement"].strip(), overlay["L9-SV-001"])
+        self.assertEqual(
+            options["B-non-weakening"]["statement"].strip(),
+            f"{donor['L9-SV-001']} {donor['L9-SV-015']}",
+        )
+
+    def test_proposed_dispositions_match_the_ledger(self):
+        ledger = self.yaml.safe_load(
+            (EVIDENCE / "owner-disposition-ledger.yaml").read_text(encoding="utf-8")
+        )
+        expected = {d["candidate_id"]: d["disposition"] for d in ledger["dispositions"]}
+        self.assertEqual(self.doc["proposed_dispositions"], expected)
+
+
 class UnreadableInputs(unittest.TestCase):
     def test_missing_composed_artifact_is_unresolved_not_pass(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -18,7 +18,7 @@
 	"source_classes": 5,
 	"composition_profiles": 1,
 	"canonical_destination_paths": 13,
-	"local_tests": 82,
+	"local_tests": 112,
 	"local_test_exit_code": 0,
 	"local_test_pass": true,
 	"independently_runnable_purpose_built_falsifiers": 6,
@@ -64,8 +64,8 @@
 		},
 		{
 			"path": "README.md",
-			"bytes": 10297,
-			"sha256": "c95cc8fd33838a252b8b2c27fb0b6f5113d2dd9b0c604a03fd30637783ca8d5f"
+			"bytes": 11299,
+			"sha256": "2de6f647b33e603e6ef076355de5ecfda096000d9c214b284fd55000da50e125"
 		},
 		{
 			"path": "SCHEMA_QUALIFICATION_REVIEW.md",
@@ -113,6 +113,21 @@
 			"sha256": "487f252a311559a507a3dcb90b13cab13c62c2db9c33631f5b09eabe578b986a"
 		},
 		{
+			"path": "evidence/admission/ADMISSION_CLOSEOUT.md",
+			"bytes": 5770,
+			"sha256": "b31ba2dc5b76a3bf398b9ff84380ef02bd1d753b80d975991a966e5651d33a59"
+		},
+		{
+			"path": "evidence/admission/composition-provenance-equivalence.json",
+			"bytes": 9828,
+			"sha256": "ec0f3eb166924c1e52cc66e6b4ee02ae614c7a4b0df29dfdefe685d355740eb3"
+		},
+		{
+			"path": "evidence/admission/owner-decision.yaml",
+			"bytes": 6732,
+			"sha256": "38b542c2ecfddea987e86f4fc7de86aef7d1b3a9692f6dfa72538ae1d17e4080"
+		},
+		{
 			"path": "evidence/native_schema_gate.json",
 			"bytes": 162,
 			"sha256": "243fb90813e5b107c68bb1ce987554f5d863bd364bb6dc8dc51dcc52ec0224ab"
@@ -134,8 +149,8 @@
 		},
 		{
 			"path": "evidence/reduction-v1/admission-readiness.json",
-			"bytes": 5061,
-			"sha256": "c8009959b9956e2dbea97adcee1a52ae8ca2ced1d6ddbc3891ef69a8436c4ca6"
+			"bytes": 5765,
+			"sha256": "59d70c88c4ddce22f26f6490f27c3170859228d15cf96fa5d58ca1c407b5c1e4"
 		},
 		{
 			"path": "evidence/reduction-v1/authority-resolution.json",
@@ -418,6 +433,11 @@
 			"sha256": "81c880c1f19583a3a86ed5754d87cac027ac764850c5684ab91263cdb70f2e92"
 		},
 		{
+			"path": "tests/test_composition_provenance_equivalence.py",
+			"bytes": 10574,
+			"sha256": "2874bf7ed0cacf6b2cca2e7231aafc1ab1db1b9d6bc4838d701549af330e8e71"
+		},
+		{
 			"path": "tests/test_irreducibility.py",
 			"bytes": 5858,
 			"sha256": "b7f4019973d04bf8b359474575ce7dd04e9bc09b4dbedcc85fc42886eb8d758c"
@@ -453,6 +473,11 @@
 			"sha256": "b3b95c575f503a9b73bbca0f9c9dbf5e00ffaa1226a4e0133b0ca5d88e6846da"
 		},
 		{
+			"path": "tests/verify_composition_provenance.py",
+			"bytes": 14753,
+			"sha256": "2b16934c3bfeec91c64316c602661fbc13463d0e031485451a4cd0a3646cc881"
+		},
+		{
 			"path": "tools/reduce_to_two_invariants.py",
 			"bytes": 14263,
 			"sha256": "332b850688119691ca99d5ede0c253f978720b9230bf629a7537700f7448b8c8"
@@ -463,5 +488,18 @@
 			"sha256": "d1fdfe224cb6743d6180143b03cc54fd8cc62d8d145a9e57035470bed49fb7e6"
 		}
 	],
-	"no_skill_files": true
+	"no_skill_files": true,
+	"composition_provenance_equivalence": {
+		"result": "PASS_INDEPENDENT_EVIDENCE_NOT_COMPILER_PASS",
+		"evidence": "evidence/admission/composition-provenance-equivalence.json",
+		"verifier": "tests/verify_composition_provenance.py",
+		"negative_controls": 16,
+		"authority_revision": "0b50cf7a09c96986d2fcd46130032224ad7104a0"
+	},
+	"admission_closeout": {
+		"record": "evidence/admission/ADMISSION_CLOSEOUT.md",
+		"owner_decision_scaffold": "evidence/admission/owner-decision.yaml",
+		"owner_decision_status": "PENDING_UNTIL_AUTHORIZED",
+		"main_at_resolution": "9488d8f"
+	}
 }

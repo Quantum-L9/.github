@@ -63,7 +63,9 @@ The last row is new in this reduction. Those three ledgers record the digests of
 ## Runnable checks
 
 ```bash
-python -m unittest discover -s tests -v                 # 82 local tests
+python -m unittest discover -s tests -v                 # 112 local tests
+python tests/verify_composition_provenance.py --archive evidence/reduction-v1/projection-run1.tar \
+  --revision 0b50cf7a09c96986d2fcd46130032224ad7104a0  # independent composition-provenance check
 python tests/run_strategic_value_falsifiers.py          # six bad/control pairs
 python tests/run_strategic_value_falsifiers.py --case SV015   # ... through SV020
 python tools/reduce_to_two_invariants.py --check        # committed files == declared reduction
@@ -91,11 +93,14 @@ Evidence lives in `evidence/reduction-v1/`; `admission-readiness.json` lists eve
 - Native schema qualification passes 26 checks against compiler `3bf1a82`.
 - In a disposable rehearsal of the applied candidate, the native `.github` validator passes every ordinary semantic check. It fails only SC-008/SC-010, because the v3.27.0 release inventory does not list the new or changed files. That needs a successor release record, which this pack must not invent.
 - The real compiler projected all five source classes (**pass**). The composition result is **unknown**: compiler 0.9.3 has no mechanical criterion for the composition profile's four declared `required_provenance` entries. The profile has carried those entries unchanged since PR #212. Two runs were byte-identical.
+- The four facts `required_provenance` declares (source projection refs and digests, composition profile ref and digest) re-derive independently on both runs, with exact five-class coverage and receipt binding. The verifier imports no compiler code, and its 16 negative controls fail closed. This is evidence for the owner's provenance decision, **not** a compiler PASS. See `evidence/admission/composition-provenance-equivalence.json`.
 - 16 producer negative controls each failed with their asserted exit code, typed failure and criterion; both positive controls passed; reversing component order leaves the composed digest unchanged. Raw compiler bytes are archived in `projection-run1.tar` / `projection-run2.tar`.
 
 `historical` evidence (`evidence/*.json`, `evidence/*.log`) is the PR #212 record and is deliberately left unchanged.
 
 ## Gates still requiring the authorized canonical owner
+
+The admission closeout (`evidence/admission/ADMISSION_CLOSEOUT.md`) re-resolves the target against current `main` (`9488d8f`: v3.28.0 admitted, v3.29.0 an open candidate) and tracks the 12-item checklist. The decisions below are scaffolded as D1–D5 in `evidence/admission/owner-decision.yaml`. That record is PENDING, and every authority reference in it is null.
 
 1. Record real owner decisions for all eight dispositions, including the amended `L9-SV-001` wording.
 2. Decide whether `required_provenance` stays on `l9.compose/strategic-planner-value@1` (composition remains `unknown` under compiler 0.9.3) or is dropped in line with the `pr-audit` and `architecture-intelligence` composition profiles. This pack does not drop a declared constraint to obtain a PASS.

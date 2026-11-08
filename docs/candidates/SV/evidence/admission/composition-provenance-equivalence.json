@@ -5,7 +5,7 @@
   },
   "authority_revision": "0b50cf7a09c96986d2fcd46130032224ad7104a0",
   "authority_revision_note": "local rehearsal revision of the applied candidate on 020a94b; not a canonical revision",
-  "canonical_precedent": "On origin/main 9488d8f, semantics/composition_profiles.yaml declares the same four tokens on l9.compose/stage-context@1; global_rules.source_projection_provenance_required is true but unread by the compiler. Removing the stanza from the SV profile would diverge from that precedent; implementing the four criteria in the compiler would resolve both profiles.",
+  "canonical_precedent": "Mixed. On origin/main 9488d8f, semantics/composition_profiles.yaml declares the same four tokens on l9.compose/stage-context@1 and none on the other thirteen profiles (including pr-audit and architecture-intelligence); global_rules.source_projection_provenance_required is true but unread by the compiler. Implementing the four criteria in the compiler would resolve both stage-context and the SV profile.",
   "does_not_establish": [
     "a compiler PASS receipt",
     "an owner decision",
