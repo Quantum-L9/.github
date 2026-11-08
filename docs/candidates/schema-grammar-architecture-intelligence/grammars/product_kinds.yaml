@@ -1,0 +1,305 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/product-kinds@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: product_kinds
+source_ref: l9.source/product-kinds@1
+source_path: semantics/product_kinds.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:294ae7a47b93619bd655619874d962b244e5c027eb6dd31ea508c53d129ace13
+applies_to_selectors:
+- $.governed_by
+- $.global_rules
+- $.kinds
+- $.unresolved_kind_candidates
+- $.catalog_status
+- $.kind_exception_model
+- $.kind_exceptions
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        contracts:
+          type: string_list
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        product_kind_is_architectural_participation_identity:
+          type: boolean
+        ? product_kind_is_determined_by_canonical_consumption_and_deployment_model_unless_an_admitted_product_kind_exception_binds_the_exact_product
+        : type: boolean
+        product_kind_is_not_inferred_from_repository_shape:
+          type: boolean
+        product_kind_is_not_inferred_from_package_format:
+          type: boolean
+        product_kind_is_not_inferred_from_provider_identity:
+          type: boolean
+        product_kind_is_not_inferred_from_semantic_complexity:
+          type: boolean
+        product_kind_is_not_inferred_from_process_presence_alone:
+          type: boolean
+        product_kind_does_not_create_semantic_ownership:
+          type: boolean
+        every_admitted_product_has_exactly_one_primary_kind:
+          type: boolean
+        archetype_specializes_kind_without_redefining_kind:
+          type: boolean
+        product_kind_constrains_identity_obligations_without_redefining_identity_semantics:
+          type: boolean
+        identity_dimension_meaning_is_owned_by_identity_model:
+          type: boolean
+        kind_law_applies_unmodified_unless_an_admitted_product_kind_exception_binds_the_exact_product:
+          type: boolean
+        product_kind_exception_is_not_a_product_kind_archetype_or_waiver_class:
+          type: boolean
+        product_kind_exception_is_admitted_only_by_the_product_kind_owner:
+          type: boolean
+    kinds:
+      type: object
+      additional_properties: true
+      fields:
+        node:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+            consumption_model:
+              type: string
+            deployment_model:
+              type: string
+            archetype_catalog:
+              type: string
+            requires:
+              type: string_list
+            required_patterns:
+              type: string_list
+            forbidden:
+              type: string_list
+            identity_dimensions:
+              type: string_list
+            admission_model:
+              type: object
+              additional_properties: true
+              fields:
+                product_release_admission:
+                  type: string_list
+                runtime_admission:
+                  type: string_list
+                rule:
+                  type: string
+            identity_contract_ref:
+              type: string
+        dependency:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+            consumption_model:
+              type: string
+            deployment_model:
+              type: string
+            archetype_catalog:
+              type: string
+            requires:
+              type: string_list
+            required_patterns:
+              type: string_list
+            forbidden:
+              type: string_list
+            identity_dimensions:
+              type: string_list
+            admission_model:
+              type: object
+              additional_properties: true
+              fields:
+                product_release_admission:
+                  type: string_list
+                consumer_binding:
+                  type: string_list
+                rule:
+                  type: string
+            runtime_identity_rule:
+              type: string
+            consumer_binding_required:
+              type: boolean
+            identity_contract_ref:
+              type: string
+    unresolved_kind_candidates:
+      type: object
+      additional_properties: true
+      fields:
+        sdk:
+          type: object
+          additional_properties: true
+          fields:
+            status:
+              type: string
+            admission:
+              type: string
+            rule:
+              type: string
+    catalog_status:
+      type: object
+      additional_properties: true
+      fields:
+        admitted_kinds:
+          type: string_list
+        unresolved_kinds:
+          type: string_list
+    kind_exception_model:
+      type: object
+      additional_properties: true
+      fields:
+        definition:
+          type: string
+        admission_authority:
+          type: string
+        claim_field:
+          type: string
+        binding_requires:
+          type: string_list
+        rules:
+          type: string_list
+        protected_requirements:
+          type: string_list
+        protected_prohibitions:
+          type: string_list
+    kind_exceptions:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          status:
+            type: string
+          kind:
+            type: string
+          authority:
+            type: object
+            additional_properties: true
+            fields:
+              owner:
+                type: string
+              authority_class:
+                type: string
+              decision_ref:
+                type: string
+          subject:
+            type: object
+            additional_properties: true
+            fields:
+              product_ref:
+                type: string
+              canonical_repository:
+                type: string
+              repository_ref:
+                type: string
+              archetype_ref:
+                type: string
+              applies_from_release:
+                type: string
+          purpose:
+            type: string
+          effective_models:
+            type: object
+            additional_properties: true
+            fields:
+              consumption_model:
+                type: string
+              deployment_model:
+                type: string
+          remote_consumption:
+            type: object
+            additional_properties: true
+            fields:
+              protocol:
+                type: string
+              authentication:
+                type: string
+              authorization:
+                type: string
+              gate_routing:
+                type: string
+          deployment:
+            type: object
+            additional_properties: true
+            fields:
+              hosting:
+                type: string
+              process_lifecycle_owner:
+                type: string
+              operational_health_owner:
+                type: string
+              canonical_persistence:
+                type: object
+                additional_properties: true
+                fields:
+                  technology_ref:
+                    type: string
+                  role:
+                    type: string
+                  semantic_owner_unchanged:
+                    type: boolean
+              hosting_coordinate:
+                type: string
+          identity:
+            type: object
+            additional_properties: true
+            fields:
+              identity_dimensions:
+                type: string_list
+              runtime_identity_rule:
+                type: string
+          departures:
+            type: array
+            items:
+              type: object
+              additional_properties: true
+              fields:
+                displaces:
+                  type: string
+                replacement:
+                  type: string
+          retained_requirements:
+            type: string_list
+          retained_prohibitions:
+            type: string_list
+          hosted_service_admission:
+            type: object
+            additional_properties: true
+            fields:
+              states:
+                type: string_list
+              rule:
+                type: string
+              topology_declaration:
+                type: object
+                additional_properties: true
+                fields:
+                  field:
+                    type: string
+                  requires:
+                    type: string
+              distinctions:
+                type: object
+                additional_properties: true
+                fields:
+                  declaration:
+                    type: string
+                  resolution:
+                    type: string
+                  admission:
+                    type: string
+          forbidden:
+            type: string_list

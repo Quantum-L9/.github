@@ -1,0 +1,294 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/product-manifest@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: product_manifest
+source_ref: l9.source/product-manifest-schema@1
+source_path: semantics/product_manifest.schema.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:3a2cbc316b090e59a06dcd7bb0393f4bc56b7f65e3a08c64403d815ce22e7ede
+applies_to_selectors:
+- $.governed_by
+- $.purpose
+- $.type
+- $.required
+- $.properties
+- $.resolved_manifest_gate
+- $.semantic_rules
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        contracts:
+          type: string_list
+    purpose:
+      type: string
+    type:
+      type: string
+    required:
+      type: string_list
+    properties:
+      type: object
+      additional_properties: true
+      fields:
+        schema:
+          type: object
+          additional_properties: true
+          fields:
+            const:
+              type: string
+        product:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                id:
+                  type: string
+                kind:
+                  type: string
+                archetype_ref:
+                  type: string
+                kind_exception_ref:
+                  type: string
+        source_topology:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                ref:
+                  type: string
+                digest:
+                  type: string
+        authority:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        requirements:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        capabilities:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        architecture:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        ports:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        adapters:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        interfaces:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+              const: object
+        effects:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+              const: object
+        relationships:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        technology:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        bindings:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        providers:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        runtime:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        communication:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        security:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        state:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        failure:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        receipts:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        observability:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        admission:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        lifecycle:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        conformance:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        compatibility:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        distribution:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        build:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        compiler:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                profile_ref:
+                  type: string
+                profile_digest:
+                  type: string
+                compiler_version:
+                  type: string
+        provenance:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        unresolved:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        manifest_digest:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        identity:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+        governance:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+      required:
+      - interfaces
+      - effects
+    resolved_manifest_gate:
+      type: object
+      additional_properties: true
+      fields:
+        all_of:
+          type: string_list
+        rule:
+          type: string
+    semantic_rules:
+      type: string_list

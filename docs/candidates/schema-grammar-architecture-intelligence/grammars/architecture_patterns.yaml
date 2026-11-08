@@ -1,0 +1,404 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/architecture-patterns@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: architecture_patterns
+source_ref: l9.source/architecture-patterns@1
+source_path: semantics/architecture_patterns.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:c4adbeff6e953404aaafe275a13a387e9fdd0d9bd8dbe3adfa46af88cfe2a323
+applies_to_selectors:
+- $.patterns[*].id
+- $.patterns[*].class
+- $.patterns[*].purpose
+- $.patterns[*].preconditions
+- $.patterns[*].guarantees
+- $.patterns[*].forbidden
+- $.patterns[*].compatible_with
+- $.patterns[*].common_examples
+- $.composition_rules[*]
+- $.global_rules
+- $.pattern_classes
+- $.patterns
+- $.composition_rules
+- $.architecture_synthesis
+- $.projection_profiles
+- $.validation_rules
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    patterns:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          class:
+            type: string
+          purpose:
+            type: string
+          structure:
+            type: object
+            additional_properties: true
+            fields:
+              nodes:
+                type: string_list
+              edges:
+                type: array
+                items:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    from:
+                      type: string
+                    relation:
+                      type: string
+                    to:
+                      type: string
+              layers:
+                type: string_list
+          preconditions:
+            type: string_list
+          guarantees:
+            type: string_list
+          architecture_obligations:
+            type: string_list
+          forbidden:
+            type: string_list
+          common_examples:
+            type: string_list
+          compatible_with:
+            type: string_list
+          lifecycle:
+            type: object
+            additional_properties: true
+            fields:
+              expression:
+                type: string
+              stages:
+                type: string_list
+          runtime_identity:
+            type: object
+            additional_properties: true
+            fields:
+              expression:
+                type: string
+          required_metadata:
+            type: string_list
+          examples:
+            type: string_list
+          composition:
+            type: object
+            additional_properties: true
+            fields:
+              expression:
+                type: string
+              profile_ref:
+                type: string
+              output_authority_class:
+                type: string
+              source_projection_provenance_required:
+                type: boolean
+              conflict_result:
+                type: string
+          canonical_roles:
+            type: object
+            additional_properties: true
+            fields:
+              organization_governance_distribution:
+                type: object
+                additional_properties: true
+                fields:
+                  owner:
+                    type: string
+              executable_conformance:
+                type: object
+                additional_properties: true
+                fields:
+                  owner:
+                    type: string
+              user_agent_operating_plane:
+                type: object
+                additional_properties: true
+                fields:
+                  owner:
+                    type: string
+          admission_rule:
+            type: object
+            additional_properties: true
+            fields:
+              expression:
+                type: string
+          rules:
+            type: string_list
+          atomic_unit:
+            type: string_list
+          invariant:
+            type: object
+            additional_properties: true
+            fields:
+              expression:
+                type: string
+          reference_model:
+            type: object
+            additional_properties: true
+            fields:
+              authoritative_direction:
+                type: string
+              reverse_traversal:
+                type: string
+              rules:
+                type: string_list
+          layers:
+            type: string_list
+          relations:
+            type: object
+            additional_properties: true
+            fields:
+              declared:
+                type: object
+                additional_properties: true
+                fields:
+                  implication_to_available:
+                    type: boolean
+              available:
+                type: object
+                additional_properties: true
+                fields:
+                  implication_to_authorized:
+                    type: boolean
+              authorized:
+                type: object
+                additional_properties: true
+                fields:
+                  implication_to_available:
+                    type: boolean
+          validity:
+            type: object
+            additional_properties: true
+            fields:
+              expression:
+                type: string
+          formula:
+            type: object
+            additional_properties: true
+            fields:
+              context:
+                type: object
+                additional_properties: true
+                fields:
+                  expression:
+                    type: string
+              candidate:
+                type: object
+                additional_properties: true
+                fields:
+                  expression:
+                    type: string
+              validation:
+                type: object
+                additional_properties: true
+                fields:
+                  expression:
+                    type: string
+              commit:
+                type: object
+                additional_properties: true
+                fields:
+                  expression:
+                    type: string
+              affected:
+                type: object
+                additional_properties: true
+                fields:
+                  expression:
+                    type: string
+          required_components:
+            type: string_list
+          workflow:
+            type: string_list
+          solver_selection:
+            type: object
+            additional_properties: true
+            fields:
+              expression:
+                type: string
+          allowed_results:
+            type: string_list
+    composition_rules:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          when:
+            type: object
+            additional_properties: true
+            fields:
+              product_kind:
+                type: string
+              product_archetype:
+                type: string
+              properties:
+                type: string_list
+          require_patterns:
+            type: string_list
+          recommend_patterns:
+            type: string_list
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        patterns_are_not_complete_architectures:
+          type: boolean
+        patterns_do_not_create_semantic_ownership:
+          type: boolean
+        provider_identity_does_not_define_pattern_identity:
+          type: boolean
+        patterns_must_be_composable:
+          type: boolean
+        patterns_must_declare_preconditions:
+          type: boolean
+        patterns_must_declare_guarantees:
+          type: boolean
+        patterns_must_declare_forbidden_uses:
+          type: boolean
+        patterns_must_reference_canonical_vocabulary:
+          type: boolean
+        patterns_must_not_expand_authority:
+          type: boolean
+        architecture_synthesis_may_only_select_admitted_patterns:
+          type: boolean
+        pattern_obligations_apply_unmodified_unless_an_admitted_product_kind_exception_displaces_them_for_its_exact_product:
+          type: boolean
+    pattern_classes:
+      type: object
+      additional_properties: true
+      fields:
+        semantic_structure:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+        deployment:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+        integration:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+        projection:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+        execution:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+        compiler:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+        persistence:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+        governance:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+    architecture_synthesis:
+      type: object
+      additional_properties: true
+      fields:
+        inputs:
+          type: object
+          additional_properties: true
+          fields:
+            required:
+              type: string_list
+            optional:
+              type: string_list
+        process:
+          type: string_list
+        output:
+          type: string_list
+    projection_profiles:
+      type: object
+      additional_properties: true
+      fields:
+        architecture_stage:
+          type: object
+          additional_properties: true
+          fields:
+            include:
+              type: string_list
+        semantic_compiler:
+          type: object
+          additional_properties: true
+          fields:
+            include:
+              type: string_list
+        architect_agent:
+          type: object
+          additional_properties: true
+          fields:
+            include:
+              type: string_list
+        code_compilation:
+          type: object
+          additional_properties: true
+          fields:
+            include:
+              type: string_list
+        human_architecture_doc:
+          type: object
+          additional_properties: true
+          fields:
+            include:
+              type: string_list
+        conformance:
+          type: object
+          additional_properties: true
+          fields:
+            include:
+              type: string_list
+        impact_analysis:
+          type: object
+          additional_properties: true
+          fields:
+            include:
+              type: string_list
+    validation_rules:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          rule:
+            type: string

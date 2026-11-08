@@ -1,0 +1,137 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/repository-registry@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: repository_registry
+source_ref: l9.source/repository-registry@1
+source_path: semantics/repository_registry.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:0b8d3df4da548e0f5f511bbc19c233d19bce478515217cbfe507014674295cb2
+applies_to_selectors:
+- $.purpose
+- $.global_rules
+- $.does_not_own
+- $.repository_lifecycle
+- $.repositories
+- $.aliases
+- $.downstream_obligations
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    purpose:
+      type: string
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        registry_names_repository_identity_and_classification_only:
+          type: boolean
+        every_entry_is_an_explicit_admission_decision:
+          type: boolean
+        repository_id_is_immutable:
+          type: boolean
+        repository_coordinate_is_provider_scoped:
+          type: boolean
+        repository_coordinate_is_case_sensitive:
+          type: boolean
+        every_registered_repository_has_exactly_one_class_ref:
+          type: boolean
+        every_class_ref_must_resolve_in_repository_classes:
+          type: boolean
+        every_class_ref_must_resolve_to_an_admitted_class:
+          type: boolean
+        repository_name_does_not_imply_repository_class:
+          type: boolean
+        repository_prefix_does_not_imply_repository_class:
+          type: boolean
+        organization_hosting_does_not_imply_l9_membership:
+          type: boolean
+        repository_shape_does_not_imply_repository_class:
+          type: boolean
+        product_kind_does_not_imply_repository_class:
+          type: boolean
+        birth_profile_does_not_imply_repository_class:
+          type: boolean
+        unregistered_repository_has_no_implied_l9_membership:
+          type: boolean
+        unknown_or_ambiguous_repository_identity_fails_closed:
+          type: boolean
+        unknown_or_ambiguous_class_assignment_fails_closed:
+          type: boolean
+        repository_rename_preserves_stable_registry_id:
+          type: boolean
+        historical_repository_coordinates_must_be_preserved_as_aliases:
+          type: boolean
+        removed_repository_entries_must_be_retained_with_retired_lifecycle:
+          type: boolean
+        registry_classification_does_not_transfer_domain_semantic_ownership:
+          type: boolean
+        registry_classification_does_not_grant_execution_authority:
+          type: boolean
+        runtime_state_is_not_recorded_here:
+          type: boolean
+        ingestion_state_is_not_recorded_here:
+          type: boolean
+        memory_state_is_not_recorded_here:
+          type: boolean
+        credentials_are_not_recorded_here:
+          type: boolean
+    does_not_own:
+      type: string_list
+    repository_lifecycle:
+      type: object
+      additional_properties: true
+      fields:
+        current:
+          type: string
+        superseded:
+          type: string
+        retired:
+          type: string
+    repositories:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          coordinate:
+            type: object
+            additional_properties: true
+            fields:
+              provider:
+                type: string
+              organization:
+                type: string
+              repository:
+                type: string
+          lifecycle:
+            type: string
+          class_ref:
+            type: string
+    aliases:
+      type: string_list
+    downstream_obligations:
+      type: object
+      additional_properties: true
+      fields:
+        resolve_repository_class_against:
+          type: string
+        reject_unregistered_repository_as_implicit_l9_member:
+          type: boolean
+        reject_unadmitted_class_ref:
+          type: boolean
+        preserve_registry_id_in_generated_views:
+          type: boolean
+        preserve_repository_coordinate_in_generated_views:
+          type: boolean
+        preserve_lifecycle_in_generated_views:
+          type: boolean
+        preserve_class_ref_in_generated_views:
+          type: boolean
+        generated_views_are_non_authoritative:
+          type: boolean

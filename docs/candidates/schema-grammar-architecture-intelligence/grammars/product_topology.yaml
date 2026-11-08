@@ -1,0 +1,959 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture-intelligence/grammar/product-topology@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: product_topology
+source_ref: l9.source/product-topology-schema@1
+source_path: semantics/product_topology.schema.yaml
+source_revision: f9db38b1035870c0c271249712f2324fff7e0046
+source_digest: sha256:a2510f4fc80b755d25b66c08f0d723e2f14b65966d6689b8b426ea23e5c3abf4
+applies_to_selectors:
+- $.governed_by
+- $.purpose
+- $.type
+- $.required
+- $.properties
+- $.semantic_rules
+- $.kind_resolution
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        contracts:
+          type: string_list
+    purpose:
+      type: string
+    type:
+      type: string
+    required:
+      type: string_list
+    properties:
+      type: object
+      additional_properties: true
+      fields:
+        schema:
+          type: object
+          additional_properties: true
+          fields:
+            const:
+              type: string
+        product:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                id:
+                  type: string
+                kind:
+                  type: string
+                archetype_ref:
+                  type: string
+                kind_exception_ref:
+                  type: string
+                name:
+                  type: string
+                versioning_family:
+                  type: string
+                status:
+                  type: string
+        identity:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                semantic_owner:
+                  type: string
+                semantic_scope:
+                  type: string
+                canonical_repository:
+                  type: string
+                dimensions:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                    fields:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        product:
+                          type: object
+                          additional_properties: true
+                          fields:
+                            type:
+                              type: string
+                        release:
+                          type: object
+                          additional_properties: true
+                          fields:
+                            type:
+                              type: string
+                        runtime:
+                          type: object
+                          additional_properties: true
+                          fields:
+                            type:
+                              type: string
+                        constellation:
+                          type: object
+                          additional_properties: true
+                          fields:
+                            type:
+                              type: string
+                        actor:
+                          type: object
+                          additional_properties: true
+                          fields:
+                            type:
+                              type: string
+                        surface:
+                          type: object
+                          additional_properties: true
+                          fields:
+                            type:
+                              type: string
+                bindings:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                resolution:
+                  type: object
+                  additional_properties: true
+                  fields:
+                    type:
+                      type: string
+                    required:
+                      type: string_list
+                    fields:
+                      type: object
+                      additional_properties: true
+                      fields:
+                        contract_ref:
+                          type: string
+                        resolver_ref:
+                          type: string
+                        assertion_schema_ref:
+                          type: string
+                        unknown_policy:
+                          type: string
+                        evidence_source_refs:
+                          type: string
+                identity_contract_refs:
+                  type: string
+                aliases:
+                  type: string
+                predecessor_refs:
+                  type: string
+                successor_refs:
+                  type: string
+                supersedes:
+                  type: string
+        purpose:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                statement:
+                  type: string
+                capability_refs:
+                  type: string
+                primary_responsibility:
+                  type: string
+                objectives:
+                  type: string
+                non_goals:
+                  type: string
+        boundary:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                owns:
+                  type: string
+                does_not_own:
+                  type: string
+                authority_boundary_refs:
+                  type: string
+                semantic_boundary_refs:
+                  type: string
+                trust_boundary_refs:
+                  type: string
+                transaction_boundary_refs:
+                  type: string
+                mutation_boundary_refs:
+                  type: string
+        requirements:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                invariant_refs:
+                  type: string
+                contract_refs:
+                  type: string
+                hard_constraints:
+                  type: string
+                soft_objectives:
+                  type: string
+                operational_requirements:
+                  type: string
+                security_requirements:
+                  type: string
+                conformance_requirements:
+                  type: string
+        capabilities:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                provides:
+                  type: string
+                requires:
+                  type: string
+                optional:
+                  type: string
+                degraded_without:
+                  type: string
+                forbidden:
+                  type: string
+        consumption:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                model:
+                  type: string
+                public_entry_modes:
+                  type: string
+                invocation_contract_refs:
+                  type: string
+                consumer_requirements:
+                  type: string
+                forbidden_consumption_modes:
+                  type: string
+        deployment:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                model:
+                  type: string
+                deployment_unit:
+                  type: string
+                runtime_boundary:
+                  type: string
+                scaling_boundary:
+                  type: string
+                failure_boundary:
+                  type: string
+                upgrade_boundary:
+                  type: string
+                artifact_forms:
+                  type: string
+                deployment_constraints:
+                  type: string
+        architecture:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                required_pattern_refs:
+                  type: string
+                optional_pattern_refs:
+                  type: string
+                forbidden_pattern_refs:
+                  type: string
+                structural_constraints:
+                  type: string
+                layer_constraints:
+                  type: string
+                composition_rules:
+                  type: string
+        contracts:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                public:
+                  type: string
+                consumed:
+                  type: string
+                produced:
+                  type: string
+                required:
+                  type: string
+                compatibility:
+                  type: string
+                schemas:
+                  type: string
+                canonicalization:
+                  type: string
+        interfaces:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                actions:
+                  type: string
+                public_programmatic_surfaces:
+                  type: string
+                command_surfaces:
+                  type: string
+                event_surfaces:
+                  type: string
+        ports:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                inbound:
+                  type: string
+                outbound:
+                  type: string
+                extension:
+                  type: string
+                forbidden:
+                  type: string
+        adapters:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                inbound:
+                  type: string
+                outbound:
+                  type: string
+                provider:
+                  type: string
+                integration:
+                  type: string
+                forbidden:
+                  type: string
+        relationships:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                products:
+                  type: string
+                relationship_constraints:
+                  type: string
+                forbidden_relationships:
+                  type: string
+        bindings:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                product_bindings:
+                  type: string
+                protocol_bindings:
+                  type: string
+                provider_bindings:
+                  type: string
+        providers:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                allowed:
+                  type: string
+                prohibited:
+                  type: string
+                substitution_contract_refs:
+                  type: string
+                provider_independence_required:
+                  type: string
+        technology:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                hard_constraints:
+                  type: string
+                preferences:
+                  type: string
+                runtime_requirements:
+                  type: string
+                language_constraints:
+                  type: string
+                platform_constraints:
+                  type: string
+        state:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                owns_authoritative_state:
+                  type: string
+                state_semantic_refs:
+                  type: string
+                persistence_ports:
+                  type: string
+                consistency_requirement_refs:
+                  type: string
+                revision_model_ref:
+                  type: string
+                transaction_model_ref:
+                  type: string
+                retention_contract_refs:
+                  type: string
+                projection_refs:
+                  type: string
+                cache_authority:
+                  type: string
+        runtime:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                participation_model:
+                  type: string
+                process_model:
+                  type: string
+                concurrency_model:
+                  type: string
+                resource_model:
+                  type: string
+                startup_requirement_refs:
+                  type: string
+                shutdown_requirement_refs:
+                  type: string
+                health_contract_refs:
+                  type: string
+                readiness_contract_refs:
+                  type: string
+                degradation_contract_refs:
+                  type: string
+        communication:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                constellation_boundary_required:
+                  type: string
+                transport_contract_refs:
+                  type: string
+                routing_authority_ref:
+                  type: string
+                ingress_contract_refs:
+                  type: string
+                egress_contract_refs:
+                  type: string
+                packet_refs:
+                  type: string
+                forbidden_paths:
+                  type: string
+        security:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                identity_source_refs:
+                  type: string
+                authentication_contract_refs:
+                  type: string
+                authorization_contract_refs:
+                  type: string
+                trust_source_refs:
+                  type: string
+                secret_contract_refs:
+                  type: string
+                credential_scope:
+                  type: string
+                isolation_requirement_refs:
+                  type: string
+                data_handling_contract_refs:
+                  type: string
+        configuration:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                contract_refs:
+                  type: string
+                namespaces:
+                  type: string
+                precedence_model_ref:
+                  type: string
+                required:
+                  type: string
+                optional:
+                  type: string
+                forbidden:
+                  type: string
+        effects:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                effect_classes:
+                  type: string
+                consequential_operations:
+                  type: string
+                idempotency_contract_refs:
+                  type: string
+                reconciliation_contract_refs:
+                  type: string
+        receipts:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                emits:
+                  type: string
+                consumes:
+                  type: string
+                canonicalization_ref:
+                  type: string
+                preservation_requirement_refs:
+                  type: string
+        failure:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                taxonomy_refs:
+                  type: string
+                fail_closed_conditions:
+                  type: string
+                degradable_conditions:
+                  type: string
+                retry_authority_ref:
+                  type: string
+                retry_contract_refs:
+                  type: string
+                ambiguity_contract_refs:
+                  type: string
+                reconciliation_contract_refs:
+                  type: string
+                unknown_outcome_rules:
+                  type: string
+        recovery:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                restart_semantics:
+                  type: string
+                replay_semantics:
+                  type: string
+                compensation_semantics:
+                  type: string
+                restore_contract_refs:
+                  type: string
+                disaster_recovery_requirement_refs:
+                  type: string
+        observability:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                logging_contract_refs:
+                  type: string
+                capability_metrics:
+                  type: string
+                provider_metrics:
+                  type: string
+                tracing_requirement_refs:
+                  type: string
+                correlation_identity_refs:
+                  type: string
+                audit_requirement_refs:
+                  type: string
+                slo_refs:
+                  type: string
+        admission:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                subject:
+                  type: string
+                authority_ref:
+                  type: string
+                admission_profile_ref:
+                  type: string
+                requirements:
+                  type: string
+                kind_specific_requirements:
+                  type: string
+                evidence_requirement_refs:
+                  type: string
+                decision_ref:
+                  type: string
+        lifecycle:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                family_ref:
+                  type: string
+                applicable_state_refs:
+                  type: string
+                transition_contract_refs:
+                  type: string
+                supersession_contract_ref:
+                  type: string
+                retirement_contract_ref:
+                  type: string
+        conformance:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                profile_refs:
+                  type: string
+                required_classes:
+                  type: string
+                fixture_profile_refs:
+                  type: string
+                negative_proof_refs:
+                  type: string
+                provider_conformance_refs:
+                  type: string
+                final_conformance_required:
+                  type: string
+        compatibility:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                public_contract_policy_ref:
+                  type: string
+                semantic_compatibility_refs:
+                  type: string
+                runtime_compatibility_refs:
+                  type: string
+                provider_compatibility_refs:
+                  type: string
+                consumer_compatibility_refs:
+                  type: string
+                breaking_change_policy_ref:
+                  type: string
+        distribution:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                artifact_identity_refs:
+                  type: string
+                artifact_forms:
+                  type: string
+                registry_refs:
+                  type: string
+                release_contract_refs:
+                  type: string
+                integrity_requirement_refs:
+                  type: string
+                publication_contract_refs:
+                  type: string
+        build:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                compilation_profile_ref:
+                  type: string
+                target_binding_refs:
+                  type: string
+                generated_surfaces:
+                  type: string
+                source_owned_surfaces:
+                  type: string
+                build_requirement_refs:
+                  type: string
+                reproducibility_requirement_refs:
+                  type: string
+        operations:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                owner_ref:
+                  type: string
+                runbook_refs:
+                  type: string
+                maintenance_contract_refs:
+                  type: string
+                migration_contract_refs:
+                  type: string
+                rollback_contract_refs:
+                  type: string
+        provenance:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                authority_ref:
+                  type: string
+                source_revision:
+                  type: string
+                source_refs:
+                  type: string
+                predecessor_topology_ref:
+                  type: string
+        unknowns:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            required:
+              type: string_list
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                material:
+                  type: string
+                non_material:
+                  type: string
+                resolution_requirement_refs:
+                  type: string
+        governance:
+          type: object
+          additional_properties: true
+          fields:
+            type:
+              type: string
+            fields:
+              type: object
+              additional_properties: true
+              fields:
+                profile_refs:
+                  type: string
+                profile_selection_contract_refs:
+                  type: string
+                autonomy_contract_refs:
+                  type: string
+                selection_inputs:
+                  type: string
+                rules:
+                  type: string
+    semantic_rules:
+      type: string_list
+    kind_resolution:
+      type: object
+      additional_properties: true
+      fields:
+        canonical_source:
+          type: string
+        admitted_kind_rule:
+          type: string
+        unknown_rule:
+          type: string
+        archetype_rule:
+          type: string
+        exception_rule:
+          type: string
+        exception_catalog:
+          type: string
