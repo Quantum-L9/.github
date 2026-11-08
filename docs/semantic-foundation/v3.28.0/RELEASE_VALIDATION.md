@@ -1,6 +1,6 @@
 # Release Validation v3.28.0
 
-Candidate status: **additive successor candidate**. It is not admitted.
+Release status: **admitted additive successor** (ADR-025, 2026-11-08). Admission takes effect at the `main` commit that merges Quantum-L9/.github#211.
 
 ## Profile and payload-schema closure
 
@@ -8,7 +8,7 @@ Candidate status: **additive successor candidate**. It is not admitted.
 - **SC-003** finds 82 unique `artifact_id` values.
 - **SC-008** checks this release record:
   - the manifest lists all **82** canonical sources;
-  - the ADR count is **24**;
+  - the ADR count is **25** (ADR-025 records the admission);
   - `HASHES.sha256` inventories every canonical source, every ADR plus the index, and this release's Markdown, at the patched bytes.
 
 ## Producer qualification at the patched coordinates
@@ -33,8 +33,7 @@ Details and the per-schema ledger are in "Schema patch ledger" below. Machine ev
 
 ## Not established
 
-- **Independent consumer replay:** none of the ten profiles has a consumer verifier reachable from this candidate.
-- **Owner acceptance** of the seven-field narrowing (see README).
+- **Independent consumer replay:** none of the ten profiles has a consumer verifier reachable from this release.
 
 ## Existing closure
 
@@ -58,7 +57,7 @@ It is generated with the v3.21.0 procedure: `sha256sum` with `./` paths, sorted 
 
 ## Admission state
 
-v3.28.0 is a candidate and does not admit itself. Validation evidence grants no authority or promotion.
+The repository owner admitted v3.28.0 in ADR-025. The validation evidence above is what the decision relied on; the evidence itself grants no authority or promotion. The `semantics/` tree is unchanged since the producer qualification, so that evidence applies to the admitted bytes without requalification.
 
 ## Schema patch ledger
 
@@ -85,7 +84,7 @@ Compiler choice: `943db9a` is the producer pinned in the #210/#211 qualification
 | Basis | Descriptors | Disposition |
 |---|---:|---|
 | Observed minimum written by `schema-derive` (18 derived schemas: smallest observed length) | 363 | Removed. The minimum was inferred only from the selected data. |
-| Hand-authored `min_items: 1` (2 authority-resolution schemas) | 18 | Removed. No canonical source governs the non-emptiness of these lists. `scripts/validate-semantics.py` RC-017 requires listed entries only for `l9.contract/validation-and-correctness@1`, and authority-resolution does not select that contract. The minimum is an open owner decision (see below). It is not re-expressed as an enforced array constraint. |
+| Hand-authored `min_items: 1` (2 authority-resolution schemas) | 18 | Removed. No canonical source governs the non-emptiness of these lists. `scripts/validate-semantics.py` RC-017 requires listed entries only for `l9.contract/validation-and-correctness@1`, and authority-resolution does not select that contract. The owner accepted their removal (ADR-025). It is not re-expressed as an enforced array constraint. |
 | **Total** | **381** | Removed. `type: string_list` and all other keys are unchanged. |
 
 Equivalence proof: each patched file parses to its original document minus exactly those keys. The pinned interpreter accepts `[]` and rejects a non-list under the original descriptor and under the patched descriptor alike, for all 381 locations. The patch therefore changes no validation outcome. It only stops claiming enforcement the interpreter does not perform. The 49 retained `min_items` all sit on `type: array` descriptors, where they are enforced; their negative cases are below.
@@ -181,7 +180,7 @@ For the five schema-definition sources, a consumer that hands the selected paylo
 
 **Consumer impact.** The declared consumers are `l9-identity-assurance`, `strategic_plan_metacognitive_reasoner` and `plan_keeper`. None has an implementation in the five repositories reachable from this session, and an organization code search found none. Whether any consumer materially requires the field is **Unknown**. It is not asserted to be lossless.
 
-**Owner disposition: UNRESOLVED.** No semantic-owner acceptance of this narrowing is recorded on #211 or #214. The narrowing is intentional and requires that acceptance.
+**Owner disposition: ACCEPTED** (ADR-025, 2026-11-08), as the intended v1 selection contract of the three profiles. Independent consumer compatibility remains undemonstrated.
 
 ### PATCH-04: qualification at the patched coordinates
 
@@ -221,14 +220,14 @@ Observation, not a negative case: verifying an artifact against the parent commi
 
 | Limitation | Effect here | Remediation |
 |---|---|---|
-| `min_items` read only for `type: array` | Non-emptiness of `string_list` values is not asserted by any of the 20 schemas | Upstream: enforce list cardinality for every list type, or reject the key. Owner: decide whether any minimum is governed |
+| `min_items` read only for `type: array` | Non-emptiness of `string_list` values is not asserted by any of the 20 schemas | Upstream: enforce list cardinality for every list type, or reject the key. Owner: removal accepted (ADR-025); no minimum is claimed |
 | Object `properties` checked only when the key is present; projection schemas declare no top-level `required` | A missing selected field is caught by `selection_equivalence`, not by `payload_schema` | None needed; recorded so `payload_schema` is not read as a completeness proof |
 | No closed-object or exact-membership rule | Extra keys are not rejected by the schema | Covered by `selection_equivalence` |
-| Dispatch by `properties.schema.const` collides with a selected source's own `schema` field | Seven whole-document selections replaced (PATCH-03) | Owner decision on the narrowing; upstream dispatch change is out of scope here |
+| Dispatch by `properties.schema.const` collides with a selected source's own `schema` field | Seven whole-document selections replaced (PATCH-03) | Narrowing accepted by the owner (ADR-025); an upstream dispatch change is out of scope here |
 
-### Open decisions and Unknowns
+### Owner decisions (ADR-025) and remaining Unknowns
 
-1. **Seven-field narrowing (blocking).** A semantic-owner acceptance is required (PATCH-03).
-2. **Hand-authored authority-resolution minimums.** Whether any of the 18 removed `min_items: 1` is governed. Removing them changed no behavior.
-3. **Consumer replay.** No independent consumer replay exists for any of the ten profiles. Consumer compatibility is not claimed.
-4. **Pinned-snapshot restrictions.** These are retained as revision-bound and accurate at the qualified coordinates. The owner may narrow them before admission.
+1. **Seven-field narrowing:** accepted as the intended v1 selection contract (PATCH-03).
+2. **Hand-authored authority-resolution minimums:** removal of the 18 `min_items: 1` accepted with the other 363. No cardinality guarantee is claimed.
+3. **Pinned-snapshot restrictions:** accepted as revision-bound, not semantic law. A change to a selected source may require a schema update and requalification.
+4. **Consumer replay (Unknown):** no independent consumer replay exists for any of the ten profiles. Consumer compatibility, migration and deployment are not claimed.
