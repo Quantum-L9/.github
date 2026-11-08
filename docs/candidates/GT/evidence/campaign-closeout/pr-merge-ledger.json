@@ -1,0 +1,56 @@
+[
+	{
+		"base": "docs/candidates-game-theory-gt",
+		"head": "97959f3154cff64d204faad7ab2fddfe7729b1ed",
+		"merge_commit": "d8f706f69f174921ca67adb4fe67b1d1b74b975b",
+		"merged": true,
+		"merged_at": "2026-11-08T16:30:55Z",
+		"pr": "Quantum-L9/.github#216",
+		"title": "fix(candidates): remediate GT #213 for joint admission with reduced SV #215 (not admitted)"
+	},
+	{
+		"base": "docs/candidates-game-theory-gt",
+		"head": "79490172a95cc85e2821118f6c754cf35284e489",
+		"merge_commit": "9c2f394ba16f3ce4ad264f2d89f38dcf20b113ba",
+		"merged": true,
+		"merged_at": "2026-11-08T16:41:22Z",
+		"pr": "Quantum-L9/.github#226",
+		"title": "fix(candidates/GT): keep repository Biome formatting; align GT x SV contract to admitted SV by reference (not admitted)"
+	},
+	{
+		"base": "main",
+		"head": "1483a5930f73da64c2ecde79d716697a66fde582",
+		"merge_commit": "5b86f0a46d6df20bec99e8332cb4f4f7c225a508",
+		"merged": true,
+		"merged_at": "2026-11-08T17:03:35Z",
+		"pr": "Quantum-L9/.github#213",
+		"title": "docs(candidates): GT candidate pack, remediated and bound to the admitted SV (not admitted)"
+	},
+	{
+		"base": "main",
+		"head": "9fbe1a89dec15c07fd9ea808c20ef4113779d90c",
+		"merge_commit": "a4bb4618d51632028264ce894a5992b379876e8f",
+		"merged": true,
+		"merged_at": "2026-11-08T17:04:05Z",
+		"pr": "Quantum-L9/.github#225",
+		"title": "feat(semantics): Game Theory core foundation v3.33.0 (ADR-030) \u2014 admitted"
+	},
+	{
+		"base": "main",
+		"head": "80c11b78948afe7e57b61c52d023fb3762dbfbd0",
+		"merge_commit": "030c6453e3a7951d843dcc1c0f440b4c6c0b3eba",
+		"merged": true,
+		"merged_at": "2026-11-08T17:25:03Z",
+		"pr": "Quantum-L9/.github#228",
+		"title": "feat(candidates/GT): dependent stage bound to the admitted SV + GT foundation (a4bb461)"
+	},
+	{
+		"base": "main",
+		"head": "540edc1281142c79dba68aef773f123f800301de",
+		"merge_commit": "05031a2d9ddbc086c6839f563831855ef7804bcf",
+		"merged": true,
+		"merged_at": "2026-11-08T17:25:16Z",
+		"pr": "Quantum-L9/.github#229",
+		"title": "feat(semantics): GT x SV interaction composition contract v3.34.0 (ADR-031) \u2014 admitted"
+	}
+]

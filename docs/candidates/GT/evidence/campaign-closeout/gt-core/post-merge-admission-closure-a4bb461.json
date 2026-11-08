@@ -1,0 +1,124 @@
+{
+	"admission": {
+		"admission_commit": "a4bb4618d51632028264ce894a5992b379876e8f",
+		"adr": "ADR-030-game-theory-core-conditional-strategic-interaction.md",
+		"changed_at_head_since_admission": [],
+		"changed_on_main_since_admission": [],
+		"current": true,
+		"release": "v3.33.0",
+		"release_coverage": {
+			"gaps": [],
+			"status": "pass"
+		},
+		"release_status": "ADMITTED",
+		"status": "pass",
+		"tried": [
+			{
+				"admission_commit": "a4bb4618d51632028264ce894a5992b379876e8f",
+				"adr": "ADR-030-game-theory-core-conditional-strategic-interaction.md",
+				"changed_at_head_since_admission": [],
+				"changed_on_main_since_admission": [],
+				"current": true,
+				"release": "v3.33.0",
+				"release_coverage": {
+					"gaps": [],
+					"status": "pass"
+				},
+				"release_status": "ADMITTED"
+			}
+		]
+	},
+	"downstream": {
+		"compositions": {
+			"l9.compose/strategic-planner-interaction@1": {
+				"artifacts": [
+					{
+						"path": "/tmp/claude-0/-home-user/2345aaed-d989-5f19-855a-2d95bc118229/scratchpad/gtq/gate/composed/l9.compose_strategic-planner-interaction_1_l9.projection_strategic-planner-interaction_1.composed.json",
+						"ref": "l9.compose/strategic-planner-interaction@1#l9.projection/strategic-planner-interaction@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"exit": 0,
+				"result": "pass"
+			}
+		},
+		"head_is_main": true,
+		"projections": {
+			"l9.projection/strategic-planner-interaction@1": {
+				"artifacts": [
+					{
+						"path": "/tmp/claude-0/-home-user/2345aaed-d989-5f19-855a-2d95bc118229/scratchpad/gtq/gate/l9.projection_strategic-planner-interaction_1/l9.source_vocabulary_1.projection.json",
+						"ref": "l9.projection/strategic-planner-interaction@1#l9.source/vocabulary@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"path": "/tmp/claude-0/-home-user/2345aaed-d989-5f19-855a-2d95bc118229/scratchpad/gtq/gate/l9.projection_strategic-planner-interaction_1/l9.source_invariants_1.projection.json",
+						"ref": "l9.projection/strategic-planner-interaction@1#l9.source/invariants@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"path": "/tmp/claude-0/-home-user/2345aaed-d989-5f19-855a-2d95bc118229/scratchpad/gtq/gate/l9.projection_strategic-planner-interaction_1/l9.source_contracts_1.projection.json",
+						"ref": "l9.projection/strategic-planner-interaction@1#l9.source/contracts@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"covers_pinned_sources": true,
+				"exit": 0,
+				"result": "pass"
+			}
+		},
+		"revision": "a4bb4618d51632028264ce894a5992b379876e8f",
+		"status": "pass"
+	},
+	"head": "a4bb4618d51632028264ce894a5992b379876e8f",
+	"main_ref": "origin/main",
+	"main_revision": "a4bb4618d51632028264ce894a5992b379876e8f",
+	"registration": {
+		"gaps": [],
+		"status": "pass"
+	},
+	"release": {
+		"gaps": [],
+		"release_status": "ADMITTED",
+		"status": "pass",
+		"version": "v3.33.0"
+	},
+	"repository": "Quantum-L9/.github",
+	"schema": "l9.projection-admission-closure/v1",
+	"subject": {
+		"canonical_sources": [],
+		"composition_profiles": ["l9.compose/strategic-planner-interaction@1"],
+		"contracts": ["l9.contract/strategic-interaction-assessment@1"],
+		"invariants": ["L9-GT-001"],
+		"projection_profiles": ["l9.projection/strategic-planner-interaction@1"],
+		"schemas": [
+			"strategic_interaction_projection.schema.yaml",
+			"strategic_interaction_composition.schema.yaml"
+		],
+		"source_classes": [],
+		"vocabulary_terms": [
+			"strategic_interaction",
+			"strategic_game_model",
+			"actor_response_model",
+			"strategy_profile",
+			"conditional_best_response",
+			"equilibrium_assessment",
+			"deviation_gain",
+			"incentive_bearing_commitment",
+			"information_disclosure_decision",
+			"policy_exploitability",
+			"incentive_compatibility",
+			"strategic_interaction_assessment"
+		]
+	},
+	"validator": {
+		"exit": 0,
+		"fail_lines": [],
+		"status": "pass"
+	},
+	"verdict": "DOWNSTREAM_USABLE"
+}

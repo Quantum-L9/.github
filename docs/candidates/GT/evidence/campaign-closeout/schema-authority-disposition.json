@@ -1,0 +1,15 @@
+{
+	"schema": "l9.gt-schema-authority-disposition/v1",
+	"decision": "RETAIN_NATIVE_YAML",
+	"owner_decision": "gt-owner-decision.yaml#G3-schema-disposition",
+	"admitted_descriptors": [
+		"semantics/strategic_interaction_projection.schema.yaml",
+		"semantics/strategic_interaction_composition.schema.yaml"
+	],
+	"qualification": "real producer 39a51b7 at f03f859, a4bb461, b091628 and 05031a2: GT projections and composition pass; control projection_schema_discriminator_removed yields unknown as asserted",
+	"not_admitted": [
+		"docs/candidates/GT/synthesis/generated/*.candidate.schema.json",
+		"docs/candidates/GT/synthesis/governance/grammars/*.yaml"
+	],
+	"not_admitted_status": "supporting evidence only (Article 4 preferred route); no JSON schema substitutes for the compiler's normative YAML descriptor"
+}

@@ -1,0 +1,74 @@
+{
+	"schema": "l9.gt-campaign-final-receipt/v1",
+	"contract": "L9-GT-SEAM-CAMPAIGN-CLOSEOUT-CONTRACT/v1",
+	"terminal_states": {
+		"GT_CORE_ADMITTED_AND_VERIFIED": true,
+		"GT_SV_CONTRACT_ADMITTED_AND_VERIFIED": true,
+		"GT_SEAM_CAMPAIGN_COMPLETE": true
+	},
+	"admitted_sv_dependency": {
+		"release": "v3.32.0",
+		"adr": "ADR-029",
+		"effective_revision": "64d8b8598300f94c3201f26866f73be6895dab60",
+		"pr": "Quantum-L9/.github#222",
+		"semantics_tree": "251bb3d9238f93f0207b1f8443c80359e034595b"
+	},
+	"gt_core": {
+		"release": "v3.33.0",
+		"adr": "docs/adr/ADR-030-game-theory-core-conditional-strategic-interaction.md",
+		"pr": "Quantum-L9/.github#225",
+		"effective_revision": "a4bb4618d51632028264ce894a5992b379876e8f",
+		"semantics_tree": "3ce1adaf6da7f5eea8c47414bffc86145906505c",
+		"qualified_at": "f03f85981a7bd8249bc5998ee04535f53608fd73",
+		"identities": {
+			"invariant": "L9-GT-001",
+			"contract": "l9.contract/strategic-interaction-assessment@1",
+			"governing_invariants": 6,
+			"vocabulary_terms": 12,
+			"projection_profile": "l9.projection/strategic-planner-interaction@1",
+			"source_classes": ["vocabulary", "invariants", "contracts"],
+			"composition_profile": "l9.compose/strategic-planner-interaction@1",
+			"forbidden_criterion": "sv_semantic_records_excluded_from_gt_projection",
+			"payload_schemas": [
+				"strategic_interaction_projection.schema.yaml",
+				"strategic_interaction_composition.schema.yaml"
+			]
+		},
+		"census": "17 files (+1077/-13): 11 semantics paths, ADR-030 + index, v3.33.0 release record",
+		"verification": {
+			"hashes": "122/122",
+			"validator": "59 PASS / 0 FAIL",
+			"producer": "GT 3/3 + composition pass; SV 5/5 + composition pass; 0 unresolved; rerun byte-identical (20 files); selections 12/6/1; forbidden criterion pass",
+			"controls": "19/19",
+			"gate": "DOWNSTREAM_USABLE at a4bb461 and at 05031a2"
+		}
+	},
+	"gt_sv_contract": {
+		"release": "v3.34.0",
+		"adr": "docs/adr/ADR-031-strategic-value-interaction-composition-contract.md",
+		"pr": "Quantum-L9/.github#229",
+		"effective_revision": "05031a2d9ddbc086c6839f563831855ef7804bcf",
+		"semantics_tree": "252ec0adcc6e62202a4b82d5bb2bbec3dcd67e34",
+		"qualified_at": "b09162876bcb40765c8cb21c5e56766b781fce73",
+		"foundation_binding": "docs/candidates/GT/evidence/admitted_foundation_binding.json (#228, foundation a4bb461)",
+		"census": "10 files (+395/-7): contracts.yaml + 3 derived ledgers, ADR-031 + index, v3.34.0 release record",
+		"verification": {
+			"hashes": "123/123",
+			"validator": "59 PASS / 0 FAIL",
+			"producer": "all 10 GT and SV projections/compositions pass at b091628 and 05031a2; reruns byte-identical; GT and SV contract selections unchanged",
+			"controls": "19/19",
+			"gate": "ADMITTED (downstream not applicable: the contract is selected by no profile)"
+		}
+	},
+	"pr_states": "pr-merge-ledger.json: #216, #226 (staging), #213, #225, #228, #229 (main) all merged",
+	"numerical_evaluator_status": "NOT ACTIVE. No Numerical Reasoning receipt type is admitted; evaluated GT×SV consumer envelopes are refused by verify_consumer_envelope; consumers stay at unresolved / not-evaluated.",
+	"historical_release_mutation": "none (predecessor release directories byte-identical at both merges)",
+	"historical_evidence": "evidence/integration-v1, sv_alignment_binding.json (null foundation), pr212_* records retained unchanged in content and distinguished from this closeout",
+	"outstanding": [
+		"Numerical Reasoning owner must admit a receipt type before any evaluated GT×SV result can be claimed",
+		"Consumers (Strategic Planner) re-pin to 05031a2 and replay through their own release process",
+		"Owner admission decisions for the v3.29.0, v3.30.0 and v3.31.0 candidate deltas remain open (not covered by ADR-029/030/031)",
+		"Cursor-Governance ops/ci_parity/tools.yaml l9-ci pin drift (session-debt ci-parity-l9-ci-pin-drift, deferred)",
+		"SonarCloud duplication between the GT and SV candidate packs' self-contained tools (non-required gate; merged past on #213)"
+	]
+}

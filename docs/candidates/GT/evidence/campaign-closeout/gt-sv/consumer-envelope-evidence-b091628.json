@@ -1,0 +1,43 @@
+{
+	"schema": "l9.gt-sv-consumer-envelope-evidence/v1",
+	"authority_revision": "b09162876bcb40765c8cb21c5e56766b781fce73",
+	"compiler_revision": "39a51b76057f6d950877ffe1c2c87c4cb6d4a891",
+	"gt_view": {
+		"ref": "l9.compose/strategic-planner-interaction@1#l9.projection/strategic-planner-interaction@1",
+		"digest": "sha256:b82356a770fa68341f7fd049078c1e6d93cd7cab7c463a0c3dcceea61d7b1904",
+		"result": "pass"
+	},
+	"sv_view": {
+		"ref": "l9.compose/strategic-planner-value@1#l9.projection/strategic-planner-value@1",
+		"digest": "sha256:c1d538b0f1e4943935cb019df16f09137496b14263499665b50938edad304dc7",
+		"result": "pass"
+	},
+	"cases": {
+		"evaluated_without_numerical_receipt": {
+			"verdict": "refused",
+			"failures": ["numerical_result: no receipt for referenced digest"]
+		},
+		"projection_receipt_presented_as_numerical_proof": {
+			"verdict": "refused",
+			"failures": [
+				"numerical_result: a semantic projection/composition receipt does not evidence an executed valuation or GT solver"
+			]
+		},
+		"composition_receipt_presented_as_numerical_proof": {
+			"verdict": "refused",
+			"failures": [
+				"numerical_result: a semantic projection/composition receipt does not evidence an executed valuation or GT solver"
+			]
+		},
+		"unresolved_envelope_without_number": {
+			"verdict": "not_evaluated",
+			"failures": []
+		}
+	},
+	"numerical_evaluator_status": "NOT_AVAILABLE: no Numerical Reasoning receipt type is admitted; evaluated consumer mode stays unavailable",
+	"does_not_establish": [
+		"an executed valuation or GT solver",
+		"a numerical result",
+		"consumer binding"
+	]
+}

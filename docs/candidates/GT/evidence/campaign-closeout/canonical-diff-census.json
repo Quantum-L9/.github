@@ -1,0 +1,155 @@
+{
+	"schema": "l9.gt-campaign-diff-census/v1",
+	"gt_core_admission_pr_225": {
+		"range": "a4bb4618d51632028264ce894a5992b379876e8f^..a4bb4618d51632028264ce894a5992b379876e8f",
+		"files": 17,
+		"added": 1077,
+		"deleted": 13,
+		"rows": [
+			{
+				"path": "docs/adr/ADR-030-game-theory-core-conditional-strategic-interaction.md",
+				"added": 48,
+				"deleted": 0
+			},
+			{
+				"path": "docs/adr/README.md",
+				"added": 2,
+				"deleted": 1
+			},
+			{
+				"path": "docs/semantic-foundation/v3.33.0/HASHES.sha256",
+				"added": 122,
+				"deleted": 0
+			},
+			{
+				"path": "docs/semantic-foundation/v3.33.0/MANIFEST.md",
+				"added": 120,
+				"deleted": 0
+			},
+			{
+				"path": "docs/semantic-foundation/v3.33.0/README.md",
+				"added": 25,
+				"deleted": 0
+			},
+			{
+				"path": "docs/semantic-foundation/v3.33.0/RELEASE_VALIDATION.md",
+				"added": 19,
+				"deleted": 0
+			},
+			{
+				"path": "semantics/capabilities.yaml",
+				"added": 4,
+				"deleted": 4
+			},
+			{
+				"path": "semantics/composition_profiles.yaml",
+				"added": 15,
+				"deleted": 0
+			},
+			{
+				"path": "semantics/contracts.yaml",
+				"added": 54,
+				"deleted": 2
+			},
+			{
+				"path": "semantics/generic_compiler_manifest.yaml",
+				"added": 2,
+				"deleted": 0
+			},
+			{
+				"path": "semantics/invariants.yaml",
+				"added": 8,
+				"deleted": 0
+			},
+			{
+				"path": "semantics/lifecycle.yaml",
+				"added": 3,
+				"deleted": 3
+			},
+			{
+				"path": "semantics/projection_profiles.yaml",
+				"added": 66,
+				"deleted": 0
+			},
+			{
+				"path": "semantics/receipt_catalog.yaml",
+				"added": 3,
+				"deleted": 3
+			},
+			{
+				"path": "semantics/strategic_interaction_composition.schema.yaml",
+				"added": 279,
+				"deleted": 0
+			},
+			{
+				"path": "semantics/strategic_interaction_projection.schema.yaml",
+				"added": 259,
+				"deleted": 0
+			},
+			{
+				"path": "semantics/vocabulary.yaml",
+				"added": 48,
+				"deleted": 0
+			}
+		]
+	},
+	"gt_sv_admission_pr_229": {
+		"range": "05031a2d9ddbc086c6839f563831855ef7804bcf^..05031a2d9ddbc086c6839f563831855ef7804bcf",
+		"files": 10,
+		"added": 395,
+		"deleted": 7,
+		"rows": [
+			{
+				"path": "docs/adr/ADR-031-strategic-value-interaction-composition-contract.md",
+				"added": 40,
+				"deleted": 0
+			},
+			{
+				"path": "docs/adr/README.md",
+				"added": 2,
+				"deleted": 1
+			},
+			{
+				"path": "docs/semantic-foundation/v3.34.0/HASHES.sha256",
+				"added": 123,
+				"deleted": 0
+			},
+			{
+				"path": "docs/semantic-foundation/v3.34.0/MANIFEST.md",
+				"added": 115,
+				"deleted": 0
+			},
+			{
+				"path": "docs/semantic-foundation/v3.34.0/README.md",
+				"added": 20,
+				"deleted": 0
+			},
+			{
+				"path": "docs/semantic-foundation/v3.34.0/RELEASE_VALIDATION.md",
+				"added": 19,
+				"deleted": 0
+			},
+			{
+				"path": "semantics/capabilities.yaml",
+				"added": 2,
+				"deleted": 2
+			},
+			{
+				"path": "semantics/contracts.yaml",
+				"added": 70,
+				"deleted": 0
+			},
+			{
+				"path": "semantics/lifecycle.yaml",
+				"added": 2,
+				"deleted": 2
+			},
+			{
+				"path": "semantics/receipt_catalog.yaml",
+				"added": 2,
+				"deleted": 2
+			}
+		]
+	},
+	"predecessor_release_records_changed": 0
+}

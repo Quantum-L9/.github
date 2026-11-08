@@ -1,0 +1,31 @@
+{
+	"schema": "l9.gt-campaign-authority-resolution/v1",
+	"target_class": "canonical global semantics; Quantum-L9/.github owns them and its repository owner holds target_class_authority (semantics/authority_model.yaml)",
+	"admission_mechanism": "explicit decision record (ADR) plus release status flip, effective at the main commit that merges them (precedents ADR-025, ADR-029)",
+	"owner_instructions": [
+		{
+			"quote": "L9-GT-SEAM-CAMPAIGN-CLOSEOUT-CONTRACT/v1 … Objective: Complete GT core admission, then admit the GT×SV dependent contract, verify both and close the campaign.",
+			"session": "session_017xwbxytavCYavKdhRr9a6n",
+			"date": "2026-11-08"
+		},
+		{
+			"quote": "Wait. The GT candidate IS to be admitted that’s the point of this close out",
+			"session": "session_017xwbxytavCYavKdhRr9a6n",
+			"date": "2026-11-08"
+		},
+		{
+			"quote": "Clarify the questions. I want this closed out meaning PR’s merged",
+			"session": "session_017xwbxytavCYavKdhRr9a6n",
+			"date": "2026-11-08",
+			"role": "assigned the campaign to this session after a parallel session's work was reconciled"
+		}
+	],
+	"owner_decision_record": "docs/candidates/GT/evidence/admission/gt-owner-decision.yaml (G1 L9-GT-001 KEEP, G2 GT-only subject, G3 native schemas retained, G4 GT×SV contract approved for separate admission)",
+	"operator_decision_relayed_by_parallel_session": {
+		"session": "session_017xwbxuk4LQ84AzM3ac5txs",
+		"quote": "Keep biome fixes. Don't separate.",
+		"applied_in": "Quantum-L9/.github#226 (restores the 33 ops/, policies/, rulesets/ paths), carried to main by #213"
+	},
+	"merge_authority": "operator instruction; ops/config/merge-authority.json enforcement disabled (Cursor-Governance CANONICAL_LAW §6.2.16); merges via stack_safe_merge.py bound to exact heads",
+	"not_manufactured": "No status was flipped, and no ADR accepted, outside the two admission commits (9fbe1a8 on #225, 540edc1 on #229) made under the instructions above."
+}
