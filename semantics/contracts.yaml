@@ -1293,3 +1293,73 @@ contracts:
     - passive_world_assessment_without_strategic_interaction_claim
     - generic_optimisation_without_strategic_actor_responses
     sv_dependency: none_for_gt_only
+- id: l9.contract/strategic-value-interaction-composition@1
+  purpose: Govern a consumer's interaction-conditioned evaluation using GT response semantics and the independently
+    admitted l9.contract/strategic-value-assessment@1 plus l9.strategic.value@1. GT does not own valuation, create
+    an SV model, or grant plan or execution authority.
+  scope: global
+  owner: Quantum-L9/.github
+  source_invariants:
+  - L9-GT-001
+  - L9-SV-001
+  - L9-SV-002
+  - L9-AUTH-002
+  - L9-HARD-001
+  - L9-UNKNOWN-001
+  - L9-PROJECTION-001
+  - L9-EVIDENCE-001
+  - L9-ASSURANCE-001
+  - L9-PROV-001
+  - L9-COORD-001
+  applies_to:
+  - assessments_claiming_combined_gt_and_strategic_value
+  requires:
+  - independently_admitted_sv_model_and_assessment_contract
+  - authenticated_current_sv_projection_and_composition
+  - authenticated_current_gt_projection_and_composition
+  - exact_compatible_canonical_authority_coordinates
+  - five_source_sv_semantic_view_and_three_source_gt_semantic_view_are_independently_compiled_with_real_producer_provenance
+  - combined_assessment_expressly_claims_interaction_conditioned_strategic_value_not_just_gt_only
+  - every_requires_entry_of_l9_contract_strategic_value_assessment_at_1_satisfied_by_reference_for_the_one_canonical_sv_claim
+  - every_forbidden_entry_of_l9_contract_strategic_value_assessment_at_1_respected_by_reference
+  - focal_action_conditional_joint_response_trajectory_distribution_with_complete_probability_mass_or_explicit_unknown
+  - one_question_appropriate_numerical_owner_method_for_canonical_sv_valuation_not_mandatory_qv
+  - one_mutually_exclusive_exhaustive_iev_sfv_dc_erl_oc_accounting_ledger_owned_by_sv_model_with_embedded_cost_reconciliation
+  - material_actors_response_or_unverified_model_adequacy_remain_conditional_or_unknown_under_sv_claim
+  - changed_material_actor_model_probability_counterfactual_or_source_revision_invalidates_affected_claim
+  - consumer_retains_candidate_selection_strategy_policy_plan_revision_and_action_authorization
+  guarantees:
+  - gt_only_remains_valid_without_sv_as_separate_unquantified_strategic_assessment
+  - sv_only_remains_independent_without_gt_as_separate_mode
+  - one_canonical_sv_claim_may_be_conditioned_on_adaptive_response_and_lower_higher_or_equal
+  - sv_five_bucket_partition_and_counterfactual_method_are_reused_by_reference_not_redefined
+  - unadmitted_incompatible_or_unknown_sv_dependency_cannot_produce_evaluated_numeric_result
+  - semantic_projection_composition_does_not_execute_numerical_valuation
+  - numerical_owner_result_and_empirical_validation_are_distinct_from_projection_provenance
+  - sequential_and_portfolio_math_are_required_only_for_claims_that_use_those_methods
+  forbidden:
+  - adding_independent_gt_uplift_to_already_counted_sv_effect
+  - duplicating_sv_five_bucket_definitions_in_gt
+  - restating_paraphrasing_or_weakening_sv_assessment_contract_obligations_in_gt_contracts
+  - reusing_an_unverified_sv_candidate_as_if_admitted
+  - silently_merging_conflicting_actor_or_value_assumptions
+  - treating_merged_projection_payload_as_executed_numerical_assessment
+  - ranking_infeasible_actions_by_soft_value
+  - automatic_plan_revision_or_action_from_combined_assessment
+  - claiming_sv_contract_is_admitted_because_a_candidate_is_open_or_candidate_schemas_pass
+  - constructing_gt_plus_sv_value_by_summing_standalone_sv_and_gt_uplift
+  - mandatory_qv_method_for_all_gt_sv_combined_evaluations
+  - numerical_ranking_before_five_bucket_causal_accounting_is_reconciled
+  outcomes:
+    satisfied: one_traceable_interaction_conditioned_canonical_sv_result
+    violated: double_counted_incompatible_or_unauthorized_composed_claim
+    unresolved: sv_dependency_unadmitted_or_comparison_model_unknown_or_unverified
+  applicability:
+    trigger: assessment_asserts_combined_gt_conditioned_quantitative_strategic_value
+    does_not_apply_to:
+    - gt_only_non_sv_assessment
+    - sv_only_assessment
+    - generic_numerical_reasoning_without_sv_claim
+    sv_dependency: independently_admitted_sv_model_contract_projection_and_composition
+    qv: only_when_question_appropriate_method_selected
+    unknown_resolution: unresolved_without_numeric_claim
