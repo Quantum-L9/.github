@@ -75,7 +75,7 @@
 		{
 			"path": "apply_to_pinned_checkout.py",
 			"bytes": 29587,
-			"sha256": "81e7ac6723dca84dce00ffb91b2ad6cf19694002c60aa59707aeb9d36e868787"
+			"sha256": "64851bc1d419e3b5f0bb552b1fba02eb9b23f253cdf1293d02fe95829dd74ff0"
 		},
 		{
 			"path": "evidence/SV015_falsification.json",
@@ -470,7 +470,7 @@
 		{
 			"path": "tests/test_alignment.py",
 			"bytes": 4671,
-			"sha256": "7182e3223c97d59a44cc27a1a935c9670041ae552dd66969a6c1e8f707e91bcf"
+			"sha256": "5a0ae942d95fa3563b298cf4bb5cd687da728996c5daf7e32d7e1db8220741bf"
 		},
 		{
 			"path": "tests/test_candidate.py",
