@@ -21,8 +21,8 @@ derivation:
       admission: canonical_active
     - artifact: contracts.yaml
       artifact_id: l9.contracts/global@1
-      sha256: 25d4e2a0ce47c37961ec9edbb959d2accdebd9216f716daeb18df47ff1a7a566
-      item_count: 28
+      sha256: 86f6df1466e7e47f5e7e8a438c62ffdcf2a97835e9e49ecd4a4eb2dec88be0e7
+      item_count: 29
       admission: canonical_active
   rule: >
     This artifact defines the minimum global semantic model for capabilities.
