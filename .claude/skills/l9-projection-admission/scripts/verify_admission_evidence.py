@@ -110,8 +110,9 @@ def _admitted_block(text: str) -> str:
 
 
 def _later_commits(repo: Path, commit: str, main: str, path: str) -> list[str]:
+    """Mainline commits after `commit` that touch `path` (see `cac.admission_commit`)."""
     return cac.git_out(
-        repo, "log", "--format=%H", f"{commit}..{main}", "--", path
+        repo, "log", "--first-parent", "--format=%H", f"{commit}..{main}", "--", path
     ).split()
 
 

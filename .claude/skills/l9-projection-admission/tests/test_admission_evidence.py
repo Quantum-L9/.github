@@ -123,6 +123,61 @@ class ReleaseAdmission(_Fixture):
         self.repo.commit("edit the admitted release")
         self.assert_gap(self.proof(), "release record edited after admission")
 
+    def merged_pull_request(self, *, squash: bool) -> Repo:
+        """v1.0.0 admitted on a branch, corrected there, then landed on main.
+
+        The branch flips the release to ADMITTED, then rewords the ADR and rehashes:
+        both before the pull request lands, which is when the record takes effect.
+        """
+        repo = Repo(self.tmp / ("squashed" if squash else "merged"))
+        repo.root.mkdir(parents=True)
+        repo.git("init", "-q")
+        repo.git("config", "user.email", "fixture@example.invalid")
+        repo.git("config", "user.name", "fixture")
+        for name, text in LEDGERS.items():
+            repo.write(f"semantics/{name}", text)
+        repo.write("scripts/validate-semantics.py", VALIDATOR)
+        repo.write("scripts/exit_code", "0")
+        repo.write("Makefile", MAKEFILE)
+        repo.git("add", "-A")
+        repo.git("commit", "-q", "-m", "base")
+        mainline = repo.git("symbolic-ref", "--short", "HEAD")
+        repo.git("checkout", "-q", "-b", "pr")
+        name = repo.admit("v1.0.0", 1, ALL_NAMES)
+        repo.git("add", "-A")
+        repo.git("commit", "-q", "-m", "flip v1.0.0 to ADMITTED on the branch")
+        path = f"docs/adr/{name}"
+        repo.write(path, repo.read(path) + "\nWording corrected before merge.\n")
+        repo.release("v1.0.0", ADMITTED.format(adr="ADR-001"))
+        repo.git("add", "-A")
+        repo.git("commit", "-q", "-m", "correct the ADR on the branch")
+        repo.git("checkout", "-q", mainline)
+        if squash:
+            repo.git("merge", "-q", "--squash", "pr")
+            repo.git("commit", "-q", "-m", "squash pr")
+        else:
+            repo.git("merge", "-q", "--no-ff", "-m", "merge pr", "pr")
+        repo.git("update-ref", "refs/remotes/origin/main", "HEAD")
+        return repo
+
+    def test_pull_request_takes_effect_where_it_lands_on_main(self):
+        for squash in (False, True):
+            repo = self.merged_pull_request(squash=squash)
+            proof = self.proof(repo)
+            self.assertEqual(proof["status"], "pass", (squash, proof["gaps"]))
+            self.assertEqual(
+                proof["admission_commit"], repo.git("rev-parse", "HEAD"), squash
+            )
+
+    def test_mainline_edit_after_a_merged_admission_is_rejected(self):
+        repo = self.merged_pull_request(squash=False)
+        path = "docs/adr/ADR-001-admit-v1.0.0.md"
+        repo.write(path, repo.read(path) + "\nAlso admits l9.projection/sneaky@1.\n")
+        repo.commit("edit the decision on main after it landed")
+        self.assert_gap(
+            self.proof(repo), "edited or removed on main after the admission commit"
+        )
+
     def test_named_candidate_without_the_approved_tree_is_rejected(self):
         first = self.repo.git("rev-parse", "HEAD")
         self.repo.write("semantics/x_model.yaml", LEDGERS["x_model.yaml"] + "z: 1\n")
