@@ -1,0 +1,34 @@
+# ADMISSION CANDIDATE ONLY: terms to append to Quantum-L9/.github/semantics/vocabulary.yaml#terms.
+# Comparator: Quantum-L9/.github@dc96a8ae9f31e359bb0e52a0b1d778fc8f265d99
+# Baseline vocabulary blob: 22b04a8e6f97d661e30c1eb68a3281e086e74f88
+# No replacement or redefinition of existing strategic_value, strategic_value_assessment,
+# systemic_future_value, counterfactual_baseline, or other admitted numerical semantics.
+# These are definitions, not a profile, schema, numeric model, or authorization.
+terms:
+  qualitative_strategic_value_screen:
+    semantic_class: derived_assessment
+    definition: >-
+      A bounded, non-numerical, evidence- and uncertainty-explicit advisory appraisal
+      of whether a feasible discretionary option could advance a specified objective
+      for an identified beneficiary relative to a stated alternative or baseline,
+      considering material adverse effects and displaced burdens. It may support
+      a conditional directional claim but is not the quantified
+      strategic_value_assessment, a computed optimum, verified causal forecast,
+      Strategic Plan change, or action permission.
+    question: >-
+      Relative to what feasible alternative, for whose objective, with which
+      supported effects, countervailing costs, and Unknowns might this option help?
+  realized_strategic_compounding:
+    semantic_class: derived_assessment
+    definition: >-
+      An evidence-supported finding that a durable, attributable improvement from
+      an earlier intervention was actually consumed by an authorized later
+      decision or action and produced a distinct additional observed relevant
+      net objective improvement relative to a stated later comparison, with material
+      adverse effects, uncertainty and attribution limits preserved. Connectivity, signal delivery,
+      storage, planned reuse, or unchanged echoes establish neither such
+      consumption nor additional realized benefit. Any asserted numerical
+      valuation separately invokes the admitted quantitative Strategic Value rules.
+    question: >-
+      What earlier improvement was later used, by whom, and what separately
+      observable additional difference followed that use?
