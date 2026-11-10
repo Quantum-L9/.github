@@ -1,0 +1,125 @@
+id: l9.projection/gar-architecture-observer@2
+class: consumer
+consumer: l9-global-architect
+purpose: Decision-complete GAR observer successor preserving all v1 architecture observation source selections and adding
+  bounded qualitative Strategic Value / Signal records. Select current canonical source meaning for evidence-first architectural
+  comparisons. Reasoning, synthesis, strategy and execution remain with their existing owners; only load incremental
+  SV/Signal context for applicable decisions.
+sources:
+  vocabulary:
+    selectors:
+    - $.terms.projection
+    - $.terms.derivation
+    - $.terms.synthesis
+    - $.terms.binding
+    - $.terms.lowering
+    - $.terms.rendering
+    - $.terms.semantic_owner
+    - $.terms.provider
+    - $.terms.harvest
+    - $.terms.globalization_candidate
+    - $.terms.admission
+    - $.terms.provenance
+    - $.terms.qualitative_strategic_value_screen
+    - $.terms.realized_strategic_compounding
+    - $.terms.signal
+    - $.terms.signal_propagation
+    - $.terms.signal_feedback_episode
+    - $.terms.signal_consumption
+    - $.terms.strategic_value
+    - $.terms.strategic_value_assessment
+    - $.terms.systemic_future_value
+    - $.terms.counterfactual_baseline
+    - $.terms.future_effect_identity
+    - $.terms.bidirectional_value_propagation
+    - $.terms.value_propagation_mesh
+    - $.terms.future_work_elimination
+    - $.terms.capability_unlock
+  invariants:
+    selectors:
+    - $.invariants[*].id
+    - $.invariants[*].statement
+    - $.invariants[*].scope
+    - $.invariants[*].owner
+    - $.invariants[?(@.id=="L9-SVQ-001")]
+    - $.invariants[?(@.id=="L9-SVQ-002")]
+    - $.invariants[?(@.id=="L9-SIGNAL-001")]
+    - $.invariants[?(@.id=="L9-SIGNAL-002")]
+    - $.invariants[?(@.id=="L9-SIGNAL-003")]
+    - $.invariants[?(@.id=="L9-SIGNAL-004")]
+  contracts:
+    selectors:
+    - $.contracts[*].id
+    - $.contracts[*].purpose
+    - $.contracts[*].scope
+    - $.contracts[*].guarantees
+    - $.contracts[*].forbidden
+    - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
+    - $.contracts[?(@.id=="l9.contract/semantic-ownership@1")]
+    - $.contracts[?(@.id=="l9.contract/projection@1")]
+    - $.contracts[?(@.id=="l9.contract/strategic-value-assessment@1")]
+    - $.contracts[?(@.id=="l9.contract/hard-constraint@1")]
+  capabilities:
+    selectors:
+    - $.global_rules
+    - $.capability_entry_contract
+    - $.capability_state_dimensions
+    - $.invocability_contract
+    - $.capability_relations
+    - $.capabilities[*].id
+    - $.capabilities[*].semantic_owner
+    - $.capabilities[*].effect_class
+    - $.capabilities[*].requires
+  architecture_patterns:
+    selectors:
+    - $.patterns[*].id
+    - $.patterns[*].class
+    - $.patterns[*].purpose
+    - $.patterns[*].preconditions
+    - $.patterns[*].guarantees
+    - $.patterns[*].forbidden
+    - $.patterns[*].compatible_with
+    - $.patterns[*].common_examples
+    - $.composition_rules[*]
+  authority_model:
+    selectors:
+    - $.authority_classes
+    - $.admission_rules
+    - $.promotion_rules
+    - $.strategic_authority
+    - $.strategic_cognition_authority
+  lifecycle:
+    selectors:
+    - $.lifecycles.architecture_pattern
+    - $.lifecycles.globalization_candidate
+    - $.lifecycles.harvest_packet
+  strategic_value_model:
+    selectors:
+    - $.identity
+    - $.valuation.explanatory_dimensions
+    - $.valuation.rule
+    - $.assessment_claim_levels
+    - $.forecast_and_realization
+    - $.evaluation_integrity.beneficiary_scope
+    - $.evaluation_integrity.uncertainty_aware_selection
+    - $.assessment_applicability
+    - $.explicit_non_ownership
+output:
+  schema: l9.projection.gar-architecture-observer/v2
+forbidden:
+- provider_implementation_details
+- target_rendering_details
+- unrelated_domain_payloads
+- repository_local_policy_as_global_law
+- obligation_not_admitted_in_a_selected_source
+- execution_publication_or_merge_authority_grant
+- adapter_host_or_surface_specific_semantics
+successor_of: l9.projection/gar-architecture-observer@1
+breaking_changes:
+  consumer_migration: explicit
+  rationale: Retain predecessor source coverage and authority boundaries; add six admitted-only qualitative Strategic
+    Value / Signal terms and complete-record invariant selectors; opt into producer source-class-dispatch validation.
+    Never reassign Numerical Reasoning, Strategy or runtime permissions.
+  removed_selections: []
+payload_validation:
+  protocol: l9.payload-validation/source-class-dispatch@1

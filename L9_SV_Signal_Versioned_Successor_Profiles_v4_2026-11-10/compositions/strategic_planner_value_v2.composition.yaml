@@ -1,0 +1,25 @@
+id: l9.compose/strategic-planner-value@2
+purpose: Compose one exact, valid, independently produced per-source projection under l9.projection/strategic-planner-value@2
+  into a versioned derived read-only consumer view. Preserve every source-class payload whole, exact record identity,
+  lineage and digests. Composition may not perform value evaluation, reasoning, selection ranking, interpretation or
+  action.
+accepts:
+- projection_artifact
+composes:
+  projection_profile: l9.projection/strategic-planner-value@2
+merge_strategy:
+  placement: source_class_namespace
+  source_coverage: exact
+  duplicate_source: conflict
+  semantic_identity_collision: require_equivalence
+conflict_result: invalid
+output:
+  schema: l9.composed-projection.strategic-planner-value/v2
+required_provenance:
+- source_projection_refs
+- source_projection_digests
+- composition_profile_ref
+- composition_profile_digest
+payload_validation:
+  protocol: l9.payload-validation/source-class-dispatch@1
+successor_of: l9.compose/strategic-planner-value@1

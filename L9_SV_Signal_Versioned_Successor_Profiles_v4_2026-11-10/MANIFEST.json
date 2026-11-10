@@ -1,0 +1,49 @@
+{
+  "package": "L9_SV_Signal_Versioned_Successor_Profiles_v4_2026-11-10",
+  "package_version": "4.0.0-candidate",
+  "status": "CANDIDATE_NOT_ADMITTED",
+  "replacement_for": "L9_SV_Signal_Powered_Profiles_v3_2026-11-10.zip",
+  "contents": {
+    "full_versioned_projection_profiles": [
+      "profiles/gar_architecture_observer_v2.profile.yaml",
+      "profiles/strategic_planner_value_v2.profile.yaml",
+      "profiles/cursor_governance_operating_plane_v3.profile.yaml"
+    ],
+    "complete_compositions": [
+      "compositions/gar_architecture_observer_v2.composition.yaml",
+      "compositions/strategic_planner_value_v2.composition.yaml"
+    ],
+    "complete_payload_schemas": [
+      "schemas/gar_architecture_observer_v2.projection.schema.yaml",
+      "schemas/gar_architecture_observer_v2.composition.schema.yaml",
+      "schemas/strategic_planner_value_v2.projection.schema.yaml",
+      "schemas/strategic_planner_value_v2.composition.schema.yaml",
+      "schemas/cursor_governance_operating_plane_v3.projection.schema.yaml"
+    ],
+    "consumer_contracts": [
+      "consumer-contracts/gar_architecture_observer_v2.consumer.contract.yaml",
+      "consumer-contracts/strategic_planner_value_v2.consumer.contract.yaml",
+      "consumer-contracts/cursor_governance_operating_plane_v3.consumer.contract.yaml"
+    ],
+    "evidence_only": [
+      "compatibility/predecessor_selection_contract.yaml",
+      "SOURCE_BINDING.yaml",
+      "VALIDATION.json",
+      "assurance/negative-controls.json",
+      "assurance/consumer-acceptance-fixtures.yaml"
+    ],
+    "independent_local_checking": [
+      "tools/validate_successors.py",
+      "tools/test_negative_controls.py"
+    ]
+  },
+  "explicit_exclusions": [
+    "patches",
+    "overlay-only profiles",
+    "the four PR234 invariant/vocabulary source files",
+    "new numerical model implementation",
+    "semantic compiler output or receipts",
+    "runtime activation or consumer permission changes"
+  ],
+  "authority": "Exact target-class admission is a separate authorized act. This package contains candidate semantics and proposed contract material, not an admission receipt."
+}

@@ -1,0 +1,51 @@
+schema: l9.candidate-profile-source-binding/v1
+status: CANDIDATE_SOURCE_COORDINATES_ONLY
+canonical_comparison:
+  repository: Quantum-L9/.github
+  branch: main
+  revision: dc96a8ae9f31e359bb0e52a0b1d778fc8f265d99
+  sources:
+    registry: semantics/canonical_sources.yaml
+    authority: semantics/authority_model.yaml
+    profiles: semantics/projection_profiles.yaml
+    compositions: semantics/composition_profiles.yaml
+    selector_model: semantics/selector_model.yaml
+  admission_is_not_implied: true
+predecessors:
+  gar: l9.projection/gar-architecture-observer@1
+  planner: l9.projection/strategic-planner-value@1
+  cursor: l9.projection/cursor-governance-operating-plane@2
+successors:
+  gar: l9.projection/gar-architecture-observer@2
+  planner: l9.projection/strategic-planner-value@2
+  cursor: l9.projection/cursor-governance-operating-plane@3
+pr234:
+  repository: Quantum-L9/.github
+  url: https://github.com/Quantum-L9/.github/pull/234
+  head_revision: 28304c31bae83a1bfc450993029d5d07e180560b
+  observed_as: open_unmerged
+  candidate_invariants:
+  - L9-SVQ-001
+  - L9-SVQ-002
+  - L9-SIGNAL-001
+  - L9-SIGNAL-002
+  - L9-SIGNAL-003
+  - L9-SIGNAL-004
+  candidate_terms:
+  - qualitative_strategic_value_screen
+  - realized_strategic_compounding
+  - signal
+  - signal_propagation
+  - signal_feedback_episode
+  - signal_consumption
+  immutable_candidate_git_blobs:
+    MASTER_STRATEGIC_VALUE_INVARIANTS.md: 7ff12f14fade5c5abadf7e7eb4be2370afb9dc5c
+    MASTER_SIGNAL_INVARIANTS.md: a30b153946ec3250f2a4acff8cd92b4231880f50
+    STRATEGIC_VALUE_VOCABULARY_CANDIDATES.yaml: 76aecc98a4325fe1cfd9101fe02065ca6c3502e6
+    SIGNAL_VOCABULARY_CANDIDATES.yaml: 6788ff7b76d59be871a516ea5d8d94295d366870
+admission_status: PENDING
+compiler_status: NOT_EXECUTED
+producer_receipts: NOT_PRODUCED
+consumer_runtime: NOT_EXECUTED
+promotion_rule: target_class_owner_must_admit_exact_semantic_sources_and_profile_schema_contracts_before_production_use
+no_authority_transfer: true

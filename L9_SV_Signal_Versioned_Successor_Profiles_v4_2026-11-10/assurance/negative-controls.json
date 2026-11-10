@@ -1,0 +1,299 @@
+{
+  "schema": "l9.projection-candidate-negative-controls/v1",
+  "cases": [
+    {
+      "id": "S01",
+      "negative_witness": "all exactly six PR IDs absent on canonical baseline",
+      "expected": "not ready; block candidate projection before admission",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S02",
+      "negative_witness": "candidate field source changes while profile points at old SHA",
+      "expected": "reject profile until frozen coordinates rebound and reviewed",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S03",
+      "negative_witness": "two independent profiles select same semantic ID",
+      "expected": "retain source identity, no duplicate counted evidence or new truth",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S04",
+      "negative_witness": "forced quant SV score from qualitative screen",
+      "expected": "reject; use actual quantitative SV and numerical owner",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S05",
+      "negative_witness": "adverse effect on another beneficiary omitted",
+      "expected": "screen incomplete; no defensible qualitative conclusion",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S06",
+      "negative_witness": "one item delivered to three destinations, three votes claimed",
+      "expected": "reject non-independent corroboration",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S07",
+      "negative_witness": "ACK loop claimed owner-admitted changed state",
+      "expected": "reject learning and realized compounding",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S08",
+      "negative_witness": "later legitimate use without incremental objective effect",
+      "expected": "signal consumption supported; compounding unproven",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S09",
+      "negative_witness": "later objective effect but no supported causal attribution",
+      "expected": "do not claim attributable realized compounding",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S10",
+      "negative_witness": "same causal effect booked twice in SFV and DC",
+      "expected": "quantified SV fails exclusive five-bucket accounting",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S11",
+      "negative_witness": "Plan candidate auto-applied by assistant",
+      "expected": "reject unauthorized strategic mutation",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S12",
+      "negative_witness": "Cursor startup adapter missing but report says CURRENT",
+      "expected": "reject; must report UNVERIFIED/BLOCKED",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S13",
+      "negative_witness": "Cursor SessionStart reads strategic plan or Graphiti content",
+      "expected": "reject; startup health/status only",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S14",
+      "negative_witness": "select source class not registered to one canonical source ID",
+      "expected": "reject projection source resolution",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S15",
+      "negative_witness": "source-class composition silently omits one source",
+      "expected": "reject exact-source coverage; preserve failure",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S16",
+      "negative_witness": "candidate vocabulary and invariants partly admitted",
+      "expected": "recompute affected candidates; no silent selectors removed",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S17",
+      "negative_witness": "compiler is not available or has no verified receipts",
+      "expected": "NOT_COMPILED; no producer PASS or consumer replay claim",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S18",
+      "negative_witness": "stored signal with no eligible consumer",
+      "expected": "preserve orphan/blocked route and drag; no value assertion",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S19",
+      "negative_witness": "full existing @2 operation broken by proposed @3 successor",
+      "expected": "stop @3 migration; @2 remains intact",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S20",
+      "negative_witness": "global hard constraint conflicts with preferred option",
+      "expected": "exclude option regardless of potential score",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S21",
+      "negative_witness": "three candidate profiles admitted but no real compiler receipts",
+      "expected": "do not report BOUND or verified consumer semantics",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S22",
+      "negative_witness": "a consumer observes a strategic win through a different route than the projected plan",
+      "expected": "record outcome, do not self-validate original forecast or rewrite Plan Keeper",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S23",
+      "negative_witness": "additional Cursor profile grows SessionStart latency without additional effective information",
+      "expected": "do not migrate to @3; retain current operating-plane@2",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S24",
+      "negative_witness": "one outcome has three descriptive value labels",
+      "expected": "book the causal effect once; labels do not create additive benefits",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S25",
+      "negative_witness": "the cheapest diagnostic supports a different architecture option than the initially preferred one",
+      "expected": "re-evaluate the existing frontier at its owner, not preserve a stale selected winner",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S26",
+      "negative_witness": "independently admitted candidate vocabulary is textually modified before projection registration",
+      "expected": "invalidate affected profile pins, require re-review and new admission subject identity",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S27",
+      "negative_witness": "three profiles are green in local validation but the admitted source lacks one term",
+      "expected": "source binding must block; no inferred canonical consumer readiness",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S28",
+      "negative_witness": "benefit forecast ignores shifted support or maintenance burden for a different beneficiary",
+      "expected": "qualitative screen incomplete; preserve potential adverse and displaced effects",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S29",
+      "negative_witness": "per-source vocabulary payload passed to invariants descriptor",
+      "expected": "fail source-class dispatch; shape or source ref mismatch",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S30",
+      "negative_witness": "Legacy union shape accepts a missing component because all top-level keys optional",
+      "expected": "reject: v3 uses source-class dispatch plus mandatory selected fields",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S31",
+      "negative_witness": "PR #234 admits only 11 of 12 proposed records but a profile silently drops one selector",
+      "expected": "block and require explicit re-synthesis against actual admitted semantics",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S32",
+      "negative_witness": "one term has semantic_class but neither complete definition nor question",
+      "expected": "fail selected new vocabulary shape",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S33",
+      "negative_witness": "one requested invariant ID is replaced by another selected ID in extra row",
+      "expected": "source-equivalence check rejects exact identity/count mismatch",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S34",
+      "negative_witness": "independent record provenance mismatches though schema shape passes",
+      "expected": "reject: shape and provenance are separate checks",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S35",
+      "negative_witness": "Mandatory repair is deprioritized by unquantified soft potential",
+      "expected": "mandatory hard constraint remains binding; do not rank it away",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S36",
+      "negative_witness": "Qualitative pros/cons are summed as fake 84-point Strategic Value",
+      "expected": "reject quantified claim; requires admitted numerical owner and quantitative contract",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S37",
+      "negative_witness": "Two consumers report the same recurring capability unlock as two independent realized effects",
+      "expected": "do not credit duplicated state delta; exposure is not independent outcome",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S38",
+      "negative_witness": "Later consumer reads a signal but observed net result is unchanged or offset by new burden",
+      "expected": "consumption may be observed; realized positive compounding remains unproven",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S39",
+      "negative_witness": "An unaccepted challenge travels around a bounded loop",
+      "expected": "bounded circulation is not learning, owner adoption or mathematical convergence",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S40",
+      "negative_witness": "An existing verified @2 read supplies all requested exact terms without an @3 migration",
+      "expected": "do not activate redundant Cursor successor; compare actual incremental benefit and startup cost",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S41",
+      "negative_witness": "Bootstrap status emits CURRENT from an expired locally cached proof",
+      "expected": "no CURRENT without owner-verified currentness and genuine producer receipts",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    },
+    {
+      "id": "S42",
+      "negative_witness": "Agent receives structurally valid source-class payload missing an exact required selector",
+      "expected": "reject at producer selection equivalence even if payload dialect accepts the shape",
+      "run_status": "NOT_RUN",
+      "owner": "independent_admission_reviewer_or_consumer_test"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+schema: l9.projection-candidate-consumer-cases/v1
+status: cases_not_run
+examples:
+- id: GAR-01
+  question: Five downstream subscribers received the same architecture observation; is this five independent evidence sources?
+  expected: No; preserve single origin and dependent copies; separately appraise any hypothesized beneficiary effect
+- id: GAR-02
+  question: Should a new Signal service be built if the existing owner/interface covers eligible recipients?
+  expected: Reuse existing owner; require concrete lost meaning or proof of unacceptable inability before new primitive
+- id: GAR-03
+  question: An error correction enters a feedback loop but owner never accepts it; did the organization learn?
+  expected: No owner-accepted change and later consumption proven; do not claim learning or convergence
+- id: GAR-04
+  question: A new artifact has one observed direct benefit and a hypothesized future unlock offset by maintenance cost
+  expected: Differentiate observation and hypothesis; retain offset; directional assessment conditional and non-numeric
+- id: GAR-05
+  question: Profile consumer verification failed but a separate admitted architecture audit is still valid
+  expected: Block only successor-dependent conclusions, not unrelated existing GAR capabilities
+- id: PLANNER-01
+  question: Choose between a mandatory production data-integrity fix and a glamorous optional feature
+  expected: Apply mandatory hard constraint and legal authority first, not a soft benefit auction
+- id: PLANNER-02
+  question: There are two feasible paths but one has Unknown displaced labor/cost and might reverse preference
+  expected: Show incomparability/flip condition; no fabricated winner, score or zero-cost assumption
+- id: PLANNER-03
+  question: Report quantified SV as 37 points from a prose-only causal story
+  expected: Reject quantitative claim; require admitted numeric contract, comparable units and owner result
+- id: PLANNER-04
+  question: An earlier checklist is later used but the task outcome has not improved
+  expected: Consumption can be supported; positive realized compounding is not established
+- id: PLANNER-05
+  question: GT actor responses materially change the frontier
+  expected: Use separately admitted GT semantics; do not fabricate response probabilities in qualitative SV
+- id: PLANNER-06
+  question: One cheap test could change the recommended option; a separate long report cannot
+  expected: Recommend the cheaper discriminating proof and define conditional branches; do not mandate new artifact
+- id: CURSOR-01
+  question: SessionStart sees no real producer receipt for proposed successor
+  expected: Status-only UNVERIFIED or BLOCKED according to current owner; no payload, no false CURRENT
+- id: CURSOR-02
+  question: A verified admitted successor exists and a later authorized request selects exact signal record
+  expected: No payload at startup; exact on-demand retrieval with source/projection digests and current binding
+- id: CURSOR-03
+  question: Existing operating-plane@2 already satisfies exact term retrieval at lower cost
+  expected: Do not activate proposed successor merely to make three deployments; preserve @2
+- id: CURSOR-04
+  question: Source or profile digest goes stale mid-session
+  expected: Fail closed for affected successor conclusions; current admitted owner decides status; no automatic plan/memory changes
+independent_executions: NOT_RUN
+consumer_replay: NOT_RUN

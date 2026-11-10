@@ -1,0 +1,62 @@
+schema: l9.candidate-consumer-use-contract/v1
+status: proposed_non_authoritative
+subject_profile: l9.projection/strategic-planner-value@2
+subject_consumer: strategic-planner
+consumer_ownership: existing_strategic_planner_analysis_not_plan_keeper_mutation
+activation:
+  when: authorized_discretionary_decision_requires_value_comparison_or_realized_compounding_review
+  prerequisite:
+  - admitted_and_current_profile_and_source_bound_projections
+  - governing_strategy_and_objective_with_proven_origin
+  - current_real_world_evidence_with_source_and_revision
+  otherwise: do_not_upgrade_candidate_profile_to_admitted_claim
+qualitative_mode:
+  requires:
+  - authorized_objective_and_affected_beneficiaries
+  - feasible_current_baseline_or_declared_incomparability
+  - admissible_options_and_applicable_hard_constraints
+  - causal_mechanism_for_each_supported_benefit_or_harm
+  - observed_hypothesized_disputed_and_Unknown_claims_kept_distinct
+  - displaced_burden_and_shared_prerequisite_checked_once_not_double_booked
+  - material_unresolved_uncertainty_and_preference_flip_condition
+  - bounded_lowest_cost_decision_discriminating_next_observation
+  allowable_results: [supported_direction, conditional_direction, incomparable_frontier, excluded_by_hard_constraint, unresolved]
+  result_status_is_local_prose_only: true
+  invalid_outputs: [unjustified_0_to_100_score, arbitrary_weight, invented_dollars, fabricated_probability, autonomous_strategic_commitment]
+realized_compounding_mode:
+  requires:
+  - earlier_attributable_durable_intervention_and_original_evidence
+  - later_eligible_actor_and_authorized_consumption_evidence
+  - separately_observed_later_net_improvement_and_feasible_comparison
+  - duplicate_effects_offsetting_harms_and_attribution_limits_reconciled
+  if_incomplete: label_not_proven_without_treating_Unknown_as_zero
+quantitative_mode:
+  status: preserved_from_admitted_strategic_planner_value_at_1
+  obligation_ref: l9.contract/strategic-value-assessment@1
+  value_model_ref: l9.strategic.value@1
+  mandatory_if_asserting_numeric_SV:
+  - objective_compatible_utility_unit_and_feasible_baseline
+  - governing_model_method_and_source_coordinates
+  - five_bucket_mutually_exclusive_exhaustive_reconciliation
+  - material_uncertainty_horizon_and_required_numerical_owner_evidence
+  rule: qualitative_advice_is_not_evidence_of_quantitative_assessment_and_is_not_a_mandatory_numeric_preflight
+strategic_interaction:
+  owner_ref: l9.contract/strategic-interaction-assessment@1
+  when: adaptive_actor_responses_are_material_and_claimed
+  rule: no_unverified_response_model_or_probabilities
+plan_mutation:
+  owner: plan_keeper_under_explicit_strategic_authority
+  projection_confers_mutation_authority: false
+forbidden:
+- ranking_infeasible_options_as_if_soft_utility_overrides_constraint
+- double_credit_for_same_effect_through_mesh_or_loop
+- treating_delivered_or_acknowledged_signal_as_observed_positive_compounding
+- quantitative_result_from_undeclared_scenario_or_same_prose_hypothesis
+- choosing_exact_winner_despite_preference_sensitive_unknown
+- delegating_strategic_plan_rewrite_to_value_assessor
+negative_witnesses:
+- mandatory_integrity_repair_must_not_be_excluded_for_lack_of_positive_expected_return
+- reuse_without_later_observed_net_improvement_must_not_be_realized_compounding
+- numeric_SV_37_without_owner_model_and_ledger_must_be_refused
+- GT_only_analysis_must_not_automatically_trigger_quantitative_SV_claim
+verification_status: consumer_replay_not_executed

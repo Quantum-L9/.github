@@ -1,0 +1,108 @@
+id: l9.projection/cursor-governance-operating-plane@3
+successor_of: l9.projection/cursor-governance-operating-plane@2
+class: consumer
+consumer: Cursor-Governance
+purpose: Successor of the verified Cursor operating-plane@2, preserving every one of its eight source classes and existing
+  selector contents. Include newly admitted SV/Signal source records for authorized on-demand selection. SessionStart
+  remains status-only under the current control-plane owner; this projection creates no hook, resolver, permission, skill
+  routing, automatic hydration or admission authority.
+sources:
+  vocabulary:
+    selectors:
+    - $.terms.authority
+    - $.terms.capability
+    - $.terms.semantic_owner
+    - $.terms.provider
+    - $.terms.bounded_autonomy
+    - $.terms.state_change
+    - $.terms.receipt
+    - $.terms.packet
+    - $.terms.conformance
+    - $.terms.invariant
+    - $.terms.contract
+    - $.terms.admission
+    - $.terms.provenance
+    - $.terms.resolution
+    - $.terms.requirement
+    - $.terms.qualitative_strategic_value_screen
+    - $.terms.realized_strategic_compounding
+    - $.terms.signal
+    - $.terms.signal_propagation
+    - $.terms.signal_feedback_episode
+    - $.terms.signal_consumption
+  capabilities:
+    selectors:
+    - $.capability_entry_contract
+    - $.capability_state_dimensions
+    - $.invocability_contract
+    - $.capabilities[*].id
+    - $.capabilities[*].semantic_owner
+    - $.capabilities[*].effect_class
+    - $.capabilities[*].authorization_requirements
+    - $.global_rules
+    - $.capability_relations
+    - $.catalog_status
+    - $.capabilities
+  authority_model:
+    selectors:
+    - $.authority_classes
+    - $.agent_authority
+    - $.human_authority
+    - $.escalation_rules
+    - $.admission_rules
+    - $.global_admission_rules
+    - $.promotion_rules
+  lifecycle:
+    selectors:
+    - $.lifecycles
+    - $.global_rules
+    - $.state_semantics
+    - $.lifecycle_relations
+  invariants:
+    selectors:
+    - $.invariants[?(@.scope=="global")]
+    - $.invariants[?(@.id=="L9-SVQ-001")]
+    - $.invariants[?(@.id=="L9-SVQ-002")]
+    - $.invariants[?(@.id=="L9-SIGNAL-001")]
+    - $.invariants[?(@.id=="L9-SIGNAL-002")]
+    - $.invariants[?(@.id=="L9-SIGNAL-003")]
+    - $.invariants[?(@.id=="L9-SIGNAL-004")]
+  contracts:
+    selectors:
+    - $.contracts[*].id
+    - $.contracts[*].purpose
+    - $.contracts[*].scope
+    - $.contracts[*].source_invariants
+    - $.contracts[*].requires
+    - $.contracts[*].guarantees
+    - $.contracts[*].forbidden
+    - $.contracts[*].outcomes
+    - $.contracts[*]
+    - $.outcome_semantics
+  error_taxonomy:
+    selectors:
+    - $.errors
+    - $.result_domains
+  receipt_catalog:
+    selectors:
+    - $.receipts
+    - $.global_rules
+    - $.receipt_kernel
+    - $.specialization_contract
+    - $.receipt_relations
+output:
+  schema: l9.projection.cursor-governance-operating-plane/v3
+forbidden:
+- adapter_host_or_surface_specific_semantics
+- repository_local_policy_as_global_law
+- execution_publication_or_merge_authority_grant
+- obligation_not_admitted_in_a_selected_source
+- skill_command_or_routing_semantics
+breaking_changes:
+  consumer_migration: explicit
+  rationale: Retain predecessor source coverage and authority boundaries; add six admitted-only qualitative Strategic
+    Value / Signal terms and complete-record invariant selectors; opt into producer source-class-dispatch validation.
+    Never reassign Numerical Reasoning, Strategy or runtime permissions.
+  removed_selections: []
+payload_validation:
+  protocol: l9.payload-validation/source-class-dispatch@1
