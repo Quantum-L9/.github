@@ -30,6 +30,10 @@ on:
   issues:
     types: [opened, edited, reopened]
 
+# No token permission by default (OpenSSF Scorecard Token-Permissions); each job
+# below grants exactly what its callee needs, which overrides this for that job.
+permissions: {}
+
 jobs:
   pr:
     if: github.event_name == 'pull_request'

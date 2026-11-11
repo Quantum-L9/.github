@@ -1,7 +1,7 @@
 {
-	"commit": "b5acce06a9f4439739f31435804671c571f44661",
+	"commit": "9f825b5667ef1d425c235cf2280f386342796b85",
 	"path": ".github/actions/install-consumer-ci/core-owned-tools.json",
 	"repository": "Quantum-L9/l9-ci-core",
-	"sha256": "16d3abe08dbe13616300ebaca38e0fb7a6ab7e161b22c144c4e62bf737284183",
+	"sha256": "83e5eaadd3d5e05b38db7a7a961425dd36aef0ddf2a88c856dd80479001e8882",
 	"vendored_at": "policies/vendor/l9-ci-core/core-owned-tools.json"
 }

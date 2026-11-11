@@ -4,7 +4,8 @@
 
 Accepted (revised 2026-11-03: automated weekly seed and restore, npm;
 revised 2026-11-05: weekly sweep paused, every manual seed restores, and
-`.github/CODEOWNERS` joins the managed seed paths)
+`.github/CODEOWNERS` joins the managed seed paths;
+revised 2026-11-11: safe-only, every ecosystem ignores semver-major bumps)
 
 **Date:** 2026-10-15
 **Deciders:** Quantum-L9 platform owners (merge of the PR that adds this record)
@@ -92,6 +93,15 @@ versions through the existing single builder.
     render.
   - `github-actions` ignores `Quantum-L9/l9-ci-core*`, `Quantum-L9/l9-ci-sdk*`
     and `Quantum-L9/.github*`.
+  - **Safe-only (revision 2026-11-11, operator decision):** every ecosystem's
+    ignore list ends with `dependency-name: "*"` and
+    `update-types: ["version-update:semver-major"]`, so Dependabot proposes
+    only minor and patch bumps. A major is a deliberate upgrade with a code
+    review, not a weekly PR: Quantum-L9/Cognitive.Engine.Graphs#429 (openai
+    1.x → 3.46.0) and #431 (actions/github-script 8 → 9) are the cases that
+    prompted it. Dependabot applies `ignore` to security updates too, so a
+    vulnerability fixed only in a new major surfaces as a Dependabot alert,
+    not a PR; alerts are unaffected.
 - **Settings in every entry:** weekly on Monday, `open-pull-requests-limit: 2`,
   `chore(deps)` prefix, `cooldown.default-days: 7`, a minor/patch group, and no
   `labels`.
