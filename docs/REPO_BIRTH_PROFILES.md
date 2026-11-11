@@ -36,7 +36,11 @@ seeding is proven; it runs on dispatch.)
 `coderabbit`, in every class that materializes `dependabot`. It is the
 `ops/render-coderabbit.js` render (`inheritance: true`, exclusion-only
 `reviews.path_filters`), written only when the repository has none. An
-existing file is kept, never restored.
+existing file is kept, never restored. `l9-repo-template` offspring
+(`non_constellation_python`) are born with the template's own
+`.coderabbit.yaml`, which does not set `inheritance: true`, so the seed never
+writes and they receive no central exclusions until the template's file sets
+it (a cross-repository operator step, ADR 0020).
 
 Three surfaces are MATERIALIZE only because their bytes differ per consumer:
 `SECURITY.md` and `.github/ISSUE_TEMPLATE/config.yml` carry the consumer's

@@ -281,6 +281,13 @@ const fails = [
 	],
 	[{ [fragmentPath("generated")]: "!\n" }, /not a single glob/],
 	[{ [fragmentPath("generated")]: "!**/a b/**\n" }, /not a single glob/],
+	[{ [fragmentPath("generated")]: "!!src/**\n" }, /starts with "!!"/],
+	[{ [fragmentPath("generated")]: "!!**/*.py\n" }, /starts with "!!"/],
+	[{ [fragmentPath("generated")]: "!**\n" }, /excludes every file/],
+	[{ [fragmentPath("generated")]: "!*\n" }, /excludes every file/],
+	[{ [fragmentPath("generated")]: "!**/*\n" }, /excludes every file/],
+	[{ [fragmentPath("generated")]: "!**/**\n" }, /excludes every file/],
+	[{ [fragmentPath("generated")]: "!/**\n" }, /excludes every file/],
 	[
 		{ [fragmentPath("generated")]: "!**/a/**\n# late\n!**/b/**\n" },
 		/comments belong above/,
@@ -319,7 +326,7 @@ const cli = spawnSync(process.execPath, ["ops/render-coderabbit.js"], {
 assert.strictEqual(cli.status, 0, cli.stderr);
 assert.strictEqual(cli.stdout, out, "CLI prints the render");
 console.log(
-	"ok: an include pattern, a missing or malformed fragment, and a header without inheritance all throw",
+	"ok: an include pattern, a double negation, a match-everything exclusion, a missing or malformed fragment, and a header without inheritance all throw",
 );
 
 // ── 4. schema validity (CodeRabbit schema.v2.json; the URL 301-redirects) ───

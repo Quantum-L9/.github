@@ -131,7 +131,8 @@ renders it from:
 top-level `inheritance: true` and a `reviews.path_filters` list of exclusions
 only. A fragment pattern without a leading `!` throws, because one include
 pattern turns CodeRabbit's list into an allowlist and every unnamed file is
-skipped. The same bytes are this repository's `.coderabbit.yaml`, the central
+skipped; so do a double negation (`!!glob`) and a match-everything exclusion
+(`!**`, `!**/*`), which would silence review. The same bytes are this repository's `.coderabbit.yaml`, the central
 configuration in `Quantum-L9/coderabbit`, and the seed. A consumer's existing
 file is never replaced: it keeps its own `path_instructions` and tools, and
 with `inheritance: true` CodeRabbit appends the central exclusions to it.
@@ -184,7 +185,7 @@ Those workflows, and `repo-birth-bootstrap.yml`, run in the
 | PR or issue template | Edit and merge. The seed sources are `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md`, and `.github/ISSUE_TEMPLATE/*`. Seeded copies are not overwritten. |
 | Governance gate rule | Edit `governance-pr.yml` or `governance-issue.yml`, then re-pin the SHA in `policies/governance-caller.yml` and update consumers that already have a caller. |
 | CODEOWNERS or dependabot | Edit `policies/CODEOWNERS`, or the fragments in `policies/dependabot/` (then regenerate `.github/dependabot.yml` with `node ops/render-dependabot.js > .github/dependabot.yml`), and merge. A new Core list is vendored with its commit and sha256 in `policies/dependabot/core-owned-tools.source.json`. Dispatch `seed-governance.yml` (or `continuous-sync.yml`) to open a PR wherever either file differs from the new org version. |
-| CodeRabbit exclusions | Edit the fragments in `policies/coderabbit/path-filters/` (exclusions only), regenerate with `node ops/render-coderabbit.js > .coderabbit.yaml`, and merge. Commit the same render to `.coderabbit.yaml` in `Quantum-L9/coderabbit`: that file reaches every repository that inherits. Seeded copies are not overwritten. |
+| CodeRabbit exclusions | Edit the fragments in `policies/coderabbit/path-filters/` (exclusions only), regenerate with `node ops/render-coderabbit.js > .coderabbit.yaml`, and merge. Commit the same render to `.coderabbit.yaml` in `Quantum-L9/coderabbit`: that file reaches every repository that inherits. Seeded copies are not overwritten, so an added exclusion reaches them through inheritance but a removed one does not: it stays in every copy seeded before the removal until that repository deletes it from its own `.coderabbit.yaml`. |
 | New repository | `auto-seed-new-repo.yml`, or `workflow_dispatch` on `seed-governance.yml`. `l9-repo-template` `make new-repo` dispatches `repo-birth-bootstrap.yml` for one repo. |
 
 ## Appendix A — secrets and called workflows

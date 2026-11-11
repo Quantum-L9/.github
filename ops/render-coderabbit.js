@@ -37,6 +37,12 @@ const PATH_FILTER_FRAGMENTS = Object.freeze([
 const INHERITANCE_RE = /^inheritance: true$/m;
 // An exclusion: `!`, then a non-empty glob with no whitespace.
 const EXCLUSION_RE = /^!\S+$/;
+// `!!glob` is a double negation: a glob engine may read it as an include,
+// which would turn the list into an allowlist. Refused.
+const DOUBLE_NEGATION_RE = /^!!/;
+// A glob made only of `*` and `/` (`!**`, `!*`, `!**/*`, `!**/**`) excludes
+// every file and silences review entirely. Refused.
+const MATCH_ALL_RE = /^![*/]+$/;
 
 function readRequired(fs, path) {
 	try {
@@ -87,6 +93,18 @@ function readFilterFragment(fs, name) {
 			if (!EXCLUSION_RE.test(line)) {
 				throw new Error(
 					`${path}:${i + 1}: path filter ${JSON.stringify(line)} is not a single glob after "!"`,
+				);
+			}
+			if (DOUBLE_NEGATION_RE.test(line)) {
+				throw new Error(
+					`${path}:${i + 1}: path filter ${JSON.stringify(line)} starts with "!!" — ` +
+						"a double negation may be read as an include and turn path_filters into an allowlist",
+				);
+			}
+			if (MATCH_ALL_RE.test(line)) {
+				throw new Error(
+					`${path}:${i + 1}: path filter ${JSON.stringify(line)} excludes every file — ` +
+						"it would silence CodeRabbit review entirely",
 				);
 			}
 			patterns.push(line);

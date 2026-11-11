@@ -75,7 +75,10 @@ Enterprise-only; the organization is on the Free plan.
   directory sweep).
 - **Contract:** top-level `inheritance: true` (the header is refused without
   it); `reviews.path_filters` is exclusions only. A fragment pattern without a
-  leading `!` throws, as does a duplicate or a pattern with whitespace.
+  leading `!` throws, as does a duplicate, a pattern with whitespace, a
+  double negation (`!!glob`, which a glob engine may read as an include) and a
+  match-everything exclusion (`!**`, `!*`, `!**/*`), which would silence
+  review entirely.
   Patterns use `**/` so they match at any depth. Tests and docs are never
   excluded.
 - **Generic only:** the fragments carry only exclusions valid for any
@@ -106,13 +109,22 @@ Enterprise-only; the organization is on the Free plan.
 
 - Good:
   - No org-distributed file can carry an include pattern.
-  - New repositories get the exclusions locally and from the central file.
+  - New repositories born without a `.coderabbit.yaml` get the exclusions
+    locally and from the central file.
   - Repository-specific review settings are never overwritten.
 - Bad:
   - Existing `.coderabbit.yaml` files are untouched. Each must add
     `inheritance: true` (or be removed) to receive the central exclusions, and
     those with include patterns keep the allowlist bug until fixed in their
     own repositories.
+  - Repositories born from `l9-repo-template` (class
+    `non_constellation_python`) are not "new repositories without a file":
+    the template ships its own `.coderabbit.yaml`, without
+    `inheritance: true`. Every repository created from it keeps that file, is
+    never seeded, and does not receive the central exclusions until
+    `l9-repo-template`'s `.coderabbit.yaml` sets `inheritance: true` (or is
+    removed). That template change is a cross-repository operator step,
+    tracked with creating `Quantum-L9/coderabbit`.
   - The test needs network access to fetch CodeRabbit's schema and fails when
     it cannot (schema validity is then unproven, never assumed).
 - Neutral:
@@ -120,6 +132,11 @@ Enterprise-only; the organization is on the Free plan.
     render is committed to `Quantum-L9/coderabbit`; seeded copies keep their
     bytes, and their own list is merged first, so the shared entries still
     append.
+  - Removing an exclusion is not symmetric. A seeded copy is the full render
+    at seed time and is never refreshed, and an exclusion always wins, so an
+    exclusion deleted centrally stays in force in every repository seeded
+    before the deletion. Retiring one org-wide also needs a change in each
+    seeded repository's own `.coderabbit.yaml`.
 
 ## Links
 
