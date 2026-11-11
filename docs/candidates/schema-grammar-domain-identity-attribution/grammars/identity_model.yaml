@@ -1,0 +1,195 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/identity-attribution/grammar/identity-model@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: identity_model
+source_ref: l9.source/identity-model@1
+source_path: semantics/identity_model.yaml
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+source_digest: sha256:b9245eca99501a38976e909e1d151942c1253b2eee2bd6bab9c6382687db4288
+applies_to_selectors:
+- $.global_rules
+- $.identity_dimensions
+- $.non_identity_dimensions
+- $.identity_binding
+- $.identity_resolution
+- $.identity_assertion
+- $.consumer_rules
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        identity_dimensions_are_semantically_distinct:
+          type: boolean
+        equal_strings_do_not_imply_equal_identity_kinds:
+          type: boolean
+        identity_resolution_is_evidence_bound:
+          type: boolean
+        identity_assertion_is_consumed_not_rederived:
+          type: boolean
+        unknown_or_ambiguous_consequential_actor_identity_fails_closed:
+          type: boolean
+        governance_profile_is_not_identity:
+          type: boolean
+        adapter_identity_is_not_actor_identity:
+          type: boolean
+        provider_identity_is_not_actor_identity:
+          type: boolean
+        surface_identity_is_not_actor_identity:
+          type: boolean
+        runtime_identity_is_not_actor_identity:
+          type: boolean
+        memory_authorship_uses_actor_identity:
+          type: boolean
+        receipts_bind_applicable_actor_and_runtime_provenance:
+          type: boolean
+    identity_dimensions:
+      type: object
+      additional_properties: true
+      fields:
+        product_identity:
+          type: object
+          additional_properties: true
+          fields:
+            question:
+              type: string
+            definition:
+              type: string
+            authority_source:
+              type: string
+            dynamic:
+              type: boolean
+        release_identity:
+          type: object
+          additional_properties: true
+          fields:
+            question:
+              type: string
+            definition:
+              type: string
+            authority_source:
+              type: string
+            dynamic:
+              type: boolean
+        runtime_identity:
+          type: object
+          additional_properties: true
+          fields:
+            question:
+              type: string
+            definition:
+              type: string
+            authority_source:
+              type: string
+            dynamic:
+              type: boolean
+        constellation_identity:
+          type: object
+          additional_properties: true
+          fields:
+            question:
+              type: string
+            definition:
+              type: string
+            authority_source:
+              type: string
+            dynamic:
+              type: boolean
+        actor_identity:
+          type: object
+          additional_properties: true
+          fields:
+            question:
+              type: string
+            definition:
+              type: string
+            authority_source:
+              type: string
+            dynamic:
+              type: boolean
+        surface_identity:
+          type: object
+          additional_properties: true
+          fields:
+            question:
+              type: string
+            definition:
+              type: string
+            authority_source:
+              type: string
+            dynamic:
+              type: boolean
+    non_identity_dimensions:
+      type: object
+      additional_properties: true
+      fields:
+        adapter_identity:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+        provider_identity:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+        governance_profile:
+          type: object
+          additional_properties: true
+          fields:
+            definition:
+              type: string
+    identity_binding:
+      type: object
+      additional_properties: true
+      fields:
+        definition:
+          type: string
+        allowed_fields:
+          type: string_list
+        rules:
+          type: string_list
+    identity_resolution:
+      type: object
+      additional_properties: true
+      fields:
+        definition:
+          type: string
+        inputs:
+          type: string_list
+        result_domain:
+          type: string_list
+        rules:
+          type: string_list
+    identity_assertion:
+      type: object
+      additional_properties: true
+      fields:
+        definition:
+          type: string
+        schema_ref:
+          type: string
+        required:
+          type: string_list
+        rules:
+          type: string_list
+    consumer_rules:
+      type: object
+      additional_properties: true
+      fields:
+        memory:
+          type: string_list
+        bootstrap:
+          type: string_list
+        governance:
+          type: string_list
+        receipts:
+          type: string_list

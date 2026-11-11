@@ -1,0 +1,127 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/contracts-conformance/grammar/contracts@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: contracts
+source_ref: l9.source/contracts@1
+source_path: semantics/contracts.yaml
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+source_digest: sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993
+applies_to_selectors:
+- $.contracts
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    contracts:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          purpose:
+            type: string
+          scope:
+            type: string
+          owner:
+            type: string
+          source_invariants:
+            type: string_list
+          applies_to:
+            type: string_list
+          requires:
+            type: string_list
+          guarantees:
+            type: string_list
+          forbidden:
+            type: string_list
+          outcomes:
+            type: object
+            additional_properties: true
+            fields:
+              satisfied:
+                type: string
+              violated:
+                type: string
+              unresolved:
+                type: string
+              admitted:
+                type: string
+              refused:
+                type: string
+              new_decision_required:
+                type: string
+              attested:
+                type: string
+              unverified:
+                type: string
+              invalid_binding:
+                type: string
+              supported:
+                type: string
+              unsupported:
+                type: string
+              resolved:
+                type: string
+              admissible:
+                type: string
+              inadmissible:
+                type: string
+              current:
+                type: string
+              non_current:
+                type: string
+              compatible:
+                type: string
+              incompatible:
+                type: string
+              preserved:
+                type: string
+              successor_required:
+                type: string
+              valid_projection:
+                type: string
+              invalid_projection:
+                type: string
+              rejected:
+                type: string
+              invocable:
+                type: string
+              not_invocable:
+                type: string
+              invalid:
+                type: string
+              unsat:
+                type: string
+              ambiguous:
+                type: string
+              blocked:
+                type: string
+              unknown:
+                type: string
+              valid:
+                type: string
+              new_candidate_required:
+                type: string
+          applicability:
+            type: object
+            additional_properties: true
+            fields:
+              trigger:
+                type: string
+              does_not_apply_to:
+                type: string_list
+              method_conditional:
+                type: string
+              unavailable_claim:
+                type: string
+              sv_dependency:
+                type: string
+              qv:
+                type: string
+              unknown_resolution:
+                type: string

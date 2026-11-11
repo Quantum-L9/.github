@@ -1,0 +1,279 @@
+schema: l9.domain-consumer-binding-catalog/v1
+artifact_id: l9.domain-consumer-binding-catalog/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_domain_consumer_bindings
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: domain_consumer_bindings.yaml
+governed_by:
+  invariants:
+  - L9-AUTH-001
+  - L9-AUTH-002
+  - L9-IDENTITY-003
+  - L9-PROJECTION-001
+  - L9-COMPAT-001
+  - L9-UNKNOWN-001
+  contracts:
+  - l9.contract/authority-boundary@1
+  - l9.contract/domain-composition-compatibility@1
+  - l9.contract/domain-composition-provenance@1
+purpose: >-
+  Declare which domain projections each of six named consumers requires, which it activates only under a declared
+  condition, and which composition contracts govern combining them. A domain consumer binding is not a projection
+  profile and not a consumer_binding of a product release. It selects meaning and creates none, keeps host, hosted
+  skill, actor and authority identities distinct, grants no permission, and leaves every unverified consumer
+  coordinate explicit.
+domain_model_ref: l9.domain-projection-model/global@1
+global_rules:
+  bindings_are_versioned_and_immutable_once_admitted: true
+  a_binding_selects_domain_projection_profiles_only: true
+  a_binding_grants_no_permission_or_action_authority: true
+  a_binding_creates_no_semantics: true
+  required_domains_resolve_uniquely: true
+  conditional_domains_activate_only_under_a_declared_activation_condition: true
+  host_and_hosted_skill_identities_remain_distinct: true
+  a_host_binding_names_its_actor_and_surfaces_from_the_canonical_registries: true
+  a_skill_binding_names_no_actor_or_surface: true
+  a_hosted_skill_composes_with_its_host_under_the_stricter_applicable_constraint: true
+  host_capability_does_not_grant_a_hosted_skill_permission: true
+  an_unresolved_consumer_coordinate_stays_explicit_and_blocks_activation: true
+  consumer_revision_is_bound_by_the_consumer_committed_projection_bundle: true
+  runtime_actor_resolution_stays_downstream: true
+  a_binding_switches_no_existing_consumer_profile: true
+consumer_kinds:
+  skill:
+    definition: A versioned procedure with an exact entrypoint file in a registered repository.
+    requires:
+    - repository_ref
+    - entrypoint
+    forbids:
+    - actor_ref
+    - surface_refs
+  host:
+    definition: An execution host surface family through which an actor runs hosted skills.
+    requires:
+    - actor_ref
+    - surface_refs
+    forbids:
+    - entrypoint
+activation_conditions:
+  explicit_task_requirement:
+    definition: The current task explicitly requires the domain's semantics.
+  hosted_skill_requirement:
+    definition: A skill running in this host requires the domain through its own binding.
+unresolved_blocks:
+  binding_activation: The binding cannot be activated until the coordinate resolves.
+  consumer_migration: The consumer cannot leave its predecessor profile until the coordinate resolves.
+composition:
+  compatibility_contract: l9.contract/domain-composition-compatibility@1
+  provenance_contract: l9.contract/domain-composition-provenance@1
+bindings:
+- id: l9.domain-consumer-binding/gar@1
+  consumer:
+    kind: skill
+    identity: l9-global-architect
+    repository_ref: l9.repository-registry/global@1#cursor-governance
+    entrypoint:
+      path: skills/l9-global-architect/SKILL.md
+      skill_name: l9-global-architect
+      skill_version: 0.8.4
+  predecessor_profiles:
+  - l9.projection/gar-architecture-observer@1
+  - l9.projection/architecture-intelligence@1
+  requires:
+  - l9.projection/architecture@1
+  - l9.projection/governance@1
+  - l9.projection/evidence-provenance@1
+  - l9.projection/contracts-conformance@1
+  - l9.projection/capabilities-dependencies@1
+  conditional:
+  - profile: l9.projection/strategic-value@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/signals@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/identity-attribution@1
+    activation: explicit_task_requirement
+  authority:
+    binding_grants_permissions: false
+    action_authority: externally_resolved
+  unresolved:
+  - coordinate: predecessor_migration_dispositions
+    reason: Selections of the predecessor profiles absent from the bound domains have no recorded disposition.
+    blocks: consumer_migration
+- id: l9.domain-consumer-binding/strategic-planner@1
+  consumer:
+    kind: skill
+    identity: strategic-planner
+    repository_ref: unresolved
+    entrypoint: unresolved
+  predecessor_profiles:
+  - l9.projection/strategic-planner-value@1
+  - l9.projection/strategic-planner-interaction@1
+  requires:
+  - l9.projection/strategic-value@1
+  - l9.projection/architecture@1
+  - l9.projection/signals@1
+  - l9.projection/governance@1
+  - l9.projection/evidence-provenance@1
+  - l9.projection/capabilities-dependencies@1
+  conditional:
+  - profile: l9.projection/contracts-conformance@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/identity-attribution@1
+    activation: explicit_task_requirement
+  authority:
+    binding_grants_permissions: false
+    action_authority: externally_resolved
+  unresolved:
+  - coordinate: repository_ref
+    reason: No registered repository is known to carry the strategic-planner consumer.
+    blocks: binding_activation
+  - coordinate: entrypoint
+    reason: No strategic-planner entrypoint file was found in any repository reachable when this binding was written.
+    blocks: binding_activation
+  - coordinate: predecessor_migration_dispositions
+    reason: Selections of the predecessor profiles absent from the bound domains have no recorded disposition.
+    blocks: consumer_migration
+- id: l9.domain-consumer-binding/cursor@1
+  consumer:
+    kind: host
+    identity: cursor
+    actor_ref: l9.actor-registry/global@1#cursor
+    surface_refs:
+    - l9.surface-registry/global@1#cursor-ide
+  predecessor_profiles:
+  - l9.projection/cursor-governance-operating-plane@2
+  requires:
+  - l9.projection/architecture@1
+  - l9.projection/governance@1
+  - l9.projection/contracts-conformance@1
+  - l9.projection/capabilities-dependencies@1
+  conditional:
+  - profile: l9.projection/strategic-value@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/signals@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/evidence-provenance@1
+    activation: hosted_skill_requirement
+  - profile: l9.projection/identity-attribution@1
+    activation: hosted_skill_requirement
+  authority:
+    binding_grants_permissions: false
+    action_authority: externally_resolved
+  unresolved:
+  - coordinate: predecessor_correspondence
+    reason: >-
+      The predecessor is the Cursor-Governance operating-plane profile, a repository consumer rather than the Cursor
+      host; whether the host binding replaces it is undecided.
+    blocks: consumer_migration
+- id: l9.domain-consumer-binding/coding-agent@1
+  consumer:
+    kind: skill
+    identity: l9-coding-agent
+    repository_ref: l9.repository-registry/global@1#cursor-governance
+    entrypoint:
+      path: skills/l9-coding-agent/SKILL.md
+      skill_name: l9-coding-agent
+      skill_version: 1.3.0
+  predecessor_profiles:
+  - l9.projection/coding-agent-execution@1
+  requires:
+  - l9.projection/architecture@1
+  - l9.projection/governance@1
+  - l9.projection/evidence-provenance@1
+  - l9.projection/contracts-conformance@1
+  - l9.projection/capabilities-dependencies@1
+  - l9.projection/identity-attribution@1
+  conditional:
+  - profile: l9.projection/strategic-value@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/signals@1
+    activation: explicit_task_requirement
+  authority:
+    binding_grants_permissions: false
+    action_authority: externally_resolved
+  unresolved:
+  - coordinate: added_selection_review
+    reason: >-
+      The bound domains cover every predecessor selection but add selections the predecessor did not make; none
+      has been reviewed for authority neutrality.
+    blocks: consumer_migration
+- id: l9.domain-consumer-binding/simple-plan@1
+  consumer:
+    kind: skill
+    identity: l9-plan-simple
+    repository_ref: l9.repository-registry/global@1#cursor-governance
+    entrypoint:
+      path: skills/l9-plan-simple/SKILL.md
+      skill_name: l9-plan-simple
+      skill_version: 1.4.0
+  predecessor_profiles: []
+  requires:
+  - l9.projection/architecture@1
+  - l9.projection/strategic-value@1
+  - l9.projection/governance@1
+  - l9.projection/capabilities-dependencies@1
+  conditional:
+  - profile: l9.projection/signals@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/evidence-provenance@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/contracts-conformance@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/identity-attribution@1
+    activation: explicit_task_requirement
+  authority:
+    binding_grants_permissions: false
+    action_authority: externally_resolved
+  unresolved: []
+- id: l9.domain-consumer-binding/claude-code@1
+  consumer:
+    kind: host
+    identity: claude-code
+    actor_ref: l9.actor-registry/global@1#claude-code
+    surface_refs:
+    - l9.surface-registry/global@1#claude-code-desktop
+    - l9.surface-registry/global@1#claude-code-cli
+    - l9.surface-registry/global@1#claude-code-ide
+    - l9.surface-registry/global@1#claude-code-web
+    - l9.surface-registry/global@1#claude-code-mobile
+  predecessor_profiles: []
+  requires:
+  - l9.projection/governance@1
+  - l9.projection/identity-attribution@1
+  - l9.projection/capabilities-dependencies@1
+  - l9.projection/contracts-conformance@1
+  - l9.projection/evidence-provenance@1
+  conditional:
+  - profile: l9.projection/architecture@1
+    activation: hosted_skill_requirement
+  - profile: l9.projection/strategic-value@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/signals@1
+    activation: explicit_task_requirement
+  authority:
+    binding_grants_permissions: false
+    action_authority: externally_resolved
+  unresolved: []
+validation_rules:
+- id: BINDING-001
+  rule: every_required_and_conditional_domain_profile_resolves_to_exactly_one_domain_profile
+- id: BINDING-002
+  rule: a_conditional_domain_names_a_declared_activation_condition_and_is_not_also_required
+- id: BINDING-003
+  rule: host_and_skill_identities_remain_distinct_and_resolve_through_their_canonical_registries
+- id: BINDING-004
+  rule: a_binding_grants_no_permission_and_leaves_action_authority_externally_resolved
+- id: COMPOSE-001
+  rule: identity_bearing_records_shared_by_bound_domains_are_canonically_equivalent_at_one_revision
+- id: COMPOSE-002
+  rule: the_semantic_dependency_closure_of_every_bound_domain_is_complete
+- id: COMPOSE-003
+  rule: conflicts_and_unknowns_fail_closed_and_an_unresolved_coordinate_blocks_what_it_names
+- id: COMPOSE-004
+  rule: composition_records_every_coordinate_the_provenance_contract_requires
+- id: COMPOSE-005
+  rule: composition_output_remains_derived_and_noncanonical

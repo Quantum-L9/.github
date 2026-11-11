@@ -1,0 +1,147 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/strategic-value/grammar/vocabulary@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: vocabulary
+source_ref: l9.source/vocabulary@1
+source_path: semantics/vocabulary.yaml
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+source_digest: sha256:76e24f641e9161fb7441ca46e5751c2e01ca152c3ea18c84e960b84271765d31
+applies_to_selectors:
+- $.terms.strategic_value
+- $.terms.systemic_future_value
+- $.terms.strategic_value_assessment
+- $.terms.counterfactual_baseline
+- $.terms.future_effect_identity
+- $.terms.bidirectional_value_propagation
+- $.terms.value_propagation_mesh
+- $.terms.future_work_elimination
+- $.terms.capability_unlock
+- $.terms.decision_relevant_information_value
+- $.terms.decision_boundary
+- $.terms.qualitative_strategic_value_screen
+- $.terms.realized_strategic_compounding
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    terms:
+      type: object
+      additional_properties: true
+      fields:
+        strategic_value:
+          type: object
+          additional_properties: true
+          fields:
+            artifact_id:
+              type: string
+            semantic_class:
+              type: string
+            definition:
+              type: string
+            detailed_model:
+              type: string
+        systemic_future_value:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+            detailed_model:
+              type: string
+        strategic_value_assessment:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+        counterfactual_baseline:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+        future_effect_identity:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+        bidirectional_value_propagation:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+        value_propagation_mesh:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+        future_work_elimination:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+        capability_unlock:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+        decision_relevant_information_value:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+        decision_boundary:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+        qualitative_strategic_value_screen:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+            question:
+              type: string
+        realized_strategic_compounding:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_class:
+              type: string
+            definition:
+              type: string
+            question:
+              type: string

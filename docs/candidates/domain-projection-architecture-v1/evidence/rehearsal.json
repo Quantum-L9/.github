@@ -1,0 +1,631 @@
+{
+	"admission": "not_granted",
+	"base": {
+		"repository": "Quantum-L9/.github",
+		"revision": "c2185b02da3ed0d9784c5a7137efd99388738300"
+	},
+	"commits": {
+		"G1_grammars": "95001cddb9d3af1c403480700c890632cb6ec27c",
+		"G2_catalog": "1936eca6677f249889fc6ac1db22f37dc73f0aac",
+		"R_registrations": "a4fa0a6f4f443699f84e9f6a405f2c9d88839013"
+	},
+	"compiler": {
+		"executable_digest": "sha256:f8a444ddb191c254f7d90151f155e0db60599355606df19cf3d2ef4b108d3a95",
+		"executable_digest_basis": "sha256 of git archive <revision> src",
+		"executed_module": "src/l9_semantic_compiler/__init__.py",
+		"repository": "Quantum-L9/l9-semantic-compiler-engine",
+		"revision": "eeac5d28f9f1a44e72287190b9087d06aeb4d574"
+	},
+	"pairs": {
+		"architecture": {
+			"composition": "l9.compose/architecture@1",
+			"grammars_exit": 0,
+			"grammars_written": 8,
+			"inexpressible": [],
+			"producer": {
+				"all_pass": true,
+				"compose_exit": 0,
+				"compose_stderr": "",
+				"project_exit": 0,
+				"project_stderr": "",
+				"receipts": {
+					"l9.compose/architecture@1#l9.projection/architecture@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "composition",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": null,
+						"unresolved_criteria": []
+					},
+					"l9.projection/architecture@1#l9.source/architecture-patterns@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/architecture@1#l9.source/architecture-rules@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/architecture@1#l9.source/dependency-archetypes@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/architecture@1#l9.source/invariants@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/architecture@1#l9.source/node-archetypes@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/architecture@1#l9.source/port-catalog@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/architecture@1#l9.source/product-kinds@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/architecture@1#l9.source/product-topology-schema@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					}
+				},
+				"replay": {
+					"byte_identical": true,
+					"differing": [],
+					"files": 18
+				}
+			},
+			"projection": "l9.projection/architecture@1",
+			"synthesis": "candidate_pair_produced",
+			"synthesis_exit": 0
+		},
+		"capabilities-dependencies": {
+			"composition": "l9.compose/capabilities-dependencies@1",
+			"grammars_exit": 0,
+			"grammars_written": 6,
+			"inexpressible": [],
+			"producer": {
+				"all_pass": true,
+				"compose_exit": 0,
+				"compose_stderr": "",
+				"project_exit": 0,
+				"project_stderr": "",
+				"receipts": {
+					"l9.compose/capabilities-dependencies@1#l9.projection/capabilities-dependencies@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "composition",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": null,
+						"unresolved_criteria": []
+					},
+					"l9.projection/capabilities-dependencies@1#l9.source/capabilities@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/capabilities-dependencies@1#l9.source/capability-resolution@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/capabilities-dependencies@1#l9.source/contracts@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/capabilities-dependencies@1#l9.source/dependency-archetypes@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/capabilities-dependencies@1#l9.source/invariants@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/capabilities-dependencies@1#l9.source/semantic-dependency-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					}
+				},
+				"replay": {
+					"byte_identical": true,
+					"differing": [],
+					"files": 14
+				}
+			},
+			"projection": "l9.projection/capabilities-dependencies@1",
+			"synthesis": "candidate_pair_produced",
+			"synthesis_exit": 0
+		},
+		"contracts-conformance": {
+			"composition": "l9.compose/contracts-conformance@1",
+			"grammars_exit": 0,
+			"grammars_written": 5,
+			"inexpressible": [],
+			"producer": {
+				"all_pass": true,
+				"compose_exit": 0,
+				"compose_stderr": "",
+				"project_exit": 0,
+				"project_stderr": "",
+				"receipts": {
+					"l9.compose/contracts-conformance@1#l9.projection/contracts-conformance@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "composition",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": null,
+						"unresolved_criteria": []
+					},
+					"l9.projection/contracts-conformance@1#l9.source/conformance-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/contracts-conformance@1#l9.source/contracts@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/contracts-conformance@1#l9.source/invariants@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/contracts-conformance@1#l9.source/requirement-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/contracts-conformance@1#l9.source/resolution-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					}
+				},
+				"replay": {
+					"byte_identical": true,
+					"differing": [],
+					"files": 12
+				}
+			},
+			"projection": "l9.projection/contracts-conformance@1",
+			"synthesis": "candidate_pair_produced",
+			"synthesis_exit": 0
+		},
+		"evidence-provenance": {
+			"composition": "l9.compose/evidence-provenance@1",
+			"grammars_exit": 0,
+			"grammars_written": 5,
+			"inexpressible": [],
+			"producer": {
+				"all_pass": true,
+				"compose_exit": 0,
+				"compose_stderr": "",
+				"project_exit": 0,
+				"project_stderr": "",
+				"receipts": {
+					"l9.compose/evidence-provenance@1#l9.projection/evidence-provenance@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "composition",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": null,
+						"unresolved_criteria": []
+					},
+					"l9.projection/evidence-provenance@1#l9.source/artifact-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/evidence-provenance@1#l9.source/contracts@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/evidence-provenance@1#l9.source/invariants@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/evidence-provenance@1#l9.source/receipt-catalog@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/evidence-provenance@1#l9.source/semantic-dependency-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					}
+				},
+				"replay": {
+					"byte_identical": true,
+					"differing": [],
+					"files": 12
+				}
+			},
+			"projection": "l9.projection/evidence-provenance@1",
+			"synthesis": "candidate_pair_produced",
+			"synthesis_exit": 0
+		},
+		"governance": {
+			"composition": "l9.compose/governance@1",
+			"grammars_exit": 0,
+			"grammars_written": 4,
+			"inexpressible": [],
+			"producer": {
+				"all_pass": true,
+				"compose_exit": 0,
+				"compose_stderr": "",
+				"project_exit": 0,
+				"project_stderr": "",
+				"receipts": {
+					"l9.compose/governance@1#l9.projection/governance@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "composition",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": null,
+						"unresolved_criteria": []
+					},
+					"l9.projection/governance@1#l9.source/authority-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/governance@1#l9.source/contracts@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/governance@1#l9.source/invariants@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/governance@1#l9.source/lifecycle@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					}
+				},
+				"replay": {
+					"byte_identical": true,
+					"differing": [],
+					"files": 10
+				}
+			},
+			"projection": "l9.projection/governance@1",
+			"synthesis": "candidate_pair_produced",
+			"synthesis_exit": 0
+		},
+		"identity-attribution": {
+			"composition": "l9.compose/identity-attribution@1",
+			"grammars_exit": 0,
+			"grammars_written": 5,
+			"inexpressible": [],
+			"producer": {
+				"all_pass": true,
+				"compose_exit": 0,
+				"compose_stderr": "",
+				"project_exit": 0,
+				"project_stderr": "",
+				"receipts": {
+					"l9.compose/identity-attribution@1#l9.projection/identity-attribution@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "composition",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": null,
+						"unresolved_criteria": []
+					},
+					"l9.projection/identity-attribution@1#l9.source/actor-registry@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/identity-attribution@1#l9.source/contracts@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/identity-attribution@1#l9.source/identity-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/identity-attribution@1#l9.source/invariants@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/identity-attribution@1#l9.source/surface-registry@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					}
+				},
+				"replay": {
+					"byte_identical": true,
+					"differing": [],
+					"files": 12
+				}
+			},
+			"projection": "l9.projection/identity-attribution@1",
+			"synthesis": "candidate_pair_produced",
+			"synthesis_exit": 0
+		},
+		"signals": {
+			"composition": "l9.compose/signals@1",
+			"grammars_exit": 0,
+			"grammars_written": 2,
+			"inexpressible": [],
+			"producer": {
+				"all_pass": true,
+				"compose_exit": 0,
+				"compose_stderr": "",
+				"project_exit": 0,
+				"project_stderr": "",
+				"receipts": {
+					"l9.compose/signals@1#l9.projection/signals@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "composition",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": null,
+						"unresolved_criteria": []
+					},
+					"l9.projection/signals@1#l9.source/invariants@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/signals@1#l9.source/vocabulary@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					}
+				},
+				"replay": {
+					"byte_identical": true,
+					"differing": [],
+					"files": 6
+				}
+			},
+			"projection": "l9.projection/signals@1",
+			"synthesis": "candidate_pair_produced",
+			"synthesis_exit": 0
+		},
+		"strategic-value": {
+			"composition": "l9.compose/strategic-value@1",
+			"grammars_exit": 0,
+			"grammars_written": 4,
+			"inexpressible": [],
+			"producer": {
+				"all_pass": true,
+				"compose_exit": 0,
+				"compose_stderr": "",
+				"project_exit": 0,
+				"project_stderr": "",
+				"receipts": {
+					"l9.compose/strategic-value@1#l9.projection/strategic-value@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "composition",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": null,
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-value@1#l9.source/contracts@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-value@1#l9.source/invariants@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-value@1#l9.source/strategic-value-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/strategic-value@1#l9.source/vocabulary@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					}
+				},
+				"replay": {
+					"byte_identical": true,
+					"differing": [],
+					"files": 10
+				}
+			},
+			"projection": "l9.projection/strategic-value@1",
+			"synthesis": "candidate_pair_produced",
+			"synthesis_exit": 0
+		}
+	},
+	"producer_archive": "docs/candidates/domain-projection-architecture-v1/evidence/producer.tar.gz",
+	"schema": "l9.candidate-rehearsal/domain-projection-architecture-v1",
+	"synthesis_archive": "docs/candidates/domain-projection-architecture-v1/evidence/synthesis.tar.gz"
+}

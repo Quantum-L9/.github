@@ -1,0 +1,39 @@
+authority_repository: Quantum-L9/.github
+authority_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+projection_profile: l9.projection/architecture@1
+composition_profile: l9.compose/architecture@1
+written:
+- source_class: architecture_patterns
+  path: docs/candidates/schema-grammar-domain-architecture/grammars/architecture_patterns.yaml
+  digest: sha256:2d0deddbe68c810f4006eb444e2f942e9dca6ab2d65e8b549a832e8daf1cec13
+  normative_overlay: []
+- source_class: architecture_rules
+  path: docs/candidates/schema-grammar-domain-architecture/grammars/architecture_rules.yaml
+  digest: sha256:1b5294b470535419e52784d0968641364615f4ceb6f275693367c652133b1ceb
+  normative_overlay: []
+- source_class: product_topology
+  path: docs/candidates/schema-grammar-domain-architecture/grammars/product_topology.yaml
+  digest: sha256:44e816e56b5664259317315c2674ac78392d7fe24a8e013cd2d95ed7dad89dfe
+  normative_overlay: []
+- source_class: product_kinds
+  path: docs/candidates/schema-grammar-domain-architecture/grammars/product_kinds.yaml
+  digest: sha256:6af101fc2610b0776d62a821408b864716245390ecceb4625901530f1d649b03
+  normative_overlay: []
+- source_class: node_archetypes
+  path: docs/candidates/schema-grammar-domain-architecture/grammars/node_archetypes.yaml
+  digest: sha256:7c00bb206e257d0c6d40976accb1791bfce68dc1002bbc42f1193c3f0739c2cb
+  normative_overlay: []
+- source_class: dependency_archetypes
+  path: docs/candidates/schema-grammar-domain-architecture/grammars/dependency_archetypes.yaml
+  digest: sha256:da4b88649f5057c6129968d6a0a3a9430d6ce525305adf6990a55d79800c91a2
+  normative_overlay: []
+- source_class: port_catalog
+  path: docs/candidates/schema-grammar-domain-architecture/grammars/port_catalog.yaml
+  digest: sha256:b874144f29813da3ae11135a655aa322d4120c1d7537a266f2766075adc73378
+  normative_overlay: []
+- source_class: invariants
+  path: docs/candidates/schema-grammar-domain-architecture/grammars/invariants.yaml
+  digest: sha256:a3be3ef7ca9efaf8afc1071aa831b2e79d55e4abf1fa4c9130d426126d93678d
+  normative_overlay: []
+inexpressible: []
+pack_dir: docs/candidates/schema-grammar-domain-architecture

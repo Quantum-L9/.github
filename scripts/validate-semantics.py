@@ -13567,6 +13567,1569 @@ def check_rc033(docs: dict[str, dict], report: Report) -> None:
             _check_rc033_negative_cases(docs, report)
 
 
+# RC-034 Domain projection architecture v1 (ADR-033 candidate). Eight reusable
+# domain projection profiles (class domain) declared by domain_projection_model.yaml,
+# their compositions and registered source-class payload schemas, six domain consumer
+# bindings, and the two domain composition contracts. Rule ids DOMAIN-001..010 are
+# declared by the model, BINDING-001..004 and COMPOSE-001..005 by the binding catalog.
+# Validation is observational: nothing here repairs, admits or activates anything.
+DOMAIN_MODEL_PATH = "semantics/domain_projection_model.yaml"
+DOMAIN_BINDINGS_PATH = "semantics/domain_consumer_bindings.yaml"
+DOMAIN_COMPILER_MANIFEST_PATH = "semantics/generic_compiler_manifest.yaml"
+DOMAIN_CANONICAL_SOURCES_PATH = "semantics/canonical_sources.yaml"
+DOMAIN_NAMES = (
+    "architecture",
+    "strategic-value",
+    "signals",
+    "governance",
+    "evidence-provenance",
+    "contracts-conformance",
+    "capabilities-dependencies",
+    "identity-attribution",
+)
+DOMAIN_PROFILE_FIELDS = frozenset(
+    {
+        "id",
+        "class",
+        "consumer",
+        "purpose",
+        "sources",
+        "output",
+        "forbidden",
+        "payload_validation",
+    }
+)
+DOMAIN_COMPOSITION_FIELDS = frozenset(
+    {
+        "id",
+        "purpose",
+        "accepts",
+        "composes",
+        "merge_strategy",
+        "conflict_result",
+        "output",
+        "payload_validation",
+    }
+)
+DOMAIN_PAYLOAD_VALIDATION = {
+    "protocol": "l9.payload-validation/source-class-dispatch@1"
+}
+DOMAIN_CONSUMER_PREFIX = "semantic_domain."
+DOMAIN_RECORD_FIELDS = frozenset(
+    {
+        "id",
+        "consumer",
+        "projection_profile",
+        "composition_profile",
+        "owned_question",
+        "primary_anchors",
+        "mandatory_closure",
+        "cross_domain_references",
+        "irreducible_boundary",
+        "negative_witness",
+        "forbidden_interpretations",
+    }
+)
+DOMAIN_COMMON_CLOSURE = (
+    "L9-AUTH-001",
+    "L9-PROV-001",
+    "L9-UNKNOWN-001",
+    "L9-COMPAT-001",
+    "L9-PROJECTION-001",
+)
+DOMAIN_FORBIDDEN_INTERPRETATIONS = {
+    "architecture": {
+        "provider_specific_implementation_as_architecture_law",
+        "architecture_observation_as_admission",
+        "consumer_specific_agent_instructions_as_architecture",
+    },
+    "strategic-value": {
+        "qualitative_claim_as_numeric_measurement",
+        "numerical_result_as_independent_verification",
+        "consumer_as_numerical_method_authority",
+        "missing_evidence_as_zero_value",
+    },
+    "signals": {
+        "signal_propagation_as_proof_of_value",
+        "feedback_as_automatic_learning",
+        "signal_consumption_as_action_authority",
+    },
+    "governance": {
+        "validation_as_admission",
+        "execution_success_as_authority",
+        "consumer_self_authorization",
+    },
+    "evidence-provenance": {
+        "evidence_as_semantic_authority",
+        "stale_receipt_as_current_assurance",
+        "provenance_as_proof_of_correctness",
+    },
+    "contracts-conformance": {
+        "candidate_defined_correctness",
+        "validation_mutating_subject",
+        "conformance_as_authorization",
+    },
+    "capabilities-dependencies": {
+        "capability_as_authority",
+        "declared_as_invocable",
+        "undeclared_semantic_substitution",
+    },
+    "identity-attribution": {
+        "surface_identity_as_actor_identity",
+        "provider_identity_as_authorship",
+        "unresolved_actor_as_consequential_author",
+    },
+}
+DOMAIN_MODEL_RULES = tuple(f"DOMAIN-{n:03d}" for n in range(1, 11))
+DOMAIN_BINDING_RULES = tuple(f"BINDING-{n:03d}" for n in range(1, 5)) + tuple(
+    f"COMPOSE-{n:03d}" for n in range(1, 6)
+)
+DOMAIN_BINDING_IDS = tuple(
+    f"l9.domain-consumer-binding/{n}@1"
+    for n in (
+        "gar",
+        "strategic-planner",
+        "cursor",
+        "coding-agent",
+        "simple-plan",
+        "claude-code",
+    )
+)
+DOMAIN_COMPATIBILITY_CONTRACT = "l9.contract/domain-composition-compatibility@1"
+DOMAIN_PROVENANCE_CONTRACT = "l9.contract/domain-composition-provenance@1"
+DOMAIN_CONTRACT_TOKENS = {
+    DOMAIN_COMPATIBILITY_CONTRACT: {
+        "requires": {
+            "every_member_names_an_exact_domain_profile_id_profile_digest_canonical_source_coordinates_source_digests_and_output_schema",
+            "every_member_resolves_against_one_governing_revision_or_an_explicit_compatibility_declaration_between_its_revisions",
+            "an_identity_bearing_record_selected_by_two_members_is_canonically_equivalent_and_has_one_owner",
+            "every_required_member_and_its_required_semantic_dependencies_resolve_without_undeclared_substitution",
+            "every_material_unresolved_input_of_any_member_remains_unresolved_in_the_result",
+            "members_carrying_different_claim_classes_are_kept_distinct",
+        },
+        "guarantees": {
+            "compatible_requires_every_required_check_to_be_satisfied",
+            "an_established_authoritative_conflict_is_incompatible",
+            "a_missing_required_rule_coordinate_or_evidence_is_unresolved_never_compatible",
+            "the_compatibility_result_is_a_derived_noncanonical_artifact",
+            "each_member_keeps_its_own_source_identity_and_digest",
+        },
+        "forbidden": {
+            "silent_precedence_between_members",
+            "reconciliation_of_conflicting_identity_bearing_records",
+            "assumed_equivalence_of_different_revisions",
+            "authority_expansion_through_composition",
+            "promotion_of_a_composed_result_to_canonical_semantics",
+            "equating_different_claim_classes",
+            "treating_signal_evidence_as_strategic_value_evidence",
+        },
+        "outcomes": {
+            "satisfied": "compatible",
+            "violated": "incompatible",
+            "unresolved": "unresolved",
+        },
+    },
+    DOMAIN_PROVENANCE_CONTRACT: {
+        "requires": {
+            "source_repository_and_source_commit_are_recorded",
+            "each_canonical_artifact_id_and_canonical_artifact_digest_is_recorded",
+            "each_profile_id_and_profile_digest_is_recorded",
+            "the_domain_consumer_binding_id_and_binding_digest_are_recorded",
+            "each_governing_composition_contract_id_and_its_catalog_digest_are_recorded",
+            "the_projection_and_composition_engine_identity_and_version_are_recorded",
+            "digests_use_the_canonical_json_and_semantic_digest_conventions_of_l9_compiler_projection_engine_at_1",
+        },
+        "guarantees": {
+            "the_content_digest_excludes_nondeterministic_metadata",
+            "the_content_digest_and_the_evaluation_receipt_digest_are_distinct",
+            "a_change_to_any_recorded_source_profile_binding_or_contract_digest_or_any_material_coordinate_requires_revalidation",
+            "replay_from_the_recorded_coordinates_reproduces_the_content_digest",
+            "material_unknowns_of_the_inputs_are_preserved",
+        },
+        "forbidden": {
+            "a_second_digest_subject_or_output_form_for_a_projection_artifact_or_its_receipt",
+            "timestamps_in_a_deterministic_content_identity",
+            "ambiguous_serialization",
+            "undeclared_transformation",
+            "presenting_a_stale_composition_as_current",
+            "provenance_as_proof_of_correctness",
+        },
+        "outcomes": {
+            "satisfied": "provenance_complete_and_current",
+            "violated": "provenance_incomplete_or_falsified",
+            "unresolved": "required_coordinate_unavailable",
+        },
+    },
+}
+# DOMAIN-010: canonical-JSON sha256 of every projection profile that is not class
+# domain, and of every composition profile that composes no domain profile, as they
+# stood on main at b6db83d. Adding domain profiles changes neither list.
+DOMAIN_PREDECESSOR_PROJECTION_DIGEST = (
+    "d8d411de90476a7ffc82f741292fc53f3415d500c89fa20c689ffb48c0018984"
+)
+DOMAIN_PREDECESSOR_COMPOSITION_DIGEST = (
+    "592d42c1e1ebf405fe938183ba5879a2332bda0c81caff72741ca8d1dba75c96"
+)
+DOMAIN_FORBIDDEN_CRITERIA = frozenset({"payload_excludes", "source_authority"})
+DOMAIN_SELECTOR_FILTER = re.compile(
+    r'^\$\.(?P<coll>[A-Za-z0-9_-]+)\[\?\(@\.(?P<field>[A-Za-z0-9_-]+)\s*(?P<op>==|contains)\s*"(?P<value>[^"]*)"\)\](?P<rest>(\.[A-Za-z0-9_-]+(\[\*\])?)*)$'
+)
+DOMAIN_SELECTOR_SEGMENT = re.compile(r"^(?P<key>[A-Za-z0-9_-]+)(?P<all>\[\*\])?$")
+DOMAIN_ID_FILTER = re.compile(
+    r'^\$\.(?P<coll>[A-Za-z0-9_-]+)\[\?\(@\.id=="(?P<value>[^"]+)"\)\]$'
+)
+DOMAIN_SECTION = re.compile(r"^\$\.[A-Za-z0-9_-]+$")
+DOMAIN_TERM = re.compile(r"^\$\.terms\.[A-Za-z0-9_-]+$")
+
+
+def _rc034_fail(
+    path: str, field: str, value: object, message: str, report: Report
+) -> None:
+    report.fail("RC-034", path, field, value, message)
+
+
+def _rc034_digest(value: object) -> str:
+    encoded = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _rc034_nodes(document: object, selector: str) -> list[tuple[tuple, object]] | None:
+    """Resolve an l9.selector/v1 selector to (path, value) nodes; None when outside the grammar."""
+    if not isinstance(selector, str):
+        return None
+    if selector == "$":
+        return [((), document)]
+    steps: list[tuple] = []
+    match = DOMAIN_SELECTOR_FILTER.match(selector)
+    if match:
+        steps = [
+            ("field", match["coll"]),
+            ("filter", match["field"], match["op"], match["value"]),
+        ]
+        rest = match["rest"]
+        tokens = rest[1:].split(".") if rest else []
+    elif selector.startswith("$."):
+        tokens = selector[2:].split(".")
+    else:
+        return None
+    for token in tokens:
+        seg = DOMAIN_SELECTOR_SEGMENT.match(token)
+        if not seg:
+            return None
+        steps.append(("field", seg["key"]))
+        if seg["all"]:
+            steps.append(("all",))
+    nodes: list[tuple[tuple, object]] = [((), document)]
+    for step in steps:
+        nxt: list[tuple[tuple, object]] = []
+        for path, value in nodes:
+            if step[0] == "field":
+                if isinstance(value, dict) and step[1] in value:
+                    nxt.append((path + (step[1],), value[step[1]]))
+            elif isinstance(value, list):
+                for index, item in enumerate(value):
+                    if step[0] == "all":
+                        nxt.append((path + (index,), item))
+                    elif isinstance(item, dict):
+                        actual = item.get(step[1])
+                        hit = (
+                            actual == step[3]
+                            if step[2] == "=="
+                            else isinstance(actual, (list, str)) and step[3] in actual
+                        )
+                        if hit:
+                            nxt.append((path + (index,), item))
+        nodes = nxt
+    return nodes
+
+
+def _rc034_source_docs(docs: dict[str, dict]) -> dict[str, dict]:
+    catalog = _mapping(docs.get(PROFILES_PATH))
+    out: dict[str, dict] = {}
+    for name, entry in _mapping(catalog.get("source_classes")).items():
+        artifact = _mapping(entry).get("canonical_artifact")
+        if isinstance(artifact, str) and f"semantics/{artifact}" in docs:
+            out[name] = docs[f"semantics/{artifact}"]
+    return out
+
+
+def _rc034_registered_projectable(docs: dict[str, dict]) -> set[str]:
+    registry = _mapping(docs.get(DOMAIN_CANONICAL_SOURCES_PATH))
+    return {
+        str(s.get("path")).removeprefix("semantics/")
+        for s in registry.get("sources") or []
+        if isinstance(s, dict)
+        and s.get("canonical") is True
+        and s.get("projection_allowed") is True
+    }
+
+
+def _rc034_schemas(docs: dict[str, dict]) -> dict[str, list[tuple[str, dict]]]:
+    manifest = _mapping(docs.get(DOMAIN_COMPILER_MANIFEST_PATH))
+    out: dict[str, list[tuple[str, dict]]] = {}
+    for name in _mapping(manifest.get("requires")).get("artifact_schemas") or []:
+        doc = docs.get(f"semantics/{name}")
+        if isinstance(doc, dict) and isinstance(doc.get("schema_id"), str):
+            out.setdefault(doc["schema_id"], []).append((str(name), doc))
+    return out
+
+
+def _rc034_model(docs: dict[str, dict], report: Report) -> dict[str, dict]:
+    path = DOMAIN_MODEL_PATH
+    model = _mapping(docs.get(path))
+    if not model:
+        _rc034_fail(
+            path, "document", None, "domain projection model is missing", report
+        )
+        return {}
+    if model.get("profile_class") != "domain":
+        _rc034_fail(
+            path, "profile_class", model.get("profile_class"), "must be domain", report
+        )
+    if model.get("consumer_prefix") != DOMAIN_CONSUMER_PREFIX:
+        _rc034_fail(
+            path,
+            "consumer_prefix",
+            model.get("consumer_prefix"),
+            f"must be {DOMAIN_CONSUMER_PREFIX}",
+            report,
+        )
+    if tuple(model.get("common_invariant_closure") or ()) != DOMAIN_COMMON_CLOSURE:
+        _rc034_fail(
+            path,
+            "common_invariant_closure",
+            model.get("common_invariant_closure"),
+            "must be the v1 common closure",
+            report,
+        )
+    rules = [
+        r.get("id") for r in model.get("validation_rules") or [] if isinstance(r, dict)
+    ]
+    if tuple(rules) != DOMAIN_MODEL_RULES:
+        _rc034_fail(
+            path,
+            "validation_rules",
+            rules,
+            "must declare DOMAIN-001..DOMAIN-010 in order",
+            report,
+        )
+    for key in (
+        "domain_set_is_closed_for_v1",
+        "domain_projection_creates_no_semantic_authority",
+        "a_domain_profile_carries_its_complete_invariant_closure",
+        "validation_of_a_domain_profile_is_not_its_admission",
+    ):
+        if _mapping(model.get("global_rules")).get(key) is not True:
+            _rc034_fail(
+                path,
+                f"global_rules.{key}",
+                _mapping(model.get("global_rules")).get(key),
+                "must be true",
+                report,
+            )
+    invariants = {
+        i.get("id"): i
+        for i in _mapping(docs.get(INVARIANTS_PATH)).get("invariants") or []
+        if isinstance(i, dict)
+    }
+    records: dict[str, dict] = {}
+    domains = model.get("domains") or []
+    expected_ids = {f"l9.domain/{n}@1" for n in DOMAIN_NAMES}
+    seen_ids = [d.get("id") for d in domains if isinstance(d, dict)]
+    if sorted(map(str, seen_ids)) != sorted(expected_ids) or len(seen_ids) != len(
+        domains
+    ):
+        _rc034_fail(
+            path,
+            "domains",
+            seen_ids,
+            "must declare exactly the eight v1 domains once each",
+            report,
+        )
+    for index, record in enumerate(domains):
+        if not isinstance(record, dict):
+            continue
+        rid = str(record.get("id"))
+        name = rid.removeprefix("l9.domain/").removesuffix("@1")
+        field = f"domains[{rid}]"
+        if name not in DOMAIN_NAMES:
+            continue
+        if set(record) != DOMAIN_RECORD_FIELDS:
+            _rc034_fail(
+                path,
+                field,
+                sorted(record),
+                "domain record fields must be exactly the v1 record shape",
+                report,
+            )
+        if record.get("consumer") != DOMAIN_CONSUMER_PREFIX + name.replace("-", "_"):
+            _rc034_fail(
+                path,
+                f"{field}.consumer",
+                record.get("consumer"),
+                "must name the semantic domain",
+                report,
+            )
+        if record.get("projection_profile") != f"l9.projection/{name}@1":
+            _rc034_fail(
+                path,
+                f"{field}.projection_profile",
+                record.get("projection_profile"),
+                "must be the domain profile",
+                report,
+            )
+        if record.get("composition_profile") != f"l9.compose/{name}@1":
+            _rc034_fail(
+                path,
+                f"{field}.composition_profile",
+                record.get("composition_profile"),
+                "must be the domain composition",
+                report,
+            )
+        for text in ("owned_question", "irreducible_boundary", "negative_witness"):
+            if not isinstance(record.get(text), str) or not record[text].strip():
+                _rc034_fail(
+                    path,
+                    f"{field}.{text}",
+                    record.get(text),
+                    "must be a non-empty statement",
+                    report,
+                )
+        for key in ("primary_anchors", "mandatory_closure"):
+            values = record.get(key)
+            if not isinstance(values, list) or (
+                key == "primary_anchors" and not values
+            ):
+                _rc034_fail(
+                    path,
+                    f"{field}.{key}",
+                    values,
+                    "must be a list of declared invariants",
+                    report,
+                )
+                continue
+            for inv in values:
+                if _mapping(invariants.get(inv)).get("scope") != "global":
+                    _rc034_fail(
+                        path,
+                        f"{field}.{key}",
+                        inv,
+                        "must name a declared global invariant",
+                        report,
+                    )
+        refs = record.get("cross_domain_references")
+        if (
+            not isinstance(refs, list)
+            or rid in refs
+            or any(r not in expected_ids for r in refs)
+        ):
+            _rc034_fail(
+                path,
+                f"{field}.cross_domain_references",
+                refs,
+                "must name other declared domains only",
+                report,
+            )
+        if (
+            set(record.get("forbidden_interpretations") or ())
+            != DOMAIN_FORBIDDEN_INTERPRETATIONS[name]
+        ):
+            _rc034_fail(
+                path,
+                f"{field}.forbidden_interpretations",
+                record.get("forbidden_interpretations"),
+                "must be exactly the v1 interpretive prohibitions of this domain",
+                report,
+            )
+        records[name] = record
+    return records
+
+
+def _rc034_profiles(
+    docs: dict[str, dict], records: dict[str, dict], report: Report
+) -> dict[str, dict]:
+    path = PROFILES_PATH
+    catalog = _mapping(docs.get(path))
+    profiles = [
+        p for p in catalog.get("projection_profiles") or [] if isinstance(p, dict)
+    ]
+    if "domain" not in _mapping(catalog.get("profile_classes")):
+        _rc034_fail(
+            path,
+            "profile_classes.domain",
+            None,
+            "the domain profile class must be declared",
+            report,
+        )
+    domain_profiles = [p for p in profiles if p.get("class") == "domain"]
+    ids = [str(p.get("id")) for p in domain_profiles]
+    expected = [f"l9.projection/{n}@1" for n in DOMAIN_NAMES]
+    if sorted(ids) != sorted(expected):
+        _rc034_fail(
+            path,
+            "projection_profiles[class=domain]",
+            ids,
+            "DOMAIN-001 exactly the eight v1 domain profiles, once each",
+            report,
+        )
+    consumers = [p.get("consumer") for p in profiles]
+    sources = _rc034_source_docs(docs)
+    projectable = _rc034_registered_projectable(docs)
+    source_classes = _mapping(catalog.get("source_classes"))
+    definitions = _mapping(
+        _mapping(catalog.get("forbidden_constraints")).get("definitions")
+    )
+    contracts = {
+        c.get("id"): c
+        for c in _mapping(docs.get(CONTRACTS_PATH)).get("contracts") or []
+        if isinstance(c, dict)
+    }
+    invariant_order = [
+        i.get("id")
+        for i in _mapping(docs.get(INVARIANTS_PATH)).get("invariants") or []
+        if isinstance(i, dict)
+    ]
+    actors = {
+        a.get("id")
+        for a in _mapping(docs.get("semantics/actor_registry.yaml")).get("actors") or []
+        if isinstance(a, dict)
+    }
+    surfaces = {
+        s.get("id")
+        for s in _mapping(docs.get("semantics/surface_registry.yaml")).get("surfaces")
+        or []
+        if isinstance(s, dict)
+    }
+    out: dict[str, dict] = {}
+    for profile in domain_profiles:
+        pid = str(profile.get("id"))
+        name = pid.removeprefix("l9.projection/").removesuffix("@1")
+        field = f"projection_profiles[{pid}]"
+        if name not in DOMAIN_NAMES:
+            _rc034_fail(
+                path, field, pid, "DOMAIN-001 is not a v1 domain profile", report
+            )
+            continue
+        out[name] = profile
+        record = records.get(name, {})
+        # DOMAIN-001 / DOMAIN-002
+        if consumers.count(profile.get("consumer")) != 1 or profile.get(
+            "consumer"
+        ) != record.get("consumer"):
+            _rc034_fail(
+                path,
+                f"{field}.consumer",
+                profile.get("consumer"),
+                "DOMAIN-001 must be the domain's unique semantic_domain consumer",
+                report,
+            )
+        if set(profile) != DOMAIN_PROFILE_FIELDS:
+            _rc034_fail(
+                path,
+                f"{field}.fields",
+                sorted(profile),
+                "DOMAIN-002 a domain profile carries exactly the v1 fields",
+                report,
+            )
+        purpose = str(profile.get("purpose") or "").lower()
+        words = set(re.findall(r"[a-z0-9-]+", purpose))
+        named = sorted((actors | surfaces | {"skill", "skills"}) & words)
+        if not purpose.strip() or named:
+            _rc034_fail(
+                path,
+                f"{field}.purpose",
+                named or purpose,
+                "DOMAIN-002 must state the concern without naming a skill, host or actor",
+                report,
+            )
+        if profile.get("payload_validation") != DOMAIN_PAYLOAD_VALIDATION:
+            _rc034_fail(
+                path,
+                f"{field}.payload_validation",
+                profile.get("payload_validation"),
+                "must declare source-class dispatch",
+                report,
+            )
+        selected: dict[str, list[tuple[tuple, object]]] = {}
+        selected_contracts: list[str] = []
+        selected_invariants: list[str] = []
+        for source_class, spec in _mapping(profile.get("sources")).items():
+            sfield = f"{field}.sources.{source_class}"
+            artifact = _mapping(source_classes.get(source_class)).get(
+                "canonical_artifact"
+            )
+            if (
+                not isinstance(artifact, str)
+                or artifact not in projectable
+                or source_class not in sources
+            ):
+                _rc034_fail(
+                    path,
+                    sfield,
+                    artifact,
+                    "DOMAIN-003 must be a registered canonical projectable source class",
+                    report,
+                )
+                continue
+            document = sources[source_class]
+            for selector in _mapping(spec).get("selectors") or []:
+                nodes = _rc034_nodes(document, selector)
+                if nodes is None or not nodes:
+                    _rc034_fail(
+                        path,
+                        sfield,
+                        selector,
+                        "DOMAIN-004 selector must parse and resolve at this revision",
+                        report,
+                    )
+                    continue
+                idf = DOMAIN_ID_FILTER.match(str(selector))
+                whole = DOMAIN_SECTION.match(str(selector)) or (
+                    source_class == "vocabulary" and DOMAIN_TERM.match(str(selector))
+                )
+                if not (whole or idf) or (idf and len(nodes) != 1):
+                    _rc034_fail(
+                        path,
+                        sfield,
+                        selector,
+                        "DOMAIN-005 must select a whole section, term, or exactly one record by id",
+                        report,
+                    )
+                selected.setdefault(source_class, []).extend(nodes)
+                if source_class == "invariants" and idf:
+                    selected_invariants.append(idf["value"])
+                if source_class == "contracts":
+                    if idf:
+                        selected_contracts.append(idf["value"])
+                    elif selector == "$.contracts":
+                        selected_contracts.extend(contracts)
+        # DOMAIN-006: exact computed invariant closure in ledger order
+        wanted = (
+            set(record.get("primary_anchors") or ())
+            | set(DOMAIN_COMMON_CLOSURE)
+            | set(record.get("mandatory_closure") or ())
+        )
+        for cid in selected_contracts:
+            wanted |= set(_mapping(contracts.get(cid)).get("source_invariants") or ())
+        ordered = [i for i in invariant_order if i in wanted]
+        if selected_invariants != ordered:
+            _rc034_fail(
+                path,
+                f"{field}.sources.invariants",
+                sorted(set(selected_invariants) ^ set(ordered)) or "order",
+                "DOMAIN-006 must select exactly primary anchors, common and mandatory closure and selected contracts' source invariants, in ledger order",
+                report,
+            )
+        # DOMAIN-007
+        for token in profile.get("forbidden") or []:
+            definition = _mapping(definitions.get(token))
+            if definition.get("criterion") not in DOMAIN_FORBIDDEN_CRITERIA:
+                _rc034_fail(
+                    path,
+                    f"{field}.forbidden",
+                    token,
+                    "DOMAIN-007 every forbidden category needs a declared criterion",
+                    report,
+                )
+                continue
+            for exclusion in definition.get("excluded_selections") or []:
+                ex_class = _mapping(exclusion).get("source_class")
+                if ex_class not in selected:
+                    continue
+                excluded = (
+                    _rc034_nodes(
+                        sources.get(ex_class), _mapping(exclusion).get("selector")
+                    )
+                    or []
+                )
+                for ex_path, _ in excluded:
+                    for sel_path, _ in selected[ex_class]:
+                        short = min(len(ex_path), len(sel_path))
+                        if ex_path[:short] == sel_path[:short]:
+                            _rc034_fail(
+                                path,
+                                f"{field}.forbidden",
+                                token,
+                                f"DOMAIN-007 the profile selects what {token} excludes",
+                                report,
+                            )
+                            break
+                    else:
+                        continue
+                    break
+        # DOMAIN-008
+        if profile.get("output") != {"schema": f"l9.projection.domain.{name}/v1"}:
+            _rc034_fail(
+                path,
+                f"{field}.output",
+                profile.get("output"),
+                "DOMAIN-008 output schema must be l9.projection.domain.<name>/v1",
+                report,
+            )
+    return out
+
+
+def _rc034_compositions(
+    docs: dict[str, dict], profiles: dict[str, dict], report: Report
+) -> None:
+    path = COMPOSITION_PROFILES_PATH
+    catalog = _mapping(docs.get(path))
+    entries = [c for c in catalog.get("profiles") or [] if isinstance(c, dict)]
+    schemas = _rc034_schemas(docs)
+    for name in DOMAIN_NAMES:
+        cid = f"l9.compose/{name}@1"
+        matches = [c for c in entries if c.get("id") == cid]
+        field = f"profiles[{cid}]"
+        if len(matches) != 1:
+            _rc034_fail(
+                path,
+                field,
+                len(matches),
+                "DOMAIN-008 each domain composition is declared exactly once",
+                report,
+            )
+            continue
+        entry = matches[0]
+        if set(entry) != DOMAIN_COMPOSITION_FIELDS:
+            _rc034_fail(
+                path,
+                f"{field}.fields",
+                sorted(entry),
+                "COMPOSE-005 a domain composition carries exactly the v1 fields and claims no canonicity",
+                report,
+            )
+        if (
+            entry.get("composes") != {"projection_profile": f"l9.projection/{name}@1"}
+            or entry.get("merge_strategy") != NAMESPACE_STRATEGY
+        ):
+            _rc034_fail(
+                path,
+                f"{field}.merge_strategy",
+                entry.get("merge_strategy"),
+                "must namespace exactly its domain profile's sources",
+                report,
+            )
+        if (
+            entry.get("accepts") != ["projection_artifact"]
+            or entry.get("conflict_result") != "invalid"
+        ):
+            _rc034_fail(
+                path,
+                f"{field}.conflict_result",
+                entry.get("conflict_result"),
+                "COMPOSE-003 conflicts fail closed",
+                report,
+            )
+        if entry.get("payload_validation") != DOMAIN_PAYLOAD_VALIDATION:
+            _rc034_fail(
+                path,
+                f"{field}.payload_validation",
+                entry.get("payload_validation"),
+                "must declare source-class dispatch",
+                report,
+            )
+        if entry.get("output") != {
+            "schema": f"l9.composed-projection.domain.{name}/v1"
+        }:
+            _rc034_fail(
+                path,
+                f"{field}.output",
+                entry.get("output"),
+                "DOMAIN-008 composition output schema must be l9.composed-projection.domain.<name>/v1",
+                report,
+            )
+        profile = profiles.get(name)
+        order = list(_mapping(profile.get("sources")).keys()) if profile else []
+        for kind, schema_id, ref_key, ref in (
+            (
+                "projection_payload_schema",
+                f"l9.projection.domain.{name}/v1",
+                "projection_profile_ref",
+                f"l9.projection/{name}@1",
+            ),
+            (
+                "composition_payload_schema",
+                f"l9.composed-projection.domain.{name}/v1",
+                "composition_profile_ref",
+                cid,
+            ),
+        ):
+            found = schemas.get(schema_id, [])
+            sfield = f"artifact_schemas[{schema_id}]"
+            if len(found) != 1:
+                _rc034_fail(
+                    DOMAIN_COMPILER_MANIFEST_PATH,
+                    sfield,
+                    len(found),
+                    "DOMAIN-008 exactly one registered schema declares this output",
+                    report,
+                )
+                continue
+            filename, doc = found[0]
+            shapes = [
+                s.get("source_class")
+                for s in doc.get("source_shapes") or []
+                if isinstance(s, dict)
+            ]
+            if (
+                doc.get("schema") != "l9.source-class-payload-schema/v1"
+                or doc.get("document_kind") != kind
+                or _mapping(doc.get("governed_by")).get(ref_key) != ref
+                or doc.get("payload_validation") != DOMAIN_PAYLOAD_VALIDATION
+                or shapes != order
+            ):
+                _rc034_fail(
+                    DOMAIN_COMPILER_MANIFEST_PATH,
+                    sfield,
+                    filename,
+                    "DOMAIN-008 registered schema must govern this profile with one shape per source class in order",
+                    report,
+                )
+
+
+def _rc034_predecessors(docs: dict[str, dict], report: Report) -> None:
+    profiles = [
+        p
+        for p in _mapping(docs.get(PROFILES_PATH)).get("projection_profiles") or []
+        if isinstance(p, dict)
+    ]
+    if (
+        _rc034_digest([p for p in profiles if p.get("class") != "domain"])
+        != DOMAIN_PREDECESSOR_PROJECTION_DIGEST
+    ):
+        _rc034_fail(
+            PROFILES_PATH,
+            "projection_profiles[class!=domain]",
+            "digest",
+            "DOMAIN-010 an existing profile version was modified, removed or reordered",
+            report,
+        )
+    domain_compositions = {f"l9.compose/{n}@1" for n in DOMAIN_NAMES}
+    compositions = [
+        c
+        for c in _mapping(docs.get(COMPOSITION_PROFILES_PATH)).get("profiles") or []
+        if isinstance(c, dict)
+    ]
+    if (
+        _rc034_digest(
+            [c for c in compositions if c.get("id") not in domain_compositions]
+        )
+        != DOMAIN_PREDECESSOR_COMPOSITION_DIGEST
+    ):
+        _rc034_fail(
+            COMPOSITION_PROFILES_PATH,
+            "profiles[non-domain]",
+            "digest",
+            "DOMAIN-010 an existing composition version was modified, removed or reordered",
+            report,
+        )
+
+
+def _rc034_contracts(docs: dict[str, dict], report: Report) -> None:
+    contracts = {
+        c.get("id"): c
+        for c in _mapping(docs.get(CONTRACTS_PATH)).get("contracts") or []
+        if isinstance(c, dict)
+    }
+    rule = {
+        DOMAIN_COMPATIBILITY_CONTRACT: "COMPOSE-001",
+        DOMAIN_PROVENANCE_CONTRACT: "COMPOSE-004",
+    }
+    for cid, tokens in DOMAIN_CONTRACT_TOKENS.items():
+        contract = _mapping(contracts.get(cid))
+        for key, expected in tokens.items():
+            observed = contract.get(key)
+            observed = set(observed) if isinstance(observed, list) else observed
+            if observed != expected:
+                _rc034_fail(
+                    CONTRACTS_PATH,
+                    f"contracts[{cid}].{key}",
+                    "drift",
+                    f"{rule[cid]} must state exactly the v1 obligations",
+                    report,
+                )
+
+
+def _rc034_bindings(
+    docs: dict[str, dict],
+    profiles: dict[str, dict],
+    records: dict[str, dict],
+    report: Report,
+) -> dict[str, int]:
+    path = DOMAIN_BINDINGS_PATH
+    catalog = _mapping(docs.get(path))
+    summary = {"bindings": 0, "activation_blocked": 0, "migration_blocked": 0}
+    if not catalog:
+        _rc034_fail(
+            path, "document", None, "domain consumer binding catalog is missing", report
+        )
+        return summary
+    rules = [
+        r.get("id")
+        for r in catalog.get("validation_rules") or []
+        if isinstance(r, dict)
+    ]
+    if tuple(rules) != DOMAIN_BINDING_RULES:
+        _rc034_fail(
+            path,
+            "validation_rules",
+            rules,
+            "must declare BINDING-001..004 and COMPOSE-001..005 in order",
+            report,
+        )
+    composition = _mapping(catalog.get("composition"))
+    if composition != {
+        "compatibility_contract": DOMAIN_COMPATIBILITY_CONTRACT,
+        "provenance_contract": DOMAIN_PROVENANCE_CONTRACT,
+    }:
+        _rc034_fail(
+            path,
+            "composition",
+            composition,
+            "COMPOSE-003 must name the two domain composition contracts",
+            report,
+        )
+    global_rules = _mapping(catalog.get("global_rules"))
+    for key in (
+        "a_binding_grants_no_permission_or_action_authority",
+        "a_binding_creates_no_semantics",
+        "host_and_hosted_skill_identities_remain_distinct",
+        "an_unresolved_consumer_coordinate_stays_explicit_and_blocks_activation",
+        "a_binding_switches_no_existing_consumer_profile",
+    ):
+        if global_rules.get(key) is not True:
+            _rc034_fail(
+                path,
+                f"global_rules.{key}",
+                global_rules.get(key),
+                "must be true",
+                report,
+            )
+    kinds = _mapping(catalog.get("consumer_kinds"))
+    activations = set(_mapping(catalog.get("activation_conditions")))
+    blocks = set(_mapping(catalog.get("unresolved_blocks")))
+    actors = {
+        a.get("id")
+        for a in _mapping(docs.get("semantics/actor_registry.yaml")).get("actors") or []
+        if isinstance(a, dict)
+    }
+    surfaces = {
+        s.get("id")
+        for s in _mapping(docs.get("semantics/surface_registry.yaml")).get("surfaces")
+        or []
+        if isinstance(s, dict)
+    }
+    repos = {
+        r.get("id")
+        for r in _mapping(docs.get("semantics/repository_registry.yaml")).get(
+            "repositories"
+        )
+        or []
+        if isinstance(r, dict)
+    }
+    domain_profile_ids = {f"l9.projection/{n}@1": n for n in DOMAIN_NAMES}
+    sources = _rc034_source_docs(docs)
+    bindings = [b for b in catalog.get("bindings") or [] if isinstance(b, dict)]
+    ids = [b.get("id") for b in bindings]
+    if sorted(map(str, ids)) != sorted(DOMAIN_BINDING_IDS) or len(ids) != len(set(ids)):
+        _rc034_fail(
+            path,
+            "bindings",
+            ids,
+            "must declare exactly the six v1 bindings once each",
+            report,
+        )
+    for binding in bindings:
+        bid = str(binding.get("id"))
+        field = f"bindings[{bid}]"
+        summary["bindings"] += 1
+        requires = binding.get("requires") or []
+        conditional = [
+            c.get("profile")
+            for c in binding.get("conditional") or []
+            if isinstance(c, dict)
+        ]
+        # BINDING-001
+        for ref in list(requires) + conditional:
+            if (
+                ref not in domain_profile_ids
+                or ref.removeprefix("l9.projection/").removesuffix("@1") not in profiles
+            ):
+                _rc034_fail(
+                    path,
+                    f"{field}.profiles",
+                    ref,
+                    "BINDING-001 must resolve to exactly one domain profile",
+                    report,
+                )
+        if len(set(requires) | set(conditional)) != len(requires) + len(conditional):
+            _rc034_fail(
+                path,
+                f"{field}.conditional",
+                sorted(set(requires) & set(conditional)) or "duplicate",
+                "BINDING-002 a domain is required or conditional, once",
+                report,
+            )
+        for entry in binding.get("conditional") or []:
+            if _mapping(entry).get("activation") not in activations:
+                _rc034_fail(
+                    path,
+                    f"{field}.conditional",
+                    entry,
+                    "BINDING-002 must name a declared activation condition",
+                    report,
+                )
+        # BINDING-003
+        consumer = _mapping(binding.get("consumer"))
+        kind = consumer.get("kind")
+        unresolved = [u for u in binding.get("unresolved") or [] if isinstance(u, dict)]
+        unresolved_coords = {u.get("coordinate") for u in unresolved}
+        for u in unresolved:
+            if (
+                set(u) != {"coordinate", "reason", "blocks"}
+                or u.get("blocks") not in blocks
+                or not str(u.get("reason") or "").strip()
+            ):
+                _rc034_fail(
+                    path,
+                    f"{field}.unresolved",
+                    u,
+                    "COMPOSE-003 an unresolved coordinate states its reason and what it blocks",
+                    report,
+                )
+        spec = _mapping(kinds.get(kind))
+        if not spec:
+            _rc034_fail(
+                path,
+                f"{field}.consumer",
+                kind,
+                "BINDING-003 consumer kind must be declared",
+                report,
+            )
+        for required in spec.get("requires") or []:
+            if required not in consumer:
+                _rc034_fail(
+                    path,
+                    f"{field}.consumer",
+                    required,
+                    "BINDING-003 consumer lacks a field its kind requires",
+                    report,
+                )
+        for forbidden in spec.get("forbids") or []:
+            if forbidden in consumer:
+                _rc034_fail(
+                    path,
+                    f"{field}.consumer",
+                    forbidden,
+                    "BINDING-003 host and skill identities must not be mixed",
+                    report,
+                )
+        if kind == "host":
+            actor = str(consumer.get("actor_ref") or "")
+            if (
+                not actor.startswith("l9.actor-registry/global@1#")
+                or actor.split("#", 1)[1] not in actors
+                or consumer.get("identity") != actor.split("#", 1)[-1]
+            ):
+                _rc034_fail(
+                    path,
+                    f"{field}.consumer.actor_ref",
+                    actor,
+                    "BINDING-003 a host names a canonical ActorIdentity, never a surface",
+                    report,
+                )
+            refs = consumer.get("surface_refs") or []
+            if not refs or any(
+                not str(r).startswith("l9.surface-registry/global@1#")
+                or str(r).split("#", 1)[1] not in surfaces
+                for r in refs
+            ):
+                _rc034_fail(
+                    path,
+                    f"{field}.consumer.surface_refs",
+                    refs,
+                    "BINDING-003 a host names canonical SurfaceIdentities",
+                    report,
+                )
+        if kind == "skill":
+            if consumer.get("identity") in actors | surfaces:
+                _rc034_fail(
+                    path,
+                    f"{field}.consumer.identity",
+                    consumer.get("identity"),
+                    "BINDING-003 a skill identity is not an actor or surface",
+                    report,
+                )
+            repo = consumer.get("repository_ref")
+            if repo == "unresolved":
+                if "repository_ref" not in unresolved_coords:
+                    _rc034_fail(
+                        path,
+                        f"{field}.consumer.repository_ref",
+                        repo,
+                        "COMPOSE-003 an unresolved repository must be declared unresolved",
+                        report,
+                    )
+            elif (
+                not str(repo).startswith("l9.repository-registry/global@1#")
+                or str(repo).split("#", 1)[1] not in repos
+            ):
+                _rc034_fail(
+                    path,
+                    f"{field}.consumer.repository_ref",
+                    repo,
+                    "BINDING-003 must name a registered repository",
+                    report,
+                )
+            entrypoint = consumer.get("entrypoint")
+            if entrypoint == "unresolved":
+                if "entrypoint" not in unresolved_coords:
+                    _rc034_fail(
+                        path,
+                        f"{field}.consumer.entrypoint",
+                        entrypoint,
+                        "COMPOSE-003 an unresolved entrypoint must be declared unresolved",
+                        report,
+                    )
+            elif set(_mapping(entrypoint)) != {
+                "path",
+                "skill_name",
+                "skill_version",
+            } or not all(
+                isinstance(v, str) and v for v in _mapping(entrypoint).values()
+            ):
+                _rc034_fail(
+                    path,
+                    f"{field}.consumer.entrypoint",
+                    entrypoint,
+                    "BINDING-003 entrypoint is an exact path, skill name and version",
+                    report,
+                )
+        # BINDING-004
+        if binding.get("authority") != {
+            "binding_grants_permissions": False,
+            "action_authority": "externally_resolved",
+        }:
+            _rc034_fail(
+                path,
+                f"{field}.authority",
+                binding.get("authority"),
+                "BINDING-004 a binding grants no permission",
+                report,
+            )
+        # COMPOSE-002: every bound domain's cross-domain references are bound too
+        bound = {
+            r.removeprefix("l9.projection/").removesuffix("@1")
+            for r in list(requires) + conditional
+            if isinstance(r, str)
+        }
+        for ref in requires:
+            name = str(ref).removeprefix("l9.projection/").removesuffix("@1")
+            for other in (
+                _mapping(records.get(name)).get("cross_domain_references") or []
+            ):
+                other_name = str(other).removeprefix("l9.domain/").removesuffix("@1")
+                if other_name not in bound:
+                    _rc034_fail(
+                        path,
+                        f"{field}.requires",
+                        ref,
+                        f"COMPOSE-002 {other} is referenced but not bound",
+                        report,
+                    )
+        # COMPOSE-001: identity-bearing records shared by bound domains are equivalent
+        seen: dict[tuple, str] = {}
+        for name in sorted(bound):
+            profile = profiles.get(name)
+            for source_class, spec in _mapping(
+                _mapping(profile).get("sources")
+            ).items():
+                for selector in _mapping(spec).get("selectors") or []:
+                    for node_path, value in (
+                        _rc034_nodes(sources.get(source_class), selector) or []
+                    ):
+                        if isinstance(value, dict) and isinstance(value.get("id"), str):
+                            key = (source_class, value["id"])
+                            digest = _rc034_digest(value)
+                            if seen.setdefault(key, digest) != digest:
+                                _rc034_fail(
+                                    path,
+                                    f"{field}.composition",
+                                    value["id"],
+                                    "COMPOSE-001 shared identity-bearing records differ",
+                                    report,
+                                )
+        if any(u.get("blocks") == "binding_activation" for u in unresolved):
+            summary["activation_blocked"] += 1
+        if any(u.get("blocks") == "consumer_migration" for u in unresolved):
+            summary["migration_blocked"] += 1
+    return summary
+
+
+def _evaluate_rc034(docs: dict[str, dict], report: Report) -> dict[str, object]:
+    records = _rc034_model(docs, report)
+    profiles = _rc034_profiles(docs, records, report)
+    _rc034_compositions(docs, profiles, report)
+    _rc034_predecessors(docs, report)
+    _rc034_contracts(docs, report)
+    summary = _rc034_bindings(docs, profiles, records, report)
+    composed = _mapping(
+        _mapping(docs.get(PROFILES_PATH)).get("composed_projection_rules")
+    )
+    if composed.get("canonical") is not False:
+        _rc034_fail(
+            PROFILES_PATH,
+            "composed_projection_rules.canonical",
+            composed.get("canonical"),
+            "COMPOSE-005 composed projections are noncanonical",
+            report,
+        )
+    summary["digests"] = {
+        name: _rc034_digest(profiles[name]) for name in sorted(profiles)
+    }
+    return summary
+
+
+def _rc034_negative_cases() -> list[tuple[str, str, str, object]]:
+    """(label, ledger path, failing field prefix, mutation) for the v1 adversarial suite."""
+
+    def profile(d: dict, name: str) -> dict:
+        return next(
+            p
+            for p in d[PROFILES_PATH]["projection_profiles"]
+            if p.get("id") == f"l9.projection/{name}@1"
+        )
+
+    def binding(d: dict, name: str) -> dict:
+        return next(
+            b
+            for b in d[DOMAIN_BINDINGS_PATH]["bindings"]
+            if b.get("id") == f"l9.domain-consumer-binding/{name}@1"
+        )
+
+    def domain(d: dict, name: str) -> dict:
+        return next(
+            r
+            for r in d[DOMAIN_MODEL_PATH]["domains"]
+            if r.get("id") == f"l9.domain/{name}@1"
+        )
+
+    def selectors(d: dict, name: str, source: str) -> list:
+        return profile(d, name)["sources"][source]["selectors"]
+
+    P, B, M, C = PROFILES_PATH, DOMAIN_BINDINGS_PATH, DOMAIN_MODEL_PATH, CONTRACTS_PATH
+    arch = "projection_profiles[l9.projection/architecture@1]"
+    return [
+        (
+            "D01 duplicate domain profile id",
+            P,
+            "projection_profiles[class=domain]",
+            lambda d: d[P]["projection_profiles"].append(
+                copy.deepcopy(profile(d, "signals"))
+            ),
+        ),
+        (
+            "D02 unknown canonical source class",
+            P,
+            f"{arch}.sources.unregistered",
+            lambda d: profile(d, "architecture")["sources"].update(
+                unregistered={"selectors": ["$.x"]}
+            ),
+        ),
+        (
+            "D03 required selector returns no match",
+            P,
+            "projection_profiles[l9.projection/governance@1].sources.lifecycle",
+            lambda d: selectors(d, "governance", "lifecycle").append(
+                "$.no_such_section"
+            ),
+        ),
+        (
+            "D04 selects an id but drops its meaning",
+            P,
+            "projection_profiles[l9.projection/signals@1].sources.invariants",
+            lambda d: selectors(d, "signals", "invariants").__setitem__(
+                0, "$.invariants[*].id"
+            ),
+        ),
+        (
+            "D05 unauthorized new semantics in a domain profile",
+            P,
+            "projection_profiles[l9.projection/governance@1].fields",
+            lambda d: profile(d, "governance").update(
+                invariants=[{"id": "L9-NEW-001"}]
+            ),
+        ),
+        (
+            "D06 existing profile version mutated",
+            P,
+            "projection_profiles[class!=domain]",
+            lambda d: d[P]["projection_profiles"][0].update(purpose="edited in place"),
+        ),
+        (
+            "D07 assumed-admitted Signal term missing",
+            P,
+            "projection_profiles[l9.projection/signals@1].sources.vocabulary",
+            lambda d: d["semantics/vocabulary.yaml"]["terms"].pop("signal"),
+        ),
+        (
+            "D08 qualitative SV claim promotable to numeric",
+            M,
+            "domains[l9.domain/strategic-value@1].forbidden_interpretations",
+            lambda d: domain(d, "strategic-value")["forbidden_interpretations"].remove(
+                "qualitative_claim_as_numeric_measurement"
+            ),
+        ),
+        (
+            "D09 signal propagation treated as realized value",
+            M,
+            "domains[l9.domain/signals@1].forbidden_interpretations",
+            lambda d: domain(d, "signals")["forbidden_interpretations"].remove(
+                "signal_propagation_as_proof_of_value"
+            ),
+        ),
+        (
+            "D10 different revisions composed without compatibility",
+            C,
+            f"contracts[{DOMAIN_COMPATIBILITY_CONTRACT}].requires",
+            lambda d: next(
+                c for c in d[C]["contracts"] if c["id"] == DOMAIN_COMPATIBILITY_CONTRACT
+            )["requires"].pop(1),
+        ),
+        (
+            "D11 historical receipt reused as current",
+            C,
+            f"contracts[{DOMAIN_PROVENANCE_CONTRACT}].forbidden",
+            lambda d: next(
+                c for c in d[C]["contracts"] if c["id"] == DOMAIN_PROVENANCE_CONTRACT
+            )["forbidden"].remove("presenting_a_stale_composition_as_current"),
+        ),
+        (
+            "D12 ActorIdentity inferred from a Claude Code surface",
+            B,
+            "bindings[l9.domain-consumer-binding/claude-code@1].consumer.actor_ref",
+            lambda d: binding(d, "claude-code")["consumer"].update(
+                actor_ref="l9.actor-registry/global@1#claude-code-cli"
+            ),
+        ),
+        (
+            "D13 coding agent inherits undeclared host authority",
+            B,
+            "bindings[l9.domain-consumer-binding/coding-agent@1].authority",
+            lambda d: binding(d, "coding-agent")["authority"].update(
+                binding_grants_permissions=True
+            ),
+        ),
+        (
+            "D13b skill binding carries a host surface",
+            B,
+            "bindings[l9.domain-consumer-binding/coding-agent@1].consumer",
+            lambda d: binding(d, "coding-agent")["consumer"].update(
+                surface_refs=["l9.surface-registry/global@1#claude-code-cli"]
+            ),
+        ),
+        (
+            "D14 declared capability treated as invocable",
+            P,
+            "projection_profiles[l9.projection/capabilities-dependencies@1].sources.invariants",
+            lambda d: selectors(d, "capabilities-dependencies", "invariants").remove(
+                '$.invariants[?(@.id=="L9-CAPABILITY-001")]'
+            ),
+        ),
+        (
+            "D15 conformance PASS treated as admission",
+            M,
+            "domains[l9.domain/governance@1].forbidden_interpretations",
+            lambda d: domain(d, "governance")["forbidden_interpretations"].remove(
+                "validation_as_admission"
+            ),
+        ),
+        (
+            "D16 composition contract loses deterministic content identity",
+            C,
+            f"contracts[{DOMAIN_PROVENANCE_CONTRACT}].guarantees",
+            lambda d: next(
+                c for c in d[C]["contracts"] if c["id"] == DOMAIN_PROVENANCE_CONTRACT
+            )["guarantees"].remove(
+                "the_content_digest_excludes_nondeterministic_metadata"
+            ),
+        ),
+        (
+            "D17 unknown requirement silently omitted",
+            B,
+            "bindings[l9.domain-consumer-binding/strategic-planner@1].consumer.entrypoint",
+            lambda d: binding(d, "strategic-planner").update(
+                unresolved=[
+                    u
+                    for u in binding(d, "strategic-planner")["unresolved"]
+                    if u["coordinate"] != "entrypoint"
+                ]
+            ),
+        ),
+        (
+            "D18 composition claims canonicity",
+            COMPOSITION_PROFILES_PATH,
+            "profiles[l9.compose/signals@1].fields",
+            lambda d: next(
+                c
+                for c in d[COMPOSITION_PROFILES_PATH]["profiles"]
+                if c["id"] == "l9.compose/signals@1"
+            ).update(canonical=True),
+        ),
+        (
+            "D19 binding references a nonexistent profile version",
+            B,
+            "bindings[l9.domain-consumer-binding/gar@1].profiles",
+            lambda d: binding(d, "gar")["requires"].__setitem__(
+                0, "l9.projection/architecture@2"
+            ),
+        ),
+        (
+            "D20 consumer-specific selection in a domain profile",
+            P,
+            f"{arch}.consumer",
+            lambda d: profile(d, "architecture").update(consumer="l9-global-architect"),
+        ),
+        (
+            "D21 forbidden category without a criterion",
+            P,
+            "projection_profiles[l9.projection/signals@1].forbidden",
+            lambda d: profile(d, "signals")["forbidden"].append(
+                "signal_consumption_as_action_authority"
+            ),
+        ),
+        (
+            "D22 forbidden exclusion overlaps a selection",
+            P,
+            "projection_profiles[l9.projection/capabilities-dependencies@1].forbidden",
+            lambda d: profile(d, "capabilities-dependencies")["forbidden"].append(
+                "skill_command_or_routing_semantics"
+            ),
+        ),
+        (
+            "D23 domain both required and conditional",
+            B,
+            "bindings[l9.domain-consumer-binding/cursor@1].conditional",
+            lambda d: binding(d, "cursor")["conditional"].append(
+                {
+                    "profile": "l9.projection/governance@1",
+                    "activation": "explicit_task_requirement",
+                }
+            ),
+        ),
+        (
+            "D24 cross-domain dependency left unbound",
+            B,
+            "bindings[l9.domain-consumer-binding/gar@1].requires",
+            lambda d: binding(d, "gar").update(
+                conditional=[
+                    c
+                    for c in binding(d, "gar")["conditional"]
+                    if c["profile"] != "l9.projection/identity-attribution@1"
+                ]
+            ),
+        ),
+        (
+            "D25 domain output schema unregistered",
+            DOMAIN_COMPILER_MANIFEST_PATH,
+            "artifact_schemas[l9.projection.domain.signals/v1]",
+            lambda d: d[DOMAIN_COMPILER_MANIFEST_PATH]["requires"][
+                "artifact_schemas"
+            ].remove("domain_signals_projection.schema.yaml"),
+        ),
+        (
+            "D26 domain profile names a skill",
+            P,
+            "projection_profiles[l9.projection/governance@1].purpose",
+            lambda d: profile(d, "governance").update(
+                purpose="Governance for the coding skill."
+            ),
+        ),
+        (
+            "D27 SVQ anchor dropped from Strategic Value",
+            P,
+            "projection_profiles[l9.projection/strategic-value@1].sources.invariants",
+            lambda d: selectors(d, "strategic-value", "invariants").remove(
+                '$.invariants[?(@.id=="L9-SVQ-001")]'
+            ),
+        ),
+    ]
+
+
+def _check_rc034_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    cases = _rc034_negative_cases()
+    for label, path, field, mutate in cases:
+        candidate = copy.deepcopy(docs)
+        try:
+            mutate(candidate)
+        except (KeyError, StopIteration, ValueError, IndexError) as exc:
+            report.fail(
+                "RC-034",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"mutation could not be applied: {exc!r}",
+            )
+            continue
+        candidate_report = Report()
+        _evaluate_rc034(candidate, candidate_report)
+        prefix = f"FAIL RC-034 {path} {field}="
+        if not any(f.startswith(prefix) for f in candidate_report.failures):
+            report.fail(
+                "RC-034",
+                VALIDATOR_PATH,
+                "negative_case",
+                label,
+                f"negative case did not fail closed at {path} {field}",
+            )
+
+    # D16 determinism: re-keying every mapping leaves each domain profile digest unchanged.
+    def rekey(value: object) -> object:
+        if isinstance(value, dict):
+            return {k: rekey(value[k]) for k in reversed(list(value))}
+        if isinstance(value, list):
+            return [rekey(v) for v in value]
+        return value
+
+    baseline = _evaluate_rc034(copy.deepcopy(docs), Report())["digests"]
+    permuted = _evaluate_rc034(rekey(copy.deepcopy(docs)), Report())["digests"]
+    if baseline != permuted or len(baseline) != len(DOMAIN_NAMES):
+        report.fail(
+            "RC-034",
+            VALIDATOR_PATH,
+            "determinism",
+            "digests",
+            "DOMAIN-009 mapping order changed a domain profile digest",
+        )
+    if not any(f.startswith(f"FAIL RC-034 {VALIDATOR_PATH}") for f in report.failures):
+        report.ok(
+            "RC-034-NEG",
+            f"{len(cases)} domain projection negative cases fail closed at their intended field, and mapping order "
+            "leaves all eight domain profile digests unchanged",
+        )
+
+
+def check_rc034(docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    summary = _evaluate_rc034(docs, report)
+    if len(report.failures) == before:
+        report.ok(
+            "RC-034",
+            f"8 domain projection profiles (class domain) and their 8 source-namespaced compositions exist once, each "
+            "selecting whole records and sections from registered projectable ledgers with its exact computed invariant "
+            "closure, criterion-backed forbidden categories that exclude nothing it selects, and one registered "
+            f"source-class payload schema per output; {summary['bindings']} domain consumer bindings resolve to those "
+            "profiles with distinct host and skill identities and no permission grant, every bound domain's "
+            "cross-domain references bound, and shared records equivalent; "
+            f"{summary['activation_blocked']} binding(s) blocked for activation and {summary['migration_blocked']} for "
+            "migration by declared unresolved coordinates; both composition contracts state their v1 obligations; "
+            "no pre-existing projection or composition profile changed",
+        )
+        _check_rc034_negative_cases(docs, report)
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -13630,6 +15193,7 @@ def main(argv: list[str]) -> int:
     check_rc030(docs, report)
     check_rc032(docs, report)
     check_rc033(docs, report)
+    check_rc034(docs, report)
     check_sc009(observed, root, report)
     for line in report.passes:
         print(line)

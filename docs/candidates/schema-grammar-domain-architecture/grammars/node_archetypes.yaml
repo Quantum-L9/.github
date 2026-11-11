@@ -1,0 +1,70 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture/grammar/node-archetypes@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: node_archetypes
+source_ref: l9.source/node-archetypes@1
+source_path: semantics/node_archetypes.yaml
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+source_digest: sha256:57bb49405e9b888ad5bcfbc3d580755fb7c330e45983bb99821113bf930132bc
+applies_to_selectors:
+- $.global_rules
+- $.archetypes
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        catalog_applies_only_to_product_kind_node:
+          type: boolean
+        archetype_does_not_define_domain_semantics:
+          type: boolean
+        archetype_does_not_create_semantic_ownership:
+          type: boolean
+        archetype_specializes_node_kind:
+          type: boolean
+        archetypes_compose_architecture_patterns:
+          type: boolean
+        archetypes_declare_required_structural_properties:
+          type: boolean
+        archetypes_declare_required_conformance_classes:
+          type: boolean
+        deployment_topology_does_not_imply_semantic_ownership:
+          type: boolean
+    archetypes:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          purpose:
+            type: string
+          properties:
+            type: string_list
+          requires:
+            type: object
+            additional_properties: true
+            fields:
+              architecture_patterns:
+                type: string_list
+              semantic_surfaces:
+                type: string_list
+              runtime_surfaces:
+                type: string_list
+              conformance_classes:
+                type: string_list
+          optional_patterns:
+            type: string_list
+          forbidden:
+            type: string_list
+          extends:
+            type: string_list
+          guarantees:
+            type: string_list

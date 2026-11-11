@@ -1,0 +1,27 @@
+authority_repository: Quantum-L9/.github
+authority_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+projection_profile: l9.projection/identity-attribution@1
+composition_profile: l9.compose/identity-attribution@1
+written:
+- source_class: identity_model
+  path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/identity_model.yaml
+  digest: sha256:bbc45cbafc3fc635243b42053e01d005d6301ef548673b3420066869c1f5891e
+  normative_overlay: []
+- source_class: actor_registry
+  path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/actor_registry.yaml
+  digest: sha256:03edd021a0d279b7a65c75f9f042062cbdfd8baaf44eb60868821354c31417c5
+  normative_overlay: []
+- source_class: surface_registry
+  path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/surface_registry.yaml
+  digest: sha256:a9b204837045cbc4edbe36ed275f45c43afd3535ff849d529bf6caac7e5d8c37
+  normative_overlay: []
+- source_class: invariants
+  path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/invariants.yaml
+  digest: sha256:82eac2b869a4887d38c467b5f926b4de2d438ddcd580a358d32b1e65a9e21689
+  normative_overlay: []
+- source_class: contracts
+  path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/contracts.yaml
+  digest: sha256:e732e2f84adff07ebbe87227e70ecc22e40be25958d8bcc1f5e8cf132a0da457
+  normative_overlay: []
+inexpressible: []
+pack_dir: docs/candidates/schema-grammar-domain-identity-attribution

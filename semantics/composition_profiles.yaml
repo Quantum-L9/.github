@@ -322,3 +322,141 @@ profiles:
       schema: l9.composed-projection.strategic-metacognition/v2
     payload_validation:
       protocol: l9.payload-validation/source-class-dispatch@1
+  # BEGIN domain composition profiles v1 (rendered by docs/candidates/domain-projection-architecture-v1/tools/render_domain_profiles.py)
+  - id: l9.compose/architecture@1
+    purpose: Compose the per-source projections of l9.projection/architecture@1 into one bounded, derived, non-canonical
+      domain view, preserving each projected source whole under its canonical source-class identity.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/architecture@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.domain.architecture/v1
+    payload_validation:
+      protocol: l9.payload-validation/source-class-dispatch@1
+  - id: l9.compose/strategic-value@1
+    purpose: Compose the per-source projections of l9.projection/strategic-value@1 into one bounded, derived, non-canonical
+      domain view, preserving each projected source whole under its canonical source-class identity.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/strategic-value@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.domain.strategic-value/v1
+    payload_validation:
+      protocol: l9.payload-validation/source-class-dispatch@1
+  - id: l9.compose/signals@1
+    purpose: Compose the per-source projections of l9.projection/signals@1 into one bounded, derived, non-canonical
+      domain view, preserving each projected source whole under its canonical source-class identity.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/signals@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.domain.signals/v1
+    payload_validation:
+      protocol: l9.payload-validation/source-class-dispatch@1
+  - id: l9.compose/governance@1
+    purpose: Compose the per-source projections of l9.projection/governance@1 into one bounded, derived, non-canonical
+      domain view, preserving each projected source whole under its canonical source-class identity.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/governance@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.domain.governance/v1
+    payload_validation:
+      protocol: l9.payload-validation/source-class-dispatch@1
+  - id: l9.compose/evidence-provenance@1
+    purpose: Compose the per-source projections of l9.projection/evidence-provenance@1 into one bounded, derived,
+      non-canonical domain view, preserving each projected source whole under its canonical source-class identity.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/evidence-provenance@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.domain.evidence-provenance/v1
+    payload_validation:
+      protocol: l9.payload-validation/source-class-dispatch@1
+  - id: l9.compose/contracts-conformance@1
+    purpose: Compose the per-source projections of l9.projection/contracts-conformance@1 into one bounded, derived,
+      non-canonical domain view, preserving each projected source whole under its canonical source-class identity.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/contracts-conformance@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.domain.contracts-conformance/v1
+    payload_validation:
+      protocol: l9.payload-validation/source-class-dispatch@1
+  - id: l9.compose/capabilities-dependencies@1
+    purpose: Compose the per-source projections of l9.projection/capabilities-dependencies@1 into one bounded, derived,
+      non-canonical domain view, preserving each projected source whole under its canonical source-class identity.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/capabilities-dependencies@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.domain.capabilities-dependencies/v1
+    payload_validation:
+      protocol: l9.payload-validation/source-class-dispatch@1
+  - id: l9.compose/identity-attribution@1
+    purpose: Compose the per-source projections of l9.projection/identity-attribution@1 into one bounded, derived,
+      non-canonical domain view, preserving each projected source whole under its canonical source-class identity.
+    accepts:
+    - projection_artifact
+    composes:
+      projection_profile: l9.projection/identity-attribution@1
+    merge_strategy:
+      placement: source_class_namespace
+      source_coverage: exact
+      duplicate_source: conflict
+      semantic_identity_collision: require_equivalence
+    conflict_result: invalid
+    output:
+      schema: l9.composed-projection.domain.identity-attribution/v1
+    payload_validation:
+      protocol: l9.payload-validation/source-class-dispatch@1
+  # END domain composition profiles v1

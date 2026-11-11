@@ -1,0 +1,67 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/identity-attribution/grammar/actor-registry@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: actor_registry
+source_ref: l9.source/actor-registry@1
+source_path: semantics/actor_registry.yaml
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+source_digest: sha256:34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f
+applies_to_selectors:
+- $.actors
+- $.aliases
+- $.alias_rules
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    actors:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          kind:
+            type: string
+          status:
+            type: string
+          description:
+            type: string
+    aliases:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          alias:
+            type: string
+          canonical:
+            type: string
+          alias_kind:
+            type: string
+          note:
+            type: string
+    alias_rules:
+      type: object
+      additional_properties: true
+      fields:
+        alias_kinds:
+          type: object
+          additional_properties: true
+          fields:
+            historical_actor_alias:
+              type: string
+        alias_resolves_to_exactly_one_canonical_actor:
+          type: boolean
+        alias_never_targets_another_alias:
+          type: boolean
+        alias_never_shadows_a_canonical_actor:
+          type: boolean
+        alias_meaning_is_bounded_to_actor_identity:
+          type: boolean
+        alias_does_not_authorize_new_consequential_authorship_after_downstream_migration:
+          type: boolean

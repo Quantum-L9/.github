@@ -1,0 +1,48 @@
+document_kind: source_field_grammar_bindings_candidate
+artifact_id: l9.candidate.schema-synthesis/signals/bindings@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+bindings:
+- source_class: vocabulary
+  source_ref: l9.source/vocabulary@1
+  source_path: semantics/vocabulary.yaml
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+  source_digest: sha256:76e24f641e9161fb7441ca46e5751c2e01ca152c3ea18c84e960b84271765d31
+  grammar_ref: l9.candidate.schema-synthesis/signals/grammar/vocabulary@1
+  grammar_path: docs/candidates/schema-grammar-domain-signals/grammars/vocabulary.yaml
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:6df735d5068f7d0b2ee5b54e10dca94a0b79296ca987e33ff19e769e9563bf33
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.terms.signal
+  - $.terms.signal_propagation
+  - $.terms.signal_feedback_episode
+  - $.terms.signal_consumption
+  approval_status: candidate
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  source_path: semantics/invariants.yaml
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+  source_digest: sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
+  grammar_ref: l9.candidate.schema-synthesis/signals/grammar/invariants@1
+  grammar_path: docs/candidates/schema-grammar-domain-signals/grammars/invariants.yaml
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:33707a3882fe61c8d6ff89ade5aa7661f85f8b4e751ded7765a849404748b905
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.invariants[?(@.id=="L9-AUTH-001")]
+  - $.invariants[?(@.id=="L9-AUTH-002")]
+  - $.invariants[?(@.id=="L9-OWNER-001")]
+  - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+  - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+  - $.invariants[?(@.id=="L9-PROV-001")]
+  - $.invariants[?(@.id=="L9-COMPAT-001")]
+  - $.invariants[?(@.id=="L9-PROJECTION-001")]
+  - $.invariants[?(@.id=="L9-IDENTITY-005")]
+  - $.invariants[?(@.id=="L9-SIGNAL-001")]
+  - $.invariants[?(@.id=="L9-SIGNAL-002")]
+  - $.invariants[?(@.id=="L9-SIGNAL-003")]
+  - $.invariants[?(@.id=="L9-SIGNAL-004")]
+  approval_status: candidate

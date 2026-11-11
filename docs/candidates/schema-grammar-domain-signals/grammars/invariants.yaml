@@ -1,0 +1,45 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/signals/grammar/invariants@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: invariants
+source_ref: l9.source/invariants@1
+source_path: semantics/invariants.yaml
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+source_digest: sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
+applies_to_selectors:
+- $.invariants[?(@.id=="L9-AUTH-001")]
+- $.invariants[?(@.id=="L9-AUTH-002")]
+- $.invariants[?(@.id=="L9-OWNER-001")]
+- $.invariants[?(@.id=="L9-EVIDENCE-001")]
+- $.invariants[?(@.id=="L9-UNKNOWN-001")]
+- $.invariants[?(@.id=="L9-PROV-001")]
+- $.invariants[?(@.id=="L9-COMPAT-001")]
+- $.invariants[?(@.id=="L9-PROJECTION-001")]
+- $.invariants[?(@.id=="L9-IDENTITY-005")]
+- $.invariants[?(@.id=="L9-SIGNAL-001")]
+- $.invariants[?(@.id=="L9-SIGNAL-002")]
+- $.invariants[?(@.id=="L9-SIGNAL-003")]
+- $.invariants[?(@.id=="L9-SIGNAL-004")]
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    invariants:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          statement:
+            type: string
+          scope:
+            type: string
+          owner:
+            type: string
+          severity:
+            type: string

@@ -1,0 +1,485 @@
+canonical: true
+schema: l9.source-class-payload-schema/v1
+artifact_id: l9.schema/domain-governance-projection@1
+authority:
+  owner: Quantum-L9/.github
+schema_id: l9.projection.domain.governance/v1
+document_kind: projection_payload_schema
+payload_validation:
+  protocol: l9.payload-validation/source-class-dispatch@1
+descriptor_dialect: l9.schema-dialect/candidate-v2@1
+governed_by:
+  projection_profile_ref: l9.projection/governance@1
+source_shapes:
+- source_class: authority_model
+  source_ref: l9.source/authority-model@1
+  descriptor:
+    additional_properties: true
+    fields:
+      admission_rules:
+        additional_properties: true
+        fields:
+          candidate_generation_is_not_admission:
+            type: boolean
+          changed_material_subject_requires_new_decision_unless_compatibility_preserves_it:
+            type: boolean
+          global_requirements:
+            type: string_list
+          self_admission_without_target_class_authority_forbidden:
+            type: boolean
+        type: object
+      agent_authority:
+        additional_properties: true
+        fields:
+          rules:
+            type: string_list
+        type: object
+      authority_classes:
+        additional_properties: true
+        fields:
+          candidate:
+            additional_properties: true
+            fields:
+              authoritative:
+                type: boolean
+              meaning:
+                type: string
+            type: object
+          canonical:
+            additional_properties: true
+            fields:
+              implicit_derivation_allowed:
+                type: boolean
+              meaning:
+                type: string
+            type: object
+          derived:
+            additional_properties: true
+            fields:
+              may_self_promote:
+                type: boolean
+              meaning:
+                type: string
+            type: object
+          evidence:
+            additional_properties: true
+            fields:
+              grants_authority:
+                type: boolean
+              meaning:
+                type: string
+            type: object
+          global_governance:
+            additional_properties: true
+            fields:
+              does_not_own:
+                type: string_list
+              owner:
+                type: string
+              roles:
+                type: string_list
+            type: object
+        type: object
+      escalation_rules:
+        additional_properties: true
+        fields:
+          authority_missing:
+            type: string
+          changed_candidate_after_decision:
+            type: string
+          semantic_conflict:
+            type: string
+          unknown:
+            type: string
+        type: object
+      human_authority:
+        additional_properties: true
+        fields:
+          rules:
+            type: string_list
+        type: object
+      promotion_rules:
+        additional_properties: true
+        fields:
+          authorized_global_state_change_required:
+            type: boolean
+          globalization_candidate_is_not_global_authority:
+            type: boolean
+          sequence:
+            type: string_list
+        type: object
+    type: object
+- source_class: lifecycle
+  source_ref: l9.source/lifecycle@1
+  descriptor:
+    additional_properties: true
+    fields:
+      lifecycles:
+        additional_properties: true
+        fields:
+          architecture_pattern:
+            additional_properties: true
+            fields:
+              branches:
+                additional_properties: true
+                fields:
+                  admitted_global_pattern:
+                    type: string
+                  domain_pattern:
+                    type: string
+                  rejected:
+                    type: string
+                  unresolved:
+                    type: string
+                type: object
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+              stages:
+                type: string_list
+            type: object
+          conformance_receipt:
+            additional_properties: true
+            fields:
+              artifact_state:
+                type: string
+              derived_statuses:
+                type: string_list
+              emitted_state:
+                type: string
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+            type: object
+          distribution:
+            additional_properties: true
+            fields:
+              branches:
+                additional_properties: true
+                fields:
+                  non_current:
+                    type: string
+                  unresolved:
+                    type: string
+                type: object
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+              stages:
+                type: string_list
+            type: object
+          fixture:
+            additional_properties: true
+            fields:
+              branches:
+                additional_properties: true
+                fields:
+                  globalization_candidate:
+                    type: string
+                  rejected:
+                    type: string
+                  unresolved:
+                    type: string
+                type: object
+              publication_gate:
+                additional_properties: true
+                fields:
+                  all_of:
+                    type: string_list
+                type: object
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+              stages:
+                type: string_list
+            type: object
+          fixture_profile:
+            additional_properties: true
+            fields:
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+              stages:
+                type: string_list
+            type: object
+          globalization_candidate:
+            additional_properties: true
+            fields:
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+              stages:
+                type: string_list
+              terminal_resolutions:
+                type: string_list
+            type: object
+          harvest_packet:
+            additional_properties: true
+            fields:
+              artifact_state:
+                type: string
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+              stages:
+                type: string_list
+            type: object
+          identity_assertion:
+            additional_properties: true
+            fields:
+              branches:
+                additional_properties: true
+                fields:
+                  ambiguous:
+                    type: string
+                  invalid:
+                    type: string
+                  unknown:
+                    type: string
+                type: object
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+              stages:
+                type: string_list
+            type: object
+          product_manifest:
+            additional_properties: true
+            fields:
+              branches:
+                additional_properties: true
+                fields:
+                  blocked:
+                    type: string
+                  unresolved:
+                    type: string
+                type: object
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+              stages:
+                type: string_list
+            type: object
+          product_topology:
+            additional_properties: true
+            fields:
+              branches:
+                additional_properties: true
+                fields:
+                  rejected:
+                    type: string
+                  unresolved:
+                    type: string
+                type: object
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+              stages:
+                type: string_list
+            type: object
+          profile:
+            additional_properties: true
+            fields:
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+              stages:
+                type: string_list
+            type: object
+          published_artifact:
+            additional_properties: true
+            fields:
+              publication_gate:
+                additional_properties: true
+                fields:
+                  all_of:
+                    type: string_list
+                  when_applicable:
+                    type: string_list
+                type: object
+              purpose:
+                type: string
+              rules:
+                type: string_list
+              semantic_owner:
+                type: string
+              stages:
+                type: string_list
+            type: object
+        type: object
+    type: object
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  descriptor:
+    additional_properties: true
+    fields:
+      invariants:
+        items:
+          additional_properties: true
+          fields:
+            id:
+              type: string
+            owner:
+              type: string
+            scope:
+              type: string
+            severity:
+              type: string
+            statement:
+              type: string
+          type: object
+        type: array
+    type: object
+- source_class: contracts
+  source_ref: l9.source/contracts@1
+  descriptor:
+    additional_properties: true
+    fields:
+      contracts:
+        items:
+          additional_properties: true
+          fields:
+            applicability:
+              additional_properties: true
+              fields:
+                does_not_apply_to:
+                  type: string_list
+                method_conditional:
+                  type: string
+                qv:
+                  type: string
+                sv_dependency:
+                  type: string
+                trigger:
+                  type: string
+                unavailable_claim:
+                  type: string
+                unknown_resolution:
+                  type: string
+              type: object
+            applies_to:
+              type: string_list
+            forbidden:
+              type: string_list
+            guarantees:
+              type: string_list
+            id:
+              type: string
+            outcomes:
+              additional_properties: true
+              fields:
+                admissible:
+                  type: string
+                admitted:
+                  type: string
+                ambiguous:
+                  type: string
+                attested:
+                  type: string
+                blocked:
+                  type: string
+                compatible:
+                  type: string
+                current:
+                  type: string
+                inadmissible:
+                  type: string
+                incompatible:
+                  type: string
+                invalid:
+                  type: string
+                invalid_binding:
+                  type: string
+                invalid_projection:
+                  type: string
+                invocable:
+                  type: string
+                new_candidate_required:
+                  type: string
+                new_decision_required:
+                  type: string
+                non_current:
+                  type: string
+                not_invocable:
+                  type: string
+                preserved:
+                  type: string
+                refused:
+                  type: string
+                rejected:
+                  type: string
+                resolved:
+                  type: string
+                satisfied:
+                  type: string
+                successor_required:
+                  type: string
+                supported:
+                  type: string
+                unknown:
+                  type: string
+                unresolved:
+                  type: string
+                unsat:
+                  type: string
+                unsupported:
+                  type: string
+                unverified:
+                  type: string
+                valid:
+                  type: string
+                valid_projection:
+                  type: string
+                violated:
+                  type: string
+              type: object
+            owner:
+              type: string
+            purpose:
+              type: string
+            requires:
+              type: string_list
+            scope:
+              type: string
+            source_invariants:
+              type: string_list
+          type: object
+        type: array
+    type: object
+derivation:
+  method: l9.schema-candidate-synthesis
+  candidate_digest: sha256:a24adbe10c31731f6a660b2fc62c4da5a772c045f21cc25b793bd269b721832e
+admission: not_granted

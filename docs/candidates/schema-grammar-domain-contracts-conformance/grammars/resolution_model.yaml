@@ -1,0 +1,60 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/contracts-conformance/grammar/resolution-model@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: resolution_model
+source_ref: l9.source/resolution-model@1
+source_path: semantics/resolution_model.yaml
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+source_digest: sha256:3c0636b0eaca00789d6ced5425fb1c3a314319dd00525dd5f811f38f81c365fc
+applies_to_selectors:
+- $.global_rules
+- $.result_domain
+- $.resolution_record
+- $.selection_rules
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        all_resolvers_share_one_result_algebra:
+          type: boolean
+        resolution_is_evidence_bound:
+          type: boolean
+        resolution_does_not_admit_subjects:
+          type: boolean
+        unknown_is_not_resolved:
+          type: boolean
+        ambiguity_is_not_silently_collapsed:
+          type: boolean
+        incompatibility_is_not_optimization_failure:
+          type: boolean
+    result_domain:
+      type: object
+      additional_properties: true
+      fields:
+        resolved:
+          type: string
+        unresolved:
+          type: string
+        incompatible:
+          type: string
+        unsat:
+          type: string
+        ambiguous:
+          type: string
+    resolution_record:
+      type: object
+      additional_properties: true
+      fields:
+        required:
+          type: string_list
+        optional:
+          type: string_list
+    selection_rules:
+      type: string_list

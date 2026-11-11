@@ -1,0 +1,95 @@
+document_kind: source_field_grammar_bindings_candidate
+artifact_id: l9.candidate.schema-synthesis/identity-attribution/bindings@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+bindings:
+- source_class: identity_model
+  source_ref: l9.source/identity-model@1
+  source_path: semantics/identity_model.yaml
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+  source_digest: sha256:b9245eca99501a38976e909e1d151942c1253b2eee2bd6bab9c6382687db4288
+  grammar_ref: l9.candidate.schema-synthesis/identity-attribution/grammar/identity-model@1
+  grammar_path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/identity_model.yaml
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:bbc45cbafc3fc635243b42053e01d005d6301ef548673b3420066869c1f5891e
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.identity_dimensions
+  - $.non_identity_dimensions
+  - $.identity_binding
+  - $.identity_resolution
+  - $.identity_assertion
+  - $.consumer_rules
+  approval_status: candidate
+- source_class: actor_registry
+  source_ref: l9.source/actor-registry@1
+  source_path: semantics/actor_registry.yaml
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+  source_digest: sha256:34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f
+  grammar_ref: l9.candidate.schema-synthesis/identity-attribution/grammar/actor-registry@1
+  grammar_path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/actor_registry.yaml
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:03edd021a0d279b7a65c75f9f042062cbdfd8baaf44eb60868821354c31417c5
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.actors
+  - $.aliases
+  - $.alias_rules
+  approval_status: candidate
+- source_class: surface_registry
+  source_ref: l9.source/surface-registry@1
+  source_path: semantics/surface_registry.yaml
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+  source_digest: sha256:d7200409ff02141a274ff8c9221d31429f6a6fae27539e6d9c8d20f1a6eba988
+  grammar_ref: l9.candidate.schema-synthesis/identity-attribution/grammar/surface-registry@1
+  grammar_path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/surface_registry.yaml
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:a9b204837045cbc4edbe36ed275f45c43afd3535ff849d529bf6caac7e5d8c37
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.surfaces
+  - $.aliases
+  - $.alias_rules
+  approval_status: candidate
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  source_path: semantics/invariants.yaml
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+  source_digest: sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
+  grammar_ref: l9.candidate.schema-synthesis/identity-attribution/grammar/invariants@1
+  grammar_path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/invariants.yaml
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:82eac2b869a4887d38c467b5f926b4de2d438ddcd580a358d32b1e65a9e21689
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.invariants[?(@.id=="L9-AUTH-001")]
+  - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+  - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+  - $.invariants[?(@.id=="L9-PROV-001")]
+  - $.invariants[?(@.id=="L9-COORD-001")]
+  - $.invariants[?(@.id=="L9-IDENTITY-001")]
+  - $.invariants[?(@.id=="L9-COMPAT-001")]
+  - $.invariants[?(@.id=="L9-PROJECTION-001")]
+  - $.invariants[?(@.id=="L9-IDENTITY-002")]
+  - $.invariants[?(@.id=="L9-IDENTITY-003")]
+  - $.invariants[?(@.id=="L9-IDENTITY-004")]
+  - $.invariants[?(@.id=="L9-IDENTITY-005")]
+  - $.invariants[?(@.id=="L9-IDENTITY-006")]
+  approval_status: candidate
+- source_class: contracts
+  source_ref: l9.source/contracts@1
+  source_path: semantics/contracts.yaml
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+  source_digest: sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993
+  grammar_ref: l9.candidate.schema-synthesis/identity-attribution/grammar/contracts@1
+  grammar_path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/contracts.yaml
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:e732e2f84adff07ebbe87227e70ecc22e40be25958d8bcc1f5e8cf132a0da457
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.contracts[?(@.id=="l9.contract/identity-resolution@1")]
+  - $.contracts[?(@.id=="l9.contract/identity-assertion@1")]
+  approval_status: candidate

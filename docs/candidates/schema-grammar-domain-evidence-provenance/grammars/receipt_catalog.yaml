@@ -1,0 +1,252 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/evidence-provenance/grammar/receipt-catalog@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: receipt_catalog
+source_ref: l9.source/receipt-catalog@1
+source_path: semantics/receipt_catalog.yaml
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+source_digest: sha256:ec7a06224263cad293b79f1f4f832bffc6b4f8eae4980bf8cbfc01bba8af8ca5
+applies_to_selectors:
+- $.global_rules
+- $.receipt_kernel
+- $.receipts
+- $.receipt_relations
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        receipt_is_evidence:
+          type: boolean
+        receipt_does_not_grant_semantic_authority:
+          type: boolean
+        receipt_does_not_grant_execution_authority:
+          type: boolean
+        receipt_claim_scope_must_be_explicit:
+          type: boolean
+        exact_subject_binding_is_required:
+          type: boolean
+        materially_governing_coordinates_must_be_bound:
+          type: boolean
+        declared_observation_or_outcome_is_required:
+          type: boolean
+        verification_must_not_depend_only_on_the_recorded_verdict:
+          type: boolean
+        receipt_digest_is_required:
+          type: boolean
+        receipt_content_is_immutable_by_digest:
+          type: boolean
+        material_subject_change_makes_prior_receipt_non_current_unless_compatibility_preserves_it:
+          type: boolean
+        result_semantics_remain_owned_by_the_applicable_contract_or_taxonomy:
+          type: boolean
+        receipt_family_registration_does_not_transfer_domain_semantic_ownership:
+          type: boolean
+        receipt_presence_does_not_imply_capability_admission_availability_authorization_or_invocability:
+          type: boolean
+        receipt_lifecycle_is_defined_separately:
+          type: boolean
+    receipt_kernel:
+      type: object
+      additional_properties: true
+      fields:
+        required_semantics:
+          type: string_list
+        field_semantics:
+          type: object
+          additional_properties: true
+          fields:
+            receipt_type:
+              type: string
+            receipt_identity:
+              type: string
+            exact_subject_ref:
+              type: string
+            claim:
+              type: string
+            governing_coordinates:
+              type: string
+            observation_or_outcome:
+              type: string
+            verification_basis:
+              type: string
+            producer_identity:
+              type: string
+            receipt_digest:
+              type: string
+        authority:
+          type: object
+          additional_properties: true
+          fields:
+            class:
+              type: string
+            grants_semantic_authority:
+              type: boolean
+            grants_execution_authority:
+              type: boolean
+            may_replace_admission_decision:
+              type: boolean
+        currentness:
+          type: object
+          additional_properties: true
+          fields:
+            rule:
+              type: string
+            currentness_is_authority:
+              type: boolean
+        forbidden:
+          type: string_list
+    receipts:
+      type: object
+      additional_properties: true
+      fields:
+        validation:
+          type: object
+          additional_properties: true
+          fields:
+            family_id:
+              type: string
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            additional_required_semantics:
+              type: string_list
+            result_semantics_source:
+              type: string
+            rules:
+              type: string_list
+            forbidden:
+              type: string_list
+        compilation:
+          type: object
+          additional_properties: true
+          fields:
+            family_id:
+              type: string
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            additional_required_semantics:
+              type: string_list
+            result_semantics_source:
+              type: string
+            schema_ref:
+              type: string
+            rules:
+              type: string_list
+            forbidden:
+              type: string_list
+        conformance:
+          type: object
+          additional_properties: true
+          fields:
+            family_id:
+              type: string
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            additional_required_semantics:
+              type: string_list
+            result_semantics_source:
+              type: string
+            rules:
+              type: string_list
+            forbidden:
+              type: string_list
+        admission:
+          type: object
+          additional_properties: true
+          fields:
+            family_id:
+              type: string
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            additional_required_semantics:
+              type: string_list
+            result_semantics_source:
+              type: string
+            rules:
+              type: string_list
+            forbidden:
+              type: string_list
+        distribution:
+          type: object
+          additional_properties: true
+          fields:
+            family_id:
+              type: string
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            additional_required_semantics:
+              type: string_list
+            result_semantics_source:
+              type: string
+            rules:
+              type: string_list
+            forbidden:
+              type: string_list
+        reconciliation:
+          type: object
+          additional_properties: true
+          fields:
+            family_id:
+              type: string
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            additional_required_semantics:
+              type: string_list
+            result_semantics_source:
+              type: string
+            rules:
+              type: string_list
+            forbidden:
+              type: string_list
+    receipt_relations:
+      type: object
+      additional_properties: true
+      fields:
+        verifies:
+          type: object
+          additional_properties: true
+          fields:
+            subject:
+              type: string
+            object:
+              type: string
+            semantics:
+              type: string
+        specializes:
+          type: object
+          additional_properties: true
+          fields:
+            subject:
+              type: string
+            object:
+              type: string
+            semantics:
+              type: string
+        current_for:
+          type: object
+          additional_properties: true
+          fields:
+            subject:
+              type: string
+            object:
+              type: string
+            semantics:
+              type: string

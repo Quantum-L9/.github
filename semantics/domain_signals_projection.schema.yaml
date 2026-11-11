@@ -1,0 +1,89 @@
+canonical: true
+schema: l9.source-class-payload-schema/v1
+artifact_id: l9.schema/domain-signals-projection@1
+authority:
+  owner: Quantum-L9/.github
+schema_id: l9.projection.domain.signals/v1
+document_kind: projection_payload_schema
+payload_validation:
+  protocol: l9.payload-validation/source-class-dispatch@1
+descriptor_dialect: l9.schema-dialect/candidate-v2@1
+governed_by:
+  projection_profile_ref: l9.projection/signals@1
+source_shapes:
+- source_class: vocabulary
+  source_ref: l9.source/vocabulary@1
+  descriptor:
+    additional_properties: true
+    fields:
+      terms:
+        additional_properties: true
+        fields:
+          signal:
+            additional_properties: true
+            fields:
+              definition:
+                type: string
+              question:
+                type: string
+              semantic_class:
+                type: string
+            type: object
+          signal_consumption:
+            additional_properties: true
+            fields:
+              definition:
+                type: string
+              question:
+                type: string
+              semantic_class:
+                type: string
+            type: object
+          signal_feedback_episode:
+            additional_properties: true
+            fields:
+              definition:
+                type: string
+              question:
+                type: string
+              semantic_class:
+                type: string
+            type: object
+          signal_propagation:
+            additional_properties: true
+            fields:
+              definition:
+                type: string
+              question:
+                type: string
+              semantic_class:
+                type: string
+            type: object
+        type: object
+    type: object
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  descriptor:
+    additional_properties: true
+    fields:
+      invariants:
+        items:
+          additional_properties: true
+          fields:
+            id:
+              type: string
+            owner:
+              type: string
+            scope:
+              type: string
+            severity:
+              type: string
+            statement:
+              type: string
+          type: object
+        type: array
+    type: object
+derivation:
+  method: l9.schema-candidate-synthesis
+  candidate_digest: sha256:5d78342053383212ac5c8f88c20727c34c971404c21074585140c0b25ba5f0c5
+admission: not_granted

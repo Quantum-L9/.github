@@ -54,6 +54,8 @@ requires:
   - strategic_planning_episode.schema.yaml
   - strategic_plan_revision_candidate.schema.yaml
   - strategic_plan_metacognitive_analysis.schema.yaml
+  - domain_projection_model.yaml
+  - domain_consumer_bindings.yaml
   compiler_catalogs:
   - compiler_passes.yaml
   - derivation_profiles.yaml
@@ -104,6 +106,22 @@ requires:
   - strategic_metacognition_projection_v2.schema.yaml
   - strategic_planning_context_composition_v2.schema.yaml
   - strategic_planning_context_projection_v2.schema.yaml
+  - domain_architecture_projection.schema.yaml
+  - domain_architecture_composition.schema.yaml
+  - domain_strategic_value_projection.schema.yaml
+  - domain_strategic_value_composition.schema.yaml
+  - domain_signals_projection.schema.yaml
+  - domain_signals_composition.schema.yaml
+  - domain_governance_projection.schema.yaml
+  - domain_governance_composition.schema.yaml
+  - domain_evidence_provenance_projection.schema.yaml
+  - domain_evidence_provenance_composition.schema.yaml
+  - domain_contracts_conformance_projection.schema.yaml
+  - domain_contracts_conformance_composition.schema.yaml
+  - domain_capabilities_dependencies_projection.schema.yaml
+  - domain_capabilities_dependencies_composition.schema.yaml
+  - domain_identity_attribution_projection.schema.yaml
+  - domain_identity_attribution_composition.schema.yaml
 capabilities:
 - canonical_source_resolution
 - profile_resolution

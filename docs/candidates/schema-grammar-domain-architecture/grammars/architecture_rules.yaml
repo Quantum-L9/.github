@@ -1,0 +1,76 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture/grammar/architecture-rules@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: architecture_rules
+source_ref: l9.source/architecture-rules@1
+source_path: semantics/architecture_rules.yaml
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
+source_digest: sha256:7026597235f9a5ba168f325f92fcdb7f00c495cd04ce364ca4d70f4c51ccacbe
+applies_to_selectors:
+- $.global_rules
+- $.rule_shape
+- $.rules
+- $.resolution_rule
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        rules_derive_obligations_not_complete_architectures:
+          type: boolean
+        architecture_patterns_remain_separate_catalog:
+          type: boolean
+        provider_choice_does_not_define_semantic_structure:
+          type: boolean
+        architecture_synthesis_may_not_invent_domain_law:
+          type: boolean
+        product_kind_obligations_precede_architecture_synthesis:
+          type: boolean
+        kind_rule_obligations_apply_unmodified_unless_an_admitted_product_kind_exception_binds_the_exact_product:
+          type: boolean
+    rule_shape:
+      type: object
+      additional_properties: true
+      fields:
+        required:
+          type: string_list
+        optional:
+          type: string_list
+    rules:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          when:
+            type: object
+            additional_properties: true
+            fields:
+              product_kind:
+                type: string
+              requirement:
+                type: string
+              effect_requirement:
+                type: string
+          derive:
+            type: object
+            additional_properties: true
+            fields:
+              architecture_obligations:
+                type: string_list
+          requires_patterns:
+            type: string_list
+          source_refs:
+            type: string_list
+          forbid:
+            type: string_list
+    resolution_rule:
+      type: string

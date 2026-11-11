@@ -12,8 +12,8 @@ canonical_source:
 derivation:
   source_artifact: invariants.yaml
   source_artifact_id: l9.invariants/global@1
-  source_digest_sha256: 2928b1206020490e80b18de3becfde0a2fbcd934b6e967a2c550be9c67c733aa
-  source_invariant_count: 34
+  source_digest_sha256: dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
+  source_invariant_count: 40
   source_admission: canonical_active
   rule: 'Contracts operationalize admitted global invariants as reusable cross-boundary obligations. They do not
     create new semantic authority or absorb domain-owned behavior.
@@ -1363,3 +1363,91 @@ contracts:
     sv_dependency: independently_admitted_sv_model_contract_projection_and_composition
     qv: only_when_question_appropriate_method_selected
     unknown_resolution: unresolved_without_numeric_claim
+- id: l9.contract/domain-composition-compatibility@1
+  purpose: Decide whether a set of domain projections selected by one domain consumer binding can be used together
+    at the requested governing coordinates, without synthesizing, reconciling, or promoting any selected meaning.
+  scope: global
+  owner: Quantum-L9/.github
+  source_invariants:
+  - L9-OWNER-001
+  - L9-COMPAT-001
+  - L9-COORD-001
+  - L9-REVISION-001
+  - L9-DEGRADE-001
+  - L9-AUTH-001
+  - L9-UNKNOWN-001
+  - L9-PROJECTION-001
+  - L9-PROMOTION-001
+  applies_to:
+  - domain_projection_sets
+  - domain_consumer_bindings
+  - composition_engines
+  - consumers
+  requires:
+  - every_member_names_an_exact_domain_profile_id_profile_digest_canonical_source_coordinates_source_digests_and_output_schema
+  - every_member_resolves_against_one_governing_revision_or_an_explicit_compatibility_declaration_between_its_revisions
+  - an_identity_bearing_record_selected_by_two_members_is_canonically_equivalent_and_has_one_owner
+  - every_required_member_and_its_required_semantic_dependencies_resolve_without_undeclared_substitution
+  - every_material_unresolved_input_of_any_member_remains_unresolved_in_the_result
+  - members_carrying_different_claim_classes_are_kept_distinct
+  guarantees:
+  - compatible_requires_every_required_check_to_be_satisfied
+  - an_established_authoritative_conflict_is_incompatible
+  - a_missing_required_rule_coordinate_or_evidence_is_unresolved_never_compatible
+  - the_compatibility_result_is_a_derived_noncanonical_artifact
+  - each_member_keeps_its_own_source_identity_and_digest
+  forbidden:
+  - silent_precedence_between_members
+  - reconciliation_of_conflicting_identity_bearing_records
+  - assumed_equivalence_of_different_revisions
+  - authority_expansion_through_composition
+  - promotion_of_a_composed_result_to_canonical_semantics
+  - equating_different_claim_classes
+  - treating_signal_evidence_as_strategic_value_evidence
+  outcomes:
+    satisfied: compatible
+    violated: incompatible
+    unresolved: unresolved
+- id: l9.contract/domain-composition-provenance@1
+  purpose: Keep every composition of domain projections independently traceable to its exact inputs, the profiles
+    and binding that selected them, the contracts that governed composition, and the engine that produced it, and
+    make it non-current when any of those coordinates changes.
+  scope: global
+  owner: Quantum-L9/.github
+  source_invariants:
+  - L9-PROV-001
+  - L9-COORD-001
+  - L9-REVISION-001
+  - L9-DERIVED-001
+  - L9-EVIDENCE-001
+  - L9-UNKNOWN-001
+  applies_to:
+  - domain_projection_sets
+  - domain_consumer_bindings
+  - composition_engines
+  - receipts
+  requires:
+  - source_repository_and_source_commit_are_recorded
+  - each_canonical_artifact_id_and_canonical_artifact_digest_is_recorded
+  - each_profile_id_and_profile_digest_is_recorded
+  - the_domain_consumer_binding_id_and_binding_digest_are_recorded
+  - each_governing_composition_contract_id_and_its_catalog_digest_are_recorded
+  - the_projection_and_composition_engine_identity_and_version_are_recorded
+  - digests_use_the_canonical_json_and_semantic_digest_conventions_of_l9_compiler_projection_engine_at_1
+  guarantees:
+  - the_content_digest_excludes_nondeterministic_metadata
+  - the_content_digest_and_the_evaluation_receipt_digest_are_distinct
+  - a_change_to_any_recorded_source_profile_binding_or_contract_digest_or_any_material_coordinate_requires_revalidation
+  - replay_from_the_recorded_coordinates_reproduces_the_content_digest
+  - material_unknowns_of_the_inputs_are_preserved
+  forbidden:
+  - a_second_digest_subject_or_output_form_for_a_projection_artifact_or_its_receipt
+  - timestamps_in_a_deterministic_content_identity
+  - ambiguous_serialization
+  - undeclared_transformation
+  - presenting_a_stale_composition_as_current
+  - provenance_as_proof_of_correctness
+  outcomes:
+    satisfied: provenance_complete_and_current
+    violated: provenance_incomplete_or_falsified
+    unresolved: required_coordinate_unavailable
