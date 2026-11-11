@@ -16,12 +16,12 @@ derivation:
   source_artifacts:
     - artifact: invariants.yaml
       artifact_id: l9.invariants/global@1
-      sha256: dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
-      item_count: 40
+      sha256: c1d3b65217d002d8bd6bace7278d6910f9d273d650ea29afff158ccab5e913ab
+      item_count: 41
       admission: canonical_active
     - artifact: contracts.yaml
       artifact_id: l9.contracts/global@1
-      sha256: f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993
+      sha256: d83a1b60980271279f6bd6db1793ca94af49a725dd245d7d781037a24de2046e
       item_count: 31
       admission: canonical_active
   rule: >

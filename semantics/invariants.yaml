@@ -307,3 +307,21 @@ invariants:
     Value finding, and material failures or Unknown stages remain explicit.
   scope: global
   owner: Quantum-L9/.github
+- id: L9-INTEGRATION-001
+  statement: >-
+    When independently produced contributions jointly determine
+    one consequential artifact or acceptance subject, one
+    accountable integration responsibility must be identified
+    for that subject and scope.
+
+    A claim of integrated correctness or completion requires
+    verification of the exact combined subject against its
+    applicable contracts. Evidence that individual contributions
+    passed independently does not establish that their
+    combination is correct.
+
+    Integration responsibility does not transfer canonical
+    semantic ownership or confer strategic, execution,
+    publication, or admission authority.
+  scope: global
+  owner: Quantum-L9/.github
