@@ -242,3 +242,68 @@ invariants:
     obligation does not by itself assert a quantified Strategic Value claim.
   scope: global
   owner: Quantum-L9/.github
+- id: L9-SVQ-001
+  statement: >-
+    When a consumer asserts a qualitative Strategic Value appraisal for a discretionary
+    option, it must state the objective, beneficiary, feasible comparison or baseline,
+    causal rationale, material beneficial and adverse effects (including displaced
+    burdens on other affected beneficiaries), and which claims are observed,
+    hypothesized, contradicted, or Unknown. An unquantified appraisal may express
+    conditional direction or potential but must not be passed off as a computed
+    Strategic Value, complete ranking, independently verified result, or action
+    permission. Applicable mandatory obligations and hard constraints remain binding.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SVQ-002
+  statement: >-
+    A claim of realized Strategic Value compounding requires evidence that an
+    attributable durable effect of an earlier intervention was consumed by a
+    later authorized action or decision and produced a supported additional net objective improvement relative to
+    a stated later comparison. Potential reuse, stored
+    records, duplicated transmissions, feedback traffic, connectivity, or
+    an unchanged repeated effect do not establish realized compounding;
+    material offsetting consequences and Unknown attribution remain explicit.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SIGNAL-001
+  statement: >-
+    When evidence-bearing information crosses a semantic or participant boundary,
+    a consequential signal claim must preserve or resolvably reference the
+    producer, pertinent evidence and lineage, material context and uncertainty,
+    and governing meaning needed by its authorized eligible consumer.
+    Signal movement does not confer truth, ownership, authority, permission,
+    or positive Strategic Value; an ineligible destination is not a valid route.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SIGNAL-002
+  statement: >-
+    A claim of stronger evidence through signal fan-out, reciprocal paths, or
+    reconvergence must retain original-source dependence and distinguish
+    nonredundant corroboration, interpretation, validation or resilience from
+    repeated or correlated copies. Added branches and hops require a justified
+    eligible consumer or distinct protective purpose; duplicate deliveries,
+    message volume, and topology labels are not independent evidence.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SIGNAL-003
+  statement: >-
+    A signal feedback episode claimed to produce learning must identify an
+    evidenced changed state consumable by a later eligible consumer; an
+    unaccepted challenge remains a challenge, not completed learning. Such
+    loops must use controls appropriate to their risks that prevent
+    unbounded replay or unjustified convergence claims. Echoes, acknowledgments,
+    finite hop limits, and cyclic routing alone do not establish learning,
+    fixed-point convergence, or realized Strategic Value; no universal
+    constellation-wide synchronization lap is required.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-SIGNAL-004
+  statement: >-
+    A consequential signal outcome claim must distinguish production,
+    attempted delivery, verified delivery, recipient acceptance, durable
+    retention, actual later consumption, and any observed change in behavior
+    or result. Evidence of an earlier stage does not establish a later one;
+    a delivery or consumption observation alone is not a positive Strategic
+    Value finding, and material failures or Unknown stages remain explicit.
+  scope: global
+  owner: Quantum-L9/.github

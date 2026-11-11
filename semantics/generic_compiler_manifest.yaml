@@ -54,6 +54,8 @@ requires:
   - strategic_planning_episode.schema.yaml
   - strategic_plan_revision_candidate.schema.yaml
   - strategic_plan_metacognitive_analysis.schema.yaml
+  - domain_projection_model.yaml
+  - domain_consumer_bindings.yaml
   compiler_catalogs:
   - compiler_passes.yaml
   - derivation_profiles.yaml

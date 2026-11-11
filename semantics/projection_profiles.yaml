@@ -54,6 +54,13 @@ profile_classes:
       execution, or receipt generation.
 
       '
+  domain:
+    definition: 'Reusable, versioned projection profile selecting the canonical semantics of one semantic concern,
+      independent of any runtime consumer. Its consumer names the semantic domain (semantic_domain.<name>), never
+      an agent, skill, host or repository. The closed v1 domain set, its invariant closure and its boundaries are
+      declared in domain_projection_model.yaml.
+
+      '
 source_classes:
   vocabulary:
     canonical_artifact: vocabulary.yaml
@@ -2890,6 +2897,457 @@ projection_profiles:
   successor_of: l9.projection/strategic-metacognition@1
   payload_validation:
     protocol: l9.payload-validation/source-class-dispatch@1
+# BEGIN domain projection profiles v1 (rendered by docs/candidates/domain-projection-architecture-v1/tools/render_domain_profiles.py)
+- id: l9.projection/architecture@1
+  class: domain
+  consumer: semantic_domain.architecture
+  purpose: 'Expose reusable canonical architecture semantics: structures, relationships, architecture rules, product
+    kinds, archetypes, ports and composition constraints, independently of any consumer. Structural validity is
+    not capability availability, strategic desirability or governance approval. The profile names no skill, host
+    or actor and grants no admission or action authority.'
+  sources:
+    architecture_patterns:
+      selectors:
+      - $.global_rules
+      - $.pattern_classes
+      - $.patterns
+      - $.composition_rules
+      - $.architecture_synthesis
+    architecture_rules:
+      selectors:
+      - $.global_rules
+      - $.rule_shape
+      - $.rules
+      - $.resolution_rule
+    product_topology:
+      selectors:
+      - $.required
+      - $.properties
+      - $.semantic_rules
+      - $.kind_resolution
+    product_kinds:
+      selectors:
+      - $.global_rules
+      - $.kinds
+      - $.kind_exceptions
+    node_archetypes:
+      selectors:
+      - $.global_rules
+      - $.archetypes
+    dependency_archetypes:
+      selectors:
+      - $.global_rules
+      - $.archetypes
+    port_catalog:
+      selectors:
+      - $.global_rules
+      - $.port_entry_contract
+      - $.ports
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-OWNER-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-HARD-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-COMPAT-001")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+  output:
+    schema: l9.projection.domain.architecture/v1
+  forbidden:
+  - provider_implementation_details
+  - target_rendering_details
+  - repository_local_policy_as_global_law
+  - execution_publication_or_merge_authority_grant
+  - obligation_not_admitted_in_a_selected_source
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+- id: l9.projection/strategic-value@1
+  class: domain
+  consumer: semantic_domain.strategic_value
+  purpose: 'Expose unified qualitative and quantitative Strategic Value semantics: the complete normative strategic
+    value model, the admitted numerical and qualitative invariants, the assessment contract and the Strategic Value
+    vocabulary. Numerical claim authority stays with the model''s numerical owner; a qualitative appraisal is not
+    a computed value, missing evidence is not zero, and the profile computes, ranks, admits and authorizes nothing.'
+  sources:
+    strategic_value_model:
+      selectors:
+      - $.artifact_id
+      - $.authority
+      - $.canonical_source
+      - $.governed_by
+      - $.purpose
+      - $.identity
+      - $.valuation
+      - $.counterfactual_mathematics
+      - $.strategic_interaction_lookahead
+      - $.assessment_claim_levels
+      - $.evaluation_integrity
+      - $.causal_accounting
+      - $.forecast_and_realization
+      - $.comparisons
+      - $.explicit_non_ownership
+      - $.assessment_applicability
+      - $.retained_former_candidate_semantics
+      - $.relocated_additional_candidate_semantics
+    vocabulary:
+      selectors:
+      - $.terms.strategic_value
+      - $.terms.systemic_future_value
+      - $.terms.strategic_value_assessment
+      - $.terms.counterfactual_baseline
+      - $.terms.future_effect_identity
+      - $.terms.bidirectional_value_propagation
+      - $.terms.value_propagation_mesh
+      - $.terms.future_work_elimination
+      - $.terms.capability_unlock
+      - $.terms.decision_relevant_information_value
+      - $.terms.decision_boundary
+      - $.terms.qualitative_strategic_value_screen
+      - $.terms.realized_strategic_compounding
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-AUTH-002")]
+      - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+      - $.invariants[?(@.id=="L9-ASSURANCE-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-HARD-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-COORD-001")]
+      - $.invariants[?(@.id=="L9-COMPAT-001")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-STRATEGY-001")]
+      - $.invariants[?(@.id=="L9-SV-001")]
+      - $.invariants[?(@.id=="L9-SV-002")]
+      - $.invariants[?(@.id=="L9-SVQ-001")]
+      - $.invariants[?(@.id=="L9-SVQ-002")]
+    contracts:
+      selectors:
+      - $.contracts[?(@.id=="l9.contract/strategic-value-assessment@1")]
+  output:
+    schema: l9.projection.domain.strategic-value/v1
+  forbidden:
+  - provider_implementation_details
+  - execution_publication_or_merge_authority_grant
+  - obligation_not_admitted_in_a_selected_source
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+- id: l9.projection/signals@1
+  class: domain
+  consumer: semantic_domain.signals
+  purpose: 'Expose admitted Signal semantics: evidence-bearing information movement, propagation, bounded feedback
+    and consumption, independently of evidence assurance and of realized value. Signal propagation does not prove
+    value, feedback is not automatic learning, and consumption is not action authority.'
+  sources:
+    vocabulary:
+      selectors:
+      - $.terms.signal
+      - $.terms.signal_propagation
+      - $.terms.signal_feedback_episode
+      - $.terms.signal_consumption
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-AUTH-002")]
+      - $.invariants[?(@.id=="L9-OWNER-001")]
+      - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-COMPAT-001")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-IDENTITY-005")]
+      - $.invariants[?(@.id=="L9-SIGNAL-001")]
+      - $.invariants[?(@.id=="L9-SIGNAL-002")]
+      - $.invariants[?(@.id=="L9-SIGNAL-003")]
+      - $.invariants[?(@.id=="L9-SIGNAL-004")]
+  output:
+    schema: l9.projection.domain.signals/v1
+  forbidden:
+  - repository_local_policy_as_global_law
+  - execution_publication_or_merge_authority_grant
+  - obligation_not_admitted_in_a_selected_source
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+- id: l9.projection/governance@1
+  class: domain
+  consumer: semantic_domain.governance
+  purpose: 'Expose canonical authority, admission, promotion, lifecycle and policy boundaries: who may decide, what
+    admission requires and which boundaries constrain action. Validation is not admission, execution success is
+    not authority, and no consumer authorizes itself; the profile grants no authority.'
+  sources:
+    authority_model:
+      selectors:
+      - $.authority_classes
+      - $.admission_rules
+      - $.promotion_rules
+      - $.agent_authority
+      - $.human_authority
+      - $.escalation_rules
+    lifecycle:
+      selectors:
+      - $.lifecycles
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-AUTH-002")]
+      - $.invariants[?(@.id=="L9-OWNER-001")]
+      - $.invariants[?(@.id=="L9-SEM-001")]
+      - $.invariants[?(@.id=="L9-SCOPE-001")]
+      - $.invariants[?(@.id=="L9-MONOTONIC-001")]
+      - $.invariants[?(@.id=="L9-PROMOTION-001")]
+      - $.invariants[?(@.id=="L9-DERIVED-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-COMPAT-001")]
+      - $.invariants[?(@.id=="L9-REVISION-001")]
+      - $.invariants[?(@.id=="L9-ADMISSION-001")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-GLOBALIZATION-001")]
+    contracts:
+      selectors:
+      - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
+      - $.contracts[?(@.id=="l9.contract/semantic-ownership@1")]
+      - $.contracts[?(@.id=="l9.contract/monotonic-subordination@1")]
+      - $.contracts[?(@.id=="l9.contract/admission-and-promotion@1")]
+  output:
+    schema: l9.projection.domain.governance/v1
+  forbidden:
+  - repository_local_policy_as_global_law
+  - execution_publication_or_merge_authority_grant
+  - obligation_not_admitted_in_a_selected_source
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+- id: l9.projection/evidence-provenance@1
+  class: domain
+  consumer: semantic_domain.evidence_provenance
+  purpose: 'Expose evidence, receipts, provenance, assurance and revision-bound currentness: what supports a claim,
+    how it was produced and whether it is current against its governing coordinates. Evidence is not semantic authority,
+    a stale receipt is not current assurance, and provenance is not proof of correctness.'
+  sources:
+    receipt_catalog:
+      selectors:
+      - $.global_rules
+      - $.receipt_kernel
+      - $.receipts
+      - $.receipt_relations
+    artifact_model:
+      selectors:
+      - $.artifacts
+      - $.derivation_rules
+    semantic_dependency_model:
+      selectors:
+      - $.dependency_rules
+      - $.invalidation_rules
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-DERIVED-001")]
+      - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+      - $.invariants[?(@.id=="L9-ASSURANCE-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-COORD-001")]
+      - $.invariants[?(@.id=="L9-COMPAT-001")]
+      - $.invariants[?(@.id=="L9-REVISION-001")]
+      - $.invariants[?(@.id=="L9-ADMISSION-001")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-CORRECTNESS-001")]
+      - $.invariants[?(@.id=="L9-IDENTITY-006")]
+    contracts:
+      selectors:
+      - $.contracts[?(@.id=="l9.contract/evidence-and-receipt@1")]
+      - $.contracts[?(@.id=="l9.contract/assurance-and-verification@1")]
+      - $.contracts[?(@.id=="l9.contract/provenance-and-coordinate@1")]
+      - $.contracts[?(@.id=="l9.contract/revision-and-supersession@1")]
+      - $.contracts[?(@.id=="l9.contract/domain-composition-provenance@1")]
+  output:
+    schema: l9.projection.domain.evidence-provenance/v1
+  forbidden:
+  - repository_local_policy_as_global_law
+  - execution_publication_or_merge_authority_grant
+  - obligation_not_admitted_in_a_selected_source
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+- id: l9.projection/contracts-conformance@1
+  class: domain
+  consumer: semantic_domain.contracts_conformance
+  purpose: 'Expose the global contract catalog with the invariants its contracts operationalize, and the requirement,
+    resolution and conformance models: what must hold and how satisfaction or violation is established. A candidate
+    never defines its own correctness, validation never mutates its subject, and conformance is not authorization.'
+  sources:
+    conformance_model:
+      selectors:
+      - $.ownership_boundary
+      - $.global_rules
+      - $.requirement_derivation_inputs
+      - $.conformance_requirement_shape
+      - $.output
+    requirement_model:
+      selectors:
+      - $.global_rules
+      - $.requirement_classes
+      - $.requirement_entry_contract
+      - $.closure_rules
+    resolution_model:
+      selectors:
+      - $.global_rules
+      - $.result_domain
+      - $.resolution_record
+      - $.selection_rules
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-AUTH-002")]
+      - $.invariants[?(@.id=="L9-OWNER-001")]
+      - $.invariants[?(@.id=="L9-SEM-001")]
+      - $.invariants[?(@.id=="L9-SCOPE-001")]
+      - $.invariants[?(@.id=="L9-MONOTONIC-001")]
+      - $.invariants[?(@.id=="L9-PROMOTION-001")]
+      - $.invariants[?(@.id=="L9-DERIVED-001")]
+      - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+      - $.invariants[?(@.id=="L9-ASSURANCE-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-HARD-001")]
+      - $.invariants[?(@.id=="L9-DEGRADE-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-COORD-001")]
+      - $.invariants[?(@.id=="L9-IDENTITY-001")]
+      - $.invariants[?(@.id=="L9-COMPAT-001")]
+      - $.invariants[?(@.id=="L9-REVISION-001")]
+      - $.invariants[?(@.id=="L9-ADMISSION-001")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-VALIDATION-001")]
+      - $.invariants[?(@.id=="L9-CORRECTNESS-001")]
+      - $.invariants[?(@.id=="L9-CAPABILITY-001")]
+      - $.invariants[?(@.id=="L9-GLOBALIZATION-001")]
+      - $.invariants[?(@.id=="L9-IDENTITY-002")]
+      - $.invariants[?(@.id=="L9-IDENTITY-003")]
+      - $.invariants[?(@.id=="L9-IDENTITY-004")]
+      - $.invariants[?(@.id=="L9-IDENTITY-005")]
+      - $.invariants[?(@.id=="L9-IDENTITY-006")]
+      - $.invariants[?(@.id=="L9-STRATEGY-001")]
+      - $.invariants[?(@.id=="L9-SV-001")]
+      - $.invariants[?(@.id=="L9-SV-002")]
+      - $.invariants[?(@.id=="L9-GT-001")]
+    contracts:
+      selectors:
+      - $.contracts
+  output:
+    schema: l9.projection.domain.contracts-conformance/v1
+  forbidden:
+  - repository_local_policy_as_global_law
+  - execution_publication_or_merge_authority_grant
+  - obligation_not_admitted_in_a_selected_source
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+- id: l9.projection/capabilities-dependencies@1
+  class: domain
+  consumer: semantic_domain.capabilities_dependencies
+  purpose: 'Expose capability declarations, state dimensions, invocability, capability resolution and semantic dependency
+    closure: which capabilities exist, which states are established and which dependencies govern their use. A capability
+    is not authority, declared is not invocable, and no semantics substitute for another without a declared contract.'
+  sources:
+    capabilities:
+      selectors:
+      - $.global_rules
+      - $.capability_entry_contract
+      - $.capability_state_dimensions
+      - $.invocability_contract
+      - $.capability_relations
+      - $.capabilities
+    capability_resolution:
+      selectors:
+      - $.inputs
+      - $.resolution_order
+      - $.outputs
+      - $.rules
+    semantic_dependency_model:
+      selectors:
+      - $.dependency_rules
+      - $.invalidation_rules
+    dependency_archetypes:
+      selectors:
+      - $.global_rules
+      - $.archetypes
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-PROMOTION-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-DEGRADE-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-COMPAT-001")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-CAPABILITY-001")]
+    contracts:
+      selectors:
+      - $.contracts[?(@.id=="l9.contract/capability-state@1")]
+      - $.contracts[?(@.id=="l9.contract/unknown-and-degradation@1")]
+  output:
+    schema: l9.projection.domain.capabilities-dependencies/v1
+  forbidden:
+  - provider_implementation_details
+  - target_rendering_details
+  - execution_publication_or_merge_authority_grant
+  - obligation_not_admitted_in_a_selected_source
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+- id: l9.projection/identity-attribution@1
+  class: domain
+  consumer: semantic_domain.identity_attribution
+  purpose: 'Expose typed identity dimensions, actor and surface registries with their typed aliases, identity resolution
+    and identity assertion: which identities are asserted, who acted and what attribution valid evidence supports.
+    A surface is not an actor, a provider is not an author, and an unresolved actor is not a consequential author;
+    identity never implies authority.'
+  sources:
+    identity_model:
+      selectors:
+      - $.global_rules
+      - $.identity_dimensions
+      - $.non_identity_dimensions
+      - $.identity_binding
+      - $.identity_resolution
+      - $.identity_assertion
+      - $.consumer_rules
+    actor_registry:
+      selectors:
+      - $.actors
+      - $.aliases
+      - $.alias_rules
+    surface_registry:
+      selectors:
+      - $.surfaces
+      - $.aliases
+      - $.alias_rules
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-COORD-001")]
+      - $.invariants[?(@.id=="L9-IDENTITY-001")]
+      - $.invariants[?(@.id=="L9-COMPAT-001")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-IDENTITY-002")]
+      - $.invariants[?(@.id=="L9-IDENTITY-003")]
+      - $.invariants[?(@.id=="L9-IDENTITY-004")]
+      - $.invariants[?(@.id=="L9-IDENTITY-005")]
+      - $.invariants[?(@.id=="L9-IDENTITY-006")]
+    contracts:
+      selectors:
+      - $.contracts[?(@.id=="l9.contract/identity-resolution@1")]
+      - $.contracts[?(@.id=="l9.contract/identity-assertion@1")]
+  output:
+    schema: l9.projection.domain.identity-attribution/v1
+  forbidden:
+  - repository_local_policy_as_global_law
+  - execution_publication_or_merge_authority_grant
+  - obligation_not_admitted_in_a_selected_source
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
+# END domain projection profiles v1
 projection_engine_contract_ref:
   artifact: projection_engine_contract.yaml
   artifact_id: l9.compiler/projection-engine@1

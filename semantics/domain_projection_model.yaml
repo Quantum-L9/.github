@@ -1,0 +1,302 @@
+schema: l9.domain-projection-model/v1
+artifact_id: l9.domain-projection-model/global@1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_domain_projection_model
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: domain_projection_model.yaml
+governed_by:
+  invariants:
+  - L9-PROJECTION-001
+  - L9-OWNER-001
+  - L9-REVISION-001
+  - L9-COMPAT-001
+  - L9-AUTH-001
+  - L9-UNKNOWN-001
+  contracts:
+  - l9.contract/projection@1
+  - l9.contract/semantic-ownership@1
+  - l9.contract/domain-composition-compatibility@1
+  - l9.contract/domain-composition-provenance@1
+purpose: >-
+  Declare the closed v1 set of eight reusable semantic domains, the question each one owns, the global invariants
+  each domain projection must carry, and the boundaries and negative witnesses that separate them. A domain
+  projection exposes canonical meaning; a domain consumer binding selects that meaning; composition verifies
+  compatibility. None of these operations creates semantic authority. The canonical sources keep their owners, and
+  this ledger adds no obligation to any selected record.
+global_rules:
+  domain_set_is_closed_for_v1: true
+  domain_profiles_live_only_in_projection_profiles_yaml: true
+  domain_profiles_are_independent_of_any_runtime_consumer: true
+  canonical_sources_retain_ownership: true
+  domain_projection_creates_no_semantic_authority: true
+  domain_projection_grants_no_admission_permission_or_action_authority: true
+  a_domain_profile_selects_whole_records_never_identifiers_alone: true
+  a_domain_profile_carries_its_complete_invariant_closure: true
+  an_unselected_invariant_is_not_thereby_inapplicable: true
+  selected_contracts_are_closed_over_their_source_invariants: true
+  every_forbidden_category_of_a_domain_profile_has_a_declared_criterion: true
+  forbidden_interpretations_bind_consumers_and_are_not_payload_criteria: true
+  admitted_domain_profile_versions_are_immutable: true
+  validation_of_a_domain_profile_is_not_its_admission: true
+profile_class: domain
+consumer_prefix: semantic_domain.
+domain_contract:
+- canonical_selection_from_registered_projectable_sources_only
+- stable_versioned_identity_l9_projection_name_at_n
+- complete_source_and_invariant_closure
+- deterministic_output_from_pinned_inputs_and_profile
+- exact_source_coordinates_and_transformation_preserved
+- no_ownership_admission_or_permission_expansion
+- missing_or_conflicting_material_semantics_remain_explicit
+- selectors_resolve_and_output_schema_is_registered
+- admitted_versions_are_never_edited_in_place
+- compatibility_requirements_exposed_without_undeclared_synthesis
+common_invariant_closure:
+- L9-AUTH-001
+- L9-PROV-001
+- L9-UNKNOWN-001
+- L9-COMPAT-001
+- L9-PROJECTION-001
+domains:
+- id: l9.domain/architecture@1
+  consumer: semantic_domain.architecture
+  projection_profile: l9.projection/architecture@1
+  composition_profile: l9.compose/architecture@1
+  owned_question: What structures, relationships, architectural rules and composition constraints are valid?
+  primary_anchors:
+  - L9-OWNER-001
+  - L9-COMPAT-001
+  - L9-HARD-001
+  mandatory_closure: []
+  cross_domain_references:
+  - l9.domain/capabilities-dependencies@1
+  - l9.domain/contracts-conformance@1
+  - l9.domain/governance@1
+  irreducible_boundary: >-
+    Structural validity is not capability availability, strategic desirability, or governance approval.
+  negative_witness: >-
+    A topology whose capabilities are all available but which violates a composition rule remains architecturally
+    invalid.
+  forbidden_interpretations:
+  - provider_specific_implementation_as_architecture_law
+  - architecture_observation_as_admission
+  - consumer_specific_agent_instructions_as_architecture
+- id: l9.domain/strategic-value@1
+  consumer: semantic_domain.strategic_value
+  projection_profile: l9.projection/strategic-value@1
+  composition_profile: l9.compose/strategic-value@1
+  owned_question: >-
+    What value can be supported relative to a declared objective, evidence base and counterfactual?
+  primary_anchors:
+  - L9-SV-001
+  - L9-SV-002
+  - L9-SVQ-001
+  - L9-SVQ-002
+  - L9-STRATEGY-001
+  mandatory_closure:
+  - L9-HARD-001
+  - L9-AUTH-002
+  - L9-EVIDENCE-001
+  cross_domain_references:
+  - l9.domain/architecture@1
+  - l9.domain/signals@1
+  - l9.domain/governance@1
+  - l9.domain/evidence-provenance@1
+  irreducible_boundary: >-
+    Strategic Value evaluates objective-relative consequences; it neither decides architectural validity nor confers
+    authority.
+  negative_witness: >-
+    A feasible design may carry lower Strategic Value than an alternative, and a positive Strategic Value calculation
+    cannot override a failed hard constraint.
+  forbidden_interpretations:
+  - qualitative_claim_as_numeric_measurement
+  - numerical_result_as_independent_verification
+  - consumer_as_numerical_method_authority
+  - missing_evidence_as_zero_value
+- id: l9.domain/signals@1
+  consumer: semantic_domain.signals
+  projection_profile: l9.projection/signals@1
+  composition_profile: l9.compose/signals@1
+  owned_question: >-
+    What information is emitted, propagated, consumed and fed back, and what can legitimately be inferred from that
+    movement?
+  primary_anchors:
+  - L9-SIGNAL-001
+  - L9-SIGNAL-002
+  - L9-SIGNAL-003
+  - L9-SIGNAL-004
+  mandatory_closure:
+  - L9-OWNER-001
+  - L9-AUTH-002
+  - L9-EVIDENCE-001
+  - L9-IDENTITY-005
+  cross_domain_references:
+  - l9.domain/evidence-provenance@1
+  - l9.domain/identity-attribution@1
+  - l9.domain/strategic-value@1
+  - l9.domain/governance@1
+  irreducible_boundary: >-
+    Signal movement is evidence-bearing information flow; it is neither evidence assurance nor realized value.
+  negative_witness: >-
+    A signal observed by several consumers neither proves its underlying claim, authorizes action, nor establishes
+    causal value.
+  forbidden_interpretations:
+  - signal_propagation_as_proof_of_value
+  - feedback_as_automatic_learning
+  - signal_consumption_as_action_authority
+- id: l9.domain/governance@1
+  consumer: semantic_domain.governance
+  projection_profile: l9.projection/governance@1
+  composition_profile: l9.compose/governance@1
+  owned_question: >-
+    Who has authority over a decision, which admission process applies, and which boundaries constrain action?
+  primary_anchors:
+  - L9-AUTH-001
+  - L9-AUTH-002
+  - L9-ADMISSION-001
+  - L9-MONOTONIC-001
+  - L9-PROMOTION-001
+  mandatory_closure:
+  - L9-OWNER-001
+  - L9-REVISION-001
+  cross_domain_references:
+  - l9.domain/identity-attribution@1
+  - l9.domain/contracts-conformance@1
+  irreducible_boundary: >-
+    Conformance establishes whether criteria are satisfied; governance establishes whether an authorized actor made
+    the required decision.
+  negative_witness: >-
+    A perfectly validated artifact stays unadmitted until the applicable authority admits its exact revision.
+  forbidden_interpretations:
+  - validation_as_admission
+  - execution_success_as_authority
+  - consumer_self_authorization
+- id: l9.domain/evidence-provenance@1
+  consumer: semantic_domain.evidence_provenance
+  projection_profile: l9.projection/evidence-provenance@1
+  composition_profile: l9.compose/evidence-provenance@1
+  owned_question: >-
+    What supports a claim, how was that support produced, and is it current against the governing coordinates?
+  primary_anchors:
+  - L9-EVIDENCE-001
+  - L9-ASSURANCE-001
+  - L9-PROV-001
+  - L9-COORD-001
+  mandatory_closure:
+  - L9-REVISION-001
+  - L9-IDENTITY-006
+  cross_domain_references:
+  - l9.domain/contracts-conformance@1
+  - l9.domain/identity-attribution@1
+  irreducible_boundary: >-
+    Evidence and provenance establish what was observed and how a result was produced; they do not define the
+    criteria against which the result is correct.
+  negative_witness: >-
+    A valid historical receipt is not presented as current after a material governing revision changes without a
+    compatibility determination.
+  forbidden_interpretations:
+  - evidence_as_semantic_authority
+  - stale_receipt_as_current_assurance
+  - provenance_as_proof_of_correctness
+- id: l9.domain/contracts-conformance@1
+  consumer: semantic_domain.contracts_conformance
+  projection_profile: l9.projection/contracts-conformance@1
+  composition_profile: l9.compose/contracts-conformance@1
+  owned_question: What requirements must hold, and how is satisfaction or violation established?
+  primary_anchors:
+  - L9-VALIDATION-001
+  - L9-CORRECTNESS-001
+  - L9-COMPAT-001
+  mandatory_closure:
+  - L9-EVIDENCE-001
+  - L9-HARD-001
+  cross_domain_references:
+  - l9.domain/evidence-provenance@1
+  - l9.domain/governance@1
+  irreducible_boundary: >-
+    Evidence can be authentic while the asserted requirement is unsatisfied; conformance independently resolves the
+    governing criterion.
+  negative_witness: >-
+    A provenance-complete receipt that checks an irrelevant criterion does not establish conformance to the required
+    contract.
+  forbidden_interpretations:
+  - candidate_defined_correctness
+  - validation_mutating_subject
+  - conformance_as_authorization
+- id: l9.domain/capabilities-dependencies@1
+  consumer: semantic_domain.capabilities_dependencies
+  projection_profile: l9.projection/capabilities-dependencies@1
+  composition_profile: l9.compose/capabilities-dependencies@1
+  owned_question: >-
+    Which capabilities exist, which states have been established, and which dependencies or conditions govern their
+    use?
+  primary_anchors:
+  - L9-CAPABILITY-001
+  - L9-DEGRADE-001
+  mandatory_closure: []
+  cross_domain_references:
+  - l9.domain/architecture@1
+  - l9.domain/governance@1
+  irreducible_boundary: >-
+    A structurally valid architecture can depend on an unavailable capability, and an available capability does not
+    establish architectural suitability.
+  negative_witness: >-
+    A capability that is declared but neither authorized nor invocable is not treated as executable.
+  forbidden_interpretations:
+  - capability_as_authority
+  - declared_as_invocable
+  - undeclared_semantic_substitution
+- id: l9.domain/identity-attribution@1
+  consumer: semantic_domain.identity_attribution
+  projection_profile: l9.projection/identity-attribution@1
+  composition_profile: l9.compose/identity-attribution@1
+  owned_question: >-
+    Which identity dimensions are asserted, who acted, and what attribution is supported by valid resolution
+    evidence?
+  primary_anchors:
+  - L9-IDENTITY-001
+  - L9-IDENTITY-002
+  - L9-IDENTITY-003
+  - L9-IDENTITY-004
+  - L9-IDENTITY-005
+  - L9-IDENTITY-006
+  mandatory_closure:
+  - L9-EVIDENCE-001
+  cross_domain_references:
+  - l9.domain/evidence-provenance@1
+  - l9.domain/governance@1
+  irreducible_boundary: >-
+    Identity determines who or what is represented; governance determines authority. Identity evidence is not used to
+    infer authority.
+  negative_witness: >-
+    A Claude Code surface, a Cursor adapter and a coding agent are not one ActorIdentity merely because they take part
+    in one execution.
+  forbidden_interpretations:
+  - surface_identity_as_actor_identity
+  - provider_identity_as_authorship
+  - unresolved_actor_as_consequential_author
+validation_rules:
+- id: DOMAIN-001
+  rule: every_domain_profile_has_a_unique_versioned_identity_and_a_unique_semantic_domain_consumer
+- id: DOMAIN-002
+  rule: a_domain_profile_carries_no_consumer_specific_behavioral_instruction_and_names_no_skill_host_or_actor
+- id: DOMAIN-003
+  rule: every_source_class_of_a_domain_profile_is_a_registered_canonical_projectable_source
+- id: DOMAIN-004
+  rule: every_selector_of_a_domain_profile_resolves_at_the_pinned_revision
+- id: DOMAIN-005
+  rule: a_domain_profile_selects_whole_records_and_sections_preserving_source_identity_and_meaning
+- id: DOMAIN-006
+  rule: a_domain_profile_selects_its_primary_anchors_common_closure_mandatory_closure_and_the_source_invariants_of_its_selected_contracts
+- id: DOMAIN-007
+  rule: a_domain_profile_creates_no_semantic_authority_and_every_forbidden_category_has_a_declared_criterion_whose_exclusions_it_does_not_select
+- id: DOMAIN-008
+  rule: a_domain_profile_output_schema_and_its_composition_output_schema_are_each_registered_once
+- id: DOMAIN-009
+  rule: a_domain_profile_digest_is_the_semantic_digest_of_its_canonical_json
+- id: DOMAIN-010
+  rule: no_existing_profile_version_changes_when_domain_profiles_are_added

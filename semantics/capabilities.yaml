@@ -16,13 +16,13 @@ derivation:
   source_artifacts:
     - artifact: invariants.yaml
       artifact_id: l9.invariants/global@1
-      sha256: 2928b1206020490e80b18de3becfde0a2fbcd934b6e967a2c550be9c67c733aa
-      item_count: 34
+      sha256: dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
+      item_count: 40
       admission: canonical_active
     - artifact: contracts.yaml
       artifact_id: l9.contracts/global@1
-      sha256: 86f6df1466e7e47f5e7e8a438c62ffdcf2a97835e9e49ecd4a4eb2dec88be0e7
-      item_count: 29
+      sha256: f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993
+      item_count: 31
       admission: canonical_active
   rule: >
     This artifact defines the minimum global semantic model for capabilities.
