@@ -1,0 +1,9 @@
+# Minified bundles, source maps and dependency lockfiles: machine-written.
+!**/*.min.js
+!**/*.min.css
+!**/*.map
+!**/package-lock.json
+!**/pnpm-lock.yaml
+!**/yarn.lock
+!**/uv.lock
+!**/poetry.lock

@@ -390,7 +390,7 @@ try {
 	);
 	assert.strictEqual(ISSUE_TEMPLATES_MATERIALIZED.length, 7);
 
-	// Exact class payload sizes (13 / 4 / 1: self_governed carries only CODEOWNERS).
+	// Exact class payload sizes (14 / 5 / 1: self_governed carries only CODEOWNERS).
 	const classes = loadRepoClasses(fs);
 	const sizes = Object.fromEntries(
 		["default", "non_constellation_python", "self_governed"].map((c) => [
@@ -405,8 +405,8 @@ try {
 		]),
 	);
 	assert.deepStrictEqual(sizes, {
-		default: 13,
-		non_constellation_python: 4,
+		default: 14,
+		non_constellation_python: 5,
 		self_governed: 1,
 	});
 

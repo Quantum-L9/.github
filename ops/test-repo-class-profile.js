@@ -185,6 +185,7 @@ try {
 		assert.deepStrictEqual(
 			Object.keys(profiled).sort(byName),
 			[
+				".coderabbit.yaml",
 				".github/CODEOWNERS",
 				".github/ISSUE_TEMPLATE/1-bug.yml",
 				".github/ISSUE_TEMPLATE/2-feature.yml",
@@ -244,6 +245,7 @@ try {
 	assert.deepStrictEqual(
 		bornDests,
 		[
+			".coderabbit.yaml",
 			".github/CODEOWNERS",
 			".github/dependabot.yml",
 			".github/labels.yml",
@@ -555,6 +557,7 @@ try {
 	assert.deepStrictEqual(seededSelfGoverned.seed_categories, [
 		"codeowners",
 		"dependabot",
+		"coderabbit",
 		"community-health",
 		"issue-templates",
 		"pr-templates",
@@ -573,10 +576,11 @@ try {
 		});
 		assert.strictEqual(
 			Object.keys(payload).length,
-			12,
-			`${repo}: exactly twelve non-CI seed destinations`,
+			13,
+			`${repo}: exactly thirteen non-CI seed destinations`,
 		);
 		assert.ok(payload[".github/CODEOWNERS"]);
+		assert.ok(payload[".coderabbit.yaml"]);
 		assert.ok(payload[".github/dependabot.yml"]);
 		assert.ok(payload[".github/PULL_REQUEST_TEMPLATE/release.md"]);
 		assert.match(
@@ -651,6 +655,7 @@ try {
 		assert.strictEqual(ncpPlan.profile.name, "non_constellation_python");
 		assert.strictEqual(ncpPlan.profile.resolved_from, "marker");
 		assert.deepStrictEqual(ncpPlan.writes.sort(byName), [
+			".coderabbit.yaml",
 			".github/CODEOWNERS",
 			".github/dependabot.yml",
 			".github/labels.yml",
