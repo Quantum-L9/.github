@@ -1,0 +1,96 @@
+kind: predecessor_full_selector_retention_evidence_only
+authority_revision: dc96a8ae9f31e359bb0e52a0b1d778fc8f265d99
+verification: local_subset_check_for_exact_predecessor_selection_order
+predecessors:
+  gar:
+    predecessor_ref: l9.projection/gar-architecture-observer@1
+    source_selectors:
+      vocabulary:
+        count: 12
+        selector_sha256: ad975f1f372096009041d7f41517cccd90782e33cbe5a1d3efc0aa5184ba3b49
+        remote_fingerprint_fnv1a32: 608016ac
+      invariants:
+        count: 4
+        selector_sha256: 403cdd97d3b0f3e174ad9ffc820d921f22de5b08123fd3724e1c64e87a91e6fa
+        remote_fingerprint_fnv1a32: e5ff2ef4
+      contracts:
+        count: 5
+        selector_sha256: 5f5d44c4ea21a1600ac896eff18e3de74a2721ad40f09261aecd27c3893e06f3
+        remote_fingerprint_fnv1a32: 0af552d1
+      capabilities:
+        count: 9
+        selector_sha256: 18c1dde26b5f6989da087c6ba46cbc6729d81671a629e189af65f7a6561bbd91
+        remote_fingerprint_fnv1a32: ab10f47f
+      architecture_patterns:
+        count: 9
+        selector_sha256: 613875c314c9ef6502b96995a6a01a9ec90d130785a7831b1f8973ff5dfdc59d
+        remote_fingerprint_fnv1a32: b5b5664b
+      authority_model:
+        count: 3
+        selector_sha256: a4e021585cabc3b4e61aa12ff989e2640f58ac5c80ae6945eeef68a8a55f7e2b
+        remote_fingerprint_fnv1a32: d8eaa795
+      lifecycle:
+        count: 3
+        selector_sha256: 9b82969c9e0cc9a762cb91601b70f6555b1c56a28f296d0f57d54a6859d6303b
+        remote_fingerprint_fnv1a32: 9be4df5b
+  planner:
+    predecessor_ref: l9.projection/strategic-planner-value@1
+    source_selectors:
+      strategic_value_model:
+        count: 18
+        selector_sha256: f579a8cc45836d975be703c165847dbcda34539e499a34e97720e7892383f898
+        remote_fingerprint_fnv1a32: a71c8511
+      vocabulary:
+        count: 11
+        selector_sha256: a3af608662022acf097e2d7ce4fc1e56cb7e78c7a826a336723850e3e520db7f
+        remote_fingerprint_fnv1a32: 5eb4f084
+      invariants:
+        count: 12
+        selector_sha256: 304afb508124ef0add6b7c0737740d61edcbd6347aaaec5b7ed3cbfc7540598a
+        remote_fingerprint_fnv1a32: 471194f8
+      contracts:
+        count: 4
+        selector_sha256: 811c30a873fc3e7ba1d4b86b8153271769de93148010b2b7fb2ee9bfac7dac9f
+        remote_fingerprint_fnv1a32: 740a555e
+      authority_model:
+        count: 5
+        selector_sha256: c5f306519febf572391ff4fd20a2253bf6170b5042e8117dee725424b7c4e099
+        remote_fingerprint_fnv1a32: 9629ca58
+  cursor:
+    predecessor_ref: l9.projection/cursor-governance-operating-plane@2
+    source_selectors:
+      vocabulary:
+        count: 15
+        selector_sha256: f85308aa47e17da5bbfd40c194f5ee8c772c09db4a730847749d782005487415
+        remote_fingerprint_fnv1a32: 4be7891c
+      capabilities:
+        count: 11
+        selector_sha256: 7d8491045f7e2af036fb285ea7ead9093c3fdf7cc0f6794ecbd8d5906db6de45
+        remote_fingerprint_fnv1a32: 1b3de011
+      authority_model:
+        count: 7
+        selector_sha256: 7f5a5de6df45d997d81318dda1f59d52f179d24fc986f5bf5734257378f7da6f
+        remote_fingerprint_fnv1a32: bb5b9611
+      lifecycle:
+        count: 4
+        selector_sha256: f3e098e09da4df04e498596b2fbc45cff02e441652607d1c350be5addd1da029
+        remote_fingerprint_fnv1a32: d94a73be
+      invariants:
+        count: 1
+        selector_sha256: e85ae6ffd019d0557c74d3b65fa71c8fbf815977d60cb16b9efe6321487124c7
+        remote_fingerprint_fnv1a32: 9b6083a5
+      contracts:
+        count: 10
+        selector_sha256: 5401a93d7402aa91db3ee19e486d124361f55676f075007ab5dd1462143c143c
+        remote_fingerprint_fnv1a32: 8f7e8ced
+      error_taxonomy:
+        count: 2
+        selector_sha256: aa930e7eb1cddb10b7d125199b181d66747b0b05f06020ab611f31e69a61bf2f
+        remote_fingerprint_fnv1a32: 03296bfb
+      receipt_catalog:
+        count: 5
+        selector_sha256: 9d7779a79b1f40d9a7fa5df88c17187538575c2661fec97889e08ba20120ab51
+        remote_fingerprint_fnv1a32: 6a99617b
+remote_fingerprint_observation: Actual source selector groups fetched from Quantum-L9/.github/main
+  exact SHA and independently compared using one deterministic ASCII FNV1a32 fingerprint
+  per group; supplemental to SHA256 exact local selector retention.

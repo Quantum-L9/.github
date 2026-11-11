@@ -1,0 +1,43 @@
+schema: l9.candidate-consumer-use-contract/v1
+status: proposed_non_authoritative
+subject_profile: l9.projection/cursor-governance-operating-plane@3
+subject_consumer: Cursor-Governance
+consumer_ownership: existing_Cursor_Governance_operating_plane_and_session_owner
+migration:
+  predecessor: l9.projection/cursor-governance-operating-plane@2
+  activation: explicit_opt_in_only_after_independent_producer_and_runtime_proof
+  preserved: all_eight_source_classes_and_predecessor_selectors
+  none_of: [new_service, new_session_hook, new_agent, new_resolver, new_permission, new_learning_writer]
+session_start:
+  default: existing_verified_2_behavior
+  new_payload_at_start: forbidden
+  allowed_overlay_action: status_only_if_owner_supports_it_without_a_new_hook
+  status_cannot_be_promoted_from: [profile_definition, candidate_zip, local_yaml_validation, green_unit_test, unverified_compiler_receipt]
+  unknown_or_stale: preserve_uncertainty_and_do_not_serve_candidate_meaning_as_canonical
+on_demand:
+  preconditions:
+  - authorized_actor_and_eligible_consumer_request
+  - exact_admitted_source_and_profile_and_revision
+  - genuine_producer_projection_and_receipt_verification
+  - nonduplicated_record_need_not_already_satisfied_by_existing_2_at_lower_cost
+  operation: current_verified_record_retrieval_through_existing_operating_plane_owner
+  returns: exact_source_bound_record_with_provenance_not_a_new_governance_decision
+  on_conflict: block_affected_overlay_without_disabling_valid_predecessor_behavior
+marginal_value_gate:
+  questions:
+  - what_specific_authorized_task_fails_under_existing_2
+  - does_new_candidate_selection_make_that_task_correct_or_more_efficient
+  - is_added_latency_security_cost_and_maintenance_justified_by_observed_gain
+  failure: retain_2_and_do_not_activate_3
+forbidden:
+- SessionStart_full_semantic_or_Strategy_or_memory_hydration
+- inferred_canonical_admission_from_connected_GitHub_branch
+- skill_routing_or_Claude_Code_permissions_from_semantic_projection
+- automatic_pr_merge_publication_or_plan_rewrite
+- treating_copied_signal_as_independent_or_promoted_knowledge
+negative_witnesses:
+- no_receipt_means_no_current_state_claim
+- stale_profile_digest_means_no_current_overlay_use
+- missing_actor_authorization_means_no_on_demand_record_access
+- all_requirements_met_by_existing_2_means_no_new_3_activation
+verification_status: consumer_replay_not_executed

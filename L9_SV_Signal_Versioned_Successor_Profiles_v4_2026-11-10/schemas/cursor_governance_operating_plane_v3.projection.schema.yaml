@@ -1,0 +1,542 @@
+schema: l9.source-class-payload-schema/v1
+artifact_id: l9.schema/cursor-governance-operating-plane-projection@3
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_global_cursor_governance_operating_plane_v3_projection_payload_schema
+  authority_class: canonical
+canonical_source:
+  format: yaml
+  artifact: cursor_governance_operating_plane_v3.projection.schema.yaml
+schema_id: l9.projection.cursor-governance-operating-plane/v3
+document_kind: projection_payload_schema
+payload_validation:
+  protocol: l9.payload-validation/source-class-dispatch@1
+descriptor_dialect: l9.schema-dialect/candidate-v2@1
+governed_by:
+  projection_profile_ref: l9.projection/cursor-governance-operating-plane@3
+purpose: Validate one exact source-class view selected under the complete l9.projection/cursor-governance-operating-plane@3
+  candidate profile; retained source records are source-owned, and schema shape does not validate claim truth, confer
+  authority, perform reasoning, or replace selector-equivalence or producer evidence.
+source_shapes:
+- source_class: vocabulary
+  source_ref: l9.source/vocabulary@1
+  descriptor:
+    type: object
+    additional_properties: true
+    required:
+    - terms
+    fields:
+      terms:
+        type: object
+        additional_properties: true
+        required:
+        - authority
+        - capability
+        - semantic_owner
+        - provider
+        - bounded_autonomy
+        - state_change
+        - receipt
+        - packet
+        - conformance
+        - invariant
+        - contract
+        - admission
+        - provenance
+        - resolution
+        - requirement
+        - qualitative_strategic_value_screen
+        - realized_strategic_compounding
+        - signal
+        - signal_propagation
+        - signal_feedback_episode
+        - signal_consumption
+        fields:
+          authority:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          capability:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          semantic_owner:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          provider:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          bounded_autonomy:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          state_change:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          receipt:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          packet:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          conformance:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          invariant:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          contract:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          admission:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          provenance:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          resolution:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          requirement:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+          qualitative_strategic_value_screen:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            - question
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+              question:
+                type: string
+          realized_strategic_compounding:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            - question
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+              question:
+                type: string
+          signal:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            - question
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+              question:
+                type: string
+          signal_propagation:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            - question
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+              question:
+                type: string
+          signal_feedback_episode:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            - question
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+              question:
+                type: string
+          signal_consumption:
+            type: object
+            additional_properties: true
+            required:
+            - semantic_class
+            - definition
+            - question
+            fields:
+              semantic_class:
+                type: string
+              definition:
+                type: string
+              question:
+                type: string
+- source_class: capabilities
+  source_ref: l9.source/capabilities@1
+  descriptor:
+    type: object
+    additional_properties: true
+    required:
+    - capabilities
+    - global_rules
+    - capability_entry_contract
+    - capability_state_dimensions
+    - invocability_contract
+    - capability_relations
+    - catalog_status
+    fields:
+      capabilities:
+        type: array
+        items:
+          type: object
+          additional_properties: true
+          required:
+          - id
+          - semantic_owner
+          fields:
+            id:
+              type: string
+            semantic_owner:
+              type: string
+            effect_class:
+              type: string
+            authorization_requirements:
+              type: string_list
+            requires:
+              type: string_list
+      global_rules:
+        type: object
+        additional_properties: true
+      capability_entry_contract:
+        type: object
+        additional_properties: true
+      capability_state_dimensions:
+        type: object
+        additional_properties: true
+      invocability_contract:
+        type: object
+        additional_properties: true
+      capability_relations:
+        type: object
+        additional_properties: true
+      catalog_status:
+        type: object
+        additional_properties: true
+- source_class: authority_model
+  source_ref: l9.source/authority-model@1
+  descriptor:
+    type: object
+    additional_properties: true
+    required:
+    - authority_classes
+    - admission_rules
+    - promotion_rules
+    - global_admission_rules
+    - agent_authority
+    - human_authority
+    - escalation_rules
+    fields:
+      authority_classes:
+        type: object
+        additional_properties: true
+      admission_rules:
+        type: object
+        additional_properties: true
+      promotion_rules:
+        type: object
+        additional_properties: true
+      global_admission_rules:
+        type: object
+        additional_properties: true
+      agent_authority:
+        type: object
+        additional_properties: true
+      human_authority:
+        type: object
+        additional_properties: true
+      escalation_rules:
+        type: object
+        additional_properties: true
+- source_class: lifecycle
+  source_ref: l9.source/lifecycle@1
+  descriptor:
+    type: object
+    additional_properties: true
+    required:
+    - lifecycles
+    - global_rules
+    - state_semantics
+    - lifecycle_relations
+    fields:
+      lifecycles:
+        type: object
+        additional_properties: true
+        fields:
+          architecture_pattern:
+            type: object
+            additional_properties: true
+          globalization_candidate:
+            type: object
+            additional_properties: true
+          harvest_packet:
+            type: object
+            additional_properties: true
+      global_rules:
+        type: object
+        additional_properties: true
+      state_semantics:
+        type: object
+        additional_properties: true
+      lifecycle_relations:
+        type: object
+        additional_properties: true
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  descriptor:
+    type: object
+    additional_properties: true
+    required:
+    - invariants
+    fields:
+      invariants:
+        type: array
+        items:
+          type: object
+          additional_properties: true
+          required:
+          - id
+          - statement
+          - scope
+          fields:
+            id:
+              type: string
+            statement:
+              type: string
+            scope:
+              type: string
+              enum:
+              - global
+            owner:
+              type: string
+            severity:
+              type: string
+        min_items: 1
+- source_class: contracts
+  source_ref: l9.source/contracts@1
+  descriptor:
+    type: object
+    additional_properties: true
+    required:
+    - contracts
+    - outcome_semantics
+    fields:
+      contracts:
+        type: array
+        items:
+          type: object
+          additional_properties: true
+          required:
+          - id
+          - purpose
+          fields:
+            id:
+              type: string
+            purpose:
+              type: string
+            scope:
+              type: string
+            owner:
+              type: string
+            source_invariants:
+              type: string_list
+            requires:
+              type: string_list
+            guarantees:
+              type: string_list
+            forbidden:
+              type: string_list
+            applies_to:
+              type: string_list
+            outcomes:
+              type: object
+              additional_properties: true
+            applicability:
+              type: object
+              additional_properties: true
+        min_items: 1
+      outcome_semantics:
+        type: object
+        additional_properties: true
+- source_class: error_taxonomy
+  source_ref: l9.source/error-taxonomy@1
+  descriptor:
+    type: object
+    additional_properties: true
+    required:
+    - errors
+    - result_domains
+    fields:
+      errors:
+        type: object
+        additional_properties: true
+      result_domains:
+        type: object
+        additional_properties: true
+- source_class: receipt_catalog
+  source_ref: l9.source/receipt-catalog@1
+  descriptor:
+    type: object
+    additional_properties: true
+    required:
+    - receipts
+    - global_rules
+    - receipt_kernel
+    - specialization_contract
+    - receipt_relations
+    fields:
+      receipts:
+        type: object
+        additional_properties: true
+      global_rules:
+        type: object
+        additional_properties: true
+      receipt_kernel:
+        type: object
+        additional_properties: true
+      specialization_contract:
+        type: object
+        additional_properties: true
+      receipt_relations:
+        type: object
+        additional_properties: true
