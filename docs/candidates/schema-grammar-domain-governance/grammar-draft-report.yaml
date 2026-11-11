@@ -1,0 +1,23 @@
+authority_repository: Quantum-L9/.github
+authority_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+projection_profile: l9.projection/governance@1
+composition_profile: l9.compose/governance@1
+written:
+- source_class: authority_model
+  path: docs/candidates/schema-grammar-domain-governance/grammars/authority_model.yaml
+  digest: sha256:9f780ff5612aeec0c8ecdd7aefe278ea03e4c2596eb772fedd03e415128d4caa
+  normative_overlay: []
+- source_class: lifecycle
+  path: docs/candidates/schema-grammar-domain-governance/grammars/lifecycle.yaml
+  digest: sha256:cd1eb2306d74b134c64348fa239fde311085be8ebdd67a87d38cfbfd208565fc
+  normative_overlay: []
+- source_class: invariants
+  path: docs/candidates/schema-grammar-domain-governance/grammars/invariants.yaml
+  digest: sha256:78117f0686b1cafbe74a5c46a9eef2d1f9d7de55e4dbf551a6e5dea025592f16
+  normative_overlay: []
+- source_class: contracts
+  path: docs/candidates/schema-grammar-domain-governance/grammars/contracts.yaml
+  digest: sha256:ae8e7cbd2f2f0a3a4195994cbc7dc5e5b9d0e5b4d60a0f174234d6799b737f7d
+  normative_overlay: []
+inexpressible: []
+pack_dir: docs/candidates/schema-grammar-domain-governance

@@ -1,0 +1,114 @@
+document_kind: source_field_grammar_bindings_candidate
+artifact_id: l9.candidate.schema-synthesis/contracts-conformance/bindings@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+bindings:
+- source_class: conformance_model
+  source_ref: l9.source/conformance-model@1
+  source_path: semantics/conformance_model.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:e777a3cb7b8d94e044934d4778045d697bcdd85ecb2ebe241e95fe60bd7141c5
+  grammar_ref: l9.candidate.schema-synthesis/contracts-conformance/grammar/conformance-model@1
+  grammar_path: docs/candidates/schema-grammar-domain-contracts-conformance/grammars/conformance_model.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:fa41348222c5c72cbf2de669b4e1bfb618d5403f62b9e9a0a3257a009ebf2974
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.ownership_boundary
+  - $.global_rules
+  - $.requirement_derivation_inputs
+  - $.conformance_requirement_shape
+  - $.output
+  approval_status: candidate
+- source_class: requirement_model
+  source_ref: l9.source/requirement-model@1
+  source_path: semantics/requirement_model.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:7865723e78b7f02817db9d5f54aedb1350cb08b45d42759c8bdafeba1320c7c2
+  grammar_ref: l9.candidate.schema-synthesis/contracts-conformance/grammar/requirement-model@1
+  grammar_path: docs/candidates/schema-grammar-domain-contracts-conformance/grammars/requirement_model.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:4a301ccc0decd171dcfec725b2aa7507de19f60bd05e411807df6f4275c429d1
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.requirement_classes
+  - $.requirement_entry_contract
+  - $.closure_rules
+  approval_status: candidate
+- source_class: resolution_model
+  source_ref: l9.source/resolution-model@1
+  source_path: semantics/resolution_model.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:3c0636b0eaca00789d6ced5425fb1c3a314319dd00525dd5f811f38f81c365fc
+  grammar_ref: l9.candidate.schema-synthesis/contracts-conformance/grammar/resolution-model@1
+  grammar_path: docs/candidates/schema-grammar-domain-contracts-conformance/grammars/resolution_model.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:3cfb352b800d2fba7926da264b2a45ac9b9cb515fbed3e626405fde6745c4e08
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.result_domain
+  - $.resolution_record
+  - $.selection_rules
+  approval_status: candidate
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  source_path: semantics/invariants.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
+  grammar_ref: l9.candidate.schema-synthesis/contracts-conformance/grammar/invariants@1
+  grammar_path: docs/candidates/schema-grammar-domain-contracts-conformance/grammars/invariants.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:776fbad48b113a871e5f7859d70364a0b0c2f8ec3d563ea1611c4fd95de8adbf
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.invariants[?(@.id=="L9-AUTH-001")]
+  - $.invariants[?(@.id=="L9-AUTH-002")]
+  - $.invariants[?(@.id=="L9-OWNER-001")]
+  - $.invariants[?(@.id=="L9-SEM-001")]
+  - $.invariants[?(@.id=="L9-SCOPE-001")]
+  - $.invariants[?(@.id=="L9-MONOTONIC-001")]
+  - $.invariants[?(@.id=="L9-PROMOTION-001")]
+  - $.invariants[?(@.id=="L9-DERIVED-001")]
+  - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+  - $.invariants[?(@.id=="L9-ASSURANCE-001")]
+  - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+  - $.invariants[?(@.id=="L9-HARD-001")]
+  - $.invariants[?(@.id=="L9-DEGRADE-001")]
+  - $.invariants[?(@.id=="L9-PROV-001")]
+  - $.invariants[?(@.id=="L9-COORD-001")]
+  - $.invariants[?(@.id=="L9-IDENTITY-001")]
+  - $.invariants[?(@.id=="L9-COMPAT-001")]
+  - $.invariants[?(@.id=="L9-REVISION-001")]
+  - $.invariants[?(@.id=="L9-ADMISSION-001")]
+  - $.invariants[?(@.id=="L9-PROJECTION-001")]
+  - $.invariants[?(@.id=="L9-VALIDATION-001")]
+  - $.invariants[?(@.id=="L9-CORRECTNESS-001")]
+  - $.invariants[?(@.id=="L9-CAPABILITY-001")]
+  - $.invariants[?(@.id=="L9-GLOBALIZATION-001")]
+  - $.invariants[?(@.id=="L9-IDENTITY-002")]
+  - $.invariants[?(@.id=="L9-IDENTITY-003")]
+  - $.invariants[?(@.id=="L9-IDENTITY-004")]
+  - $.invariants[?(@.id=="L9-IDENTITY-005")]
+  - $.invariants[?(@.id=="L9-IDENTITY-006")]
+  - $.invariants[?(@.id=="L9-STRATEGY-001")]
+  - $.invariants[?(@.id=="L9-SV-001")]
+  - $.invariants[?(@.id=="L9-SV-002")]
+  - $.invariants[?(@.id=="L9-GT-001")]
+  approval_status: candidate
+- source_class: contracts
+  source_ref: l9.source/contracts@1
+  source_path: semantics/contracts.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993
+  grammar_ref: l9.candidate.schema-synthesis/contracts-conformance/grammar/contracts@1
+  grammar_path: docs/candidates/schema-grammar-domain-contracts-conformance/grammars/contracts.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:dd12e46ece6ec68350fc53bd689226096006bdf4db3d593f3204970eff00842e
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.contracts
+  approval_status: candidate

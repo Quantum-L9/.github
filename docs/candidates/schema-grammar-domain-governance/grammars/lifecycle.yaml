@@ -1,0 +1,243 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/governance/grammar/lifecycle@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: lifecycle
+source_ref: l9.source/lifecycle@1
+source_path: semantics/lifecycle.yaml
+source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_digest: sha256:3463c5f44376bf566347008419becc900a761dd77d99691e983afc49c2f7231c
+applies_to_selectors:
+- $.lifecycles
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    lifecycles:
+      type: object
+      additional_properties: true
+      fields:
+        architecture_pattern:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            branches:
+              type: object
+              additional_properties: true
+              fields:
+                admitted_global_pattern:
+                  type: string
+                domain_pattern:
+                  type: string
+                rejected:
+                  type: string
+                unresolved:
+                  type: string
+            rules:
+              type: string_list
+        globalization_candidate:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            terminal_resolutions:
+              type: string_list
+            rules:
+              type: string_list
+        harvest_packet:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            artifact_state:
+              type: string
+            stages:
+              type: string_list
+            rules:
+              type: string_list
+        fixture:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            branches:
+              type: object
+              additional_properties: true
+              fields:
+                rejected:
+                  type: string
+                unresolved:
+                  type: string
+                globalization_candidate:
+                  type: string
+            publication_gate:
+              type: object
+              additional_properties: true
+              fields:
+                all_of:
+                  type: string_list
+            rules:
+              type: string_list
+        fixture_profile:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            rules:
+              type: string_list
+        conformance_receipt:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            artifact_state:
+              type: string
+            emitted_state:
+              type: string
+            derived_statuses:
+              type: string_list
+            rules:
+              type: string_list
+        published_artifact:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            publication_gate:
+              type: object
+              additional_properties: true
+              fields:
+                all_of:
+                  type: string_list
+                when_applicable:
+                  type: string_list
+            rules:
+              type: string_list
+        profile:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            rules:
+              type: string_list
+        distribution:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            branches:
+              type: object
+              additional_properties: true
+              fields:
+                unresolved:
+                  type: string
+                non_current:
+                  type: string
+            rules:
+              type: string_list
+        product_topology:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            branches:
+              type: object
+              additional_properties: true
+              fields:
+                rejected:
+                  type: string
+                unresolved:
+                  type: string
+            rules:
+              type: string_list
+        product_manifest:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            branches:
+              type: object
+              additional_properties: true
+              fields:
+                blocked:
+                  type: string
+                unresolved:
+                  type: string
+            rules:
+              type: string_list
+        identity_assertion:
+          type: object
+          additional_properties: true
+          fields:
+            semantic_owner:
+              type: string
+            purpose:
+              type: string
+            stages:
+              type: string_list
+            branches:
+              type: object
+              additional_properties: true
+              fields:
+                unknown:
+                  type: string
+                ambiguous:
+                  type: string
+                invalid:
+                  type: string
+            rules:
+              type: string_list

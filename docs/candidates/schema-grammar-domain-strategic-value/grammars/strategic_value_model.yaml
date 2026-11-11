@@ -1,0 +1,636 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/strategic-value/grammar/strategic-value-model@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: strategic_value_model
+source_ref: l9.source/strategic-value-model@1
+source_path: semantics/strategic_value_model.yaml
+source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_digest: sha256:28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69
+applies_to_selectors:
+- $.artifact_id
+- $.authority
+- $.canonical_source
+- $.governed_by
+- $.purpose
+- $.identity
+- $.valuation
+- $.counterfactual_mathematics
+- $.strategic_interaction_lookahead
+- $.assessment_claim_levels
+- $.evaluation_integrity
+- $.causal_accounting
+- $.forecast_and_realization
+- $.comparisons
+- $.explicit_non_ownership
+- $.assessment_applicability
+- $.retained_former_candidate_semantics
+- $.relocated_additional_candidate_semantics
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    artifact_id:
+      type: string
+    authority:
+      type: object
+      additional_properties: true
+      fields:
+        owner:
+          type: string
+        scope:
+          type: string
+        authority_class:
+          type: string
+    canonical_source:
+      type: object
+      additional_properties: true
+      fields:
+        format:
+          type: string
+        artifact:
+          type: string
+    governed_by:
+      type: object
+      additional_properties: true
+      fields:
+        invariants:
+          type: string_list
+        contracts:
+          type: string_list
+    purpose:
+      type: string
+    identity:
+      type: object
+      additional_properties: true
+      fields:
+        semantic_ref:
+          type: string
+        canonical_term_ref:
+          type: string
+        related_term_ref:
+          type: string
+        assessment_contract_ref:
+          type: string
+        numerical_owner:
+          type: string
+        strategic_plan_owner_ref:
+          type: string
+    valuation:
+      type: object
+      additional_properties: true
+      fields:
+        conceptual_decomposition:
+          type: string
+        semantic_class:
+          type: string
+        requires_declared:
+          type: string_list
+        systemic_future_value_definition:
+          type: string
+        explanatory_dimensions:
+          type: string_list
+        rule:
+          type: string
+        accounting_partition_contract:
+          type: object
+          additional_properties: true
+          fields:
+            status:
+              type: string
+            scope:
+              type: string
+            representation_modes:
+              type: string_list
+            required_component_buckets:
+              type: string_list
+            normative_partition:
+              type: object
+              additional_properties: true
+              fields:
+                mutually_exclusive_booking:
+                  type: boolean
+                exhaustive_material_consequence_coverage:
+                  type: boolean
+                each_effect_requires_stable_causal_and_period_identity:
+                  type: boolean
+                each_effect_requires_one_accounting_home_after_reconciliation:
+                  type: boolean
+                shared_or_overlapping_effects_require_explicit_attribution_and_exclusion:
+                  type: boolean
+                common_utility_units_time_basis_and_discount_treatment_required:
+                  type: boolean
+                losses_and_costs_already_reflected_in_utility_flows_cannot_be_subtracted_again:
+                  type: boolean
+                unknown_effect_booking_never_defaults_to_zero:
+                  type: boolean
+            component_coverage_ledger:
+              type: object
+              additional_properties: true
+              fields:
+                required_per_material_effect:
+                  type: string_list
+                embedded_cost_handling:
+                  type: string
+                zero_bucket_semantics:
+                  type: string
+                incomplete_coverage_result:
+                  type: string
+            sign_and_expectation_discipline:
+              type: string_list
+            example_equivalence:
+              type: object
+              additional_properties: true
+              fields:
+                gross:
+                  type: string
+                reconciled_net:
+                  type: string
+                invalid:
+                  type: string
+            negative_witnesses:
+              type: object
+              additional_properties: true
+              fields:
+                embedded_DC_subtracted_again:
+                  type: string
+                embedded_expected_risk_loss_subtracted_again:
+                  type: string
+                embedded_opportunity_cost_subtracted_again:
+                  type: string
+                unclassified_material_consequence:
+                  type: string
+                zero_subtraction_without_ledger_basis:
+                  type: string
+                same_effect_in_mutually_exclusive_scenarios:
+                  type: string
+                genuinely_distinct_recurring_period_effects:
+                  type: string
+    counterfactual_mathematics:
+      type: object
+      additional_properties: true
+      fields:
+        normative_meaning:
+          type: string
+        bounded_expression:
+          type: string
+        geometric_discount_special_case:
+          type: string
+        expectation_semantics:
+          type: string_list
+        utility_accounting:
+          type: string_list
+        numerical_owner:
+          type: string
+        consumer_behavior:
+          type: string
+    strategic_interaction_lookahead:
+      type: object
+      additional_properties: true
+      fields:
+        applies_when:
+          type: string
+        method_policy:
+          type: string
+        supported_method_families:
+          type: string_list
+        selection_requirements:
+          type: string_list
+        bounded_recurrence:
+          type: string
+        qv_only_required_model_coordinates:
+          type: string_list
+        qv_only_stopping_conditions:
+          type: string_list
+        ownership:
+          type: object
+          additional_properties: true
+          fields:
+            formal_admissibility:
+              type: string
+            belief_and_response_uncertainty:
+              type: string
+            objective_utility_and_lookahead_valuation:
+              type: string
+            available_actions_and_execution_authority:
+              type: string
+        rule:
+          type: string
+    assessment_claim_levels:
+      type: object
+      additional_properties: true
+      fields:
+        declared_aggregate:
+          type: string
+        supplied_trajectory_calculation:
+          type: string
+        independently_verified_numerical_assessment:
+          type: string
+        unknown_or_degraded:
+          type: string
+    evaluation_integrity:
+      type: object
+      additional_properties: true
+      fields:
+        counterfactual_identification:
+          type: string_list
+        beneficiary_scope:
+          type: string_list
+        nonanticipativity:
+          type: string_list
+        joint_portfolio_valuation:
+          type: string_list
+        uncertainty_aware_selection:
+          type: string_list
+        independent_method_assurance:
+          type: string_list
+    causal_accounting:
+      type: object
+      additional_properties: true
+      fields:
+        stable_effect_identity_required:
+          type: boolean
+        shared_state_delta_booked_once:
+          type: boolean
+        explicit_attribution_and_overlap_required:
+          type: boolean
+        loops_unrolled_through_time:
+          type: boolean
+        unchanged_echo_incremental_value:
+          type: string
+        topology_kinds:
+          type: string_list
+        negative_drag_and_coordination_costs_preserved:
+          type: boolean
+        conditional_relevance:
+          type: string
+    forecast_and_realization:
+      type: object
+      additional_properties: true
+      fields:
+        predicted_value_is:
+          type: string
+        realized_value_is:
+          type: string
+        realization_never_retroactively_proves_ex_ante_forecast:
+          type: boolean
+    comparisons:
+      type: object
+      additional_properties: true
+      fields:
+        compatible_objective_and_units_required:
+          type: boolean
+        may_return:
+          type: string_list
+        relevant_meta_action_kinds:
+          type: string_list
+        unknown_is_not_zero:
+          type: boolean
+        valuation_does_not_override_mandatory_constraints:
+          type: boolean
+        output_is_not_authorization:
+          type: boolean
+        output_is_not_strategic_plan_graph_content:
+          type: boolean
+        output_is_not_strategic_commitment:
+          type: boolean
+        stale_model_or_evidence_invalidates_affected_assessment:
+          type: boolean
+    explicit_non_ownership:
+      type: string_list
+    assessment_applicability:
+      type: object
+      additional_properties: true
+      fields:
+        claim_gate:
+          type: string
+        does_not_govern:
+          type: string_list
+        method_applicability:
+          type: string
+        non_claim:
+          type: string
+        unsupported_claim:
+          type: string
+    retained_former_candidate_semantics:
+      type: object
+      additional_properties: true
+      fields:
+        L9-SV-003:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+        L9-SV-004:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+        L9-SV-005:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+        L9-SV-006:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+        L9-SV-007:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+        L9-SV-008:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+        L9-SV-009:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+        L9-SV-010:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+        L9-SV-011:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+        L9-SV-012:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+        L9-SV-013:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+        L9-SV-014:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            governing_layer:
+              type: string
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+    relocated_additional_candidate_semantics:
+      type: object
+      additional_properties: true
+      fields:
+        L9-SV-015:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            disposition:
+              type: string
+            governing_invariants:
+              type: string_list
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+            authority_status:
+              type: string
+        L9-SV-016:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            disposition:
+              type: string
+            governing_invariants:
+              type: string_list
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+            authority_status:
+              type: string
+        L9-SV-017:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            disposition:
+              type: string
+            governing_invariants:
+              type: string_list
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+            authority_status:
+              type: string
+        L9-SV-018:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            disposition:
+              type: string
+            governing_invariants:
+              type: string_list
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+            authority_status:
+              type: string
+        L9-SV-019:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            disposition:
+              type: string
+            governing_invariants:
+              type: string_list
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+            authority_status:
+              type: string
+        L9-SV-020:
+          type: object
+          additional_properties: true
+          fields:
+            source_candidate_id:
+              type: string
+            meaning:
+              type: string
+            disposition:
+              type: string
+            governing_invariants:
+              type: string_list
+            model_section:
+              type: string
+            contract_obligation:
+              type: string
+            when:
+              type: string
+            authority_status:
+              type: string

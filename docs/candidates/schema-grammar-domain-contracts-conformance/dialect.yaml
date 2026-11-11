@@ -1,0 +1,16 @@
+document_kind: schema_synthesis_dialect_candidate
+artifact_id: l9.schema-dialect/candidate-v2@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+protocol: source-dispatched-candidate/v2
+supported_operators:
+- type
+- fields
+- items
+- required
+- const
+- enum
+- min_items
+- additional_properties

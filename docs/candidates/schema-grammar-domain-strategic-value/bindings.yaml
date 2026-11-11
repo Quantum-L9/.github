@@ -1,0 +1,102 @@
+document_kind: source_field_grammar_bindings_candidate
+artifact_id: l9.candidate.schema-synthesis/strategic-value/bindings@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+bindings:
+- source_class: strategic_value_model
+  source_ref: l9.source/strategic-value-model@1
+  source_path: semantics/strategic_value_model.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69
+  grammar_ref: l9.candidate.schema-synthesis/strategic-value/grammar/strategic-value-model@1
+  grammar_path: docs/candidates/schema-grammar-domain-strategic-value/grammars/strategic_value_model.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:8d7eb1af074f85756374468833e688a32fe839864ed1d77f76f2c045762c78b4
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.artifact_id
+  - $.authority
+  - $.canonical_source
+  - $.governed_by
+  - $.purpose
+  - $.identity
+  - $.valuation
+  - $.counterfactual_mathematics
+  - $.strategic_interaction_lookahead
+  - $.assessment_claim_levels
+  - $.evaluation_integrity
+  - $.causal_accounting
+  - $.forecast_and_realization
+  - $.comparisons
+  - $.explicit_non_ownership
+  - $.assessment_applicability
+  - $.retained_former_candidate_semantics
+  - $.relocated_additional_candidate_semantics
+  approval_status: candidate
+- source_class: vocabulary
+  source_ref: l9.source/vocabulary@1
+  source_path: semantics/vocabulary.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:76e24f641e9161fb7441ca46e5751c2e01ca152c3ea18c84e960b84271765d31
+  grammar_ref: l9.candidate.schema-synthesis/strategic-value/grammar/vocabulary@1
+  grammar_path: docs/candidates/schema-grammar-domain-strategic-value/grammars/vocabulary.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:51548dce6ddb9bcf204c93e704cc9a614a41feb4c923b33ecbbd10c04f644da2
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.terms.strategic_value
+  - $.terms.systemic_future_value
+  - $.terms.strategic_value_assessment
+  - $.terms.counterfactual_baseline
+  - $.terms.future_effect_identity
+  - $.terms.bidirectional_value_propagation
+  - $.terms.value_propagation_mesh
+  - $.terms.future_work_elimination
+  - $.terms.capability_unlock
+  - $.terms.decision_relevant_information_value
+  - $.terms.decision_boundary
+  - $.terms.qualitative_strategic_value_screen
+  - $.terms.realized_strategic_compounding
+  approval_status: candidate
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  source_path: semantics/invariants.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
+  grammar_ref: l9.candidate.schema-synthesis/strategic-value/grammar/invariants@1
+  grammar_path: docs/candidates/schema-grammar-domain-strategic-value/grammars/invariants.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:060fafcf45ca9d6d540af010596ea9d3b830c48751b5468da445425d8f1eddbd
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.invariants[?(@.id=="L9-AUTH-001")]
+  - $.invariants[?(@.id=="L9-AUTH-002")]
+  - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+  - $.invariants[?(@.id=="L9-ASSURANCE-001")]
+  - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+  - $.invariants[?(@.id=="L9-HARD-001")]
+  - $.invariants[?(@.id=="L9-PROV-001")]
+  - $.invariants[?(@.id=="L9-COORD-001")]
+  - $.invariants[?(@.id=="L9-COMPAT-001")]
+  - $.invariants[?(@.id=="L9-PROJECTION-001")]
+  - $.invariants[?(@.id=="L9-STRATEGY-001")]
+  - $.invariants[?(@.id=="L9-SV-001")]
+  - $.invariants[?(@.id=="L9-SV-002")]
+  - $.invariants[?(@.id=="L9-SVQ-001")]
+  - $.invariants[?(@.id=="L9-SVQ-002")]
+  approval_status: candidate
+- source_class: contracts
+  source_ref: l9.source/contracts@1
+  source_path: semantics/contracts.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993
+  grammar_ref: l9.candidate.schema-synthesis/strategic-value/grammar/contracts@1
+  grammar_path: docs/candidates/schema-grammar-domain-strategic-value/grammars/contracts.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:6d14fde4c75fe763dbb44dc26c5f1417f76adf2b2162241ccd99c228da8d403f
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.contracts[?(@.id=="l9.contract/strategic-value-assessment@1")]
+  approval_status: candidate

@@ -1,0 +1,23 @@
+authority_repository: Quantum-L9/.github
+authority_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+projection_profile: l9.projection/strategic-value@1
+composition_profile: l9.compose/strategic-value@1
+written:
+- source_class: strategic_value_model
+  path: docs/candidates/schema-grammar-domain-strategic-value/grammars/strategic_value_model.yaml
+  digest: sha256:8d7eb1af074f85756374468833e688a32fe839864ed1d77f76f2c045762c78b4
+  normative_overlay: []
+- source_class: vocabulary
+  path: docs/candidates/schema-grammar-domain-strategic-value/grammars/vocabulary.yaml
+  digest: sha256:51548dce6ddb9bcf204c93e704cc9a614a41feb4c923b33ecbbd10c04f644da2
+  normative_overlay: []
+- source_class: invariants
+  path: docs/candidates/schema-grammar-domain-strategic-value/grammars/invariants.yaml
+  digest: sha256:060fafcf45ca9d6d540af010596ea9d3b830c48751b5468da445425d8f1eddbd
+  normative_overlay: []
+- source_class: contracts
+  path: docs/candidates/schema-grammar-domain-strategic-value/grammars/contracts.yaml
+  digest: sha256:6d14fde4c75fe763dbb44dc26c5f1417f76adf2b2162241ccd99c228da8d403f
+  normative_overlay: []
+inexpressible: []
+pack_dir: docs/candidates/schema-grammar-domain-strategic-value

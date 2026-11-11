@@ -1,0 +1,27 @@
+authority_repository: Quantum-L9/.github
+authority_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+projection_profile: l9.projection/contracts-conformance@1
+composition_profile: l9.compose/contracts-conformance@1
+written:
+- source_class: conformance_model
+  path: docs/candidates/schema-grammar-domain-contracts-conformance/grammars/conformance_model.yaml
+  digest: sha256:fa41348222c5c72cbf2de669b4e1bfb618d5403f62b9e9a0a3257a009ebf2974
+  normative_overlay: []
+- source_class: requirement_model
+  path: docs/candidates/schema-grammar-domain-contracts-conformance/grammars/requirement_model.yaml
+  digest: sha256:4a301ccc0decd171dcfec725b2aa7507de19f60bd05e411807df6f4275c429d1
+  normative_overlay: []
+- source_class: resolution_model
+  path: docs/candidates/schema-grammar-domain-contracts-conformance/grammars/resolution_model.yaml
+  digest: sha256:3cfb352b800d2fba7926da264b2a45ac9b9cb515fbed3e626405fde6745c4e08
+  normative_overlay: []
+- source_class: invariants
+  path: docs/candidates/schema-grammar-domain-contracts-conformance/grammars/invariants.yaml
+  digest: sha256:776fbad48b113a871e5f7859d70364a0b0c2f8ec3d563ea1611c4fd95de8adbf
+  normative_overlay: []
+- source_class: contracts
+  path: docs/candidates/schema-grammar-domain-contracts-conformance/grammars/contracts.yaml
+  digest: sha256:dd12e46ece6ec68350fc53bd689226096006bdf4db3d593f3204970eff00842e
+  normative_overlay: []
+inexpressible: []
+pack_dir: docs/candidates/schema-grammar-domain-contracts-conformance

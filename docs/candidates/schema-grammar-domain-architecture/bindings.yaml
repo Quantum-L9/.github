@@ -1,0 +1,133 @@
+document_kind: source_field_grammar_bindings_candidate
+artifact_id: l9.candidate.schema-synthesis/architecture/bindings@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+bindings:
+- source_class: architecture_patterns
+  source_ref: l9.source/architecture-patterns@1
+  source_path: semantics/architecture_patterns.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:c4adbeff6e953404aaafe275a13a387e9fdd0d9bd8dbe3adfa46af88cfe2a323
+  grammar_ref: l9.candidate.schema-synthesis/architecture/grammar/architecture-patterns@1
+  grammar_path: docs/candidates/schema-grammar-domain-architecture/grammars/architecture_patterns.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:7d29aace1f039f7c234f60406095b916cead355e069e4ac0fa2e8626d254e675
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.pattern_classes
+  - $.patterns
+  - $.composition_rules
+  - $.architecture_synthesis
+  approval_status: candidate
+- source_class: architecture_rules
+  source_ref: l9.source/architecture-rules@1
+  source_path: semantics/architecture_rules.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:7026597235f9a5ba168f325f92fcdb7f00c495cd04ce364ca4d70f4c51ccacbe
+  grammar_ref: l9.candidate.schema-synthesis/architecture/grammar/architecture-rules@1
+  grammar_path: docs/candidates/schema-grammar-domain-architecture/grammars/architecture_rules.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:4e9a59141cab45e9a1327eb50973ed8905c6d9519c143dbf1096802efa871e38
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.rule_shape
+  - $.rules
+  - $.resolution_rule
+  approval_status: candidate
+- source_class: product_topology
+  source_ref: l9.source/product-topology-schema@1
+  source_path: semantics/product_topology.schema.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:a2510f4fc80b755d25b66c08f0d723e2f14b65966d6689b8b426ea23e5c3abf4
+  grammar_ref: l9.candidate.schema-synthesis/architecture/grammar/product-topology@1
+  grammar_path: docs/candidates/schema-grammar-domain-architecture/grammars/product_topology.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:33206cb38ba2cebc1b3497fb8056cd4d17df8bff913a8788faff161d1d06e44e
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.required
+  - $.properties
+  - $.semantic_rules
+  - $.kind_resolution
+  approval_status: candidate
+- source_class: product_kinds
+  source_ref: l9.source/product-kinds@1
+  source_path: semantics/product_kinds.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:294ae7a47b93619bd655619874d962b244e5c027eb6dd31ea508c53d129ace13
+  grammar_ref: l9.candidate.schema-synthesis/architecture/grammar/product-kinds@1
+  grammar_path: docs/candidates/schema-grammar-domain-architecture/grammars/product_kinds.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:d994d491981c0558608d5e95bd151dc57781ba7c284418233a7f6cf24dcde1b4
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.kinds
+  - $.kind_exceptions
+  approval_status: candidate
+- source_class: node_archetypes
+  source_ref: l9.source/node-archetypes@1
+  source_path: semantics/node_archetypes.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:57bb49405e9b888ad5bcfbc3d580755fb7c330e45983bb99821113bf930132bc
+  grammar_ref: l9.candidate.schema-synthesis/architecture/grammar/node-archetypes@1
+  grammar_path: docs/candidates/schema-grammar-domain-architecture/grammars/node_archetypes.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:c20fbbd8cf58203c3e7674ac9a16ad1da13962cc1bd78f595b9138bf82eef2ae
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.archetypes
+  approval_status: candidate
+- source_class: dependency_archetypes
+  source_ref: l9.source/dependency-archetypes@1
+  source_path: semantics/dependency_archetypes.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:31d846c51c4f83c87c3ce697e720e73921d108a1946ed81e121f7bfa61e0a8d7
+  grammar_ref: l9.candidate.schema-synthesis/architecture/grammar/dependency-archetypes@1
+  grammar_path: docs/candidates/schema-grammar-domain-architecture/grammars/dependency_archetypes.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:5f322d72e2eece3df7335c8941d6c5fa485365ee4899174ee06adfd162650c32
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.archetypes
+  approval_status: candidate
+- source_class: port_catalog
+  source_ref: l9.source/port-catalog@1
+  source_path: semantics/port_catalog.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:f53354d355b2d1f5a2e69fb80a30eccb4e73fa8bacaea43071f12a0270a07098
+  grammar_ref: l9.candidate.schema-synthesis/architecture/grammar/port-catalog@1
+  grammar_path: docs/candidates/schema-grammar-domain-architecture/grammars/port_catalog.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:801aee5c5f085145a87ce070f85a00118718180bc7e1ab54def7d1a60340d04f
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.port_entry_contract
+  - $.ports
+  approval_status: candidate
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  source_path: semantics/invariants.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
+  grammar_ref: l9.candidate.schema-synthesis/architecture/grammar/invariants@1
+  grammar_path: docs/candidates/schema-grammar-domain-architecture/grammars/invariants.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:06d4c85e036032cc7e066261f04a38fc04342e837f9fbfb3a9939484769409dc
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.invariants[?(@.id=="L9-AUTH-001")]
+  - $.invariants[?(@.id=="L9-OWNER-001")]
+  - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+  - $.invariants[?(@.id=="L9-HARD-001")]
+  - $.invariants[?(@.id=="L9-PROV-001")]
+  - $.invariants[?(@.id=="L9-COMPAT-001")]
+  - $.invariants[?(@.id=="L9-PROJECTION-001")]
+  approval_status: candidate

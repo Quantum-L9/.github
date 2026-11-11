@@ -1,0 +1,130 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/contracts-conformance/grammar/requirement-model@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: requirement_model
+source_ref: l9.source/requirement-model@1
+source_path: semantics/requirement_model.yaml
+source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_digest: sha256:7865723e78b7f02817db9d5f54aedb1350cb08b45d42759c8bdafeba1320c7c2
+applies_to_selectors:
+- $.global_rules
+- $.requirement_classes
+- $.requirement_entry_contract
+- $.closure_rules
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        requirements_are_typed:
+          type: boolean
+        requirements_preserve_source_provenance:
+          type: boolean
+        hard_requirements_are_non_compensable:
+          type: boolean
+        preferences_do_not_satisfy_hard_requirements:
+          type: boolean
+        unresolved_requirements_remain_explicit:
+          type: boolean
+        resolution_does_not_create_authority:
+          type: boolean
+        provider_capability_is_not_semantic_requirement_ownership:
+          type: boolean
+    requirement_classes:
+      type: object
+      additional_properties: true
+      fields:
+        semantic:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            default_hardness:
+              type: string
+        authority:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            default_hardness:
+              type: string
+        capability:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            default_hardness:
+              type: string
+        interface:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            default_hardness:
+              type: string
+        architecture:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            default_hardness:
+              type: string
+        technology:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            default_hardness:
+              type: string
+            note:
+              type: string
+        conformance:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            default_hardness:
+              type: string
+        operational:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            default_hardness:
+              type: string
+            note:
+              type: string
+        objective:
+          type: object
+          additional_properties: true
+          fields:
+            meaning:
+              type: string
+            default_hardness:
+              type: string
+    requirement_entry_contract:
+      type: object
+      additional_properties: true
+      fields:
+        required:
+          type: string_list
+        optional:
+          type: string_list
+        hardness_domain:
+          type: string_list
+    closure_rules:
+      type: string_list

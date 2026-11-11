@@ -1,0 +1,81 @@
+document_kind: source_field_grammar_bindings_candidate
+artifact_id: l9.candidate.schema-synthesis/governance/bindings@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+bindings:
+- source_class: authority_model
+  source_ref: l9.source/authority-model@1
+  source_path: semantics/authority_model.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
+  grammar_ref: l9.candidate.schema-synthesis/governance/grammar/authority-model@1
+  grammar_path: docs/candidates/schema-grammar-domain-governance/grammars/authority_model.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:9f780ff5612aeec0c8ecdd7aefe278ea03e4c2596eb772fedd03e415128d4caa
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.authority_classes
+  - $.admission_rules
+  - $.promotion_rules
+  - $.agent_authority
+  - $.human_authority
+  - $.escalation_rules
+  approval_status: candidate
+- source_class: lifecycle
+  source_ref: l9.source/lifecycle@1
+  source_path: semantics/lifecycle.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:3463c5f44376bf566347008419becc900a761dd77d99691e983afc49c2f7231c
+  grammar_ref: l9.candidate.schema-synthesis/governance/grammar/lifecycle@1
+  grammar_path: docs/candidates/schema-grammar-domain-governance/grammars/lifecycle.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:cd1eb2306d74b134c64348fa239fde311085be8ebdd67a87d38cfbfd208565fc
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.lifecycles
+  approval_status: candidate
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  source_path: semantics/invariants.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
+  grammar_ref: l9.candidate.schema-synthesis/governance/grammar/invariants@1
+  grammar_path: docs/candidates/schema-grammar-domain-governance/grammars/invariants.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:78117f0686b1cafbe74a5c46a9eef2d1f9d7de55e4dbf551a6e5dea025592f16
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.invariants[?(@.id=="L9-AUTH-001")]
+  - $.invariants[?(@.id=="L9-AUTH-002")]
+  - $.invariants[?(@.id=="L9-OWNER-001")]
+  - $.invariants[?(@.id=="L9-SEM-001")]
+  - $.invariants[?(@.id=="L9-SCOPE-001")]
+  - $.invariants[?(@.id=="L9-MONOTONIC-001")]
+  - $.invariants[?(@.id=="L9-PROMOTION-001")]
+  - $.invariants[?(@.id=="L9-DERIVED-001")]
+  - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+  - $.invariants[?(@.id=="L9-PROV-001")]
+  - $.invariants[?(@.id=="L9-COMPAT-001")]
+  - $.invariants[?(@.id=="L9-REVISION-001")]
+  - $.invariants[?(@.id=="L9-ADMISSION-001")]
+  - $.invariants[?(@.id=="L9-PROJECTION-001")]
+  - $.invariants[?(@.id=="L9-GLOBALIZATION-001")]
+  approval_status: candidate
+- source_class: contracts
+  source_ref: l9.source/contracts@1
+  source_path: semantics/contracts.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993
+  grammar_ref: l9.candidate.schema-synthesis/governance/grammar/contracts@1
+  grammar_path: docs/candidates/schema-grammar-domain-governance/grammars/contracts.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:ae8e7cbd2f2f0a3a4195994cbc7dc5e5b9d0e5b4d60a0f174234d6799b737f7d
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
+  - $.contracts[?(@.id=="l9.contract/semantic-ownership@1")]
+  - $.contracts[?(@.id=="l9.contract/monotonic-subordination@1")]
+  - $.contracts[?(@.id=="l9.contract/admission-and-promotion@1")]
+  approval_status: candidate

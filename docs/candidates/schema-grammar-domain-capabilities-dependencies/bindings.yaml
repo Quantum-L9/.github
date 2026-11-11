@@ -1,0 +1,103 @@
+document_kind: source_field_grammar_bindings_candidate
+artifact_id: l9.candidate.schema-synthesis/capabilities-dependencies/bindings@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+bindings:
+- source_class: capabilities
+  source_ref: l9.source/capabilities@1
+  source_path: semantics/capabilities.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:fe39a6b1e0a7dd17bcf917f3cdeed9425273e3e70a9a684fd9796fd2f4f8c5b3
+  grammar_ref: l9.candidate.schema-synthesis/capabilities-dependencies/grammar/capabilities@1
+  grammar_path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/capabilities.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:23174f5038bd165d64416d2c155548531427a5c61a3a3242da4a6087c943ba88
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.capability_entry_contract
+  - $.capability_state_dimensions
+  - $.invocability_contract
+  - $.capability_relations
+  - $.capabilities
+  approval_status: candidate
+- source_class: capability_resolution
+  source_ref: l9.source/capability-resolution@1
+  source_path: semantics/capability_resolution.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:7063ca77d6fa9253cd1a71839f50960d2109d6afb32dda1c609b057008e36954
+  grammar_ref: l9.candidate.schema-synthesis/capabilities-dependencies/grammar/capability-resolution@1
+  grammar_path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/capability_resolution.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:02d567a79db6ad3a3323c2968601c93eb4ffe6d17e7bd466acc7b53136d01ef9
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.inputs
+  - $.resolution_order
+  - $.outputs
+  - $.rules
+  approval_status: candidate
+- source_class: semantic_dependency_model
+  source_ref: l9.source/semantic-dependency-model@1
+  source_path: semantics/semantic_dependency_model.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:b6204c0128ba0493c6e70dfd6976fd409efdc6e8a68b70fac8ea9226833fcf9c
+  grammar_ref: l9.candidate.schema-synthesis/capabilities-dependencies/grammar/semantic-dependency-model@1
+  grammar_path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/semantic_dependency_model.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:690dd7368d3769d4df98be8ba0b2583a6907f269d104102e161c2c3bfdd939df
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.dependency_rules
+  - $.invalidation_rules
+  approval_status: candidate
+- source_class: dependency_archetypes
+  source_ref: l9.source/dependency-archetypes@1
+  source_path: semantics/dependency_archetypes.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:31d846c51c4f83c87c3ce697e720e73921d108a1946ed81e121f7bfa61e0a8d7
+  grammar_ref: l9.candidate.schema-synthesis/capabilities-dependencies/grammar/dependency-archetypes@1
+  grammar_path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/dependency_archetypes.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:d54f79136f1456fc3f735b6f4e9fa152c06552ecb6b46be5d318735fc25778c5
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.archetypes
+  approval_status: candidate
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  source_path: semantics/invariants.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
+  grammar_ref: l9.candidate.schema-synthesis/capabilities-dependencies/grammar/invariants@1
+  grammar_path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/invariants.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:9450e3d69f4a06807c20226631c053bb0c3afc8a3903f1c3b4b81b13d7a4ee33
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.invariants[?(@.id=="L9-AUTH-001")]
+  - $.invariants[?(@.id=="L9-PROMOTION-001")]
+  - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+  - $.invariants[?(@.id=="L9-DEGRADE-001")]
+  - $.invariants[?(@.id=="L9-PROV-001")]
+  - $.invariants[?(@.id=="L9-COMPAT-001")]
+  - $.invariants[?(@.id=="L9-PROJECTION-001")]
+  - $.invariants[?(@.id=="L9-CAPABILITY-001")]
+  approval_status: candidate
+- source_class: contracts
+  source_ref: l9.source/contracts@1
+  source_path: semantics/contracts.yaml
+  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_digest: sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993
+  grammar_ref: l9.candidate.schema-synthesis/capabilities-dependencies/grammar/contracts@1
+  grammar_path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/contracts.yaml
+  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
+  grammar_digest: sha256:fc8a2d39667d8910e4a27dc352240d5181947a7283fc68bf67d14a3ea32f311b
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.contracts[?(@.id=="l9.contract/capability-state@1")]
+  - $.contracts[?(@.id=="l9.contract/unknown-and-degradation@1")]
+  approval_status: candidate
