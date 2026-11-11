@@ -102,7 +102,9 @@ Enterprise-only; the organization is on the Free plan.
   (`node ops/render-coderabbit.js > .coderabbit.yaml`).
   `ops/test-render-coderabbit.js` asserts the equality, the include-pattern
   refusal, validity against `https://coderabbit.ai/integrations/schema.v2.json`
-  (fetched with `curl -L`, validated by python3 `jsonschema`), and seed-payload
+  (vendored at `policies/vendor/coderabbit/schema.v2.json`, its sha256 pinned
+  in `policies/coderabbit/schema.v2.source.json` and checked before python3
+  `jsonschema` validates against it; no network access), and seed-payload
   inclusion.
 
 ### Consequences
@@ -125,8 +127,9 @@ Enterprise-only; the organization is on the Free plan.
     `l9-repo-template`'s `.coderabbit.yaml` sets `inheritance: true` (or is
     removed). That template change is a cross-repository operator step,
     tracked with creating `Quantum-L9/coderabbit`.
-  - The test needs network access to fetch CodeRabbit's schema and fails when
-    it cannot (schema validity is then unproven, never assumed).
+  - The vendored schema can lag CodeRabbit's published one. It changes only by
+    a reviewed refresh of the copy and its digest together, so an upstream
+    schema change never turns the gate red for an unrelated pull request.
 - Neutral:
   - A change to the exclusions reaches inheriting repositories when the new
     render is committed to `Quantum-L9/coderabbit`; seeded copies keep their
