@@ -82,3 +82,13 @@ python3 docs/candidates/domain-projection-architecture-v1/rehearse.py \
 | Post-merge trusted replay on `main` | `DOWNSTREAM_USABLE` | agent, after admission |
 
 No consumer is switched. Every historical profile stays resolvable.
+
+## Admission subject
+
+`evidence/subject.json` is the subject `discover_admission_subject.py --admitted-base v3.35.0 --write-subject`
+computed at the release commit: 6 invariants, 8 terms, 2 contracts, 3 canonical sources (two new ledgers and the
+`projection-profiles` catalog, whose residual content gained the `domain` class), 8 projection profiles, 8
+composition profiles and 16 schemas; no revision, no unclassified change, no missing dependency. `--declared` scope
+closure passes. The checker's `make validate check test` stage was not run in-session because the execution gate
+reserves `make test` for CI; `make validate` (which runs the same suites) and `make check` pass, and the pull
+request's CI runs `make test`.

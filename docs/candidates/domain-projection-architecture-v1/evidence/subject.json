@@ -1,0 +1,69 @@
+{
+	"canonical_sources": [
+		"l9.source/domain-consumer-bindings@1",
+		"l9.source/domain-projection-model@1",
+		"l9.source/projection-profiles@1"
+	],
+	"composition_profiles": [
+		"l9.compose/architecture@1",
+		"l9.compose/capabilities-dependencies@1",
+		"l9.compose/contracts-conformance@1",
+		"l9.compose/evidence-provenance@1",
+		"l9.compose/governance@1",
+		"l9.compose/identity-attribution@1",
+		"l9.compose/signals@1",
+		"l9.compose/strategic-value@1"
+	],
+	"contracts": [
+		"l9.contract/domain-composition-compatibility@1",
+		"l9.contract/domain-composition-provenance@1"
+	],
+	"description": "discovered against base 1f034a9e0aa89c718fed306e96090ee7d51051ac",
+	"invariants": [
+		"L9-SIGNAL-001",
+		"L9-SIGNAL-002",
+		"L9-SIGNAL-003",
+		"L9-SIGNAL-004",
+		"L9-SVQ-001",
+		"L9-SVQ-002"
+	],
+	"projection_profiles": [
+		"l9.projection/architecture@1",
+		"l9.projection/capabilities-dependencies@1",
+		"l9.projection/contracts-conformance@1",
+		"l9.projection/evidence-provenance@1",
+		"l9.projection/governance@1",
+		"l9.projection/identity-attribution@1",
+		"l9.projection/signals@1",
+		"l9.projection/strategic-value@1"
+	],
+	"schema": "l9.projection-admission-subject/v1",
+	"schemas": [
+		"domain_architecture_composition.schema.yaml",
+		"domain_architecture_projection.schema.yaml",
+		"domain_capabilities_dependencies_composition.schema.yaml",
+		"domain_capabilities_dependencies_projection.schema.yaml",
+		"domain_contracts_conformance_composition.schema.yaml",
+		"domain_contracts_conformance_projection.schema.yaml",
+		"domain_evidence_provenance_composition.schema.yaml",
+		"domain_evidence_provenance_projection.schema.yaml",
+		"domain_governance_composition.schema.yaml",
+		"domain_governance_projection.schema.yaml",
+		"domain_identity_attribution_composition.schema.yaml",
+		"domain_identity_attribution_projection.schema.yaml",
+		"domain_signals_composition.schema.yaml",
+		"domain_signals_projection.schema.yaml",
+		"domain_strategic_value_composition.schema.yaml",
+		"domain_strategic_value_projection.schema.yaml"
+	],
+	"vocabulary_terms": [
+		"domain_consumer_binding",
+		"domain_projection",
+		"qualitative_strategic_value_screen",
+		"realized_strategic_compounding",
+		"signal",
+		"signal_consumption",
+		"signal_feedback_episode",
+		"signal_propagation"
+	]
+}
