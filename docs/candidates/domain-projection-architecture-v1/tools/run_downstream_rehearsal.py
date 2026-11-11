@@ -46,6 +46,14 @@ def _scrub(value: object, replacements: dict[str, str]) -> object:
     return value
 
 
+def _subject_path(requested: Path) -> Path:
+    """The subject file, confined to this authority checkout; anything else is refused."""
+    resolved = requested.resolve()
+    if ROOT not in resolved.parents or not resolved.is_file():
+        raise SystemExit(f"refusing --subject {requested}: not a file inside {ROOT}")
+    return resolved
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--compiler-src", type=Path, required=True)
@@ -54,14 +62,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--subject", type=Path, default=PACK / "evidence/subject.json")
     parser.add_argument("--emit", action="store_true")
     args = parser.parse_args(argv)
+    subject_path = _subject_path(args.subject)
     sys.path.insert(0, str(SCRIPTS))
     import check_admission_closure as gate
 
-    subject = (
-        gate.load_subject(args.subject)
-        if hasattr(gate, "load_subject")
-        else json.loads(args.subject.read_text("utf-8"))
-    )
+    subject = gate.load_subject(subject_path)
     output_root = args.output_root.resolve()
     compiler = args.compiler_src.resolve()
     report = gate.downstream(
@@ -81,7 +86,7 @@ def main(argv: list[str] | None = None) -> int:
         "wording": f"rehearsal {report.get('status')} at {report.get('revision')}, not admitted",
         "verdict_ceiling": "rehearsal; DOWNSTREAM_USABLE requires ADMITTED and HEAD == main",
         "gate_function": ".claude/skills/l9-projection-admission/scripts/check_admission_closure.py#downstream",
-        "subject_file": str(args.subject.resolve().relative_to(ROOT)),
+        "subject_file": str(subject_path.relative_to(ROOT)),
         "downstream": report,
     }
     text = json.dumps(report, indent="\t", sort_keys=True) + "\n"
