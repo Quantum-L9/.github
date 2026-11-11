@@ -5,7 +5,9 @@
 Accepted (revised 2026-11-03: automated weekly seed and restore, npm;
 revised 2026-11-05: weekly sweep paused, every manual seed restores, and
 `.github/CODEOWNERS` joins the managed seed paths;
-revised 2026-11-11: safe-only, every ecosystem ignores semver-major bumps)
+revised 2026-11-11: safe-only, every ecosystem ignores semver-major bumps;
+revised 2026-11-11: dependency-lane decision recorded, posture unchanged until
+the lane ships)
 
 **Date:** 2026-10-15
 **Deciders:** Quantum-L9 platform owners (merge of the PR that adds this record)
@@ -64,6 +66,19 @@ problems follow:
    inventory covers `README.md`. Either change needs a Semantic Foundation
    release. This is a domain decision, so it uses the domain template's
    `NNNN-short-title.md` form.
+6. **A per-repository overlay merged into the render (revision 2026-11-11,
+   considered for the dependency lane).** This would be a consumer file such as
+   `.l9/dependabot.overlay.yaml` adding ignores and groups to the managed
+   bytes. Rejected:
+   - Its one candidate consumer, `l9-meta-injector`, kept a hand-written file
+     to group updates so that one maintainer rebind covered a whole group
+     (its ADR-056). Its ADR-093 retired the committed per-PR evidence that
+     needed rebinding.
+   - The safe-only revision above already ignores the majors that file held
+     back.
+   - An overlay would make every render depend on an extra consumer read, for
+     no consumer that needs it. A rule every repository needs is a fragment
+     change here, as Consequences already says.
 
 ## Decision Outcome
 
@@ -131,6 +146,29 @@ versions through the existing single builder.
   repository. Exceptions in
   `policies/mandatory-files.yml` are not consulted by continuous-sync, as
   before.
+- **Dependency lane (revision 2026-11-11, operator decision; not yet
+  implemented):** Dependabot pull requests become auto-merge eligible through a
+  dependency lane owned by Core (`Quantum-L9/l9-ci-core`). A consumer adds no
+  workflow and selects no Core revision.
+  - **Eligibility:** semver-minor and semver-patch version updates to
+    development dependencies, after this render's 7-day cooldown. Security
+    updates are eligible only when the lane's regeneration of committed
+    generated output is clean. Runtime dependencies stay advisory until the
+    lane has one month of clean history. Majors are never eligible; they are
+    already ignored above.
+  - **Gate:** the organization's required checks decide the merge. The lane
+    only enables auto-merge.
+  - **Credential:** the private key of a dedicated GitHub App,
+    `l9-deps-lane`, limited to contents and pull requests read/write. It is
+    stored as an organization Actions secret visible only to enrolled
+    repositories. Only a `workflow_run` job reads it, never the
+    Dependabot-triggered run. A Dependabot run can read Dependabot secrets
+    only, and the job that installs dependency code must not hold a write
+    credential. It is neither a personal access token nor the
+    `l9-governance-seeder` App, whose scope is wider than this lane needs.
+  - **Posture until it ships:** the rendered header keeps `ADVISORY POSTURE`
+    and nothing auto-merges. The header changes in the same change that ships
+    the lane, so the render never promises behaviour that nothing performs.
 - **Self-config:** `.github` runs its own render.
   `ops/test-render-dependabot.js` asserts `.github/dependabot.yml` equals the
   render for this repository's root.
@@ -154,6 +192,9 @@ versions through the existing single builder.
 - Neutral:
   - Moving Core's list means a commit, a sha256 and new bytes in one change,
     the same discipline as `ops/governance-v1-pin.txt`.
+  - The dependency-lane revision changes no rendered byte and no fixture. It is
+    the authority the Core lane will cite. Until that lane exists, every
+    Dependabot pull request remains advisory.
 
 ## Links
 
