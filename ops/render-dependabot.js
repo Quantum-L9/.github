@@ -20,6 +20,14 @@ const FRAGMENT_DIR = "policies/dependabot";
 const SOURCE_RECORD = `${FRAGMENT_DIR}/core-owned-tools.source.json`;
 const CORE_OWNED_SCHEMA = "l9.core-owned-tools/v1";
 const IGNORE_TOKEN = "{{ignore}}";
+// Safe-only (ADR-0019 revision 2026-11-11): no ecosystem proposes a semver-major
+// bump. Dependabot applies `ignore` to version and security updates alike, so a
+// fix published only in a new major surfaces as a Dependabot alert, not a PR.
+// base-actions.yml.tpl carries the same two lines literally.
+const MAJOR_IGNORE = Object.freeze([
+	'      - dependency-name: "*"',
+	'        update-types: ["version-update:semver-major"]',
+]);
 
 // Root files that decide the rendered ecosystems. Only the root `/` is in
 // scope: nested manifests are neither probed nor rendered.
@@ -196,14 +204,13 @@ function fragment(fs, name, ignoreNames = []) {
 		throw new Error(
 			`fragment ${name}: ${IGNORE_TOKEN} must stand alone on its line`,
 		);
-	const block = ignoreNames.length
-		? [
-				"    ignore:",
-				...ignoreNames.map(
-					(n) => `      - dependency-name: ${JSON.stringify(n)}`,
-				),
-			]
-		: [];
+	// Every ecosystem ends its ignore list with MAJOR_IGNORE, so the block is
+	// never empty even when Core owns nothing in that ecosystem.
+	const block = [
+		"    ignore:",
+		...ignoreNames.map((n) => `      - dependency-name: ${JSON.stringify(n)}`),
+		...MAJOR_IGNORE,
+	];
 	return lines.flatMap((l) => (l === tokens[0] ? block : [l]));
 }
 
