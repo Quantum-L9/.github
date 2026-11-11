@@ -46,6 +46,14 @@ No existing profile or composition changes: RC-034 pins both predecessor catalog
   `Quantum-L9/l9-semantic-compiler-engine@eeac5d28f9f1a44e72287190b9087d06aeb4d574` (0.10.0), imported only from
   `--compiler-root`. See `evidence/rehearsal.json` for the base commit, grammar counts, synthesis and per-receipt
   results; `evidence/*.tar.gz` hold the synthesis requests, synthesized pairs and producer outputs.
+  Rehearsal base `c2185b02da3ed0d9784c5a7137efd99388738300`: 39 grammars drafted, 0 inexpressible, 8 of 8 pairs
+  synthesized, 47 of 47 projection and composition receipts `pass` with complete coverage and empty unresolved
+  criteria, and two producer runs per pair byte-identical. A second, independent clone reproduced all 91 emitted
+  files byte-for-byte at the earlier base `05d0278`.
+- **Base currency:** every file a domain projection or composition reads (its 24 source ledgers, both profile
+  catalogs, the selector model and both engine contracts; 29 files) is unchanged between the rehearsal base and the
+  release commit: `git diff --name-only c2185b0 HEAD -- <those files>` is empty. Later commits touch only the binding
+  catalog, the registered schemas' own bytes, the validator, the release record and this pack.
 - **Migration equivalence** (`tools/migration_equivalence.py`, `evidence/migration_equivalence.json`).
 - **Validator**: `make validate check test`, RC-034 and RC-034-NEG.
 
