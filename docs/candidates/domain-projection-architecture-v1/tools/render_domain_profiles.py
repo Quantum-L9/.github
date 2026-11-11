@@ -31,7 +31,7 @@ COMMON_FORBIDDEN = ["obligation_not_admitted_in_a_selected_source"]
 # name -> (purpose, sections, contracts, extra vocabulary terms, forbidden)
 DOMAINS: dict[str, dict[str, Any]] = {
     "architecture": {
-        "purpose": "Expose reusable canonical architecture semantics: structures, relationships, architecture rules, product kinds, archetypes, ports and composition constraints, independently of any consumer. Structural validity is not capability availability, strategic desirability or governance approval. The profile names no skill, host or actor and grants no admission or action authority.",
+        "purpose": "Expose reusable canonical architecture semantics: structures, relationships, architecture rules, product kinds, archetypes, ports and composition constraints, independently of any consumer. Structural validity is not capability availability, strategic desirability or governance approval. The profile names no consumer and grants no admission or action authority.",
         "sections": {
             "architecture_patterns": ["global_rules", "pattern_classes", "patterns", "composition_rules", "architecture_synthesis"],
             "architecture_rules": ["global_rules", "rule_shape", "rules", "resolution_rule"],

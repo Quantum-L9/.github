@@ -2903,8 +2903,8 @@ projection_profiles:
   consumer: semantic_domain.architecture
   purpose: 'Expose reusable canonical architecture semantics: structures, relationships, architecture rules, product
     kinds, archetypes, ports and composition constraints, independently of any consumer. Structural validity is
-    not capability availability, strategic desirability or governance approval. The profile names no skill, host
-    or actor and grants no admission or action authority.'
+    not capability availability, strategic desirability or governance approval. The profile names no consumer and
+    grants no admission or action authority.'
   sources:
     architecture_patterns:
       selectors:
