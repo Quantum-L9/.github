@@ -1,6 +1,6 @@
 # Semantic Foundation Manifest v3.37.0
 
-Release status: **ADDITIVE SUCCESSOR CANDIDATE**
+Release status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-034, 2026-11-11)
 
 ## Install surface
 
@@ -122,9 +122,9 @@ The v3.36.0 inventory is preserved. No file is added, removed or renamed.
 
 ## Architecture decision records
 
-The release contains **33** accepted ADRs plus the ADR index under `docs/adr/`.
+The release contains **34** accepted ADRs plus the ADR index under `docs/adr/`.
 
-v3.37.0 is a candidate. It carries no ADR of its own and does not admit itself.
+v3.37.0 adds ADR-034, which admits it.
 
 ## Semantic changes
 

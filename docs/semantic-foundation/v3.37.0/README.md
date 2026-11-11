@@ -1,8 +1,8 @@
 # Semantic Foundation v3.37.0
 
-Status: **ADDITIVE SUCCESSOR CANDIDATE**.
+Status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-034, 2026-11-11).
 
-v3.37.0 proposes integration accountability and an authority-neutral technical coordination role.
+v3.37.0 carries ADR-034: integration accountability and an authority-neutral technical coordination role.
 
 ## Bounded delta
 
@@ -25,4 +25,4 @@ Admission subject discovery (`.claude/skills/l9-projection-admission/scripts/dis
 
 ## Authority
 
-`Quantum-L9/.github` owns these ledgers. This candidate does not admit itself. Nothing here creates an actor identity, Constellation routing, Plan Keeper authority, or execution, publication, merge, admission or deployment authority.
+`Quantum-L9/.github` owns these ledgers. ADR-034 admits the v3.37.0 delta. Nothing here creates an actor identity, Constellation routing, Plan Keeper authority, or execution, publication, merge, admission or deployment authority.

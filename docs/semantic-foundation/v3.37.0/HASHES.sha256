@@ -1,6 +1,6 @@
-931056bf3ce75aea017c49e487e29f3281251cb0b284e844db6db42e0ed1971a  ./MANIFEST.md
-6154e521e73d3a0635bb8d1c6382be8c787a88508fb99948b31cd3c1f99165a0  ./README.md
-2dfbbdfc701b6f02efde444720b2337aa86c39ead57d6213dd9da3f56541ee73  ./RELEASE_VALIDATION.md
+16a42dd3806cd8c6a9a8216a6acb6dcb994484f54b442e730bf91876edb1c5a6  ./MANIFEST.md
+53f0d80f8ab1dfbcde406856f92510ca70bc7fabd4835cfba2a8022eba46874a  ./README.md
+a5752906aff0090a1a8236ad74d81421e844dffd6620df29f6b3f79181c339aa  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -34,7 +34,8 @@ ed874f5daffa93184bd52d92eb434cce2c1eb77fe1c125016ca5a4b6f4a42edd  ./docs/adr/ADR
 6fd57bdad6e9d389408a59ab4199274550443c6426801caa84e184718a8ff0ab  ./docs/adr/ADR-031-strategic-value-interaction-composition-contract.md
 373a74ba8ce190f940092c9df997720c8813f89850db9de4aace2d5b45123326  ./docs/adr/ADR-032-source-class-payload-dispatch-successors.md
 802ad4b68cbc4214185031f978eae9186cef257f425cdd0340280dbb70653d83  ./docs/adr/ADR-033-domain-projection-architecture-v1.md
-6d5ce7900c47b5c24e1aec7c2e3b5be0478a99f7d1e49141216167db4409babd  ./docs/adr/README.md
+50228895ba57479735f4c3eb4df1f46189078f526ad5fc88262800622ef81825  ./docs/adr/ADR-034-integration-accountability-and-technical-coordination-role.md
+6aa397a111661aa9b23cda22eb68145181c44b88ab0d304c2ca0e64cf5d5a7c0  ./docs/adr/README.md
 34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f  ./semantics/actor_registry.yaml
 09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4  ./semantics/affected_strategic_closure.schema.yaml
 d6d81cb1a804b1e957d064790bcf70d855ece0b58f82522863a9e55159761694  ./semantics/architecture_break_test_composition.schema.yaml
