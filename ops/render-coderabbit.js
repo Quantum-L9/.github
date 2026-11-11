@@ -39,7 +39,7 @@ const INHERITANCE_RE = /^inheritance: true$/m;
 const EXCLUSION_RE = /^!\S+$/;
 // `!!glob` is a double negation: a glob engine may read it as an include,
 // which would turn the list into an allowlist. Refused.
-const DOUBLE_NEGATION_RE = /^!!/;
+const DOUBLE_NEGATION = "!!";
 // A glob made only of `*` and `/` (`!**`, `!*`, `!**/*`, `!**/**`) excludes
 // every file and silences review entirely. Refused.
 const MATCH_ALL_RE = /^![*/]+$/;
@@ -95,7 +95,7 @@ function readFilterFragment(fs, name) {
 					`${path}:${i + 1}: path filter ${JSON.stringify(line)} is not a single glob after "!"`,
 				);
 			}
-			if (DOUBLE_NEGATION_RE.test(line)) {
+			if (line.startsWith(DOUBLE_NEGATION)) {
 				throw new Error(
 					`${path}:${i + 1}: path filter ${JSON.stringify(line)} starts with "!!" — ` +
 						"a double negation may be read as an include and turn path_filters into an allowlist",
