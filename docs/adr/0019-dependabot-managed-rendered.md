@@ -6,8 +6,8 @@ Accepted (revised 2026-11-03: automated weekly seed and restore, npm;
 revised 2026-11-05: weekly sweep paused, every manual seed restores, and
 `.github/CODEOWNERS` joins the managed seed paths;
 revised 2026-11-11: safe-only, every ecosystem ignores semver-major bumps;
-revised 2026-11-11: dependency-lane decision recorded, posture unchanged until
-the lane ships)
+revised 2026-11-11: dependency-lane decision recorded, with no App or secret,
+and posture unchanged until the lane ships)
 
 **Date:** 2026-10-15
 **Deciders:** Quantum-L9 platform owners (merge of the PR that adds this record)
@@ -151,21 +151,28 @@ versions through the existing single builder.
   dependency lane owned by Core (`Quantum-L9/l9-ci-core`). A consumer adds no
   workflow and selects no Core revision.
   - **Eligibility:** semver-minor and semver-patch version updates to
-    development dependencies, after this render's 7-day cooldown. Security
-    updates are eligible only when the lane's regeneration of committed
-    generated output is clean. Runtime dependencies stay advisory until the
-    lane has one month of clean history. Majors are never eligible; they are
-    already ignored above.
+    development dependencies, and security updates, after this render's 7-day
+    cooldown. Runtime dependencies stay advisory until the lane has one month
+    of clean history. Majors are never eligible; they are already ignored
+    above.
   - **Gate:** the organization's required checks decide the merge. The lane
-    only enables auto-merge.
-  - **Credential:** the private key of a dedicated GitHub App,
-    `l9-deps-lane`, limited to contents and pull requests read/write. It is
-    stored as an organization Actions secret visible only to enrolled
-    repositories. Only a `workflow_run` job reads it, never the
-    Dependabot-triggered run. A Dependabot run can read Dependabot secrets
-    only, and the job that installs dependency code must not hold a write
-    credential. It is neither a personal access token nor the
-    `l9-governance-seeder` App, whose scope is wider than this lane needs.
+    only enables auto-merge. It never pushes a commit to a Dependabot branch:
+    a branch that needs regenerated committed output fails its checks and
+    waits for a maintainer.
+  - **Credential: none beyond the built-in token.** The lane runs on the
+    Dependabot pull request with the workflow's own `GITHUB_TOKEN`, raised to
+    `contents: write` and `pull-requests: write`, and checks out no pull
+    request code. It needs no GitHub App, organization secret or personal
+    access token. A dedicated App was considered so the lane could push
+    regenerated output; a push made with `GITHUB_TOKEN` starts no checks. It
+    was rejected (operator decision 2026-11-11): with no per-PR generated
+    evidence committed, what would still need regenerating is too rare to
+    justify a credential.
+  - **Enrollment:** `policies/repo-settings.yml` sets
+    `allow_auto_merge: false` org-wide, and `enforce-policies.yml` restores it
+    weekly. A repository joins the lane through an `allow_auto_merge: true`
+    override there, applied through the API by that workflow and never by
+    hand, in the same change that ships the lane.
   - **Posture until it ships:** the rendered header keeps `ADVISORY POSTURE`
     and nothing auto-merges. The header changes in the same change that ships
     the lane, so the render never promises behaviour that nothing performs.
