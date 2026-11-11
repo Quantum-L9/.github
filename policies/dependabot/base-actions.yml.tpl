@@ -12,6 +12,8 @@
       - dependency-name: "Quantum-L9/.github*"
       - dependency-name: "Quantum-L9/l9-ci-core*"
       - dependency-name: "Quantum-L9/l9-ci-sdk*"
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       actions-minor-patch:
         patterns: ["*"]
