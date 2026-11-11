@@ -1,0 +1,983 @@
+{
+	"admission": "not_granted",
+	"basis": "nodes resolved at one revision of semantics/; comparison by source class and exact ledger path",
+	"bindings": {
+		"l9.domain-consumer-binding/coding-agent@1": {
+			"added_by_source_class": {
+				"actor_registry": 3,
+				"architecture_patterns": 5,
+				"architecture_rules": 4,
+				"artifact_model": 2,
+				"authority_model": 2,
+				"capabilities": 6,
+				"capability_resolution": 4,
+				"conformance_model": 5,
+				"contracts": 8,
+				"dependency_archetypes": 2,
+				"identity_model": 7,
+				"invariants": 20,
+				"lifecycle": 1,
+				"node_archetypes": 2,
+				"port_catalog": 3,
+				"product_kinds": 3,
+				"product_topology": 4,
+				"receipt_catalog": 4,
+				"requirement_model": 4,
+				"resolution_model": 4,
+				"semantic_dependency_model": 2,
+				"strategic_value_model": 18,
+				"surface_registry": 3,
+				"vocabulary": 17
+			},
+			"added_count": 133,
+			"bound_domains": [
+				"l9.projection/architecture@1",
+				"l9.projection/governance@1",
+				"l9.projection/evidence-provenance@1",
+				"l9.projection/contracts-conformance@1",
+				"l9.projection/capabilities-dependencies@1",
+				"l9.projection/identity-attribution@1",
+				"l9.projection/strategic-value@1",
+				"l9.projection/signals@1"
+			],
+			"migration_ready": true,
+			"missing": [],
+			"missing_count": 0,
+			"new_nodes": 163,
+			"old_nodes": 33,
+			"predecessor_profiles": [
+				"l9.projection/coding-agent-execution@1"
+			]
+		},
+		"l9.domain-consumer-binding/cursor@1": {
+			"added_by_source_class": {
+				"actor_registry": 3,
+				"architecture_patterns": 5,
+				"architecture_rules": 4,
+				"artifact_model": 2,
+				"capability_resolution": 4,
+				"conformance_model": 5,
+				"contracts": 1,
+				"dependency_archetypes": 2,
+				"identity_model": 7,
+				"node_archetypes": 2,
+				"port_catalog": 3,
+				"product_kinds": 3,
+				"product_topology": 4,
+				"requirement_model": 4,
+				"resolution_model": 4,
+				"semantic_dependency_model": 2,
+				"strategic_value_model": 18,
+				"surface_registry": 3,
+				"vocabulary": 17
+			},
+			"added_count": 93,
+			"bound_domains": [
+				"l9.projection/architecture@1",
+				"l9.projection/governance@1",
+				"l9.projection/contracts-conformance@1",
+				"l9.projection/capabilities-dependencies@1",
+				"l9.projection/strategic-value@1",
+				"l9.projection/signals@1",
+				"l9.projection/evidence-provenance@1",
+				"l9.projection/identity-attribution@1"
+			],
+			"migration_ready": false,
+			"missing": [
+				{
+					"disposition": "undisposed",
+					"node": "$.global_admission_rules",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.catalog_status",
+					"source_class": "capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.outcome_semantics",
+					"source_class": "contracts"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.errors",
+					"source_class": "error_taxonomy"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.result_domains",
+					"source_class": "error_taxonomy"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.global_rules",
+					"source_class": "lifecycle"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.lifecycle_relations",
+					"source_class": "lifecycle"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.state_semantics",
+					"source_class": "lifecycle"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.specialization_contract",
+					"source_class": "receipt_catalog"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.admission",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.authority",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.bounded_autonomy",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.capability",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.conformance",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.contract",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.invariant",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.packet",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.provenance",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.provider",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.receipt",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.requirement",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.resolution",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.semantic_owner",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.state_change",
+					"source_class": "vocabulary"
+				}
+			],
+			"missing_count": 24,
+			"new_nodes": 163,
+			"old_nodes": 359,
+			"predecessor_profiles": [
+				"l9.projection/cursor-governance-operating-plane@2"
+			]
+		},
+		"l9.domain-consumer-binding/gar@1": {
+			"added_by_source_class": {
+				"actor_registry": 3,
+				"artifact_model": 1,
+				"conformance_model": 5,
+				"lifecycle": 1,
+				"receipt_catalog": 4,
+				"strategic_value_model": 18,
+				"surface_registry": 3,
+				"vocabulary": 17
+			},
+			"added_count": 52,
+			"bound_domains": [
+				"l9.projection/architecture@1",
+				"l9.projection/governance@1",
+				"l9.projection/evidence-provenance@1",
+				"l9.projection/contracts-conformance@1",
+				"l9.projection/capabilities-dependencies@1",
+				"l9.projection/strategic-value@1",
+				"l9.projection/signals@1",
+				"l9.projection/identity-attribution@1"
+			],
+			"migration_ready": false,
+			"missing": [
+				{
+					"disposition": "undisposed",
+					"node": "$.projection_profiles",
+					"source_class": "architecture_patterns"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.validation_rules",
+					"source_class": "architecture_patterns"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "architecture_rules"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.authority_classes",
+					"source_class": "artifact_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.compiler_authority",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.global_admission_rules",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.global_promotion",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.identity_authority",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.product_admission_authority",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.product_manifest_authority",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.product_topology_authority",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.profile_publication",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.project_contract_admission",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.binding_families.provider",
+					"source_class": "binding_catalog"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.compatibility",
+					"source_class": "binding_catalog"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.catalog_authority_boundaries",
+					"source_class": "capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.catalog_registration_contract",
+					"source_class": "capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.catalog_status",
+					"source_class": "capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.derivation",
+					"source_class": "capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.effect_class_model",
+					"source_class": "capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.provider_realization_model",
+					"source_class": "capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.requirement_model",
+					"source_class": "capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.state_dimension_rules",
+					"source_class": "capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "capability_resolution"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.derivation",
+					"source_class": "contracts"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.outcome_semantics",
+					"source_class": "contracts"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "dependency_archetypes"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "identity_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.purpose",
+					"source_class": "identity_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.invariants",
+					"source_class": "invariants"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.invariants[?(@.id==\"INV-VALIDATION-MONOTONICITY\")].id",
+					"source_class": "invariants"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.invariants[?(@.id==\"INV-VALIDATION-MONOTONICITY\")].scope",
+					"source_class": "invariants"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.invariants[?(@.id==\"INV-VALIDATION-MONOTONICITY\")].statement",
+					"source_class": "invariants"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.global_rules",
+					"source_class": "lifecycle"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.lifecycle_relations",
+					"source_class": "lifecycle"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.state_semantics",
+					"source_class": "lifecycle"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "node_archetypes"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.catalog_status",
+					"source_class": "port_catalog"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "port_catalog"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.catalog_status",
+					"source_class": "product_kinds"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "product_kinds"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.kind_exception_model",
+					"source_class": "product_kinds"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.unresolved_kind_candidates",
+					"source_class": "product_kinds"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "product_manifest"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.properties",
+					"source_class": "product_manifest"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.purpose",
+					"source_class": "product_manifest"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.required",
+					"source_class": "product_manifest"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.resolved_manifest_gate",
+					"source_class": "product_manifest"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.semantic_rules",
+					"source_class": "product_manifest"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.type",
+					"source_class": "product_manifest"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "product_topology"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.purpose",
+					"source_class": "product_topology"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.type",
+					"source_class": "product_topology"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.aliases",
+					"source_class": "repository_registry"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.does_not_own",
+					"source_class": "repository_registry"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.downstream_obligations",
+					"source_class": "repository_registry"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.global_rules",
+					"source_class": "repository_registry"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.purpose",
+					"source_class": "repository_registry"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.repositories",
+					"source_class": "repository_registry"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.repository_lifecycle",
+					"source_class": "repository_registry"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "requirement_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "resolution_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.binding_rules",
+					"source_class": "technology_capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.capability_classes",
+					"source_class": "technology_capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.global_rules",
+					"source_class": "technology_capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.registration_requirements",
+					"source_class": "technology_capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.technologies[?(@.id==\"python\")]",
+					"source_class": "technology_capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.technologies[?(@.id==\"pytest\")]",
+					"source_class": "technology_capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.technologies[?(@.id==\"mongodb\")]",
+					"source_class": "technology_capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.technologies[?(@.id==\"postgresql\")]",
+					"source_class": "technology_capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.technologies[?(@.id==\"gate-sdk\")]",
+					"source_class": "technology_capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.technologies[?(@.id==\"graphiti-mcp\")]",
+					"source_class": "technology_capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.technologies[?(@.id==\"zep\")]",
+					"source_class": "technology_capabilities"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.global_rules",
+					"source_class": "technology_profiles"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.governed_by",
+					"source_class": "technology_profiles"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.profile_shape",
+					"source_class": "technology_profiles"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.profiles",
+					"source_class": "technology_profiles"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.resolution",
+					"source_class": "technology_profiles"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.relationships.authority_flow",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.relationships.binding_lowering_relationship",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.relationships.compilation_relationship",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.relationships.harvest_promotion_flow",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.relationships.identity_resolution_flow",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.relationships.project_contract_flow",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.relationships.projection_derivation_distinction",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.relationships.surgical_repair_flow",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.adapter",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.admission",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.authority",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.binding",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.capability",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.capability_closure",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.constraint",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.contract",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.dependency",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.derivation",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.globalization_candidate",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.hard_constraint",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.harvest",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.identity_assertion",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.invariant",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.lowering",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.node",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.objective",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.port",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.product",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.product_archetype",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.product_kind",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.product_kind_exception",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.product_manifest",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.product_relationship",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.product_topology",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.project_contract",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.projection",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.provenance",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.provider",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.rendering",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.requirement",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.requirement_closure",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.resolution",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.semantic_owner",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.synthesis",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.technology_profile",
+					"source_class": "vocabulary"
+				}
+			],
+			"missing_count": 123,
+			"new_nodes": 163,
+			"old_nodes": 642,
+			"predecessor_profiles": [
+				"l9.projection/gar-architecture-observer@1",
+				"l9.projection/architecture-intelligence@1"
+			]
+		},
+		"l9.domain-consumer-binding/strategic-planner@1": {
+			"added_by_source_class": {
+				"actor_registry": 3,
+				"architecture_patterns": 5,
+				"architecture_rules": 4,
+				"artifact_model": 2,
+				"authority_model": 3,
+				"capabilities": 6,
+				"capability_resolution": 4,
+				"conformance_model": 5,
+				"contracts": 13,
+				"dependency_archetypes": 2,
+				"identity_model": 7,
+				"invariants": 26,
+				"lifecycle": 1,
+				"node_archetypes": 2,
+				"port_catalog": 3,
+				"product_kinds": 3,
+				"product_topology": 4,
+				"receipt_catalog": 4,
+				"requirement_model": 4,
+				"resolution_model": 4,
+				"semantic_dependency_model": 2,
+				"surface_registry": 3,
+				"vocabulary": 6
+			},
+			"added_count": 116,
+			"bound_domains": [
+				"l9.projection/strategic-value@1",
+				"l9.projection/architecture@1",
+				"l9.projection/signals@1",
+				"l9.projection/governance@1",
+				"l9.projection/evidence-provenance@1",
+				"l9.projection/capabilities-dependencies@1",
+				"l9.projection/contracts-conformance@1",
+				"l9.projection/identity-attribution@1"
+			],
+			"migration_ready": false,
+			"missing": [
+				{
+					"disposition": "undisposed",
+					"node": "$.strategic_authority",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.strategic_cognition_authority",
+					"source_class": "authority_model"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.actor_response_model",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.conditional_best_response",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.deviation_gain",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.equilibrium_assessment",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.incentive_bearing_commitment",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.incentive_compatibility",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.information_disclosure_decision",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.policy_exploitability",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.strategic_game_model",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.strategic_interaction",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.strategic_interaction_assessment",
+					"source_class": "vocabulary"
+				},
+				{
+					"disposition": "undisposed",
+					"node": "$.terms.strategy_profile",
+					"source_class": "vocabulary"
+				}
+			],
+			"missing_count": 14,
+			"new_nodes": 163,
+			"old_nodes": 64,
+			"predecessor_profiles": [
+				"l9.projection/strategic-planner-value@1",
+				"l9.projection/strategic-planner-interaction@1"
+			]
+		}
+	},
+	"schema": "l9.candidate-evidence/domain-migration-equivalence-v1"
+}

@@ -196,8 +196,10 @@ bindings:
     binding_grants_permissions: false
     action_authority: externally_resolved
   unresolved:
-  - coordinate: predecessor_migration_dispositions
-    reason: Selections of the predecessor profile absent from the bound domains have no recorded disposition.
+  - coordinate: added_selection_review
+    reason: >-
+      The bound domains cover every predecessor selection but add selections the predecessor did not make; none
+      has been reviewed for authority neutrality.
     blocks: consumer_migration
 - id: l9.domain-consumer-binding/simple-plan@1
   consumer:
