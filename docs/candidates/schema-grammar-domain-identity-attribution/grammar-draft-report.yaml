@@ -1,27 +1,27 @@
 authority_repository: Quantum-L9/.github
-authority_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+authority_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 projection_profile: l9.projection/identity-attribution@1
 composition_profile: l9.compose/identity-attribution@1
 written:
 - source_class: identity_model
   path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/identity_model.yaml
-  digest: sha256:de2bcc542173b138c331c39488fb99a3c3cc1b3b3165ad6c7f673b56a4a8a21d
+  digest: sha256:bbc45cbafc3fc635243b42053e01d005d6301ef548673b3420066869c1f5891e
   normative_overlay: []
 - source_class: actor_registry
   path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/actor_registry.yaml
-  digest: sha256:0d7b8256114a03b2c2d23763109f1a135b8fd7d169109cc497eb8ead57c90fd5
+  digest: sha256:03edd021a0d279b7a65c75f9f042062cbdfd8baaf44eb60868821354c31417c5
   normative_overlay: []
 - source_class: surface_registry
   path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/surface_registry.yaml
-  digest: sha256:a1f4badc3ac63dd35a48e65c0668a1f187e988f395ea1b260757d25d48454fde
+  digest: sha256:a9b204837045cbc4edbe36ed275f45c43afd3535ff849d529bf6caac7e5d8c37
   normative_overlay: []
 - source_class: invariants
   path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/invariants.yaml
-  digest: sha256:e8e4798fa22de853c07047e72afd17c5adabc7fb1dd3a0a456c5f0a4fdb31ada
+  digest: sha256:82eac2b869a4887d38c467b5f926b4de2d438ddcd580a358d32b1e65a9e21689
   normative_overlay: []
 - source_class: contracts
   path: docs/candidates/schema-grammar-domain-identity-attribution/grammars/contracts.yaml
-  digest: sha256:1b258e1230f1d2634530b5eca67e142d9c6425bada735936f6f8ee4ee5fe9e2a
+  digest: sha256:e732e2f84adff07ebbe87227e70ecc22e40be25958d8bcc1f5e8cf132a0da457
   normative_overlay: []
 inexpressible: []
 pack_dir: docs/candidates/schema-grammar-domain-identity-attribution

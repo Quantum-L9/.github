@@ -1,31 +1,31 @@
 authority_repository: Quantum-L9/.github
-authority_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+authority_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 projection_profile: l9.projection/capabilities-dependencies@1
 composition_profile: l9.compose/capabilities-dependencies@1
 written:
 - source_class: capabilities
   path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/capabilities.yaml
-  digest: sha256:23174f5038bd165d64416d2c155548531427a5c61a3a3242da4a6087c943ba88
+  digest: sha256:927bda55b4bfdc5b4be298540ef28a0277567976cc2dbb74dee3294e9178b9d5
   normative_overlay: []
 - source_class: capability_resolution
   path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/capability_resolution.yaml
-  digest: sha256:02d567a79db6ad3a3323c2968601c93eb4ffe6d17e7bd466acc7b53136d01ef9
+  digest: sha256:7dd6f8aa7e5d78819d2f5491c5ee636d7e314c1bc8dc43ed18f96731374a5729
   normative_overlay: []
 - source_class: semantic_dependency_model
   path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/semantic_dependency_model.yaml
-  digest: sha256:690dd7368d3769d4df98be8ba0b2583a6907f269d104102e161c2c3bfdd939df
+  digest: sha256:ee7cb18cc1544269e4c22c18f0e5cf3d01b3136674874dcc455e7d9387f7ded9
   normative_overlay: []
 - source_class: dependency_archetypes
   path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/dependency_archetypes.yaml
-  digest: sha256:d54f79136f1456fc3f735b6f4e9fa152c06552ecb6b46be5d318735fc25778c5
+  digest: sha256:39f1d2349cf3ae7bed3611f38102b9c13cb7f2215fc31f7710b464b21d045d71
   normative_overlay: []
 - source_class: invariants
   path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/invariants.yaml
-  digest: sha256:9450e3d69f4a06807c20226631c053bb0c3afc8a3903f1c3b4b81b13d7a4ee33
+  digest: sha256:f034313df24c5005da3031d13960ec7f3a81e2ef1d26b97552c71b1add2c0185
   normative_overlay: []
 - source_class: contracts
   path: docs/candidates/schema-grammar-domain-capabilities-dependencies/grammars/contracts.yaml
-  digest: sha256:fc8a2d39667d8910e4a27dc352240d5181947a7283fc68bf67d14a3ea32f311b
+  digest: sha256:27df9abc8d04adc3433d4bdc2a8dba48a27ce16e8aac75719adfc46e3b7f068e
   normative_overlay: []
 inexpressible: []
 pack_dir: docs/candidates/schema-grammar-domain-capabilities-dependencies

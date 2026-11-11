@@ -7,7 +7,7 @@ admission: not_granted
 source_class: architecture_patterns
 source_ref: l9.source/architecture-patterns@1
 source_path: semantics/architecture_patterns.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:c4adbeff6e953404aaafe275a13a387e9fdd0d9bd8dbe3adfa46af88cfe2a323
 applies_to_selectors:
 - $.global_rules

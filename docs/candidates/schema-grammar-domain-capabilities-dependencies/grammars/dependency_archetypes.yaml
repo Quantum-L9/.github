@@ -7,7 +7,7 @@ admission: not_granted
 source_class: dependency_archetypes
 source_ref: l9.source/dependency-archetypes@1
 source_path: semantics/dependency_archetypes.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:31d846c51c4f83c87c3ce697e720e73921d108a1946ed81e121f7bfa61e0a8d7
 applies_to_selectors:
 - $.global_rules

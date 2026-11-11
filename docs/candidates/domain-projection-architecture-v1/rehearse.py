@@ -35,7 +35,7 @@ from typing import Any
 
 import yaml
 
-BASE_SHA = "05d0278"
+BASE_SHA = "c2185b0"
 REPOSITORY = "Quantum-L9/.github"
 PACK = Path(__file__).resolve().parent
 PACK_REL = "docs/candidates/domain-projection-architecture-v1"
@@ -205,6 +205,9 @@ def _register(dest: Path, synthesized: list[str], work: Path) -> dict[str, bytes
     registered: dict[str, bytes] = {}
     manifest_path = dest / "semantics/generic_compiler_manifest.yaml"
     text = manifest_path.read_text("utf-8")
+    # Idempotent: drop any domain schema registration the base already carries, then register once.
+    names = {_schema_file(n, k) for n in PAIRS for k in ("projection", "composition")}
+    text = "".join(line for line in text.splitlines(True) if line.strip().removeprefix("- ") not in names)
     anchor = "  - strategic_planning_context_projection_v2.schema.yaml\n"
     if text.count(anchor) != 1:
         raise SystemExit("cannot locate the artifact_schemas anchor in the compiler manifest")

@@ -7,7 +7,7 @@ admission: not_granted
 source_class: receipt_catalog
 source_ref: l9.source/receipt-catalog@1
 source_path: semantics/receipt_catalog.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:ec7a06224263cad293b79f1f4f832bffc6b4f8eae4980bf8cbfc01bba8af8ca5
 applies_to_selectors:
 - $.global_rules

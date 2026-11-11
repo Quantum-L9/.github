@@ -8,12 +8,12 @@ bindings:
 - source_class: receipt_catalog
   source_ref: l9.source/receipt-catalog@1
   source_path: semantics/receipt_catalog.yaml
-  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
   source_digest: sha256:ec7a06224263cad293b79f1f4f832bffc6b4f8eae4980bf8cbfc01bba8af8ca5
   grammar_ref: l9.candidate.schema-synthesis/evidence-provenance/grammar/receipt-catalog@1
   grammar_path: docs/candidates/schema-grammar-domain-evidence-provenance/grammars/receipt_catalog.yaml
-  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
-  grammar_digest: sha256:159b9b1a4fedb39d9fc6f899af617bdb55a6b37d70f214849a25b48c7be6a4bd
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:75705b7551bb3703300e08cc68dbdfd978fbbb38f2b90da27c4febd2933177d4
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.global_rules
@@ -24,12 +24,12 @@ bindings:
 - source_class: artifact_model
   source_ref: l9.source/artifact-model@1
   source_path: semantics/artifact_model.yaml
-  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
   source_digest: sha256:21f8bb783d7611ae1b3c60474c6ca31f6096f29d7ef0e94ef81f12e6d2defe09
   grammar_ref: l9.candidate.schema-synthesis/evidence-provenance/grammar/artifact-model@1
   grammar_path: docs/candidates/schema-grammar-domain-evidence-provenance/grammars/artifact_model.yaml
-  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
-  grammar_digest: sha256:87329387801602e9103d458852b03dd8c3ff48ac58699b886ddbdfb2498473f6
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:722060325a42c02be5fd6c48421ce1090e4b697cc1128c42fcde0b5d706d7444
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.artifacts
@@ -38,12 +38,12 @@ bindings:
 - source_class: semantic_dependency_model
   source_ref: l9.source/semantic-dependency-model@1
   source_path: semantics/semantic_dependency_model.yaml
-  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
   source_digest: sha256:b6204c0128ba0493c6e70dfd6976fd409efdc6e8a68b70fac8ea9226833fcf9c
   grammar_ref: l9.candidate.schema-synthesis/evidence-provenance/grammar/semantic-dependency-model@1
   grammar_path: docs/candidates/schema-grammar-domain-evidence-provenance/grammars/semantic_dependency_model.yaml
-  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
-  grammar_digest: sha256:96770349cc55a788316f659cda7d26aa02b9b5e1512e5797247986f86eb7358e
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:e45a9c847efd9c1f0b1f22eb9f28d6a25dd9e961df4f1dc401ead47e1f2b593f
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.dependency_rules
@@ -52,12 +52,12 @@ bindings:
 - source_class: invariants
   source_ref: l9.source/invariants@1
   source_path: semantics/invariants.yaml
-  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
   source_digest: sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
   grammar_ref: l9.candidate.schema-synthesis/evidence-provenance/grammar/invariants@1
   grammar_path: docs/candidates/schema-grammar-domain-evidence-provenance/grammars/invariants.yaml
-  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
-  grammar_digest: sha256:3be39ad6d9a69ca9f85cb1a1efc6e338861c13cebb141180271bf1666617c206
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:964400cf5e96fd78ae246c50df47256414ea9277d6cf335b21a6e7be0ea27bf2
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.invariants[?(@.id=="L9-AUTH-001")]
@@ -77,12 +77,12 @@ bindings:
 - source_class: contracts
   source_ref: l9.source/contracts@1
   source_path: semantics/contracts.yaml
-  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
   source_digest: sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993
   grammar_ref: l9.candidate.schema-synthesis/evidence-provenance/grammar/contracts@1
   grammar_path: docs/candidates/schema-grammar-domain-evidence-provenance/grammars/contracts.yaml
-  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
-  grammar_digest: sha256:6d39b66047f8772c461bef434d86a5e19990b7355b648c5b5ed40f4478560ae5
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:01f61a9abeb89216d4a54572430e85b6258545359c95e0f33ff5cc4e2e6b8473
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.contracts[?(@.id=="l9.contract/evidence-and-receipt@1")]

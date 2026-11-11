@@ -7,7 +7,7 @@ admission: not_granted
 source_class: lifecycle
 source_ref: l9.source/lifecycle@1
 source_path: semantics/lifecycle.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:3463c5f44376bf566347008419becc900a761dd77d99691e983afc49c2f7231c
 applies_to_selectors:
 - $.lifecycles

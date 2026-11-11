@@ -1,15 +1,15 @@
 authority_repository: Quantum-L9/.github
-authority_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+authority_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 projection_profile: l9.projection/signals@1
 composition_profile: l9.compose/signals@1
 written:
 - source_class: vocabulary
   path: docs/candidates/schema-grammar-domain-signals/grammars/vocabulary.yaml
-  digest: sha256:12c1e8e8e7a126283d8af7df30f3ae86251b3f8483f67a09d479b35d8c09e069
+  digest: sha256:6df735d5068f7d0b2ee5b54e10dca94a0b79296ca987e33ff19e769e9563bf33
   normative_overlay: []
 - source_class: invariants
   path: docs/candidates/schema-grammar-domain-signals/grammars/invariants.yaml
-  digest: sha256:41798542ea1275ebf9fdac22c481fde4e2c0f984774555d12f08d3d5a82f5c14
+  digest: sha256:33707a3882fe61c8d6ff89ade5aa7661f85f8b4e751ded7765a849404748b905
   normative_overlay: []
 inexpressible: []
 pack_dir: docs/candidates/schema-grammar-domain-signals

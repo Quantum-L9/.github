@@ -7,7 +7,7 @@ admission: not_granted
 source_class: port_catalog
 source_ref: l9.source/port-catalog@1
 source_path: semantics/port_catalog.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:f53354d355b2d1f5a2e69fb80a30eccb4e73fa8bacaea43071f12a0270a07098
 applies_to_selectors:
 - $.global_rules

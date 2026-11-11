@@ -7,7 +7,7 @@ admission: not_granted
 source_class: product_kinds
 source_ref: l9.source/product-kinds@1
 source_path: semantics/product_kinds.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:294ae7a47b93619bd655619874d962b244e5c027eb6dd31ea508c53d129ace13
 applies_to_selectors:
 - $.global_rules

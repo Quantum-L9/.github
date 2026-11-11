@@ -883,5 +883,5 @@ source_shapes:
     type: object
 derivation:
   method: l9.schema-candidate-synthesis
-  candidate_digest: sha256:70922433eb44a46d22c3072a249d9749bede9b5df2e6bdea1071bd94e2ee6cb7
+  candidate_digest: sha256:9c7312add48511996812043b72d64b3728d56057e8f8b66ad84acee88ca4ddc1
 admission: not_granted

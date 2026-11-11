@@ -1,27 +1,27 @@
 authority_repository: Quantum-L9/.github
-authority_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+authority_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 projection_profile: l9.projection/evidence-provenance@1
 composition_profile: l9.compose/evidence-provenance@1
 written:
 - source_class: receipt_catalog
   path: docs/candidates/schema-grammar-domain-evidence-provenance/grammars/receipt_catalog.yaml
-  digest: sha256:159b9b1a4fedb39d9fc6f899af617bdb55a6b37d70f214849a25b48c7be6a4bd
+  digest: sha256:75705b7551bb3703300e08cc68dbdfd978fbbb38f2b90da27c4febd2933177d4
   normative_overlay: []
 - source_class: artifact_model
   path: docs/candidates/schema-grammar-domain-evidence-provenance/grammars/artifact_model.yaml
-  digest: sha256:87329387801602e9103d458852b03dd8c3ff48ac58699b886ddbdfb2498473f6
+  digest: sha256:722060325a42c02be5fd6c48421ce1090e4b697cc1128c42fcde0b5d706d7444
   normative_overlay: []
 - source_class: semantic_dependency_model
   path: docs/candidates/schema-grammar-domain-evidence-provenance/grammars/semantic_dependency_model.yaml
-  digest: sha256:96770349cc55a788316f659cda7d26aa02b9b5e1512e5797247986f86eb7358e
+  digest: sha256:e45a9c847efd9c1f0b1f22eb9f28d6a25dd9e961df4f1dc401ead47e1f2b593f
   normative_overlay: []
 - source_class: invariants
   path: docs/candidates/schema-grammar-domain-evidence-provenance/grammars/invariants.yaml
-  digest: sha256:3be39ad6d9a69ca9f85cb1a1efc6e338861c13cebb141180271bf1666617c206
+  digest: sha256:964400cf5e96fd78ae246c50df47256414ea9277d6cf335b21a6e7be0ea27bf2
   normative_overlay: []
 - source_class: contracts
   path: docs/candidates/schema-grammar-domain-evidence-provenance/grammars/contracts.yaml
-  digest: sha256:6d39b66047f8772c461bef434d86a5e19990b7355b648c5b5ed40f4478560ae5
+  digest: sha256:01f61a9abeb89216d4a54572430e85b6258545359c95e0f33ff5cc4e2e6b8473
   normative_overlay: []
 inexpressible: []
 pack_dir: docs/candidates/schema-grammar-domain-evidence-provenance

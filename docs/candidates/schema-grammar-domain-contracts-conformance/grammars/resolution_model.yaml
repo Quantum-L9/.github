@@ -7,7 +7,7 @@ admission: not_granted
 source_class: resolution_model
 source_ref: l9.source/resolution-model@1
 source_path: semantics/resolution_model.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:3c0636b0eaca00789d6ced5425fb1c3a314319dd00525dd5f811f38f81c365fc
 applies_to_selectors:
 - $.global_rules

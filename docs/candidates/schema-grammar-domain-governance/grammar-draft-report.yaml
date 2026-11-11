@@ -1,23 +1,23 @@
 authority_repository: Quantum-L9/.github
-authority_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+authority_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 projection_profile: l9.projection/governance@1
 composition_profile: l9.compose/governance@1
 written:
 - source_class: authority_model
   path: docs/candidates/schema-grammar-domain-governance/grammars/authority_model.yaml
-  digest: sha256:9f780ff5612aeec0c8ecdd7aefe278ea03e4c2596eb772fedd03e415128d4caa
+  digest: sha256:919f07c5a27aa0a438678c6dfc20f8981cb3bc367ee87e8e6c08ebc1959ded2d
   normative_overlay: []
 - source_class: lifecycle
   path: docs/candidates/schema-grammar-domain-governance/grammars/lifecycle.yaml
-  digest: sha256:cd1eb2306d74b134c64348fa239fde311085be8ebdd67a87d38cfbfd208565fc
+  digest: sha256:a8c59ebe2ee12c4905df05c6c890455198b71273150b3efd56896e794ee6d166
   normative_overlay: []
 - source_class: invariants
   path: docs/candidates/schema-grammar-domain-governance/grammars/invariants.yaml
-  digest: sha256:78117f0686b1cafbe74a5c46a9eef2d1f9d7de55e4dbf551a6e5dea025592f16
+  digest: sha256:d1ad0893daaa656657a0e4a03d59d17a5695699211bb4f9d5be7913b94a81dbe
   normative_overlay: []
 - source_class: contracts
   path: docs/candidates/schema-grammar-domain-governance/grammars/contracts.yaml
-  digest: sha256:ae8e7cbd2f2f0a3a4195994cbc7dc5e5b9d0e5b4d60a0f174234d6799b737f7d
+  digest: sha256:e62863fd8bde3bf44d8a33b77ba0edb1636b35e53a3e56043114afbb02316cdd
   normative_overlay: []
 inexpressible: []
 pack_dir: docs/candidates/schema-grammar-domain-governance

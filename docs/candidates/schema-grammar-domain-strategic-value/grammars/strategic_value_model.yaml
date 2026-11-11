@@ -7,7 +7,7 @@ admission: not_granted
 source_class: strategic_value_model
 source_ref: l9.source/strategic-value-model@1
 source_path: semantics/strategic_value_model.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69
 applies_to_selectors:
 - $.artifact_id

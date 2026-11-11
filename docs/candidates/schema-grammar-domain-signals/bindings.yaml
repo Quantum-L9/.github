@@ -8,12 +8,12 @@ bindings:
 - source_class: vocabulary
   source_ref: l9.source/vocabulary@1
   source_path: semantics/vocabulary.yaml
-  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
   source_digest: sha256:76e24f641e9161fb7441ca46e5751c2e01ca152c3ea18c84e960b84271765d31
   grammar_ref: l9.candidate.schema-synthesis/signals/grammar/vocabulary@1
   grammar_path: docs/candidates/schema-grammar-domain-signals/grammars/vocabulary.yaml
-  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
-  grammar_digest: sha256:12c1e8e8e7a126283d8af7df30f3ae86251b3f8483f67a09d479b35d8c09e069
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:6df735d5068f7d0b2ee5b54e10dca94a0b79296ca987e33ff19e769e9563bf33
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.terms.signal
@@ -24,12 +24,12 @@ bindings:
 - source_class: invariants
   source_ref: l9.source/invariants@1
   source_path: semantics/invariants.yaml
-  source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+  source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
   source_digest: sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219
   grammar_ref: l9.candidate.schema-synthesis/signals/grammar/invariants@1
   grammar_path: docs/candidates/schema-grammar-domain-signals/grammars/invariants.yaml
-  grammar_revision: 4f4e49f8f731d54fdd5f9af9160435e27681c2f7
-  grammar_digest: sha256:41798542ea1275ebf9fdac22c481fde4e2c0f984774555d12f08d3d5a82f5c14
+  grammar_revision: 95001cddb9d3af1c403480700c890632cb6ec27c
+  grammar_digest: sha256:33707a3882fe61c8d6ff89ade5aa7661f85f8b4e751ded7765a849404748b905
   grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
   applies_to_selectors:
   - $.invariants[?(@.id=="L9-AUTH-001")]

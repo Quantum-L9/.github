@@ -7,7 +7,7 @@ admission: not_granted
 source_class: artifact_model
 source_ref: l9.source/artifact-model@1
 source_path: semantics/artifact_model.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:21f8bb783d7611ae1b3c60474c6ca31f6096f29d7ef0e94ef81f12e6d2defe09
 applies_to_selectors:
 - $.artifacts

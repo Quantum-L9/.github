@@ -7,7 +7,7 @@ admission: not_granted
 source_class: capabilities
 source_ref: l9.source/capabilities@1
 source_path: semantics/capabilities.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:fe39a6b1e0a7dd17bcf917f3cdeed9425273e3e70a9a684fd9796fd2f4f8c5b3
 applies_to_selectors:
 - $.global_rules

@@ -7,7 +7,7 @@ admission: not_granted
 source_class: requirement_model
 source_ref: l9.source/requirement-model@1
 source_path: semantics/requirement_model.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:7865723e78b7f02817db9d5f54aedb1350cb08b45d42759c8bdafeba1320c7c2
 applies_to_selectors:
 - $.global_rules

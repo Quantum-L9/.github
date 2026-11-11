@@ -7,7 +7,7 @@ admission: not_granted
 source_class: identity_model
 source_ref: l9.source/identity-model@1
 source_path: semantics/identity_model.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:b9245eca99501a38976e909e1d151942c1253b2eee2bd6bab9c6382687db4288
 applies_to_selectors:
 - $.global_rules

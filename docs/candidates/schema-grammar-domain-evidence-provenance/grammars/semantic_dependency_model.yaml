@@ -7,7 +7,7 @@ admission: not_granted
 source_class: semantic_dependency_model
 source_ref: l9.source/semantic-dependency-model@1
 source_path: semantics/semantic_dependency_model.yaml
-source_revision: 05d02789eded67d3d848ec9c07d48a76592001f2
+source_revision: c2185b02da3ed0d9784c5a7137efd99388738300
 source_digest: sha256:b6204c0128ba0493c6e70dfd6976fd409efdc6e8a68b70fac8ea9226833fcf9c
 applies_to_selectors:
 - $.dependency_rules
