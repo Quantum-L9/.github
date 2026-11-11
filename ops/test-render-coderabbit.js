@@ -16,6 +16,14 @@
  */
 const assert = require("node:assert");
 const { spawnSync } = require("node:child_process");
+
+// python3 and curl are resolved from PATH on purpose: `make validate` prepends
+// the .venv that `make setup` provisions with PyYAML and jsonschema
+// (Repo.mk USE_VENV), and CI puts the pinned interpreter first. Python runs
+// isolated (-I). No credential is in this suite's environment.
+const tool = (cmd, args, opts) =>
+	spawnSync(cmd, args, { encoding: "utf8", ...opts }); // NOSONAR S4036: runner PATH by design (see above)
+const python = (args, opts) => tool("python3", ["-I", ...args], opts);
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -78,7 +86,7 @@ function globToRegExp(glob) {
 		} else if (glob[i] === "*") {
 			re += "[^/]*";
 		} else {
-			re += glob[i].replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+			re += glob[i].replace(/[.+?^${}()|[\]\\]/g, String.raw`\$&`);
 		}
 	}
 	return new RegExp(`^${re}$`);
@@ -115,13 +123,12 @@ assert.strictEqual(
 console.log("ok: render is deterministic and equals .coderabbit.yaml");
 
 // ── 2. contract on the parsed document ──────────────────────────────────────
-const parsed = spawnSync(
-	"python3",
+const parsed = python(
 	[
 		"-c",
 		"import sys, json, yaml; json.dump(yaml.safe_load(sys.stdin.read()), sys.stdout)",
 	],
-	{ input: out, encoding: "utf8" },
+	{ input: out },
 );
 assert.strictEqual(
 	parsed.status,
@@ -151,6 +158,64 @@ for (const p of [
 	"!**/*.min.js",
 ]) {
 	assert.ok(filters.includes(p), `required exclusion ${p}`);
+}
+// Generic only: the reviewed set below is the whole render. Every pattern is
+// one depth-independent segment (a directory, a file name or a `*.ext`), so
+// no repository-specific path or repository name can enter the central file;
+// repository exclusions belong in that repository's own .coderabbit.yaml,
+// which inheritance merges with this one.
+const GENERIC_PATTERNS = [
+	"!**/node_modules/**",
+	"!**/.venv/**",
+	"!**/venv/**",
+	"!**/vendor/**",
+	"!**/.tox/**",
+	"!**/dist/**",
+	"!**/build/**",
+	"!**/__pycache__/**",
+	"!**/*.pyc",
+	"!**/*.egg-info/**",
+	"!**/.mypy_cache/**",
+	"!**/.pytest_cache/**",
+	"!**/.ruff_cache/**",
+	"!**/htmlcov/**",
+	"!**/.coverage",
+	"!**/*.min.js",
+	"!**/*.min.css",
+	"!**/*.map",
+	"!**/package-lock.json",
+	"!**/pnpm-lock.yaml",
+	"!**/yarn.lock",
+	"!**/uv.lock",
+	"!**/poetry.lock",
+	"!**/*.zip",
+	"!**/*.tar.gz",
+	"!**/*.tgz",
+];
+assert.deepStrictEqual(
+	filters,
+	GENERIC_PATTERNS,
+	"the render carries exactly the reviewed generic exclusions",
+);
+const ONE_SEGMENT = /^!\*\*\/\*?[\w.-]+(?:\/\*\*)?$/;
+for (const p of filters) {
+	assert.match(
+		p,
+		ONE_SEGMENT,
+		`${p} is one generic, depth-independent segment`,
+	);
+}
+for (const name of [
+	"plasticos",
+	"erp_extracted_data",
+	"odoo",
+	"quantum-l9/",
+	"cryptoxdog",
+]) {
+	assert.ok(
+		!filters.some((p) => p.toLowerCase().includes(name)),
+		`no repository-specific pattern (${name})`,
+	);
 }
 // Depth-independent: every directory or name pattern starts with **/.
 for (const p of filters)
@@ -261,7 +326,7 @@ console.log(
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "coderabbit-schema-"));
 try {
 	const schemaFile = path.join(tmp, "schema.v2.json");
-	const curl = spawnSync(
+	const curl = tool(
 		"curl",
 		[
 			"-sSL",
@@ -281,8 +346,7 @@ try {
 		0,
 		`could not fetch ${SCHEMA_URL} with curl -L (${curl.error?.message || curl.stderr}) — schema validity is unproven`,
 	);
-	const check = spawnSync(
-		"python3",
+	const check = python(
 		[
 			"-c",
 			[
@@ -296,7 +360,7 @@ try {
 			].join("\n"),
 			schemaFile,
 		],
-		{ input: out, encoding: "utf8" },
+		{ input: out },
 	);
 	assert.strictEqual(
 		check.status,
@@ -304,8 +368,7 @@ try {
 		`render is not valid against ${SCHEMA_URL}:\n${check.stdout}${check.stderr}`,
 	);
 	// The validator is live: a document the schema forbids is rejected.
-	const negative = spawnSync(
-		"python3",
+	const negative = python(
 		[
 			"-c",
 			"import json, sys\nfrom jsonschema import Draft202012Validator\nschema = json.load(open(sys.argv[1]))\nsys.exit(0 if list(Draft202012Validator(schema).iter_errors({'inheritance': 'yes', 'reviews': {'path_filters': [1]}})) else 1)",

@@ -77,7 +77,14 @@ Enterprise-only; the organization is on the Free plan.
   it); `reviews.path_filters` is exclusions only. A fragment pattern without a
   leading `!` throws, as does a duplicate or a pattern with whitespace.
   Patterns use `**/` so they match at any depth. Tests and docs are never
-  excluded. Patterns are double-quoted because a bare leading `!` is a YAML
+  excluded.
+- **Generic only:** the fragments carry only exclusions valid for any
+  repository (installed dependencies, build output, caches, generated files,
+  lockfiles, archives), each one depth-independent segment. No repository
+  name or repository-specific path enters the renderer, the fragments or the
+  central file; a repository's own exclusions go in its own
+  `.coderabbit.yaml`, which `inheritance: true` merges with the central one.
+  The test pins the exact reviewed set and the one-segment shape. Patterns are double-quoted because a bare leading `!` is a YAML
   tag.
 - **Seed:** category `coderabbit` writes `.coderabbit.yaml` at the consumer
   root. It is in `DEFAULT_CATEGORIES` and in every class that materializes

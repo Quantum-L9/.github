@@ -23,6 +23,7 @@ reviews:
     - "!**/.tox/**"
     # Build output, caches and coverage reports: regenerated, never reviewed.
     - "!**/dist/**"
+    - "!**/build/**"
     - "!**/__pycache__/**"
     - "!**/*.pyc"
     - "!**/*.egg-info/**"
@@ -31,7 +32,8 @@ reviews:
     - "!**/.ruff_cache/**"
     - "!**/htmlcov/**"
     - "!**/.coverage"
-    # Minified bundles, source maps and dependency lockfiles: machine-written.
+    # Minified bundles, source maps, dependency lockfiles and archives:
+    # machine-written.
     - "!**/*.min.js"
     - "!**/*.min.css"
     - "!**/*.map"
@@ -40,3 +42,6 @@ reviews:
     - "!**/yarn.lock"
     - "!**/uv.lock"
     - "!**/poetry.lock"
+    - "!**/*.zip"
+    - "!**/*.tar.gz"
+    - "!**/*.tgz"

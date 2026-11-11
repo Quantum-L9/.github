@@ -1,4 +1,5 @@
-# Minified bundles, source maps and dependency lockfiles: machine-written.
+# Minified bundles, source maps, dependency lockfiles and archives:
+# machine-written.
 !**/*.min.js
 !**/*.min.css
 !**/*.map
@@ -7,3 +8,6 @@
 !**/yarn.lock
 !**/uv.lock
 !**/poetry.lock
+!**/*.zip
+!**/*.tar.gz
+!**/*.tgz

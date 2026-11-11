@@ -1,5 +1,6 @@
 # Build output, caches and coverage reports: regenerated, never reviewed.
 !**/dist/**
+!**/build/**
 !**/__pycache__/**
 !**/*.pyc
 !**/*.egg-info/**
