@@ -19,10 +19,10 @@ REL = ROOT / "docs/semantic-foundation" / VERSION
 PACK = "docs/candidates/domain-projection-architecture-v1"
 STATUS = "ADDITIVE SUCCESSOR CANDIDATE"
 
-DELTA = f"""- `semantics/invariants.yaml`: `L9-SVQ-001`, `L9-SVQ-002`, `L9-SIGNAL-001`, `L9-SIGNAL-002`, `L9-SIGNAL-003` and `L9-SIGNAL-004`, record-equal to the Quantum-L9/.github#234 candidates.
+DELTA = """- `semantics/invariants.yaml`: `L9-SVQ-001`, `L9-SVQ-002`, `L9-SIGNAL-001`, `L9-SIGNAL-002`, `L9-SIGNAL-003` and `L9-SIGNAL-004`, record-equal to the Quantum-L9/.github#234 candidates.
 - `semantics/vocabulary.yaml`: terms `qualitative_strategic_value_screen`, `realized_strategic_compounding`, `signal`, `signal_propagation`, `signal_feedback_episode` and `signal_consumption` (record-equal to #234), and `domain_projection` and `domain_consumer_binding`.
 - `semantics/contracts.yaml`: `l9.contract/domain-composition-compatibility@1` and `l9.contract/domain-composition-provenance@1`.
-- `semantics/projection_profiles.yaml`: profile class `domain` and eight domain profiles `l9.projection/<name>@1` for `architecture`, `strategic-value`, `signals`, `governance`, `evidence-provenance`, `contracts-conformance`, `capabilities-dependencies` and `identity-attribution`, each declaring `payload_validation: {{protocol: l9.payload-validation/source-class-dispatch@1}}`.
+- `semantics/projection_profiles.yaml`: profile class `domain` and eight domain profiles `l9.projection/<name>@1` for `architecture`, `strategic-value`, `signals`, `governance`, `evidence-provenance`, `contracts-conformance`, `capabilities-dependencies` and `identity-attribution`, each declaring `payload_validation: {protocol: l9.payload-validation/source-class-dispatch@1}`.
 - `semantics/composition_profiles.yaml`: the eight `l9.compose/<name>@1` compositions, source-class namespaced, declaring the same protocol.
 - New ledgers `semantics/domain_projection_model.yaml` (`DOMAIN-001`..`DOMAIN-010`) and `semantics/domain_consumer_bindings.yaml` (six bindings, `BINDING-001`..`004`, `COMPOSE-001`..`005`), registered in `semantics/canonical_sources.yaml` and `semantics/generic_compiler_manifest.yaml#requires.semantic_catalogs`.
 - Sixteen registered payload schemas of type `l9.source-class-payload-schema/v1` (one projection and one composition schema per domain, each named domain_NAME_projection or domain_NAME_composition with suffix .schema.yaml under semantics/), listed in `semantics/generic_compiler_manifest.yaml#requires.artifact_schemas`.
@@ -129,10 +129,18 @@ Not admitted. Admission requires the owner's explicit decision recorded in an ac
     entries = [(f"./semantics/{n}", ROOT / "semantics" / n) for n in semantics]
     entries += [(f"./docs/adr/{n}", ROOT / "docs/adr" / n) for n in adrs]
     entries.append(("./docs/adr/README.md", ROOT / "docs/adr/README.md"))
-    entries += [(f"./{n}", REL / n) for n in ("MANIFEST.md", "README.md", "RELEASE_VALIDATION.md")]
-    lines = sorted((f"{_sha(p)}  {rel}\n" for rel, p in entries), key=lambda line: line.split("  ", 1)[1].encode())
+    entries += [
+        (f"./{n}", REL / n)
+        for n in ("MANIFEST.md", "README.md", "RELEASE_VALIDATION.md")
+    ]
+    lines = sorted(
+        (f"{_sha(p)}  {rel}\n" for rel, p in entries),
+        key=lambda line: line.split("  ", 1)[1].encode(),
+    )
     (REL / "HASHES.sha256").write_text("".join(lines), "utf-8")
-    print(f"cut {VERSION}: {len(semantics)} sources, {len(adrs)} ADRs, {len(lines)} hashes")
+    print(
+        f"cut {VERSION}: {len(semantics)} sources, {len(adrs)} ADRs, {len(lines)} hashes"
+    )
     return 0
 
 

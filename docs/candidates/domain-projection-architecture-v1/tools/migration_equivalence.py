@@ -24,11 +24,16 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[4]
-OUT = ROOT / "docs/candidates/domain-projection-architecture-v1/evidence/migration_equivalence.json"
+OUT = (
+    ROOT
+    / "docs/candidates/domain-projection-architecture-v1/evidence/migration_equivalence.json"
+)
 
 
 def _validator():
-    spec = importlib.util.spec_from_file_location("validate_semantics", ROOT / "scripts/validate-semantics.py")
+    spec = importlib.util.spec_from_file_location(
+        "validate_semantics", ROOT / "scripts/validate-semantics.py"
+    )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -51,7 +56,11 @@ def _label(document: object, path: tuple) -> str:
     for part in path:
         node = node[part]
         if isinstance(part, int):
-            out += f'[?(@.id=="{node["id"]}")]' if isinstance(node, dict) and "id" in node else f"[{part}]"
+            out += (
+                f'[?(@.id=="{node["id"]}")]'
+                if isinstance(node, dict) and "id" in node
+                else f"[{part}]"
+            )
         else:
             out += f".{part}"
     return out
@@ -72,7 +81,9 @@ def compute() -> dict:
         for pid in profile_ids:
             for source_class, spec in (profiles[pid].get("sources") or {}).items():
                 for selector in spec.get("selectors") or []:
-                    for path, _ in v._rc034_nodes(docs.get(source_class), selector) or []:
+                    for path, _ in (
+                        v._rc034_nodes(docs.get(source_class), selector) or []
+                    ):
                         found.add((source_class, path))
         return found
 
@@ -80,7 +91,9 @@ def compute() -> dict:
         cls, path = node
         return any(c == cls and path[: len(p)] == p for c, p in by)
 
-    revision = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    revision = subprocess.run(
+        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True
+    ).stdout.strip()
     receipt = {
         "schema": "l9.candidate-evidence/domain-migration-equivalence-v1",
         "admission": "not_granted",
@@ -91,7 +104,9 @@ def compute() -> dict:
         old_ids = binding.get("predecessor_profiles") or []
         if not old_ids:
             continue
-        new_ids = list(binding["requires"]) + [c["profile"] for c in binding.get("conditional") or []]
+        new_ids = list(binding["requires"]) + [
+            c["profile"] for c in binding.get("conditional") or []
+        ]
         s_old, s_new = nodes(old_ids), nodes(new_ids)
         missing = sorted((c, p) for c, p in s_old if not covered((c, p), s_new))
         added = sorted((c, p) for c, p in s_new if not covered((c, p), s_old))
@@ -103,14 +118,22 @@ def compute() -> dict:
             "missing_count": len(missing),
             "added_count": len(added),
             "missing": [
-                {"source_class": c, "node": _label(docs[c], p), "disposition": "undisposed"} for c, p in missing
+                {
+                    "source_class": c,
+                    "node": _label(docs[c], p),
+                    "disposition": "undisposed",
+                }
+                for c, p in missing
             ],
             "added_by_source_class": {
-                c: sum(1 for cc, _ in added if cc == c) for c in sorted({cc for cc, _ in added})
+                c: sum(1 for cc, _ in added if cc == c)
+                for c in sorted({cc for cc, _ in added})
             },
             "migration_ready": not missing,
         }
-    receipt["source_revision_note"] = f"computed at a checkout whose HEAD was {revision[:12]} or a descendant with identical semantics/"
+    receipt["source_revision_note"] = (
+        f"computed at a checkout whose HEAD was {revision[:12]} or a descendant with identical semantics/"
+    )
     return receipt
 
 
@@ -126,7 +149,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.write:
         OUT.write_text(text, "utf-8")
         for bid, entry in receipt["bindings"].items():
-            print(f"{bid}: old {entry['old_nodes']} new {entry['new_nodes']} missing {entry['missing_count']} added {entry['added_count']}")
+            print(
+                f"{bid}: old {entry['old_nodes']} new {entry['new_nodes']} missing {entry['missing_count']} added {entry['added_count']}"
+            )
         return 0
     same = OUT.is_file() and OUT.read_text("utf-8") == text
     print("migration equivalence receipt " + ("current" if same else "STALE"))

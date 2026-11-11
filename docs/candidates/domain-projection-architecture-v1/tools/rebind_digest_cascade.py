@@ -18,8 +18,17 @@ from pathlib import Path
 import yaml
 
 SEM = Path(__file__).resolve().parents[4] / "semantics"
-COLLECTION = {"invariants.yaml": "invariants", "contracts.yaml": "contracts", "capabilities.yaml": "capabilities"}
-ORDER = ("contracts.yaml", "capabilities.yaml", "lifecycle.yaml", "receipt_catalog.yaml")
+COLLECTION = {
+    "invariants.yaml": "invariants",
+    "contracts.yaml": "contracts",
+    "capabilities.yaml": "capabilities",
+}
+ORDER = (
+    "contracts.yaml",
+    "capabilities.yaml",
+    "lifecycle.yaml",
+    "receipt_catalog.yaml",
+)
 
 
 def sha(name: str) -> str:
@@ -36,7 +45,9 @@ def rebind(name: str) -> str:
     if "source_artifact" in derivation:  # contracts.yaml shape
         src = derivation["source_artifact"]
         text = text.replace(derivation["source_digest_sha256"], sha(src), 1)
-        text = re.sub(r"(\n  source_invariant_count: )\d+", rf"\g<1>{count(src)}", text, count=1)
+        text = re.sub(
+            r"(\n  source_invariant_count: )\d+", rf"\g<1>{count(src)}", text, count=1
+        )
         return text
     for entry in derivation["source_artifacts"]:
         art = entry["artifact"]
