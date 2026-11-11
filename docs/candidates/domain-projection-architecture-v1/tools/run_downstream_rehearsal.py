@@ -27,7 +27,6 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 
@@ -58,11 +57,24 @@ def main(argv: list[str] | None = None) -> int:
     sys.path.insert(0, str(SCRIPTS))
     import check_admission_closure as gate
 
-    subject = gate.load_subject(args.subject) if hasattr(gate, "load_subject") else json.loads(args.subject.read_text("utf-8"))
+    subject = (
+        gate.load_subject(args.subject)
+        if hasattr(gate, "load_subject")
+        else json.loads(args.subject.read_text("utf-8"))
+    )
     output_root = args.output_root.resolve()
     compiler = args.compiler_src.resolve()
-    report = gate.downstream(ROOT, compiler, output_root, subject, args.compiler_revision)
-    report = _scrub(report, {str(output_root): "<output-root>", str(compiler): "<compiler-src>", str(ROOT): "<authority-checkout>"})
+    report = gate.downstream(
+        ROOT, compiler, output_root, subject, args.compiler_revision
+    )
+    report = _scrub(
+        report,
+        {
+            str(output_root): "<output-root>",
+            str(compiler): "<compiler-src>",
+            str(ROOT): "<authority-checkout>",
+        },
+    )
     report = {
         "schema": "l9.candidate-evidence/domain-projection-downstream-rehearsal-v1",
         "admission": "not_granted",
@@ -74,7 +86,16 @@ def main(argv: list[str] | None = None) -> int:
     }
     text = json.dumps(report, indent="\t", sort_keys=True) + "\n"
     print(json.dumps({k: report[k] for k in ("wording", "admission")}, indent=1))
-    print(json.dumps({k: v for k, v in report["downstream"].items() if k in ("status", "revision", "reason")}, indent=1))
+    print(
+        json.dumps(
+            {
+                k: v
+                for k, v in report["downstream"].items()
+                if k in ("status", "revision", "reason")
+            },
+            indent=1,
+        )
+    )
     if args.emit:
         out = PACK / "evidence/downstream"
         if out.exists():
@@ -82,11 +103,17 @@ def main(argv: list[str] | None = None) -> int:
         (out / "run-1").mkdir(parents=True)
         (out / "report.json").write_text(text, "utf-8")
         run = output_root / "run-1"
-        for path in sorted(p for p in run.rglob("*") if p.is_file() and "requests" not in p.relative_to(run).parts):
+        for path in sorted(
+            p
+            for p in run.rglob("*")
+            if p.is_file() and "requests" not in p.relative_to(run).parts
+        ):
             target = out / "run-1" / path.relative_to(run)
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(path.read_bytes())
-        print(f"emitted {sum(1 for p in (out / 'run-1').rglob('*') if p.is_file())} run-1 files and report.json")
+        print(
+            f"emitted {sum(1 for p in (out / 'run-1').rglob('*') if p.is_file())} run-1 files and report.json"
+        )
     return 0 if report["downstream"].get("status") == "pass" else 1
 
 
