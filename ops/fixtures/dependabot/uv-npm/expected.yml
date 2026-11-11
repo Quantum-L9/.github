@@ -7,6 +7,8 @@
 # .pre-commit-config.yaml exists.
 # Tools Core selects (Quantum-L9/l9-ci-core core-owned-tools.json) and the
 # Core, SDK and .github action pins are ignored: they are not bumped here.
+# Safe-only: no semver-major bump is proposed in any ecosystem; a fix that
+# exists only in a new major arrives as a Dependabot alert, not a PR.
 # ADVISORY POSTURE: this opens PRs only. No auto-merge, no major groups.
 version: 2
 updates:
@@ -24,6 +26,8 @@ updates:
       - dependency-name: "Quantum-L9/.github*"
       - dependency-name: "Quantum-L9/l9-ci-core*"
       - dependency-name: "Quantum-L9/l9-ci-sdk*"
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       actions-minor-patch:
         patterns: ["*"]
@@ -44,6 +48,8 @@ updates:
       - dependency-name: "pytest"
       - dependency-name: "ruff"
       - dependency-name: "semgrep"
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       python-minor-patch:
         patterns: ["*"]
@@ -60,6 +66,8 @@ updates:
       default-days: 7
     ignore:
       - dependency-name: "@biomejs/biome"
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       npm-minor-patch:
         patterns: ["*"]

@@ -47,6 +47,10 @@ const ACTION_IGNORES = [
 	"Quantum-L9/l9-ci-core*",
 	"Quantum-L9/l9-ci-sdk*",
 ];
+// Safe-only (ADR-0019 revision 2026-11-11): every ecosystem ignores every
+// semver-major bump, as the last entry of its ignore list.
+const MAJOR_RULE =
+	/ {6}- dependency-name: "\*"\n {8}update-types: \["version-update:semver-major"\]\n {4}groups:/;
 // Ecosystems whose Core-owned names are ignored in the render.
 const CORE_IGNORE_ECOSYSTEMS = ["uv", "pip", "npm", "pre-commit"];
 // The renderer sorts in code-unit order; the assertions use the same order.
@@ -75,9 +79,11 @@ function entries(yml) {
 	return Object.fromEntries(
 		blocks.map((b) => {
 			const ecosystem = b.match(/^ {2}- package-ecosystem: (\S+)/)[1];
-			const ignores = [
-				...b.matchAll(/^ {6}- dependency-name: "([^"]+)"$/gm),
-			].map((m) => m[1]);
+			// Named ignores only: the safe-only majors rule ("*" + update-types)
+			// is asserted separately, as MAJOR_RULE.
+			const ignores = [...b.matchAll(/^ {6}- dependency-name: "([^"]+)"$/gm)]
+				.map((m) => m[1])
+				.filter((n) => n !== "*");
 			return [ecosystem, { text: b, ignores }];
 		}),
 	);
@@ -166,6 +172,11 @@ process.chdir(root);
 			);
 		}
 		for (const entry of Object.values(byEcosystem)) {
+			assert.match(
+				entry.text,
+				MAJOR_RULE,
+				`${name}: every ecosystem ignores semver-major bumps (safe-only)`,
+			);
 			assert.match(entry.text, /open-pull-requests-limit: 2\n/);
 			assert.match(entry.text, /prefix: "chore\(deps\)"\n/);
 			assert.match(entry.text, /cooldown:\n {6}default-days: 7\n/);
