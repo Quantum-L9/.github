@@ -92,3 +92,24 @@ composition profiles and 16 schemas; no revision, no unclassified change, no mis
 closure passes. The checker's `make validate check test` stage was not run in-session because the execution gate
 reserves `make test` for CI; `make validate` (which runs the same suites) and `make check` pass, and the pull
 request's CI runs `make test`.
+
+## Downstream rehearsal (admission skill, CONFIRM stage)
+
+`tools/run_downstream_rehearsal.py` calls `check_admission_closure.downstream()` from
+`.claude/skills/l9-projection-admission/` unchanged: the real producer
+(`Quantum-L9/l9-semantic-compiler-engine@eeac5d28f9f1a44e72287190b9087d06aeb4d574`, a pristine clone with no tracked
+or untracked changes) projects and composes every profile of `evidence/subject.json` twice at the authority commit
+`0b46944911bda80ba375f448a7513630216b5d89`, and `verify_admission_evidence.verify_outputs` re-verifies every emitted
+byte against the authority tree.
+
+| Check | Result |
+| --- | --- |
+| Producer runs | 8 projection profiles and 8 compositions, both runs `pass` |
+| Independent verification | 39 projections and 8 compositions verified, 0 gaps |
+| Negative controls | 225 of 225 rejected by their targeted check |
+| Deterministic replay | 94 files, byte-identical, none only in one run |
+
+`evidence/downstream/report.json` is the report (machine-local paths replaced) and `evidence/downstream/run-1/` the
+producer's projection artifacts, compositions and receipts. This is a **rehearsal PASS at `0b46944`, not admitted**.
+`DOWNSTREAM_USABLE` still requires the owner's admission and the same run at `main`. The gate's `evaluate()` was not
+run because it also invokes `make test`, which CI owns.

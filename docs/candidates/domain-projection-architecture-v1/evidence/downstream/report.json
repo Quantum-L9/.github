@@ -1,0 +1,1096 @@
+{
+	"admission": "not_granted",
+	"downstream": {
+		"compiler": {
+			"dirty": false,
+			"gaps": [],
+			"revision": "eeac5d28f9f1a44e72287190b9087d06aeb4d574"
+		},
+		"compositions": {
+			"l9.compose/architecture@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:8f38b2b43c1ffa0f39bc8906edaa2b7d820f6a741721d09eb7af83afffa237a3",
+						"digest": "sha256:5230f88c6e0c80a87187234f019dec9a35317e2168d5fecde990d81a115a0b6d",
+						"path": "<output-root>/run-1/composed/l9.compose_architecture_1_l9.projection_architecture_1.composed.json",
+						"receipt_digest": "sha256:172564351642afc71b453d7cdce2fd8b793140ba6c068521694bcbc755a0ef39",
+						"receipt_path": "<output-root>/run-1/receipts/a8bd94d0aa9db617ac8917971f27ae9fad7425992c8aa75ca4b8decf02aea2da.json",
+						"ref": "l9.compose/architecture@1#l9.projection/architecture@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"composes": "l9.projection/architecture@1",
+				"exit": 0,
+				"result": "pass"
+			},
+			"l9.compose/capabilities-dependencies@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:cb0f80c194e9b752416cdf5d74207c79cc56d8c6adb9723b113b32f6aa03d45a",
+						"digest": "sha256:6352bd71c1f525ef693fb5f64ac602819ddf96d3fa60e51a4188199ced7404c5",
+						"path": "<output-root>/run-1/composed/l9.compose_capabilities-dependencies_1_l9.projection_capabilities-dependencies_1.composed.json",
+						"receipt_digest": "sha256:45e0f66bda2786e9114585394caca97b3ea5f79c809409a524ff2dd86bf935de",
+						"receipt_path": "<output-root>/run-1/receipts/88b8b04f4875291d08cc65d68453b59f81abd71bef094de724c89984738579d7.json",
+						"ref": "l9.compose/capabilities-dependencies@1#l9.projection/capabilities-dependencies@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"composes": "l9.projection/capabilities-dependencies@1",
+				"exit": 0,
+				"result": "pass"
+			},
+			"l9.compose/contracts-conformance@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:f16b7fdc1c91e195d51b7366e9003d8da4c75e5c7ae6f973df9a7d598ca7a7a3",
+						"digest": "sha256:19394cef09df860be467591b59cffe152b44e3d603f5264fde0c80845df522ff",
+						"path": "<output-root>/run-1/composed/l9.compose_contracts-conformance_1_l9.projection_contracts-conformance_1.composed.json",
+						"receipt_digest": "sha256:c927d32656aeece38cf2123769eb4a4da61292ce3d15055ddcb603fd734720d2",
+						"receipt_path": "<output-root>/run-1/receipts/3afbef1d11c5f399edc4720e044b40efff7e7a20f7b14adf08227b826b31f916.json",
+						"ref": "l9.compose/contracts-conformance@1#l9.projection/contracts-conformance@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"composes": "l9.projection/contracts-conformance@1",
+				"exit": 0,
+				"result": "pass"
+			},
+			"l9.compose/evidence-provenance@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:6e2d9c0a0f77602dc9fc47b80f45f260caca2ebb765f569597f587369b955cd5",
+						"digest": "sha256:ebefe2969be1d460096c2ac02a5e43ce4e27c5346614c4b406134cb6af9dc217",
+						"path": "<output-root>/run-1/composed/l9.compose_evidence-provenance_1_l9.projection_evidence-provenance_1.composed.json",
+						"receipt_digest": "sha256:d99ff8a4dc28fba484ab15d324b3ad03409c5d68ebfbbb867ef0812fc74560d8",
+						"receipt_path": "<output-root>/run-1/receipts/f376f11329b394ced3a03fec19afe28e7886c1ae1ccdde2a292b3e3c0ce04702.json",
+						"ref": "l9.compose/evidence-provenance@1#l9.projection/evidence-provenance@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"composes": "l9.projection/evidence-provenance@1",
+				"exit": 0,
+				"result": "pass"
+			},
+			"l9.compose/governance@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:e0bb552346cb5643ff619d0f5aff9ef3341763414d256966331983af787dbf07",
+						"digest": "sha256:1b6ec60fdd9e3a9999941f3396873fcfcdf94b8d4028b6fe730011311b9d8754",
+						"path": "<output-root>/run-1/composed/l9.compose_governance_1_l9.projection_governance_1.composed.json",
+						"receipt_digest": "sha256:b6739f603b593f21ad647f38ff1d8beb0fa912c601780eb63ce2c3f39bec17b8",
+						"receipt_path": "<output-root>/run-1/receipts/f0e56914e37b9c462b8dea1c2f9828fde9d1889654d124a49efab7e8d1995240.json",
+						"ref": "l9.compose/governance@1#l9.projection/governance@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"composes": "l9.projection/governance@1",
+				"exit": 0,
+				"result": "pass"
+			},
+			"l9.compose/identity-attribution@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:57aa7b06a96af2d8a099c5d39a6c9a3e919b78f0aec7f479a837724e6bed731d",
+						"digest": "sha256:1c0835f770d41ed67bd74f876ea8d9b4c881964fd885158896347e2122f783ef",
+						"path": "<output-root>/run-1/composed/l9.compose_identity-attribution_1_l9.projection_identity-attribution_1.composed.json",
+						"receipt_digest": "sha256:b47e7a0de341bae3a4ba22e8b7c26116ba4486d7a2f9e7e061906a37c4a41e8d",
+						"receipt_path": "<output-root>/run-1/receipts/8470332ed0f866c29140f5286a7045a445258c48ef2734009cdc861344c41fba.json",
+						"ref": "l9.compose/identity-attribution@1#l9.projection/identity-attribution@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"composes": "l9.projection/identity-attribution@1",
+				"exit": 0,
+				"result": "pass"
+			},
+			"l9.compose/signals@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:472e68c1d37bb99c906c669dab3371fd6740d5c8bc5ca5d2c8f7ee2f6470d44e",
+						"digest": "sha256:92993e412ac6b599ade968a106fa00d846d65a6011e6b34e2a3c439aaf425f44",
+						"path": "<output-root>/run-1/composed/l9.compose_signals_1_l9.projection_signals_1.composed.json",
+						"receipt_digest": "sha256:9f83b5cd1cef5e9b58e115e08d894528f0b5ae1ddb01325cf849fca82e5dcf95",
+						"receipt_path": "<output-root>/run-1/receipts/1f239294bbbf447b16efbb0def8257ac1deaaa3bc100858bff8c695856413916.json",
+						"ref": "l9.compose/signals@1#l9.projection/signals@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"composes": "l9.projection/signals@1",
+				"exit": 0,
+				"result": "pass"
+			},
+			"l9.compose/strategic-value@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:384a48c3efe663027a66e2f2ea3cf1eb390a31427ba9572bd54a886b4706bdc0",
+						"digest": "sha256:529d58f49e69d385e986aada59230720b650ce769302b29a2da274cc0d81127f",
+						"path": "<output-root>/run-1/composed/l9.compose_strategic-value_1_l9.projection_strategic-value_1.composed.json",
+						"receipt_digest": "sha256:94da608fdd3a8b068e6e7cf5a64c8a4741f27c4f435447f9c6193663646d40fa",
+						"receipt_path": "<output-root>/run-1/receipts/78a68a8772d481b194e6e24e8446c398ca03669cbefb18b3a4a40524a0abae92.json",
+						"ref": "l9.compose/strategic-value@1#l9.projection/strategic-value@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"composes": "l9.projection/strategic-value@1",
+				"exit": 0,
+				"result": "pass"
+			}
+		},
+		"deterministic_replay": {
+			"differing": [],
+			"files": 94,
+			"only_in_first": [],
+			"only_in_second": [],
+			"status": "pass"
+		},
+		"projections": {
+			"l9.projection/architecture@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:7ae8432088570a799ab1c0d2c556f3f98e0a1071e89463078f1ed79421a41ca3",
+						"digest": "sha256:2c9632157c332bfca20a53b3222da5b6a86df084c7b66a90fbbc0040812d8c07",
+						"path": "<output-root>/run-1/l9.projection_architecture_1/l9.source_architecture-patterns_1.projection.json",
+						"receipt_digest": "sha256:80f2b8cdd14f6da5b0670613701f0c81ca40ab8fb6cdcd375db044bb9b1d8473",
+						"receipt_path": "<output-root>/run-1/receipts/9cc13d8a029033af00738f39cdaa184e913ef5f46d21408baf9072e02f87e549.json",
+						"ref": "l9.projection/architecture@1#l9.source/architecture-patterns@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:252f5d13737fab02ec87d36ca8621de60df6adc2efca282c4ec9faf5f0d6a3e1",
+						"digest": "sha256:c3380fc606b84635930cdef0603275ed4fb2c7ff3220dce3ce75dd1877621c0c",
+						"path": "<output-root>/run-1/l9.projection_architecture_1/l9.source_architecture-rules_1.projection.json",
+						"receipt_digest": "sha256:9b47cf635ae72cd5e347f8c10c95b1428ea6eea8e9823e6b69724997de63a2fb",
+						"receipt_path": "<output-root>/run-1/receipts/baaae6a5c632f2d66ee659f0b906fb300535fcefa15bdc4392f13f638729432b.json",
+						"ref": "l9.projection/architecture@1#l9.source/architecture-rules@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:eac775bc75544f43aa8ea42823bee9ebd5192d6a12f269b740b9b9531a6cc27e",
+						"digest": "sha256:bfb15a6ae6029fce79d834159be043afad5582a0a8c9b4dc674d07bd7d48edf0",
+						"path": "<output-root>/run-1/l9.projection_architecture_1/l9.source_product-topology-schema_1.projection.json",
+						"receipt_digest": "sha256:35ef50e5ba8cdca44219d0d6f0d35bfc9be5cea287eeb7bf8994b6a38567ba96",
+						"receipt_path": "<output-root>/run-1/receipts/b84b236e0007a8f1ff050f1fd9ef8fd69ee5de77070f846b9991ef5a91d0a0f6.json",
+						"ref": "l9.projection/architecture@1#l9.source/product-topology-schema@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:5c9e6d91083b29b36865d34bfd93a2367e5047f38c7716e12e5f740eafcf7fa9",
+						"digest": "sha256:a5e4d123280d9ffc590d93ca08e8a6b2c1d0ce50a2802fe3333b2ea8ceb167ee",
+						"path": "<output-root>/run-1/l9.projection_architecture_1/l9.source_product-kinds_1.projection.json",
+						"receipt_digest": "sha256:7114898a8c3b7cfc7fb7b8dab2b85ad343a84805ac1e2c2d987a3e3b11ab0b40",
+						"receipt_path": "<output-root>/run-1/receipts/a9fbb553aa51dd4594ae7a2e0efec6416d965306114bb1c70e4670ab09c2002a.json",
+						"ref": "l9.projection/architecture@1#l9.source/product-kinds@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:3739a3df4700790d6d937db118a1cdb130e51f6990115eb1f5eeac3b39734a58",
+						"digest": "sha256:545a8aa226925468572f2bedcc49c91a9fce6a1a8d0050432ad494dafe2f132d",
+						"path": "<output-root>/run-1/l9.projection_architecture_1/l9.source_node-archetypes_1.projection.json",
+						"receipt_digest": "sha256:7066972f4b03dd2836a8d7c85d05aba5a9e4482514affbc0a7f37c036354d889",
+						"receipt_path": "<output-root>/run-1/receipts/f9ef5beabfe4c7e9876f481ab1ca7a46ead7fa6c3b2be8d9b5249f73a9ea4934.json",
+						"ref": "l9.projection/architecture@1#l9.source/node-archetypes@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:2865f09f311acccca990aeb68421ab9aaee50441ce890966d457fa4d309448d0",
+						"digest": "sha256:b4c5624d3dca5c4aff5d895c426b1969088c91f3479581e1692d591ecf315a7d",
+						"path": "<output-root>/run-1/l9.projection_architecture_1/l9.source_dependency-archetypes_1.projection.json",
+						"receipt_digest": "sha256:0ba0658a2ea1cb656b39b54bfbd711847638f43abe9487de5cc93cca579d9612",
+						"receipt_path": "<output-root>/run-1/receipts/b6e9bfe92fa90d20aca7d9dd3f05cac4c872ed629a981e8150c8ffed700dfb51.json",
+						"ref": "l9.projection/architecture@1#l9.source/dependency-archetypes@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:d949076dfa31cc9823b94ef8bfd2b005ecdc3d2fbf4bcbdb8accb1e5f2396427",
+						"digest": "sha256:4cc00fc35dfdde3ade3f1521c9411472b2561fd48ff76a35c22b30e7d47c6cad",
+						"path": "<output-root>/run-1/l9.projection_architecture_1/l9.source_port-catalog_1.projection.json",
+						"receipt_digest": "sha256:da0502916f051dbea76caddf26b445dda29aa909e1aad64b4aaa776023775da2",
+						"receipt_path": "<output-root>/run-1/receipts/b46f01d31599bbbec38aede91802ff4a52915e1d6ec25b315574e72dc112af1f.json",
+						"ref": "l9.projection/architecture@1#l9.source/port-catalog@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:6f48af7fb720b6ca54d27a2307d6cff4a314bd4e512acc8016db42ad0cdad078",
+						"digest": "sha256:f690e2b74cee6021cbb1485a9e9d60d63840e68d0076f3c6787dfcb25b79201e",
+						"path": "<output-root>/run-1/l9.projection_architecture_1/l9.source_invariants_1.projection.json",
+						"receipt_digest": "sha256:4ee188fbe8f778a503b30e07e5b108738d07f4c415d758ed3ff1f503805cceb6",
+						"receipt_path": "<output-root>/run-1/receipts/30e93f1f0e6257d80c97d43fc419ebc96041f760151bee256849ce4e22207221.json",
+						"ref": "l9.projection/architecture@1#l9.source/invariants@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"covers_pinned_sources": true,
+				"exit": 0,
+				"pins": {
+					"authority": {
+						"repository": "Quantum-L9/.github",
+						"revision": "0b46944911bda80ba375f448a7513630216b5d89"
+					},
+					"projection_profile": {
+						"digest": "sha256:136dbe9d7e87e3ea4d8bae8a2ce9046880c820eab30c80ca8d81994028531c2a",
+						"ref": "l9.projection/architecture@1"
+					},
+					"sources": [
+						{
+							"digest": "sha256:c4adbeff6e953404aaafe275a13a387e9fdd0d9bd8dbe3adfa46af88cfe2a323",
+							"ref": "l9.source/architecture-patterns@1"
+						},
+						{
+							"digest": "sha256:7026597235f9a5ba168f325f92fcdb7f00c495cd04ce364ca4d70f4c51ccacbe",
+							"ref": "l9.source/architecture-rules@1"
+						},
+						{
+							"digest": "sha256:a2510f4fc80b755d25b66c08f0d723e2f14b65966d6689b8b426ea23e5c3abf4",
+							"ref": "l9.source/product-topology-schema@1"
+						},
+						{
+							"digest": "sha256:294ae7a47b93619bd655619874d962b244e5c027eb6dd31ea508c53d129ace13",
+							"ref": "l9.source/product-kinds@1"
+						},
+						{
+							"digest": "sha256:57bb49405e9b888ad5bcfbc3d580755fb7c330e45983bb99821113bf930132bc",
+							"ref": "l9.source/node-archetypes@1"
+						},
+						{
+							"digest": "sha256:31d846c51c4f83c87c3ce697e720e73921d108a1946ed81e121f7bfa61e0a8d7",
+							"ref": "l9.source/dependency-archetypes@1"
+						},
+						{
+							"digest": "sha256:f53354d355b2d1f5a2e69fb80a30eccb4e73fa8bacaea43071f12a0270a07098",
+							"ref": "l9.source/port-catalog@1"
+						},
+						{
+							"digest": "sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219",
+							"ref": "l9.source/invariants@1"
+						}
+					]
+				},
+				"result": "pass"
+			},
+			"l9.projection/capabilities-dependencies@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:93fdd4f1ddfd97d69d6fe6b013107963d834b070cef3e79155e0c3fac84d1dfd",
+						"digest": "sha256:1e737f890501fbd75c4605811a09949dc64cf0c52780ac4ea4b9a78fd9385743",
+						"path": "<output-root>/run-1/l9.projection_capabilities-dependencies_1/l9.source_capabilities_1.projection.json",
+						"receipt_digest": "sha256:c3dc124499be0e492f71bb52495ae6f305b7cd60b96cf725f18e42f533ed7a2e",
+						"receipt_path": "<output-root>/run-1/receipts/f28d52895531e0c815ab7bfa2d86688c1223757a7922d4c2023b60b50a65f8b9.json",
+						"ref": "l9.projection/capabilities-dependencies@1#l9.source/capabilities@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:477303cba5963dbefba9e2eb1d730ca1b2c4b92402392da686a4910086bdcf46",
+						"digest": "sha256:d265a903045de6f59d84239a9817054971ed81f32039c12cc762b5dbb8823a51",
+						"path": "<output-root>/run-1/l9.projection_capabilities-dependencies_1/l9.source_capability-resolution_1.projection.json",
+						"receipt_digest": "sha256:c7302ea629a0f521003ea376df7c3f3423d0affb5de09b83f0484b52ce8aaa6d",
+						"receipt_path": "<output-root>/run-1/receipts/4a7678557f5e407e8a6e0bd0c49a9e9f6478d8ec2d4ca865ea4d07b2265f1084.json",
+						"ref": "l9.projection/capabilities-dependencies@1#l9.source/capability-resolution@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:dc537dc360e6c3ab5662b8b45b74ed2134e9f25a9e762a94b418cfa691b55cd5",
+						"digest": "sha256:c31d74f86083399c345a1a3662dce7351c4d4775a6951b22e46c7126ac239bc3",
+						"path": "<output-root>/run-1/l9.projection_capabilities-dependencies_1/l9.source_semantic-dependency-model_1.projection.json",
+						"receipt_digest": "sha256:3a7383a71a978a649182b65b341960777a258de9a5504124e09b4c14d4bf34f4",
+						"receipt_path": "<output-root>/run-1/receipts/2b868810828e60ed4357687638c4a3ee4635348433e95b8c309f39efe919fdf4.json",
+						"ref": "l9.projection/capabilities-dependencies@1#l9.source/semantic-dependency-model@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:7b12272ac300a05d72c948bf2d43135b8c7a70655c56aca0cc5b27defa49f32e",
+						"digest": "sha256:6cb66a6e557a568f55de2862c06eb079b70773a0f05ebb1d7053c9c851220497",
+						"path": "<output-root>/run-1/l9.projection_capabilities-dependencies_1/l9.source_dependency-archetypes_1.projection.json",
+						"receipt_digest": "sha256:efa52972e94792a53d15fa2ac33b02a7671eb33a03a3354c2c6166dfb2a1cbcc",
+						"receipt_path": "<output-root>/run-1/receipts/e3a187025946b900ed8c2928f19b1283af52e195119e81675003061902e3976c.json",
+						"ref": "l9.projection/capabilities-dependencies@1#l9.source/dependency-archetypes@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:d5ac419930e7a58e89d23425b30903063558a9aed0632d7adf26be7c48ed68df",
+						"digest": "sha256:506a2cd514646f1ed915d406cd8782d412a3ecb8cf777475bf4079857163fadf",
+						"path": "<output-root>/run-1/l9.projection_capabilities-dependencies_1/l9.source_invariants_1.projection.json",
+						"receipt_digest": "sha256:f9ab1cd0227bf515b85552885153f53e48441322c9f0eeb802ea07b85aaa4c5e",
+						"receipt_path": "<output-root>/run-1/receipts/0d9a8774a0abdfed6a95730c2930192cc6051c17e2053d01e4373d342c1d35f1.json",
+						"ref": "l9.projection/capabilities-dependencies@1#l9.source/invariants@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:ad6ec3c913f38cfd4d987c2eeb702d963c18c2dcb06c794c6c22558604757bb2",
+						"digest": "sha256:1184c1f4588efd24eeec7f25ca3d9c9fcca2bda678591e81e526d0780e69b9e0",
+						"path": "<output-root>/run-1/l9.projection_capabilities-dependencies_1/l9.source_contracts_1.projection.json",
+						"receipt_digest": "sha256:14c8b36707842226f7f5f58d85ab77b1cfd155cf5aba0b70964a9a21cf89a809",
+						"receipt_path": "<output-root>/run-1/receipts/bb49c40f8906087941a66e09533fbdcb3a2e809ae735e5747818a426de19ee5e.json",
+						"ref": "l9.projection/capabilities-dependencies@1#l9.source/contracts@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"covers_pinned_sources": true,
+				"exit": 0,
+				"pins": {
+					"authority": {
+						"repository": "Quantum-L9/.github",
+						"revision": "0b46944911bda80ba375f448a7513630216b5d89"
+					},
+					"projection_profile": {
+						"digest": "sha256:e17c474013e3a3a150c4eac3b67ed4f5118274e1fe599cb78655c081040e3302",
+						"ref": "l9.projection/capabilities-dependencies@1"
+					},
+					"sources": [
+						{
+							"digest": "sha256:fe39a6b1e0a7dd17bcf917f3cdeed9425273e3e70a9a684fd9796fd2f4f8c5b3",
+							"ref": "l9.source/capabilities@1"
+						},
+						{
+							"digest": "sha256:7063ca77d6fa9253cd1a71839f50960d2109d6afb32dda1c609b057008e36954",
+							"ref": "l9.source/capability-resolution@1"
+						},
+						{
+							"digest": "sha256:b6204c0128ba0493c6e70dfd6976fd409efdc6e8a68b70fac8ea9226833fcf9c",
+							"ref": "l9.source/semantic-dependency-model@1"
+						},
+						{
+							"digest": "sha256:31d846c51c4f83c87c3ce697e720e73921d108a1946ed81e121f7bfa61e0a8d7",
+							"ref": "l9.source/dependency-archetypes@1"
+						},
+						{
+							"digest": "sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219",
+							"ref": "l9.source/invariants@1"
+						},
+						{
+							"digest": "sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993",
+							"ref": "l9.source/contracts@1"
+						}
+					]
+				},
+				"result": "pass"
+			},
+			"l9.projection/contracts-conformance@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:5b9b41635e48f48b12abdf7ab9f188f0c9bc09585736e12c29fa9f83987c7c74",
+						"digest": "sha256:f2fc2fe2c5c747a38d48783dfd6948d253fcfead35c5a71373d5b083ac10423c",
+						"path": "<output-root>/run-1/l9.projection_contracts-conformance_1/l9.source_conformance-model_1.projection.json",
+						"receipt_digest": "sha256:2d0176f3e273fd950d6cf5673a490913d0fc49c69c6307c8cc6c01b311afe5b7",
+						"receipt_path": "<output-root>/run-1/receipts/035a6d2bb12291581354556dccf81cab5054be9c51374accfd9f9ee85d5b1fc8.json",
+						"ref": "l9.projection/contracts-conformance@1#l9.source/conformance-model@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:f25b0d62e8c124d64720451bd1b30a1cbdcdcb4058d8c7d306ebbee10475c5f9",
+						"digest": "sha256:71e6ae42a94c6f6a0d081595f961cfbd952afbde0ae7e5c1c15538a1b19035fc",
+						"path": "<output-root>/run-1/l9.projection_contracts-conformance_1/l9.source_requirement-model_1.projection.json",
+						"receipt_digest": "sha256:1233c2a07c422c8755c66befb2f011f4d0eeea6b5d28f48b4321345429a8e259",
+						"receipt_path": "<output-root>/run-1/receipts/0e2de072f1803bb1b4a0bd2e4442091c6e65b427617e6cead86c4f1d1a29a0f7.json",
+						"ref": "l9.projection/contracts-conformance@1#l9.source/requirement-model@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:01071c4ef955dce8ce78b6b6a2b40d52a2581e63ccebc8ab7073a31f7e239158",
+						"digest": "sha256:bde31acf332b0266eedcff8c7e2206c3ef77f1bd6f41d9d1dfd87737e08397d9",
+						"path": "<output-root>/run-1/l9.projection_contracts-conformance_1/l9.source_resolution-model_1.projection.json",
+						"receipt_digest": "sha256:8c51c5666ae76860cfbcbf0c0e09163f7b94630b80676f165c33b04d4205ff54",
+						"receipt_path": "<output-root>/run-1/receipts/f0a721da6edecda8be62e8deee424e5f3d279b183c479e557e19c2c4ae1c36a9.json",
+						"ref": "l9.projection/contracts-conformance@1#l9.source/resolution-model@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:314382adfc66fa8a5059f550fdb142669eca15c184bd619cf437605e24396f37",
+						"digest": "sha256:bd2e0c617a6b2dd5437cb5e198edea428d2257fa010b1dbb64c05612d12eb3d7",
+						"path": "<output-root>/run-1/l9.projection_contracts-conformance_1/l9.source_invariants_1.projection.json",
+						"receipt_digest": "sha256:24b09bebd8e6036d0ee0e854d288d39fa816d1b09c129433302925f6176fd514",
+						"receipt_path": "<output-root>/run-1/receipts/3cf9d2a28b660242d416a6eb884baf61117bf63d08ab719e30871b7f0942c6b3.json",
+						"ref": "l9.projection/contracts-conformance@1#l9.source/invariants@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:ba396436767f0f1d4cd91b8f3f6ba1c57bdc0bb3517659adc69b31e13455256e",
+						"digest": "sha256:55f9bf82f0a0f164444501b57973626182befd660a9fa72b8feff6c8429ee7c1",
+						"path": "<output-root>/run-1/l9.projection_contracts-conformance_1/l9.source_contracts_1.projection.json",
+						"receipt_digest": "sha256:081f332305c1e6fa9ddb3b550cedb999054427bd722a0177348aef9d88069cb4",
+						"receipt_path": "<output-root>/run-1/receipts/d35e88a4a4d07dd726dbcdbe9c9d660bf5901e0e358582613ccb1f6c03d34cc6.json",
+						"ref": "l9.projection/contracts-conformance@1#l9.source/contracts@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"covers_pinned_sources": true,
+				"exit": 0,
+				"pins": {
+					"authority": {
+						"repository": "Quantum-L9/.github",
+						"revision": "0b46944911bda80ba375f448a7513630216b5d89"
+					},
+					"projection_profile": {
+						"digest": "sha256:b94e40e8e76cc9b7db97d5a1c15e9e64d090d9ba7869638796a85cd954a5d312",
+						"ref": "l9.projection/contracts-conformance@1"
+					},
+					"sources": [
+						{
+							"digest": "sha256:e777a3cb7b8d94e044934d4778045d697bcdd85ecb2ebe241e95fe60bd7141c5",
+							"ref": "l9.source/conformance-model@1"
+						},
+						{
+							"digest": "sha256:7865723e78b7f02817db9d5f54aedb1350cb08b45d42759c8bdafeba1320c7c2",
+							"ref": "l9.source/requirement-model@1"
+						},
+						{
+							"digest": "sha256:3c0636b0eaca00789d6ced5425fb1c3a314319dd00525dd5f811f38f81c365fc",
+							"ref": "l9.source/resolution-model@1"
+						},
+						{
+							"digest": "sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219",
+							"ref": "l9.source/invariants@1"
+						},
+						{
+							"digest": "sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993",
+							"ref": "l9.source/contracts@1"
+						}
+					]
+				},
+				"result": "pass"
+			},
+			"l9.projection/evidence-provenance@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:18c98e2ede639a78827409d4b22416ef05b7c9c63c1ec64ba4f33a0ddd596013",
+						"digest": "sha256:597ff3a590bb795ac38daec8867c51e30de6714794be4ced173a4e15bd3f3d8f",
+						"path": "<output-root>/run-1/l9.projection_evidence-provenance_1/l9.source_receipt-catalog_1.projection.json",
+						"receipt_digest": "sha256:b9f5a8638a2f2e0b887ccf823594eb0994269f6a13ada8cb0bba6df6439ec929",
+						"receipt_path": "<output-root>/run-1/receipts/78fccbcbb52ae4c27a9d75c9f754d9e63ab969300f742ad5132bb44ee1493b77.json",
+						"ref": "l9.projection/evidence-provenance@1#l9.source/receipt-catalog@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:f884f833418b67249151ee10ddbcf5c282ad1c2838bb96f1d541b91eddd59954",
+						"digest": "sha256:1e56111c93decbfaf646f5e78a14647dfd6303fc515a5b8fcd8bf14b69e03300",
+						"path": "<output-root>/run-1/l9.projection_evidence-provenance_1/l9.source_artifact-model_1.projection.json",
+						"receipt_digest": "sha256:73d5009442816b44f89fb5045556b2dc46e6655534f73ee4738ee0729ef0541c",
+						"receipt_path": "<output-root>/run-1/receipts/7a9bbf65391a30c0679f3680caa3e5cdd4e7b08cd4c23c12c31676a0bf2b25e6.json",
+						"ref": "l9.projection/evidence-provenance@1#l9.source/artifact-model@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:534035e06775ecdeeb5e4b5340179c7e909119cd6e02794f7b3ef4338b6b93e9",
+						"digest": "sha256:8bae26cd7f9051f50e2fa30abfc106eae2e041aadd3f0bafbe90a848450fc9ff",
+						"path": "<output-root>/run-1/l9.projection_evidence-provenance_1/l9.source_semantic-dependency-model_1.projection.json",
+						"receipt_digest": "sha256:50b38ba9206e0154f8629e759bbcc9b137aa67d7d2fd7536217fe867678e81f7",
+						"receipt_path": "<output-root>/run-1/receipts/9cc4550052ff5ed388012510a889632b596c6255f754f2d03f11e44abdb0c0f6.json",
+						"ref": "l9.projection/evidence-provenance@1#l9.source/semantic-dependency-model@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:8dff4f5df18f74847710541e476aea9d49bda9f4cd2b6663c9d50eccdbd0307f",
+						"digest": "sha256:31a9eb936ad428c4899ab052cf6ef9ad4dc9bd47f63bb01c6ba0362746f9d8c9",
+						"path": "<output-root>/run-1/l9.projection_evidence-provenance_1/l9.source_invariants_1.projection.json",
+						"receipt_digest": "sha256:f65299e049cca061670b6d581666b9f564a30902a401fdf76c1eae63031da8d2",
+						"receipt_path": "<output-root>/run-1/receipts/b0694f115e6769466fe1ac10d4d361db324749f40efe6871e1d668972bb45ced.json",
+						"ref": "l9.projection/evidence-provenance@1#l9.source/invariants@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:91d8684e6657d0db84c63a33d6fd91b22a5d9e9303453b4da91fb8c59d0ae49b",
+						"digest": "sha256:badcc468b04c20ae1443913481ac395552d0b5d6d1d6de607947ebc0cd169353",
+						"path": "<output-root>/run-1/l9.projection_evidence-provenance_1/l9.source_contracts_1.projection.json",
+						"receipt_digest": "sha256:85e189a05a09ca0e2d7eed3b1f1667536e6741da01639627fc80946e4fd89a0a",
+						"receipt_path": "<output-root>/run-1/receipts/325691c0065c7d8c2a5f0e5d954a10682841f35ba6264b2b938fd089ba763a4d.json",
+						"ref": "l9.projection/evidence-provenance@1#l9.source/contracts@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"covers_pinned_sources": true,
+				"exit": 0,
+				"pins": {
+					"authority": {
+						"repository": "Quantum-L9/.github",
+						"revision": "0b46944911bda80ba375f448a7513630216b5d89"
+					},
+					"projection_profile": {
+						"digest": "sha256:2719d0b29894950759445ae361831d3de6ec8662a5e91842d51c76cf241d224a",
+						"ref": "l9.projection/evidence-provenance@1"
+					},
+					"sources": [
+						{
+							"digest": "sha256:ec7a06224263cad293b79f1f4f832bffc6b4f8eae4980bf8cbfc01bba8af8ca5",
+							"ref": "l9.source/receipt-catalog@1"
+						},
+						{
+							"digest": "sha256:21f8bb783d7611ae1b3c60474c6ca31f6096f29d7ef0e94ef81f12e6d2defe09",
+							"ref": "l9.source/artifact-model@1"
+						},
+						{
+							"digest": "sha256:b6204c0128ba0493c6e70dfd6976fd409efdc6e8a68b70fac8ea9226833fcf9c",
+							"ref": "l9.source/semantic-dependency-model@1"
+						},
+						{
+							"digest": "sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219",
+							"ref": "l9.source/invariants@1"
+						},
+						{
+							"digest": "sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993",
+							"ref": "l9.source/contracts@1"
+						}
+					]
+				},
+				"result": "pass"
+			},
+			"l9.projection/governance@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:9ac5ba26b58982c88bee80131083628376eb42ed4a9321ae73da0dd31f4500f5",
+						"digest": "sha256:bd0b28a58a4897d5154b61fc2e0b49a389b86f33fbf37cbf7cfc6c4d2c156f76",
+						"path": "<output-root>/run-1/l9.projection_governance_1/l9.source_authority-model_1.projection.json",
+						"receipt_digest": "sha256:8aa1c19b6f4f2c54874f4c9b76fdde3cc0bc4a98d3a89561c62d5df3c3ee4f13",
+						"receipt_path": "<output-root>/run-1/receipts/dafcdac032e0f1ee9a5f1f8eccd4e2a83df194b963a56e46a28019ddfffff080.json",
+						"ref": "l9.projection/governance@1#l9.source/authority-model@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:64ba088b10cccd67b9431f5f3e868fd3dab735a9395827f60ed88938b4788b36",
+						"digest": "sha256:346b9249c090b7c7628d64bdec47c22d87c94a15c384aa454fc12834ccdf0a8d",
+						"path": "<output-root>/run-1/l9.projection_governance_1/l9.source_lifecycle_1.projection.json",
+						"receipt_digest": "sha256:c922c24c49f26f1f8fb7503b4a9946eacb26a245492fb99c10338372c39d349d",
+						"receipt_path": "<output-root>/run-1/receipts/da1325ddc7e7a803ed01daa3830b074289635c3c4a663ad95bab3ae7a462f3df.json",
+						"ref": "l9.projection/governance@1#l9.source/lifecycle@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:3591faa3957e1f10bc9cc47fccb5aae9ffe7c74115578419f2519e377abc24bd",
+						"digest": "sha256:ceef3451ce6364d92b77fc79884c8c3f0567dae4b8d113c2b37759989a6cd513",
+						"path": "<output-root>/run-1/l9.projection_governance_1/l9.source_invariants_1.projection.json",
+						"receipt_digest": "sha256:56d74f22e9f88dd91102f3e4e6c96120b62e24ae2c3296285ec0cd3e067090ef",
+						"receipt_path": "<output-root>/run-1/receipts/af5209c1aef16a98ac71538ae70929ac5cab0ce6af88e020781fb2dd10d0c16f.json",
+						"ref": "l9.projection/governance@1#l9.source/invariants@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:f3c1617753496bfa1570d46099be64dc0596dc4ba29e192d9fbe03c6d2075c8f",
+						"digest": "sha256:c017e0514a5ea046c4b98c28fdeba2d6fd53c59d370d4d0f41e9398591486c6f",
+						"path": "<output-root>/run-1/l9.projection_governance_1/l9.source_contracts_1.projection.json",
+						"receipt_digest": "sha256:ce40ca20e7bbe5f781e4396ef6ed802f23bf832b3dd18a5d511bbb7922a045c0",
+						"receipt_path": "<output-root>/run-1/receipts/8e1094efe7f053afefb82e76c1633d1744cd75131b2d23176fb52e9a7135f7dd.json",
+						"ref": "l9.projection/governance@1#l9.source/contracts@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"covers_pinned_sources": true,
+				"exit": 0,
+				"pins": {
+					"authority": {
+						"repository": "Quantum-L9/.github",
+						"revision": "0b46944911bda80ba375f448a7513630216b5d89"
+					},
+					"projection_profile": {
+						"digest": "sha256:e3867848e5846d41c332fc6bcc8b404cba53c73167615d9df057b0f97d87dc2d",
+						"ref": "l9.projection/governance@1"
+					},
+					"sources": [
+						{
+							"digest": "sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620",
+							"ref": "l9.source/authority-model@1"
+						},
+						{
+							"digest": "sha256:3463c5f44376bf566347008419becc900a761dd77d99691e983afc49c2f7231c",
+							"ref": "l9.source/lifecycle@1"
+						},
+						{
+							"digest": "sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219",
+							"ref": "l9.source/invariants@1"
+						},
+						{
+							"digest": "sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993",
+							"ref": "l9.source/contracts@1"
+						}
+					]
+				},
+				"result": "pass"
+			},
+			"l9.projection/identity-attribution@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:0e58d6dd3ec7a44ae2b21b0218e461afc101dee52dd2f228f9042f0487bb1152",
+						"digest": "sha256:c5d478faf07131ae5ee16de61a815052105214633cd790145837ac8d150218fe",
+						"path": "<output-root>/run-1/l9.projection_identity-attribution_1/l9.source_identity-model_1.projection.json",
+						"receipt_digest": "sha256:c90a899f08919ed9a9ae3b8c06c3e27a0efc040eeaeb9baf1826cee19873b46e",
+						"receipt_path": "<output-root>/run-1/receipts/29d2659ad42ce41d2d75452fd4a9e18b5d76e5a2d35c5a0563ed8f7a5a93588b.json",
+						"ref": "l9.projection/identity-attribution@1#l9.source/identity-model@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:89c909dba477fc151362c9176ec533d68b6c2e44ace7700205a1d4ed2987ad08",
+						"digest": "sha256:1a57bbcfcf74e2644553cecf5a90d0dbae41f357493021450116cf301a03fd5c",
+						"path": "<output-root>/run-1/l9.projection_identity-attribution_1/l9.source_actor-registry_1.projection.json",
+						"receipt_digest": "sha256:ff610260255faf744427f98fa84a38730b03a4a55f540c16c331a178bcba56a0",
+						"receipt_path": "<output-root>/run-1/receipts/9be6e078f51b722c5435db647d3244ccd2d2be353b9a9d0cab3d2d2b2975f0a5.json",
+						"ref": "l9.projection/identity-attribution@1#l9.source/actor-registry@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:09d1cd6437c1d1965e44569bc31888af7e1e66ed7b2456f950be6e947cb90cc3",
+						"digest": "sha256:3dffd61a7d592050a5635e18e0b4ad7d5bf6b37451428f3241309544d5770d9e",
+						"path": "<output-root>/run-1/l9.projection_identity-attribution_1/l9.source_surface-registry_1.projection.json",
+						"receipt_digest": "sha256:39acbde0b5fce3486fb35bdbd932b1609aad61a581b21bafc1adbe1b57776be3",
+						"receipt_path": "<output-root>/run-1/receipts/c31da4a4ff9a81bd9a37a8e2b17706f37619cef7d9e98b48f45917fb7425d8db.json",
+						"ref": "l9.projection/identity-attribution@1#l9.source/surface-registry@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:14e5e9cca310ce42b85f4b4aeeabbd5b0eafe4b3db9a59f289d37c5d5c8e01e1",
+						"digest": "sha256:791ba42b07721c8038e7350be326a0719c08595a492aa50a6eac3d09756d200b",
+						"path": "<output-root>/run-1/l9.projection_identity-attribution_1/l9.source_invariants_1.projection.json",
+						"receipt_digest": "sha256:f66cdd7052f2cda47c57ac3e591d15fde2a7d0f79ad864237577a607b4cce606",
+						"receipt_path": "<output-root>/run-1/receipts/6c78c0c479ec00c6200ed4686cfa2ddf85638d03041d3c2487d038794de90a86.json",
+						"ref": "l9.projection/identity-attribution@1#l9.source/invariants@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:92b851e4faa6aea8f172700e6c816eb8d265505b91038cdff00477dddd5531f6",
+						"digest": "sha256:929fad4e4a7199b01c3ef19c7664d06bdbb464e95b1e8ee1df0c789eda069241",
+						"path": "<output-root>/run-1/l9.projection_identity-attribution_1/l9.source_contracts_1.projection.json",
+						"receipt_digest": "sha256:26d7aec0cfe0f1b539ee0cbd816eed49bdc47273b0ffd3deb732056e962c7695",
+						"receipt_path": "<output-root>/run-1/receipts/58e4b9775e0102f971957c705be6584d5db1b4f54c97b6796e4eb0c107bcab4a.json",
+						"ref": "l9.projection/identity-attribution@1#l9.source/contracts@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"covers_pinned_sources": true,
+				"exit": 0,
+				"pins": {
+					"authority": {
+						"repository": "Quantum-L9/.github",
+						"revision": "0b46944911bda80ba375f448a7513630216b5d89"
+					},
+					"projection_profile": {
+						"digest": "sha256:062a28729209c9857cf70f3068ea6d565bb1ce54c765ace52b92afaa5d09e5b6",
+						"ref": "l9.projection/identity-attribution@1"
+					},
+					"sources": [
+						{
+							"digest": "sha256:b9245eca99501a38976e909e1d151942c1253b2eee2bd6bab9c6382687db4288",
+							"ref": "l9.source/identity-model@1"
+						},
+						{
+							"digest": "sha256:34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f",
+							"ref": "l9.source/actor-registry@1"
+						},
+						{
+							"digest": "sha256:d7200409ff02141a274ff8c9221d31429f6a6fae27539e6d9c8d20f1a6eba988",
+							"ref": "l9.source/surface-registry@1"
+						},
+						{
+							"digest": "sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219",
+							"ref": "l9.source/invariants@1"
+						},
+						{
+							"digest": "sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993",
+							"ref": "l9.source/contracts@1"
+						}
+					]
+				},
+				"result": "pass"
+			},
+			"l9.projection/signals@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:c8556691d8f9b77c59a969334a20163ab6cd24ab284645f9ab3cf8d57b26b066",
+						"digest": "sha256:4859d19e94099c8e66ff8a63871d4bf25bb8ace22405729c12cd754c2049b3c7",
+						"path": "<output-root>/run-1/l9.projection_signals_1/l9.source_vocabulary_1.projection.json",
+						"receipt_digest": "sha256:2d069df793b774c52ba5e9789c802f6ca61d53adb7b152cb37e4309e11e5ee7b",
+						"receipt_path": "<output-root>/run-1/receipts/06ba471353dd7249956838de9c632607889f62e8b092c49c56d3be41e92f4ddf.json",
+						"ref": "l9.projection/signals@1#l9.source/vocabulary@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:5ee40759b9e42a41a28486cae8aded331f1b7a78308dfdea4c9f0ed2a3e6ad31",
+						"digest": "sha256:92467dbb21451ec500c7d9126d560688d85ffad44bc8e147d0f594973496b37b",
+						"path": "<output-root>/run-1/l9.projection_signals_1/l9.source_invariants_1.projection.json",
+						"receipt_digest": "sha256:d7e9c4579bf3b79385613be10b5076907e9f2c4ed4bb705499032085cedba4d4",
+						"receipt_path": "<output-root>/run-1/receipts/3bfde955b28acb7c4370db63388ffda7555e7d0f05cee1962c8ae2d02b0b8cc1.json",
+						"ref": "l9.projection/signals@1#l9.source/invariants@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"covers_pinned_sources": true,
+				"exit": 0,
+				"pins": {
+					"authority": {
+						"repository": "Quantum-L9/.github",
+						"revision": "0b46944911bda80ba375f448a7513630216b5d89"
+					},
+					"projection_profile": {
+						"digest": "sha256:bf19a48c6d7c70dfedf9d295e6f88e43f7a80a255212a2bae4b109a371bce843",
+						"ref": "l9.projection/signals@1"
+					},
+					"sources": [
+						{
+							"digest": "sha256:76e24f641e9161fb7441ca46e5751c2e01ca152c3ea18c84e960b84271765d31",
+							"ref": "l9.source/vocabulary@1"
+						},
+						{
+							"digest": "sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219",
+							"ref": "l9.source/invariants@1"
+						}
+					]
+				},
+				"result": "pass"
+			},
+			"l9.projection/strategic-value@1": {
+				"artifacts": [
+					{
+						"content_digest": "sha256:a1a2effdce02353025112506ed67887da021ab94a3f867ee6a2341b4e0ea6955",
+						"digest": "sha256:a67a9b2360e781d08f59cde47272b072c45a91b929a956fec71c3e2e1d196135",
+						"path": "<output-root>/run-1/l9.projection_strategic-value_1/l9.source_strategic-value-model_1.projection.json",
+						"receipt_digest": "sha256:06d3a2037c43e0397df2e6d310c570f7affebf49f6354de1ee4053b3292318db",
+						"receipt_path": "<output-root>/run-1/receipts/23bda4ed9dab4adc69784241850f16a41f4c653d71cf268fb0ef3a2af3bd9094.json",
+						"ref": "l9.projection/strategic-value@1#l9.source/strategic-value-model@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:7ae5b4aa0fe29bbc582ca5f90d20c5a35d29ed793b0a263c2534feddc7b0b3bc",
+						"digest": "sha256:2c876b24a03ec180318aa8daf43bb9c80c5bfdabf4b7b1eca664494b88dba7ce",
+						"path": "<output-root>/run-1/l9.projection_strategic-value_1/l9.source_vocabulary_1.projection.json",
+						"receipt_digest": "sha256:46c3ca923a1fdc58f2e78f26f7197a3e889fc8d9f9a579a154bdbcfd410849a1",
+						"receipt_path": "<output-root>/run-1/receipts/48756cf16c7fea0beae92b109142f9920781a959237214b349f5f529ad67e8fe.json",
+						"ref": "l9.projection/strategic-value@1#l9.source/vocabulary@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:875141968fd5d970f3795c85e5a32130d0005e0dc9fc53eb7018567148ac0eeb",
+						"digest": "sha256:3ed989de19dc5660f78e5d99c782bf72e7db611c3e75cbe0092c53da97b8b006",
+						"path": "<output-root>/run-1/l9.projection_strategic-value_1/l9.source_invariants_1.projection.json",
+						"receipt_digest": "sha256:e340933dda43a455df7fcb6e1278e289ece5a24fc4adc7c75ab27c485d731cf0",
+						"receipt_path": "<output-root>/run-1/receipts/222ba29f0e8847bbb69532514588a23b1353b5ab26c38cf2fa2f9c0914a864ba.json",
+						"ref": "l9.projection/strategic-value@1#l9.source/invariants@1",
+						"result": "pass",
+						"unresolved": []
+					},
+					{
+						"content_digest": "sha256:ddbf39a0cc9312e1bb87e729e74ef23996aaea0110369dd5438aa0aec2f88a7e",
+						"digest": "sha256:38bc3345f50b849bffa03675318c867eead36e9346015ce3b1e84bc7c588ba34",
+						"path": "<output-root>/run-1/l9.projection_strategic-value_1/l9.source_contracts_1.projection.json",
+						"receipt_digest": "sha256:698633b38070bc74b1442832d28b079a5d54bcb11a67525997fa7cfba8bf4ee0",
+						"receipt_path": "<output-root>/run-1/receipts/235484e9b4011c212d33971e6f003dc424d7faec9243657fcb47d83ab742286e.json",
+						"ref": "l9.projection/strategic-value@1#l9.source/contracts@1",
+						"result": "pass",
+						"unresolved": []
+					}
+				],
+				"covers_pinned_sources": true,
+				"exit": 0,
+				"pins": {
+					"authority": {
+						"repository": "Quantum-L9/.github",
+						"revision": "0b46944911bda80ba375f448a7513630216b5d89"
+					},
+					"projection_profile": {
+						"digest": "sha256:1c417874bfc3a16648906d01bda3e80040269fab3120738aa29b932c4cc7f1d4",
+						"ref": "l9.projection/strategic-value@1"
+					},
+					"sources": [
+						{
+							"digest": "sha256:28156a3363488861fe18ee1647f5851128402e4cac93dd68319a82dab42efc69",
+							"ref": "l9.source/strategic-value-model@1"
+						},
+						{
+							"digest": "sha256:76e24f641e9161fb7441ca46e5751c2e01ca152c3ea18c84e960b84271765d31",
+							"ref": "l9.source/vocabulary@1"
+						},
+						{
+							"digest": "sha256:dcaf1085b3e38ed66e4884b1146deeced22be9466c6298f5a1621894bd564219",
+							"ref": "l9.source/invariants@1"
+						},
+						{
+							"digest": "sha256:f6af40e106da06f005ca57292cb69f48079df870ed45153565f844691a323993",
+							"ref": "l9.source/contracts@1"
+						}
+					]
+				},
+				"result": "pass"
+			}
+		},
+		"revision": "0b46944911bda80ba375f448a7513630216b5d89",
+		"second_run_status": "pass",
+		"status": "pass",
+		"verification": {
+			"gaps": [],
+			"negative_controls": {
+				"l9.compose/architecture@1: component digest": true,
+				"l9.compose/architecture@1: duplicate component": true,
+				"l9.compose/architecture@1: missing component": true,
+				"l9.compose/architecture@1: namespace payload altered": true,
+				"l9.compose/architecture@1: namespace relabelled": true,
+				"l9.compose/capabilities-dependencies@1: component digest": true,
+				"l9.compose/capabilities-dependencies@1: duplicate component": true,
+				"l9.compose/capabilities-dependencies@1: missing component": true,
+				"l9.compose/capabilities-dependencies@1: namespace payload altered": true,
+				"l9.compose/capabilities-dependencies@1: namespace relabelled": true,
+				"l9.compose/contracts-conformance@1: component digest": true,
+				"l9.compose/contracts-conformance@1: duplicate component": true,
+				"l9.compose/contracts-conformance@1: missing component": true,
+				"l9.compose/contracts-conformance@1: namespace payload altered": true,
+				"l9.compose/contracts-conformance@1: namespace relabelled": true,
+				"l9.compose/evidence-provenance@1: component digest": true,
+				"l9.compose/evidence-provenance@1: duplicate component": true,
+				"l9.compose/evidence-provenance@1: missing component": true,
+				"l9.compose/evidence-provenance@1: namespace payload altered": true,
+				"l9.compose/evidence-provenance@1: namespace relabelled": true,
+				"l9.compose/governance@1: component digest": true,
+				"l9.compose/governance@1: duplicate component": true,
+				"l9.compose/governance@1: missing component": true,
+				"l9.compose/governance@1: namespace payload altered": true,
+				"l9.compose/governance@1: namespace relabelled": true,
+				"l9.compose/identity-attribution@1: component digest": true,
+				"l9.compose/identity-attribution@1: duplicate component": true,
+				"l9.compose/identity-attribution@1: missing component": true,
+				"l9.compose/identity-attribution@1: namespace payload altered": true,
+				"l9.compose/identity-attribution@1: namespace relabelled": true,
+				"l9.compose/signals@1: component digest": true,
+				"l9.compose/signals@1: duplicate component": true,
+				"l9.compose/signals@1: missing component": true,
+				"l9.compose/signals@1: namespace payload altered": true,
+				"l9.compose/signals@1: namespace relabelled": true,
+				"l9.compose/strategic-value@1: component digest": true,
+				"l9.compose/strategic-value@1: duplicate component": true,
+				"l9.compose/strategic-value@1: missing component": true,
+				"l9.compose/strategic-value@1: namespace payload altered": true,
+				"l9.compose/strategic-value@1: namespace relabelled": true,
+				"l9.projection/architecture@1#l9.source/architecture-patterns@1: profile digest": true,
+				"l9.projection/architecture@1#l9.source/architecture-patterns@1: selected record dropped": true,
+				"l9.projection/architecture@1#l9.source/architecture-patterns@1: selected value altered": true,
+				"l9.projection/architecture@1#l9.source/architecture-patterns@1: source digest": true,
+				"l9.projection/architecture@1#l9.source/architecture-patterns@1: unsealed edit": true,
+				"l9.projection/architecture@1#l9.source/architecture-rules@1: profile digest": true,
+				"l9.projection/architecture@1#l9.source/architecture-rules@1: selected record dropped": true,
+				"l9.projection/architecture@1#l9.source/architecture-rules@1: selected value altered": true,
+				"l9.projection/architecture@1#l9.source/architecture-rules@1: source digest": true,
+				"l9.projection/architecture@1#l9.source/architecture-rules@1: unsealed edit": true,
+				"l9.projection/architecture@1#l9.source/dependency-archetypes@1: profile digest": true,
+				"l9.projection/architecture@1#l9.source/dependency-archetypes@1: selected record dropped": true,
+				"l9.projection/architecture@1#l9.source/dependency-archetypes@1: selected value altered": true,
+				"l9.projection/architecture@1#l9.source/dependency-archetypes@1: source digest": true,
+				"l9.projection/architecture@1#l9.source/dependency-archetypes@1: unsealed edit": true,
+				"l9.projection/architecture@1#l9.source/invariants@1: profile digest": true,
+				"l9.projection/architecture@1#l9.source/invariants@1: selected record dropped": true,
+				"l9.projection/architecture@1#l9.source/invariants@1: selected value altered": true,
+				"l9.projection/architecture@1#l9.source/invariants@1: source digest": true,
+				"l9.projection/architecture@1#l9.source/invariants@1: unsealed edit": true,
+				"l9.projection/architecture@1#l9.source/node-archetypes@1: profile digest": true,
+				"l9.projection/architecture@1#l9.source/node-archetypes@1: selected record dropped": true,
+				"l9.projection/architecture@1#l9.source/node-archetypes@1: selected value altered": true,
+				"l9.projection/architecture@1#l9.source/node-archetypes@1: source digest": true,
+				"l9.projection/architecture@1#l9.source/node-archetypes@1: unsealed edit": true,
+				"l9.projection/architecture@1#l9.source/port-catalog@1: profile digest": true,
+				"l9.projection/architecture@1#l9.source/port-catalog@1: selected value altered": true,
+				"l9.projection/architecture@1#l9.source/port-catalog@1: source digest": true,
+				"l9.projection/architecture@1#l9.source/port-catalog@1: unsealed edit": true,
+				"l9.projection/architecture@1#l9.source/product-kinds@1: profile digest": true,
+				"l9.projection/architecture@1#l9.source/product-kinds@1: selected record dropped": true,
+				"l9.projection/architecture@1#l9.source/product-kinds@1: selected value altered": true,
+				"l9.projection/architecture@1#l9.source/product-kinds@1: source digest": true,
+				"l9.projection/architecture@1#l9.source/product-kinds@1: unsealed edit": true,
+				"l9.projection/architecture@1#l9.source/product-topology-schema@1: profile digest": true,
+				"l9.projection/architecture@1#l9.source/product-topology-schema@1: selected record dropped": true,
+				"l9.projection/architecture@1#l9.source/product-topology-schema@1: selected value altered": true,
+				"l9.projection/architecture@1#l9.source/product-topology-schema@1: source digest": true,
+				"l9.projection/architecture@1#l9.source/product-topology-schema@1: unsealed edit": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/capabilities@1: profile digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/capabilities@1: selected value altered": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/capabilities@1: source digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/capabilities@1: unsealed edit": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/capability-resolution@1: profile digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/capability-resolution@1: selected record dropped": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/capability-resolution@1: selected value altered": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/capability-resolution@1: source digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/capability-resolution@1: unsealed edit": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/contracts@1: profile digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/contracts@1: selected record dropped": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/contracts@1: selected value altered": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/contracts@1: source digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/contracts@1: unsealed edit": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/dependency-archetypes@1: profile digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/dependency-archetypes@1: selected record dropped": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/dependency-archetypes@1: selected value altered": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/dependency-archetypes@1: source digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/dependency-archetypes@1: unsealed edit": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/invariants@1: profile digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/invariants@1: selected record dropped": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/invariants@1: selected value altered": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/invariants@1: source digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/invariants@1: unsealed edit": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/semantic-dependency-model@1: profile digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/semantic-dependency-model@1: selected value altered": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/semantic-dependency-model@1: source digest": true,
+				"l9.projection/capabilities-dependencies@1#l9.source/semantic-dependency-model@1: unsealed edit": true,
+				"l9.projection/contracts-conformance@1#l9.source/conformance-model@1: profile digest": true,
+				"l9.projection/contracts-conformance@1#l9.source/conformance-model@1: selected record dropped": true,
+				"l9.projection/contracts-conformance@1#l9.source/conformance-model@1: selected value altered": true,
+				"l9.projection/contracts-conformance@1#l9.source/conformance-model@1: source digest": true,
+				"l9.projection/contracts-conformance@1#l9.source/conformance-model@1: unsealed edit": true,
+				"l9.projection/contracts-conformance@1#l9.source/contracts@1: profile digest": true,
+				"l9.projection/contracts-conformance@1#l9.source/contracts@1: selected record dropped": true,
+				"l9.projection/contracts-conformance@1#l9.source/contracts@1: selected value altered": true,
+				"l9.projection/contracts-conformance@1#l9.source/contracts@1: source digest": true,
+				"l9.projection/contracts-conformance@1#l9.source/contracts@1: unsealed edit": true,
+				"l9.projection/contracts-conformance@1#l9.source/invariants@1: profile digest": true,
+				"l9.projection/contracts-conformance@1#l9.source/invariants@1: selected record dropped": true,
+				"l9.projection/contracts-conformance@1#l9.source/invariants@1: selected value altered": true,
+				"l9.projection/contracts-conformance@1#l9.source/invariants@1: source digest": true,
+				"l9.projection/contracts-conformance@1#l9.source/invariants@1: unsealed edit": true,
+				"l9.projection/contracts-conformance@1#l9.source/requirement-model@1: profile digest": true,
+				"l9.projection/contracts-conformance@1#l9.source/requirement-model@1: selected record dropped": true,
+				"l9.projection/contracts-conformance@1#l9.source/requirement-model@1: selected value altered": true,
+				"l9.projection/contracts-conformance@1#l9.source/requirement-model@1: source digest": true,
+				"l9.projection/contracts-conformance@1#l9.source/requirement-model@1: unsealed edit": true,
+				"l9.projection/contracts-conformance@1#l9.source/resolution-model@1: profile digest": true,
+				"l9.projection/contracts-conformance@1#l9.source/resolution-model@1: selected record dropped": true,
+				"l9.projection/contracts-conformance@1#l9.source/resolution-model@1: selected value altered": true,
+				"l9.projection/contracts-conformance@1#l9.source/resolution-model@1: source digest": true,
+				"l9.projection/contracts-conformance@1#l9.source/resolution-model@1: unsealed edit": true,
+				"l9.projection/evidence-provenance@1#l9.source/artifact-model@1: profile digest": true,
+				"l9.projection/evidence-provenance@1#l9.source/artifact-model@1: selected record dropped": true,
+				"l9.projection/evidence-provenance@1#l9.source/artifact-model@1: selected value altered": true,
+				"l9.projection/evidence-provenance@1#l9.source/artifact-model@1: source digest": true,
+				"l9.projection/evidence-provenance@1#l9.source/artifact-model@1: unsealed edit": true,
+				"l9.projection/evidence-provenance@1#l9.source/contracts@1: profile digest": true,
+				"l9.projection/evidence-provenance@1#l9.source/contracts@1: selected record dropped": true,
+				"l9.projection/evidence-provenance@1#l9.source/contracts@1: selected value altered": true,
+				"l9.projection/evidence-provenance@1#l9.source/contracts@1: source digest": true,
+				"l9.projection/evidence-provenance@1#l9.source/contracts@1: unsealed edit": true,
+				"l9.projection/evidence-provenance@1#l9.source/invariants@1: profile digest": true,
+				"l9.projection/evidence-provenance@1#l9.source/invariants@1: selected record dropped": true,
+				"l9.projection/evidence-provenance@1#l9.source/invariants@1: selected value altered": true,
+				"l9.projection/evidence-provenance@1#l9.source/invariants@1: source digest": true,
+				"l9.projection/evidence-provenance@1#l9.source/invariants@1: unsealed edit": true,
+				"l9.projection/evidence-provenance@1#l9.source/receipt-catalog@1: profile digest": true,
+				"l9.projection/evidence-provenance@1#l9.source/receipt-catalog@1: selected value altered": true,
+				"l9.projection/evidence-provenance@1#l9.source/receipt-catalog@1: source digest": true,
+				"l9.projection/evidence-provenance@1#l9.source/receipt-catalog@1: unsealed edit": true,
+				"l9.projection/evidence-provenance@1#l9.source/semantic-dependency-model@1: profile digest": true,
+				"l9.projection/evidence-provenance@1#l9.source/semantic-dependency-model@1: selected value altered": true,
+				"l9.projection/evidence-provenance@1#l9.source/semantic-dependency-model@1: source digest": true,
+				"l9.projection/evidence-provenance@1#l9.source/semantic-dependency-model@1: unsealed edit": true,
+				"l9.projection/governance@1#l9.source/authority-model@1: profile digest": true,
+				"l9.projection/governance@1#l9.source/authority-model@1: selected value altered": true,
+				"l9.projection/governance@1#l9.source/authority-model@1: source digest": true,
+				"l9.projection/governance@1#l9.source/authority-model@1: unsealed edit": true,
+				"l9.projection/governance@1#l9.source/contracts@1: profile digest": true,
+				"l9.projection/governance@1#l9.source/contracts@1: selected record dropped": true,
+				"l9.projection/governance@1#l9.source/contracts@1: selected value altered": true,
+				"l9.projection/governance@1#l9.source/contracts@1: source digest": true,
+				"l9.projection/governance@1#l9.source/contracts@1: unsealed edit": true,
+				"l9.projection/governance@1#l9.source/invariants@1: profile digest": true,
+				"l9.projection/governance@1#l9.source/invariants@1: selected record dropped": true,
+				"l9.projection/governance@1#l9.source/invariants@1: selected value altered": true,
+				"l9.projection/governance@1#l9.source/invariants@1: source digest": true,
+				"l9.projection/governance@1#l9.source/invariants@1: unsealed edit": true,
+				"l9.projection/governance@1#l9.source/lifecycle@1: profile digest": true,
+				"l9.projection/governance@1#l9.source/lifecycle@1: selected value altered": true,
+				"l9.projection/governance@1#l9.source/lifecycle@1: source digest": true,
+				"l9.projection/governance@1#l9.source/lifecycle@1: unsealed edit": true,
+				"l9.projection/identity-attribution@1#l9.source/actor-registry@1: profile digest": true,
+				"l9.projection/identity-attribution@1#l9.source/actor-registry@1: selected record dropped": true,
+				"l9.projection/identity-attribution@1#l9.source/actor-registry@1: selected value altered": true,
+				"l9.projection/identity-attribution@1#l9.source/actor-registry@1: source digest": true,
+				"l9.projection/identity-attribution@1#l9.source/actor-registry@1: unsealed edit": true,
+				"l9.projection/identity-attribution@1#l9.source/contracts@1: profile digest": true,
+				"l9.projection/identity-attribution@1#l9.source/contracts@1: selected record dropped": true,
+				"l9.projection/identity-attribution@1#l9.source/contracts@1: selected value altered": true,
+				"l9.projection/identity-attribution@1#l9.source/contracts@1: source digest": true,
+				"l9.projection/identity-attribution@1#l9.source/contracts@1: unsealed edit": true,
+				"l9.projection/identity-attribution@1#l9.source/identity-model@1: profile digest": true,
+				"l9.projection/identity-attribution@1#l9.source/identity-model@1: selected value altered": true,
+				"l9.projection/identity-attribution@1#l9.source/identity-model@1: source digest": true,
+				"l9.projection/identity-attribution@1#l9.source/identity-model@1: unsealed edit": true,
+				"l9.projection/identity-attribution@1#l9.source/invariants@1: profile digest": true,
+				"l9.projection/identity-attribution@1#l9.source/invariants@1: selected record dropped": true,
+				"l9.projection/identity-attribution@1#l9.source/invariants@1: selected value altered": true,
+				"l9.projection/identity-attribution@1#l9.source/invariants@1: source digest": true,
+				"l9.projection/identity-attribution@1#l9.source/invariants@1: unsealed edit": true,
+				"l9.projection/identity-attribution@1#l9.source/surface-registry@1: profile digest": true,
+				"l9.projection/identity-attribution@1#l9.source/surface-registry@1: selected record dropped": true,
+				"l9.projection/identity-attribution@1#l9.source/surface-registry@1: selected value altered": true,
+				"l9.projection/identity-attribution@1#l9.source/surface-registry@1: source digest": true,
+				"l9.projection/identity-attribution@1#l9.source/surface-registry@1: unsealed edit": true,
+				"l9.projection/signals@1#l9.source/invariants@1: profile digest": true,
+				"l9.projection/signals@1#l9.source/invariants@1: selected record dropped": true,
+				"l9.projection/signals@1#l9.source/invariants@1: selected value altered": true,
+				"l9.projection/signals@1#l9.source/invariants@1: source digest": true,
+				"l9.projection/signals@1#l9.source/invariants@1: unsealed edit": true,
+				"l9.projection/signals@1#l9.source/vocabulary@1: profile digest": true,
+				"l9.projection/signals@1#l9.source/vocabulary@1: selected value altered": true,
+				"l9.projection/signals@1#l9.source/vocabulary@1: source digest": true,
+				"l9.projection/signals@1#l9.source/vocabulary@1: unsealed edit": true,
+				"l9.projection/strategic-value@1#l9.source/contracts@1: profile digest": true,
+				"l9.projection/strategic-value@1#l9.source/contracts@1: selected record dropped": true,
+				"l9.projection/strategic-value@1#l9.source/contracts@1: selected value altered": true,
+				"l9.projection/strategic-value@1#l9.source/contracts@1: source digest": true,
+				"l9.projection/strategic-value@1#l9.source/contracts@1: unsealed edit": true,
+				"l9.projection/strategic-value@1#l9.source/invariants@1: profile digest": true,
+				"l9.projection/strategic-value@1#l9.source/invariants@1: selected record dropped": true,
+				"l9.projection/strategic-value@1#l9.source/invariants@1: selected value altered": true,
+				"l9.projection/strategic-value@1#l9.source/invariants@1: source digest": true,
+				"l9.projection/strategic-value@1#l9.source/invariants@1: unsealed edit": true,
+				"l9.projection/strategic-value@1#l9.source/strategic-value-model@1: profile digest": true,
+				"l9.projection/strategic-value@1#l9.source/strategic-value-model@1: selected record dropped": true,
+				"l9.projection/strategic-value@1#l9.source/strategic-value-model@1: selected value altered": true,
+				"l9.projection/strategic-value@1#l9.source/strategic-value-model@1: source digest": true,
+				"l9.projection/strategic-value@1#l9.source/strategic-value-model@1: unsealed edit": true,
+				"l9.projection/strategic-value@1#l9.source/vocabulary@1: profile digest": true,
+				"l9.projection/strategic-value@1#l9.source/vocabulary@1: selected value altered": true,
+				"l9.projection/strategic-value@1#l9.source/vocabulary@1: source digest": true,
+				"l9.projection/strategic-value@1#l9.source/vocabulary@1: unsealed edit": true
+			},
+			"status": "pass",
+			"verified_compositions": 8,
+			"verified_projections": 39
+		}
+	},
+	"gate_function": ".claude/skills/l9-projection-admission/scripts/check_admission_closure.py#downstream",
+	"schema": "l9.candidate-evidence/domain-projection-downstream-rehearsal-v1",
+	"subject_file": "docs/candidates/domain-projection-architecture-v1/evidence/subject.json",
+	"verdict_ceiling": "rehearsal; DOWNSTREAM_USABLE requires ADMITTED and HEAD == main",
+	"wording": "rehearsal pass at 0b46944911bda80ba375f448a7513630216b5d89, not admitted"
+}
