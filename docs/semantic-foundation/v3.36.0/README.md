@@ -1,8 +1,8 @@
 # Semantic Foundation v3.36.0
 
-Status: **ADDITIVE SUCCESSOR CANDIDATE**.
+Status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-033, 2026-11-11).
 
-v3.36.0 is a candidate. It is not admitted until an accepted ADR names it.
+v3.36.0 carries ADR-033: Domain Projection Architecture v1.
 
 ## Bounded delta
 
@@ -32,4 +32,4 @@ Candidate pack: `docs/candidates/domain-projection-architecture-v1/` (design dep
 
 ## Authority
 
-`Quantum-L9/.github` owns these ledgers. Nothing here grants plan admission, strategic commitment, execution, publication, merge, admission or deployment authority, and no consumer is switched.
+`Quantum-L9/.github` owns these ledgers. Nothing here grants plan admission, strategic commitment, execution, publication, merge, admission or deployment authority, and no consumer is switched. ADR-033 admits the v3.36.0 delta.
