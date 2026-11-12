@@ -1,6 +1,6 @@
-c6867b67816e37e9ba01323a6b1318eca395b30019fea45c6688af013f2039a4  ./MANIFEST.md
-ad00cded9d26ec5f853fa7a223cf655741673e6673625a2cf2a3e87143a1cfa0  ./README.md
-5d772c320e83995f2189527766ade61b90481056db83874b5926dcc81c91e9c6  ./RELEASE_VALIDATION.md
+eaf7d7877a062ce967bf3b510f92141ab28752c3d95944bfabc002b23ce6e29c  ./MANIFEST.md
+ae7c857041e1868ed9f914a30b9bed4b21b641a54ada5bd598ef0de507a72f29  ./README.md
+cd7f8713f1996c1203fc6ba8d8512e83469a56c993e65f90c332299e7e5bf070  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -35,7 +35,8 @@ ed874f5daffa93184bd52d92eb434cce2c1eb77fe1c125016ca5a4b6f4a42edd  ./docs/adr/ADR
 373a74ba8ce190f940092c9df997720c8813f89850db9de4aace2d5b45123326  ./docs/adr/ADR-032-source-class-payload-dispatch-successors.md
 802ad4b68cbc4214185031f978eae9186cef257f425cdd0340280dbb70653d83  ./docs/adr/ADR-033-domain-projection-architecture-v1.md
 50228895ba57479735f4c3eb4df1f46189078f526ad5fc88262800622ef81825  ./docs/adr/ADR-034-integration-accountability-and-technical-coordination-role.md
-6aa397a111661aa9b23cda22eb68145181c44b88ab0d304c2ca0e64cf5d5a7c0  ./docs/adr/README.md
+ec9892c93e2698d5e99e0c26edf8f6acc51236733f85ced54e09577ba2ac506d  ./docs/adr/ADR-035-bounded-decision-autonomy-and-material-decision-escalation.md
+e61bab0b02aac1f052212b43ec136794f46fe17fd40b67e1633a32aafd81b8b7  ./docs/adr/README.md
 34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f  ./semantics/actor_registry.yaml
 09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4  ./semantics/affected_strategic_closure.schema.yaml
 d6d81cb1a804b1e957d064790bcf70d855ece0b58f82522863a9e55159761694  ./semantics/architecture_break_test_composition.schema.yaml

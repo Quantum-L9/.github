@@ -1,8 +1,8 @@
 # Semantic Foundation v3.38.0
 
-Status: **ADDITIVE SUCCESSOR CANDIDATE**.
+Status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-035, 2026-11-12).
 
-v3.38.0 proposes bounded decision autonomy and material decision escalation.
+v3.38.0 carries ADR-035: bounded decision autonomy and material decision escalation.
 
 ## Bounded delta
 
@@ -26,4 +26,4 @@ Admission subject discovery measured from the v3.37.0 candidate finds exactly th
 
 ## Authority
 
-`Quantum-L9/.github` owns these ledgers. This candidate does not admit itself. Nothing here creates an actor identity, Constellation routing, Plan Keeper authority, or execution, publication, merge, admission or deployment authority.
+`Quantum-L9/.github` owns these ledgers. ADR-035 admits the v3.38.0 delta. Nothing here creates an actor identity, Constellation routing, Plan Keeper authority, or execution, publication, merge, admission or deployment authority.

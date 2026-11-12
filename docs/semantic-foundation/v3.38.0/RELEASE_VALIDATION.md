@@ -1,12 +1,12 @@
 # Release Validation v3.38.0
 
-Release status: **additive successor candidate**. It is not admitted until an ADR records the owner's decision for this exact subject and the pull request carrying that ADR merges into `main`.
+Release status: **admitted additive successor** (ADR-035, 2026-11-12). Admission takes effect at the `main` commit that merges the pull request carrying ADR-035.
 
 ## Closure
 
 - **SC-001** parses 112 canonical sources as YAML mappings.
 - **SC-004**, **RC-001**, **RC-002** and **RC-011**: the derivation cascade is rebound from final bytes.
-- **SC-008** proves this release record: **112** canonical sources, **34** ADRs, and a hash inventory of every canonical source, every ADR plus the index, and this release's Markdown.
+- **SC-008** proves this release record: **112** canonical sources, **35** ADRs, and a hash inventory of every canonical source, every ADR plus the index, and this release's Markdown.
 
 ## Release integrity
 
@@ -14,4 +14,6 @@ Release status: **additive successor candidate**. It is not admitted until an AD
 
 ## Admission state
 
-Candidate. Target class: canonical global semantics, owned by `Quantum-L9/.github`.
+The repository owner admitted v3.38.0 in ADR-035, by an explicit instruction in governed session `session_017xwbxw3RduoWFP29VkobHR`: "push Stages B and C as stacked branches, Stage b admits all 6". Subject: `L9-AUTONOMY-001`, `L9-AUTONOMY-002`, `L9-AUTONOMY-003`, `decision_resolution_class`, `material_decision_escalation` and `bounded_replanning`. Target class: canonical global semantics, owned by `Quantum-L9/.github`. Approved `semantics/` tree: `7d238c39c7493f73df12d196e50747aa2086665d` at candidate commit `7418bd5849b986de6ad42ad7d9c88b77b573a038`, where `check_admission_closure.py --require released` reported `RELEASED_CANDIDATE`.
+
+Post-merge trusted replay on `main` is a separate, later step.
