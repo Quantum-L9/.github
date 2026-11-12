@@ -1,0 +1,54 @@
+schema: l9.candidate.vocabulary-reconciliation/v1
+artifact_id: l9.candidate/r5-d2-unknown-capability-result-term@1
+status: APPLIED_IN_CANDIDATE_RELEASE   # v3.41.0 (ADR-038), operator ruling DR-D2-04; not admitted
+contract: L9-GH-R5-D2-003
+base: Quantum-L9/.github@dcd9d0092740756c19ac681d399bd438409bdc52   # sites re-verified unchanged at 821c477 (F1 head)
+
+subject: the result of evaluating a binding when a required capability is unknown
+
+sites_at_base:
+  - path: semantics/binding_catalog.yaml
+    line: 164   # 198 at 821c477, after v3.40.0 added pytest/v2
+    coordinate: compatibility.unknown_capability
+    value: unsupported_until_resolved
+  - path: semantics/technology_capabilities.yaml
+    line: 172-173
+    coordinate: binding_rules.unknown_capability.result
+    value: incompatible_until_resolved
+  - path: semantics/error_taxonomy.yaml
+    line: 55-56
+    coordinate: binding.unknown_capability.result
+    value: UNKNOWN          # outcome class, not a competing term; listed because it is the third reader-facing site
+related_rules_unchanged:
+    - semantics/technology_capabilities.yaml L16 global_rules.unknown_capability_is_not_equivalent_to_supported
+    - semantics/contracts.yaml L792 l9.contract/technology-binding@1 forbidden unknown_capability_treated_as_supported
+
+consumers:
+  Quantum-L9/.github:
+    executable_readers: none   # grep of scripts/ and Repo.mk finds no reader of either value
+    validators: none
+  Quantum-L9/l9-semantic-compiler-engine:
+    executable_readers: none_found
+    copies:   # vendored YAML, not readers
+      - authority/admitted/.github/binding_catalog.yaml
+      - authority/admitted/.github/technology_capabilities.yaml
+      - 'tests/specimens/github-semantics-f9993ed1/semantics/{binding_catalog,technology_capabilities,error_taxonomy,contracts}.yaml'
+    evidence: GitHub code search (default branch only; unindexed branches not covered) for unsupported_until_resolved, incompatible_until_resolved, unknown_capability (language:python returned no results)
+  other_repositories: Unknown (not searched; outside repository_access)
+
+proposal:
+  recommended_term: incompatible_until_resolved
+  rationale:
+    - it names the binding outcome (compatibility), matching the RequiredCapabilities ⊆ ProviderCapabilities rule both sites state
+    - it is the term the D2 two-tier evaluation uses
+    - 'the word unsupported reads as a provider fact (not_provided); an unknown capability is not a known absence'
+  successor_change: >
+    In the D2 successor release, set binding_catalog.yaml compatibility.unknown_capability
+    to incompatible_until_resolved; leave technology_capabilities.yaml unchanged; record that
+    both map to error_taxonomy binding.unknown_capability result UNKNOWN and to
+    l9.contract/technology-binding@1 outcome unresolved.
+  validator: >
+    A new semantic check fails if binding_catalog.yaml#compatibility.unknown_capability and
+    technology_capabilities.yaml#binding_rules.unknown_capability.result differ.
+  blast_radius: two YAML values in .github; vendored copies in the compiler refresh on its next authority sync; no executable reader found
+  decision: owner (DR-D2-04)
