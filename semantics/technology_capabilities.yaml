@@ -215,7 +215,7 @@ binding_rules:
         when: admitted definition and admitted, cited, deployment-satisfied fact, with no qualifying passing receipt
         result: semantically_compatible
       - id: D2-EVAL-08
-        when: as D2-EVAL-07, and the newest receipt bound to the exact provider binding id and digest, token, probe and deployment profile passes
+        when: as D2-EVAL-07, and the newest receipt bound to the exact provider binding id and digest, token, probe, deployment profile and deployed server version passes
         result: runtime_qualified
       - id: D2-EVAL-09
         when: a receipt binds a different binding digest or deployment profile, records a provider_server_version that is missing, unparseable, outside the binding's server_version_range or different from the deployed server version, or names an in-memory, fake or mock subject
