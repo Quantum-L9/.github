@@ -1,5 +1,5 @@
-# Falsifying fixture: an execution plan with no cases executes no witness, so its aggregation cannot pass; the final
-# branch fails closed as an error.
+# Falsifying fixture: an execution plan with no cases executes no witness, so its aggregation never defaults to
+# success; zero executed cases is an error (verdict runs without shape validation, so min_items does not mask it).
 document: verdict
 violates: pass_only_when_every_witness_case_executes_and_every_assertion_holds
 obligation_index: 0

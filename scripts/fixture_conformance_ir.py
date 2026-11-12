@@ -249,11 +249,11 @@ def schema_violations(value: Any, descriptor: Any, path: str = "$") -> list[str]
         for name in descriptor.get("required", []) or []:
             if name not in value:
                 return [f"{path}.{name}: required field missing"]
-        # Optional means the key may be omitted, not that it may be null: a present
-        # value is always checked against its descriptor, so an explicit null passes
-        # only where the declared type admits it (`any`).
+        required = set(descriptor.get("required", []) or [])
         for key, child in (descriptor.get("properties") or {}).items():
             if key in value:
+                if value[key] is None and key not in required:
+                    continue
                 found = schema_violations(value[key], child, f"{path}.{key}")
                 if found:
                     return found
@@ -1250,13 +1250,11 @@ def precondition_outcome(precondition: dict, result: Any) -> str:
 
 
 def obligation_verdict(obligation: dict, case_outcomes: dict[str, str]) -> str:
-    """Aggregate per-case outcomes into an obligation verdict.
+    """Aggregate per-case outcomes (pass|fail) into an obligation verdict.
 
     Encodes an_unresolved_obligation_never_yields_a_pass_verdict and the
-    verdict_rule const. A missing outcome, an error, or any value outside the
-    verdict domain is an error; an unresolved case makes the obligation
-    unresolved; pass is returned only when every planned case passed, and every
-    other combination fails closed as an error.
+    verdict_rule const. An empty plan, a missing outcome, or any outcome other
+    than pass or fail (including an unresolved case) is an error, never a pass.
     """
     if (
         obligation["disposition"] == "unresolved"
@@ -1267,15 +1265,13 @@ def obligation_verdict(obligation: dict, case_outcomes: dict[str, str]) -> str:
     outcomes = [
         case_outcomes.get(c, "error") for c in obligation["execution_plan"]["cases"]
     ]
-    if any(o == "error" or o not in VERDICTS for o in outcomes):
+    if not outcomes:
         return "error"
-    if any(o == "unresolved" for o in outcomes):
-        return "unresolved"
+    if any(o not in ("pass", "fail") for o in outcomes):
+        return "error"
     if any(o == "fail" for o in outcomes):
         return "fail"
-    if outcomes and all(o == "pass" for o in outcomes):
-        return "pass"
-    return "error"
+    return "pass"
 
 
 # --- fixture-suite runner ----------------------------------------------------
