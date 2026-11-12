@@ -1,6 +1,6 @@
 b37353bb985a56c8331a7b6f3435e1aaf158e0e84e2624c8d16c0ad5ea1fe012  ./MANIFEST.md
 be80b43f4e775425539fb365094ca3c080e3de707d9542a4e43551d5144db160  ./README.md
-8be4613578288b578f8528df27fa8385403a1588ff100f6d62a65269428f9a2b  ./RELEASE_VALIDATION.md
+2400dd53acd7e477bcf1598613338ed9e4dfa33cc4aa19f8f6fe4ff1f535600a  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -38,7 +38,7 @@ ed874f5daffa93184bd52d92eb434cce2c1eb77fe1c125016ca5a4b6f4a42edd  ./docs/adr/ADR
 ec9892c93e2698d5e99e0c26edf8f6acc51236733f85ced54e09577ba2ac506d  ./docs/adr/ADR-035-bounded-decision-autonomy-and-material-decision-escalation.md
 d2fc4cdc2fb4d6691dfa95f9cfcb309fddd5e062d438ba9bda91dc6d461f97b8  ./docs/adr/ADR-036-technical-coordination-role-projection.md
 133e17a0b241d69ff35e33f8233694035677e80ff005375679162a19a06abeec  ./docs/adr/ADR-037-fixture-ir-and-conformance-ir-structural-contracts.md
-f4b072b8e45238132f3cf25bdc64eeb9bd60ee09997f40840a02d2ba98f9193c  ./docs/adr/ADR-038-datastore-capability-semantics-and-provider-bindings.md
+b0567f736351576fba6d4f86059b2f0fabede96cecccc635ee21667fb9cdfc2a  ./docs/adr/ADR-038-datastore-capability-semantics-and-provider-bindings.md
 953a97398bf9bba534720b96d45b1b35cd08f8a652b244961ec8d0c5735438b2  ./docs/adr/README.md
 34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f  ./semantics/actor_registry.yaml
 09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4  ./semantics/affected_strategic_closure.schema.yaml

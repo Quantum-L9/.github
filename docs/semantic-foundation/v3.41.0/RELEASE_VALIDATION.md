@@ -23,4 +23,25 @@ Files changed by v3.37.0–v3.39.0: `invariants`, `contracts`, `capabilities`, `
 
 ## Admission state
 
-Not admitted. The admission subject is computed by `discover_admission_subject.py` against base `821c477` (the v3.40.0 candidate head) and graded by `check_admission_closure.py --require released --admitted-base v3.39.0`; the target rung is `RELEASED_CANDIDATE`. Results are in the candidate report. The owner decision covers the 13 capability definitions, aliases, coverage, deployment profiles and runtime-receipt binding, the two-tier rule, the unknown-capability term, and the MongoDB provider binding. Runtime qualification of any provider is not part of this subject.
+Not admitted. The owner decision covers the 13 capability definitions, aliases, coverage, deployment profiles and runtime-receipt binding (ADR-038 decision 9), the two-tier rule, the unknown-capability term, and the MongoDB provider binding. Runtime qualification of any provider is not part of this subject.
+
+**Subject.** `discover_admission_subject.py --checkout . --base 821c477 --candidate HEAD --main-ref origin/main` exits 0 with status `pass`: canonical sources `l9.source/binding-catalog@1` and `l9.source/technology-capabilities@1`; no gap, no unclassified change, no required dependency, no revision, no changed derived coordinate.
+
+**Gate as specified (fails structurally).**
+
+`check_admission_closure.py --checkout . --subject <D2 subject> --require released --main-ref origin/main --admitted-base v3.39.0`
+
+Exit 1, verdict `REGISTERED`. Registration, validator and make pass. Two gates fail for one reason: this release is stacked on v3.40.0, an unadmitted candidate that is not on `main`, and the release-sequence and scope rules measure from admitted `main`. `release.sequence` reports "HEAD cuts 2 new releases ['v3.40.0', 'v3.41.0']; cut exactly one successor"; `scope` reports F1's eight identities (`l9.source/compilation-profiles@1`, `l9.source/ir-catalog@1`, `l9.source/product-manifest-schema@1`, `l9.source/product-topology-schema@1`, `l9.source/vocabulary@1`, `conformance_ir.schema.yaml`, `fixture_ir.schema.yaml`, `harness_surface.schema.yaml`) as new or changed since admitted v3.39.0 but omitted from the subject.
+
+**Evidence of record while v3.40.0 is unmerged** (coordinator ruling D2-GATE-01 = A).
+
+`discover_admission_subject.py --checkout . --admitted-base v3.39.0 --candidate HEAD --main-ref origin/main --write-subject <union subject>` (D2's two sources plus F1's five sources and three schemas), then
+
+`check_admission_closure.py --checkout . --subject <union subject> --require released --main-ref refs/pull/247/head --admitted-base v3.39.0`
+
+Exit 0, verdict `RELEASED_CANDIDATE`; scope and release pass (`new_releases: ['v3.41.0']`, `open_candidate_on_main: 'v3.40.0'`). The specified gate is to be re-run unchanged once `.github#247` merges. Folding into v3.40.0 and changing the gate were refused.
+
+## Projection effects
+
+- `l9.projection/stage-provider-bindings@1` now projects `l9.binding/provider/mongodb@1` (`$.bindings[?(@.class=="provider")]`) but not `capability_definitions` or the tiers; a successor profile `@2` is a required follow-up (ADR-038, Consequences).
+- Projected bytes change, within payload schemas that declare the affected sections as open objects, for: `l9.projection/semantic-compiler-core@1` (`$.bindings`, `$.compatibility`), `l9.projection/architecture-intelligence@1` (`$.binding_rules`, `$.compatibility`; `architecture_intelligence_projection.schema.yaml` declares both `type: object`) and `l9.projection/repository-operations-compiler@1` (`$.binding_rules`, `$.compatibility`). No profile, selector or payload schema changes.
