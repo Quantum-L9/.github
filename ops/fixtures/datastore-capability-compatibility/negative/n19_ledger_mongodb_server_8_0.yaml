@@ -1,0 +1,18 @@
+schema: l9.fixture.datastore-capability-compatibility/v1
+polarity: negative
+description: MongoDB facts are pinned to the 9.0 documentation line; 8.0 is Unknown.
+falsifies:
+- D2-EVAL-10
+case:
+  token_definitions: '@ledger'
+  provider_binding: '@ledger:l9.binding/provider/mongodb@1'
+  admission: admitted
+  deployment_profile: replica_set
+  server_version: 8.0.4
+  receipts: []
+  required_capabilities:
+  - transactions
+expect:
+  overall: incompatible_until_resolved
+  tokens:
+    transactions: incompatible_until_resolved

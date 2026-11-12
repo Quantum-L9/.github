@@ -1,0 +1,18 @@
+schema: l9.fixture.datastore-capability-compatibility/v1
+polarity: negative
+description: MongoDB standalone deployments do not support transactions.
+falsifies:
+- D2-EVAL-05
+case:
+  token_definitions: '@ledger'
+  provider_binding: '@ledger:l9.binding/provider/mongodb@1'
+  admission: admitted
+  deployment_profile: standalone
+  server_version: 9.0.3
+  receipts: []
+  required_capabilities:
+  - transactions
+expect:
+  overall: incompatible
+  tokens:
+    transactions: incompatible

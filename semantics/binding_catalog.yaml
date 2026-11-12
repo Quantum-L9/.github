@@ -185,6 +185,211 @@ bindings:
   - final_conformance_is_required_before_generated_artifacts_count_as_realized
   - existing_target_bytes_have_no_authority_or_preservation_privilege
   - rendering_is_deterministic_and_semantically_noncreative
+- id: l9.binding/provider/mongodb@1
+  class: provider
+  provider:
+    technology: mongodb
+    semantic_ownership:
+      implied: false
+  fact_source:
+    kind: vendor_documentation
+    documentation: MongoDB Database Manual, https://www.mongodb.com/docs/manual/ (version selector "Version 9.0 (current)")
+    retrieved: '2026-11-11'
+    quotes_rematched_against_raw_page_html: '2026-11-12'
+  server_version_range:
+    min_inclusive: '9.0'
+    max_exclusive: '9.1'
+    basis: >
+      Every fact below was read from the manual's current line, labelled Version
+      9.0 on the retrieval date. Other server lines are Unknown until their own
+      documentation is cited; deployments outside the range are
+      incompatible_until_resolved for every token.
+  deployment_profiles:
+    - standalone
+    - replica_set
+    - sharded_cluster
+  rules:
+    - provider_does_not_become_semantic_owner
+    - every_fact_names_a_defined_token_or_alias
+    - a_provided_fact_cites_vendor_documentation_with_a_verbatim_quote
+    - an_inferred_fact_is_labelled_inference_from_vendor_statements
+    - a_fact_without_vendor_citation_is_unknown
+    - runtime_qualification_is_a_separate_obligation_and_never_part_of_the_fact
+  facts:
+    transactions:
+      status: provided
+      fact_basis: vendor_statement
+      requires_deployment: [replica_set, sharded_cluster]
+      preconditions:
+        - featureCompatibilityVersion at least 4.0 on a replica set and 4.2 on a sharded cluster
+        - a transaction runs for less than transactionLifetimeLimitSeconds (60 s by default) or is aborted
+      citations:
+        - url: https://www.mongodb.com/docs/manual/core/transactions/
+          quote: MongoDB supports distributed transactions, including transactions on replica sets and sharded clusters.
+        - url: https://www.mongodb.com/docs/manual/core/transactions-production-consideration/
+          quote: MongoDB standalone deployments do not support transactions.
+        - url: https://www.mongodb.com/docs/manual/core/transactions-production-consideration/
+          quote: the featureCompatibilityVersion for all members of the deployment must be at least
+      runtime_qualification_obligation:
+        probe_id: l9.probe/datastore/transactions@1
+        deployment_profiles: [replica_set]
+        status: not_executed
+    conditional_updates:
+      status: provided
+      fact_basis: vendor_statement
+      requires_deployment: []
+      caveats:
+        - the predicate must include the expected current value; a filter on the identifier alone loses concurrent updates
+      citations:
+        - url: https://www.mongodb.com/docs/manual/core/write-operations-atomicity/
+          quote: In MongoDB, write operations are atomic on the single-document level, even if modifying multiple values.
+        - url: https://www.mongodb.com/docs/manual/core/write-operations-atomicity/
+          quote: include the expected current value in the update filter
+        - url: https://www.mongodb.com/docs/manual/reference/command/findAndModify/
+          quote: When modifying a single document, both findAndModify and the updateOne() method atomically update the document.
+      runtime_qualification_obligation:
+        probe_id: l9.probe/datastore/conditional-updates@1
+        deployment_profiles: [replica_set]
+        status: not_executed
+    snapshot_isolation:
+      status: provided
+      fact_basis: inference_from_vendor_statements
+      inference: >
+        The vendor does not use the term snapshot isolation. Snapshot reads of
+        majority-committed data at one point in time, together with a write
+        conflict abort when a document modified outside the transaction is
+        later modified inside it, match the token's guarantee.
+      requires_deployment: [replica_set, sharded_cluster]
+      preconditions:
+        - transaction read concern "snapshot"
+        - the transaction commits with write concern "majority"
+      citations:
+        - url: https://www.mongodb.com/docs/manual/reference/read-concern-snapshot/
+          quote: provides its guarantees only if the transaction commits with write concern "majority"
+        - url: https://www.mongodb.com/docs/manual/reference/read-concern-snapshot/
+          quote: returns majority-committed data as it appears across shards from a specific single point in time in the recent past.
+        - url: https://www.mongodb.com/docs/manual/core/transactions-production-consideration/
+          quote: the transaction aborts because of a write conflict
+      runtime_qualification_obligation:
+        probe_id: l9.probe/datastore/snapshot-isolation@1
+        deployment_profiles: [replica_set]
+        status: not_executed
+    serializable_isolation:
+      status: unknown
+      fact_basis: none
+      note: >
+        The vendor claims serializability only for single-document operations on
+        a replica set in the absence of rollback, and states nothing about
+        multi-document transactions or write skew.
+      citations:
+        - url: https://www.mongodb.com/docs/manual/core/read-isolation-consistency-recency/
+          quote: is serializable only in the absence of a rollback
+      runtime_qualification_obligation:
+        probe_id: l9.probe/datastore/serializable-isolation@1
+        deployment_profiles: [replica_set]
+        status: not_executed
+    replicated_durable_commit:
+      status: provided
+      fact_basis: vendor_statement
+      requires_deployment: [replica_set, sharded_cluster]
+      preconditions:
+        - write concern "majority" set at the transaction level, not per operation
+      caveats:
+        - 'j: true alone does not prevent rollback after a primary failover'
+        - 'w: 1 writes can be rolled back if the primary steps down before replication'
+      citations:
+        - url: https://www.mongodb.com/docs/manual/reference/write-concern/
+          quote: have durably written the change to their local oplog
+        - url: https://www.mongodb.com/docs/manual/reference/write-concern/
+          quote: you set the write concern at the transaction level, not at the individual operation level
+        - url: https://www.mongodb.com/docs/manual/core/transactions/
+          quote: 'applies w: "majority" as the write concern when retrying'
+      runtime_qualification_obligation:
+        probe_id: l9.probe/datastore/replicated-durable-commit@1
+        deployment_profiles: [replica_set]
+        status: not_executed
+    commit_outcome_unknown_signal:
+      status: provided
+      fact_basis: vendor_statement
+      requires_deployment: [replica_set, sharded_cluster]
+      provider_signal:
+        ambiguous_commit: error label UnknownTransactionCommitResult
+        retryable_abort: error label TransientTransactionError
+      caveats:
+        - the core transaction API retries neither label; the callback API may retry and run the callback more than once
+      citations:
+        - url: https://www.mongodb.com/docs/manual/core/transactions-in-applications/
+          quote: To retry the commit operation if the commit encounters an UnknownTransactionCommitResult error.
+        - url: https://www.mongodb.com/docs/manual/core/transactions-in-applications/
+          quote: associated with the label "TransientTransactionError"
+        - url: https://www.mongodb.com/docs/languages/python/pymongo-driver/current/crud/transactions/
+          quote: this method may retry the commit or the entire transaction, which may invoke the callback multiple times by a single call to with_transaction().
+      runtime_qualification_obligation:
+        probe_id: l9.probe/datastore/commit-outcome-unknown-signal@1
+        deployment_profiles: [replica_set]
+        status: not_executed
+    server_authoritative_time_in_update_expressions:
+      status: provided
+      fact_basis: vendor_statement
+      requires_deployment: []
+      citations:
+        - url: https://www.mongodb.com/docs/manual/reference/aggregation-variables/
+          quote: returns the same value for all members of the deployment
+        - url: https://www.mongodb.com/docs/manual/tutorial/update-documents-with-aggregation-pipeline/
+          quote: The operation uses the aggregation variable NOW for the current datetime.
+        - url: https://www.mongodb.com/docs/manual/reference/method/db.collection.updateOne/
+          quote: The aggregation variable NOW resolves to the current datetime value and remains the same throughout the pipeline.
+      runtime_qualification_obligation:
+        probe_id: l9.probe/datastore/server-time-update-expressions@1
+        deployment_profiles: [replica_set]
+        status: not_executed
+    server_authoritative_time_in_query_filters:
+      status: unknown
+      fact_basis: none
+      note: >
+        No vendor page read shows the server time variable inside a query filter
+        through $expr. It stays Unknown until a vendor citation or a passing
+        live receipt is recorded.
+      runtime_qualification_obligation:
+        probe_id: l9.probe/datastore/server-time-query-filters@1
+        deployment_profiles: [replica_set]
+        status: not_executed
+    unique_key:
+      status: provided
+      fact_basis: vendor_statement
+      requires_deployment: []
+      provider_signal:
+        duplicate_key: error code 11000 DuplicateKey
+      citations:
+        - url: https://www.mongodb.com/docs/manual/core/index-unique/
+          quote: A unique index ensures that the indexed fields do not store duplicate values
+        - url: https://www.mongodb.com/docs/manual/reference/error-codes/
+          quote: 11000 DuplicateKey
+        - url: https://www.mongodb.com/docs/manual/reference/command/findAndModify/
+          quote: Upserts can create duplicate documents, unless there is a unique index to prevent duplicates.
+      runtime_qualification_obligation:
+        probe_id: l9.probe/datastore/unique-key@1
+        deployment_profiles: [replica_set]
+        status: not_executed
+    change_notifications:
+      status: provided
+      fact_basis: vendor_statement
+      requires_deployment: [replica_set, sharded_cluster]
+      citations:
+        - url: https://www.mongodb.com/docs/manual/changestreams/
+          quote: 'Change streams are available for replica sets and sharded clusters:'
+      runtime_qualification_obligation:
+        probe_id: l9.probe/datastore/change-notifications@1
+        deployment_profiles: [replica_set]
+        status: not_executed
+    document_storage:
+      status: unknown
+      fact_basis: none
+      note: No vendor citation was recorded for this token.
+      runtime_qualification_obligation:
+        probe_id: l9.probe/datastore/document-storage@1
+        deployment_profiles: [replica_set]
+        status: not_executed
 
 validation_binding_families:
 - LocalSATBinding
@@ -195,7 +400,7 @@ validation_binding_families:
 compatibility:
   provider: RequiredCapabilities ⊆ ProviderCapabilities
   target: RequiredTargetCapabilities ⊆ TargetCapabilities
-  unknown_capability: unsupported_until_resolved
+  unknown_capability: incompatible_until_resolved
   optimization_permitted_only_after_compatibility: true
   provider_does_not_become_semantic_owner: true
   binding_selection_does_not_transform_source_ir: true

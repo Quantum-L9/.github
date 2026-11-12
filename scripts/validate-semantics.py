@@ -15617,6 +15617,634 @@ def check_rc035(root: Path, docs: dict[str, dict], report: Report) -> None:
         _check_rc035_negative_cases(docs, report)
 
 
+# RC-036 Datastore capability semantics and provider bindings (v3.41.0,
+# ADR-038). technology_capabilities.yaml#capability_definitions defines every
+# datastore capability token a covered technology asserts; binding_rules
+# .provider_compatibility_tiers decides RequiredCapabilities ⊆
+# ProviderCapabilities in two tiers (semantically_compatible needs admitted
+# definitions and admitted vendor-cited facts; runtime_qualified also needs a
+# passing live receipt); class provider bindings in binding_catalog.yaml carry
+# vendor-cited facts whose runtime qualification is a separate, unexecuted
+# obligation. The unknown-capability result is one term in both ledgers.
+RC036_TECH = "semantics/technology_capabilities.yaml"
+RC036_BIND = "semantics/binding_catalog.yaml"
+RC036_FIXTURES = "ops/fixtures/datastore-capability-compatibility"
+RC036_ORDER = [
+    "incompatible",
+    "incompatible_until_resolved",
+    "semantically_compatible",
+    "runtime_qualified",
+]
+RC036_RULES = {f"D2-EVAL-{n:02d}" for n in range(1, 11)}
+RC036_ENTRY = ("scope", "guarantee", "not_implied", "failure_signal", "runtime_probe")
+RC036_STATUS = {"provided", "not_provided", "unknown"}
+RC036_BASIS = {"vendor_statement", "inference_from_vendor_statements", "none"}
+RC036_FORBIDDEN_TEXT = ("://", "password", "secret=", "apikey", "api_key")
+RC036_RECEIPT_COORDINATES = {
+    "provider_binding_id",
+    "provider_binding_digest_sha256",
+    "token",
+    "probe_id",
+    "deployment_profile",
+    "provider_server_version",
+    "verdict",
+    "executed_at",
+    "executor_identity",
+}
+RC036_TIER_FLAGS = (
+    "runtime_qualification_is_not_an_admission_precondition",
+    "admitted_definition_does_not_imply_runtime_qualification",
+    "provider_name_never_implies_a_token",
+)
+
+
+def _rc036_static(docs: dict[str, dict], report: Report) -> None:
+    tech = _mapping(docs.get(RC036_TECH))
+    bind = _mapping(docs.get(RC036_BIND))
+    block = _mapping(tech.get("capability_definitions"))
+    tokens = _mapping(block.get("tokens"))
+    if not tokens:
+        report.fail(
+            "RC-036",
+            RC036_TECH,
+            "capability_definitions.tokens",
+            None,
+            "no capability definitions",
+        )
+        return
+    probes: dict[str, str] = {}
+    for token, entry in tokens.items():
+        entry = _mapping(entry)
+        for key in RC036_ENTRY:
+            if not entry.get(key):
+                report.fail(
+                    "RC-036",
+                    RC036_TECH,
+                    f"capability_definitions.tokens.{token}.{key}",
+                    None,
+                    "required definition field missing or empty",
+                )
+        probe = _mapping(entry.get("runtime_probe"))
+        probe_id = probe.get("probe_id")
+        if not (
+            isinstance(probe_id, str) and probe_id.startswith("l9.probe/datastore/")
+        ) or not probe.get("description"):
+            report.fail(
+                "RC-036",
+                RC036_TECH,
+                f"capability_definitions.tokens.{token}.runtime_probe",
+                probe_id,
+                "probe needs an l9.probe/datastore/ id and a description",
+            )
+        elif probe_id in probes.values():
+            report.fail(
+                "RC-036",
+                RC036_TECH,
+                f"capability_definitions.tokens.{token}.runtime_probe.probe_id",
+                probe_id,
+                "probe id shared by two tokens",
+            )
+        else:
+            probes[token] = probe_id
+        text = json.dumps(entry).lower()
+        for needle in RC036_FORBIDDEN_TEXT:
+            if needle in text:
+                report.fail(
+                    "RC-036",
+                    RC036_TECH,
+                    f"capability_definitions.tokens.{token}",
+                    needle,
+                    "definition carries connection or credential material",
+                )
+    aliases = _mapping(block.get("aliases"))
+    for alias, target in aliases.items():
+        if target not in tokens or alias in tokens:
+            report.fail(
+                "RC-036",
+                RC036_TECH,
+                f"capability_definitions.aliases.{alias}",
+                target,
+                "alias must name a defined token and must not itself be a token",
+            )
+
+    def resolves(token: object) -> bool:
+        return token in tokens or aliases.get(token) in tokens
+
+    registered = {
+        _mapping(t).get("id"): _mapping(t) for t in _list(tech.get("technologies"))
+    }
+    covered = _list(_mapping(block.get("coverage")).get("technologies"))
+    if not covered:
+        report.fail(
+            "RC-036",
+            RC036_TECH,
+            "capability_definitions.coverage.technologies",
+            None,
+            "coverage list empty",
+        )
+    for tid in covered:
+        if tid not in registered:
+            report.fail(
+                "RC-036",
+                RC036_TECH,
+                "capability_definitions.coverage.technologies",
+                tid,
+                "covered technology is not registered",
+            )
+            continue
+        for token in _list(registered[tid].get("provides")):
+            if not resolves(token):
+                report.fail(
+                    "RC-036",
+                    RC036_TECH,
+                    f"technologies[{tid}].provides",
+                    token,
+                    "asserted token has no definition or alias",
+                )
+    profiles = set(_list(block.get("deployment_profiles")))
+    receipt_family = _mapping(block.get("runtime_receipt")).get("family")
+    families = {
+        _mapping(r).get("family_id")
+        for r in _mapping(
+            _mapping(docs.get("semantics/receipt_catalog.yaml")).get("receipts")
+        ).values()
+    }
+    if receipt_family not in families:
+        report.fail(
+            "RC-036",
+            RC036_TECH,
+            "capability_definitions.runtime_receipt.family",
+            receipt_family,
+            "runtime receipt family not in receipt_catalog.yaml",
+        )
+    bound = set(
+        _list(
+            _mapping(block.get("runtime_receipt")).get("additional_bound_coordinates")
+        )
+    )
+    if not RC036_RECEIPT_COORDINATES <= bound:
+        report.fail(
+            "RC-036",
+            RC036_TECH,
+            "capability_definitions.runtime_receipt.additional_bound_coordinates",
+            sorted(RC036_RECEIPT_COORDINATES - bound),
+            "runtime receipt must bind binding id and digest, token, probe, deployment, server version, verdict, time and executor",
+        )
+    rules = _mapping(tech.get("binding_rules"))
+    tiers = _mapping(rules.get("provider_compatibility_tiers"))
+    if tiers.get("order") != RC036_ORDER:
+        report.fail(
+            "RC-036",
+            RC036_TECH,
+            "binding_rules.provider_compatibility_tiers.order",
+            tiers.get("order"),
+            "tier order changed",
+        )
+    ids = [_mapping(r).get("id") for r in _list(tiers.get("token_rules"))]
+    if len(ids) != len(set(ids)) or set(ids) != RC036_RULES:
+        report.fail(
+            "RC-036",
+            RC036_TECH,
+            "binding_rules.provider_compatibility_tiers.token_rules",
+            sorted(map(str, ids)),
+            "token rules must be exactly D2-EVAL-01..10",
+        )
+    if set(_list(tiers.get("rule_order"))) != RC036_RULES - {"D2-EVAL-09"}:
+        report.fail(
+            "RC-036",
+            RC036_TECH,
+            "binding_rules.provider_compatibility_tiers.rule_order",
+            tiers.get("rule_order"),
+            "rule order must place every result rule once",
+        )
+    if tiers.get("empty_required_capabilities") != "incompatible_until_resolved":
+        report.fail(
+            "RC-036",
+            RC036_TECH,
+            "binding_rules.provider_compatibility_tiers.empty_required_capabilities",
+            tiers.get("empty_required_capabilities"),
+            "an empty requirement set is not vacuously compatible",
+        )
+    contract = next(
+        (
+            c
+            for c in _list(
+                _mapping(docs.get("semantics/contracts.yaml")).get("contracts")
+            )
+            if _mapping(c).get("id") == "l9.contract/technology-binding@1"
+        ),
+        {},
+    )
+    outcomes = set(_mapping(_mapping(contract).get("outcomes")))
+    mapping = _mapping(tiers.get("technology_binding_outcomes"))
+    if set(mapping) != set(RC036_ORDER) or not set(mapping.values()) <= outcomes:
+        report.fail(
+            "RC-036",
+            RC036_TECH,
+            "binding_rules.provider_compatibility_tiers.technology_binding_outcomes",
+            mapping,
+            "every tier must map to a technology-binding@1 outcome",
+        )
+    for flag in RC036_TIER_FLAGS:
+        if tiers.get(flag) is not True:
+            report.fail(
+                "RC-036",
+                RC036_TECH,
+                f"binding_rules.provider_compatibility_tiers.{flag}",
+                tiers.get(flag),
+                "must be true",
+            )
+    unknown_tech = _mapping(rules.get("unknown_capability")).get("result")
+    unknown_bind = _mapping(bind.get("compatibility")).get("unknown_capability")
+    if unknown_tech != unknown_bind or unknown_tech != "incompatible_until_resolved":
+        report.fail(
+            "RC-036",
+            RC036_BIND,
+            "compatibility.unknown_capability",
+            unknown_bind,
+            f"must equal technology_capabilities.yaml binding_rules.unknown_capability.result ({unknown_tech!r}) and be incompatible_until_resolved",
+        )
+    providers = [
+        _mapping(b)
+        for b in _list(bind.get("bindings"))
+        if _mapping(b).get("class") == "provider"
+    ]
+    if not providers:
+        report.fail(
+            "RC-036",
+            RC036_BIND,
+            "bindings[class=provider]",
+            0,
+            "no provider binding registered",
+        )
+    for b in providers:
+        bid = b.get("id")
+        where = f"bindings[{bid}]"
+        technology = _mapping(b.get("provider")).get("technology")
+        if _mapping(registered.get(technology)).get("class") != "datastore":
+            report.fail(
+                "RC-036",
+                RC036_BIND,
+                f"{where}.provider.technology",
+                technology,
+                "provider technology must be a registered datastore",
+            )
+        if not _mapping(b.get("fact_source")).get("documentation"):
+            report.fail(
+                "RC-036",
+                RC036_BIND,
+                f"{where}.fact_source",
+                None,
+                "vendor documentation source missing",
+            )
+        rng = _mapping(b.get("server_version_range"))
+        try:
+            low = tuple(int(x) for x in str(rng.get("min_inclusive")).split("."))
+            high = tuple(int(x) for x in str(rng.get("max_exclusive")).split("."))
+            ordered = low < high
+        except ValueError:
+            ordered = False
+        if not ordered:
+            report.fail(
+                "RC-036",
+                RC036_BIND,
+                f"{where}.server_version_range",
+                rng,
+                "server version range must be min_inclusive < max_exclusive",
+            )
+        facts = _mapping(b.get("facts"))
+        for token in _list(_mapping(registered.get(technology)).get("provides")):
+            if aliases.get(token, token) not in facts:
+                report.fail(
+                    "RC-036",
+                    RC036_BIND,
+                    f"{where}.facts",
+                    token,
+                    "token the technology asserts has no fact (record unknown instead)",
+                )
+        for token, fact in facts.items():
+            fact = _mapping(fact)
+            at = f"{where}.facts.{token}"
+            if token not in tokens:
+                report.fail(
+                    "RC-036",
+                    RC036_BIND,
+                    at,
+                    token,
+                    "fact must name a defined token, not an alias or an undefined token",
+                )
+                continue
+            status, basis = fact.get("status"), fact.get("fact_basis")
+            if status not in RC036_STATUS or basis not in RC036_BASIS:
+                report.fail(
+                    "RC-036",
+                    RC036_BIND,
+                    at,
+                    (status, basis),
+                    "status or fact_basis outside the closed domain",
+                )
+            if status in ("provided", "not_provided"):
+                if basis == "none":
+                    report.fail(
+                        "RC-036",
+                        RC036_BIND,
+                        f"{at}.fact_basis",
+                        basis,
+                        "a decided fact needs a vendor basis",
+                    )
+                cites = _list(fact.get("citations"))
+                if not cites or any(
+                    not str(_mapping(c).get("url", "")).startswith("https://")
+                    or not _mapping(c).get("quote")
+                    for c in cites
+                ):
+                    report.fail(
+                        "RC-036",
+                        RC036_BIND,
+                        f"{at}.citations",
+                        len(cites),
+                        "a decided fact cites vendor documentation with an https url and a verbatim quote",
+                    )
+            if basis == "inference_from_vendor_statements" and not fact.get(
+                "inference"
+            ):
+                report.fail(
+                    "RC-036",
+                    RC036_BIND,
+                    f"{at}.inference",
+                    None,
+                    "an inferred fact states its inference",
+                )
+            if not set(_list(fact.get("requires_deployment"))) <= profiles:
+                report.fail(
+                    "RC-036",
+                    RC036_BIND,
+                    f"{at}.requires_deployment",
+                    fact.get("requires_deployment"),
+                    "deployment profile not declared",
+                )
+            obligation = _mapping(fact.get("runtime_qualification_obligation"))
+            if (
+                obligation.get("probe_id") != probes.get(token)
+                or obligation.get("status") != "not_executed"
+            ):
+                report.fail(
+                    "RC-036",
+                    RC036_BIND,
+                    f"{at}.runtime_qualification_obligation",
+                    obligation.get("status"),
+                    "obligation must name the token's probe and stay not_executed; the ledger never records runtime qualification",
+                )
+            if "receipt" in fact or "verdict" in fact:
+                report.fail(
+                    "RC-036",
+                    RC036_BIND,
+                    at,
+                    "receipt",
+                    "a fact never carries a live receipt",
+                )
+
+
+def _rc036_negative_cases() -> list[tuple[str, object]]:
+    T, B = RC036_TECH, RC036_BIND
+
+    def tok(d: dict, name: str) -> dict:
+        return d[T]["capability_definitions"]["tokens"][name]
+
+    def tiers(d: dict) -> dict:
+        return d[T]["binding_rules"]["provider_compatibility_tiers"]
+
+    def mongo(d: dict) -> dict:
+        return next(
+            b
+            for b in d[B]["bindings"]
+            if b.get("id") == "l9.binding/provider/mongodb@1"
+        )
+
+    def fact(d: dict, name: str) -> dict:
+        return mongo(d)["facts"][name]
+
+    def tech(d: dict, tid: str) -> dict:
+        return next(t for t in d[T]["technologies"] if t.get("id") == tid)
+
+    return [
+        (
+            "definition_without_guarantee",
+            lambda d: tok(d, "transactions").pop("guarantee"),
+        ),
+        (
+            "probe_with_connection_string",
+            lambda d: tok(d, "transactions")["runtime_probe"].__setitem__(
+                "description", "connect to mongodb://u:p@h"
+            ),
+        ),
+        (
+            "probe_id_shared",
+            lambda d: tok(d, "json_storage")["runtime_probe"].__setitem__(
+                "probe_id", "l9.probe/datastore/transactions@1"
+            ),
+        ),
+        (
+            "alias_to_undefined_token",
+            lambda d: d[T]["capability_definitions"]["aliases"].__setitem__(
+                "unique_indexes", "unique_thing"
+            ),
+        ),
+        (
+            "covered_technology_token_undefined",
+            lambda d: tech(d, "postgresql")["provides"].append("graph_search"),
+        ),
+        (
+            "coverage_list_emptied",
+            lambda d: d[T]["capability_definitions"]["coverage"].__setitem__(
+                "technologies", []
+            ),
+        ),
+        (
+            "receipt_server_version_unbound",
+            lambda d: d[T]["capability_definitions"]["runtime_receipt"][
+                "additional_bound_coordinates"
+            ].remove("provider_server_version"),
+        ),
+        (
+            "receipt_family_unregistered",
+            lambda d: d[T]["capability_definitions"]["runtime_receipt"].__setitem__(
+                "family", "l9.receipt/datastore@1"
+            ),
+        ),
+        ("tier_order_changed", lambda d: tiers(d)["order"].reverse()),
+        ("tier_rule_dropped", lambda d: tiers(d)["token_rules"].pop()),
+        (
+            "tier_outcome_unmapped",
+            lambda d: tiers(d)["technology_binding_outcomes"].__setitem__(
+                "semantically_compatible", "qualified"
+            ),
+        ),
+        (
+            "runtime_qualification_made_admission_precondition",
+            lambda d: tiers(d).__setitem__(
+                "runtime_qualification_is_not_an_admission_precondition", False
+            ),
+        ),
+        (
+            "empty_requirements_vacuously_compatible",
+            lambda d: tiers(d).__setitem__(
+                "empty_required_capabilities", "semantically_compatible"
+            ),
+        ),
+        (
+            "unknown_capability_term_diverges",
+            lambda d: d[B]["compatibility"].__setitem__(
+                "unknown_capability", "unsupported_until_resolved"
+            ),
+        ),
+        (
+            "provider_technology_unregistered",
+            lambda d: mongo(d)["provider"].__setitem__("technology", "couchdb"),
+        ),
+        (
+            "server_version_range_inverted",
+            lambda d: mongo(d)["server_version_range"].__setitem__(
+                "min_inclusive", "9.2"
+            ),
+        ),
+        (
+            "asserted_token_without_fact",
+            lambda d: mongo(d)["facts"].pop("document_storage"),
+        ),
+        (
+            "fact_names_alias",
+            lambda d: mongo(d)["facts"].__setitem__(
+                "unique_indexes", mongo(d)["facts"].pop("unique_key")
+            ),
+        ),
+        (
+            "provided_fact_uncited",
+            lambda d: fact(d, "transactions").__setitem__("citations", []),
+        ),
+        (
+            "provided_fact_without_basis",
+            lambda d: fact(d, "transactions").__setitem__("fact_basis", "none"),
+        ),
+        (
+            "inference_unlabelled",
+            lambda d: fact(d, "snapshot_isolation").pop("inference"),
+        ),
+        (
+            "unknown_promoted_without_citation",
+            lambda d: fact(d, "server_authoritative_time_in_query_filters").__setitem__(
+                "status", "provided"
+            ),
+        ),
+        (
+            "undeclared_deployment_profile",
+            lambda d: fact(d, "transactions")["requires_deployment"].append(
+                "serverless"
+            ),
+        ),
+        (
+            "runtime_qualification_claimed",
+            lambda d: fact(d, "transactions")[
+                "runtime_qualification_obligation"
+            ].__setitem__("status", "passed"),
+        ),
+        (
+            "obligation_probe_mismatch",
+            lambda d: fact(d, "transactions")[
+                "runtime_qualification_obligation"
+            ].__setitem__("probe_id", "l9.probe/datastore/unique-key@1"),
+        ),
+        (
+            "fact_carries_receipt",
+            lambda d: fact(d, "unique_key").__setitem__("receipt", {"verdict": "pass"}),
+        ),
+    ]
+
+
+def check_rc036(root: Path, docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _rc036_static(docs, report)
+    if len(report.failures) != before:
+        return
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    try:
+        import datastore_capability_compatibility as dcc
+    finally:
+        sys.path.pop(0)
+    try:
+        passes, failures, falsified = dcc.run_suite(root)
+    except (OSError, KeyError, TypeError, ValueError, yaml.YAMLError) as exc:
+        report.fail(
+            "RC-036",
+            RC036_FIXTURES,
+            "suite",
+            type(exc).__name__,
+            f"suite could not run: {exc}",
+        )
+        return
+    for line in failures:
+        report.fail("RC-036", RC036_FIXTURES, "suite", line[:80], line)
+    missing = sorted(RC036_RULES - falsified)
+    if missing:
+        report.fail(
+            "RC-036",
+            RC036_FIXTURES,
+            "falsifies",
+            missing,
+            "every token rule needs at least one fixture",
+        )
+    negatives = sum(1 for line in passes if line.startswith("negative "))
+    positives = len(passes) - negatives
+    if failures or missing or not negatives or not positives:
+        return
+    tokens = _mapping(
+        _mapping(docs[RC036_TECH].get("capability_definitions")).get("tokens")
+    )
+    report.ok(
+        "RC-036",
+        f"{len(tokens)} datastore capability tokens are defined (scope, guarantee, not_implied, failure signal, "
+        "runtime probe) and every token a covered technology asserts resolves directly or by alias; the two-tier "
+        "provider compatibility rule maps onto technology-binding@1 outcomes; the unknown-capability result is "
+        "incompatible_until_resolved in both ledgers; every class provider binding fact names a defined token, "
+        "cites vendor documentation when decided, labels inference, and carries an unexecuted runtime obligation; "
+        f"{positives} positive and {negatives} negative compatibility fixtures hold and every token rule is falsified",
+    )
+    rejected = 0
+    cases = _rc036_negative_cases()
+    for label, mutate in cases:
+        mutated = copy.deepcopy(docs)
+        mutate(mutated)
+        probe = Report()
+        _rc036_static(mutated, probe)
+        if probe.failures:
+            rejected += 1
+        else:
+            report.fail(
+                "RC-036",
+                "scripts/validate-semantics.py",
+                "negative_case",
+                label,
+                "mutation was accepted",
+            )
+    # Evaluator mutant: receipt qualification without the server-version check
+    # must be caught by the fixtures (n21, n22).
+    _, mutant_failures, _ = dcc.run_suite(root, check_server_version=False)
+    if not mutant_failures:
+        report.fail(
+            "RC-036",
+            RC036_FIXTURES,
+            "evaluator_mutant",
+            "check_server_version=False",
+            "a version-blind receipt check was accepted by every fixture",
+        )
+    elif rejected == len(cases):
+        report.ok(
+            "RC-036-NEG",
+            f"{rejected} datastore capability, tier, reconciliation and provider-binding mutations fail closed, "
+            f"and the version-blind evaluator mutant is rejected by {len(mutant_failures)} fixtures",
+        )
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -15682,6 +16310,7 @@ def main(argv: list[str]) -> int:
     check_rc033(docs, report)
     check_rc034(docs, report)
     check_rc035(root, docs, report)
+    check_rc036(root, docs, report)
     check_sc009(observed, root, report)
     for line in report.passes:
         print(line)

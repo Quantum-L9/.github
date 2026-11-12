@@ -1,0 +1,18 @@
+schema: l9.fixture.datastore-capability-compatibility/v1
+polarity: negative
+description: MongoDB serializable_isolation is Unknown, never assumed.
+falsifies:
+- D2-EVAL-02
+case:
+  token_definitions: '@ledger'
+  provider_binding: '@ledger:l9.binding/provider/mongodb@1'
+  admission: admitted
+  deployment_profile: replica_set
+  server_version: 9.0.3
+  receipts: []
+  required_capabilities:
+  - serializable_isolation
+expect:
+  overall: incompatible_until_resolved
+  tokens:
+    serializable_isolation: incompatible_until_resolved

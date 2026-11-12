@@ -1,0 +1,56 @@
+schema: l9.fixture.datastore-capability-compatibility/v1
+polarity: negative
+description: A deployment-conditional fact with an unknown deployment is incompatible_until_resolved.
+falsifies:
+- D2-EVAL-04
+case:
+  required_capabilities:
+  - transactions
+  - conditional_updates
+  - commit_outcome_unknown_signal
+  token_definitions:
+    transactions:
+      admission: admitted
+      probe_id: l9.probe/datastore/transactions@1
+    conditional_updates:
+      admission: admitted
+      probe_id: l9.probe/datastore/conditional-updates@1
+    commit_outcome_unknown_signal:
+      admission: admitted
+      probe_id: l9.probe/datastore/commit-outcome-unknown-signal@1
+  provider_binding:
+    id: l9.binding/provider/example-datastore@1
+    class: provider
+    provider:
+      technology: example-datastore
+    server_version_range:
+      min_inclusive: '2.0'
+      max_exclusive: '3.0'
+    facts:
+      transactions:
+        status: provided
+        admission: admitted
+        requires_deployment:
+        - replica_set
+        citations: &id001
+        - url: https://vendor.example/docs/transactions
+          quote: synthetic fixture citation
+      conditional_updates:
+        status: provided
+        admission: admitted
+        requires_deployment: []
+        citations: *id001
+      commit_outcome_unknown_signal:
+        status: provided
+        admission: admitted
+        requires_deployment:
+        - replica_set
+        citations: *id001
+  deployment_profile: unknown
+  server_version: '2.4'
+  receipts: []
+expect:
+  overall: incompatible_until_resolved
+  tokens:
+    transactions: incompatible_until_resolved
+    conditional_updates: semantically_compatible

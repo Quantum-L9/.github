@@ -1,0 +1,31 @@
+schema: l9.fixture.datastore-capability-compatibility/v1
+polarity: negative
+description: Admitted MongoDB on a 9.0 replica set meets six State tokens; server time in query filters is Unknown,
+  so the whole set is incompatible_until_resolved.
+falsifies:
+- D2-EVAL-02
+case:
+  token_definitions: '@ledger'
+  provider_binding: '@ledger:l9.binding/provider/mongodb@1'
+  admission: admitted
+  deployment_profile: replica_set
+  server_version: 9.0.3
+  receipts: []
+  required_capabilities:
+  - transactions
+  - snapshot_isolation
+  - replicated_durable_commit
+  - conditional_updates
+  - unique_key
+  - commit_outcome_unknown_signal
+  - server_authoritative_time_in_query_filters
+expect:
+  overall: incompatible_until_resolved
+  tokens:
+    transactions: semantically_compatible
+    snapshot_isolation: semantically_compatible
+    replicated_durable_commit: semantically_compatible
+    conditional_updates: semantically_compatible
+    unique_key: semantically_compatible
+    commit_outcome_unknown_signal: semantically_compatible
+    server_authoritative_time_in_query_filters: incompatible_until_resolved
