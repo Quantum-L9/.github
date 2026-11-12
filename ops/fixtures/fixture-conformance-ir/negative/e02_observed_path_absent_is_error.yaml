@@ -1,0 +1,20 @@
+# Falsifying fixture: must be rejected under `violates`.
+document: evaluation
+violates: a_relational_assertion_whose_target_or_observed_path_is_absent_at_evaluation_is_an_error_never_a_pass
+assertion:
+  id: a
+  law_ref: urn:example:law:x
+  target:
+    kind: step
+    ref: when
+    path: expires_at
+  predicate: greater_than
+  operand:
+    $observed:
+      step: first
+      path: expires_at
+recorded:
+  when:
+    expires_at: '2026-11-12T00:00:00Z'
+  first: {}
+expected_outcome: error

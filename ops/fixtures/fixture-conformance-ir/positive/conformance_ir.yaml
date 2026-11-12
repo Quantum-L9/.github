@@ -1,0 +1,74 @@
+# Synthetic, product-neutral witness for l9.conformance-ir/v1 (R5-F1). Consumes positive/fixture_ir.yaml.
+# One obligation per law_index entry (conformance_ir.schema.yaml#obligation_derivation): governing_refs is the law,
+# subject_class / observable_semantics / verification_class are its law_kind / statement / verification_class, and
+# witnessed_by is exactly the cases that cite it. fixture_ir_digest is the semantic digest of that fixture IR.
+schema: l9.conformance-ir/v1
+subject:
+  product_ref: urn:example:product:counter
+  closure_digest: sha256:1f1330fc7a8997738771e5af525194a89117d293b8447ef3f5d32abc2a77ffd6
+  fixture_ir_digest: sha256:a9b51ab026df5e703a682484988d6838312acee5bb4e0c2f389fb6a5cceeddd7
+authority:
+  authority_revision: Quantum-L9/.github@0000000000000000000000000000000000000000
+  compilation_profile_ref: l9.compilation/product-build@1
+  stage: conformance
+fixture_profile:
+  status: absent
+  profile_refs: []
+obligations:
+- id: obl.create-starts-at-zero
+  subject_class: product_invariant
+  governing_refs: [urn:example:law:create-starts-at-zero]
+  observable_semantics: A committed create yields value zero at the receipt revision.
+  verification_class: fixture_replay
+  witnessed_by: [create_starts_at_zero, erased_identity_not_reused]
+  disposition: executable
+  execution_plan: {mode: fixture_replay, cases: [create_starts_at_zero, erased_identity_not_reused], isolation: fresh_subject_per_case, verdict_rule: pass_only_when_every_witness_case_executes_and_every_assertion_holds}
+- id: obl.exact-retry-is-idempotent
+  subject_class: product_invariant
+  governing_refs: [urn:example:law:exact-retry-is-idempotent]
+  observable_semantics: An exact retry of an operation returns the original receipt.
+  verification_class: fixture_replay
+  witnessed_by: [exact_retry_returns_original]
+  disposition: executable
+  execution_plan: {mode: fixture_replay, cases: [exact_retry_returns_original], isolation: fresh_subject_per_case, verdict_rule: pass_only_when_every_witness_case_executes_and_every_assertion_holds}
+- id: obl.revision-compare-and-set
+  subject_class: product_invariant
+  governing_refs: [urn:example:law:revision-compare-and-set]
+  observable_semantics: Concurrent writers at one revision commit exactly once.
+  verification_class: fixture_replay
+  witnessed_by: [concurrent_increments_one_commit]
+  disposition: executable
+  execution_plan: {mode: fixture_replay, cases: [concurrent_increments_one_commit], isolation: fresh_subject_per_case, verdict_rule: pass_only_when_every_witness_case_executes_and_every_assertion_holds}
+- id: obl.ambiguous-commit-reconciles
+  subject_class: product_invariant
+  governing_refs: [urn:example:law:ambiguous-commit-reconciles]
+  observable_semantics: A commit whose effect may have occurred reports OUTCOME_UNKNOWN and leaves exactly one durable receipt.
+  verification_class: fixture_replay
+  witnessed_by: [ambiguous_commit_reconciles]
+  disposition: executable
+  execution_plan: {mode: fixture_replay, cases: [ambiguous_commit_reconciles], isolation: fresh_subject_per_case, verdict_rule: pass_only_when_every_witness_case_executes_and_every_assertion_holds}
+- id: obl.counter-store-is-the-only-writer
+  subject_class: product_invariant
+  governing_refs: [urn:example:law:counter-store-is-the-only-writer]
+  observable_semantics: Only the counter store adapter writes counter state.
+  verification_class: static_inspection
+  witnessed_by: []
+  disposition: unresolved
+- id: obl.lease-expiry
+  subject_class: admitted_contract
+  governing_refs: [urn:example:law:lease-expiry]
+  observable_semantics: An expired lease is reassignable.
+  verification_class: fixture_replay
+  witnessed_by: [lease_expiry_reassigns]
+  disposition: unresolved
+  execution_plan: {mode: fixture_replay, cases: [lease_expiry_reassigns], isolation: fresh_subject_per_case, verdict_rule: pass_only_when_every_witness_case_executes_and_every_assertion_holds}
+unresolved:
+- {obligation_ref: obl.counter-store-is-the-only-writer, result: unresolved, reason: Its verification class is static_inspection; fixture replay never proves it.}
+- {obligation_ref: obl.lease-expiry, result: unresolved, reason: Its only witness case is unresolved (no declared clock port).}
+unknowns:
+- {id: unk.fixture-profile, kind: fixture_profile_absent, subject: 'urn:example:product:counter', reason: The product declares no fixture profile; product-declared cases still compile and no profile requirement is claimed satisfied.}
+provenance:
+  closure_digest: sha256:1f1330fc7a8997738771e5af525194a89117d293b8447ef3f5d32abc2a77ffd6
+  fixture_ir_digest: sha256:a9b51ab026df5e703a682484988d6838312acee5bb4e0c2f389fb6a5cceeddd7
+  conformance_model_ref: l9.conformance-model/global@1
+  compiler: {compiler_version: l9-semantic-compiler@0.0.0-example}

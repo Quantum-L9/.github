@@ -1,0 +1,11 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: no_harness_control_or_harness_observation_ref_is_an_interface_surface_action
+mutation:
+- op: set
+  path:
+  - interface_surface
+  - harness_observations
+  - 0
+  - observation_ref
+  value: counter.get

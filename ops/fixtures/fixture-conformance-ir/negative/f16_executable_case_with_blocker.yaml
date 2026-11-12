@@ -1,0 +1,11 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: an_executable_case_has_no_blocked_by_and_is_not_listed_in_unresolved
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 0
+  - blocked_by
+  value:
+  - urn:example:unknown:x

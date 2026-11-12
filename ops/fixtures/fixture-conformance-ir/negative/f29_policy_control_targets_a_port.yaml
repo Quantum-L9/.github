@@ -1,0 +1,11 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: only_fault_injection_and_internal_setup_controls_name_a_target_port_and_no_harness_control_writes_system_under_test_state_otherwise
+mutation:
+- op: set
+  path:
+  - interface_surface
+  - harness_controls
+  - 2
+  - target_port_ref
+  value: urn:example:port:CounterStore:1

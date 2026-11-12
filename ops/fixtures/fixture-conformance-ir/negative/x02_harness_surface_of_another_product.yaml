@@ -1,0 +1,8 @@
+# Falsifying fixture: positive/fixture_ir.yaml against a mutated positive/harness_surface.yaml; must be rejected under `violates`.
+document: fixture_harness
+violates: harness_controls_and_harness_observations_equal_the_product_harness_surface_entries_without_implementation_ref_for_the_same_product
+harness_mutation:
+- op: set
+  path:
+  - product_ref
+  value: urn:example:product:other

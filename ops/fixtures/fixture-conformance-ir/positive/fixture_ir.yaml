@@ -1,0 +1,152 @@
+# Synthetic, product-neutral witness for l9.fixture-ir/v1 (R5-F1). Not product law.
+schema: l9.fixture-ir/v1
+subject:
+  product_ref: urn:example:product:counter
+  closure_digest: sha256:1f1330fc7a8997738771e5af525194a89117d293b8447ef3f5d32abc2a77ffd6
+authority:
+  authority_revision: Quantum-L9/.github@0000000000000000000000000000000000000000
+  compilation_profile_ref: l9.compilation/product-build@1
+  stage: fixtures
+interface_surface:
+  actions:
+  - {action_ref: counter.create, request_contract_ref: urn:example:CounterCreate:1, result_contract_ref: urn:example:CounterReceipt:1, effect_class: state_mutation}
+  - {action_ref: counter.increment, request_contract_ref: urn:example:CounterIncrement:1, result_contract_ref: urn:example:CounterReceipt:1, effect_class: state_mutation}
+  - {action_ref: counter.get, request_contract_ref: urn:example:CounterRead:1, result_contract_ref: urn:example:CounterValue:1, effect_class: read_observation}
+  problem_contract_refs:
+  - urn:example:CounterProblem:1
+  setup_ports:
+  - port_ref: urn:example:port:LimitCatalog:1
+    contract_refs:
+    - urn:example:LimitAdmission:1
+  forbidden_actions:
+  - counter.hard_delete
+  harness_controls:
+  - {control_ref: urn:example:harness:store-fault, kind: fault_injection, target_port_ref: 'urn:example:port:CounterStore:1', contract_ref: 'urn:example:harness:FaultInjection:1'}
+  - {control_ref: urn:example:harness:retention-erase, kind: internal_setup, target_port_ref: 'urn:example:port:CounterStore:1', contract_ref: 'urn:example:harness:RetentionErase:1', result_contract_ref: 'urn:example:harness:EraseReceipt:1'}
+  - {control_ref: urn:example:harness:authz-policy, kind: authorization_policy, contract_ref: 'urn:example:harness:AuthorizationPolicy:1'}
+  harness_observations:
+  - {observation_ref: urn:example:harness:receipt-count, result_contract_ref: 'urn:example:harness:ReceiptCount:1'}
+law_index:
+- {law_ref: 'urn:example:law:create-starts-at-zero', law_kind: product_invariant, statement: 'A committed create yields value zero at the receipt revision.', verification_class: fixture_replay, source: {artifact: 'urn:example:product:counter/invariants.yaml', revision: 'urn:example:rev:1', digest: 'sha256:5555555555555555555555555555555555555555555555555555555555555555'}}
+- {law_ref: 'urn:example:law:exact-retry-is-idempotent', law_kind: product_invariant, statement: 'An exact retry of an operation returns the original receipt.', verification_class: fixture_replay, source: {artifact: 'urn:example:product:counter/invariants.yaml', revision: 'urn:example:rev:1', digest: 'sha256:5555555555555555555555555555555555555555555555555555555555555555'}}
+- {law_ref: 'urn:example:law:revision-compare-and-set', law_kind: product_invariant, statement: 'Concurrent writers at one revision commit exactly once.', verification_class: fixture_replay, source: {artifact: 'urn:example:product:counter/invariants.yaml', revision: 'urn:example:rev:1', digest: 'sha256:5555555555555555555555555555555555555555555555555555555555555555'}}
+- {law_ref: 'urn:example:law:ambiguous-commit-reconciles', law_kind: product_invariant, statement: 'A commit whose effect may have occurred reports OUTCOME_UNKNOWN and leaves exactly one durable receipt.', verification_class: fixture_replay, source: {artifact: 'urn:example:product:counter/invariants.yaml', revision: 'urn:example:rev:1', digest: 'sha256:5555555555555555555555555555555555555555555555555555555555555555'}}
+- {law_ref: 'urn:example:law:counter-store-is-the-only-writer', law_kind: product_invariant, statement: 'Only the counter store adapter writes counter state.', verification_class: static_inspection, source: {artifact: 'urn:example:product:counter/invariants.yaml', revision: 'urn:example:rev:1', digest: 'sha256:5555555555555555555555555555555555555555555555555555555555555555'}}
+- {law_ref: 'urn:example:law:lease-expiry', law_kind: admitted_contract, statement: 'An expired lease is reassignable.', verification_class: fixture_replay, source: {artifact: 'urn:example:contracts.yaml', revision: 'urn:example:rev:1', digest: 'sha256:6666666666666666666666666666666666666666666666666666666666666666'}}
+fixture_cases:
+- id: create_starts_at_zero
+  disposition: executable
+  source_law_refs: [urn:example:law:create-starts-at-zero]
+  given:
+    steps: []
+  when:
+    mode: single
+    operation: counter.create
+    request: {counter_id: c1, operation_id: op.1}
+  expect:
+    observations:
+    - id: read_after
+      kind: interface_action
+      operation: counter.get
+      request: {counter_id: c1}
+      context: {tenant_ref: tenant.a, principal_ref: agent.a, budget_ms: 5000}
+    assertions:
+    - {id: committed, law_ref: urn:example:law:create-starts-at-zero, target: {kind: step, ref: when, path: status}, predicate: equals, operand: committed}
+    - {id: receipt_contract, law_ref: urn:example:law:create-starts-at-zero, target: {kind: step, ref: when}, predicate: result_contract_is, operand: urn:example:CounterReceipt:1}
+    - {id: value_zero, law_ref: urn:example:law:create-starts-at-zero, target: {kind: observation, ref: read_after, path: value}, predicate: equals, operand: 0}
+    - {id: same_revision, law_ref: urn:example:law:create-starts-at-zero, target: {kind: observation, ref: read_after, path: revision}, predicate: equals, operand: {$observed: {step: when, path: revision}}}
+  provenance: {derived_from: law_index, derivation_ref: urn:example:law-ir:counter@1}
+- id: exact_retry_returns_original
+  disposition: executable
+  source_law_refs: [urn:example:law:exact-retry-is-idempotent]
+  given:
+    steps:
+    - {id: original, kind: interface_action, operation: counter.create, request: {counter_id: c1, operation_id: op.1}, precondition: {status: committed}}
+  when:
+    mode: single
+    operation: counter.create
+    request: {counter_id: c1, operation_id: op.1}
+  expect:
+    observations: []
+    assertions:
+    - {id: same_receipt, law_ref: urn:example:law:exact-retry-is-idempotent, target: {kind: step, ref: when}, predicate: equals, operand: {$observed: {step: original, path: ''}}}
+  provenance: {derived_from: law_index, derivation_ref: urn:example:law-ir:counter@1}
+- id: concurrent_increments_one_commit
+  disposition: executable
+  source_law_refs: [urn:example:law:revision-compare-and-set]
+  given:
+    steps:
+    - {id: limit, kind: port_fixture, operation: urn:example:LimitAdmission:1, request: {max_value: 10}}
+    - {id: created, kind: interface_action, operation: counter.create, request: {counter_id: c1, operation_id: op.1}, precondition: {status: committed}}
+  when:
+    mode: parallel
+    steps:
+    - {id: writer_a, operation: counter.increment, request: {counter_id: c1, expected_revision: {$from: {step: created, path: revision}}, operation_id: op.a}}
+    - {id: writer_b, operation: counter.increment, request: {counter_id: c1, expected_revision: {$from: {step: created, path: revision}}, operation_id: op.b}}
+  expect:
+    observations:
+    - {id: final, kind: interface_action, operation: counter.get, request: {counter_id: c1}}
+    assertions:
+    - {id: one_commit, law_ref: urn:example:law:revision-compare-and-set, target: {kind: group}, predicate: count_where, operand: {where: [{path: status, predicate: equals, operand: committed}], count: 1}}
+    - {id: one_conflict, law_ref: urn:example:law:revision-compare-and-set, target: {kind: group}, predicate: count_where, operand: {where: [{path: status, predicate: equals, operand: conflict}, {path: receipt_id, predicate: is_absent}], count: 1}}
+    - {id: value_one, law_ref: urn:example:law:revision-compare-and-set, target: {kind: observation, ref: final, path: value}, predicate: equals, operand: 1}
+    - {id: revision_advanced, law_ref: urn:example:law:revision-compare-and-set, target: {kind: observation, ref: final, path: revision}, predicate: greater_than, operand: {$observed: {step: created, path: revision}}}
+  provenance: {derived_from: law_index, derivation_ref: urn:example:law-ir:counter@1}
+- id: ambiguous_commit_reconciles
+  disposition: executable
+  source_law_refs: [urn:example:law:ambiguous-commit-reconciles]
+  given:
+    steps:
+    - {id: policy, kind: harness_control, operation: urn:example:harness:authz-policy, request: {allow: [counter.create, counter.get]}}
+    - {id: fault, kind: harness_control, operation: urn:example:harness:store-fault, request: {port_method: commit, code: TIMEOUT, after_effect: after}}
+  when:
+    mode: single
+    operation: counter.create
+    request: {counter_id: c2, operation_id: op.2}
+    context: {tenant_ref: tenant.a, principal_ref: agent.a, authorization_ref: policy.allow, budget_ms: 30000}
+  expect:
+    observations:
+    - {id: receipts, kind: harness_observation, operation: urn:example:harness:receipt-count, request: {operation_id: op.2}}
+    assertions:
+    - {id: outcome_unknown, law_ref: urn:example:law:ambiguous-commit-reconciles, target: {kind: step, ref: when, path: code}, predicate: equals, operand: OUTCOME_UNKNOWN}
+    - {id: problem_contract, law_ref: urn:example:law:ambiguous-commit-reconciles, target: {kind: step, ref: when}, predicate: result_contract_is, operand: urn:example:CounterProblem:1}
+    - {id: one_receipt, law_ref: urn:example:law:ambiguous-commit-reconciles, target: {kind: observation, ref: receipts, path: count}, predicate: equals, operand: 1}
+    - {id: count_contract, law_ref: urn:example:law:ambiguous-commit-reconciles, target: {kind: observation, ref: receipts}, predicate: result_contract_is, operand: 'urn:example:harness:ReceiptCount:1'}
+  provenance: {derived_from: law_index, derivation_ref: urn:example:law-ir:counter@1}
+- id: erased_identity_not_reused
+  disposition: executable
+  source_law_refs: [urn:example:law:create-starts-at-zero]
+  given:
+    steps:
+    - {id: created, kind: interface_action, operation: counter.create, request: {counter_id: c3, operation_id: op.3}, precondition: {status: committed}, context: {tenant_ref: tenant.a, principal_ref: agent.a}}
+    - {id: erase, kind: harness_control, operation: urn:example:harness:retention-erase, request: {counter_id: c3, decision_ref: retention.decision.1}}
+  when:
+    mode: single
+    operation: counter.create
+    request: {counter_id: c3, operation_id: op.4, prior_digest: {$from: {step: erase, path: state_digest}}}
+  expect:
+    observations: []
+    assertions:
+    - {id: refused, law_ref: urn:example:law:create-starts-at-zero, target: {kind: step, ref: when, path: status}, predicate: equals, operand: refused}
+  provenance: {derived_from: law_index, derivation_ref: urn:example:law-ir:counter@1}
+- id: lease_expiry_reassigns
+  disposition: unresolved
+  blocked_by: [urn:example:unknown:no-declared-clock-port]
+  source_law_refs: [urn:example:law:lease-expiry]
+  given:
+    steps: []
+  when:
+    mode: single
+    operation: counter.get
+    request: {counter_id: c1}
+  expect:
+    observations: []
+    assertions:
+    - {id: placeholder_unexecuted, law_ref: urn:example:law:lease-expiry, target: {kind: step, ref: when, path: lease}, predicate: is_present}
+  provenance: {derived_from: law_index, derivation_ref: urn:example:law-ir:counter@1}
+unresolved:
+- {case_ref: lease_expiry_reassigns, result: unresolved, reason: Expiry needs a controllable clock and the manifest declares no clock setup port.}
+provenance:
+  closure_digest: sha256:1f1330fc7a8997738771e5af525194a89117d293b8447ef3f5d32abc2a77ffd6
+  law_index_digest: sha256:2be9a4198efc472b61ac26925fe34548628004494471347d3f066741d01d6d4c
+  compiler: {compiler_version: l9-semantic-compiler@0.0.0-example}

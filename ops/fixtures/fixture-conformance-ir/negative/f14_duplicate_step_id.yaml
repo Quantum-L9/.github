@@ -1,0 +1,13 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: step_observation_assertion_and_case_ids_are_unique_within_their_scope
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 2
+  - when
+  - steps
+  - 1
+  - id
+  value: writer_a

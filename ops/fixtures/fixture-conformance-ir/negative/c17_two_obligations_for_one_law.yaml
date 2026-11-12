@@ -1,0 +1,25 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: there_is_exactly_one_obligation_per_law_index_entry_of_the_consumed_fixture_ir_and_its_governing_refs_are_exactly_that_law_ref
+mutation:
+- op: append
+  path:
+  - obligations
+  value:
+    id: obl.create-again
+    subject_class: product_invariant
+    governing_refs:
+    - urn:example:law:create-starts-at-zero
+    observable_semantics: A committed create yields value zero at the receipt revision.
+    verification_class: fixture_replay
+    witnessed_by:
+    - create_starts_at_zero
+    - erased_identity_not_reused
+    disposition: executable
+    execution_plan:
+      mode: fixture_replay
+      cases:
+      - create_starts_at_zero
+      - erased_identity_not_reused
+      isolation: fresh_subject_per_case
+      verdict_rule: pass_only_when_every_witness_case_executes_and_every_assertion_holds

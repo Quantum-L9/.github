@@ -1,0 +1,39 @@
+# Positive reference evaluations (R5-F1): outcomes the pinned semantics require, including the ones that hold.
+# Negative evaluations (e*.yaml, p*.yaml) prove the non-pass outcomes under the rule each names.
+evaluations:
+- id: is_absent_on_absent_path_holds
+  assertion: {id: a, law_ref: urn:example:law:x, target: {kind: step, ref: when, path: next_cursor}, predicate: is_absent}
+  recorded: {when: {coverage: resync_required}}
+  expected_outcome: pass
+- id: is_present_on_present_path_holds
+  assertion: {id: a, law_ref: urn:example:law:x, target: {kind: step, ref: when, path: events.0.seq}, predicate: is_present}
+  recorded: {when: {events: [{seq: 4}]}}
+  expected_outcome: pass
+- id: is_null_on_null_holds
+  assertion: {id: a, law_ref: urn:example:law:x, target: {kind: step, ref: when, path: events.0.prior_revision}, predicate: is_null}
+  recorded: {when: {events: [{prior_revision: null}]}}
+  expected_outcome: pass
+- id: array_length_by_index_presence
+  assertion: {id: a, law_ref: urn:example:law:x, target: {kind: step, ref: when, path: events.2}, predicate: is_absent}
+  recorded: {when: {events: [{seq: 1}, {seq: 2}]}}
+  expected_outcome: pass
+- id: relational_with_observed_operand_holds
+  assertion: {id: a, law_ref: urn:example:law:x, target: {kind: observation, ref: final, path: revision}, predicate: greater_than, operand: {$observed: {step: created, path: revision}}}
+  recorded: {final: {revision: 1}, created: {revision: 0}}
+  expected_outcome: pass
+- id: count_where_exact_count_holds
+  assertion: {id: a, law_ref: urn:example:law:x, target: {kind: group}, predicate: count_where, operand: {where: [{path: status, predicate: equals, operand: committed}], count: 1}}
+  group: [{status: committed}, {status: conflict}]
+  expected_outcome: pass
+- id: count_where_conjunction_and_absent_clause_path
+  assertion: {id: a, law_ref: urn:example:law:x, target: {kind: group}, predicate: count_where, operand: {where: [{path: status, predicate: equals, operand: conflict}, {path: receipt_id, predicate: is_absent}], count: 1}}
+  group: [{status: committed, receipt_id: r1}, {status: conflict}]
+  expected_outcome: pass
+- id: count_where_zero_count_holds
+  assertion: {id: a, law_ref: urn:example:law:x, target: {kind: group}, predicate: count_where, operand: {where: [{path: status, predicate: equals, operand: refused}], count: 0}}
+  group: [{status: committed}, {status: conflict}]
+  expected_outcome: pass
+- id: precondition_flat_map_holds
+  precondition: {status: committed, state_ref.revision: 0}
+  result: {status: committed, state_ref: {revision: 0}}
+  expected_outcome: hold

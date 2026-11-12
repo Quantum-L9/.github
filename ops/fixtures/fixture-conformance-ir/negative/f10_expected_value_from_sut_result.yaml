@@ -1,0 +1,16 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: no_expected_value_derives_from_the_system_under_test
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 0
+  - expect
+  - assertions
+  - 2
+  - operand
+  value:
+    $from:
+      step: when
+      path: value

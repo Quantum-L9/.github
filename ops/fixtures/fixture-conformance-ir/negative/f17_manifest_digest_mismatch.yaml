@@ -1,0 +1,9 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: subject_and_provenance_closure_digest_are_equal
+mutation:
+- op: set
+  path:
+  - provenance
+  - closure_digest
+  value: sha256:3333333333333333333333333333333333333333333333333333333333333333

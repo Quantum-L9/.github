@@ -1,0 +1,15 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: a_given_step_precondition_is_a_flat_map_of_dotted_paths_to_literals_that_are_not_mappings_and_contain_no_value_reference
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 1
+  - given
+  - steps
+  - 0
+  - precondition
+  value:
+    status:
+      equals: committed

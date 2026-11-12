@@ -1,0 +1,13 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: every_harness_observation_names_a_declared_harness_observation
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 3
+  - expect
+  - observations
+  - 0
+  - operation
+  value: urn:example:harness:undeclared

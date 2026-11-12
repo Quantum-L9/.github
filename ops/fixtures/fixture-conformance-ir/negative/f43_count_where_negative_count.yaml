@@ -1,0 +1,14 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: a_count_where_operand_is_a_non_empty_where_list_of_path_scalar_predicate_and_literal_operand_clauses_and_a_non_negative_integer_count
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 2
+  - expect
+  - assertions
+  - 0
+  - operand
+  - count
+  value: -1

@@ -1,0 +1,15 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: a_single_when_names_exactly_one_operation_and_request_and_no_steps
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 0
+  - when
+  - steps
+  value:
+  - id: extra
+    operation: counter.get
+    request:
+      counter_id: c1

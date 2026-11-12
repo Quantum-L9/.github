@@ -1,0 +1,196 @@
+# R5-F1 language test: State cases encoded in candidate l9.fixture-ir/v1 form.
+# EVIDENCE ONLY. This is not a State product fixture and carries no State authority (State authors its own cases).
+# Source: Quantum-L9/l9-wip@ce0c4973af31aa68741014febef1364ba58f3e3f
+#   l9-state/l9-state-FULL-WORK-PACK-HANDOFF-READY/l9-state/{fixtures/SEMANTIC_CASES.yaml, product-topology.yaml,
+#   invariants.yaml, contracts/}
+# Stand-in coordinate (disclosed, not compiled provenance): no compiled State ProductManifest exists at this revision,
+# so subject/provenance closure_digest is a stand-in (sha256 of product-topology.yaml bytes), not a closure digest.
+# Law input is the interim law_index: State's own invariant ids, bound to invariants.yaml at ce0c4973 by file sha256
+# (real provenance); each statement is that invariant's `assertion` text verbatim. verification_class fixture_replay
+# is this language test's assignment, not State's declaration.
+schema: l9.fixture-ir/v1
+subject:
+  product_ref: l9.state
+  closure_digest: sha256:2bb63927e3c1d0c15fe1117f310aea576514bee9407c6bba91c6f9abc733713a
+authority:
+  authority_revision: Quantum-L9/.github@f8e44d1536cb218de41dde4685c606a4d6460915
+  compilation_profile_ref: l9.compilation/product-build@1
+  stage: fixtures
+interface_surface:
+  actions:
+  - {action_ref: state.create, request_contract_ref: 'urn:l9:state:StateCreateRequest:1.0', result_contract_ref: 'urn:l9:state:StateReceipt:1.0', effect_class: state_mutation}
+  - {action_ref: state.get, request_contract_ref: 'urn:l9:state:StateReadRequest:1.0', result_contract_ref: 'urn:l9:state:StateReadResult:1.0', effect_class: read_observation}
+  - {action_ref: state.transition, request_contract_ref: 'urn:l9:state:StateTransitionRequest:1.0', result_contract_ref: 'urn:l9:state:StateReceipt:1.0', effect_class: state_mutation}
+  - {action_ref: state.events, request_contract_ref: 'urn:l9:state:StateEventReadRequest:1.0', result_contract_ref: 'urn:l9:state:StateEventPage:1.0', effect_class: read_observation}
+  - {action_ref: state.history, request_contract_ref: 'urn:l9:state:StateHistoryRequest:1.0', result_contract_ref: 'urn:l9:state:StateHistoryPage:1.0', effect_class: read_observation}
+  - {action_ref: state.operation.inspect, request_contract_ref: 'urn:l9:state:StateOperationInspectRequest:1.0', result_contract_ref: 'urn:l9:state:StateOperationInspectResult:1.0', effect_class: read_observation}
+  problem_contract_refs:
+  - 'urn:l9:state:StateProblem:1.0'
+  setup_ports:
+  - port_ref: 'urn:l9:state:port:ContractCatalog:1.0'
+    contract_refs: ['urn:l9:state:contract:ContractCatalogPort:1.0']
+  - port_ref: 'urn:l9:state:port:ScopeAuthorization:1.0'
+    contract_refs: ['urn:l9:state:contract:ScopeAuthorizationPort:1.0']
+  forbidden_actions: [state.hard_erase, state.hard_delete]
+  # Stand-in harness refs (language test only): State's declared harness surface (topology
+  # conformance.harness_surface_ref) does not exist yet; names follow State's harness directives.
+  harness_controls:
+  - {control_ref: 'l9.state/harness@1#advance_clock', kind: clock, contract_ref: 'l9.state/harness@1#AdvanceClock'}
+  - {control_ref: 'l9.state/harness@1#trim_journal_before', kind: journal_retention, contract_ref: 'l9.state/harness@1#TrimJournalBefore'}
+  - {control_ref: 'l9.state/harness@1#inject_fault', kind: fault_injection, target_port_ref: 'urn:l9:state:port:StateStore:1.0', contract_ref: 'l9.state/harness@1#InjectFault'}
+  - {control_ref: 'l9.state/harness@1#authorization', kind: authorization_policy, contract_ref: 'l9.state/harness@1#AuthorizationPolicy'}
+  - {control_ref: 'l9.state/harness@1#retention_hard_erase', kind: internal_setup, target_port_ref: 'urn:l9:state:port:StateStore:1.0', contract_ref: 'l9.state/harness@1#RetentionHardErase'}
+  harness_observations:
+  - {observation_ref: 'l9.state/harness@1#count_operation_receipts', result_contract_ref: 'l9.state/harness@1#OperationReceiptCount'}
+  - {observation_ref: 'l9.state/harness@1#gate_registration', result_contract_ref: 'l9.state/harness@1#GateRegistration'}
+law_index:
+- {law_ref: 'l9.state/invariants@1#STATE-ATOMIC-001', law_kind: product_invariant, statement: 'State mutation commits projection, immutable revision, event, and receipt atomically.', verification_class: fixture_replay, source: {artifact: 'Quantum-L9/l9-wip:l9-state/l9-state-FULL-WORK-PACK-HANDOFF-READY/l9-state/invariants.yaml', revision: 'Quantum-L9/l9-wip@ce0c4973af31aa68741014febef1364ba58f3e3f', digest: 'sha256:47079ce89cc801325ef6989cc34525a041244c37bce2e5ffdb1c64682fd73479'}}
+- {law_ref: 'l9.state/invariants@1#STATE-CURSOR-001', law_kind: product_invariant, statement: 'Public cursors are State-issued and provider-independent.', verification_class: fixture_replay, source: {artifact: 'Quantum-L9/l9-wip:l9-state/l9-state-FULL-WORK-PACK-HANDOFF-READY/l9-state/invariants.yaml', revision: 'Quantum-L9/l9-wip@ce0c4973af31aa68741014febef1364ba58f3e3f', digest: 'sha256:47079ce89cc801325ef6989cc34525a041244c37bce2e5ffdb1c64682fd73479'}}
+- {law_ref: 'l9.state/invariants@1#STATE-IDEMP-001', law_kind: product_invariant, statement: 'One scoped operation ID binds exactly one action and canonical request digest.', verification_class: fixture_replay, source: {artifact: 'Quantum-L9/l9-wip:l9-state/l9-state-FULL-WORK-PACK-HANDOFF-READY/l9-state/invariants.yaml', revision: 'Quantum-L9/l9-wip@ce0c4973af31aa68741014febef1364ba58f3e3f', digest: 'sha256:47079ce89cc801325ef6989cc34525a041244c37bce2e5ffdb1c64682fd73479'}}
+- {law_ref: 'l9.state/invariants@1#STATE-OUTCOME-001', law_kind: product_invariant, statement: 'An admitted OperationKey has at most one durable terminal receipt.', verification_class: fixture_replay, source: {artifact: 'Quantum-L9/l9-wip:l9-state/l9-state-FULL-WORK-PACK-HANDOFF-READY/l9-state/invariants.yaml', revision: 'Quantum-L9/l9-wip@ce0c4973af31aa68741014febef1364ba58f3e3f', digest: 'sha256:47079ce89cc801325ef6989cc34525a041244c37bce2e5ffdb1c64682fd73479'}}
+- {law_ref: 'l9.state/invariants@1#STATE-OUTCOME-003', law_kind: product_invariant, statement: 'A terminal OperationKey is never re-evaluated; changed-world retry requires a new operation_id.', verification_class: fixture_replay, source: {artifact: 'Quantum-L9/l9-wip:l9-state/l9-state-FULL-WORK-PACK-HANDOFF-READY/l9-state/invariants.yaml', revision: 'Quantum-L9/l9-wip@ce0c4973af31aa68741014febef1364ba58f3e3f', digest: 'sha256:47079ce89cc801325ef6989cc34525a041244c37bce2e5ffdb1c64682fd73479'}}
+- {law_ref: 'l9.state/invariants@1#STATE-RETRY-001', law_kind: product_invariant, statement: 'retry_class describes retry safety, not workflow recovery.', verification_class: fixture_replay, source: {artifact: 'Quantum-L9/l9-wip:l9-state/l9-state-FULL-WORK-PACK-HANDOFF-READY/l9-state/invariants.yaml', revision: 'Quantum-L9/l9-wip@ce0c4973af31aa68741014febef1364ba58f3e3f', digest: 'sha256:47079ce89cc801325ef6989cc34525a041244c37bce2e5ffdb1c64682fd73479'}}
+- {law_ref: 'l9.state/invariants@1#STATE-REV-001', law_kind: product_invariant, statement: 'Revision starts at 0 and increments exactly once per state mutation; object identity is never reused.', verification_class: fixture_replay, source: {artifact: 'Quantum-L9/l9-wip:l9-state/l9-state-FULL-WORK-PACK-HANDOFF-READY/l9-state/invariants.yaml', revision: 'Quantum-L9/l9-wip@ce0c4973af31aa68741014febef1364ba58f3e3f', digest: 'sha256:47079ce89cc801325ef6989cc34525a041244c37bce2e5ffdb1c64682fd73479'}}
+fixture_cases:
+- id: create_revision_zero
+  disposition: executable
+  source_law_refs: ['l9.state/invariants@1#STATE-REV-001', 'l9.state/invariants@1#STATE-ATOMIC-001']
+  given:
+    steps:
+    - id: admit_contracts
+      kind: port_fixture
+      operation: 'urn:l9:state:contract:ContractCatalogPort:1.0'
+      request: {admit_schema: {schema_ref: 'urn:example:state:1', schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}, admit_retention: {retention_policy_ref: retention.standard.v1, retention_policy_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}}
+  when:
+    mode: single
+    operation: state.create
+    request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, schema_ref: 'urn:example:state:1', schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: ready, value: 1}, operation_id: op.create.1, retention_policy_ref: retention.standard.v1, retention_policy_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
+  expect:
+    observations:
+    - {id: events_after, kind: interface_action, operation: state.events, request: {contract_version: '1.0', scope_ref: subject.1, consumer_ref: consumer.1, limit: 10}}
+    assertions:
+    - {id: receipt, law_ref: 'l9.state/invariants@1#STATE-ATOMIC-001', target: {kind: step, ref: when}, predicate: result_contract_is, operand: 'urn:l9:state:StateReceipt:1.0'}
+    - {id: committed, law_ref: 'l9.state/invariants@1#STATE-ATOMIC-001', target: {kind: step, ref: when, path: status}, predicate: equals, operand: committed}
+    - {id: revision_zero, law_ref: 'l9.state/invariants@1#STATE-REV-001', target: {kind: step, ref: when, path: state_ref.revision}, predicate: equals, operand: 0}
+    - {id: event_prior_null, law_ref: 'l9.state/invariants@1#STATE-REV-001', target: {kind: observation, ref: events_after, path: events.0.prior_revision}, predicate: is_null}
+    - {id: event_kind_created, law_ref: 'l9.state/invariants@1#STATE-ATOMIC-001', target: {kind: observation, ref: events_after, path: events.0.event_kind}, predicate: equals, operand: created}
+    - {id: event_is_receipt_event, law_ref: 'l9.state/invariants@1#STATE-ATOMIC-001', target: {kind: observation, ref: events_after, path: events.0.event_id}, predicate: equals, operand: {$observed: {step: when, path: event_ref}}}
+  provenance: {derived_from: owner_authored_case, derivation_ref: 'l9.state/semantic-fixtures@1#create_revision_zero'}
+- id: duplicate_exact_operation
+  disposition: executable
+  source_law_refs: ['l9.state/invariants@1#STATE-IDEMP-001', 'l9.state/invariants@1#STATE-OUTCOME-001']
+  given:
+    steps:
+    - {id: admit_contracts, kind: port_fixture, operation: 'urn:l9:state:contract:ContractCatalogPort:1.0', request: {admit_schema: {schema_ref: 'urn:example:state:1', schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}, admit_retention: {retention_policy_ref: retention.standard.v1, retention_policy_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}}}
+    - id: original
+      kind: interface_action
+      operation: state.create
+      request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, schema_ref: 'urn:example:state:1', schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: ready, value: 1}, operation_id: op.create.1, retention_policy_ref: retention.standard.v1, retention_policy_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
+      precondition: {status: committed}
+  when:
+    mode: single
+    operation: state.create
+    request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, schema_ref: 'urn:example:state:1', schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: ready, value: 1}, operation_id: op.create.1, retention_policy_ref: retention.standard.v1, retention_policy_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
+  expect:
+    observations:
+    - {id: current, kind: interface_action, operation: state.get, request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1}}
+    assertions:
+    - {id: original_receipt, law_ref: 'l9.state/invariants@1#STATE-OUTCOME-001', target: {kind: step, ref: when}, predicate: equals, operand: {$observed: {step: original, path: ''}}}
+    - {id: no_new_revision, law_ref: 'l9.state/invariants@1#STATE-IDEMP-001', target: {kind: observation, ref: current, path: state_ref.revision}, predicate: equals, operand: 0}
+  provenance: {derived_from: owner_authored_case, derivation_ref: 'l9.state/semantic-fixtures@1#duplicate_exact_operation'}
+- id: concurrent_revision_writers
+  disposition: executable
+  source_law_refs: ['l9.state/invariants@1#STATE-REV-001', 'l9.state/invariants@1#STATE-ATOMIC-001']
+  given:
+    steps:
+    - {id: admit_contracts, kind: port_fixture, operation: 'urn:l9:state:contract:ContractCatalogPort:1.0', request: {admit_schema: {schema_ref: 'urn:example:state:1', schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}, admit_retention: {retention_policy_ref: retention.standard.v1, retention_policy_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}}}
+    - id: created
+      kind: interface_action
+      operation: state.create
+      request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, schema_ref: 'urn:example:state:1', schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: ready, value: 1}, operation_id: op.create.1, retention_policy_ref: retention.standard.v1, retention_policy_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
+      precondition: {status: committed}
+  when:
+    mode: parallel
+    steps:
+    - id: writer_a
+      operation: state.transition
+      request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, expected_revision: 0, expected_state_digest: {$from: {step: created, path: state_ref.state_digest}}, expected_schema_ref: 'urn:example:state:1', expected_schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: a, value: 2}, transition_label: to_a, operation_id: op.a}
+    - id: writer_b
+      operation: state.transition
+      request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, expected_revision: 0, expected_state_digest: {$from: {step: created, path: state_ref.state_digest}}, expected_schema_ref: 'urn:example:state:1', expected_schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: b, value: 3}, transition_label: to_b, operation_id: op.b}
+  expect:
+    observations:
+    - {id: final, kind: interface_action, operation: state.get, request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1}}
+    assertions:
+    - {id: exactly_one_commit, law_ref: 'l9.state/invariants@1#STATE-REV-001', target: {kind: group}, predicate: count_where, operand: {where: [{path: status, predicate: equals, operand: committed}], count: 1}}
+    - {id: exactly_one_conflict, law_ref: 'l9.state/invariants@1#STATE-ATOMIC-001', target: {kind: group}, predicate: count_where, operand: {where: [{path: status, predicate: equals, operand: conflict}], count: 1}}
+    - {id: revision_one, law_ref: 'l9.state/invariants@1#STATE-REV-001', target: {kind: observation, ref: final, path: state_ref.revision}, predicate: equals, operand: 1}
+  provenance: {derived_from: owner_authored_case, derivation_ref: 'l9.state/semantic-fixtures@1#concurrent_revision_writers'}
+- id: expired_event_cursor
+  disposition: executable
+  source_law_refs: ['l9.state/invariants@1#STATE-CURSOR-001', 'l9.state/invariants@1#STATE-RETRY-001']
+  given:
+    steps:
+    - {id: admit_contracts, kind: port_fixture, operation: 'urn:l9:state:contract:ContractCatalogPort:1.0', request: {admit_schema: {schema_ref: 'urn:example:state:1', schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}, admit_retention: {retention_policy_ref: retention.standard.v1, retention_policy_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}}}
+    - {id: created, kind: interface_action, operation: state.create, request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, schema_ref: 'urn:example:state:1', schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: ready, value: 1}, operation_id: op.create.1, retention_policy_ref: retention.standard.v1, retention_policy_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}, precondition: {status: committed}, context: {tenant_ref: tenant.a, principal_ref: agent.a}}
+    - {id: first_page, kind: interface_action, operation: state.events, request: {contract_version: '1.0', scope_ref: subject.1, consumer_ref: consumer.1, limit: 1}, context: {tenant_ref: tenant.a, principal_ref: agent.a}}
+    - {id: trim, kind: harness_control, operation: 'l9.state/harness@1#trim_journal_before', request: {scope_ref: subject.1, before_seq: 1000}}
+  when:
+    mode: single
+    operation: state.events
+    request: {contract_version: '1.0', scope_ref: subject.1, consumer_ref: consumer.1, cursor: {$from: {step: first_page, path: next_cursor}}, limit: 10}
+    context: {tenant_ref: tenant.a, principal_ref: agent.a, budget_ms: 30000}
+  expect:
+    observations: []
+    assertions:
+    - {id: page_not_problem, law_ref: 'l9.state/invariants@1#STATE-CURSOR-001', target: {kind: step, ref: when}, predicate: result_contract_is, operand: 'urn:l9:state:StateEventPage:1.0'}
+    - {id: coverage_resync_required, law_ref: 'l9.state/invariants@1#STATE-CURSOR-001', target: {kind: step, ref: when, path: coverage}, predicate: equals, operand: resync_required}
+    - {id: no_events, law_ref: 'l9.state/invariants@1#STATE-CURSOR-001', target: {kind: step, ref: when, path: events}, predicate: equals, operand: []}
+    - {id: no_next_cursor, law_ref: 'l9.state/invariants@1#STATE-RETRY-001', target: {kind: step, ref: when, path: next_cursor}, predicate: is_absent}
+    - {id: retained_from_present, law_ref: 'l9.state/invariants@1#STATE-CURSOR-001', target: {kind: step, ref: when, path: retained_from_seq}, predicate: is_present}
+    - {id: high_water_present, law_ref: 'l9.state/invariants@1#STATE-CURSOR-001', target: {kind: step, ref: when, path: high_water_seq}, predicate: is_present}
+  provenance: {derived_from: owner_authored_case, derivation_ref: 'l9.state/semantic-fixtures@1#expired_event_cursor'}
+- id: terminal_conflict_is_sticky
+  disposition: executable
+  source_law_refs: ['l9.state/invariants@1#STATE-OUTCOME-001', 'l9.state/invariants@1#STATE-OUTCOME-003']
+  given:
+    steps:
+    - {id: admit_contracts, kind: port_fixture, operation: 'urn:l9:state:contract:ContractCatalogPort:1.0', request: {admit_schema: {schema_ref: 'urn:example:state:1', schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}, admit_retention: {retention_policy_ref: retention.standard.v1, retention_policy_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}}}
+    - id: created
+      kind: interface_action
+      operation: state.create
+      request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, schema_ref: 'urn:example:state:1', schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: ready, value: 1}, operation_id: op.create.1, retention_policy_ref: retention.standard.v1, retention_policy_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
+      precondition: {status: committed}
+    - id: advance
+      kind: interface_action
+      operation: state.transition
+      request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, expected_revision: 0, expected_state_digest: {$from: {step: created, path: state_ref.state_digest}}, expected_schema_ref: 'urn:example:state:1', expected_schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: a, value: 2}, transition_label: to_a, operation_id: op.advance}
+      precondition: {status: committed}
+    - id: stale_write
+      kind: interface_action
+      operation: state.transition
+      request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, expected_revision: 0, expected_state_digest: {$from: {step: created, path: state_ref.state_digest}}, expected_schema_ref: 'urn:example:state:1', expected_schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: x, value: 9}, transition_label: to_x, operation_id: op.stale}
+      precondition: {status: conflict}
+    - id: world_changes
+      kind: interface_action
+      operation: state.transition
+      request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, expected_revision: 1, expected_state_digest: {$from: {step: advance, path: state_ref.state_digest}}, expected_schema_ref: 'urn:example:state:1', expected_schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: b, value: 3}, transition_label: to_b, operation_id: op.world}
+      precondition: {status: committed}
+  when:
+    mode: single
+    operation: state.transition
+    request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1, expected_revision: 0, expected_state_digest: {$from: {step: created, path: state_ref.state_digest}}, expected_schema_ref: 'urn:example:state:1', expected_schema_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, payload: {phase: x, value: 9}, transition_label: to_x, operation_id: op.stale}
+  expect:
+    observations:
+    - {id: current, kind: interface_action, operation: state.get, request: {contract_version: '1.0', object_id: object.1, scope_ref: subject.1}}
+    assertions:
+    - {id: original_conflict_returned, law_ref: 'l9.state/invariants@1#STATE-OUTCOME-003', target: {kind: step, ref: when}, predicate: equals, operand: {$observed: {step: stale_write, path: ''}}}
+    - {id: still_conflict, law_ref: 'l9.state/invariants@1#STATE-OUTCOME-001', target: {kind: step, ref: when, path: status}, predicate: equals, operand: conflict}
+    - {id: reason_revision_conflict, law_ref: 'l9.state/invariants@1#STATE-OUTCOME-001', target: {kind: step, ref: when, path: reason_codes}, predicate: includes, operand: REVISION_CONFLICT}
+    - {id: world_unchanged_by_retry, law_ref: 'l9.state/invariants@1#STATE-OUTCOME-003', target: {kind: observation, ref: current, path: state_ref.revision}, predicate: equals, operand: 2}
+  provenance: {derived_from: owner_authored_case, derivation_ref: 'l9.state/semantic-fixtures@1#terminal_conflict_is_sticky'}
+unresolved: []
+provenance:
+  closure_digest: sha256:2bb63927e3c1d0c15fe1117f310aea576514bee9407c6bba91c6f9abc733713a
+  law_index_digest: sha256:54664fe8b603f0179eee2c80c8fcec1dad619daa5e8cbefec7714c86c0badb6b
+  compiler: {compiler_version: none-language-test-only}

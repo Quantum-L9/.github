@@ -1,0 +1,20 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: every_assertion_targets_a_when_step_the_when_group_or_a_declared_observation_and_never_a_given_step
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 1
+  - expect
+  - assertions
+  - 0
+  value:
+    id: setup_status
+    law_ref: urn:example:law:exact-retry-is-idempotent
+    target:
+      kind: step
+      ref: original
+      path: status
+    predicate: equals
+    operand: committed

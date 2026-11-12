@@ -57,8 +57,9 @@ ProductTopology
 - ADR-034: Integration Accountability and the Technical Coordination Role
 - ADR-035: Bounded Decision Autonomy and Material Decision Escalation
 - ADR-036: Technical Coordination Role Projection
+- ADR-037: Structural contracts for l9.fixture-ir/v1, l9.conformance-ir/v1 and l9.harness-surface/v1
 
-ADR-001 through ADR-036 are the global semantic decisions. They live in this
+ADR-001 through ADR-037 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions

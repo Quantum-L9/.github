@@ -1,0 +1,13 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: an_observed_operand_appears_only_in_a_relational_predicate_and_never_names_its_own_target_value
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 0
+  - expect
+  - assertions
+  - 3
+  - predicate
+  value: includes

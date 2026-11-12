@@ -1,0 +1,30 @@
+# Synthetic ProductManifest witness for the closure digest (R5-F1). Not product law and not a resolved manifest.
+# closure_digest = semantic digest of this document without manifest_digest, closure_digest and conformance.compilation
+# (product_manifest.schema.yaml#closure_digest_definition). positive/fixture_ir.yaml binds it as subject.closure_digest.
+# manifest_digest is a witness value: the semantic digest of this document without manifest_digest.
+schema: l9.product-manifest/v1
+product: {id: urn:example:product:counter, kind: node, archetype_ref: urn:example:archetype:stateful-service}
+source_topology: {ref: urn:example:product:counter/product-topology.yaml, digest: 'sha256:7777777777777777777777777777777777777777777777777777777777777777'}
+authority: {}
+identity: {}
+requirements: {}
+capabilities: {}
+architecture: {}
+ports: {inbound: [{port_ref: urn:example:port:CounterApi:1, contract_refs: [urn:example:CounterCreate:1]}]}
+adapters: {}
+relationships: {}
+technology: {}
+bindings: {}
+providers: {}
+admission: {}
+lifecycle: {}
+conformance:
+  profile_refs: []
+  fixture_case_refs: [{ref: urn:example:product:counter/fixtures/cases.yaml, digest: 'sha256:d2bedd4a267b23f20129f56d6d29a23c08f23583f98e24e0e66e1a2798b1700e'}]
+  harness_surface_ref: {ref: urn:example:product:counter/harness-surface.yaml, digest: 'sha256:b1214e539ba778fe1f90225dc3ce8e188e01b8cb6a24a3d27eb744d435b218f1'}
+  compilation: {fixture_ir_digest: 'sha256:a9b51ab026df5e703a682484988d6838312acee5bb4e0c2f389fb6a5cceeddd7', conformance_ir_digest: 'sha256:7a6a655ca2eb4c81e1cee90ad1fab31b140969a80409427f5a308aa7de06c11b'}
+compiler: {profile_ref: l9.compilation/product-build@1, profile_digest: 'sha256:8888888888888888888888888888888888888888888888888888888888888888', compiler_version: l9-semantic-compiler@0.0.0-example}
+provenance: {}
+unresolved: []
+closure_digest: 'sha256:1f1330fc7a8997738771e5af525194a89117d293b8447ef3f5d32abc2a77ffd6'
+manifest_digest: 'sha256:f654fdf7b5e2e45bc7f4e2936a9518960783b96075366ac967ab78fe4d9c52f8'

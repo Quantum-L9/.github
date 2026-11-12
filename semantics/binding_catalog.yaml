@@ -66,6 +66,40 @@ bindings:
   rules:
   - binding_declares_mapping
   - binding_does_not_perform_lowering
+- id: pytest/v2
+  class: target
+  source_ir: fixture_ir
+  target_ir: pytest_ir
+  target:
+    technology: pytest
+  successor_of: pytest/v1
+  maps:
+    fixture_case: pytest_test_function
+    given: setup_phase
+    given.steps.interface_action: setup_system_under_test_call
+    given.steps.port_fixture: setup_port_fixture
+    given.steps.harness_control: setup_harness_control
+    given.steps.precondition: setup_precondition_error_not_failure
+    when.operation: system_under_test_call
+    when.steps.sequence: ordered_system_under_test_calls
+    when.steps.parallel: concurrently_issued_system_under_test_calls
+    context: gate_invocation_context
+    expect: pytest_assertions
+    expect.observations.interface_action: post_call_observation_call
+    expect.observations.harness_observation: post_call_harness_observation
+    disposition.unresolved: unresolved_case_reported_never_passed
+    expect.observations.context: gate_invocation_context_of_the_observation_call
+    expect.group.count_where: exact_count_of_group_member_results_satisfying_every_where_clause
+    expect.presence: path_resolution_check_where_absence_is_a_value_not_an_error
+  rules:
+  - binding_declares_mapping
+  - binding_does_not_perform_lowering
+  - unresolved_case_never_renders_as_a_passing_or_skipped_success
+  - parallel_group_renders_as_concurrently_issued_calls_without_ordering_guarantee
+  - setup_precondition_failure_renders_as_error_never_as_assertion_failure
+  - value_references_resolve_from_recorded_step_results_only
+  - harness_controls_and_observations_render_only_through_the_product_declared_harness_surface
+  - context_renders_as_the_gate_invocation_context_of_its_step_and_never_as_request_payload
 - id: l9.binding/repository-operations-pyproject@1
   class: target
   source_ir: repository_operations_ir

@@ -1,0 +1,10 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: no_expected_result_is_defined_by_the_system_under_test_or_by_conformance_evidence
+mutation:
+- op: set
+  path:
+  - obligations
+  - 0
+  - expected_result
+  value: pass

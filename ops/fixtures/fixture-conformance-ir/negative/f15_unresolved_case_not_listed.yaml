@@ -1,0 +1,8 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: an_unresolved_case_is_listed_in_unresolved_with_a_non_resolved_result_and_names_what_blocks_it
+mutation:
+- op: delete
+  path:
+  - unresolved
+  - 0

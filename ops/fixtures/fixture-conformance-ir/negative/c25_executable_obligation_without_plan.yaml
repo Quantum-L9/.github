@@ -1,0 +1,9 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: a_fixture_replay_obligation_with_witnesses_has_an_execution_plan_whose_cases_are_exactly_the_witnessed_by_cases_and_any_other_obligation_has_none
+mutation:
+- op: delete
+  path:
+  - obligations
+  - 1
+  - execution_plan

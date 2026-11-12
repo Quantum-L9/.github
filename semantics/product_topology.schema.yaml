@@ -371,6 +371,24 @@ properties:
       negative_proof_refs: semantic_ref_list
       provider_conformance_refs: semantic_ref_list
       final_conformance_required: boolean
+      fixture_case_refs:
+        type: array
+        items:
+          type: object
+          required:
+          - ref
+          - digest
+          fields:
+            ref: semantic_ref
+            digest: semantic_digest
+      harness_surface_ref:
+        type: object
+        required:
+        - ref
+        - digest
+        fields:
+          ref: semantic_ref
+          digest: semantic_digest
   compatibility:
     type: object
     fields:
@@ -503,6 +521,31 @@ semantic_rules:
 - port_and_adapter_entries_follow_entry_shapes
 - implementation_ref_is_an_optional_declared_source_coordinate_not_semantic_authority
 - implementation_ref_never_makes_a_port_or_adapter_resolve
+- conformance_fixture_case_refs_name_product_owned_fixture_ir_documents_bound_by_digest_and_are_not_fixture_profiles
+- conformance_harness_surface_ref_names_the_product_l9_harness_surface_document_and_grants_no_gate_action
+- absent_fixture_case_refs_or_harness_surface_ref_changes_no_existing_topology_obligation
+- a_conformance_product_file_digest_is_the_sha256_of_the_raw_bytes_of_the_named_file
+- a_conformance_product_file_ref_resolves_to_exactly_one_repository_spec_authoritative_source_entry_whose_coordinate_equals_it_and_whose_path_stays_inside_the_repository
+- an_unresolved_ambiguous_escaping_or_digest_mismatched_product_file_ref_is_a_typed_refusal_never_a_resolution
+product_file_resolution:
+  applies_to:
+  - properties.conformance.fields.fixture_case_refs
+  - properties.conformance.fields.harness_surface_ref
+  rule: 'A product file ref {ref, digest} resolves through the product''s RepositorySpec. ref must equal the coordinate
+    of exactly one entry under the RepositorySpec''s source_surfaces.authoritative groups. That entry''s path is
+    relative to the directory holding the RepositorySpec, is not absolute, and never escapes that directory. The
+    file at that path is read as raw bytes, and digest must equal "sha256:" + the lowercase hex sha256 of those bytes.
+    Nothing outside the matched entry''s path is read.'
+  refusals:
+    product_file_ref_unresolved: No authoritative source entry's coordinate equals ref, or the matched path names no
+      file.
+    product_file_ref_ambiguous: More than one authoritative source entry's coordinate equals ref.
+    product_file_path_escapes_repository: The matched entry's path is absolute or resolves outside the directory
+      holding the RepositorySpec.
+    product_file_digest_mismatch: The raw-bytes sha256 of the matched file differs from digest.
+  consumer_requirement: A RepositorySpec authoritative source entry that a topology product file ref names carries a
+    coordinate equal to that ref. The RepositorySpec schema is not owned here; this states only what resolution
+    reads.
 kind_resolution:
   canonical_source: product_kinds.yaml
   admitted_kind_rule: Declared kind must resolve to an admitted ProductKind before ProductManifest may pass the

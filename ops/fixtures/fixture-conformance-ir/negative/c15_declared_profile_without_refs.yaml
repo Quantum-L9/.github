@@ -1,0 +1,9 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: a_declared_fixture_profile_names_at_least_one_profile_ref_and_records_no_fixture_profile_absent_unknown
+mutation:
+- op: set
+  path:
+  - fixture_profile
+  - status
+  value: declared

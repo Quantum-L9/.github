@@ -1,0 +1,17 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: a_from_reference_names_only_an_earlier_step_of_the_same_case_and_never_a_step_of_its_own_parallel_group
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 2
+  - when
+  - steps
+  - 1
+  - request
+  - expected_revision
+  value:
+    $from:
+      step: writer_a
+      path: revision

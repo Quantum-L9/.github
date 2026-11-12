@@ -1,0 +1,9 @@
+# Falsifying fixture: positive/fixture_ir.yaml against a mutated positive/product_manifest.yaml; must be rejected under `violates`.
+document: closure
+violates: a_manifest_that_records_conformance_compilation_records_closure_digest_and_the_compiled_fixture_and_conformance_ir_digests
+manifest_mutation:
+- op: delete
+  path:
+  - conformance
+  - compilation
+  - conformance_ir_digest

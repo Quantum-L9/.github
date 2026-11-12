@@ -1,0 +1,8 @@
+# Falsifying fixture: positive/fixture_ir.yaml against a mutated positive/product_manifest.yaml; must be rejected under `violates`.
+document: closure
+violates: manifest_closure_digest_is_the_semantic_digest_of_the_manifest_without_manifest_digest_closure_digest_and_conformance_compilation
+manifest_mutation:
+- op: set
+  path:
+  - closure_digest
+  value: sha256:4444444444444444444444444444444444444444444444444444444444444444

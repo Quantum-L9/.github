@@ -676,6 +676,11 @@ class Registration:
             if isinstance(p, dict)
         ]
         self.schemas = schema_registry(tree)
+        self.ir_ids = {
+            e.get("id")
+            for e in tree.yaml_or_empty("semantics/ir_catalog.yaml").get("irs") or []
+            if isinstance(e, dict) and _nonempty_str(e.get("id"))
+        }
         forbidden = self.profiles_doc.get("forbidden_constraints") or {}
         self.forbidden_defs = set((forbidden.get("definitions") or {}).keys())
         # Registry ambiguity blocks every subject: resolution by position is not resolution.
@@ -1134,11 +1139,57 @@ class Registration:
             for p in self.projections + self.compositions
             if (p.get("output") or {}).get("schema") == const
         ]
+        if const in self.ir_ids and doc.get("schema") == SCHEMA_DEFINITION:
+            self._ir_schema(name, doc, const, outputs)
+            return
         if len(outputs) != 1:
             self.gaps.append(
                 f"schema {name}: {const} is the output of {len(outputs)} profiles, "
                 "not exactly one"
             )
+
+    def _ir_schema(
+        self, name: str, doc: dict[str, Any], const: str, outputs: list[Any]
+    ) -> None:
+        """An IR structural schema: its const is an ir_catalog IR id and no profile governs it.
+
+        The precedent is ADR-027 (`l9.schema/implementation-ir@1`). It registers through
+        `governed_by.contracts` alone. A const that is also a profile output is ambiguous,
+        and a schema that names a governing profile is not an IR schema.
+        """
+        if outputs:
+            self.gaps.append(
+                f"schema {name}: {const} is an ir_catalog IR id and also the output of "
+                f"{len(outputs)} profile(s); IR schema identity is ambiguous"
+            )
+        governed = doc.get("governed_by")
+        governed = governed if isinstance(governed, dict) else {}
+        profile_refs = sorted(
+            k
+            for k in ("projection_profile_ref", "composition_profile_ref")
+            if k in governed
+        )
+        if profile_refs:
+            self.gaps.append(
+                f"schema {name}: IR schema for {const} names governing profile "
+                f"field(s) {profile_refs}"
+            )
+        contracts = governed.get("contracts")
+        if (
+            not isinstance(contracts, list)
+            or not contracts
+            or not all(_nonempty_str(c) for c in contracts)
+        ):
+            self.gaps.append(
+                f"schema {name}: IR schema for {const} declares no governed_by.contracts"
+            )
+            return
+        defined = _ids(self.contracts)
+        for ref in contracts:
+            if defined.count(ref) != 1:
+                self.gaps.append(
+                    f"schema {name}: governed_by contract {ref} is not defined exactly once"
+                )
 
     def run(self) -> dict[str, Any]:
         for ident in self.subject["invariants"]:

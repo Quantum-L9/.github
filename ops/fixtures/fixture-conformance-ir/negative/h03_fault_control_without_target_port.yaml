@@ -1,0 +1,9 @@
+# Falsifying fixture: mutates positive/harness_surface.yaml; must be rejected under `violates`.
+document: harness_surface
+violates: a_fault_injection_control_declares_a_target_port_ref_and_only_fault_injection_and_internal_setup_controls_name_one
+mutation:
+- op: delete
+  path:
+  - harness_controls
+  - 0
+  - target_port_ref

@@ -1,0 +1,11 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: provenance_law_index_digest_is_the_semantic_digest_of_law_index
+mutation:
+- op: set
+  path:
+  - law_index
+  - 0
+  - source
+  - digest
+  value: sha256:7777777777777777777777777777777777777777777777777777777777777777

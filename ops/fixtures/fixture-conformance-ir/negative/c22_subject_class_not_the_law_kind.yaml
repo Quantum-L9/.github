@@ -1,0 +1,10 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: an_obligation_subject_class_observable_semantics_and_verification_class_are_its_law_kind_statement_and_verification_class
+mutation:
+- op: set
+  path:
+  - obligations
+  - 5
+  - subject_class
+  value: product_invariant

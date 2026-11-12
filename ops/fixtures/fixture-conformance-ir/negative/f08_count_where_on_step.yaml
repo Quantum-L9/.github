@@ -1,0 +1,15 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: count_where_targets_only_a_when_group_and_scalar_predicates_never_target_a_group
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 2
+  - expect
+  - assertions
+  - 0
+  - target
+  value:
+    kind: step
+    ref: writer_a

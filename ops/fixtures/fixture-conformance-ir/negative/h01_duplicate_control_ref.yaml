@@ -1,0 +1,12 @@
+# Falsifying fixture: mutates positive/harness_surface.yaml; must be rejected under `violates`.
+document: harness_surface
+violates: control_refs_and_observation_refs_are_unique_across_the_surface
+mutation:
+- op: append
+  path:
+  - harness_controls
+  value:
+    control_ref: urn:example:harness:authz-policy
+    kind: authorization_policy
+    contract_ref: urn:example:harness:AuthorizationPolicy:2
+    implementation_ref: tests/harness/authz.py::set_policy_v2

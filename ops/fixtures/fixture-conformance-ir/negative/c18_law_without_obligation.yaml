@@ -1,0 +1,12 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`. A static_inspection law still yields an obligation.
+document: conformance_ir
+violates: there_is_exactly_one_obligation_per_law_index_entry_of_the_consumed_fixture_ir_and_its_governing_refs_are_exactly_that_law_ref
+mutation:
+- op: delete
+  path:
+  - obligations
+  - 4
+- op: delete
+  path:
+  - unresolved
+  - 0

@@ -1,0 +1,7 @@
+# Falsifying fixture: every witness outcome reported pass for an unresolved obligation; aggregation must stay unresolved.
+document: verdict
+violates: an_unresolved_obligation_never_yields_a_pass_verdict
+obligation_index: 5
+case_outcomes:
+  lease_expiry_reassigns: pass
+expected_verdict: unresolved

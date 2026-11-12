@@ -98,6 +98,9 @@ requires:
   - strategic_metacognition_projection.schema.yaml
   - strategic_planning_context_projection.schema.yaml
   - implementation_ir.schema.yaml
+  - fixture_ir.schema.yaml
+  - conformance_ir.schema.yaml
+  - harness_surface.schema.yaml
   - strategic_interaction_projection.schema.yaml
   - strategic_interaction_composition.schema.yaml
   - identity_assurance_composition_v2.schema.yaml

@@ -1,0 +1,11 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: no_forbidden_action_is_an_interface_surface_action_or_names_any_step_or_observation_operation
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 0
+  - when
+  - operation
+  value: counter.hard_delete

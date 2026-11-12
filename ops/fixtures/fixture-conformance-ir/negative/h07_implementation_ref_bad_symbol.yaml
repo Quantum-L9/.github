@@ -1,0 +1,10 @@
+# Falsifying fixture: mutates positive/harness_surface.yaml; must be rejected under `violates`.
+document: harness_surface
+violates: every_implementation_ref_is_a_repository_relative_posix_path_with_an_optional_top_level_symbol_that_never_escapes_the_repository
+mutation:
+- op: set
+  path:
+  - harness_controls
+  - 1
+  - implementation_ref
+  value: src/counter/retention.py::hard-erase()

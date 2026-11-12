@@ -37,6 +37,9 @@ irs:
 - id: l9.conformance-ir/v1
   semantic_class: conformance_ir
   purpose: Canonical representation of executable conformance obligations before target-specific rendering or execution.
+- id: l9.harness-surface/v1
+  semantic_class: harness_surface
+  purpose: Product-authored declaration of the harness controls and harness observations a product exposes to its conformance harness, each bound to a verified implementation_ref; bound by raw-bytes digest from ProductTopology conformance.harness_surface_ref and consumed by the fixtures stage. It declares no Gate action and is never semantic authority.
 - id: l9.architecture-ir/v1
   semantic_class: architecture_ir
   purpose: Validated architecture representation synthesized from admitted semantic obligations, constraints, applicable

@@ -1,0 +1,11 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: every_obligation_traces_to_governing_semantics_through_a_governing_ref_shared_with_each_witness_case_source_law_refs
+mutation:
+- op: set
+  path:
+  - obligations
+  - 0
+  - governing_refs
+  value:
+  - urn:example:law:unrelated

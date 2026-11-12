@@ -1,0 +1,13 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: every_interface_action_observation_is_an_interface_surface_action_whose_effect_class_is_read_observation
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 0
+  - expect
+  - observations
+  - 0
+  - operation
+  value: counter.increment
