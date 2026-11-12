@@ -1460,6 +1460,50 @@ terms:
     question: >-
       Which domain projections does this consumer need, under which activation
       conditions, and what remains unresolved about the consumer itself?
+  technical_coordination_role:
+    semantic_class: semantic_role
+    definition: >-
+      A scope-bound role that coordinates authorized technical work across
+      independently responsible specialists, agents, or sessions. It
+      interprets approved objectives and applicable architectural constraints,
+      identifies dependencies and integration obligations, coordinates the
+      assignment of bounded work to eligible executors within their existing
+      authorization, reconciles evidence and blockers, and presents
+      consequential decisions to their authoritative owners. The role does not
+      itself own Strategy, canonical architecture, implementation truth,
+      durable work state, or the authority to execute, admit, publish, or
+      merge.
+    question: >-
+      Who coordinates the technical work while preserving the authority and
+      ownership of its participants?
+    rules:
+    - role_is_not_actor_identity
+    - role_selection_does_not_grant_authority
+    - delegation_requires_applicable_authorization
+    - strategic_plan_remains_owned_by_plan_keeper
+    - architecture_judgment_remains_with_its_owner
+    - durable_work_state_remains_source_owned
+    - specialist_results_require_applicable_verification
+    - coordination_does_not_imply_acceptance_or_completion
+  integration_responsibility:
+    semantic_class: semantic_concept
+    definition: >-
+      An explicitly assigned, scope-bound accountability for reconciling
+      independently produced contributions that jointly affect a shared
+      acceptance subject. The responsible party identifies the exact combined
+      revision, applicable interfaces and contracts, material conflicts and
+      unresolved dependencies, and the evidence required to substantiate
+      integrated correctness. This accountability is distinct from canonical
+      semantic ownership, execution permission, and final decision authority.
+    question: >-
+      Who is accountable for verifying that the combined work satisfies its
+      governing contracts?
+    rules:
+    - integration_subject_and_scope_must_be_explicit
+    - integration_acceptance_requires_combined_state_evidence
+    - component_receipts_do_not_prove_integrated_correctness
+    - integration_accountability_does_not_transfer_ownership
+    - integration_accountability_does_not_grant_action_authority
 relationships:
   authority_flow:
     sequence:
