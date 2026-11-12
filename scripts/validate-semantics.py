@@ -15640,6 +15640,17 @@ RC036_ENTRY = ("scope", "guarantee", "not_implied", "failure_signal", "runtime_p
 RC036_STATUS = {"provided", "not_provided", "unknown"}
 RC036_BASIS = {"vendor_statement", "inference_from_vendor_statements", "none"}
 RC036_FORBIDDEN_TEXT = ("://", "password", "secret=", "apikey", "api_key")
+RC036_RECEIPT_COORDINATES = {
+    "provider_binding_id",
+    "provider_binding_digest_sha256",
+    "token",
+    "probe_id",
+    "deployment_profile",
+    "provider_server_version",
+    "verdict",
+    "executed_at",
+    "executor_identity",
+}
 RC036_TIER_FLAGS = (
     "runtime_qualification_is_not_an_admission_precondition",
     "admitted_definition_does_not_imply_runtime_qualification",
@@ -15765,6 +15776,19 @@ def _rc036_static(docs: dict[str, dict], report: Report) -> None:
             "capability_definitions.runtime_receipt.family",
             receipt_family,
             "runtime receipt family not in receipt_catalog.yaml",
+        )
+    bound = set(
+        _list(
+            _mapping(block.get("runtime_receipt")).get("additional_bound_coordinates")
+        )
+    )
+    if not RC036_RECEIPT_COORDINATES <= bound:
+        report.fail(
+            "RC-036",
+            RC036_TECH,
+            "capability_definitions.runtime_receipt.additional_bound_coordinates",
+            sorted(RC036_RECEIPT_COORDINATES - bound),
+            "runtime receipt must bind binding id and digest, token, probe, deployment, server version, verdict, time and executor",
         )
     rules = _mapping(tech.get("binding_rules"))
     tiers = _mapping(rules.get("provider_compatibility_tiers"))
@@ -16037,6 +16061,12 @@ def _rc036_negative_cases() -> list[tuple[str, object]]:
             ),
         ),
         (
+            "receipt_server_version_unbound",
+            lambda d: d[T]["capability_definitions"]["runtime_receipt"][
+                "additional_bound_coordinates"
+            ].remove("provider_server_version"),
+        ),
+        (
             "receipt_family_unregistered",
             lambda d: d[T]["capability_definitions"]["runtime_receipt"].__setitem__(
                 "family", "l9.receipt/datastore@1"
@@ -16196,10 +16226,22 @@ def check_rc036(root: Path, docs: dict[str, dict], report: Report) -> None:
                 label,
                 "mutation was accepted",
             )
-    if rejected == len(cases):
+    # Evaluator mutant: receipt qualification without the server-version check
+    # must be caught by the fixtures (n21, n22).
+    _, mutant_failures, _ = dcc.run_suite(root, check_server_version=False)
+    if not mutant_failures:
+        report.fail(
+            "RC-036",
+            RC036_FIXTURES,
+            "evaluator_mutant",
+            "check_server_version=False",
+            "a version-blind receipt check was accepted by every fixture",
+        )
+    elif rejected == len(cases):
         report.ok(
             "RC-036-NEG",
-            f"{rejected} datastore capability, tier, reconciliation and provider-binding mutations fail closed",
+            f"{rejected} datastore capability, tier, reconciliation and provider-binding mutations fail closed, "
+            f"and the version-blind evaluator mutant is rejected by {len(mutant_failures)} fixtures",
         )
 
 

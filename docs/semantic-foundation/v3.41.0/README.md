@@ -11,7 +11,7 @@ Successor to the v3.40.0 candidate (ADR-037, `.github#247`, head `821c477`), whi
 - `semantics/technology_capabilities.yaml#capability_definitions`: 13 provider-neutral tokens with scope, guarantee, `not_implied`, failure signal and runtime probe; aliases `unique_indexes`, `unique_constraints` → `unique_key`; coverage of `mongodb` and `postgresql`; deployment profiles `standalone`, `replica_set`, `sharded_cluster`; runtime receipt `l9.receipt/conformance@1` with additional bound coordinates.
 - `semantics/technology_capabilities.yaml#binding_rules.provider_compatibility_tiers`: D2-EVAL-01..10, overall rule, empty-set rule, mapping to `technology-binding@1` outcomes. Runtime qualification is not an admission precondition; an admitted definition never implies it.
 - `semantics/binding_catalog.yaml`: `l9.binding/provider/mongodb@1` (facts pinned to `[9.0, 9.1)`; `snapshot_isolation` provided by labelled inference; `serializable_isolation`, `server_authoritative_time_in_query_filters` and `document_storage` unknown; every runtime obligation `not_executed`); `compatibility.unknown_capability: incompatible_until_resolved`.
-- `scripts/validate-semantics.py`: RC-036 and RC-036-NEG; `scripts/datastore_capability_compatibility.py`; `ops/fixtures/datastore-capability-compatibility/` (5 positive, 20 negative).
+- `scripts/validate-semantics.py`: RC-036 and RC-036-NEG; `scripts/datastore_capability_compatibility.py`; `ops/fixtures/datastore-capability-compatibility/` (5 positive, 22 negative).
 - ADR-038 (candidate).
 
 ## Evidence

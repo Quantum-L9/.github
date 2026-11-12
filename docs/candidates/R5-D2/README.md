@@ -15,8 +15,8 @@ This pack is evidence for an owner decision. Nothing here is canonical until v3.
 | `compatibility_evaluation.candidate.yaml` | `semantics/technology_capabilities.yaml#binding_rules.provider_compatibility_tiers` |
 | `provider_bindings/mongodb.candidate.yaml` | `semantics/binding_catalog.yaml#bindings[l9.binding/provider/mongodb@1]` |
 | `tools/evaluate_compatibility.py` | `scripts/datastore_capability_compatibility.py` (RC-036) |
-| `fixtures/` (16) | `ops/fixtures/datastore-capability-compatibility/` (5 positive, 20 negative) |
-| `tests/test_d2_candidate.py` | `scripts/validate-semantics.py` RC-036 and RC-036-NEG (25 mutations) |
+| `fixtures/` (16) | `ops/fixtures/datastore-capability-compatibility/` (5 positive, 22 negative) |
+| `tests/test_d2_candidate.py` | `scripts/validate-semantics.py` RC-036 and RC-036-NEG (26 ledger mutations and a version-blind evaluator mutant) |
 | `vocabulary_reconciliation.candidate.yaml` | kept here as evidence; applied to `binding_catalog.yaml#compatibility.unknown_capability` |
 
 The State requirement evidence the provider draft listed (`l9-wip@ce0c4973`, `mongodb.py` L79–81, L411–421,

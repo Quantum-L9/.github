@@ -72,9 +72,23 @@ def _receipt_qualifies(
     token: str,
     probe_id: object,
     deployment: object,
+    server_version: object,
+    check_server_version: bool = True,
 ) -> bool:
     if str(receipt.get("subject_kind", "")).lower() in FAKE_SUBJECTS:
         return False  # D2-EVAL-09
+    if check_server_version:
+        # D2-EVAL-09: the receipt's provider_server_version is a bound coordinate.
+        # It must be present, parseable, inside the binding's range and equal to
+        # the deployed server version; otherwise the receipt does not qualify.
+        version = receipt.get("provider_server_version")
+        bounds = binding.get("server_version_range")
+        if _version_tuple(version) is None or _version_tuple(server_version) is None:
+            return False
+        if _version_tuple(version) != _version_tuple(server_version):
+            return False
+        if isinstance(bounds, dict) and not _in_range(version, bounds):
+            return False
     return (
         receipt.get("provider_binding_id") == binding.get("id")
         and receipt.get("provider_binding_digest_sha256") == binding_digest(binding)
@@ -92,6 +106,7 @@ def evaluate_token(
     deployment: object,
     server_version: object,
     receipts: list[dict[str, Any]],
+    check_server_version: bool = True,
 ) -> tuple[str, str]:
     canonical = aliases.get(token, token)
     definition = definitions.get(canonical)
@@ -121,7 +136,15 @@ def evaluate_token(
     qualifying = [
         r
         for r in receipts
-        if _receipt_qualifies(r, binding, canonical, probe_id, deployment)
+        if _receipt_qualifies(
+            r,
+            binding,
+            canonical,
+            probe_id,
+            deployment,
+            server_version,
+            check_server_version,
+        )
     ]
     if qualifying:
         newest = max(qualifying, key=lambda r: str(r.get("executed_at", "")))
@@ -131,7 +154,9 @@ def evaluate_token(
 
 
 def evaluate(
-    case: dict[str, Any], aliases: dict[str, str] | None = None
+    case: dict[str, Any],
+    aliases: dict[str, str] | None = None,
+    check_server_version: bool = True,
 ) -> dict[str, Any]:
     required = list(case.get("required_capabilities") or [])
     if not required:
@@ -153,6 +178,7 @@ def evaluate(
             case.get("deployment_profile"),
             case.get("server_version"),
             receipts,
+            check_server_version,
         )
         for t in required
     }
@@ -209,7 +235,10 @@ def resolve_case(
     return resolved
 
 
-def run_suite(root: Path) -> tuple[list[str], list[str], set[str]]:
+def run_suite(
+    root: Path, check_server_version: bool = True
+) -> tuple[list[str], list[str], set[str]]:
+    """Run every fixture. check_server_version=False is the RC-036-NEG code mutant."""
     definitions, aliases, providers = ledger_inputs(root)
     passes: list[str] = []
     failures: list[str] = []
@@ -218,7 +247,7 @@ def run_suite(root: Path) -> tuple[list[str], list[str], set[str]]:
         for path in sorted((root / FIXTURES / polarity).glob("*.yaml")):
             doc = yaml.safe_load(path.read_text(encoding="utf-8"))
             case = resolve_case(doc["case"], definitions, providers)
-            got = evaluate(case, aliases)
+            got = evaluate(case, aliases, check_server_version)
             expect = doc["expect"]
             ok = got["overall"] == expect["overall"] and all(
                 got["tokens"].get(t, {}).get("result") == r

@@ -218,7 +218,7 @@ binding_rules:
         when: as D2-EVAL-07, and the newest receipt bound to the exact provider binding id and digest, token, probe and deployment profile passes
         result: runtime_qualified
       - id: D2-EVAL-09
-        when: a receipt binds a different binding digest or deployment profile, or names an in-memory, fake or mock subject
+        when: a receipt binds a different binding digest or deployment profile, records a provider_server_version that is missing, unparseable, outside the binding's server_version_range or different from the deployed server version, or names an in-memory, fake or mock subject
         result: receipt_ignored
       - id: D2-EVAL-10
         when: the provider binding declares a server_version_range and the deployed server version is unknown or outside it
