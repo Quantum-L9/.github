@@ -5,7 +5,8 @@
 # help/setup/validate/check/test and includes this file. Everything this
 # repository runs lives here. Do not redefine a facade target in this file.
 #
-#   make setup     repo-setup     the toolchain the gates need (node, git, PyYAML)
+#   make setup     repo-setup     the toolchain the gates need (node, git, curl,
+#                                 PyYAML, jsonschema)
 #   make validate  repo-validate  the complete local gate, unchanged: seed
 #                                 payload suites, SHA pins, semantic closure
 #   make check     repo-check     static subset: SHA-pin audit
@@ -26,15 +27,15 @@
 # $(USE_VENV), so a runner whose python3 lacks PyYAML (Core) sees the same one.
 USE_VENV = if [ -x .venv/bin/python3 ]; then export PATH="$(CURDIR)/.venv/bin:$$PATH"; fi;
 
-repo-setup: ## Check node and git; provide a PyYAML interpreter (.venv if needed)
+repo-setup: ## Check node and git; provide a PyYAML + jsonschema interpreter (.venv if needed)
 	@set -euo pipefail; \
-	for tool in node git python3; do \
+	for tool in node git python3 curl; do \
 	  command -v "$$tool" >/dev/null 2>&1 || { echo "❌ $$tool not found — make validate cannot run" >&2; exit 1; }; \
 	done; \
-	if ! python3 -c 'import yaml' >/dev/null 2>&1 \
-	   && ! { [ -x .venv/bin/python3 ] && .venv/bin/python3 -c 'import yaml' >/dev/null 2>&1; }; then \
+	if ! python3 -c 'import yaml, jsonschema' >/dev/null 2>&1 \
+	   && ! { [ -x .venv/bin/python3 ] && .venv/bin/python3 -c 'import yaml, jsonschema' >/dev/null 2>&1; }; then \
 	  python3 -m venv .venv; \
-	  .venv/bin/pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2"; \
+	  .venv/bin/pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2" "jsonschema==4.23.0"; \
 	fi
 
 repo-check: ## Static check: audit this repo for floating action refs

@@ -57,8 +57,9 @@ on:
       categories:
         description: >-
           Comma-separated categories, or "all" (= each repo's class
-          seed_categories; default class: codeowners, dependabot, governance,
-          community-health, issue-templates, pr-templates). Opt-in: labels.
+          seed_categories; default class: codeowners, dependabot, coderabbit,
+          governance, community-health, issue-templates, pr-templates).
+          Opt-in: labels.
           A category a repo's class forbids skips that repo. Retired (fail
           closed): on-org-update.
         type: string

@@ -24,7 +24,7 @@ differ from the org version, and opens one PR per target; it never merges one.
 | --- | --- | --- | --- |
 | **Inheritance** | The passive community-health surfaces: `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml`. For `self_governed` repositories, `SECURITY.md` and the templates as well. | None | Live from `main`. These are never in the seed payload. One local copy blocks inheritance for that file. There is no merge. |
 | **Reference** | `governance-pr.yml` and `governance-issue.yml`, called from the consumer's `.github/workflows/governance.yml` | None for the callee | The caller pins a full commit SHA (`policies/governance-caller.yml`). Moving a tag does not retarget a caller that already pins a SHA. Missing-only seed does not overwrite an existing caller. |
-| **Physical copy** | `.github/CODEOWNERS`, `.github/dependabot.yml`, the governance caller where the class allows it, `SECURITY.md`, `.github/ISSUE_TEMPLATE/*`, `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md`. Default categories: `codeowners`, `dependabot`, `governance`, `community-health`, `issue-templates`, `pr-templates`. `labels` is opt-in. | Org secret `GH_TOKEN` | Missing-only pull request, except the managed files (`MANAGED_SEED_PATHS`: `.github/CODEOWNERS` and the rendered `.github/dependabot.yml`), which every seed replaces with the current org version when they differ. |
+| **Physical copy** | `.github/CODEOWNERS`, `.github/dependabot.yml`, `.coderabbit.yaml`, the governance caller where the class allows it, `SECURITY.md`, `.github/ISSUE_TEMPLATE/*`, `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md`. Default categories: `codeowners`, `dependabot`, `coderabbit`, `governance`, `community-health`, `issue-templates`, `pr-templates`. `labels` is opt-in. | Org secret `GH_TOKEN` | Missing-only pull request, except the managed files (`MANAGED_SEED_PATHS`: `.github/CODEOWNERS` and the rendered `.github/dependabot.yml`), which every seed replaces with the current org version when they differ. `.coderabbit.yaml` is rendered but missing-only ([ADR 0020](adr/0020-coderabbit-central-config-seeded.md)). |
 | **Remote apply** | Labels and repository settings | Org secret / governance App | API state, not a file. `sync-labels-all.yml`, `enforce-policies.yml`, `repo-birth-bootstrap.yml`. |
 
 Seed sources that are also this repository's own files are read from those
@@ -33,6 +33,7 @@ files. Consumer-only files live in `policies/`:
 - `policies/CODEOWNERS` → `.github/CODEOWNERS` (skipped when the consumer already has a root `CODEOWNERS`)
 - `policies/governance-caller.yml` → `.github/workflows/governance.yml`
 - `.github/dependabot.yml` (rendered per repository root by `ops/render-dependabot.js`, not copied), `.github/labels.yml` (opt-in)
+- `.coderabbit.yaml` (`coderabbit`; rendered by `ops/render-coderabbit.js` from `policies/coderabbit/`, missing-only, never restored)
 - `SECURITY.md` (`community-health`; advisory URLs rewritten to the consumer)
 - `.github/ISSUE_TEMPLATE/` — seven named forms (`1-bug.yml`, `2-feature.yml`, `3-task.yml`, `4-incident.yml`, `ci-failure.yml`, `gov-violation.yml`, `config.yml`), never a directory sweep; `config.yml` advisory URL rewritten to the consumer
 - `.github/pull_request_template.md` and `.github/PULL_REQUEST_TEMPLATE/release.md` (`pr-templates`, named files, never a directory copy)
@@ -124,6 +125,19 @@ renders it from:
 - Core's `core-owned-tools.json`, vendored at
   `policies/vendor/l9-ci-core/` and digest-checked.
 
+`.coderabbit.yaml` is RENDERED, MISSING-ONLY
+([ADR 0020](adr/0020-coderabbit-central-config-seeded.md)).
+`ops/render-coderabbit.js` renders one file from `policies/coderabbit/`:
+top-level `inheritance: true` and a `reviews.path_filters` list of exclusions
+only. A fragment pattern without a leading `!` throws, because one include
+pattern turns CodeRabbit's list into an allowlist and every unnamed file is
+skipped; so do a double negation (`!!glob`) and a match-everything exclusion
+(`!**`, `!**/*`), which would silence review. The same bytes are this repository's `.coderabbit.yaml`, the central
+configuration in `Quantum-L9/coderabbit`, and the seed. A consumer's existing
+file is never replaced: it keeps its own `path_instructions` and tools, and
+with `inheritance: true` CodeRabbit appends the central exclusions to it.
+`continuous-sync.yml` does not touch it.
+
 The rendered file ignores Core-owned tools and the Core, SDK and `.github`
 action pins. Every entrypoint passes the shape to the one builder. A root that
 cannot be listed is `UNREACHABLE` (or `BLOCKED_PERMISSION`), never an
@@ -171,6 +185,7 @@ Those workflows, and `repo-birth-bootstrap.yml`, run in the
 | PR or issue template | Edit and merge. The seed sources are `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/release.md`, and `.github/ISSUE_TEMPLATE/*`. Seeded copies are not overwritten. |
 | Governance gate rule | Edit `governance-pr.yml` or `governance-issue.yml`, then re-pin the SHA in `policies/governance-caller.yml` and update consumers that already have a caller. |
 | CODEOWNERS or dependabot | Edit `policies/CODEOWNERS`, or the fragments in `policies/dependabot/` (then regenerate `.github/dependabot.yml` with `node ops/render-dependabot.js > .github/dependabot.yml`), and merge. A new Core list is vendored with its commit and sha256 in `policies/dependabot/core-owned-tools.source.json`. Dispatch `seed-governance.yml` (or `continuous-sync.yml`) to open a PR wherever either file differs from the new org version. |
+| CodeRabbit exclusions | Edit the fragments in `policies/coderabbit/path-filters/` (exclusions only), regenerate with `node ops/render-coderabbit.js > .coderabbit.yaml`, and merge. Commit the same render to `.coderabbit.yaml` in `Quantum-L9/coderabbit`: that file reaches every repository that inherits. Seeded copies are not overwritten, so an added exclusion reaches them through inheritance but a removed one does not: it stays in every copy seeded before the removal until that repository deletes it from its own `.coderabbit.yaml`. |
 | New repository | `auto-seed-new-repo.yml`, or `workflow_dispatch` on `seed-governance.yml`. `l9-repo-template` `make new-repo` dispatches `repo-birth-bootstrap.yml` for one repo. |
 
 ## Appendix A — secrets and called workflows

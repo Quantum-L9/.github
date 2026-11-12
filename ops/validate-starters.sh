@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # ops/validate-starters.sh
 # Runs the ops/test-*.js suites: seed payload selection, the rendered
-# dependabot.yml (ops/render-dependabot.js, ADR 0019), the repo-class birth
+# dependabot.yml (ops/render-dependabot.js, ADR 0019), the rendered
+# .coderabbit.yaml (ops/render-coderabbit.js, ADR 0020; fetches CodeRabbit's
+# schema with curl and validates with python3 jsonschema), the repo-class birth
 # profile contract, the shared label taxonomy parser, the seed-branch safety
 # gate, the branch guard inside both seed workflows and continuous-sync
 # (including its class-aware PR-template and caller re-pin management and its
@@ -46,6 +48,7 @@ else
     ops/test-build-seed-payload.js \
     ops/test-seed-payload-consumer-gates.js \
     ops/test-render-dependabot.js \
+    ops/test-render-coderabbit.js \
     ops/test-repo-class-profile.js \
     ops/test-label-taxonomy.js \
     ops/test-seed-branch-safety.js \

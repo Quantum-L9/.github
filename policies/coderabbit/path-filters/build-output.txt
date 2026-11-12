@@ -1,0 +1,11 @@
+# Build output, caches and coverage reports: regenerated, never reviewed.
+!**/dist/**
+!**/build/**
+!**/__pycache__/**
+!**/*.pyc
+!**/*.egg-info/**
+!**/.mypy_cache/**
+!**/.pytest_cache/**
+!**/.ruff_cache/**
+!**/htmlcov/**
+!**/.coverage

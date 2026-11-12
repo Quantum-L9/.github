@@ -33,6 +33,8 @@
 #   .github/workflows/governance.yml             re-pinned only: the
 #     governance-pr/-issue `uses:` SHAs follow policies/governance-caller.yml;
 #     the rest of a consumer's caller (e.g. `strict: true`) is theirs
+# .coderabbit.yaml is seeded missing-only and never restored here (ADR
+# docs/adr/0020-coderabbit-central-config-seeded.md).
 # Alternate templates (PULL_REQUEST_TEMPLATE/, root or docs/ copies) are
 # reported per repo for classification, never edited. A path another open PR
 # already changes is BLOCKED_CONFLICT. Writes are one atomic commit per repo,

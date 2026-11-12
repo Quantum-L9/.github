@@ -138,7 +138,7 @@ printf 'schema: l9.org-birth-profile-marker/v1\nprofile: non_constellation_pytho
   > "$NCP/.l9/org-birth-profile.yaml"
 NCP_OUT="$(cd "$ORG_ROOT" && bash ops/sync-org-files.sh "$NCP" --include-all)"
 grep -q 'class: non_constellation_python (marker)' <<< "$NCP_OUT" || fail "ncp class not reported"
-for f in .github/CODEOWNERS .github/dependabot.yml .github/labels.yml SECURITY.md; do
+for f in .coderabbit.yaml .github/CODEOWNERS .github/dependabot.yml .github/labels.yml SECURITY.md; do
   [[ -f "$NCP/$f" ]] || fail "ncp did not receive $f"
 done
 for f in .github/workflows/governance.yml .github/workflows/l9-analysis.yml .github/workflows/l9-lint-test.yml \
@@ -149,7 +149,7 @@ done
 [[ -d "$NCP/.github/workflows" ]] && fail "ncp received a workflows directory"
 grep -q 'https://github.com/Quantum-L9/example/security/advisories/new' "$NCP/SECURITY.md" || \
   fail "ncp SECURITY.md advisory link not rewritten"
-echo "✅ non_constellation_python gets exactly CODEOWNERS, dependabot, labels, SECURITY.md — no CI, no inherited files"
+echo "✅ non_constellation_python gets exactly .coderabbit.yaml, CODEOWNERS, dependabot, labels, SECURITY.md — no CI, no inherited files"
 
 # An explicit category the class forbids is refused, with nothing written.
 if (cd "$ORG_ROOT" && bash ops/sync-org-files.sh "$NCP" --include governance) > "$WORK/forbid.out" 2>&1; then

@@ -31,10 +31,11 @@
   },
   "classes": {
     "default": {
-      "description": "No class marker. Materialize codeowners, dependabot, governance, SECURITY.md, issue templates, and pull-request templates. Inherit the passive community-health surfaces. Apply labels and repository settings.",
+      "description": "No class marker. Materialize codeowners, dependabot, coderabbit (missing-only), governance, SECURITY.md, issue templates, and pull-request templates. Inherit the passive community-health surfaces. Apply labels and repository settings.",
       "seed_categories": [
         "codeowners",
         "dependabot",
+        "coderabbit",
         "governance",
         "community-health",
         "issue-templates",
@@ -88,10 +89,11 @@
       ]
     },
     "org_seeded_self_governed": {
-      "description": "Materialize ownership, rendered Dependabot, SECURITY.md and issue/PR templates while keeping repository CI self-governed. Inherit passive community-health surfaces. Never seed the org governance caller or CI distribution paths.",
+      "description": "Materialize ownership, rendered Dependabot, the missing-only CodeRabbit config, SECURITY.md and issue/PR templates while keeping repository CI self-governed. Inherit passive community-health surfaces. Never seed the org governance caller or CI distribution paths.",
       "seed_categories": [
         "codeowners",
         "dependabot",
+        "coderabbit",
         "community-health",
         "issue-templates",
         "pr-templates"
@@ -120,10 +122,11 @@
       ]
     },
     "non_constellation_python": {
-      "description": "Materialize codeowners, dependabot, labels, and SECURITY.md (consumer-specific advisory routing). Inherit the passive community-health surfaces, issue templates, and pull-request templates. Forbid org CI distribution paths and the retired consumer CI pin files.",
+      "description": "Materialize codeowners, dependabot, coderabbit (missing-only), labels, and SECURITY.md (consumer-specific advisory routing). Inherit the passive community-health surfaces, issue templates, and pull-request templates. Forbid org CI distribution paths and the retired consumer CI pin files.",
       "seed_categories": [
         "codeowners",
         "dependabot",
+        "coderabbit",
         "labels",
         "community-health"
       ],

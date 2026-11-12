@@ -1,0 +1,6 @@
+# Installed and vendored third-party code: not authored in the repository.
+!**/node_modules/**
+!**/.venv/**
+!**/venv/**
+!**/vendor/**
+!**/.tox/**

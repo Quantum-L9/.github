@@ -452,7 +452,7 @@ async function failClosedScenarios(wf, run, label) {
 			`${label}: planned under a stale class (dry=${dry})`,
 		);
 		if (dry) {
-			assert.match(rowOf(r)[2], /would seed 4/);
+			assert.match(rowOf(r)[2], /would seed 5/);
 			assert.strictEqual(wrote(r), false);
 		} else {
 			const tree = r.calls
@@ -462,6 +462,7 @@ async function failClosedScenarios(wf, run, label) {
 			assert.deepStrictEqual(
 				tree,
 				[
+					".coderabbit.yaml",
 					".github/CODEOWNERS",
 					".github/dependabot.yml",
 					".github/labels.yml",
@@ -718,6 +719,9 @@ async function failClosedScenarios(wf, run, label) {
 	{
 		const files = Object.fromEntries(
 			[
+				// Missing-only (ADR 0020): a consumer's own .coderabbit.yaml,
+				// whatever its bytes, is complete and never replaced.
+				".coderabbit.yaml",
 				".github/CODEOWNERS",
 				".github/dependabot.yml",
 				".github/workflows/governance.yml",
@@ -1224,6 +1228,7 @@ async function managedRestoreScenarios(run, label) {
 		assert.deepStrictEqual(
 			treesByRepo["ncp-repo"],
 			[
+				".coderabbit.yaml",
 				".github/CODEOWNERS",
 				".github/dependabot.yml",
 				".github/labels.yml",
@@ -1288,8 +1293,8 @@ async function managedRestoreScenarios(run, label) {
 		const ncpPreview = rowFor(r, "ncp-repo")[2];
 		assert.match(
 			ncpPreview,
-			/would seed 4/,
-			`${label}: ncp dry run previews 4 files (got ${ncpPreview})`,
+			/would seed 5/,
+			`${label}: ncp dry run previews 5 files (got ${ncpPreview})`,
 		);
 		for (const denied of FORBIDDEN_FOR_GOVERNED) {
 			assert.ok(
@@ -1302,7 +1307,7 @@ async function managedRestoreScenarios(run, label) {
 			/would seed 1( file\(s\))?: \.github\/CODEOWNERS/,
 		);
 		assert.match(rowFor(r, "typo-repo")[2], /skipped: .*unknown class/);
-		assert.match(rowFor(r, "plain-repo")[2], /would seed 13/);
+		assert.match(rowFor(r, "plain-repo")[2], /would seed 14/);
 		console.log(
 			`ok: ${label} — dry run previews the class payload and never a forbidden path`,
 		);

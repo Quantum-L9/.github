@@ -29,9 +29,11 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: "3.12"
-      - name: Install the pinned YAML parser
+      # ops/test-render-coderabbit.js validates the rendered .coderabbit.yaml
+      # against CodeRabbit's published JSON Schema with jsonschema.
+      - name: Install the pinned YAML parser and schema validator
         run: |
-          python3 -m pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2"
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2" "jsonschema==4.23.0"
       # ops/test-seed-pr-body.js renders seed PR bodies with the real PR-body
       # composer at the commit governance-pr.yml pins (the trigger suite keeps
       # this ref equal to that pin).

@@ -21,6 +21,9 @@
 #   codeowners        .github/CODEOWNERS (path-scoped; managed, root CODEOWNERS or not)
 #   dependabot        .github/dependabot.yml, rendered for the consumer root
 #                     (ops/render-dependabot.js, ADR 0019)
+#   coderabbit        .coderabbit.yaml at the consumer root, missing-only: the
+#                     org render (ops/render-coderabbit.js, ADR 0020); an
+#                     existing file is kept, never restored
 #   governance        .github/workflows/governance.yml (FORBID for governed classes)
 #   community-health  SECURITY.md only; advisory links are rewritten to the
 #                     consumer's origin remote. CODE_OF_CONDUCT.md,
@@ -46,7 +49,7 @@ ORG_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 usage() {
   echo "Usage: $0 <consumer-repo-path> [--include-all|--include <category>...] [--dry-run]" >&2
   echo "Default: the consumer's repo class decides (policies/repo-classes.yml)" >&2
-  echo "Categories: codeowners dependabot governance community-health issue-templates pr-templates labels" >&2
+  echo "Categories: codeowners dependabot coderabbit governance community-health issue-templates pr-templates labels" >&2
   echo "Retired: on-org-update, l9-ci-pack (fail closed)" >&2
   exit 1
 }

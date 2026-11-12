@@ -31,6 +31,17 @@ same advisory PR. A manual `continuous-sync.yml` Apply does the same on demand.
 `.l9/no-sync` is the only opt-out. (The sweep's weekly cron is disabled until
 seeding is proven; it runs on dispatch.)
 
+`.coderabbit.yaml` is **MATERIALIZE, rendered, missing-only**
+([ADR 0020](adr/0020-coderabbit-central-config-seeded.md)): category
+`coderabbit`, in every class that materializes `dependabot`. It is the
+`ops/render-coderabbit.js` render (`inheritance: true`, exclusion-only
+`reviews.path_filters`), written only when the repository has none. An
+existing file is kept, never restored. `l9-repo-template` offspring
+(`non_constellation_python`) are born with the template's own
+`.coderabbit.yaml`, which does not set `inheritance: true`, so the seed never
+writes and they receive no central exclusions until the template's file sets
+it (a cross-repository operator step, ADR 0020).
+
 Three surfaces are MATERIALIZE only because their bytes differ per consumer:
 `SECURITY.md` and `.github/ISSUE_TEMPLATE/config.yml` carry the consumer's
 advisory URL, and `.github/workflows/governance.yml` pins one org SHA
@@ -85,10 +96,10 @@ labels and repository settings.
 
 | Class | For | Materialize (`seed_categories`) | Inherit | Forbid |
 | --- | --- | --- | --- | --- |
-| `default` | No marker and no override | `codeowners`, `dependabot`, `governance`, `community-health` (`SECURITY.md` only), `issue-templates`, `pr-templates` (default + `release.md`) | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml` | nothing |
-| `non_constellation_python` | `l9-repo-template` offspring | `codeowners`, `dependabot`, `labels`, `community-health` (`SECURITY.md` only) | the passive community-health surfaces above, issue templates, PR templates | org CI distribution paths, the governance caller, retired CI pin files |
+| `default` | No marker and no override | `codeowners`, `dependabot`, `coderabbit`, `governance`, `community-health` (`SECURITY.md` only), `issue-templates`, `pr-templates` (default + `release.md`) | `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SUPPORT.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml` | nothing |
+| `non_constellation_python` | `l9-repo-template` offspring | `codeowners`, `dependabot`, `coderabbit`, `labels`, `community-health` (`SECURITY.md` only) | the passive community-health surfaces above, issue templates, PR templates | org CI distribution paths, the governance caller, retired CI pin files |
 | `self_governed` | `l9-ci-core`, or an explicit marker | `codeowners` | every community-health surface including `SECURITY.md`, `.github/FUNDING.yml`, `.github/VULNERABILITY_REPORT.yml`, issue templates, PR templates | org CI distribution paths and the governance caller |
-| `org_seeded_self_governed` | `l9-meta-injector`, `l9-constellation-topology` | `codeowners`, `dependabot`, `community-health` (`SECURITY.md` only), `issue-templates`, `pr-templates` | the passive community-health surfaces | org CI distribution paths and the governance caller |
+| `org_seeded_self_governed` | `l9-meta-injector`, `l9-constellation-topology` | `codeowners`, `dependabot`, `coderabbit`, `community-health` (`SECURITY.md` only), `issue-templates`, `pr-templates` | the passive community-health surfaces | org CI distribution paths and the governance caller |
 
 `default` reproduces `DEFAULT_CATEGORIES` in `ops/build-seed-payload.js` and
 inherits the passive community-health surfaces. `ops/test-repo-class-profile.js`

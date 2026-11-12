@@ -12,6 +12,7 @@ const {
 	shapeFromRoot,
 	shapeOfDirectory,
 } = require("./render-dependabot.js");
+const { renderCoderabbit } = require("./render-coderabbit.js");
 
 /**
  * Build the consumer-repo seed payload from the canonical files in this repo.
@@ -53,6 +54,7 @@ const {
 const DEFAULT_CATEGORIES = Object.freeze([
 	"codeowners",
 	"dependabot",
+	"coderabbit",
 	"governance",
 	"community-health",
 	"issue-templates",
@@ -177,6 +179,12 @@ function applyRepoPlaceholders(text, repository) {
  * `.github/dependabot.yml` is rendered per repository root, ADR
  * docs/adr/0019-dependabot-managed-rendered.md. A repository opts out of the
  * restore with `.l9/no-sync`.
+ *
+ * `.coderabbit.yaml` is deliberately NOT managed (ADR
+ * docs/adr/0020-coderabbit-central-config-seeded.md): repositories carry their
+ * own path_instructions and tools, which a restore would overwrite. It is
+ * seeded missing-only, and `inheritance: true` lets the central
+ * Quantum-L9/coderabbit file supply the shared exclusions.
  */
 const MANAGED_SEED_PATHS = Object.freeze([
 	".github/CODEOWNERS",
@@ -281,6 +289,12 @@ function buildSeedPayload({
 					fs,
 					shape: repoShape,
 				});
+				break;
+			}
+			case "coderabbit": {
+				// Missing-only (ADR docs/adr/0020-coderabbit-central-config-seeded.md):
+				// the same render as the central Quantum-L9/coderabbit file.
+				payload[".coderabbit.yaml"] = renderCoderabbit({ fs });
 				break;
 			}
 			case "governance": {
@@ -540,6 +554,7 @@ module.exports = {
 	seedNeedsRepoShape,
 	buildSeedPayload,
 	renderDependabot,
+	renderCoderabbit,
 	shapeFromRoot,
 	probeRepoShape,
 	selectSeedWrites,
