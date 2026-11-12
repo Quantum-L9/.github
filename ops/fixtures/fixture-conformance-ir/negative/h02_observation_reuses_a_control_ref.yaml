@@ -1,0 +1,10 @@
+# Falsifying fixture: mutates positive/harness_surface.yaml; must be rejected under `violates`.
+document: harness_surface
+violates: control_refs_and_observation_refs_are_unique_across_the_surface
+mutation:
+- op: set
+  path:
+  - harness_observations
+  - 0
+  - observation_ref
+  value: urn:example:harness:store-fault

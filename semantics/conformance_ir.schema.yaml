@@ -1,0 +1,248 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_conformance_ir_schema
+artifact_id: l9.schema/conformance-ir@1
+canonical_source:
+  format: yaml
+  artifact: conformance_ir.schema.yaml
+governed_by:
+  contracts:
+  - l9.contract/conformance-resolution@1
+  - l9.contract/validation-and-correctness@1
+  - l9.contract/assurance-and-verification@1
+  - l9.contract/provenance-and-coordinate@1
+  - l9.contract/unknown-and-degradation@1
+  - l9.contract/derived-artifact@1
+purpose: Structural contract of l9.conformance-ir/v1, an output of compilation Stage 12 (conformance). Each obligation
+  is one conformance_requirement_shape of conformance_model.yaml bound to the l9.fixture-ir/v1 cases that witness it,
+  with a verification class and a target-neutral execution plan. It adds no law, names no target technology, and
+  grants no authority. Rendering an obligation into an executable target is a later binding step.
+obligation_derivation:
+  per_law: 'Obligations are derived from law, never authored. The consumed fixture IR''s law_index yields exactly one
+    obligation per entry: governing_refs is exactly [law_ref]; subject_class is the entry''s law_kind;
+    observable_semantics is the entry''s statement; verification_class is the entry''s verification_class; witnessed_by
+    is exactly the fixture cases whose source_law_refs cite that law_ref, in fixture-IR order.'
+  verification_class: 'A closed domain (fixture_replay, static_inspection, external_runtime_evidence), defined by
+    fixture_ir.schema.yaml#verification_classes. Only fixture_replay can make an obligation executable. A
+    static_inspection or external_runtime_evidence obligation is unresolved, carries no execution_plan, and is never
+    a pass: it is never reported as proven by fixture replay.'
+dispositions:
+  executable: The verification class is fixture_replay, at least one witnessing case is executable and none is
+    unresolved, so the obligation may be rendered and executed and its verdict counted.
+  unresolved: The verification class is not fixture_replay, a witnessing case is unresolved, or no executable case
+    witnesses the obligation (including a law that no case cites). The obligation is recorded and its verdict is
+    unresolved, never pass.
+verdicts:
+  pass: Every witnessing case executed and every assertion held.
+  fail: Every witnessing case executed and at least one assertion did not hold.
+  error: A setup precondition or the harness failed before an assertion could be evaluated. Never pass.
+  unresolved: The obligation is unresolved. Never pass.
+type: object
+required:
+- schema
+- subject
+- authority
+- fixture_profile
+- obligations
+- unresolved
+- unknowns
+- provenance
+properties:
+  schema:
+    const: l9.conformance-ir/v1
+  subject:
+    type: object
+    required:
+    - product_ref
+    - closure_digest
+    - fixture_ir_digest
+    properties:
+      product_ref:
+        type: semantic_ref
+      closure_digest:
+        type: semantic_digest
+      fixture_ir_digest:
+        type: semantic_digest
+  authority:
+    type: object
+    required:
+    - authority_revision
+    - compilation_profile_ref
+    - stage
+    properties:
+      authority_revision:
+        type: semantic_ref
+      compilation_profile_ref:
+        const: l9.compilation/product-build@1
+      stage:
+        const: conformance
+  fixture_profile:
+    type: object
+    required:
+    - status
+    - profile_refs
+    properties:
+      status:
+        enum:
+        - declared
+        - absent
+      profile_refs:
+        type: array
+        items:
+          type: semantic_ref
+  obligations:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - subject_class
+      - governing_refs
+      - observable_semantics
+      - verification_class
+      - witnessed_by
+      - disposition
+      properties:
+        id:
+          type: string
+        subject_class:
+          enum:
+          - product_invariant
+          - admitted_contract
+          - admitted_invariant
+        governing_refs:
+          type: array
+          min_items: 1
+          items:
+            type: semantic_ref
+        observable_semantics:
+          type: string
+        verification_class:
+          enum:
+          - fixture_replay
+          - static_inspection
+          - external_runtime_evidence
+        witnessed_by:
+          type: array
+          items:
+            type: string
+        disposition:
+          enum:
+          - executable
+          - unresolved
+        execution_plan:
+          type: object
+          required:
+          - mode
+          - cases
+          - isolation
+          - verdict_rule
+          properties:
+            mode:
+              const: fixture_replay
+            cases:
+              type: array
+              min_items: 1
+              items:
+                type: string
+            isolation:
+              const: fresh_subject_per_case
+            verdict_rule:
+              const: pass_only_when_every_witness_case_executes_and_every_assertion_holds
+        profile_hint:
+          type: semantic_ref
+        binding_constraints:
+          type: array
+          items:
+            type: semantic_ref
+        evidence_requirements:
+          type: array
+          items:
+            type: semantic_ref
+  unresolved:
+    type: array
+    items:
+      type: object
+      required:
+      - obligation_ref
+      - result
+      - reason
+      properties:
+        obligation_ref:
+          type: string
+        result:
+          enum:
+          - unresolved
+          - incompatible
+          - unsat
+          - ambiguous
+        reason:
+          type: string
+  unknowns:
+    type: array
+    items:
+      type: object
+      required:
+      - id
+      - kind
+      - subject
+      - reason
+      properties:
+        id:
+          type: string
+        kind:
+          enum:
+          - fixture_profile_absent
+        subject:
+          type: semantic_ref
+        reason:
+          type: string
+  provenance:
+    type: object
+    required:
+    - closure_digest
+    - fixture_ir_digest
+    - conformance_model_ref
+    - compiler
+    properties:
+      closure_digest:
+        type: semantic_digest
+      fixture_ir_digest:
+        type: semantic_digest
+      conformance_model_ref:
+        const: l9.conformance-model/global@1
+      compiler:
+        type: object
+        required:
+        - compiler_version
+        properties:
+          compiler_version:
+            type: semantic_ref
+semantic_rules:
+- an_absent_fixture_profile_is_recorded_as_a_typed_fixture_profile_absent_unknown_never_as_a_satisfied_requirement
+- a_declared_fixture_profile_names_at_least_one_profile_ref_and_records_no_fixture_profile_absent_unknown
+- there_is_exactly_one_obligation_per_law_index_entry_of_the_consumed_fixture_ir_and_its_governing_refs_are_exactly_that_law_ref
+- an_obligation_is_witnessed_by_exactly_the_fixture_cases_whose_source_law_refs_cite_its_law
+- an_obligation_subject_class_observable_semantics_and_verification_class_are_its_law_kind_statement_and_verification_class
+- an_obligation_whose_verification_class_is_not_fixture_replay_is_unresolved_and_carries_no_execution_plan
+- a_fixture_replay_obligation_whose_witnesses_are_all_executable_is_executable_whether_or_not_a_fixture_profile_is_declared
+- every_obligation_witness_names_a_fixture_case_of_the_consumed_fixture_ir
+- every_obligation_traces_to_governing_semantics_through_a_governing_ref_shared_with_each_witness_case_source_law_refs
+- an_obligation_with_an_unresolved_witness_or_no_executable_witness_is_unresolved
+- an_unresolved_obligation_is_listed_in_unresolved_with_a_non_resolved_result_and_an_executable_obligation_is_not
+- an_unresolved_obligation_never_yields_a_pass_verdict
+- a_fixture_replay_obligation_with_witnesses_has_an_execution_plan_whose_cases_are_exactly_the_witnessed_by_cases_and_any_other_obligation_has_none
+- the_execution_plan_names_no_target_technology_binding_or_runtime
+- obligation_ids_are_unique
+- subject_and_provenance_fixture_ir_digest_are_the_semantic_digest_of_the_consumed_fixture_ir
+- subject_and_provenance_closure_digest_equal_the_consumed_fixture_ir_closure_digest
+- no_expected_result_is_defined_by_the_system_under_test_or_by_conformance_evidence
+- conformance_ir_adds_no_law_and_is_never_semantic_authority
+enforcement:
+  structural: This schema, through the l9.schema-definition/v1 interpreter.
+  semantic_rules: reference-conformance/v1 (solver_catalog.yaml, stage conformance). In this repository RC-035
+    (scripts/validate-semantics.py) checks every rule above that is decidable from a conformance IR and the fixture
+    IR it consumes against the positive and negative fixtures under ops/fixtures/fixture-conformance-ir/.

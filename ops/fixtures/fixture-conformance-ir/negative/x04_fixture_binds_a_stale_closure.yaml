@@ -1,0 +1,12 @@
+# Falsifying fixture: positive/fixture_ir.yaml against a mutated positive/product_manifest.yaml; must be rejected under `violates`. A changed Stage 13 input changes the closure.
+document: closure
+violates: subject_closure_digest_is_the_closure_digest_of_the_consumed_product_manifest
+manifest_mutation:
+- op: set
+  path:
+  - ports
+  - inbound
+  - 0
+  - contract_refs
+  value:
+  - urn:example:CounterCreate:2

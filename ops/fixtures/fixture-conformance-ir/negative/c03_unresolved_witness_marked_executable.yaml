@@ -1,0 +1,14 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: an_obligation_with_an_unresolved_witness_or_no_executable_witness_is_unresolved
+mutation:
+- op: set
+  path:
+  - obligations
+  - 5
+  - disposition
+  value: executable
+- op: delete
+  path:
+  - unresolved
+  - 1

@@ -1,0 +1,11 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: the_execution_plan_names_no_target_technology_binding_or_runtime
+mutation:
+- op: set
+  path:
+  - obligations
+  - 0
+  - execution_plan
+  - technology
+  value: pytest

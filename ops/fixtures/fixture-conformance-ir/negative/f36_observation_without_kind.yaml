@@ -1,0 +1,12 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: structural
+mutation:
+- op: delete
+  path:
+  - fixture_cases
+  - 3
+  - expect
+  - observations
+  - 0
+  - kind

@@ -1,0 +1,6 @@
+# Falsifying fixture: resolution of a product file ref against positive/product_files.yaml (mutated) must end in the typed refusal under `violates`. A product-authored file binds raw bytes, never its canonical JSON.
+document: product_file
+violates: a_conformance_product_file_digest_is_the_sha256_of_the_raw_bytes_of_the_named_file
+ref: urn:example:product:counter/fixtures/cases.yaml
+digest: sha256:3d7d214f5ff92f4098f2ed48227c8359e5b7b52110fba7bf8fb1887e5c556c61
+expected_refusal: product_file_digest_mismatch

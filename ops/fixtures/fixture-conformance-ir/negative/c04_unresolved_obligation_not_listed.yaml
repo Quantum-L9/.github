@@ -1,0 +1,8 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: an_unresolved_obligation_is_listed_in_unresolved_with_a_non_resolved_result_and_an_executable_obligation_is_not
+mutation:
+- op: delete
+  path:
+  - unresolved
+  - 0

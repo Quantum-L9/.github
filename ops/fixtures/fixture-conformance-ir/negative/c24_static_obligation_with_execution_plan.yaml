@@ -1,0 +1,15 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: an_obligation_whose_verification_class_is_not_fixture_replay_is_unresolved_and_carries_no_execution_plan
+mutation:
+- op: set
+  path:
+  - obligations
+  - 4
+  - execution_plan
+  value:
+    mode: fixture_replay
+    cases:
+    - create_starts_at_zero
+    isolation: fresh_subject_per_case
+    verdict_rule: pass_only_when_every_witness_case_executes_and_every_assertion_holds

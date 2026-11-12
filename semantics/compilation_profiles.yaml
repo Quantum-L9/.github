@@ -180,6 +180,8 @@ profiles:
     consumes:
     - semantic_law_ir
     - law_provenance
+    - product_fixture_cases
+    - product_harness_surface
     operations:
     - projection
     - derivation

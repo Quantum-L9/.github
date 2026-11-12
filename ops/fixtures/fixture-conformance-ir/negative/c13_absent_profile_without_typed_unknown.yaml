@@ -1,0 +1,8 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: an_absent_fixture_profile_is_recorded_as_a_typed_fixture_profile_absent_unknown_never_as_a_satisfied_requirement
+mutation:
+- op: delete
+  path:
+  - unknowns
+  - 0

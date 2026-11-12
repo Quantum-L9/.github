@@ -1,0 +1,13 @@
+# Synthetic, product-neutral witness for l9.harness-surface/v1 (R5-F1). Not product law.
+# positive/fixture_ir.yaml interface_surface.harness_controls / harness_observations are exactly these entries
+# without implementation_ref.
+schema: l9.harness-surface/v1
+product_ref: urn:example:product:counter
+owner: urn:example:owner:counter-team
+revision: urn:example:rev:1
+harness_controls:
+- {control_ref: urn:example:harness:store-fault, kind: fault_injection, target_port_ref: 'urn:example:port:CounterStore:1', contract_ref: 'urn:example:harness:FaultInjection:1', implementation_ref: 'tests/harness/faults.py::inject_store_fault'}
+- {control_ref: urn:example:harness:retention-erase, kind: internal_setup, target_port_ref: 'urn:example:port:CounterStore:1', contract_ref: 'urn:example:harness:RetentionErase:1', result_contract_ref: 'urn:example:harness:EraseReceipt:1', implementation_ref: 'src/counter/retention.py::hard_erase'}
+- {control_ref: urn:example:harness:authz-policy, kind: authorization_policy, contract_ref: 'urn:example:harness:AuthorizationPolicy:1', implementation_ref: 'tests/harness/authz.py::set_policy'}
+harness_observations:
+- {observation_ref: urn:example:harness:receipt-count, result_contract_ref: 'urn:example:harness:ReceiptCount:1', implementation_ref: 'tests/harness/receipts.py::count_receipts'}

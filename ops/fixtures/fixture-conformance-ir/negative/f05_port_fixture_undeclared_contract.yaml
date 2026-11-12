@@ -1,0 +1,13 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: every_port_fixture_setup_operation_is_a_contract_ref_of_a_declared_setup_port
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 2
+  - given
+  - steps
+  - 0
+  - operation
+  value: urn:example:UndeclaredSetup:1

@@ -1,0 +1,15 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: invocation_context_appears_only_on_gate_action_steps_and_interface_action_observations_and_its_values_are_fixture_literals_and_budget_ms_is_a_non_negative_integer
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 3
+  - given
+  - steps
+  - 0
+  - context
+  value:
+    tenant_ref: tenant.a
+    principal_ref: agent.a

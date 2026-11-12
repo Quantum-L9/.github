@@ -1,0 +1,17 @@
+# Falsifying fixture: resolution of a product file ref against positive/product_files.yaml (mutated) must end in the typed refusal under `violates`.
+document: product_file
+violates: a_conformance_product_file_ref_resolves_to_exactly_one_repository_spec_authoritative_source_entry_whose_coordinate_equals_it_and_whose_path_stays_inside_the_repository
+mutation:
+- op: append
+  path:
+  - repository_spec
+  - source_surfaces
+  - authoritative
+  - product
+  value:
+    path: fixtures/cases-copy.yaml
+    semantic_role: product_fixture_cases
+    coordinate: urn:example:product:counter/fixtures/cases.yaml
+ref: urn:example:product:counter/fixtures/cases.yaml
+digest: sha256:d2bedd4a267b23f20129f56d6d29a23c08f23583f98e24e0e66e1a2798b1700e
+expected_refusal: product_file_ref_ambiguous

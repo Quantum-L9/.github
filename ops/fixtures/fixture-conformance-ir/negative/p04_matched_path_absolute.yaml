@@ -1,0 +1,16 @@
+# Falsifying fixture: resolution of a product file ref against positive/product_files.yaml (mutated) must end in the typed refusal under `violates`.
+document: product_file
+violates: an_unresolved_ambiguous_escaping_or_digest_mismatched_product_file_ref_is_a_typed_refusal_never_a_resolution
+mutation:
+- op: set
+  path:
+  - repository_spec
+  - source_surfaces
+  - authoritative
+  - product
+  - 1
+  - path
+  value: /etc/fixtures/cases.yaml
+ref: urn:example:product:counter/fixtures/cases.yaml
+digest: sha256:d2bedd4a267b23f20129f56d6d29a23c08f23583f98e24e0e66e1a2798b1700e
+expected_refusal: product_file_path_escapes_repository

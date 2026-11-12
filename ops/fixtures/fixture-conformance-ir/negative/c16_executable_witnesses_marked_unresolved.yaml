@@ -1,0 +1,17 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: a_fixture_replay_obligation_whose_witnesses_are_all_executable_is_executable_whether_or_not_a_fixture_profile_is_declared
+mutation:
+- op: set
+  path:
+  - obligations
+  - 0
+  - disposition
+  value: unresolved
+- op: append
+  path:
+  - unresolved
+  value:
+    obligation_ref: obl.create-starts-at-zero
+    result: unresolved
+    reason: no fixture profile

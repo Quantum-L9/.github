@@ -1,0 +1,105 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_harness_surface_schema
+artifact_id: l9.schema/harness-surface@1
+canonical_source:
+  format: yaml
+  artifact: harness_surface.schema.yaml
+governed_by:
+  contracts:
+  - l9.contract/conformance-resolution@1
+  - l9.contract/validation-and-correctness@1
+  - l9.contract/provenance-and-coordinate@1
+  - l9.contract/unknown-and-degradation@1
+purpose: Structural contract of l9.harness-surface/v1, the product-authored declaration of the harness controls and
+  harness observations a product exposes to its conformance harness. The product's ProductTopology names it through
+  conformance.harness_surface_ref {ref, digest}, and compilation Stage 8 (fixtures) consumes it as
+  product_harness_surface. It adds no law, declares no Gate action, and grants no authority. A fixture IR's
+  interface_surface.harness_controls and harness_observations are exactly its entries without implementation_ref.
+entries:
+  controls: Each control reuses the fixture-IR harness control entry shape (fixture_ir.schema.yaml
+    interface_surface.harness_controls) and adds a required implementation_ref.
+  observations: Each observation reuses the fixture-IR harness observation entry shape (fixture_ir.schema.yaml
+    interface_surface.harness_observations) and adds a required implementation_ref.
+  implementation_ref: 'The source coordinate of the product-owned code that realizes the control or observation, in
+    the form product_topology.schema.yaml#entry_shapes.implementation_source_coordinate (<repository-relative POSIX
+    path>[::<top-level symbol>]). It is verified, never regenerated: the code must exist, and the compiler creates
+    none (the python-gate-node port binding precedent, binding_catalog.yaml). It is a declared source location, not
+    semantic authority.'
+digest: The topology binds this document by "sha256:" + the lowercase hex sha256 of its raw bytes
+  (fixture_ir.schema.yaml#digest_bases.product_authored_file).
+type: object
+required:
+- schema
+- product_ref
+- owner
+- harness_controls
+- harness_observations
+properties:
+  schema:
+    const: l9.harness-surface/v1
+  product_ref:
+    type: semantic_ref
+  owner:
+    type: semantic_ref
+  revision:
+    type: semantic_ref
+  harness_controls:
+    type: array
+    items:
+      type: object
+      required:
+      - control_ref
+      - kind
+      - contract_ref
+      - implementation_ref
+      properties:
+        control_ref:
+          type: semantic_ref
+        kind:
+          enum:
+          - clock
+          - journal_retention
+          - fault_injection
+          - authorization_policy
+          - internal_setup
+        target_port_ref:
+          type: semantic_ref
+        contract_ref:
+          type: semantic_ref
+        result_contract_ref:
+          type: semantic_ref
+        implementation_ref:
+          type: string
+  harness_observations:
+    type: array
+    items:
+      type: object
+      required:
+      - observation_ref
+      - result_contract_ref
+      - implementation_ref
+      properties:
+        observation_ref:
+          type: semantic_ref
+        result_contract_ref:
+          type: semantic_ref
+        implementation_ref:
+          type: string
+semantic_rules:
+- control_refs_and_observation_refs_are_unique_across_the_surface
+- a_fault_injection_control_declares_a_target_port_ref_and_only_fault_injection_and_internal_setup_controls_name_one
+- every_implementation_ref_is_a_repository_relative_posix_path_with_an_optional_top_level_symbol_that_never_escapes_the_repository
+- every_implementation_ref_names_existing_product_owned_code_and_is_verified_never_regenerated
+- no_harness_control_or_observation_is_a_gate_action_and_the_surface_grants_none
+- the_harness_surface_adds_no_law_and_is_never_semantic_authority
+enforcement:
+  structural: This schema, through the l9.schema-definition/v1 interpreter.
+  semantic_rules: fixture-derivation-validator/v1 (solver_catalog.yaml, stage fixtures), the solver of the stage that
+    consumes it. In this repository RC-035 (scripts/validate-semantics.py) checks the first three rules against the
+    positive and negative fixtures under ops/fixtures/fixture-conformance-ir/, and the fixture-IR correspondence rule
+    checks that no control or observation is an interface action. Existence of the implementation code needs the
+    product repository and is the solver's obligation.

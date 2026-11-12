@@ -1,0 +1,596 @@
+schema: l9.schema-definition/v1
+canonical: true
+authority:
+  owner: Quantum-L9/.github
+  authority_class: canonical
+  scope: l9_global_fixture_ir_schema
+artifact_id: l9.schema/fixture-ir@1
+canonical_source:
+  format: yaml
+  artifact: fixture_ir.schema.yaml
+governed_by:
+  contracts:
+  - l9.contract/conformance-resolution@1
+  - l9.contract/validation-and-correctness@1
+  - l9.contract/provenance-and-coordinate@1
+  - l9.contract/unknown-and-degradation@1
+  - l9.contract/derived-artifact@1
+purpose: Structural contract of l9.fixture-ir/v1, the output of compilation Stage 8 (fixtures) and a required input
+  of Stage 12 (conformance). It fixes the language-neutral shape of a fixture case derived from admitted law. It adds
+  no law and no product meaning. A fixture case states initial state through declared contract-typed setup
+  operations (given), exactly one interface operation or one declared group of interface operations (when), and
+  observable consequences over result contracts and declared observation operations only (expect). It never
+  prescribes how the system under test realizes the behavior.
+interim_law_input:
+  status: interim_substitution_pending_owner_decision
+  substitutes_for:
+  - compilation_profiles.yaml#l9.compilation/product-build@1.stages[fixtures].consumes.semantic_law_ir
+  - compilation_profiles.yaml#l9.compilation/product-build@1.stages[fixtures].consumes.law_provenance
+  statement: l9.law-ir/v1 has no structural schema and Stage 7 (laws) is not realized. Until an owner-admitted
+    l9.law-ir/v1 schema exists, Stage 8 takes its law input from law_index, a provenance-bound list of governed,
+    digest-bound semantics already in the product's resolved closure (the product's own invariant ids and admitted
+    contract refs). This substitution is part of the admission subject and is not canonical until admitted. It
+    defines no law and no law-ir shape.
+  follow_up: An l9.law-ir/v1 structural schema is an owner-owned Unknown. When one is admitted, a successor
+    l9.schema/fixture-ir@2 replaces law_index with the law-ir reference and law_provenance.
+dispositions:
+  executable: Every expectation of the case traces to admitted law and every operation it names is declared, so the
+    case may be lowered to an executable target and its outcome counted.
+  unresolved: The governing semantics, an operation, an observation surface or a controllable precondition the
+    case needs is not declared or not admitted. The case is recorded and is never executed as passing.
+value_references:
+  from: 'A request value of the exact form {"$from": {"step": <step id>, "path": <dotted path>}} is replaced, before
+    the operation runs, by the value at that path of an earlier step result in the same case. It never names a later
+    step, a step of the same parallel group, or an observation. A harness control step is a source only when its
+    control declares a result_contract_ref; a harness observation is never a source.'
+  observed: 'An assertion operand of the exact form {"$observed": {"step": <step or observation id>, "path": <dotted
+    path>}} is the value observed at that path. It is allowed only in a relational predicate (equals, not_equals,
+    greater_than, less_than) and never names the assertion''s own target value. Assertions are evaluated after every
+    step and observation of the case has run, so it may name any given step, when step (including a sibling of the
+    same parallel group) or observation of the same case. In a relational predicate, a target or $observed path
+    absent from the recorded result at evaluation makes the assertion an error, never a pass.'
+closure_binding:
+  closure_digest: 'subject.closure_digest and provenance.closure_digest name the pre-manifest closure the fixtures are
+    derived from: the closure_digest that product_manifest.schema.yaml#closure_digest_definition defines (the canonical
+    semantic digest of the ProductManifest without manifest_digest, closure_digest and conformance.compilation). Stage
+    8 runs before Stage 13 writes manifest_digest, so a fixture IR never binds manifest_digest. The ProductManifest
+    records both digests.'
+digest_bases:
+  product_authored_file: A product-authored file (a fixture case document named by topology
+    conformance.fixture_case_refs, or the harness surface named by conformance.harness_surface_ref) is bound by
+    "sha256:" + the lowercase hex sha256 of its raw bytes.
+  derived_ir: A derived IR or derived index (law_index, a fixture IR, a conformance IR, the manifest closure) is bound
+    by its semantic digest, "sha256:" + the lowercase hex sha256 of its canonical JSON (keys sorted, separators ","
+    and ":", no ASCII escaping, UTF-8).
+evaluation:
+  presence: is_present holds iff the target path resolves in the recorded result; is_absent holds iff it does not;
+    is_null holds iff it resolves to null. An absent path makes is_present and is_null fail and is_absent hold; it is
+    never an error for these three predicates.
+  relational: equals, not_equals, greater_than and less_than whose target path or $observed path is absent at
+    evaluation are an error, never a pass and never a fail.
+  count_where: 'The operand is exactly {where: [{path, predicate, operand?}, ...], count}. where is a non-empty list of
+    clauses; each clause applies one scalar predicate other than result_contract_is (equals, not_equals, includes,
+    excludes, greater_than, less_than, is_null, is_present, is_absent) at its dotted path of one group member result,
+    with a literal operand exactly when the predicate takes one (never $from or $observed). count is a non-negative
+    integer. The assertion holds iff exactly count group members satisfy every clause; a relational clause whose path
+    is absent from a member makes that member not satisfy the clause.'
+  paths: A path is dotted; a segment that is a non-negative integer indexes an array; the empty path is the whole
+    result. A key containing "." is not expressible.
+  precondition: 'A given step''s precondition is a flat map {<dotted path>: <literal>}: each value is a literal that is
+    not a mapping and contains no $from or $observed. It holds iff the step result value at every path equals its
+    literal. A precondition that does not hold is a setup error of the case, never a fail and never a pass.'
+harness:
+  controls: A harness control is a declared environment operation that is not a Gate action. The product declares its
+    controls in its l9.harness-surface/v1 document (topology conformance.harness_surface_ref); a fixture never invents
+    one. A given step of kind harness_control names a declared control_ref and carries a request shaped by the
+    control's contract_ref.
+  control_kinds:
+    clock: Advances the controllable clock the system under test observes.
+    journal_retention: Moves a retention horizon (for example, trims a journal before a sequence position).
+    fault_injection: 'Makes one declared port method of target_port_ref fail with a declared code, before or after its
+      effect takes place. Its request is {port_method, code, after_effect: before | after}.'
+    authorization_policy: Sets the policy a declared authorization port answers with.
+    internal_setup: A declared internal setup operation the product exposes only to its harness (for example a
+      retention executor's hard erase). It is never a Gate action and never a when-operation, and a forbidden
+      interface action stays forbidden.
+  observations: A harness observation is a declared read-only observation outside the interface surface (for example
+    a count of durable operation receipts, or a Gate registration). Its result is shaped by its result_contract_ref.
+  context: 'Every Gate action step (given interface_action, when, when.steps) and every interface_action observation
+    may carry a Gate invocation context {tenant_ref, principal_ref, authorization_ref?, budget_ms?}. A harness control
+    step and a harness observation never carry one. Its values are fixture literals: never a $from or $observed
+    reference.'
+verification_classes:
+  fixture_replay: The law is proven by replaying the fixture cases that cite it against the system under test.
+  static_inspection: The law is proven by inspecting the product's declared artifacts without running it. No fixture
+    case proves it, so its obligation is never executable and never passes through fixture replay.
+  external_runtime_evidence: The law is proven only by evidence produced outside the fixture harness (for example
+    production telemetry). Its obligation is never executable and never passes through fixture replay.
+predicates:
+  scalar:
+  - equals
+  - not_equals
+  - includes
+  - excludes
+  - greater_than
+  - less_than
+  - is_null
+  - is_present
+  - is_absent
+  - result_contract_is
+  relational:
+  - equals
+  - not_equals
+  - greater_than
+  - less_than
+  group:
+  - count_where
+type: object
+required:
+- schema
+- subject
+- authority
+- interface_surface
+- law_index
+- fixture_cases
+- unresolved
+- provenance
+properties:
+  schema:
+    const: l9.fixture-ir/v1
+  subject:
+    type: object
+    required:
+    - product_ref
+    - closure_digest
+    properties:
+      product_ref:
+        type: semantic_ref
+      closure_digest:
+        type: semantic_digest
+  authority:
+    type: object
+    required:
+    - authority_revision
+    - compilation_profile_ref
+    - stage
+    properties:
+      authority_revision:
+        type: semantic_ref
+      compilation_profile_ref:
+        const: l9.compilation/product-build@1
+      stage:
+        const: fixtures
+  interface_surface:
+    type: object
+    required:
+    - actions
+    - problem_contract_refs
+    - setup_ports
+    - forbidden_actions
+    - harness_controls
+    - harness_observations
+    properties:
+      actions:
+        type: array
+        min_items: 1
+        items:
+          type: object
+          required:
+          - action_ref
+          - request_contract_ref
+          - result_contract_ref
+          - effect_class
+          properties:
+            action_ref:
+              type: semantic_ref
+            request_contract_ref:
+              type: semantic_ref
+            result_contract_ref:
+              type: semantic_ref
+            effect_class:
+              type: semantic_ref
+      problem_contract_refs:
+        type: array
+        items:
+          type: semantic_ref
+      setup_ports:
+        type: array
+        items:
+          type: object
+          required:
+          - port_ref
+          - contract_refs
+          properties:
+            port_ref:
+              type: semantic_ref
+            contract_refs:
+              type: array
+              min_items: 1
+              items:
+                type: semantic_ref
+      forbidden_actions:
+        type: array
+        items:
+          type: semantic_ref
+      harness_controls:
+        type: array
+        items:
+          type: object
+          required:
+          - control_ref
+          - kind
+          - contract_ref
+          properties:
+            control_ref:
+              type: semantic_ref
+            kind:
+              enum:
+              - clock
+              - journal_retention
+              - fault_injection
+              - authorization_policy
+              - internal_setup
+            target_port_ref:
+              type: semantic_ref
+            contract_ref:
+              type: semantic_ref
+            result_contract_ref:
+              type: semantic_ref
+      harness_observations:
+        type: array
+        items:
+          type: object
+          required:
+          - observation_ref
+          - result_contract_ref
+          properties:
+            observation_ref:
+              type: semantic_ref
+            result_contract_ref:
+              type: semantic_ref
+  law_index:
+    type: array
+    min_items: 1
+    items:
+      type: object
+      required:
+      - law_ref
+      - law_kind
+      - statement
+      - verification_class
+      - source
+      properties:
+        law_ref:
+          type: semantic_ref
+        law_kind:
+          enum:
+          - product_invariant
+          - admitted_contract
+          - admitted_invariant
+        statement:
+          type: string
+        verification_class:
+          enum:
+          - fixture_replay
+          - static_inspection
+          - external_runtime_evidence
+        source:
+          type: object
+          required:
+          - artifact
+          - revision
+          - digest
+          properties:
+            artifact:
+              type: semantic_ref
+            revision:
+              type: semantic_ref
+            digest:
+              type: semantic_digest
+  fixture_cases:
+    type: array
+    min_items: 1
+    items:
+      type: object
+      required:
+      - id
+      - disposition
+      - source_law_refs
+      - given
+      - when
+      - expect
+      - provenance
+      properties:
+        id:
+          type: string
+        disposition:
+          enum:
+          - executable
+          - unresolved
+        source_law_refs:
+          type: array
+          min_items: 1
+          items:
+            type: semantic_ref
+        blocked_by:
+          type: array
+          items:
+            type: semantic_ref
+        given:
+          type: object
+          required:
+          - steps
+          properties:
+            steps:
+              type: array
+              items:
+                type: object
+                required:
+                - id
+                - kind
+                - operation
+                - request
+                properties:
+                  id:
+                    type: string
+                  kind:
+                    enum:
+                    - interface_action
+                    - port_fixture
+                    - harness_control
+                  operation:
+                    type: semantic_ref
+                  request:
+                    type: object
+                  precondition:
+                    type: object
+                  context:
+                    type: object
+                    required:
+                    - tenant_ref
+                    - principal_ref
+                    properties:
+                      tenant_ref:
+                        type: semantic_ref
+                      principal_ref:
+                        type: semantic_ref
+                      authorization_ref:
+                        type: semantic_ref
+                      budget_ms:
+                        type: any
+        when:
+          type: object
+          required:
+          - mode
+          properties:
+            mode:
+              enum:
+              - single
+              - sequence
+              - parallel
+            operation:
+              type: semantic_ref
+            request:
+              type: object
+            context:
+              type: object
+              required:
+              - tenant_ref
+              - principal_ref
+              properties:
+                tenant_ref:
+                  type: semantic_ref
+                principal_ref:
+                  type: semantic_ref
+                authorization_ref:
+                  type: semantic_ref
+                budget_ms:
+                  type: any
+            steps:
+              type: array
+              items:
+                type: object
+                required:
+                - id
+                - operation
+                - request
+                properties:
+                  id:
+                    type: string
+                  operation:
+                    type: semantic_ref
+                  request:
+                    type: object
+                  context:
+                    type: object
+                    required:
+                    - tenant_ref
+                    - principal_ref
+                    properties:
+                      tenant_ref:
+                        type: semantic_ref
+                      principal_ref:
+                        type: semantic_ref
+                      authorization_ref:
+                        type: semantic_ref
+                      budget_ms:
+                        type: any
+        expect:
+          type: object
+          required:
+          - observations
+          - assertions
+          properties:
+            observations:
+              type: array
+              items:
+                type: object
+                required:
+                - id
+                - kind
+                - operation
+                - request
+                properties:
+                  id:
+                    type: string
+                  kind:
+                    enum:
+                    - interface_action
+                    - harness_observation
+                  operation:
+                    type: semantic_ref
+                  request:
+                    type: object
+                  context:
+                    type: object
+                    required:
+                    - tenant_ref
+                    - principal_ref
+                    properties:
+                      tenant_ref:
+                        type: semantic_ref
+                      principal_ref:
+                        type: semantic_ref
+                      authorization_ref:
+                        type: semantic_ref
+                      budget_ms:
+                        type: any
+            assertions:
+              type: array
+              min_items: 1
+              items:
+                type: object
+                required:
+                - id
+                - law_ref
+                - target
+                - predicate
+                properties:
+                  id:
+                    type: string
+                  law_ref:
+                    type: semantic_ref
+                  target:
+                    type: object
+                    required:
+                    - kind
+                    properties:
+                      kind:
+                        enum:
+                        - step
+                        - group
+                        - observation
+                      ref:
+                        type: string
+                      path:
+                        type: string
+                  predicate:
+                    enum:
+                    - equals
+                    - not_equals
+                    - includes
+                    - excludes
+                    - greater_than
+                    - less_than
+                    - is_null
+                    - is_present
+                    - is_absent
+                    - result_contract_is
+                    - count_where
+                  operand:
+                    type: any
+        provenance:
+          type: object
+          required:
+          - derived_from
+          properties:
+            derived_from:
+              enum:
+              - law_index
+              - owner_authored_case
+            derivation_ref:
+              type: semantic_ref
+  unresolved:
+    type: array
+    items:
+      type: object
+      required:
+      - case_ref
+      - result
+      - reason
+      properties:
+        case_ref:
+          type: string
+        result:
+          enum:
+          - unresolved
+          - incompatible
+          - unsat
+          - ambiguous
+        reason:
+          type: string
+  provenance:
+    type: object
+    required:
+    - closure_digest
+    - law_index_digest
+    - compiler
+    properties:
+      closure_digest:
+        type: semantic_digest
+      law_index_digest:
+        type: semantic_digest
+      compiler:
+        type: object
+        required:
+        - compiler_version
+        properties:
+          compiler_version:
+            type: semantic_ref
+semantic_rules:
+- every_source_law_ref_resolves_to_exactly_one_law_index_entry_with_source_provenance
+- law_index_refs_are_unique
+- provenance_law_index_digest_is_the_semantic_digest_of_law_index
+- every_law_index_entry_resolves_in_the_consumed_manifest_resolved_closure_at_its_recorded_revision_and_digest
+- every_fixture_case_cites_at_least_one_source_law_and_every_assertion_law_ref_is_one_of_the_case_source_law_refs
+- a_single_when_names_exactly_one_operation_and_request_and_no_steps
+- a_sequence_when_names_at_least_one_step_and_a_parallel_when_names_at_least_two_steps_and_neither_names_a_top_level_operation
+- every_when_operation_and_every_interface_action_setup_operation_is_an_interface_surface_action
+- every_port_fixture_setup_operation_is_a_contract_ref_of_a_declared_setup_port
+- every_interface_action_observation_is_an_interface_surface_action_whose_effect_class_is_read_observation
+- every_harness_observation_names_a_declared_harness_observation
+- every_harness_control_step_names_a_declared_harness_control
+- a_fault_injection_control_declares_a_target_port_ref_and_its_step_request_names_port_method_code_and_after_effect_before_or_after
+- only_fault_injection_and_internal_setup_controls_name_a_target_port_and_no_harness_control_writes_system_under_test_state_otherwise
+- no_harness_control_or_harness_observation_ref_is_an_interface_surface_action
+- invocation_context_appears_only_on_gate_action_steps_and_interface_action_observations_and_its_values_are_fixture_literals_and_budget_ms_is_a_non_negative_integer
+- no_forbidden_action_is_an_interface_surface_action_or_names_any_step_or_observation_operation
+- every_assertion_targets_a_when_step_the_when_group_or_a_declared_observation_and_never_a_given_step
+- count_where_targets_only_a_when_group_and_scalar_predicates_never_target_a_group
+- a_count_where_operand_is_a_non_empty_where_list_of_path_scalar_predicate_and_literal_operand_clauses_and_a_non_negative_integer_count
+- count_where_holds_iff_exactly_count_group_members_satisfy_every_where_clause
+- result_contract_is_names_the_target_action_result_contract_or_a_declared_problem_contract
+- no_expected_value_derives_from_the_system_under_test
+- an_observed_operand_appears_only_in_a_relational_predicate_and_never_names_its_own_target_value
+- a_from_reference_names_only_an_earlier_step_of_the_same_case_and_never_a_step_of_its_own_parallel_group
+- a_from_reference_names_a_harness_control_step_only_when_that_control_declares_a_result_contract_and_never_names_a_harness_observation
+- a_relational_assertion_whose_target_or_observed_path_is_absent_at_evaluation_is_an_error_never_a_pass
+- is_present_holds_iff_the_target_path_resolves_is_absent_iff_it_does_not_and_is_null_iff_it_resolves_to_null_and_an_absent_path_is_never_an_error_for_them
+- a_given_step_precondition_is_a_flat_map_of_dotted_paths_to_literals_that_are_not_mappings_and_contain_no_value_reference
+- a_precondition_holds_iff_every_path_equals_its_literal_and_one_that_does_not_hold_is_a_setup_error_never_a_fail_or_a_pass
+- step_observation_assertion_and_case_ids_are_unique_within_their_scope
+- an_unresolved_case_is_listed_in_unresolved_with_a_non_resolved_result_and_names_what_blocks_it
+- an_executable_case_has_no_blocked_by_and_is_not_listed_in_unresolved
+- subject_and_provenance_closure_digest_are_equal
+- subject_closure_digest_is_the_closure_digest_of_the_consumed_product_manifest
+- interface_surface_actions_problem_contracts_and_setup_ports_are_exactly_lowered_from_the_consumed_manifest
+- harness_controls_and_harness_observations_equal_the_product_harness_surface_entries_without_implementation_ref_for_the_same_product
+- fixture_ir_adds_no_law_and_is_never_semantic_authority
+enforcement:
+  structural: This schema, through the l9.schema-definition/v1 interpreter.
+  semantic_rules: fixture-derivation-validator/v1 (solver_catalog.yaml, stage fixtures). In this repository RC-035
+    (scripts/validate-semantics.py) runs the reference validator scripts/fixture_conformance_ir.py over the positive
+    and negative fixtures under ops/fixtures/fixture-conformance-ir/. It checks every rule decidable from the document
+    alone, proves the evaluation rules with the reference evaluator over recorded results, and checks the closure and
+    harness-surface correspondence rules against a consumed manifest witness and a harness-surface witness. The
+    law-closure and interface-lowering rules need a resolved manifest closure and are the solver's obligation.

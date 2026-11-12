@@ -1,0 +1,17 @@
+# Synthetic RepositorySpec slice and product-authored files for product-file resolution (R5-F1). Not product law.
+# Each ref resolves to exactly one source_surfaces.authoritative entry whose coordinate equals it; each digest is
+# "sha256:" + sha256 of the file's raw bytes (product_topology.schema.yaml#product_file_resolution).
+repository_spec:
+  schema: l9.repository-semantics/v1
+  source_surfaces:
+    authoritative:
+      product:
+      - {path: product-topology.yaml, semantic_role: product_contract, coordinate: urn:example:product:counter/product-topology.yaml}
+      - {path: fixtures/cases.yaml, semantic_role: product_fixture_cases, coordinate: urn:example:product:counter/fixtures/cases.yaml}
+      - {path: ./harness/surface.yaml, semantic_role: product_harness_surface, coordinate: urn:example:product:counter/harness-surface.yaml}
+files:
+  fixtures/cases.yaml: "schema: l9.fixture-ir-cases/example\nnote: synthetic product-owned fixture case document\n"
+  harness/surface.yaml: "schema: l9.harness-surface/v1\nproduct_ref: urn:example:product:counter\n"
+refs:
+- {ref: urn:example:product:counter/fixtures/cases.yaml, digest: 'sha256:d2bedd4a267b23f20129f56d6d29a23c08f23583f98e24e0e66e1a2798b1700e', expected_path: fixtures/cases.yaml}
+- {ref: urn:example:product:counter/harness-surface.yaml, digest: 'sha256:b1214e539ba778fe1f90225dc3ce8e188e01b8cb6a24a3d27eb744d435b218f1', expected_path: harness/surface.yaml}

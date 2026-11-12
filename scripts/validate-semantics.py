@@ -15151,6 +15151,472 @@ def check_rc034(docs: dict[str, dict], report: Report) -> None:
         _check_rc034_negative_cases(docs, report)
 
 
+# --------------------------------------------------------------------------
+# RC-035 Fixture-IR and Conformance-IR structural contracts (R5-F1 candidate).
+# Both schemas are profile-less IR schemas (ADR-027 shape): their const is an
+# ir_catalog IR id, they are governed by defined contracts, and their
+# enforcement names the registered solver of the stage that produces them.
+# The suite in scripts/fixture_conformance_ir.py checks every
+# document-decidable semantic rule against positive witnesses and one or more
+# falsifying fixtures per rule under ops/fixtures/fixture-conformance-ir/.
+RC035_SCHEMAS = {
+    "semantics/fixture_ir.schema.yaml": (
+        "l9.schema/fixture-ir@1",
+        "l9.fixture-ir/v1",
+        "fixture-derivation-validator/v1",
+        "fixtures",
+    ),
+    "semantics/conformance_ir.schema.yaml": (
+        "l9.schema/conformance-ir@1",
+        "l9.conformance-ir/v1",
+        "reference-conformance/v1",
+        "conformance",
+    ),
+    # Product-authored input consumed by stage 8; registered through the same
+    # IR-schema route (its const is an ir_catalog id) and enforced by the
+    # solver of the stage that consumes it.
+    "semantics/harness_surface.schema.yaml": (
+        "l9.schema/harness-surface@1",
+        "l9.harness-surface/v1",
+        "fixture-derivation-validator/v1",
+        "fixtures",
+    ),
+}
+RC035_FIXTURES = "ops/fixtures/fixture-conformance-ir"
+# sha256 of json.dumps(<pytest/v1 entry>, sort_keys=True, separators=(",", ":"))
+# at the v3.36.0 admission commit, unchanged through v3.39.0. pytest/v1 is admitted and changes
+# only by successor.
+RC035_PYTEST_V1_DIGEST = (
+    "cbff6899d43531e4ed4c2a0e094a01a6665c66cf6a9c7a475f5ba51d0bbb34d1"
+)
+RC035_PYTEST_V2_MAPS = {
+    "fixture_case",
+    "given",
+    "given.steps.harness_control",
+    "when.operation",
+    "when.steps.sequence",
+    "when.steps.parallel",
+    "context",
+    "expect",
+    "expect.observations.interface_action",
+    "expect.observations.harness_observation",
+    "disposition.unresolved",
+    "expect.observations.context",
+    "expect.group.count_where",
+    "expect.presence",
+}
+RC035_STAGE8_INPUTS = ("product_fixture_cases", "product_harness_surface")
+RC035_REFUSALS = {
+    "product_file_ref_unresolved",
+    "product_file_ref_ambiguous",
+    "product_file_path_escapes_repository",
+    "product_file_digest_mismatch",
+}
+
+
+def _rc035_registration(docs: dict[str, dict], report: Report) -> None:
+    manifest = _mapping(
+        _mapping(docs.get("semantics/generic_compiler_manifest.yaml")).get("requires")
+    )
+    listed = _list(manifest.get("artifact_schemas"))
+    ir_ids = {
+        _mapping(e).get("id")
+        for e in _list(_mapping(docs.get("semantics/ir_catalog.yaml")).get("irs"))
+    }
+    contracts = {
+        _mapping(e).get("id")
+        for e in _list(_mapping(docs.get("semantics/contracts.yaml")).get("contracts"))
+    }
+    solvers = {
+        _mapping(e).get("id"): _mapping(e)
+        for e in _list(
+            _mapping(docs.get("semantics/solver_catalog.yaml")).get("solvers")
+        )
+    }
+    for path, (artifact_id, ir_id, solver, stage) in RC035_SCHEMAS.items():
+        schema = _mapping(docs.get(path))
+        name = path.removeprefix("semantics/")
+        if listed.count(name) != 1:
+            report.fail(
+                "RC-035", path, "artifact_schemas", name, "not listed exactly once"
+            )
+        if schema.get("schema") != "l9.schema-definition/v1":
+            report.fail(
+                "RC-035",
+                path,
+                "schema",
+                schema.get("schema"),
+                "not l9.schema-definition/v1",
+            )
+        if schema.get("artifact_id") != artifact_id:
+            report.fail(
+                "RC-035",
+                path,
+                "artifact_id",
+                schema.get("artifact_id"),
+                f"expected {artifact_id}",
+            )
+        const = _mapping(
+            _mapping(_mapping(schema.get("properties")).get("schema"))
+        ).get("const")
+        if const != ir_id or ir_id not in ir_ids:
+            report.fail(
+                "RC-035",
+                path,
+                "properties.schema.const",
+                const,
+                f"expected ir_catalog id {ir_id}",
+            )
+        governed = _mapping(schema.get("governed_by"))
+        refs = _list(governed.get("contracts"))
+        if not refs or any(r not in contracts for r in refs):
+            report.fail(
+                "RC-035",
+                path,
+                "governed_by.contracts",
+                refs,
+                "missing or undefined contract",
+            )
+        if (
+            "projection_profile_ref" in governed
+            or "composition_profile_ref" in governed
+        ):
+            report.fail(
+                "RC-035",
+                path,
+                "governed_by",
+                governed,
+                "an IR schema names no governing profile",
+            )
+        enforcement = str(
+            _mapping(schema.get("enforcement")).get("semantic_rules") or ""
+        )
+        entry = solvers.get(solver)
+        if (
+            not enforcement.startswith(solver)
+            or entry is None
+            or entry.get("stage") != stage
+        ):
+            report.fail(
+                "RC-035",
+                path,
+                "enforcement.semantic_rules",
+                enforcement[:60],
+                f"must name {solver} (stage {stage})",
+            )
+
+
+def _canonical_digest(value: object) -> str:
+    return hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
+def _rc035_successor_surfaces(docs: dict[str, dict], report: Report) -> None:
+    """pytest/v1 unchanged, pytest/v2 registered, topology fields optional, stage 8 input."""
+    path = "semantics/binding_catalog.yaml"
+    bindings = [_mapping(b) for b in _list(_mapping(docs.get(path)).get("bindings"))]
+    v1 = [b for b in bindings if b.get("id") == "pytest/v1"]
+    v2 = [b for b in bindings if b.get("id") == "pytest/v2"]
+    if len(v1) != 1 or _canonical_digest(v1[0]) != RC035_PYTEST_V1_DIGEST:
+        report.fail(
+            "RC-035",
+            path,
+            "pytest/v1",
+            len(v1),
+            "admitted pytest/v1 changed in place or not unique",
+        )
+    if len(v2) != 1:
+        report.fail(
+            "RC-035",
+            path,
+            "pytest/v2",
+            len(v2),
+            "pytest/v2 not registered exactly once",
+        )
+    else:
+        entry = v2[0]
+        missing = RC035_PYTEST_V2_MAPS - set(_mapping(entry.get("maps")))
+        if (
+            entry.get("successor_of") != "pytest/v1"
+            or entry.get("source_ir") != "fixture_ir"
+            or missing
+        ):
+            report.fail(
+                "RC-035",
+                path,
+                "pytest/v2",
+                sorted(missing),
+                "pytest/v2 must succeed pytest/v1 over fixture_ir and map every fixture-IR form",
+            )
+    topo_path = "semantics/product_topology.schema.yaml"
+    conformance = _mapping(
+        _mapping(_mapping(docs.get(topo_path)).get("properties")).get("conformance")
+    )
+    fields = _mapping(conformance.get("fields"))
+    if _list(conformance.get("required")) != ["profile_refs"]:
+        report.fail(
+            "RC-035",
+            topo_path,
+            "properties.conformance.required",
+            conformance.get("required"),
+            "new conformance fields must stay optional",
+        )
+    case_refs = _mapping(fields.get("fixture_case_refs"))
+    items = _mapping(case_refs.get("items"))
+    harness_ref = _mapping(fields.get("harness_surface_ref"))
+    if (
+        case_refs.get("type") != "array"
+        or sorted(_list(items.get("required"))) != ["digest", "ref"]
+        or harness_ref.get("type") != "object"
+        or sorted(_list(harness_ref.get("required"))) != ["digest", "ref"]
+    ):
+        report.fail(
+            "RC-035",
+            topo_path,
+            "properties.conformance.fields",
+            sorted(fields),
+            "fixture_case_refs [{ref, digest}] and harness_surface_ref {ref, digest} must be declared",
+        )
+    resolution = _mapping(_mapping(docs.get(topo_path)).get("product_file_resolution"))
+    if set(_mapping(resolution.get("refusals"))) != RC035_REFUSALS:
+        report.fail(
+            "RC-035",
+            topo_path,
+            "product_file_resolution.refusals",
+            sorted(_mapping(resolution.get("refusals"))),
+            f"typed refusals must be exactly {sorted(RC035_REFUSALS)}",
+        )
+    manifest_path = "semantics/product_manifest.schema.yaml"
+    manifest = _mapping(docs.get(manifest_path))
+    excluded = _list(
+        _mapping(manifest.get("closure_digest_definition")).get("excluded")
+    )
+    m_props = _mapping(manifest.get("properties"))
+    if (
+        sorted(excluded)
+        != ["closure_digest", "conformance.compilation", "manifest_digest"]
+        or _mapping(m_props.get("closure_digest")).get("type") != "semantic_digest"
+        or "closure_digest" in _list(manifest.get("required"))
+    ):
+        report.fail(
+            "RC-035",
+            manifest_path,
+            "closure_digest_definition",
+            sorted(excluded),
+            "closure_digest must be an optional semantic_digest excluding exactly manifest_digest, closure_digest and conformance.compilation",
+        )
+    profiles = _list(_mapping(docs.get(COMPILATION_PROFILES_PATH)).get("profiles"))
+    build = [
+        _mapping(p)
+        for p in profiles
+        if _mapping(p).get("id") == "l9.compilation/product-build@1"
+    ]
+    stage = (
+        [
+            _mapping(st)
+            for st in _list(build[0].get("stages"))
+            if _mapping(st).get("id") == "fixtures"
+        ]
+        if build
+        else []
+    )
+    if not stage or any(
+        name not in _list(stage[0].get("consumes")) for name in RC035_STAGE8_INPUTS
+    ):
+        report.fail(
+            "RC-035",
+            COMPILATION_PROFILES_PATH,
+            "product-build@1.fixtures.consumes",
+            "-",
+            f"stage 8 must consume {', '.join(RC035_STAGE8_INPUTS)}",
+        )
+
+
+def _rc035_negative_cases(docs: dict[str, dict]) -> list[tuple[str, str, object]]:
+    """(label, dotted path inside the fixture-IR schema or a ledger, replacement)."""
+    f = "semantics/fixture_ir.schema.yaml"
+    return [
+        ("const_not_an_ir_id", f"{f}#properties.schema.const", "l9.fixture-ir/v9"),
+        ("artifact_id_drift", f"{f}#artifact_id", "l9.schema/fixture-ir@2"),
+        ("undefined_contract", f"{f}#governed_by.contracts", ["l9.contract/missing@1"]),
+        ("empty_contracts", f"{f}#governed_by.contracts", []),
+        (
+            "profile_governed",
+            f"{f}#governed_by.projection_profile_ref",
+            "l9.projection/x@1",
+        ),
+        (
+            "wrong_solver",
+            f"{f}#enforcement.semantic_rules",
+            "reference-conformance/v1 (stage conformance)",
+        ),
+        (
+            "unlisted_schema",
+            "semantics/generic_compiler_manifest.yaml#requires.artifact_schemas",
+            ["implementation_ir.schema.yaml"],
+        ),
+    ] + _rc035_successor_negative_cases(docs)
+
+
+def _rc035_successor_negative_cases(
+    docs: dict[str, dict],
+) -> list[tuple[str, str, object]]:
+    bindings = _list(
+        _mapping(docs.get("semantics/binding_catalog.yaml")).get("bindings")
+    )
+    ids = [_mapping(b).get("id") for b in bindings]
+    v1 = ids.index("pytest/v1") if "pytest/v1" in ids else 0
+    v2 = ids.index("pytest/v2") if "pytest/v2" in ids else 0
+    profiles = _list(_mapping(docs.get(COMPILATION_PROFILES_PATH)).get("profiles"))
+    build = next(
+        (
+            i
+            for i, p in enumerate(profiles)
+            if _mapping(p).get("id") == "l9.compilation/product-build@1"
+        ),
+        0,
+    )
+    stages = _list(_mapping(profiles[build] if profiles else {}).get("stages"))
+    fixtures = next(
+        (i for i, st in enumerate(stages) if _mapping(st).get("id") == "fixtures"), 0
+    )
+    b = "semantics/binding_catalog.yaml#bindings"
+    t = "semantics/product_topology.schema.yaml#properties.conformance"
+    return [
+        ("pytest_v1_edited_in_place", f"{b}.{v1}.maps.when.steps", "x"),
+        ("pytest_v2_without_successor_of", f"{b}.{v2}.successor_of", "pytest/v0"),
+        (
+            "pytest_v2_missing_harness_map",
+            f"{b}.{v2}.maps",
+            {"fixture_case": "pytest_test_function"},
+        ),
+        (
+            "topology_new_field_required",
+            f"{t}.required",
+            ["profile_refs", "fixture_case_refs"],
+        ),
+        ("topology_harness_field_dropped", f"{t}.fields.harness_surface_ref", None),
+        (
+            "topology_harness_field_back_to_a_plain_ref",
+            f"{t}.fields.harness_surface_ref",
+            "semantic_ref",
+        ),
+        (
+            "topology_refusal_code_dropped",
+            "semantics/product_topology.schema.yaml#product_file_resolution.refusals",
+            {"product_file_ref_unresolved": "x"},
+        ),
+        (
+            "stage_8_drops_product_fixture_cases",
+            f"{COMPILATION_PROFILES_PATH}#profiles.{build}.stages.{fixtures}.consumes",
+            ["semantic_law_ir", "law_provenance", "product_harness_surface"],
+        ),
+        (
+            "stage_8_drops_product_harness_surface",
+            f"{COMPILATION_PROFILES_PATH}#profiles.{build}.stages.{fixtures}.consumes",
+            ["semantic_law_ir", "law_provenance", "product_fixture_cases"],
+        ),
+        (
+            "closure_digest_covers_compilation",
+            "semantics/product_manifest.schema.yaml#closure_digest_definition.excluded",
+            ["manifest_digest", "closure_digest"],
+        ),
+        (
+            "closure_digest_made_required",
+            "semantics/product_manifest.schema.yaml#required",
+            ["schema", "closure_digest"],
+        ),
+        (
+            "harness_surface_const_not_an_ir_id",
+            "semantics/harness_surface.schema.yaml#properties.schema.const",
+            "l9.harness-surface/v9",
+        ),
+        (
+            "harness_surface_unlisted",
+            "semantics/generic_compiler_manifest.yaml#requires.artifact_schemas",
+            ["fixture_ir.schema.yaml", "conformance_ir.schema.yaml"],
+        ),
+    ]
+
+
+def _check_rc035_negative_cases(docs: dict[str, dict], report: Report) -> None:
+    rejected = 0
+    cases = _rc035_negative_cases(docs)
+    for label, target, value in cases:
+        path, dotted = target.split("#")
+        mutated = copy.deepcopy(docs)
+        node = mutated[path]
+        *parents, last = dotted.split(".")
+        for key in parents:
+            node = (
+                node[int(key)] if isinstance(node, list) else node.setdefault(key, {})
+            )
+        if isinstance(node, list):
+            node[int(last)] = value
+        else:
+            node[last] = value
+        probe = Report()
+        _rc035_registration(mutated, probe)
+        _rc035_successor_surfaces(mutated, probe)
+        if probe.failures:
+            rejected += 1
+        else:
+            report.fail(
+                "RC-035",
+                "scripts/validate-semantics.py",
+                "negative_case",
+                label,
+                "mutation was accepted",
+            )
+    if rejected == len(cases):
+        report.ok(
+            "RC-035-NEG",
+            f"{rejected} registration and successor-surface mutations (IR and harness-surface schemas, pytest/v1 pin, pytest/v2, optional topology fields and typed refusals, manifest closure digest, stage-8 inputs) fail closed",
+        )
+
+
+def check_rc035(root: Path, docs: dict[str, dict], report: Report) -> None:
+    before = len(report.failures)
+    _rc035_registration(docs, report)
+    _rc035_successor_surfaces(docs, report)
+    if len(report.failures) != before:
+        return
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    try:
+        import fixture_conformance_ir as fci
+    finally:
+        sys.path.pop(0)
+    try:
+        passes, failures = fci.run_suite(root / RC035_FIXTURES, root / "semantics")
+    except (OSError, KeyError, TypeError, ValueError, yaml.YAMLError) as exc:
+        report.fail(
+            "RC-035",
+            RC035_FIXTURES,
+            "suite",
+            type(exc).__name__,
+            f"suite could not run: {exc}",
+        )
+        return
+    for line in failures:
+        report.fail("RC-035", RC035_FIXTURES, "suite", line[:80], line)
+    if not failures:
+        negatives = sum(1 for line in passes if line.startswith("negative "))
+        report.ok(
+            "RC-035",
+            "l9.schema/fixture-ir@1, l9.schema/conformance-ir@1 and l9.schema/harness-surface@1 are registered "
+            "profile-less schemas whose const is an ir_catalog id, governed by defined contracts and enforced by the "
+            "registered solver of the stage that produces or consumes them; every positive witness validates and "
+            f"{negatives} falsifying fixtures are each rejected under the semantic rule they name, every "
+            "document-decidable, evaluated and cross-document rule is falsified at least once, and the rule lists "
+            "match the schemas; pytest/v1 is unchanged by digest and pytest/v2 succeeds it with every fixture-IR "
+            "form mapped; product-topology conformance fixture_case_refs and harness_surface_ref {ref, digest} are "
+            "optional with typed product-file refusals; the manifest closure digest is defined; stage 8 consumes "
+            "product_fixture_cases and product_harness_surface",
+        )
+        _check_rc035_negative_cases(docs, report)
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -15215,6 +15681,7 @@ def main(argv: list[str]) -> int:
     check_rc032(docs, report)
     check_rc033(docs, report)
     check_rc034(docs, report)
+    check_rc035(root, docs, report)
     check_sc009(observed, root, report)
     for line in report.passes:
         print(line)

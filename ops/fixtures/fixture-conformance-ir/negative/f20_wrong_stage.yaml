@@ -1,0 +1,9 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: structural
+mutation:
+- op: set
+  path:
+  - authority
+  - stage
+  value: conformance

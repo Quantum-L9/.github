@@ -1,0 +1,10 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: every_source_law_ref_resolves_to_exactly_one_law_index_entry_with_source_provenance
+mutation:
+- op: append
+  path:
+  - fixture_cases
+  - 0
+  - source_law_refs
+  value: urn:example:law:not-in-closure

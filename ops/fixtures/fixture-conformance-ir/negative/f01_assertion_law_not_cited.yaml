@@ -1,0 +1,13 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: every_fixture_case_cites_at_least_one_source_law_and_every_assertion_law_ref_is_one_of_the_case_source_law_refs
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 0
+  - expect
+  - assertions
+  - 0
+  - law_ref
+  value: urn:example:law:invented

@@ -1,0 +1,15 @@
+# Falsifying fixture: the reference evaluator must reach expected_outcome (never pass) under `violates`.
+document: evaluation
+violates: is_present_holds_iff_the_target_path_resolves_is_absent_iff_it_does_not_and_is_null_iff_it_resolves_to_null_and_an_absent_path_is_never_an_error_for_them
+assertion:
+  id: a
+  law_ref: urn:example:law:x
+  target:
+    kind: step
+    ref: when
+    path: next_cursor
+  predicate: is_absent
+recorded:
+  when:
+    next_cursor: c2
+expected_outcome: fail

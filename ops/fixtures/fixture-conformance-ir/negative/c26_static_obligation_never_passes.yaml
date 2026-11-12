@@ -1,0 +1,21 @@
+# Falsifying fixture: aggregation must stay non-pass under `violates`. Even a mis-dispositioned static_inspection obligation aggregates to unresolved.
+document: verdict
+violates: an_unresolved_obligation_never_yields_a_pass_verdict
+obligation_index: 4
+obligation_mutation:
+- op: set
+  path:
+  - disposition
+  value: executable
+- op: set
+  path:
+  - execution_plan
+  value:
+    mode: fixture_replay
+    cases:
+    - create_starts_at_zero
+    isolation: fresh_subject_per_case
+    verdict_rule: pass_only_when_every_witness_case_executes_and_every_assertion_holds
+case_outcomes:
+  create_starts_at_zero: pass
+expected_verdict: unresolved

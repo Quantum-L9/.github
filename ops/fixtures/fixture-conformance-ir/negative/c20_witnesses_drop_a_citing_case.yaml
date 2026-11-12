@@ -1,0 +1,19 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: an_obligation_is_witnessed_by_exactly_the_fixture_cases_whose_source_law_refs_cite_its_law
+mutation:
+- op: set
+  path:
+  - obligations
+  - 0
+  - witnessed_by
+  value:
+  - create_starts_at_zero
+- op: set
+  path:
+  - obligations
+  - 0
+  - execution_plan
+  - cases
+  value:
+  - create_starts_at_zero

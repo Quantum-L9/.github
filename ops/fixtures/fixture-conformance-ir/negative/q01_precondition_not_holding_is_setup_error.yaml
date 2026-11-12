@@ -1,0 +1,8 @@
+# Falsifying fixture: a precondition that does not hold is a setup error (never pass, never fail) under `violates`.
+document: precondition
+violates: a_precondition_holds_iff_every_path_equals_its_literal_and_one_that_does_not_hold_is_a_setup_error_never_a_fail_or_a_pass
+precondition:
+  status: committed
+result:
+  status: conflict
+expected_outcome: error

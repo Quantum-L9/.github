@@ -1,0 +1,10 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: a_fault_injection_control_declares_a_target_port_ref_and_its_step_request_names_port_method_code_and_after_effect_before_or_after
+mutation:
+- op: delete
+  path:
+  - interface_surface
+  - harness_controls
+  - 0
+  - target_port_ref

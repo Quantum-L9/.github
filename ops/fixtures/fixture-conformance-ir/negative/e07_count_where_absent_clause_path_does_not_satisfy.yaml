@@ -1,0 +1,19 @@
+# Falsifying fixture: the reference evaluator must reach expected_outcome (never pass) under `violates`.
+document: evaluation
+violates: count_where_holds_iff_exactly_count_group_members_satisfy_every_where_clause
+assertion:
+  id: a
+  law_ref: urn:example:law:x
+  target:
+    kind: group
+  predicate: count_where
+  operand:
+    where:
+    - path: status
+      predicate: equals
+      operand: committed
+    count: 1
+group:
+- code: TIMEOUT
+- code: TIMEOUT
+expected_outcome: fail

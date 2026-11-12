@@ -1,0 +1,14 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: subject_and_provenance_fixture_ir_digest_are_the_semantic_digest_of_the_consumed_fixture_ir
+mutation: []
+fixture_ir_mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 0
+  - expect
+  - assertions
+  - 2
+  - operand
+  value: 1

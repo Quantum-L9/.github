@@ -1285,6 +1285,99 @@ def _real_prerequisites():
     return here, engine, None
 
 
+# --------------------------------------------------------------------------- IR schemas
+
+IR_CATALOG = "irs:\n- id: l9.x-ir/v1\n  purpose: an x IR\n"
+IR_SCHEMA = (
+    "schema: l9.schema-definition/v1\nartifact_id: l9.schema/x-ir@1\n"
+    "governed_by:\n  contracts:\n  - l9.contract/x@1\ntype: object\n"
+    "properties:\n  schema:\n    const: l9.x-ir/v1\n"
+)
+
+
+class IRSchemaRegistration(_Fixture):
+    """A profile-less IR structural schema (ADR-027 shape) registers through its contracts."""
+
+    def ir_gaps(self, schema_text=IR_SCHEMA, catalog=IR_CATALOG, extra_schemas=()):
+        if catalog is not None:
+            self.repo.write("semantics/ir_catalog.yaml", catalog)
+        self.repo.write("semantics/x_ir.schema.yaml", schema_text)
+        self.repo.write(
+            "semantics/generic_compiler_manifest.yaml",
+            manifest(
+                (
+                    "x_projection.schema.yaml",
+                    "x_composition.schema.yaml",
+                    "x_ir.schema.yaml",
+                    *extra_schemas,
+                )
+            ),
+        )
+        subject = self.subject(schemas=["x_ir.schema.yaml"])
+        report = self.verdict(subject)
+        return [g for g in report["registration"]["gaps"] if "x_ir" in g]
+
+    def test_ir_schema_with_contracts_and_no_profile_registers(self):
+        self.assertEqual(self.ir_gaps(), [])
+
+    def test_ir_id_not_in_ir_catalog_keeps_the_profile_output_gap(self):
+        gaps = self.ir_gaps(catalog="irs:\n- id: l9.other-ir/v1\n  purpose: other\n")
+        self.assertEqual(
+            gaps,
+            [
+                (
+                    "schema x_ir.schema.yaml: l9.x-ir/v1 is the output of 0 profiles, "
+                    "not exactly one"
+                )
+            ],
+        )
+
+    def test_missing_ir_catalog_keeps_the_profile_output_gap(self):
+        gaps = self.ir_gaps(catalog=None)
+        self.assertEqual(len(gaps), 1)
+        self.assertIn("is the output of 0 profiles", gaps[0])
+
+    def test_ir_id_that_is_also_a_profile_output_is_ambiguous(self):
+        self.repo.write(
+            "semantics/projection_profiles.yaml",
+            PROFILES_HEAD
+            + "projection_profiles:\n"
+            + PROFILE.replace("schema: l9.projection.x/v1", "schema: l9.x-ir/v1"),
+        )
+        gaps = "\n".join(self.ir_gaps())
+        self.assertIn("IR schema identity is ambiguous", gaps)
+
+    def test_missing_governed_by_contracts_is_refused(self):
+        text = IR_SCHEMA.replace(
+            "governed_by:\n  contracts:\n  - l9.contract/x@1\n", ""
+        )
+        self.assertIn(
+            "declares no governed_by.contracts", "\n".join(self.ir_gaps(text))
+        )
+
+    def test_empty_governed_by_contracts_is_refused(self):
+        text = IR_SCHEMA.replace(
+            "  contracts:\n  - l9.contract/x@1\n", "  contracts: []\n"
+        )
+        self.assertIn(
+            "declares no governed_by.contracts", "\n".join(self.ir_gaps(text))
+        )
+
+    def test_undefined_governing_contract_is_refused(self):
+        text = IR_SCHEMA.replace("l9.contract/x@1", "l9.contract/missing@1")
+        self.assertIn(
+            "governed_by contract l9.contract/missing@1 is not defined exactly once",
+            "\n".join(self.ir_gaps(text)),
+        )
+
+    def test_ir_schema_naming_a_governing_profile_is_refused(self):
+        text = IR_SCHEMA.replace(
+            "governed_by:\n",
+            "governed_by:\n  projection_profile_ref: l9.projection/x@1\n",
+        )
+        self.assertIn("names governing profile field(s)", "\n".join(self.ir_gaps(text)))
+
+
 class RealRepository(unittest.TestCase):
     """The known admitted pair stays usable; staged candidates are never reported admitted."""
 

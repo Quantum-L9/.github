@@ -1,0 +1,17 @@
+# Falsifying fixture: must be rejected under `violates`.
+document: fixture_ir
+violates: a_from_reference_names_a_harness_control_step_only_when_that_control_declares_a_result_contract_and_never_names_a_harness_observation
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 3
+  - expect
+  - observations
+  - 0
+  - request
+  - operation_id
+  value:
+    $from:
+      step: receipts
+      path: count

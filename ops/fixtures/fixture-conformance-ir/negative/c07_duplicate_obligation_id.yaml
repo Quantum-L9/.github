@@ -1,0 +1,10 @@
+# Falsifying fixture: mutates positive/conformance_ir.yaml; must be rejected under `violates`.
+document: conformance_ir
+violates: obligation_ids_are_unique
+mutation:
+- op: set
+  path:
+  - obligations
+  - 1
+  - id
+  value: obl.create-starts-at-zero

@@ -1,0 +1,11 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`.
+document: fixture_ir
+violates: a_sequence_when_names_at_least_one_step_and_a_parallel_when_names_at_least_two_steps_and_neither_names_a_top_level_operation
+mutation:
+- op: delete
+  path:
+  - fixture_cases
+  - 2
+  - when
+  - steps
+  - 1
