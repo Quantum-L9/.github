@@ -249,11 +249,11 @@ def schema_violations(value: Any, descriptor: Any, path: str = "$") -> list[str]
         for name in descriptor.get("required", []) or []:
             if name not in value:
                 return [f"{path}.{name}: required field missing"]
-        required = set(descriptor.get("required", []) or [])
+        # Optional means the key may be omitted, not that it may be null: a present
+        # value is always checked against its descriptor, so an explicit null passes
+        # only where the declared type admits it (`any`).
         for key, child in (descriptor.get("properties") or {}).items():
             if key in value:
-                if value[key] is None and key not in required:
-                    continue
                 found = schema_violations(value[key], child, f"{path}.{key}")
                 if found:
                     return found

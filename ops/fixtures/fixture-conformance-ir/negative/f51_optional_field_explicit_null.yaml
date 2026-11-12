@@ -1,0 +1,12 @@
+# Falsifying fixture: mutates positive/fixture_ir.yaml; must be rejected under `violates`. Optional means the key may be
+# omitted, not that it may be null: an explicitly present null is checked against its descriptor (semantic_ref) and fails.
+document: fixture_ir
+violates: structural
+mutation:
+- op: set
+  path:
+  - fixture_cases
+  - 0
+  - provenance
+  - derivation_ref
+  value: null
