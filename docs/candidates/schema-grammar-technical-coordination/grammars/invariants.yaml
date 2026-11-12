@@ -7,7 +7,7 @@ admission: not_granted
 source_class: invariants
 source_ref: l9.source/invariants@1
 source_path: semantics/invariants.yaml
-source_revision: 62e20d48e8e61c130d460ba9e0b88e20283f5de2
+source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
 source_digest: sha256:d3eb316ee57b4bd6c2093b2ebd60caf0d06a4bcbfe32ee26f488f8d4887d9f96
 applies_to_selectors:
 - $.invariants[?(@.id=="L9-INTEGRATION-001")]
@@ -26,6 +26,12 @@ applies_to_selectors:
 - $.invariants[?(@.id=="L9-STRATEGY-001")]
 - $.invariants[?(@.id=="L9-SIGNAL-004")]
 - $.invariants[?(@.id=="L9-PROJECTION-001")]
+- $.invariants[?(@.id=="L9-SEM-001")]
+- $.invariants[?(@.id=="L9-SCOPE-001")]
+- $.invariants[?(@.id=="L9-CORRECTNESS-001")]
+- $.invariants[?(@.id=="L9-EVIDENCE-001")]
+- $.invariants[?(@.id=="L9-REVISION-001")]
+- $.invariants[?(@.id=="L9-DERIVED-001")]
 grammar:
   type: object
   additional_properties: true

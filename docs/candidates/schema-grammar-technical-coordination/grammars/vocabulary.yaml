@@ -7,7 +7,7 @@ admission: not_granted
 source_class: vocabulary
 source_ref: l9.source/vocabulary@1
 source_path: semantics/vocabulary.yaml
-source_revision: 62e20d48e8e61c130d460ba9e0b88e20283f5de2
+source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
 source_digest: sha256:28ee4c5346858746345b8270ffc9ea31e1e066a08b301eaf1f7e3679613c259e
 applies_to_selectors:
 - $.terms.technical_coordination_role

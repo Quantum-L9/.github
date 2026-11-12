@@ -40,7 +40,12 @@ def _load_base() -> Any:
     if spec is None or spec.loader is None:
         raise SystemExit(f"refusing: precedent rehearsal missing: {BASE_MODULE}")
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    # The precedent pack is committed evidence; loading it must leave no residue there.
+    previous, sys.dont_write_bytecode = sys.dont_write_bytecode, True
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.dont_write_bytecode = previous
     return module
 
 

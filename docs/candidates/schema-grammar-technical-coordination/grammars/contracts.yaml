@@ -7,7 +7,7 @@ admission: not_granted
 source_class: contracts
 source_ref: l9.source/contracts@1
 source_path: semantics/contracts.yaml
-source_revision: 62e20d48e8e61c130d460ba9e0b88e20283f5de2
+source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
 source_digest: sha256:e2c1defbba1f1ddc785e2fc6536a256fed0cdc8bd07df012b8cbc780fc5b0dc1
 applies_to_selectors:
 - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]

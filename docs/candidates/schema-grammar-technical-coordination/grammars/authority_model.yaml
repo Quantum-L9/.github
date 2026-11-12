@@ -7,7 +7,7 @@ admission: not_granted
 source_class: authority_model
 source_ref: l9.source/authority-model@1
 source_path: semantics/authority_model.yaml
-source_revision: 62e20d48e8e61c130d460ba9e0b88e20283f5de2
+source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
 source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
 applies_to_selectors:
 - $.agent_authority

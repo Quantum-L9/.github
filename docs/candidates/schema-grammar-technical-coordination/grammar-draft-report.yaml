@@ -1,27 +1,27 @@
 authority_repository: Quantum-L9/.github
-authority_revision: 62e20d48e8e61c130d460ba9e0b88e20283f5de2
+authority_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
 projection_profile: l9.projection/technical-coordination@1
 composition_profile: l9.compose/technical-coordination@1
 written:
 - source_class: vocabulary
   path: docs/candidates/schema-grammar-technical-coordination/grammars/vocabulary.yaml
-  digest: sha256:44cb9c6660398a2286598a33afa1e1bb96b06eaa543e9550402fca08656748b3
+  digest: sha256:95ab02e6969f3451f125e407ca9a77813c086d3e3e4e42f55000a9dd7c86fcdd
   normative_overlay: []
 - source_class: invariants
   path: docs/candidates/schema-grammar-technical-coordination/grammars/invariants.yaml
-  digest: sha256:b815ca8b32b94564177317f4a9eeee0a4ef38df2aae803964b314729c17c2791
+  digest: sha256:b9222044d08fa8084f9bc71b8f06a4d67ab65a363cbd3343dc7d14ddae63cee7
   normative_overlay: []
 - source_class: contracts
   path: docs/candidates/schema-grammar-technical-coordination/grammars/contracts.yaml
-  digest: sha256:368d5a96e2cea37673a140be568ea88b7b13f960a660e4d0bd812b6859eb8e83
+  digest: sha256:c4d5ac68e70bbcd56bc46e29ddec73cb7279164210dc52777d652239ddd06363
   normative_overlay: []
 - source_class: authority_model
   path: docs/candidates/schema-grammar-technical-coordination/grammars/authority_model.yaml
-  digest: sha256:fd5d6ae6d0161935d6674427f67d74b53edc258541ac4f5884dde5010b1c81f0
+  digest: sha256:852005f632e8adc224a086078f5a3e36241c66c623c746464487da3bef3bee94
   normative_overlay: []
 - source_class: strategic_cognition_model
   path: docs/candidates/schema-grammar-technical-coordination/grammars/strategic_cognition_model.yaml
-  digest: sha256:74bad6c7cec55bdfa9fb0755ae137a345aadbe24a4904d0ee29a7a5364d05695
+  digest: sha256:4cb05e01ee8d26290771c50e0e5f49a38cdfa48910d3021d7697eb2acdb51e2c
   normative_overlay: []
 inexpressible: []
 pack_dir: docs/candidates/schema-grammar-technical-coordination

@@ -2,12 +2,12 @@
 	"admission": "not_granted",
 	"base": {
 		"repository": "Quantum-L9/.github",
-		"revision": "62e20d48e8e61c130d460ba9e0b88e20283f5de2"
+		"revision": "10a9e5e9364720e3a03627daaded3235cd7ba16f"
 	},
 	"commits": {
-		"G1_grammars": "2de79f10453795fa225c203459a4ce914ba738f4",
-		"G2_catalog": "b5f103f55ea71d9fe53da8d076afc424588f8119",
-		"R_registrations": "a7c4aabb07051ee95ce71d52807a2bb8b145a417"
+		"G1_grammars": "0f43c6d8d0dc1a2f97b6663206a1f65053b7e442",
+		"G2_catalog": "34fefc6b2dbb398934a47bc4d86927bba691f292",
+		"R_registrations": "a95f98608a7f73eb7e811a115d83b4ad6bece863"
 	},
 	"compiler": {
 		"executable_digest": "sha256:f8a444ddb191c254f7d90151f155e0db60599355606df19cf3d2ef4b108d3a95",

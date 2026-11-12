@@ -7,7 +7,7 @@ admission: not_granted
 source_class: strategic_cognition_model
 source_ref: l9.source/strategic-cognition-model@1
 source_path: semantics/strategic_cognition_model.yaml
-source_revision: 62e20d48e8e61c130d460ba9e0b88e20283f5de2
+source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
 source_digest: sha256:af540e9607915878b66cb7632fd3ca63f57f80707b1c605fc21536d06ec81a7d
 applies_to_selectors:
 - $.global_rules
