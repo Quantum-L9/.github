@@ -17,7 +17,7 @@ released and admitted by the owner (`.claude/skills/l9-projection-admission`).
 | `scripts/fixture_conformance_ir.py` (repo root; RC-035) | Shape interpreter (the `l9.schema-definition/v1` descriptor grammar) plus a validator for every document-decidable semantic rule |
 | `semantics/harness_surface.schema.yaml` (registered in the 2026-11-12 amendment) | `l9.schema/harness-surface@1`, structural contract of the product-authored `l9.harness-surface/v1` (Stage 8 input) |
 | `ops/fixtures/fixture-conformance-ir/positive/` | Synthetic, product-neutral positive witnesses: fixture IR, conformance IR consuming it, harness surface, a synthetic manifest for the closure digest, product files with a RepositorySpec slice, and reference evaluations |
-| `ops/fixtures/fixture-conformance-ir/negative/` | 107 falsifying fixtures: one or more per checked, evaluated or cross-document rule, plus structural controls |
+| `ops/fixtures/fixture-conformance-ir/negative/` | 108 falsifying fixtures: one or more per checked, evaluated or cross-document rule, plus structural controls |
 | `language-test/state_fixture_ir.candidate.yaml` | The State language test (5 cases), evidence only |
 | `semantics/binding_catalog.yaml#pytest/v2` | Registered in v3.40.0 by operator decision F1-D2 (the earlier proposal file is removed) |
 
@@ -95,7 +95,7 @@ Amendment of 2026-11-12 (ADR-037 decisions 12–20) adds:
 
 Every checked (fixture 29, conformance 18, harness 3, topology 3, manifest 2), evaluated (4) and cross-document (2)
 rule has at least one falsifying fixture; the runner fails if a rule lacks one or if a rule list drifts from its
-schema. Result at this revision: **124 passed, 0 failed** (17 positive checks across 6 witness files, 107 negative).
+schema. Result at this revision: **125 passed, 0 failed** (17 positive checks across 6 witness files, 108 negative).
 Rules that need a resolved manifest closure, the product repository's code, or state a non-authority property are
 the solvers' obligations and are listed as external in the validator.
 

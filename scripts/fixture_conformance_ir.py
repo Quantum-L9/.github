@@ -1253,7 +1253,8 @@ def obligation_verdict(obligation: dict, case_outcomes: dict[str, str]) -> str:
     """Aggregate per-case outcomes (pass|fail|error) into an obligation verdict.
 
     Encodes an_unresolved_obligation_never_yields_a_pass_verdict and the
-    verdict_rule const. A missing outcome is an error, never a pass.
+    verdict_rule const. A missing outcome, or any outcome other than pass or fail
+    (including an unresolved case), is an error, never a pass.
     """
     if (
         obligation["disposition"] == "unresolved"
@@ -1264,7 +1265,7 @@ def obligation_verdict(obligation: dict, case_outcomes: dict[str, str]) -> str:
     outcomes = [
         case_outcomes.get(c, "error") for c in obligation["execution_plan"]["cases"]
     ]
-    if any(o == "error" or o not in VERDICTS for o in outcomes):
+    if any(o not in ("pass", "fail") for o in outcomes):
         return "error"
     if any(o == "fail" for o in outcomes):
         return "fail"
