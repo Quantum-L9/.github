@@ -8,7 +8,9 @@
  * exclusions-only contract (an include pattern throws, the bug class that
  * silenced CodeRabbit in cryptoxdog/IB-Odoo_19); fail-closed input handling;
  * that tests and docs stay reviewable; validity against CodeRabbit's published
- * schema (fetched with `curl -L`, validated by python3 jsonschema); and the
+ * schema (the copy vendored at policies/vendor/coderabbit/schema.v2.json,
+ * digest-checked against policies/coderabbit/schema.v2.source.json and
+ * validated by python3 jsonschema, with no network access); and the
  * missing-only `coderabbit` seed category.
  *
  * Run from the Quantum-L9/.github repo root:
@@ -17,15 +19,15 @@
 const assert = require("node:assert");
 const { spawnSync } = require("node:child_process");
 
-// python3 and curl are resolved from PATH on purpose: `make validate` prepends
+// python3 is resolved from PATH on purpose: `make validate` prepends
 // the .venv that `make setup` provisions with PyYAML and jsonschema
 // (Repo.mk USE_VENV), and CI puts the pinned interpreter first. Python runs
 // isolated (-I). No credential is in this suite's environment.
 const tool = (cmd, args, opts) =>
 	spawnSync(cmd, args, { encoding: "utf8", ...opts }); // NOSONAR S4036: runner PATH by design (see above)
 const python = (args, opts) => tool("python3", ["-I", ...args], opts);
+const crypto = require("node:crypto");
 const fs = require("node:fs");
-const os = require("node:os");
 const path = require("node:path");
 const {
 	HEADER,
@@ -48,7 +50,10 @@ const { loadRepoClasses, resolveProfile } = require("./repo-class-profile.js");
 const root = path.resolve(__dirname, "..");
 process.chdir(root);
 
-const SCHEMA_URL = "https://coderabbit.ai/integrations/schema.v2.json";
+// CodeRabbit's schema is vendored, as Core's list is (ADR-0019): the gate
+// is reproducible from the tree, and an upstream schema change reaches it only
+// through a reviewed refresh of the copy and its digest.
+const SCHEMA_SOURCE = "policies/coderabbit/schema.v2.source.json";
 const DEST = ".coderabbit.yaml";
 
 /** fs whose reads of the named repository paths are overridden. */
@@ -329,69 +334,61 @@ console.log(
 	"ok: an include pattern, a double negation, a match-everything exclusion, a missing or malformed fragment, and a header without inheritance all throw",
 );
 
-// ── 4. schema validity (CodeRabbit schema.v2.json; the URL 301-redirects) ───
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "coderabbit-schema-"));
-try {
-	const schemaFile = path.join(tmp, "schema.v2.json");
-	const curl = tool(
-		"curl",
-		[
-			"-sSL",
-			"--fail",
-			"--retry",
-			"3",
-			"--max-time",
-			"60",
-			"-o",
-			schemaFile,
-			SCHEMA_URL,
-		],
-		{ encoding: "utf8" },
-	);
-	assert.strictEqual(
-		curl.status,
-		0,
-		`could not fetch ${SCHEMA_URL} with curl -L (${curl.error?.message || curl.stderr}) — schema validity is unproven`,
-	);
-	const check = python(
-		[
-			"-c",
-			[
-				"import json, sys, yaml",
-				"from jsonschema import Draft202012Validator",
-				"schema = json.load(open(sys.argv[1]))",
-				"Draft202012Validator.check_schema(schema)",
-				"errors = sorted(Draft202012Validator(schema).iter_errors(yaml.safe_load(sys.stdin.read())), key=str)",
-				"[print(e.json_path, e.message) for e in errors]",
-				"sys.exit(1 if errors else 0)",
-			].join("\n"),
-			schemaFile,
-		],
-		{ input: out },
-	);
-	assert.strictEqual(
-		check.status,
-		0,
-		`render is not valid against ${SCHEMA_URL}:\n${check.stdout}${check.stderr}`,
-	);
-	// The validator is live: a document the schema forbids is rejected.
-	const negative = python(
-		[
-			"-c",
-			"import json, sys\nfrom jsonschema import Draft202012Validator\nschema = json.load(open(sys.argv[1]))\nsys.exit(0 if list(Draft202012Validator(schema).iter_errors({'inheritance': 'yes', 'reviews': {'path_filters': [1]}})) else 1)",
-			schemaFile,
-		],
-		{ encoding: "utf8" },
-	);
-	assert.strictEqual(
-		negative.status,
-		0,
-		`schema validator accepted an invalid document: ${negative.stderr}`,
-	);
-} finally {
-	fs.rmSync(tmp, { recursive: true, force: true });
+// ── 4. schema validity (vendored CodeRabbit schema.v2.json, digest-pinned) ──
+const schemaSource = JSON.parse(fs.readFileSync(SCHEMA_SOURCE, "utf8"));
+for (const key of ["url", "sha256", "retrieved", "vendored_at"]) {
+	assert.ok(schemaSource[key], `${SCHEMA_SOURCE} is missing ${key}`);
 }
-console.log(`ok: render validates against ${SCHEMA_URL}`);
+assert.match(schemaSource.sha256, /^[0-9a-f]{64}$/, "sha256 is a full digest");
+const schemaFile = schemaSource.vendored_at;
+const schemaDigest = crypto
+	.createHash("sha256")
+	.update(fs.readFileSync(schemaFile))
+	.digest("hex");
+assert.strictEqual(
+	schemaDigest,
+	schemaSource.sha256,
+	`${schemaFile} sha256 ${schemaDigest} does not match ${SCHEMA_SOURCE}; ` +
+		"re-vendor the schema and its digest together (docs/DISTRIBUTION.md)",
+);
+const check = python(
+	[
+		"-c",
+		[
+			"import json, sys, yaml",
+			"from jsonschema import Draft202012Validator",
+			"schema = json.load(open(sys.argv[1]))",
+			"Draft202012Validator.check_schema(schema)",
+			"errors = sorted(Draft202012Validator(schema).iter_errors(yaml.safe_load(sys.stdin.read())), key=str)",
+			"[print(e.json_path, e.message) for e in errors]",
+			"sys.exit(1 if errors else 0)",
+		].join("\n"),
+		schemaFile,
+	],
+	{ input: out },
+);
+assert.strictEqual(
+	check.status,
+	0,
+	`render is not valid against ${schemaSource.url} (${schemaFile}):\n${check.stdout}${check.stderr}`,
+);
+// The validator is live: a document the schema forbids is rejected.
+const negative = python(
+	[
+		"-c",
+		"import json, sys\nfrom jsonschema import Draft202012Validator\nschema = json.load(open(sys.argv[1]))\nsys.exit(0 if list(Draft202012Validator(schema).iter_errors({'inheritance': 'yes', 'reviews': {'path_filters': [1]}})) else 1)",
+		schemaFile,
+	],
+	{ encoding: "utf8" },
+);
+assert.strictEqual(
+	negative.status,
+	0,
+	`schema validator accepted an invalid document: ${negative.stderr}`,
+);
+console.log(
+	`ok: render validates against ${schemaSource.url} (vendored, sha256 ${schemaSource.sha256.slice(0, 12)})`,
+);
 
 // ── 5. seed payload: the coderabbit category, missing-only ──────────────────
 assert.ok(DEFAULT_CATEGORIES.includes("coderabbit"));
