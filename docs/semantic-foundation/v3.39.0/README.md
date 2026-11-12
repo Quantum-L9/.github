@@ -1,8 +1,8 @@
 # Semantic Foundation v3.39.0
 
-Status: **ADDITIVE SUCCESSOR CANDIDATE**.
+Status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-036, 2026-11-12).
 
-v3.39.0 proposes the technical coordination role projection.
+v3.39.0 carries ADR-036: the technical coordination role projection.
 
 ## Bounded delta
 
@@ -26,4 +26,4 @@ Producer rehearsal: `docs/candidates/technical-coordination-v1/evidence/rehearsa
 
 ## Authority
 
-`Quantum-L9/.github` owns these ledgers. This candidate does not admit itself. Nothing here creates an actor identity, Constellation routing, Plan Keeper authority, or execution, publication, merge, admission or deployment authority.
+`Quantum-L9/.github` owns these ledgers. ADR-036 admits the v3.39.0 delta. Nothing here creates an actor identity, Constellation routing, Plan Keeper authority, or execution, publication, merge, admission or deployment authority.

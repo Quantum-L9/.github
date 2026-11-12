@@ -56,8 +56,9 @@ ProductTopology
 - ADR-033: Domain Projection Architecture v1: Eight Domain Projections, Six Domain Consumer Bindings, and Qualitative Strategic Value and Signal Law
 - ADR-034: Integration Accountability and the Technical Coordination Role
 - ADR-035: Bounded Decision Autonomy and Material Decision Escalation
+- ADR-036: Technical Coordination Role Projection
 
-ADR-001 through ADR-035 are the global semantic decisions. They live in this
+ADR-001 through ADR-036 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions
