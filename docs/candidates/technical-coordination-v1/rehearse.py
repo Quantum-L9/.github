@@ -74,6 +74,8 @@ def configure(base: Any) -> Any:
             payload_validation.registered_schema_documents = render
 
     def clone_at_base(dest: Path) -> str:
+        # The worktree starts empty and only the derived semantics tree is ever checked out,
+        # so no other file of the source revision can reach a rehearsal commit.
         repo = base._repo_root()
         base._run(
             [
@@ -87,7 +89,6 @@ def configure(base: Any) -> Any:
             ]
         )
         source = base._git(repo, "rev-parse", "HEAD")
-        base._git(dest, "checkout", "-q", "--detach", source)
         base._git(dest, "read-tree", "--empty")
         base._git(dest, "read-tree", "--prefix=semantics/", f"{source}:semantics")
         for name in SCHEMA_FILES:
@@ -95,10 +96,13 @@ def configure(base: Any) -> Any:
                 dest, "rm", "-q", "--cached", "--ignore-unmatch", f"semantics/{name}"
             )
         manifest = dest / MANIFEST
+        manifest.parent.mkdir(parents=True, exist_ok=True)
         manifest.write_text(
             "".join(
                 line
-                for line in manifest.read_text("utf-8").splitlines(True)
+                for line in base._git(dest, "show", f"{source}:{MANIFEST}").splitlines(
+                    True
+                )
                 if line.strip().removeprefix("- ") not in SCHEMA_FILES
             ),
             "utf-8",
