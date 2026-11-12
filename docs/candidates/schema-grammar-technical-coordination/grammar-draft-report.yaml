@@ -1,0 +1,27 @@
+authority_repository: Quantum-L9/.github
+authority_revision: 62e20d48e8e61c130d460ba9e0b88e20283f5de2
+projection_profile: l9.projection/technical-coordination@1
+composition_profile: l9.compose/technical-coordination@1
+written:
+- source_class: vocabulary
+  path: docs/candidates/schema-grammar-technical-coordination/grammars/vocabulary.yaml
+  digest: sha256:44cb9c6660398a2286598a33afa1e1bb96b06eaa543e9550402fca08656748b3
+  normative_overlay: []
+- source_class: invariants
+  path: docs/candidates/schema-grammar-technical-coordination/grammars/invariants.yaml
+  digest: sha256:b815ca8b32b94564177317f4a9eeee0a4ef38df2aae803964b314729c17c2791
+  normative_overlay: []
+- source_class: contracts
+  path: docs/candidates/schema-grammar-technical-coordination/grammars/contracts.yaml
+  digest: sha256:368d5a96e2cea37673a140be568ea88b7b13f960a660e4d0bd812b6859eb8e83
+  normative_overlay: []
+- source_class: authority_model
+  path: docs/candidates/schema-grammar-technical-coordination/grammars/authority_model.yaml
+  digest: sha256:fd5d6ae6d0161935d6674427f67d74b53edc258541ac4f5884dde5010b1c81f0
+  normative_overlay: []
+- source_class: strategic_cognition_model
+  path: docs/candidates/schema-grammar-technical-coordination/grammars/strategic_cognition_model.yaml
+  digest: sha256:74bad6c7cec55bdfa9fb0755ae137a345aadbe24a4904d0ee29a7a5364d05695
+  normative_overlay: []
+inexpressible: []
+pack_dir: docs/candidates/schema-grammar-technical-coordination

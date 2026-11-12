@@ -106,6 +106,8 @@ requires:
   - strategic_metacognition_projection_v2.schema.yaml
   - strategic_planning_context_composition_v2.schema.yaml
   - strategic_planning_context_projection_v2.schema.yaml
+  - technical_coordination_projection.schema.yaml
+  - technical_coordination_composition.schema.yaml
   - domain_architecture_projection.schema.yaml
   - domain_architecture_composition.schema.yaml
   - domain_strategic_value_projection.schema.yaml

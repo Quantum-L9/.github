@@ -1,0 +1,36 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/technical-coordination/grammar/authority-model@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: authority_model
+source_ref: l9.source/authority-model@1
+source_path: semantics/authority_model.yaml
+source_revision: 62e20d48e8e61c130d460ba9e0b88e20283f5de2
+source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
+applies_to_selectors:
+- $.agent_authority
+- $.escalation_rules
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    agent_authority:
+      type: object
+      additional_properties: true
+      fields:
+        rules:
+          type: string_list
+    escalation_rules:
+      type: object
+      additional_properties: true
+      fields:
+        authority_missing:
+          type: string
+        semantic_conflict:
+          type: string
+        unknown:
+          type: string
+        changed_candidate_after_decision:
+          type: string

@@ -1,0 +1,101 @@
+{
+	"admission": "not_granted",
+	"base": {
+		"repository": "Quantum-L9/.github",
+		"revision": "62e20d48e8e61c130d460ba9e0b88e20283f5de2"
+	},
+	"commits": {
+		"G1_grammars": "2de79f10453795fa225c203459a4ce914ba738f4",
+		"G2_catalog": "b5f103f55ea71d9fe53da8d076afc424588f8119",
+		"R_registrations": "a7c4aabb07051ee95ce71d52807a2bb8b145a417"
+	},
+	"compiler": {
+		"executable_digest": "sha256:f8a444ddb191c254f7d90151f155e0db60599355606df19cf3d2ef4b108d3a95",
+		"executable_digest_basis": "sha256 of git archive <revision> src",
+		"executed_module": "src/l9_semantic_compiler/__init__.py",
+		"repository": "Quantum-L9/l9-semantic-compiler-engine",
+		"revision": "eeac5d28f9f1a44e72287190b9087d06aeb4d574"
+	},
+	"pairs": {
+		"technical-coordination": {
+			"composition": "l9.compose/technical-coordination@1",
+			"grammars_exit": 0,
+			"grammars_written": 5,
+			"inexpressible": [],
+			"producer": {
+				"all_pass": true,
+				"compose_exit": 0,
+				"compose_stderr": "",
+				"project_exit": 0,
+				"project_stderr": "",
+				"receipts": {
+					"l9.compose/technical-coordination@1#l9.projection/technical-coordination@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "composition",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": null,
+						"unresolved_criteria": []
+					},
+					"l9.projection/technical-coordination@1#l9.source/authority-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/technical-coordination@1#l9.source/contracts@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/technical-coordination@1#l9.source/invariants@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/technical-coordination@1#l9.source/strategic-cognition-model@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					},
+					"l9.projection/technical-coordination@1#l9.source/vocabulary@1": {
+						"coverage": "complete",
+						"dispatch_basis": "verified_profile_output_schema_and_verified_source_class",
+						"operation": "projection",
+						"payload_schema": "pass",
+						"result": "pass",
+						"selection_equivalence": "pass",
+						"unresolved_criteria": []
+					}
+				},
+				"replay": {
+					"byte_identical": true,
+					"differing": [],
+					"files": 12
+				}
+			},
+			"projection": "l9.projection/technical-coordination@1",
+			"synthesis": "candidate_pair_produced",
+			"synthesis_exit": 0
+		}
+	},
+	"producer_archive": "docs/candidates/technical-coordination-v1/evidence/producer.tar.gz",
+	"schema": "l9.candidate-rehearsal/technical-coordination-v1",
+	"synthesis_archive": "docs/candidates/technical-coordination-v1/evidence/synthesis.tar.gz"
+}
