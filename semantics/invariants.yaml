@@ -321,3 +321,38 @@ invariants:
     decision authority.
   scope: global
   owner: Quantum-L9/.github
+- id: L9-AUTONOMY-001
+  statement: >-
+    When current authorization and applicable policy permit autonomous
+    decision resolution, an agent must resolve decisions determined by
+    authoritative evidence or governing policy without requesting a new
+    discretionary approval. The agent may independently choose and verify a
+    reversible realization among compliant alternatives when the choice
+    preserves the accepted objective, architecture, contracts, scope,
+    constraints, and authorization ceiling. This discretion does not grant
+    capability invocation authority, establish missing facts, alter accepted
+    semantics, or authorize new risk acceptance.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-AUTONOMY-002
+  statement: >-
+    A request for a governing decision must identify the smallest material
+    unresolved authority question, required fact, contractual conflict, or
+    boundary change that prevents an authorized consequence. The blocker
+    applies to its affected dependency closure. Independent work whose
+    prerequisites and authorization remain satisfied may continue. Novelty,
+    model confidence, or non-authoritative implementation preference alone
+    does not require a higher-authority decision. This rule does not suppress
+    mandatory incident, safety, security, or operational notifications.
+  scope: global
+  owner: Quantum-L9/.github
+- id: L9-AUTONOMY-003
+  statement: >-
+    An autonomous revision to future execution work must remain within its
+    accepted objective, architecture, public contracts, permission ceiling,
+    risk acceptance, and mandatory convergence gates. Material replanning
+    requires an evidence-backed trigger and verification under the applicable
+    governing contract. Historical outcomes and receipts must not be rewritten
+    to justify the new plan.
+  scope: global
+  owner: Quantum-L9/.github
