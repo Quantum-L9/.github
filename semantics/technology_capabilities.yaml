@@ -215,10 +215,10 @@ binding_rules:
         when: admitted definition and admitted, cited, deployment-satisfied fact, with no qualifying passing receipt
         result: semantically_compatible
       - id: D2-EVAL-08
-        when: as D2-EVAL-07, and the newest receipt bound to the exact provider binding id and digest, token, probe, deployment profile and deployed server version passes
+        when: as D2-EVAL-07, and the newest receipt (ordered by the parsed execution instant, not its text) bound to the exact provider binding id and digest, token, probe, deployment profile and deployed server version passes; the digest is computed over the canonical binding entry exactly as registered
         result: runtime_qualified
       - id: D2-EVAL-09
-        when: a receipt binds a different binding digest or deployment profile, records a provider_server_version that is missing, unparseable, outside the binding's server_version_range or different from the deployed server version, or names an in-memory, fake or mock subject
+        when: a receipt is not of family l9.receipt/conformance@1, names no executor_identity, records an executed_at that is missing or not a timezone-aware ISO-8601 instant, binds a different binding digest or deployment profile, records a provider_server_version that is missing, unparseable, outside the binding's server_version_range or different from the deployed server version, or names an in-memory, fake or mock subject
         result: receipt_ignored
       - id: D2-EVAL-10
         when: the provider binding declares a server_version_range and the deployed server version is unknown or outside it

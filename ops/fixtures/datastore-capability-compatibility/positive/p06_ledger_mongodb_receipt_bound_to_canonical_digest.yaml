@@ -1,0 +1,30 @@
+schema: l9.fixture.datastore-capability-compatibility/v1
+polarity: positive
+description: A passing receipt bound to the digest of the canonical ledger binding (not of an evaluation copy) runtime-qualifies
+  the token.
+falsifies:
+- D2-EVAL-08
+case:
+  token_definitions: '@ledger'
+  provider_binding: '@ledger:l9.binding/provider/mongodb@1'
+  admission: admitted
+  deployment_profile: replica_set
+  server_version: 9.0.3
+  receipts:
+  - family: l9.receipt/conformance@1
+    provider_binding_id: l9.binding/provider/mongodb@1
+    provider_binding_digest_sha256: sha256:02e256c0f406552a503e19fbf155f12e8579a3d3b375bf1d138b236af133c8ca
+    token: transactions
+    probe_id: l9.probe/datastore/transactions@1
+    deployment_profile: replica_set
+    provider_server_version: 9.0.3
+    verdict: pass
+    executed_at: '2026-11-11T00:00:00Z'
+    executor_identity: l9.actor-registry/global@1#claude-code
+    subject_kind: live_deployment
+  required_capabilities:
+  - transactions
+expect:
+  overall: runtime_qualified
+  tokens:
+    transactions: runtime_qualified

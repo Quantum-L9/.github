@@ -23,6 +23,7 @@ import copy
 import hashlib
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +39,7 @@ RESULTS = (
     "runtime_qualified",
 )
 FAKE_SUBJECTS = frozenset({"in_memory", "fake", "mock"})
+RECEIPT_FAMILY = "l9.receipt/conformance@1"
 
 
 def binding_digest(binding: dict[str, Any]) -> str:
@@ -52,6 +54,18 @@ def _version_tuple(value: object) -> tuple[int, ...] | None:
         return tuple(int(part) for part in str(value).split("."))
     except ValueError:
         return None
+
+
+def _executed_at(receipt: dict[str, Any]) -> datetime | None:
+    """Parsed, timezone-aware execution time, or None when missing or invalid."""
+    raw = receipt.get("executed_at")
+    if not isinstance(raw, str) or not raw:
+        return None
+    try:
+        stamp = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return stamp if stamp.tzinfo is not None else None
 
 
 def _in_range(version: object, bounds: dict[str, Any]) -> bool | None:
@@ -77,6 +91,14 @@ def _receipt_qualifies(
 ) -> bool:
     if str(receipt.get("subject_kind", "")).lower() in FAKE_SUBJECTS:
         return False  # D2-EVAL-09
+    # D2-EVAL-09: a qualifying receipt is an l9.receipt/conformance@1 receipt that
+    # names its executor and records a parseable, timezone-aware execution time.
+    if receipt.get("family") != RECEIPT_FAMILY:
+        return False
+    if not str(receipt.get("executor_identity") or "").strip():
+        return False
+    if _executed_at(receipt) is None:
+        return False
     if check_server_version:
         # D2-EVAL-09: the receipt's provider_server_version is a bound coordinate.
         # It must be present, parseable, inside the binding's range and equal to
@@ -107,6 +129,7 @@ def evaluate_token(
     server_version: object,
     receipts: list[dict[str, Any]],
     check_server_version: bool = True,
+    fact_admission: object = None,
 ) -> tuple[str, str]:
     canonical = aliases.get(token, token)
     definition = definitions.get(canonical)
@@ -116,7 +139,7 @@ def evaluate_token(
     fact = facts.get(canonical)
     if (
         not isinstance(fact, dict)
-        or fact.get("admission") != "admitted"
+        or fact.get("admission", fact_admission) != "admitted"
         or fact.get("status") not in ("provided", "not_provided")
     ):
         return "incompatible_until_resolved", "D2-EVAL-02"
@@ -147,7 +170,7 @@ def evaluate_token(
         )
     ]
     if qualifying:
-        newest = max(qualifying, key=lambda r: str(r.get("executed_at", "")))
+        newest = max(qualifying, key=lambda r: _executed_at(r) or datetime.min)
         if newest.get("verdict") == "pass":
             return "runtime_qualified", "D2-EVAL-08"
     return "semantically_compatible", "D2-EVAL-07"
@@ -179,6 +202,7 @@ def evaluate(
             case.get("server_version"),
             receipts,
             check_server_version,
+            case.get("fact_admission"),
         )
         for t in required
     }
@@ -228,10 +252,10 @@ def resolve_case(
         }
     ref = case.get("provider_binding")
     if isinstance(ref, str) and ref.startswith("@ledger:"):
-        binding = copy.deepcopy(providers[ref.split(":", 1)[1]])
-        for fact in (binding.get("facts") or {}).values():
-            fact["admission"] = admission
-        resolved["provider_binding"] = binding
+        # The binding stays byte-for-byte canonical so its digest matches a real
+        # receipt's; the evaluation-only admission state travels beside it.
+        resolved["provider_binding"] = copy.deepcopy(providers[ref.split(":", 1)[1]])
+        resolved["fact_admission"] = admission
     return resolved
 
 
