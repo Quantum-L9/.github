@@ -1504,6 +1504,37 @@ terms:
     - component_receipts_do_not_prove_integrated_correctness
     - integration_accountability_does_not_transfer_ownership
     - integration_accountability_does_not_grant_action_authority
+  decision_resolution_class:
+    semantic_class: semantic_concept
+    definition: >-
+      Classification of a decision by the authoritative basis and boundary of
+      its resolution. The classes distinguish evidence-determined,
+      policy-determined, bounded realization choice, authority-reserved, and
+      unresolved-required-input decisions. Classification directs the
+      appropriate resolution or escalation path. It does not create authority,
+      capability availability, or missing evidence.
+    question: >-
+      Can this decision be resolved under existing authority, or is a new
+      governing decision required?
+  material_decision_escalation:
+    semantic_class: semantic_concept
+    definition: >-
+      A request for a governing decision concerning an exact unresolved
+      material question that cannot be settled within current authority and
+      evidence. It identifies the affected subject, evidence, decision owner
+      or unresolved ownership, blocked dependencies, and the boundary requiring
+      resolution. It is distinct from an operational notification, routine
+      progress report, or implementation preference.
+    question: >-
+      What exact decision requires whose authority, and which work is actually
+      blocked?
+  bounded_replanning:
+    semantic_class: semantic_concept
+    definition: >-
+      Evidence-based adjustment of unresolved future execution work within an
+      unchanged authorized objective, constraints, permissions, and acceptance
+      obligations, without rewriting historical evidence or assuming a new
+      governing authority.
 relationships:
   authority_flow:
     sequence:
