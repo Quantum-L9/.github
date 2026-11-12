@@ -8,7 +8,7 @@
 |---|---|
 | Release | Semantic Foundation **v3.39.0**, additive successor to v3.38.0 |
 | Pull request | The Quantum-L9/.github pull request from `claude-mobile/adoring-goodall-8u0rlb-coordination` that carries this record and the candidate commit below, stacked on the v3.38.0 pull request from `claude-mobile/adoring-goodall-8u0rlb-autonomy`. |
-| Approved semantic tree | `semantics/` tree `55fd1a232c395bbddf66d2cfa2934f92466e721f`, at the release-cut candidate commit `3f9b90a6a980e10d34e909d8df9b5ef2d0c24ca5`. No later commit changes `semantics/`: they add this ADR, its index entry and the v3.39.0 status lines. |
+| Approved semantic tree | `semantics/` tree `d7f2fd0aa782a53dba3a101af2d4a551441e3f04`, at the release-cut candidate commit `80b0ffb4d0df4d1ffd69bdd388fcdf9c7873b704`. The earlier candidate commit `3f9b90a6a980e10d34e909d8df9b5ef2d0c24ca5` (tree `55fd1a232c395bbddf66d2cfa2934f92466e721f`) is superseded: review on the pull request found that the selected contracts cited six invariants the profile did not select, and the profile now closes over them. No later commit changes `semantics/`: they add this ADR, its index entry and the v3.39.0 status lines. |
 | Producer | `Quantum-L9/l9-semantic-compiler-engine@eeac5d28f9f1a44e72287190b9087d06aeb4d574` (Semantic Compiler 0.10.0) |
 | Target class and authority | Canonical global semantics. `Quantum-L9/.github` owns them, and its repository owner holds `target_class_authority`. |
 | Effective revision | The `main` commit that merges this record. It is recorded on the merged pull request; it cannot be recorded inside the hashed bytes it admits. |
@@ -30,10 +30,11 @@ A technical coordination role needs a small, source-bound semantic context: the 
 ## Decision
 
 1. Admit the four definitions above exactly as they stand in the approved semantic tree.
-2. The profile selects `technical_coordination_role`, `integration_responsibility`, `decision_resolution_class`, `material_decision_escalation`, `bounded_autonomy`, `plan_keeper` and `signal_consumption`; `L9-INTEGRATION-001`, `L9-AUTONOMY-001`, `L9-AUTONOMY-002` and thirteen existing invariants; five global contracts; and `authority_model` and `strategic_cognition_model` sections. `L9-AUTONOMY-003` and `bounded_replanning` are not selected.
+2. The profile selects `technical_coordination_role`, `integration_responsibility`, `decision_resolution_class`, `material_decision_escalation`, `bounded_autonomy`, `plan_keeper` and `signal_consumption`; `L9-INTEGRATION-001`, `L9-AUTONOMY-001`, `L9-AUTONOMY-002` and nineteen existing invariants; five global contracts; and `authority_model` and `strategic_cognition_model` sections. `L9-AUTONOMY-003` and `bounded_replanning` are not selected.
 3. It is a `consumer` profile, not a ninth domain projection, and it grants no authority or runtime capability. Its forbidden categories all have declared criteria.
 4. The payload schemas were rendered by the compiler, not hand-authored.
-5. DOMAIN-010 keeps its predecessor digests exact and names this pair as registered after its pin.
+5. Every selected contract is closed over its `source_invariants`: the profile also selects `L9-SEM-001`, `L9-SCOPE-001`, `L9-CORRECTNESS-001`, `L9-EVIDENCE-001`, `L9-REVISION-001` and `L9-DERIVED-001`.
+6. DOMAIN-010 keeps its predecessor digests exact and names this pair as registered after its pin.
 
 ## Consequences
 
@@ -42,7 +43,7 @@ A technical coordination role needs a small, source-bound semantic context: the 
 
 ## Evidence relied on
 
-- Producer rehearsal (`docs/candidates/technical-coordination-v1/evidence/rehearsal.json`): 5 grammars, 0 inexpressible; the candidate pair synthesized; 5 projections and 1 composition pass with complete coverage and empty unresolved criteria; byte-identical replay of 12 files.
+- Producer rehearsal (`docs/candidates/technical-coordination-v1/evidence/rehearsal.json`), reproducible with `rehearse.py --check` from any commit carrying the approved `semantics/` tree, because its base is derived from that tree: 5 grammars, 0 inexpressible; the candidate pair synthesized; 5 projections and 1 composition pass with complete coverage and empty unresolved criteria; byte-identical replay of 12 files.
 - Subject discovery measured from the v3.38.0 candidate: exactly the four identities above; every dependency admitted or in the subject; no unclassified change.
 - `check_admission_closure.py --require released --main-ref claude-mobile/adoring-goodall-8u0rlb-autonomy` on the candidate commit: verdict `RELEASED_CANDIDATE`, registration with no unresolvable declarations, validator, `make validate`, `make check`, `make test`, release inventory and scope closure all passing.
 - `scripts/validate-semantics.py` exits 0 with 61 PASS lines and no FAIL; a mutation of a predecessor profile still fails DOMAIN-010.

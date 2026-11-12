@@ -14,6 +14,6 @@ Release status: **admitted additive successor** (ADR-036, 2026-11-12). Admission
 
 ## Admission state
 
-The repository owner admitted v3.39.0 in ADR-036, by an explicit instruction in governed session `session_017xwbxw3RduoWFP29VkobHR`: "I want to formally admit these candidates to https://github.com/Quantum-L9/.github". Subject: `l9.projection/technical-coordination@1`, `l9.compose/technical-coordination@1` and their two payload schemas. Target class: canonical global semantics, owned by `Quantum-L9/.github`. Approved `semantics/` tree: `55fd1a232c395bbddf66d2cfa2934f92466e721f` at candidate commit `3f9b90a6a980e10d34e909d8df9b5ef2d0c24ca5`, where `check_admission_closure.py --require released` reported `RELEASED_CANDIDATE`.
+The repository owner admitted v3.39.0 in ADR-036, by an explicit instruction in governed session `session_017xwbxw3RduoWFP29VkobHR`: "I want to formally admit these candidates to https://github.com/Quantum-L9/.github". Subject: `l9.projection/technical-coordination@1`, `l9.compose/technical-coordination@1` and their two payload schemas. Target class: canonical global semantics, owned by `Quantum-L9/.github`. Approved `semantics/` tree: `d7f2fd0aa782a53dba3a101af2d4a551441e3f04` at candidate commit `80b0ffb4d0df4d1ffd69bdd388fcdf9c7873b704`, where `check_admission_closure.py --require released` reported `RELEASED_CANDIDATE`.
 
 Post-merge trusted replay on `main` is a separate, later step.
