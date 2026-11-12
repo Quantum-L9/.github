@@ -100,9 +100,9 @@ def configure(base: Any) -> Any:
         manifest.write_text(
             "".join(
                 line
-                for line in base._git(dest, "show", f"{source}:{MANIFEST}").splitlines(
-                    True
-                )
+                for line in base._run(
+                    ["git", "-C", str(dest), "show", f"{source}:{MANIFEST}"]
+                ).stdout.splitlines(True)
                 if line.strip().removeprefix("- ") not in SCHEMA_FILES
             ),
             "utf-8",
