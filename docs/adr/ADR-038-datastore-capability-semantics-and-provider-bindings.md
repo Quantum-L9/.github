@@ -1,0 +1,42 @@
+# ADR-038 — Datastore Capability Semantics and Provider Bindings
+
+**Status:** Candidate for semantic-foundation v3.41.0. Drafted on 2026-11-12 under contract `L9-GH-R5-D2-003` (campaign R5 conformance-first, coordinator session `session_017xwbxvuMUJdESvB6TvQcXs`, executor session `session_017xwbxvwZRJTyLKPcpAPNSs`). Predecessor: the v3.40.0 candidate (ADR-037, `.github#247`, head `821c477`), itself unadmitted on admitted v3.39.0. Admission of v3.41.0 by the repository owner is the acceptance gate; this record does not admit itself. Decisions 1–8 apply the operator's rulings DR-D2-01..08 ("accept all", 2026-11-12, relayed verbatim by the coordinator).
+
+## Context
+
+`semantics/technology_capabilities.yaml` registers `mongodb` and `postgresql` as datastores providing `transactions`, `conditional_updates` and other tokens, but no ledger defines any of them. `semantics/binding_catalog.yaml` declares the `provider` binding family and the rule `RequiredCapabilities ⊆ ProviderCapabilities`, but holds no `class: provider` binding. `l9.contract/technology-binding@1` therefore reaches only its `unresolved` outcome for any datastore port: a provider fact cannot be checked against a requirement whose meaning is not stated, and the contract forbids inferring a capability from model memory or a provider name. The two ledgers also name the result for an unknown capability differently (`unsupported_until_resolved` and `incompatible_until_resolved`).
+
+The R5-A evidence (`Quantum-L9/l9-semantic-compiler-engine@94138a2`, `reports/r5/r5a/sufficiency_and_irreducibility.md` §3 D2, §4) shows the State node relying on multi-document transaction, snapshot, durability, commit-ambiguity and server-time behavior that only its adapter code states. Live replica-set conformance of that adapter remains a separate obligation (R5-C).
+
+## Options considered
+
+- **A — Leave tokens undefined; rely on provider names.** Contradicts `technology-binding@1#forbidden`. Rejected.
+- **B — A new capability ledger.** Adds a registered source for content that belongs beside the technologies it constrains. Rejected by ruling DR-D2-03.
+- **C — Definitions and a two-tier rule in `technology_capabilities.yaml`, vendor-cited facts in `binding_catalog.yaml` provider entries.** Adopted.
+
+## Decisions (proposed)
+
+1. **Definitions (DR-D2-01, DR-D2-03).** `technology_capabilities.yaml#capability_definitions` defines 13 provider-neutral tokens, each with `scope`, `guarantee`, `not_implied`, `failure_signal` and a `runtime_probe {probe_id, description}`: `transactions`, `conditional_updates`, `snapshot_isolation`, `serializable_isolation`, `replicated_durable_commit`, `commit_outcome_unknown_signal`, `server_authoritative_time_in_update_expressions`, `server_authoritative_time_in_query_filters`, `unique_key`, `document_storage`, `relational_storage`, `json_storage`, `change_notifications`. `coverage.technologies: [mongodb, postgresql]`: every token those technologies assert resolves to exactly one definition. No new ledger is registered.
+2. **Durability token name (DR-D2-02).** `replicated_durable_commit`.
+3. **Two tiers.** `binding_rules.provider_compatibility_tiers` decides each required token as `incompatible`, `incompatible_until_resolved`, `semantically_compatible` or `runtime_qualified` (rules D2-EVAL-01..10). `semantically_compatible` needs an admitted definition and an admitted, vendor-cited, deployment- and version-satisfied provider fact. `runtime_qualified` also needs the newest receipt bound to the exact binding id and digest, token, probe and deployment profile to pass; a receipt from an in-memory, fake or mock subject, another digest or another deployment is ignored. Runtime qualification is not an admission precondition, and an admitted definition never implies it. An empty requirement set is `incompatible_until_resolved`. Tiers map onto `technology-binding@1` outcomes (`incompatible` → `incompatible`, `incompatible_until_resolved` → `unresolved`, both compatible tiers → `resolved`).
+4. **One unknown-capability term (DR-D2-04).** `binding_catalog.yaml#compatibility.unknown_capability` becomes `incompatible_until_resolved`, equal to `technology_capabilities.yaml#binding_rules.unknown_capability.result`; RC-036 fails if they differ. No executable reader of either value was found in this repository or in the compiler's default branch.
+5. **Provider binding and version pin (DR-D2-05).** `binding_catalog.yaml` registers its first provider binding, `l9.binding/provider/mongodb@1`. Each fact carries `status` (`provided` | `not_provided` | `unknown`), `fact_basis`, `requires_deployment`, citations (official MongoDB documentation, https URL and verbatim quote) and a separate `runtime_qualification_obligation {probe_id, deployment_profiles, status: not_executed}`. `server_version_range {min_inclusive: '9.0', max_exclusive: '9.1'}` pins the facts to the documentation line they were read from; any other or unknown server version is `incompatible_until_resolved` (D2-EVAL-10).
+6. **Inference and Unknowns (DR-D2-06).** `snapshot_isolation` is provided with `fact_basis: inference_from_vendor_statements` and states its inference; `serializable_isolation` is `unknown`.
+7. **Server time split (DR-D2-07).** `server_authoritative_time_in_update_expressions` is provided for MongoDB; `server_authoritative_time_in_query_filters` is `unknown`.
+8. **Unique key (DR-D2-08).** `unique_key`, with `aliases: {unique_indexes: unique_key, unique_constraints: unique_key}`. Technology registrations keep their existing token names.
+9. **Runtime receipt.** A live probe result is an `l9.receipt/conformance@1` receipt with the additional bound coordinates listed in `capability_definitions.runtime_receipt`; no new receipt family is registered.
+10. **Validator.** `scripts/validate-semantics.py` RC-036 checks the definitions, aliases, coverage, tiers, term equality and every provider fact, and runs `scripts/datastore_capability_compatibility.py` over `ops/fixtures/datastore-capability-compatibility/` (5 positive, 20 negative fixtures; every D2-EVAL rule falsified at least once). RC-036-NEG: 25 mutations fail closed.
+11. No invariant, contract, term, capability, receipt family, lifecycle, projection or composition profile changes. Ledger changes are limited to `technology_capabilities.yaml` (two new sections, no existing entry changed) and `binding_catalog.yaml` (one binding added, one value changed). No derivation coordinate changes.
+
+## Review findings (recorded, not resolved)
+
+- **Runtime qualification is not claimed.** Every provider fact's obligation is `not_executed`. Live replica-set conformance (R5-C) is the only route to `runtime_qualified`.
+- **PostgreSQL** has no provider binding; its facts are Unknown pending vendor citation.
+- **`graphiti-mcp` and `zep` tokens** stay undefined (outside `coverage`).
+- **Projection reach.** `l9.projection/stage-provider-bindings@1` now carries the MongoDB binding but not `capability_definitions` or the tiers; evaluating tiers from that projection alone needs a profile successor. `semantic-compiler-core@1`, `architecture-intelligence@1` and `repository-operations-compiler@1` project changed bytes.
+- **State today.** With this release admitted, MongoDB on a 9.0 replica set is `semantically_compatible` for six of State's seven required tokens and the set stays `incompatible_until_resolved` on `server_authoritative_time_in_query_filters` (fixture `n17`).
+
+## Consequences
+
+- A datastore port's requirement can be decided mechanically against a provider binding, with unknowns failing closed per token.
+- No provider name, in-memory test or unadmitted fact can make a requirement compatible, and no ledger entry can claim runtime qualification.
