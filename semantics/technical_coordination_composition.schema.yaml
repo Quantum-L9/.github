@@ -1,0 +1,345 @@
+canonical: true
+schema: l9.source-class-payload-schema/v1
+artifact_id: l9.schema/technical-coordination-composition@1
+authority:
+  owner: Quantum-L9/.github
+schema_id: l9.composed-projection.technical-coordination/v1
+document_kind: composition_payload_schema
+payload_validation:
+  protocol: l9.payload-validation/source-class-dispatch@1
+descriptor_dialect: l9.schema-dialect/candidate-v2@1
+governed_by:
+  composition_profile_ref: l9.compose/technical-coordination@1
+source_shapes:
+- source_class: vocabulary
+  source_ref: l9.source/vocabulary@1
+  descriptor:
+    additional_properties: true
+    fields:
+      terms:
+        additional_properties: true
+        fields:
+          bounded_autonomy:
+            additional_properties: true
+            fields:
+              definition:
+                type: string
+              principle:
+                type: string_list
+              semantic_class:
+                type: string
+            type: object
+          decision_resolution_class:
+            additional_properties: true
+            fields:
+              definition:
+                type: string
+              question:
+                type: string
+              semantic_class:
+                type: string
+            type: object
+          integration_responsibility:
+            additional_properties: true
+            fields:
+              definition:
+                type: string
+              question:
+                type: string
+              rules:
+                type: string_list
+              semantic_class:
+                type: string
+            type: object
+          material_decision_escalation:
+            additional_properties: true
+            fields:
+              definition:
+                type: string
+              question:
+                type: string
+              semantic_class:
+                type: string
+            type: object
+          plan_keeper:
+            additional_properties: true
+            fields:
+              definition:
+                type: string
+              detailed_model:
+                type: string
+              semantic_class:
+                type: string
+            type: object
+          signal_consumption:
+            additional_properties: true
+            fields:
+              definition:
+                type: string
+              question:
+                type: string
+              semantic_class:
+                type: string
+            type: object
+          technical_coordination_role:
+            additional_properties: true
+            fields:
+              definition:
+                type: string
+              question:
+                type: string
+              rules:
+                type: string_list
+              semantic_class:
+                type: string
+            type: object
+        type: object
+    type: object
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  descriptor:
+    additional_properties: true
+    fields:
+      invariants:
+        items:
+          additional_properties: true
+          fields:
+            id:
+              type: string
+            owner:
+              type: string
+            scope:
+              type: string
+            severity:
+              type: string
+            statement:
+              type: string
+          type: object
+        type: array
+    type: object
+- source_class: contracts
+  source_ref: l9.source/contracts@1
+  descriptor:
+    additional_properties: true
+    fields:
+      contracts:
+        items:
+          additional_properties: true
+          fields:
+            applicability:
+              additional_properties: true
+              fields:
+                does_not_apply_to:
+                  type: string_list
+                method_conditional:
+                  type: string
+                qv:
+                  type: string
+                sv_dependency:
+                  type: string
+                trigger:
+                  type: string
+                unavailable_claim:
+                  type: string
+                unknown_resolution:
+                  type: string
+              type: object
+            applies_to:
+              type: string_list
+            forbidden:
+              type: string_list
+            guarantees:
+              type: string_list
+            id:
+              type: string
+            outcomes:
+              additional_properties: true
+              fields:
+                admissible:
+                  type: string
+                admitted:
+                  type: string
+                ambiguous:
+                  type: string
+                attested:
+                  type: string
+                blocked:
+                  type: string
+                compatible:
+                  type: string
+                current:
+                  type: string
+                inadmissible:
+                  type: string
+                incompatible:
+                  type: string
+                invalid:
+                  type: string
+                invalid_binding:
+                  type: string
+                invalid_projection:
+                  type: string
+                invocable:
+                  type: string
+                new_candidate_required:
+                  type: string
+                new_decision_required:
+                  type: string
+                non_current:
+                  type: string
+                not_invocable:
+                  type: string
+                preserved:
+                  type: string
+                refused:
+                  type: string
+                rejected:
+                  type: string
+                resolved:
+                  type: string
+                satisfied:
+                  type: string
+                successor_required:
+                  type: string
+                supported:
+                  type: string
+                unknown:
+                  type: string
+                unresolved:
+                  type: string
+                unsat:
+                  type: string
+                unsupported:
+                  type: string
+                unverified:
+                  type: string
+                valid:
+                  type: string
+                valid_projection:
+                  type: string
+                violated:
+                  type: string
+              type: object
+            owner:
+              type: string
+            purpose:
+              type: string
+            requires:
+              type: string_list
+            scope:
+              type: string
+            source_invariants:
+              type: string_list
+          type: object
+        type: array
+    type: object
+- source_class: authority_model
+  source_ref: l9.source/authority-model@1
+  descriptor:
+    additional_properties: true
+    fields:
+      agent_authority:
+        additional_properties: true
+        fields:
+          rules:
+            type: string_list
+        type: object
+      escalation_rules:
+        additional_properties: true
+        fields:
+          authority_missing:
+            type: string
+          changed_candidate_after_decision:
+            type: string
+          semantic_conflict:
+            type: string
+          unknown:
+            type: string
+        type: object
+    type: object
+- source_class: strategic_cognition_model
+  source_ref: l9.source/strategic-cognition-model@1
+  descriptor:
+    additional_properties: true
+    fields:
+      authority_separation:
+        additional_properties: true
+        fields:
+          invariant_ref:
+            type: string
+          resolution_ref:
+            type: string
+          strategic_plan_owner:
+            type: string
+          strategic_plan_reasoning_analysis_owner:
+            type: string
+          teaching_relation:
+            additional_properties: true
+            fields:
+              authority_effect:
+                type: string
+              carries:
+                type: string
+              from:
+                type: string
+              to:
+                type: string
+            type: object
+        type: object
+      global_rules:
+        additional_properties: true
+        fields:
+          metacognition_is_advisory_to_strategic_authority:
+            type: boolean
+          metacognitive_analysis_is_advisory_and_cannot_mutate_strategy:
+            type: boolean
+          plan_revision_candidate_is_not_strategy_until_admitted_under_strategic_authority:
+            type: boolean
+          planning_episode_is_non_authoritative_reasoning_record:
+            type: boolean
+          projection_consumption_does_not_transfer_truth_source_ownership:
+            type: boolean
+          reasoning_capability_does_not_confer_strategic_authority:
+            type: boolean
+          semantic_compiler_remains_independent_of_reasoning_plane:
+            type: boolean
+          strategic_cognition_does_not_own_runtime_execution:
+            type: boolean
+          strategic_cognition_does_not_own_underlying_truth_sources:
+            type: boolean
+          strategic_label_does_not_create_authority_or_ownership:
+            type: boolean
+          strategic_roles_are_semantic_roles_not_actor_identities:
+            type: boolean
+        type: object
+      roles:
+        additional_properties: true
+        fields:
+          plan_keeper:
+            additional_properties: true
+            fields:
+              actor_identity_binding:
+                type: string
+              authority_source:
+                type: string
+              definition:
+                type: string
+              does_not_own:
+                type: string_list
+              may:
+                type: string_list
+              may_not:
+                type: string_list
+              owns:
+                type: string_list
+              reasons_over:
+                type: string_list
+              role_kind:
+                type: string
+            type: object
+        type: object
+    type: object
+derivation:
+  method: l9.schema-candidate-synthesis
+  candidate_digest: sha256:2fbe1a469a7704eb9193600d0669eb59b5023d1fe63e1aabdaad6202310ab61f
+admission: not_granted

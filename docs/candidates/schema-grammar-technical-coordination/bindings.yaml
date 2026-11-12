@@ -1,0 +1,106 @@
+document_kind: source_field_grammar_bindings_candidate
+artifact_id: l9.candidate.schema-synthesis/technical-coordination/bindings@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+bindings:
+- source_class: vocabulary
+  source_ref: l9.source/vocabulary@1
+  source_path: semantics/vocabulary.yaml
+  source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
+  source_digest: sha256:28ee4c5346858746345b8270ffc9ea31e1e066a08b301eaf1f7e3679613c259e
+  grammar_ref: l9.candidate.schema-synthesis/technical-coordination/grammar/vocabulary@1
+  grammar_path: docs/candidates/schema-grammar-technical-coordination/grammars/vocabulary.yaml
+  grammar_revision: 0298515690d667ef44655b110330afc01b627bb7
+  grammar_digest: sha256:95ab02e6969f3451f125e407ca9a77813c086d3e3e4e42f55000a9dd7c86fcdd
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.terms.technical_coordination_role
+  - $.terms.integration_responsibility
+  - $.terms.decision_resolution_class
+  - $.terms.material_decision_escalation
+  - $.terms.bounded_autonomy
+  - $.terms.plan_keeper
+  - $.terms.signal_consumption
+  approval_status: candidate
+- source_class: invariants
+  source_ref: l9.source/invariants@1
+  source_path: semantics/invariants.yaml
+  source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
+  source_digest: sha256:d3eb316ee57b4bd6c2093b2ebd60caf0d06a4bcbfe32ee26f488f8d4887d9f96
+  grammar_ref: l9.candidate.schema-synthesis/technical-coordination/grammar/invariants@1
+  grammar_path: docs/candidates/schema-grammar-technical-coordination/grammars/invariants.yaml
+  grammar_revision: 0298515690d667ef44655b110330afc01b627bb7
+  grammar_digest: sha256:b9222044d08fa8084f9bc71b8f06a4d67ab65a363cbd3343dc7d14ddae63cee7
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.invariants[?(@.id=="L9-INTEGRATION-001")]
+  - $.invariants[?(@.id=="L9-AUTONOMY-001")]
+  - $.invariants[?(@.id=="L9-AUTONOMY-002")]
+  - $.invariants[?(@.id=="L9-AUTH-001")]
+  - $.invariants[?(@.id=="L9-AUTH-002")]
+  - $.invariants[?(@.id=="L9-CAPABILITY-001")]
+  - $.invariants[?(@.id=="L9-HARD-001")]
+  - $.invariants[?(@.id=="L9-MONOTONIC-001")]
+  - $.invariants[?(@.id=="L9-OWNER-001")]
+  - $.invariants[?(@.id=="L9-ASSURANCE-001")]
+  - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+  - $.invariants[?(@.id=="L9-COORD-001")]
+  - $.invariants[?(@.id=="L9-PROV-001")]
+  - $.invariants[?(@.id=="L9-STRATEGY-001")]
+  - $.invariants[?(@.id=="L9-SIGNAL-004")]
+  - $.invariants[?(@.id=="L9-PROJECTION-001")]
+  - $.invariants[?(@.id=="L9-SEM-001")]
+  - $.invariants[?(@.id=="L9-SCOPE-001")]
+  - $.invariants[?(@.id=="L9-CORRECTNESS-001")]
+  - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+  - $.invariants[?(@.id=="L9-REVISION-001")]
+  - $.invariants[?(@.id=="L9-DERIVED-001")]
+  approval_status: candidate
+- source_class: contracts
+  source_ref: l9.source/contracts@1
+  source_path: semantics/contracts.yaml
+  source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
+  source_digest: sha256:e2c1defbba1f1ddc785e2fc6536a256fed0cdc8bd07df012b8cbc780fc5b0dc1
+  grammar_ref: l9.candidate.schema-synthesis/technical-coordination/grammar/contracts@1
+  grammar_path: docs/candidates/schema-grammar-technical-coordination/grammars/contracts.yaml
+  grammar_revision: 0298515690d667ef44655b110330afc01b627bb7
+  grammar_digest: sha256:c4d5ac68e70bbcd56bc46e29ddec73cb7279164210dc52777d652239ddd06363
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
+  - $.contracts[?(@.id=="l9.contract/semantic-ownership@1")]
+  - $.contracts[?(@.id=="l9.contract/assurance-and-verification@1")]
+  - $.contracts[?(@.id=="l9.contract/provenance-and-coordinate@1")]
+  - $.contracts[?(@.id=="l9.contract/projection@1")]
+  approval_status: candidate
+- source_class: authority_model
+  source_ref: l9.source/authority-model@1
+  source_path: semantics/authority_model.yaml
+  source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
+  source_digest: sha256:9303ee5910f3db2b10abe71bdcb5e360128ee77e7e4bd3ebe9e05dba77018620
+  grammar_ref: l9.candidate.schema-synthesis/technical-coordination/grammar/authority-model@1
+  grammar_path: docs/candidates/schema-grammar-technical-coordination/grammars/authority_model.yaml
+  grammar_revision: 0298515690d667ef44655b110330afc01b627bb7
+  grammar_digest: sha256:852005f632e8adc224a086078f5a3e36241c66c623c746464487da3bef3bee94
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.agent_authority
+  - $.escalation_rules
+  approval_status: candidate
+- source_class: strategic_cognition_model
+  source_ref: l9.source/strategic-cognition-model@1
+  source_path: semantics/strategic_cognition_model.yaml
+  source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
+  source_digest: sha256:af540e9607915878b66cb7632fd3ca63f57f80707b1c605fc21536d06ec81a7d
+  grammar_ref: l9.candidate.schema-synthesis/technical-coordination/grammar/strategic-cognition-model@1
+  grammar_path: docs/candidates/schema-grammar-technical-coordination/grammars/strategic_cognition_model.yaml
+  grammar_revision: 0298515690d667ef44655b110330afc01b627bb7
+  grammar_digest: sha256:4cb05e01ee8d26290771c50e0e5f49a38cdfa48910d3021d7697eb2acdb51e2c
+  grammar_owner: Quantum-L9/.github code owners (candidate; owner review pending)
+  applies_to_selectors:
+  - $.global_rules
+  - $.roles.plan_keeper
+  - $.authority_separation
+  approval_status: candidate

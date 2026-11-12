@@ -1,0 +1,95 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/technical-coordination/grammar/strategic-cognition-model@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: strategic_cognition_model
+source_ref: l9.source/strategic-cognition-model@1
+source_path: semantics/strategic_cognition_model.yaml
+source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
+source_digest: sha256:af540e9607915878b66cb7632fd3ca63f57f80707b1c605fc21536d06ec81a7d
+applies_to_selectors:
+- $.global_rules
+- $.roles.plan_keeper
+- $.authority_separation
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    global_rules:
+      type: object
+      additional_properties: true
+      fields:
+        strategic_cognition_does_not_own_underlying_truth_sources:
+          type: boolean
+        strategic_cognition_does_not_own_runtime_execution:
+          type: boolean
+        reasoning_capability_does_not_confer_strategic_authority:
+          type: boolean
+        projection_consumption_does_not_transfer_truth_source_ownership:
+          type: boolean
+        strategic_roles_are_semantic_roles_not_actor_identities:
+          type: boolean
+        strategic_label_does_not_create_authority_or_ownership:
+          type: boolean
+        metacognition_is_advisory_to_strategic_authority:
+          type: boolean
+        semantic_compiler_remains_independent_of_reasoning_plane:
+          type: boolean
+        planning_episode_is_non_authoritative_reasoning_record:
+          type: boolean
+        plan_revision_candidate_is_not_strategy_until_admitted_under_strategic_authority:
+          type: boolean
+        metacognitive_analysis_is_advisory_and_cannot_mutate_strategy:
+          type: boolean
+    roles:
+      type: object
+      additional_properties: true
+      fields:
+        plan_keeper:
+          type: object
+          additional_properties: true
+          fields:
+            role_kind:
+              type: string
+            actor_identity_binding:
+              type: string
+            definition:
+              type: string
+            owns:
+              type: string_list
+            reasons_over:
+              type: string_list
+            may:
+              type: string_list
+            authority_source:
+              type: string
+            does_not_own:
+              type: string_list
+            may_not:
+              type: string_list
+    authority_separation:
+      type: object
+      additional_properties: true
+      fields:
+        invariant_ref:
+          type: string
+        resolution_ref:
+          type: string
+        strategic_plan_owner:
+          type: string
+        strategic_plan_reasoning_analysis_owner:
+          type: string
+        teaching_relation:
+          type: object
+          additional_properties: true
+          fields:
+            from:
+              type: string
+            to:
+              type: string
+            carries:
+              type: string
+            authority_effect:
+              type: string

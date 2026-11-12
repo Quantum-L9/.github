@@ -1,0 +1,54 @@
+document_kind: source_field_grammar_candidate
+artifact_id: l9.candidate.schema-synthesis/technical-coordination/grammar/invariants@1
+owner: Quantum-L9/.github code owners (candidate; owner review pending)
+approval_status: candidate
+canonical: false
+admission: not_granted
+source_class: invariants
+source_ref: l9.source/invariants@1
+source_path: semantics/invariants.yaml
+source_revision: 10a9e5e9364720e3a03627daaded3235cd7ba16f
+source_digest: sha256:d3eb316ee57b4bd6c2093b2ebd60caf0d06a4bcbfe32ee26f488f8d4887d9f96
+applies_to_selectors:
+- $.invariants[?(@.id=="L9-INTEGRATION-001")]
+- $.invariants[?(@.id=="L9-AUTONOMY-001")]
+- $.invariants[?(@.id=="L9-AUTONOMY-002")]
+- $.invariants[?(@.id=="L9-AUTH-001")]
+- $.invariants[?(@.id=="L9-AUTH-002")]
+- $.invariants[?(@.id=="L9-CAPABILITY-001")]
+- $.invariants[?(@.id=="L9-HARD-001")]
+- $.invariants[?(@.id=="L9-MONOTONIC-001")]
+- $.invariants[?(@.id=="L9-OWNER-001")]
+- $.invariants[?(@.id=="L9-ASSURANCE-001")]
+- $.invariants[?(@.id=="L9-UNKNOWN-001")]
+- $.invariants[?(@.id=="L9-COORD-001")]
+- $.invariants[?(@.id=="L9-PROV-001")]
+- $.invariants[?(@.id=="L9-STRATEGY-001")]
+- $.invariants[?(@.id=="L9-SIGNAL-004")]
+- $.invariants[?(@.id=="L9-PROJECTION-001")]
+- $.invariants[?(@.id=="L9-SEM-001")]
+- $.invariants[?(@.id=="L9-SCOPE-001")]
+- $.invariants[?(@.id=="L9-CORRECTNESS-001")]
+- $.invariants[?(@.id=="L9-EVIDENCE-001")]
+- $.invariants[?(@.id=="L9-REVISION-001")]
+- $.invariants[?(@.id=="L9-DERIVED-001")]
+grammar:
+  type: object
+  additional_properties: true
+  fields:
+    invariants:
+      type: array
+      items:
+        type: object
+        additional_properties: true
+        fields:
+          id:
+            type: string
+          statement:
+            type: string
+          scope:
+            type: string
+          owner:
+            type: string
+          severity:
+            type: string

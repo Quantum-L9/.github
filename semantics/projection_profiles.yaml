@@ -3348,6 +3348,75 @@ projection_profiles:
   payload_validation:
     protocol: l9.payload-validation/source-class-dispatch@1
 # END domain projection profiles v1
+- id: l9.projection/technical-coordination@1
+  class: consumer
+  consumer: technical_coordination_role
+  purpose: >-
+    Select the smallest admitted source-bound semantic context needed by a
+    scope-bound technical coordination role to coordinate authorized
+    specialist assignments, identify shared integration obligations, reconcile
+    evidenced results, and preserve strategic, architecture, execution, and
+    state ownership boundaries. This projection grants no authority or runtime
+    capability and is not a domain projection.
+  sources:
+    vocabulary:
+      selectors:
+      - $.terms.technical_coordination_role
+      - $.terms.integration_responsibility
+      - $.terms.decision_resolution_class
+      - $.terms.material_decision_escalation
+      - $.terms.bounded_autonomy
+      - $.terms.plan_keeper
+      - $.terms.signal_consumption
+    invariants:
+      selectors:
+      - $.invariants[?(@.id=="L9-INTEGRATION-001")]
+      - $.invariants[?(@.id=="L9-AUTONOMY-001")]
+      - $.invariants[?(@.id=="L9-AUTONOMY-002")]
+      - $.invariants[?(@.id=="L9-AUTH-001")]
+      - $.invariants[?(@.id=="L9-AUTH-002")]
+      - $.invariants[?(@.id=="L9-CAPABILITY-001")]
+      - $.invariants[?(@.id=="L9-HARD-001")]
+      - $.invariants[?(@.id=="L9-MONOTONIC-001")]
+      - $.invariants[?(@.id=="L9-OWNER-001")]
+      - $.invariants[?(@.id=="L9-ASSURANCE-001")]
+      - $.invariants[?(@.id=="L9-UNKNOWN-001")]
+      - $.invariants[?(@.id=="L9-COORD-001")]
+      - $.invariants[?(@.id=="L9-PROV-001")]
+      - $.invariants[?(@.id=="L9-STRATEGY-001")]
+      - $.invariants[?(@.id=="L9-SIGNAL-004")]
+      - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-SEM-001")]
+      - $.invariants[?(@.id=="L9-SCOPE-001")]
+      - $.invariants[?(@.id=="L9-CORRECTNESS-001")]
+      - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+      - $.invariants[?(@.id=="L9-REVISION-001")]
+      - $.invariants[?(@.id=="L9-DERIVED-001")]
+    contracts:
+      selectors:
+      - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
+      - $.contracts[?(@.id=="l9.contract/semantic-ownership@1")]
+      - $.contracts[?(@.id=="l9.contract/assurance-and-verification@1")]
+      - $.contracts[?(@.id=="l9.contract/provenance-and-coordinate@1")]
+      - $.contracts[?(@.id=="l9.contract/projection@1")]
+    authority_model:
+      selectors:
+      - $.agent_authority
+      - $.escalation_rules
+    strategic_cognition_model:
+      selectors:
+      - $.global_rules
+      - $.roles.plan_keeper
+      - $.authority_separation
+  output:
+    schema: l9.projection.technical-coordination/v1
+  forbidden:
+  - obligation_not_admitted_in_a_selected_source
+  - repository_local_policy_as_global_law
+  - execution_publication_or_merge_authority_grant
+  - adapter_host_or_surface_specific_semantics
+  payload_validation:
+    protocol: l9.payload-validation/source-class-dispatch@1
 projection_engine_contract_ref:
   artifact: projection_engine_contract.yaml
   artifact_id: l9.compiler/projection-engine@1
