@@ -1,0 +1,24 @@
+schema: l9.fixture.datastore-capability-compatibility/v1
+polarity: positive
+description: 'Canonical MongoDB binding on a 9.0 replica set: every cited provided token is semantically_compatible.'
+falsifies:
+- D2-EVAL-07
+case:
+  token_definitions: '@ledger'
+  provider_binding: '@ledger:l9.binding/provider/mongodb@1'
+  admission: admitted
+  deployment_profile: replica_set
+  server_version: 9.0.3
+  receipts: []
+  required_capabilities:
+  - transactions
+  - snapshot_isolation
+  - replicated_durable_commit
+  - conditional_updates
+  - unique_key
+  - commit_outcome_unknown_signal
+  - server_authoritative_time_in_update_expressions
+  - change_notifications
+expect:
+  overall: semantically_compatible
+  tokens: {}

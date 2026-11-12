@@ -1,0 +1,30 @@
+schema: l9.fixture.datastore-capability-compatibility/v1
+polarity: negative
+description: Canonical definitions and MongoDB facts that are only candidates satisfy no State token.
+falsifies:
+- D2-EVAL-01
+case:
+  token_definitions: '@ledger'
+  provider_binding: '@ledger:l9.binding/provider/mongodb@1'
+  admission: candidate
+  deployment_profile: replica_set
+  server_version: 9.0.3
+  receipts: []
+  required_capabilities:
+  - transactions
+  - snapshot_isolation
+  - replicated_durable_commit
+  - conditional_updates
+  - unique_key
+  - commit_outcome_unknown_signal
+  - server_authoritative_time_in_query_filters
+expect:
+  overall: incompatible_until_resolved
+  tokens:
+    transactions: incompatible_until_resolved
+    snapshot_isolation: incompatible_until_resolved
+    replicated_durable_commit: incompatible_until_resolved
+    conditional_updates: incompatible_until_resolved
+    unique_key: incompatible_until_resolved
+    commit_outcome_unknown_signal: incompatible_until_resolved
+    server_authoritative_time_in_query_filters: incompatible_until_resolved

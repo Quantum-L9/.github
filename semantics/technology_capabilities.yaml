@@ -177,6 +177,67 @@ binding_rules:
     compiler_action:
       - stop_binding
       - require_technology_registration
+  provider_compatibility_tiers:
+    purpose: >
+      Decide RequiredCapabilities ⊆ ProviderCapabilities per capability token
+      in two separate tiers. Semantic admission of definitions and provider
+      facts needs no live receipt; runtime qualification of a deployed provider
+      needs a passing live conformance receipt. A missing live receipt never
+      blocks admission of a definition, and an admitted definition never
+      implies runtime qualification.
+    definitions_ref: technology_capabilities.yaml#capability_definitions
+    provider_facts_ref: binding_catalog.yaml#bindings[class=provider].facts
+    order:
+      - incompatible
+      - incompatible_until_resolved
+      - semantically_compatible
+      - runtime_qualified
+    token_rules:
+      - id: D2-EVAL-01
+        when: the token has no admitted definition, directly or through an alias
+        result: incompatible_until_resolved
+      - id: D2-EVAL-02
+        when: the provider binding has no admitted fact for the token, or its status is unknown
+        result: incompatible_until_resolved
+      - id: D2-EVAL-03
+        when: the admitted fact has status not_provided
+        result: incompatible
+      - id: D2-EVAL-04
+        when: the fact declares requires_deployment and the deployment profile is unknown
+        result: incompatible_until_resolved
+      - id: D2-EVAL-05
+        when: the fact declares requires_deployment and the deployment profile is not listed
+        result: incompatible
+      - id: D2-EVAL-06
+        when: the fact has status provided but no vendor citation
+        result: incompatible_until_resolved
+      - id: D2-EVAL-07
+        when: admitted definition and admitted, cited, deployment-satisfied fact, with no qualifying passing receipt
+        result: semantically_compatible
+      - id: D2-EVAL-08
+        when: as D2-EVAL-07, and the newest receipt bound to the exact provider binding id and digest, token, probe and deployment profile passes
+        result: runtime_qualified
+      - id: D2-EVAL-09
+        when: a receipt binds a different binding digest or deployment profile, or names an in-memory, fake or mock subject
+        result: receipt_ignored
+      - id: D2-EVAL-10
+        when: the provider binding declares a server_version_range and the deployed server version is unknown or outside it
+        result: incompatible_until_resolved
+    rule_order: [D2-EVAL-01, D2-EVAL-02, D2-EVAL-03, D2-EVAL-06, D2-EVAL-10, D2-EVAL-04, D2-EVAL-05, D2-EVAL-08, D2-EVAL-07]
+    overall:
+      - any_token_incompatible_gives_incompatible
+      - otherwise_any_token_incompatible_until_resolved_gives_incompatible_until_resolved
+      - otherwise_every_token_runtime_qualified_gives_runtime_qualified
+      - otherwise_semantically_compatible
+    empty_required_capabilities: incompatible_until_resolved
+    technology_binding_outcomes:
+      incompatible: incompatible
+      incompatible_until_resolved: unresolved
+      semantically_compatible: resolved
+      runtime_qualified: resolved
+    runtime_qualification_is_not_an_admission_precondition: true
+    admitted_definition_does_not_imply_runtime_qualification: true
+    provider_name_never_implies_a_token: true
 registration_requirements:
   required:
     - id
@@ -192,3 +253,297 @@ registration_requirements:
     - technology_registration_precedes_provider_binding
     - capability_names_must_reference_canonical_vocabulary_or_capability_catalog
     - registration_does_not_grant_authority
+
+capability_definitions:
+  purpose: >
+    Provider-neutral meaning of datastore capability tokens. A definition states
+    what must hold, never which provider holds it. A provider asserts a token
+    semantically only through a vendor-cited fact in a class provider binding
+    (binding_catalog.yaml), and at runtime only through a passing live
+    conformance receipt.
+  governed_by:
+    - l9.contract/technology-binding@1
+  rules:
+    - token_meaning_is_provider_neutral
+    - token_is_satisfied_semantically_only_by_an_admitted_vendor_cited_provider_fact
+    - token_is_satisfied_at_runtime_only_by_a_passing_live_conformance_receipt
+    - provider_name_never_implies_a_token
+    - in_memory_or_fake_store_evidence_never_satisfies_a_runtime_probe
+    - undefined_token_is_incompatible_until_resolved
+    - probe_descriptions_carry_no_connection_string_host_or_credential
+  coverage:
+    rule: every capability token provided by a covered technology resolves to exactly one definition, directly or through an alias
+    technologies:
+      - mongodb
+      - postgresql
+  aliases:
+    unique_indexes: unique_key
+    unique_constraints: unique_key
+  deployment_profiles:
+    - standalone
+    - replica_set
+    - sharded_cluster
+  runtime_receipt:
+    family: l9.receipt/conformance@1
+    additional_bound_coordinates:
+      - provider_binding_id
+      - provider_binding_digest_sha256
+      - token
+      - probe_id
+      - deployment_profile
+      - provider_server_version
+      - verdict
+      - executed_at
+      - executor_identity
+    forbidden:
+      - connection_strings
+      - credentials
+      - in_memory_or_fake_provider_as_subject
+  entry_contract:
+    required:
+      - scope
+      - guarantee
+      - not_implied
+      - failure_signal
+      - runtime_probe
+    runtime_probe_required:
+      - probe_id
+      - description
+  tokens:
+    transactions:
+      scope: >
+        An explicitly bounded unit of work spanning more than one record, and
+        more than one collection or table where the provider admits that, within
+        one database deployment.
+      guarantee: >
+        Atomic multi-record commit: either every write in the unit becomes
+        visible to other readers, or none does. No reader outside the unit
+        observes a partial subset of its writes after commit or after abort.
+      not_implied:
+        - a particular isolation level (snapshot_isolation, serializable_isolation)
+        - a durability level (replicated_durable_commit)
+        - a definite commit outcome reported to the caller (commit_outcome_unknown_signal)
+        - cross-deployment or cross-provider atomicity
+      failure_signal: >
+        A unit that cannot commit is aborted and the abort is reported to the
+        caller as an error; no partial effects survive the abort.
+      runtime_probe:
+        probe_id: l9.probe/datastore/transactions@1
+        description: >
+          On a live deployment of the declared profile, run a unit writing N>=2
+          records across >=2 collections or tables; abort after the first write
+          and assert no write is visible; repeat with commit and assert all
+          writes become visible together to a concurrent reader.
+    conditional_updates:
+      scope: One record, one write operation.
+      guarantee: >
+        Compare-and-set on a declared predicate: the write applies if and only
+        if the predicate holds on the record's current server-side state at the
+        instant of the write, as one atomic step. Concurrent writers cannot both
+        succeed against the same pre-image.
+      not_implied:
+        - multi-record atomicity (transactions)
+        - predicate evaluation against server time (server_authoritative_time_in_query_filters)
+      failure_signal: >
+        The caller can distinguish "predicate did not match, nothing written"
+        from "written" without a second read.
+      runtime_probe:
+        probe_id: l9.probe/datastore/conditional-updates@1
+        description: >
+          K>=8 concurrent writers attempt the same revision-guarded update of one
+          record; assert exactly one reports applied, all others report not
+          matched, and the final record equals the winner's write.
+    snapshot_isolation:
+      scope: Reads and writes inside one transaction (requires transactions).
+      guarantee: >
+        All reads in the transaction observe one consistent committed snapshot
+        taken at or before its first read; a write conflicting with a write
+        committed by a concurrent transaction after that snapshot aborts this
+        transaction instead of overwriting (first committer wins on the written
+        records).
+      not_implied:
+        - serializability; write skew between disjoint written sets remains possible
+      failure_signal: >
+        A write-write conflict surfaces as a transaction abort the caller can
+        classify as retryable.
+      runtime_probe:
+        probe_id: l9.probe/datastore/snapshot-isolation@1
+        description: >
+          T1 reads record A, T2 updates A and commits, T1 re-reads A and must
+          observe the pre-T2 value, then T1 writes A and must abort with a
+          classifiable conflict.
+    serializable_isolation:
+      scope: Reads and writes inside one transaction (requires transactions).
+      guarantee: >
+        The committed history is equivalent to some serial order of the
+        committed transactions; in particular write skew is prevented.
+      not_implied:
+        - a serial order visible to the caller
+      failure_signal: >
+        A transaction that would violate serializability aborts with an error
+        the caller can classify as retryable.
+      runtime_probe:
+        probe_id: l9.probe/datastore/serializable-isolation@1
+        description: >
+          Write-skew probe: two transactions each read two records bound by an
+          invariant and each update a different one; assert at most one commits.
+    replicated_durable_commit:
+      scope: A committed write or transaction on a replicated deployment.
+      guarantee: >
+        A commit acknowledged to the caller is durably recorded on a strict
+        majority of voting replicas, and survives the loss or failover of any
+        minority of replicas without rollback.
+      not_implied:
+        - survival of the loss of a majority of replicas
+        - durability of writes acknowledged under a weaker caller-selected level
+      failure_signal: >
+        When the quorum is not reached within the caller's bound, the caller
+        receives an error, never a success, and the commit outcome may be
+        unknown (commit_outcome_unknown_signal).
+      runtime_probe:
+        probe_id: l9.probe/datastore/replicated-durable-commit@1
+        description: >
+          Commit at the durable level, force a leader failover, and assert the
+          acknowledged write is present after election; isolate the leader from
+          the majority and assert a commit is not acknowledged as success.
+    commit_outcome_unknown_signal:
+      scope: The commit step of a transaction (requires transactions).
+      guarantee: >
+        When the provider cannot report whether a commit took effect, it reports
+        that ambiguity with a distinct, machine-classifiable signal, separate
+        from definitely aborted and definitely committed, so the caller can
+        reconcile instead of assuming either outcome.
+      not_implied:
+        - that the provider resolves the ambiguity
+        - that retrying the commit is safe for the caller's semantics
+      failure_signal: The signal itself.
+      runtime_probe:
+        probe_id: l9.probe/datastore/commit-outcome-unknown-signal@1
+        description: >
+          Force a commit whose acknowledgement cannot be obtained (a durable
+          commit whose time bound expires, or a partition during commit) and
+          assert the caller observes the distinct ambiguity signal, never a plain
+          abort or success.
+    server_authoritative_time_in_update_expressions:
+      scope: The value expressions of a single write or conditional update.
+      guarantee: >
+        An update expression can reference the provider's own clock value for
+        the operation, evaluated server-side, so written timestamps do not
+        depend on any client clock.
+      not_implied:
+        - use of server time in query filters (server_authoritative_time_in_query_filters)
+        - clock monotonicity across failover
+        - bounded skew between provider nodes
+      failure_signal: >
+        An expression the provider cannot evaluate server-side is rejected,
+        never replaced with a client-supplied value.
+      runtime_probe:
+        probe_id: l9.probe/datastore/server-time-update-expressions@1
+        description: >
+          From a client whose clock is skewed by several minutes, write a
+          timestamp through a server-time update expression and assert it
+          tracks the provider's clock, not the client's.
+    server_authoritative_time_in_query_filters:
+      scope: The filter predicates of reads and of conditional updates.
+      guarantee: >
+        A filter predicate can compare stored values with the provider's own
+        clock value for the operation, evaluated server-side, so time-based
+        fences such as leases and expiries do not depend on any client clock.
+      not_implied:
+        - clock monotonicity across failover
+        - bounded skew between provider nodes
+      failure_signal: >
+        A filter the provider cannot evaluate server-side is rejected, never
+        replaced with a client-supplied value.
+      runtime_probe:
+        probe_id: l9.probe/datastore/server-time-query-filters@1
+        description: >
+          Run a lease acquire, renew and expire sequence whose fences are filter
+          predicates on server time, from a client whose clock is skewed by
+          several minutes; assert lease decisions follow server time only.
+    unique_key:
+      scope: One declared key (a single or compound field or column set) over one collection or table.
+      guarantee: >
+        The provider rejects any write that would make two records share the
+        declared key value, atomically with that write, including under
+        concurrent writers and concurrent upserts.
+      not_implied:
+        - uniqueness across collections, tables or deployments
+        - that the key exists before it is declared
+        - deferred-constraint semantics
+      failure_signal: >
+        The rejected write fails with a distinct, machine-classifiable
+        duplicate-key error.
+      runtime_probe:
+        probe_id: l9.probe/datastore/unique-key@1
+        description: >
+          K>=8 concurrent writers insert or upsert records with one key value;
+          assert exactly one succeeds, the others fail with the duplicate-key
+          signal, and exactly one record exists afterwards.
+    document_storage:
+      scope: One record.
+      guarantee: >
+        A record is a self-describing nested structure of fields, arrays and
+        sub-records, stored and returned without a schema declared to the
+        provider, whose nested fields can be addressed in predicates and updates.
+      not_implied:
+        - schema validation unless separately declared
+        - any transactional property
+      failure_signal: >
+        A record exceeding the provider's declared size or nesting limit is
+        rejected, never truncated.
+      runtime_probe:
+        probe_id: l9.probe/datastore/document-storage@1
+        description: >
+          Round-trip a nested record at and just over the declared limits;
+          assert byte-equal read-back and explicit rejection over the limit.
+    relational_storage:
+      scope: One table and the declared relations between tables.
+      guarantee: >
+        Records are rows of a declared schema of typed columns; the provider
+        enforces declared column types and declared referential constraints on
+        every write.
+      not_implied:
+        - any isolation level
+      failure_signal: >
+        A write violating a declared type or referential constraint is rejected
+        with a classifiable error.
+      runtime_probe:
+        probe_id: l9.probe/datastore/relational-storage@1
+        description: >
+          Attempt type-violating and dangling-reference writes; assert each is
+          rejected and nothing is persisted.
+    json_storage:
+      scope: One column or field of one record.
+      guarantee: >
+        A field holds a JSON value stored and returned semantically equal
+        (object key order not guaranteed) whose members can be addressed in
+        predicates.
+      not_implied:
+        - preservation of object key order or insignificant whitespace
+        - document_storage
+      failure_signal: A value that is not valid JSON is rejected, never coerced.
+      runtime_probe:
+        probe_id: l9.probe/datastore/json-storage@1
+        description: >
+          Round-trip nested JSON values and filter on a nested member; assert
+          semantic equality and rejection of invalid JSON.
+    change_notifications:
+      scope: Committed writes to a declared collection, table or database.
+      guarantee: >
+        A subscriber receives an ordered notification of every committed write
+        in scope, never of an uncommitted or aborted write, and can resume after
+        disconnection from a provider-issued position without gaps while that
+        position is retained.
+      not_implied:
+        - unbounded retention of resume positions
+        - exactly-once processing by the subscriber
+      failure_signal: >
+        A resume from a position no longer retained fails with a distinct error
+        instead of silently skipping notifications.
+      runtime_probe:
+        probe_id: l9.probe/datastore/change-notifications@1
+        description: >
+          Subscribe, commit N writes and abort M, disconnect, commit K more and
+          resume; assert exactly the N+K committed writes are observed in commit
+          order and none of the M.

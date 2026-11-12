@@ -1,0 +1,20 @@
+schema: l9.fixture.datastore-capability-compatibility/v1
+polarity: positive
+description: The admitted alias unique_indexes resolves to unique_key, which the canonical MongoDB binding provides.
+falsifies:
+- D2-EVAL-01
+case:
+  token_definitions: '@ledger'
+  provider_binding: '@ledger:l9.binding/provider/mongodb@1'
+  admission: admitted
+  deployment_profile: replica_set
+  server_version: 9.0.3
+  receipts: []
+  required_capabilities:
+  - unique_indexes
+  - unique_constraints
+expect:
+  overall: semantically_compatible
+  tokens:
+    unique_indexes: semantically_compatible
+    unique_constraints: semantically_compatible

@@ -1,0 +1,100 @@
+schema: l9.fixture.datastore-capability-compatibility/v1
+polarity: negative
+description: A failing receipt newer than a passing one withdraws runtime qualification.
+falsifies:
+- D2-EVAL-08
+case:
+  required_capabilities:
+  - transactions
+  - conditional_updates
+  - commit_outcome_unknown_signal
+  token_definitions:
+    transactions:
+      admission: admitted
+      probe_id: l9.probe/datastore/transactions@1
+    conditional_updates:
+      admission: admitted
+      probe_id: l9.probe/datastore/conditional-updates@1
+    commit_outcome_unknown_signal:
+      admission: admitted
+      probe_id: l9.probe/datastore/commit-outcome-unknown-signal@1
+  provider_binding:
+    id: l9.binding/provider/example-datastore@1
+    class: provider
+    provider:
+      technology: example-datastore
+    server_version_range:
+      min_inclusive: '2.0'
+      max_exclusive: '3.0'
+    facts:
+      transactions:
+        status: provided
+        admission: admitted
+        requires_deployment:
+        - replica_set
+        citations: &id001
+        - url: https://vendor.example/docs/transactions
+          quote: synthetic fixture citation
+      conditional_updates:
+        status: provided
+        admission: admitted
+        requires_deployment: []
+        citations: *id001
+      commit_outcome_unknown_signal:
+        status: provided
+        admission: admitted
+        requires_deployment:
+        - replica_set
+        citations: *id001
+  deployment_profile: replica_set
+  server_version: '2.4'
+  receipts:
+  - family: l9.receipt/conformance@1
+    provider_binding_id: l9.binding/provider/example-datastore@1
+    provider_binding_digest_sha256: '@binding'
+    token: transactions
+    probe_id: l9.probe/datastore/transactions@1
+    deployment_profile: replica_set
+    provider_server_version: '2.4'
+    verdict: pass
+    executed_at: '2026-11-11T00:00:00Z'
+    executor_identity: l9.actor-registry/global@1#claude-code
+    subject_kind: live_deployment
+  - family: l9.receipt/conformance@1
+    provider_binding_id: l9.binding/provider/example-datastore@1
+    provider_binding_digest_sha256: '@binding'
+    token: conditional_updates
+    probe_id: l9.probe/datastore/conditional-updates@1
+    deployment_profile: replica_set
+    provider_server_version: '2.4'
+    verdict: pass
+    executed_at: '2026-11-11T00:00:00Z'
+    executor_identity: l9.actor-registry/global@1#claude-code
+    subject_kind: live_deployment
+  - family: l9.receipt/conformance@1
+    provider_binding_id: l9.binding/provider/example-datastore@1
+    provider_binding_digest_sha256: '@binding'
+    token: commit_outcome_unknown_signal
+    probe_id: l9.probe/datastore/commit-outcome-unknown-signal@1
+    deployment_profile: replica_set
+    provider_server_version: '2.4'
+    verdict: pass
+    executed_at: '2026-11-11T00:00:00Z'
+    executor_identity: l9.actor-registry/global@1#claude-code
+    subject_kind: live_deployment
+  - family: l9.receipt/conformance@1
+    provider_binding_id: l9.binding/provider/example-datastore@1
+    provider_binding_digest_sha256: '@binding'
+    token: transactions
+    probe_id: l9.probe/datastore/transactions@1
+    deployment_profile: replica_set
+    provider_server_version: '2.4'
+    verdict: fail
+    executed_at: '2026-11-12T00:00:00Z'
+    executor_identity: l9.actor-registry/global@1#claude-code
+    subject_kind: live_deployment
+expect:
+  overall: semantically_compatible
+  tokens:
+    transactions: semantically_compatible
+    conditional_updates: runtime_qualified
