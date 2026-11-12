@@ -2,13 +2,13 @@ schema: l9.candidate.vocabulary-reconciliation/v1
 artifact_id: l9.candidate/r5-d2-unknown-capability-result-term@1
 status: APPLIED_IN_CANDIDATE_RELEASE   # v3.41.0 (ADR-038), operator ruling DR-D2-04; not admitted
 contract: L9-GH-R5-D2-003
-base: Quantum-L9/.github@dcd9d0092740756c19ac681d399bd438409bdc52   # sites re-verified unchanged at 821c477 (F1 head)
+base: Quantum-L9/.github@dcd9d0092740756c19ac681d399bd438409bdc52   # sites re-verified unchanged at 821c477 (F1's head at that time); F1's 44e02a0 does not touch either ledger
 
 subject: the result of evaluating a binding when a required capability is unknown
 
 sites_at_base:
   - path: semantics/binding_catalog.yaml
-    line: 164   # 198 at 821c477, after v3.40.0 added pytest/v2
+    line: 164   # 198 at 821c477 (measured then; unchanged at 44e02a0), after v3.40.0 added pytest/v2
     coordinate: compatibility.unknown_capability
     value: unsupported_until_resolved
   - path: semantics/technology_capabilities.yaml

@@ -4,7 +4,7 @@ Status: **ADDITIVE SUCCESSOR CANDIDATE**
 
 v3.41.0 defines the datastore capability tokens that technologies already assert, states how a provider binding is decided against a port's required capabilities in two tiers, and registers the first provider binding (MongoDB) with vendor-cited facts. Before this release `transactions`, `conditional_updates` and the other datastore tokens had no definition, the provider binding family had no entry, and `l9.contract/technology-binding@1` could reach only `unresolved` for a datastore port.
 
-Successor to the v3.40.0 candidate (ADR-037, `.github#247`, head `821c477`), which is not admitted; the admitted base is v3.39.0. This is contract `L9-GH-R5-D2-003` of campaign R5 (conformance-first). ADR-038 is its candidate decision record and does not admit itself. Its decisions 1–8 apply the operator's rulings DR-D2-01..08 ("accept all", 2026-11-12).
+Successor to the v3.40.0 candidate (ADR-037, `.github#247`, head `44e02a0`), which is not admitted; the admitted base is v3.39.0. This is contract `L9-GH-R5-D2-003` of campaign R5 (conformance-first). ADR-038 is its candidate decision record and does not admit itself. Its decisions 1–8 apply the operator's rulings DR-D2-01..08 ("accept all", 2026-11-12).
 
 ## Bounded delta
 

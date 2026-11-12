@@ -25,7 +25,7 @@ Files changed by v3.37.0–v3.39.0: `invariants`, `contracts`, `capabilities`, `
 
 Not admitted. The owner decision covers the 13 capability definitions, aliases, coverage, deployment profiles and runtime-receipt binding (ADR-038 decision 9), the two-tier rule, the unknown-capability term, and the MongoDB provider binding. Runtime qualification of any provider is not part of this subject.
 
-**Subject.** `discover_admission_subject.py --checkout . --base 821c477 --candidate HEAD --main-ref origin/main` exits 0 with status `pass`: canonical sources `l9.source/binding-catalog@1` and `l9.source/technology-capabilities@1`; no gap, no unclassified change, no required dependency, no revision, no changed derived coordinate.
+**Subject.** `discover_admission_subject.py --checkout . --base 44e02a0 --candidate HEAD --main-ref origin/main` exits 0 with status `pass`: canonical sources `l9.source/binding-catalog@1` and `l9.source/technology-capabilities@1`; no gap, no unclassified change, no required dependency, no revision, no changed derived coordinate.
 
 **Gate as specified (fails structurally).**
 

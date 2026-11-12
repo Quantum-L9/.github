@@ -1,7 +1,7 @@
 # R5-D2 candidate pack — datastore capability semantics and provider bindings
 
 Contract `L9-GH-R5-D2-003` (rev 3), campaign R5 conformance-first. Status: **registered in the v3.41.0 candidate
-release (ADR-038); not admitted.** Base: F1's candidate head `Quantum-L9/.github@821c477` (v3.40.0 / ADR-037,
+release (ADR-038); not admitted.** Base: F1's candidate head `Quantum-L9/.github@44e02a0` (v3.40.0 / ADR-037,
 `.github#247`, itself unadmitted on admitted v3.39.0 `f8e44d1`). Drafted first on `dcd9d00` (v3.36.0) at
 `agent/r5/D2@aa1cbf2`; this branch ports the pack without that history.
 

@@ -1,6 +1,6 @@
 # ADR-038 — Datastore Capability Semantics and Provider Bindings
 
-**Status:** Candidate for semantic-foundation v3.41.0. Drafted on 2026-11-12 under contract `L9-GH-R5-D2-003` (campaign R5 conformance-first, coordinator session `session_017xwbxvuMUJdESvB6TvQcXs`, executor session `session_017xwbxvwZRJTyLKPcpAPNSs`). Predecessor: the v3.40.0 candidate (ADR-037, `.github#247`, head `821c477`), itself unadmitted on admitted v3.39.0. Admission of v3.41.0 by the repository owner is the acceptance gate; this record does not admit itself. Decisions 1–8 apply the operator's rulings DR-D2-01..08 ("accept all", 2026-11-12, relayed verbatim by the coordinator).
+**Status:** Candidate for semantic-foundation v3.41.0. Drafted on 2026-11-12 under contract `L9-GH-R5-D2-003` (campaign R5 conformance-first, coordinator session `session_017xwbxvuMUJdESvB6TvQcXs`, executor session `session_017xwbxvwZRJTyLKPcpAPNSs`). Predecessor: the v3.40.0 candidate (ADR-037, `.github#247`, head `44e02a0`), itself unadmitted on admitted v3.39.0. Admission of v3.41.0 by the repository owner is the acceptance gate; this record does not admit itself. Decisions 1–8 apply the operator's rulings DR-D2-01..08 ("accept all", 2026-11-12, relayed verbatim by the coordinator).
 
 ## Context
 
