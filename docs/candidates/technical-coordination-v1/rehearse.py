@@ -3,9 +3,14 @@
 
 This is the domain-projection-architecture-v1 rehearsal
 (`docs/candidates/domain-projection-architecture-v1/rehearse.py`) run for one pair. It loads
-that module and overrides only what differs: the base commit (which carries the
-technical-coordination profile pair but no payload schemas), the pair, the pack paths, the
-schema file and artifact names (no `domain-` prefix) and the report schema. Every stage
+that module and overrides only what differs: the base, the pair, the pack paths, the schema
+file and artifact names (no `domain-` prefix) and the report schema.
+
+The base is derived, not pinned to a branch commit that a squash merge would discard: it is
+a parentless commit, with the precedent's fixed identity and dates, whose tree is the
+`semantics/` tree of the checkout's HEAD without this pair's two payload schemas and their
+`artifact_schemas` entries. Any commit that carries the approved `semantics/` tree, whatever
+its history, therefore reproduces the same base and the same outputs. Every stage
 (G1 grammars, G2 catalog, S synthesis, R registration with
 `payload_validation.registered_schema_documents()`, P producer run twice) is the precedent's
 own code. `--emit` writes the outputs; `--check` compares a fresh rehearsal with the commit.
@@ -21,8 +26,12 @@ from typing import Any
 PACK = Path(__file__).resolve().parent
 BASE_MODULE = PACK.parent / "domain-projection-architecture-v1" / "rehearse.py"
 
-BASE_SHA = "62e20d48e8e61c130d460ba9e0b88e20283f5de2"
 PAIR = "technical-coordination"
+SCHEMA_FILES = tuple(
+    f"{PAIR.replace('-', '_')}_{kind}.schema.yaml"
+    for kind in ("projection", "composition")
+)
+MANIFEST = "semantics/generic_compiler_manifest.yaml"
 REPORT_SCHEMA = "l9.candidate-rehearsal/technical-coordination-v1"
 
 
@@ -59,12 +68,53 @@ def configure(base: Any) -> Any:
         finally:
             payload_validation.registered_schema_documents = render
 
+    def clone_at_base(dest: Path) -> str:
+        repo = base._repo_root()
+        base._run(
+            [
+                "git",
+                "clone",
+                "-q",
+                "--no-checkout",
+                "--no-hardlinks",
+                str(repo),
+                str(dest),
+            ]
+        )
+        source = base._git(repo, "rev-parse", "HEAD")
+        base._git(dest, "checkout", "-q", "--detach", source)
+        base._git(dest, "read-tree", "--empty")
+        base._git(dest, "read-tree", "--prefix=semantics/", f"{source}:semantics")
+        for name in SCHEMA_FILES:
+            base._git(
+                dest, "rm", "-q", "--cached", "--ignore-unmatch", f"semantics/{name}"
+            )
+        manifest = dest / MANIFEST
+        manifest.write_text(
+            "".join(
+                line
+                for line in manifest.read_text("utf-8").splitlines(True)
+                if line.strip().removeprefix("- ") not in SCHEMA_FILES
+            ),
+            "utf-8",
+        )
+        base._git(dest, "add", "--", MANIFEST)
+        tree = base._git(dest, "write-tree")
+        commit = base._git(
+            dest,
+            "commit-tree",
+            tree,
+            "-m",
+            f"rehearsal base: semantics without {PAIR} payload schemas",
+        )
+        base._git(dest, "checkout", "-q", "-f", "--detach", commit)
+        return commit
+
     def rehearse(*args: Any) -> dict[str, Any]:
         result = base_rehearse(*args)
         result["report"]["schema"] = REPORT_SCHEMA
         return result
 
-    base.BASE_SHA = BASE_SHA
     base.PACK = PACK
     base.PACK_REL = "docs/candidates/technical-coordination-v1"
     base.PAIRS = (PAIR,)
@@ -72,6 +122,7 @@ def configure(base: Any) -> Any:
     base._schema_file = lambda name, kind: (
         f"{name.replace('-', '_')}_{kind}.schema.yaml"
     )
+    base._clone_at_base = clone_at_base
     base._register = register
     base.rehearse = rehearse
     return base

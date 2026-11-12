@@ -3386,6 +3386,12 @@ projection_profiles:
       - $.invariants[?(@.id=="L9-STRATEGY-001")]
       - $.invariants[?(@.id=="L9-SIGNAL-004")]
       - $.invariants[?(@.id=="L9-PROJECTION-001")]
+      - $.invariants[?(@.id=="L9-SEM-001")]
+      - $.invariants[?(@.id=="L9-SCOPE-001")]
+      - $.invariants[?(@.id=="L9-CORRECTNESS-001")]
+      - $.invariants[?(@.id=="L9-EVIDENCE-001")]
+      - $.invariants[?(@.id=="L9-REVISION-001")]
+      - $.invariants[?(@.id=="L9-DERIVED-001")]
     contracts:
       selectors:
       - $.contracts[?(@.id=="l9.contract/authority-boundary@1")]
