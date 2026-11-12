@@ -37,7 +37,7 @@ ed874f5daffa93184bd52d92eb434cce2c1eb77fe1c125016ca5a4b6f4a42edd  ./docs/adr/ADR
 50228895ba57479735f4c3eb4df1f46189078f526ad5fc88262800622ef81825  ./docs/adr/ADR-034-integration-accountability-and-technical-coordination-role.md
 ec9892c93e2698d5e99e0c26edf8f6acc51236733f85ced54e09577ba2ac506d  ./docs/adr/ADR-035-bounded-decision-autonomy-and-material-decision-escalation.md
 d2fc4cdc2fb4d6691dfa95f9cfcb309fddd5e062d438ba9bda91dc6d461f97b8  ./docs/adr/ADR-036-technical-coordination-role-projection.md
-133e17a0b241d69ff35e33f8233694035677e80ff005375679162a19a06abeec  ./docs/adr/ADR-037-fixture-ir-and-conformance-ir-structural-contracts.md
+42c09f7614aa0b63e788d7c5891b440f21989b200ccc6713371feeeda1623fde  ./docs/adr/ADR-037-fixture-ir-and-conformance-ir-structural-contracts.md
 25030cbd63c38ed108765b3ac571e7c5d8389a2999cf16077c6c9e8876464e8d  ./docs/adr/ADR-038-datastore-capability-semantics-and-provider-bindings.md
 953a97398bf9bba534720b96d45b1b35cd08f8a652b244961ec8d0c5735438b2  ./docs/adr/README.md
 34fbe4abc246e21c28401941025317be52c109c88335577616a2648cc93c6f6f  ./semantics/actor_registry.yaml
