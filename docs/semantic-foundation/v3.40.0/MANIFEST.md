@@ -143,7 +143,7 @@ v3.40.0 adds ADR-037 (structural contracts for `l9.fixture-ir/v1` and `l9.confor
 - `semantics/compilation_profiles.yaml` (`l9.compilation/product-build@1` stage 8) and `semantics/vocabulary.yaml#semantic_build_stages` (RC-013 parity): stage 8 consumes `product_fixture_cases` and `product_harness_surface`.
 - `semantics/binding_catalog.yaml`: `pytest/v2`, `successor_of: pytest/v1`, mapping groups, observations, harness controls and observations, context (including observation context), exact `count_where`, presence checks and unresolved cases. `pytest/v1` is unchanged.
 - `semantics/generic_compiler_manifest.yaml#requires.artifact_schemas` lists the three schemas.
-- `scripts/validate-semantics.py`: RC-035 and RC-035-NEG; `scripts/fixture_conformance_ir.py` and `ops/fixtures/fixture-conformance-ir/` (6 positive witness files, 108 falsifying fixtures).
+- `scripts/validate-semantics.py`: RC-035 and RC-035-NEG; `scripts/fixture_conformance_ir.py` and `ops/fixtures/fixture-conformance-ir/` (6 positive witness files, 110 falsifying fixtures).
 - ADR-037 (candidate).
 
 No solver, conformance-model, invariant, contract, term, projection or composition profile changes. `ir_catalog.yaml` gains one entry (`l9.harness-surface/v1`); `product_manifest.schema.yaml` gains only optional fields, its closure-digest definition and two rules. `pytest/v1` is unchanged (RC-035 pins its digest).

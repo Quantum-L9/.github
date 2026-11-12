@@ -1,0 +1,9 @@
+# Falsifying fixture: a case outcome outside the verdict domain (pass|fail|error|unresolved) is never a pass; the
+# aggregation fails closed as an error.
+document: verdict
+violates: pass_only_when_every_witness_case_executes_and_every_assertion_holds
+obligation_index: 0
+case_outcomes:
+  create_starts_at_zero: pass
+  erased_identity_not_reused: skipped
+expected_verdict: error

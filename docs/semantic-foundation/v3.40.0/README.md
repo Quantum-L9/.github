@@ -18,7 +18,7 @@ Successor to v3.39.0. This is contract `L9-GH-R5-F1-001` of campaign R5 (conform
 - `semantics/compilation_profiles.yaml` (`l9.compilation/product-build@1` stage 8) and `semantics/vocabulary.yaml#semantic_build_stages` (RC-013 parity): stage 8 consumes `product_fixture_cases` and `product_harness_surface`.
 - `semantics/binding_catalog.yaml`: `pytest/v2`, `successor_of: pytest/v1`, mapping groups, observations, harness controls and observations, context (including observation context), exact `count_where`, presence checks and unresolved cases. `pytest/v1` is unchanged.
 - `semantics/generic_compiler_manifest.yaml#requires.artifact_schemas` lists the three schemas.
-- `scripts/validate-semantics.py`: RC-035 and RC-035-NEG; `scripts/fixture_conformance_ir.py` and `ops/fixtures/fixture-conformance-ir/` (6 positive witness files, 108 falsifying fixtures).
+- `scripts/validate-semantics.py`: RC-035 and RC-035-NEG; `scripts/fixture_conformance_ir.py` and `ops/fixtures/fixture-conformance-ir/` (6 positive witness files, 110 falsifying fixtures).
 - ADR-037 (candidate).
 
 ## Evidence

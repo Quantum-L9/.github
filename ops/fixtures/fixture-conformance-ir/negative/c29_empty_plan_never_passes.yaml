@@ -1,0 +1,13 @@
+# Falsifying fixture: an execution plan with no cases executes no witness, so its aggregation cannot pass; the final
+# branch fails closed as an error.
+document: verdict
+violates: pass_only_when_every_witness_case_executes_and_every_assertion_holds
+obligation_index: 0
+obligation_mutation:
+- op: set
+  path:
+  - execution_plan
+  - cases
+  value: []
+case_outcomes: {}
+expected_verdict: error

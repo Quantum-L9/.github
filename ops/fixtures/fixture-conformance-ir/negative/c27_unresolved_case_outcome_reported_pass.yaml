@@ -1,0 +1,10 @@
+# Falsifying fixture: an executable obligation whose plan case has an `unresolved` runtime outcome did not execute
+# that witness, so the obligation is unresolved and never passes (verdict rule: pass only when every witness case
+# executes and every assertion holds).
+document: verdict
+violates: an_unresolved_obligation_never_yields_a_pass_verdict
+obligation_index: 0
+case_outcomes:
+  create_starts_at_zero: pass
+  erased_identity_not_reused: unresolved
+expected_verdict: unresolved
