@@ -13770,6 +13770,11 @@ DOMAIN_PREDECESSOR_PROJECTION_DIGEST = (
 DOMAIN_PREDECESSOR_COMPOSITION_DIGEST = (
     "592d42c1e1ebf405fe938183ba5879a2332bda0c81caff72741ca8d1dba75c96"
 )
+# Non-domain profiles registered after b6db83d, each by an admitted successor release. They
+# are named one by one, so the predecessor digests above stay exact: adding a profile is an
+# explicit edit here, and changing, removing or reordering a predecessor still fails.
+DOMAIN_010_LATER_PROFILES = frozenset({"l9.projection/technical-coordination@1"})  # v3.39.0
+DOMAIN_010_LATER_COMPOSITIONS = frozenset({"l9.compose/technical-coordination@1"})  # v3.39.0
 DOMAIN_FORBIDDEN_CRITERIA = frozenset({"payload_excludes", "source_authority"})
 DOMAIN_SELECTOR_FILTER = re.compile(
     r'^\$\.(?P<coll>[A-Za-z0-9_-]+)\[\?\(@\.(?P<field>[A-Za-z0-9_-]+)\s*(?P<op>==|contains)\s*"(?P<value>[^"]*)"\)\](?P<rest>(\.[A-Za-z0-9_-]+(\[\*\])?)*)$'
@@ -14396,7 +14401,13 @@ def _rc034_predecessors(docs: dict[str, dict], report: Report) -> None:
         if isinstance(p, dict)
     ]
     if (
-        _rc034_digest([p for p in profiles if p.get("class") != "domain"])
+        _rc034_digest(
+            [
+                p
+                for p in profiles
+                if p.get("class") != "domain" and p.get("id") not in DOMAIN_010_LATER_PROFILES
+            ]
+        )
         != DOMAIN_PREDECESSOR_PROJECTION_DIGEST
     ):
         _rc034_fail(
@@ -14414,7 +14425,12 @@ def _rc034_predecessors(docs: dict[str, dict], report: Report) -> None:
     ]
     if (
         _rc034_digest(
-            [c for c in compositions if c.get("id") not in domain_compositions]
+            [
+                c
+                for c in compositions
+                if c.get("id") not in domain_compositions
+                and c.get("id") not in DOMAIN_010_LATER_COMPOSITIONS
+            ]
         )
         != DOMAIN_PREDECESSOR_COMPOSITION_DIGEST
     ):
