@@ -361,5 +361,30 @@ class RegisterBirthTest(unittest.TestCase):
         self.assertTrue(report.failures)
 
 
+class ChangesOutConfinementTest(unittest.TestCase):
+    """--changes-out may only write a .json file inside a scratch root."""
+
+    def test_temp_path_is_accepted(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "nested" / "registration.json"
+            self.assertEqual(rb.confined_output(str(target)), target.resolve())
+
+    def test_traversal_outside_scratch_roots_is_refused(self) -> None:
+        with self.assertRaises(rb.BirthRegistrationError):
+            rb.confined_output("/etc/passwd.json")
+
+    def test_non_json_name_is_refused(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(rb.BirthRegistrationError):
+                rb.confined_output(str(Path(tmp) / "registration.txt"))
+
+    def test_symlink_is_refused(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            link = Path(tmp) / "registration.json"
+            link.symlink_to("/etc/passwd")
+            with self.assertRaises(rb.BirthRegistrationError):
+                rb.confined_output(str(link))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

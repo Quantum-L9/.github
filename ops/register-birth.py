@@ -33,9 +33,11 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -648,6 +650,31 @@ def apply(args: argparse.Namespace) -> dict[str, Any]:
     return result
 
 
+def confined_output(raw: str) -> Path:
+    """Resolve ``--changes-out`` to a JSON file inside an allowed scratch root.
+
+    The result file is a run artifact, never a repository edit, so it may only
+    land under the runner's temp directory, the system temp directory or the
+    working directory. Anything else (a traversal, an absolute path elsewhere,
+    a symlink or a non-JSON name) is refused before a byte is written.
+    """
+    candidate = Path(raw)
+    if candidate.is_symlink():
+        raise BirthRegistrationError(f"--changes-out must not be a symlink: {raw}")
+    target = candidate.resolve()
+    if target.suffix != ".json":
+        raise BirthRegistrationError(f"--changes-out must name a .json file: {raw}")
+    roots = [Path.cwd().resolve(), Path(tempfile.gettempdir()).resolve()]
+    runner_temp = os.environ.get("RUNNER_TEMP")
+    if runner_temp:
+        roots.append(Path(runner_temp).resolve())
+    if not any(target.is_relative_to(root) for root in roots):
+        raise BirthRegistrationError(
+            f"--changes-out must be inside the working directory or a temp directory: {raw}"
+        )
+    return target
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="register-birth.py", description=__doc__.splitlines()[0]
@@ -699,7 +726,13 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     text = json.dumps(result, indent=2, sort_keys=True)
     if args.changes_out:
-        Path(args.changes_out).write_text(text + "\n", encoding="utf-8")
+        try:
+            out = confined_output(args.changes_out)
+        except BirthRegistrationError as exc:
+            print(f"register-birth: REFUSED: {exc}", file=sys.stderr)
+            return 1
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text + "\n", encoding="utf-8")
     print(text)
     return 0
 
