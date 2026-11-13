@@ -390,9 +390,9 @@ class ChangesOutConfinementTest(unittest.TestCase):
         with self.assertRaises(rb.BirthRegistrationError):
             rb.confined_output(raw)
 
-    def test_non_json_name_is_refused(self) -> None:
+    def test_other_file_name_is_refused(self) -> None:
         with self.assertRaises(rb.BirthRegistrationError):
-            rb.confined_output(str(Path(self._tmp.name) / "birth" / "registration.txt"))
+            rb.confined_output(str(Path(self._tmp.name) / "birth" / "other.json"))
 
     def test_symlink_is_refused(self) -> None:
         birth = Path(self._tmp.name) / "birth"

@@ -656,22 +656,20 @@ def scratch_dir() -> Path:
     return Path(base).resolve() / "birth"
 
 
+CHANGES_OUT_NAME = "registration.json"
+
+
 def confined_output(raw: str) -> Path:
-    """Resolve ``--changes-out`` to a JSON file directly inside ``scratch_dir()``.
+    """Return the one file ``--changes-out`` may name: ``$RUNNER_TEMP/birth/registration.json``.
 
     The result file is a run artifact, never a repository edit. The written path
-    is rebuilt from the trusted scratch directory and the argument's bare file
-    name, and the argument must name exactly that path, so a traversal, any other
-    directory, a symlink or a non-JSON name is refused before a byte is written.
+    is a constant built from the trusted scratch directory; the argument is only
+    compared with it, so any other path (a traversal, another directory or file
+    name, a symlink) is refused before a byte is written.
     """
-    name = os.path.basename(raw)
-    if not name.endswith(".json") or name in {"", ".json"}:
-        raise BirthRegistrationError(f"--changes-out must name a .json file: {raw}")
-    target = scratch_dir() / name
+    target = scratch_dir() / CHANGES_OUT_NAME
     if Path(raw).resolve() != target:
-        raise BirthRegistrationError(
-            f"--changes-out must be a file directly inside {scratch_dir()}: {raw}"
-        )
+        raise BirthRegistrationError(f"--changes-out must be exactly {target}: {raw}")
     if target.is_symlink():
         raise BirthRegistrationError(f"--changes-out must not be a symlink: {raw}")
     return target
