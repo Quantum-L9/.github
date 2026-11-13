@@ -379,20 +379,21 @@ class ChangesOutConfinementTest(unittest.TestCase):
 
     def test_scratch_path_is_accepted(self) -> None:
         target = Path(self._tmp.name) / "birth" / "registration.json"
-        self.assertEqual(rb.confined_output(str(target)), target.resolve())
+        rb.check_changes_out(str(target))
+        self.assertEqual(rb.changes_out_target(), target.resolve())
 
     def test_other_directory_is_refused(self) -> None:
         with self.assertRaises(rb.BirthRegistrationError):
-            rb.confined_output(str(Path(self._tmp.name) / "registration.json"))
+            rb.check_changes_out(str(Path(self._tmp.name) / "registration.json"))
 
     def test_traversal_is_refused(self) -> None:
         raw = str(Path(self._tmp.name) / "birth" / ".." / ".." / "registration.json")
         with self.assertRaises(rb.BirthRegistrationError):
-            rb.confined_output(raw)
+            rb.check_changes_out(raw)
 
     def test_other_file_name_is_refused(self) -> None:
         with self.assertRaises(rb.BirthRegistrationError):
-            rb.confined_output(str(Path(self._tmp.name) / "birth" / "other.json"))
+            rb.check_changes_out(str(Path(self._tmp.name) / "birth" / "other.json"))
 
     def test_symlink_is_refused(self) -> None:
         birth = Path(self._tmp.name) / "birth"
@@ -400,7 +401,7 @@ class ChangesOutConfinementTest(unittest.TestCase):
         link = birth / "registration.json"
         link.symlink_to("/etc/passwd")
         with self.assertRaises(rb.BirthRegistrationError):
-            rb.confined_output(str(link))
+            rb.check_changes_out(str(link))
 
 
 if __name__ == "__main__":

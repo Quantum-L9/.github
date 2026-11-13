@@ -659,20 +659,24 @@ def scratch_dir() -> Path:
 CHANGES_OUT_NAME = "registration.json"
 
 
-def confined_output(raw: str) -> Path:
-    """Return the one file ``--changes-out`` may name: ``$RUNNER_TEMP/birth/registration.json``.
+def changes_out_target() -> Path:
+    """The one file the result may be written to: ``$RUNNER_TEMP/birth/registration.json``."""
+    return scratch_dir() / CHANGES_OUT_NAME
 
-    The result file is a run artifact, never a repository edit. The written path
-    is a constant built from the trusted scratch directory; the argument is only
-    compared with it, so any other path (a traversal, another directory or file
-    name, a symlink) is refused before a byte is written.
+
+def check_changes_out(raw: str) -> None:
+    """Refuse any ``--changes-out`` other than ``changes_out_target()``.
+
+    The result file is a run artifact, never a repository edit. The argument is
+    only compared with the constant target and never used to build the path
+    that is written, so a traversal, another directory or file name, or a
+    symlink is refused before a byte is written.
     """
-    target = scratch_dir() / CHANGES_OUT_NAME
+    target = changes_out_target()
     if Path(raw).resolve() != target:
         raise BirthRegistrationError(f"--changes-out must be exactly {target}: {raw}")
     if target.is_symlink():
         raise BirthRegistrationError(f"--changes-out must not be a symlink: {raw}")
-    return target
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -727,10 +731,11 @@ def main(argv: list[str] | None = None) -> int:
     text = json.dumps(result, indent=2, sort_keys=True)
     if args.changes_out:
         try:
-            out = confined_output(args.changes_out)
+            check_changes_out(args.changes_out)
         except BirthRegistrationError as exc:
             print(f"register-birth: REFUSED: {exc}", file=sys.stderr)
             return 1
+        out = changes_out_target()
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(text + "\n", encoding="utf-8")
     print(text)
