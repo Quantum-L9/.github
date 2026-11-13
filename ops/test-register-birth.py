@@ -11,6 +11,7 @@ from __future__ import annotations
 import copy
 import importlib.util
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -362,28 +363,44 @@ class RegisterBirthTest(unittest.TestCase):
 
 
 class ChangesOutConfinementTest(unittest.TestCase):
-    """--changes-out may only write a .json file inside a scratch root."""
+    """--changes-out may only write a .json file directly inside $RUNNER_TEMP/birth."""
 
-    def test_temp_path_is_accepted(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            target = Path(tmp) / "nested" / "registration.json"
-            self.assertEqual(rb.confined_output(str(target)), target.resolve())
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self._saved = os.environ.get("RUNNER_TEMP")
+        os.environ["RUNNER_TEMP"] = self._tmp.name
 
-    def test_traversal_outside_scratch_roots_is_refused(self) -> None:
+    def tearDown(self) -> None:
+        if self._saved is None:
+            os.environ.pop("RUNNER_TEMP", None)
+        else:
+            os.environ["RUNNER_TEMP"] = self._saved
+        self._tmp.cleanup()
+
+    def test_scratch_path_is_accepted(self) -> None:
+        target = Path(self._tmp.name) / "birth" / "registration.json"
+        self.assertEqual(rb.confined_output(str(target)), target.resolve())
+
+    def test_other_directory_is_refused(self) -> None:
         with self.assertRaises(rb.BirthRegistrationError):
-            rb.confined_output("/etc/passwd.json")
+            rb.confined_output(str(Path(self._tmp.name) / "registration.json"))
+
+    def test_traversal_is_refused(self) -> None:
+        raw = str(Path(self._tmp.name) / "birth" / ".." / ".." / "registration.json")
+        with self.assertRaises(rb.BirthRegistrationError):
+            rb.confined_output(raw)
 
     def test_non_json_name_is_refused(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            with self.assertRaises(rb.BirthRegistrationError):
-                rb.confined_output(str(Path(tmp) / "registration.txt"))
+        with self.assertRaises(rb.BirthRegistrationError):
+            rb.confined_output(str(Path(self._tmp.name) / "birth" / "registration.txt"))
 
     def test_symlink_is_refused(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            link = Path(tmp) / "registration.json"
-            link.symlink_to("/etc/passwd")
-            with self.assertRaises(rb.BirthRegistrationError):
-                rb.confined_output(str(link))
+        birth = Path(self._tmp.name) / "birth"
+        birth.mkdir()
+        link = birth / "registration.json"
+        link.symlink_to("/etc/passwd")
+        with self.assertRaises(rb.BirthRegistrationError):
+            rb.confined_output(str(link))
 
 
 if __name__ == "__main__":

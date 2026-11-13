@@ -650,28 +650,30 @@ def apply(args: argparse.Namespace) -> dict[str, Any]:
     return result
 
 
-def confined_output(raw: str) -> Path:
-    """Resolve ``--changes-out`` to a JSON file inside an allowed scratch root.
+def scratch_dir() -> Path:
+    """The one directory ``--changes-out`` may write into: ``$RUNNER_TEMP/birth``."""
+    base = os.environ.get("RUNNER_TEMP") or tempfile.gettempdir()
+    return Path(base).resolve() / "birth"
 
-    The result file is a run artifact, never a repository edit, so it may only
-    land under the runner's temp directory, the system temp directory or the
-    working directory. Anything else (a traversal, an absolute path elsewhere,
-    a symlink or a non-JSON name) is refused before a byte is written.
+
+def confined_output(raw: str) -> Path:
+    """Resolve ``--changes-out`` to a JSON file directly inside ``scratch_dir()``.
+
+    The result file is a run artifact, never a repository edit. The written path
+    is rebuilt from the trusted scratch directory and the argument's bare file
+    name, and the argument must name exactly that path, so a traversal, any other
+    directory, a symlink or a non-JSON name is refused before a byte is written.
     """
-    candidate = Path(raw)
-    if candidate.is_symlink():
-        raise BirthRegistrationError(f"--changes-out must not be a symlink: {raw}")
-    target = candidate.resolve()
-    if target.suffix != ".json":
+    name = os.path.basename(raw)
+    if not name.endswith(".json") or name in {"", ".json"}:
         raise BirthRegistrationError(f"--changes-out must name a .json file: {raw}")
-    roots = [Path.cwd().resolve(), Path(tempfile.gettempdir()).resolve()]
-    runner_temp = os.environ.get("RUNNER_TEMP")
-    if runner_temp:
-        roots.append(Path(runner_temp).resolve())
-    if not any(target.is_relative_to(root) for root in roots):
+    target = scratch_dir() / name
+    if Path(raw).resolve() != target:
         raise BirthRegistrationError(
-            f"--changes-out must be inside the working directory or a temp directory: {raw}"
+            f"--changes-out must be a file directly inside {scratch_dir()}: {raw}"
         )
+    if target.is_symlink():
+        raise BirthRegistrationError(f"--changes-out must not be a symlink: {raw}")
     return target
 
 
