@@ -5958,6 +5958,122 @@ RC023_REPOSITORIES = {
     "l9-wip": "l9-wip",
 }
 RC023_REPOSITORY_COUNT = 33
+# v3.42.0 (ADR-039): a factory-born entry. The census above stays a pin for the
+# repositories admitted before the factory existed. An entry that carries
+# `birth_provenance` is admitted by the merge of the reviewable PR that
+# `ops/register-birth.py` opens from the factory's attested birth record, so it
+# is checked by shape instead of by a second hand-maintained pin: its id is a
+# function of its coordinate, its provenance names the factory, the receipt
+# schema, the receipt digest and the commits the receipt binds. Provenance is
+# evidence of what the factory produced and confers no authority
+# (L9-EVIDENCE-001); a pinned entry never carries it.
+RC023_FACTORY = "Quantum-L9/l9-repo-template"
+RC023_FACTORY_RECEIPT_SCHEMA = "l9.birth-receipt/v1"
+RC023_FACTORY_PROVENANCE_KEYS = (
+    "factory",
+    "receipt_schema",
+    "receipt_digest",
+    "root_commit",
+    "template_sha",
+    "template_version",
+    "org_policy_sha",
+    "birth_profile",
+    "born_at",
+)
+RC023_FACTORY_ENTRY_KEYS = (
+    "id",
+    "coordinate",
+    "lifecycle",
+    "class_ref",
+    "birth_provenance",
+)
+_RC023_REPOSITORY_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}")
+_RC023_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+_RC023_SHA = re.compile(r"[0-9a-f]{40}")
+_RC023_RECEIPT_DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
+_RC023_PROFILE = re.compile(r"[a-z0-9][a-z0-9_]*")
+
+
+def rc023_factory_repository_id(repository: object) -> str | None:
+    """The registry id of a factory-born repository: a function of its name.
+
+    Lowercase, with every run of `.`, `_` and `-` folded to one `-`. None when
+    the name is not a GitHub repository name or yields no such id, so a
+    free-form id can never be proposed.
+    """
+    if not isinstance(repository, str) or not _RC023_REPOSITORY_NAME.fullmatch(
+        repository
+    ):
+        return None
+    rid = re.sub(r"[._-]+", "-", repository.lower()).strip("-")
+    return rid if _RC023_ID.fullmatch(rid) else None
+
+
+def _rc023_is_sha(value: object) -> bool:
+    return isinstance(value, str) and bool(_RC023_SHA.fullmatch(value))
+
+
+def _rc023_is_text(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+RC023_FACTORY_PROVENANCE_RULES = (
+    ("factory", lambda v: v == RC023_FACTORY, f"must be {RC023_FACTORY}"),
+    (
+        "receipt_schema",
+        lambda v: v == RC023_FACTORY_RECEIPT_SCHEMA,
+        f"must be {RC023_FACTORY_RECEIPT_SCHEMA}",
+    ),
+    (
+        "receipt_digest",
+        lambda v: isinstance(v, str) and bool(_RC023_RECEIPT_DIGEST.fullmatch(v)),
+        "must be sha256:<64 hex>",
+    ),
+    ("root_commit", _rc023_is_sha, "must be a 40-hex commit sha"),
+    ("template_sha", _rc023_is_sha, "must be a 40-hex commit sha"),
+    ("template_version", _rc023_is_text, "must be a non-empty string"),
+    ("org_policy_sha", _rc023_is_sha, "must be a 40-hex commit sha"),
+    (
+        "birth_profile",
+        lambda v: isinstance(v, str) and bool(_RC023_PROFILE.fullmatch(v)),
+        "must be a birth profile name",
+    ),
+    ("born_at", _rc023_is_text, "must be a non-empty string"),
+)
+
+
+def rc023_factory_entry_problems(entry: object) -> list[str]:
+    """Every way an entry fails the factory-born shape; empty when it holds.
+
+    Lifecycle, class and duplicate rules are the registry-wide RC-023 checks
+    and apply to this entry as to every other one.
+    """
+    if not isinstance(entry, dict):
+        return ["entry must be a mapping"]
+    problems = [
+        f"unexpected key {key}"
+        for key in sorted(set(entry) - set(RC023_FACTORY_ENTRY_KEYS))
+    ]
+    coordinate = entry.get("coordinate")
+    repository = coordinate.get("repository") if isinstance(coordinate, dict) else None
+    expected_id = rc023_factory_repository_id(repository)
+    if expected_id is None:
+        problems.append(
+            f"coordinate.repository {repository!r} is not a repository name"
+        )
+    elif entry.get("id") != expected_id:
+        problems.append(f"id must be {expected_id!r} for {repository!r}")
+    provenance = entry.get("birth_provenance")
+    if not isinstance(provenance, dict):
+        return [*problems, "birth_provenance must be a mapping"]
+    for key in sorted(set(RC023_FACTORY_PROVENANCE_KEYS) - set(provenance)):
+        problems.append(f"birth_provenance.{key} is missing")
+    for key in sorted(set(provenance) - set(RC023_FACTORY_PROVENANCE_KEYS)):
+        problems.append(f"birth_provenance.{key} is not a provenance field")
+    for key, holds, message in RC023_FACTORY_PROVENANCE_RULES:
+        if key in provenance and not holds(provenance[key]):
+            problems.append(f"birth_provenance.{key} {message}")
+    return problems
 
 
 def _rc023_fail(
@@ -6154,14 +6270,21 @@ def _evaluate_rc023_registry(docs: dict[str, dict], report: Report) -> None:
             report,
         )
         return
-    if len(repositories) != RC023_REPOSITORY_COUNT:
+    pinned_count = sum(
+        1
+        for entry in repositories
+        if not (isinstance(entry, dict) and "birth_provenance" in entry)
+    )
+    if pinned_count != RC023_REPOSITORY_COUNT:
         _rc023_fail(
             path,
             "repositories",
-            len(repositories),
-            f"exactly {RC023_REPOSITORY_COUNT} repositories are admitted",
+            pinned_count,
+            f"exactly {RC023_REPOSITORY_COUNT} pinned repositories are admitted "
+            "(factory-born entries are counted apart)",
             report,
         )
+    factory_ids: set[str] = set()
     seen_ids: dict[str, int] = {}
     seen_coordinates: dict[tuple[str, str, str], int] = {}
     for index, entry in enumerate(repositories):
@@ -6179,6 +6302,24 @@ def _evaluate_rc023_registry(docs: dict[str, dict], report: Report) -> None:
             continue
         field = f"repositories[{rid}]"
         seen_ids[rid] = seen_ids.get(rid, 0) + 1
+        if "birth_provenance" in entry:
+            factory_ids.add(rid)
+            if rid in RC023_REPOSITORIES:
+                _rc023_fail(
+                    path,
+                    f"{field}.birth_provenance",
+                    rid,
+                    "a pinned repository never carries factory birth provenance",
+                    report,
+                )
+            for problem in rc023_factory_entry_problems(entry):
+                _rc023_fail(
+                    path,
+                    f"{field}.birth_provenance",
+                    rid,
+                    f"factory-born entry: {problem}",
+                    report,
+                )
         coordinate = entry.get("coordinate")
         if not isinstance(coordinate, dict):
             _rc023_fail(
@@ -6246,7 +6387,7 @@ def _evaluate_rc023_registry(docs: dict[str, dict], report: Report) -> None:
                 "repository id is registered more than once",
                 report,
             )
-        if rid not in RC023_REPOSITORIES:
+        if rid not in RC023_REPOSITORIES and rid not in factory_ids:
             _rc023_fail(
                 path,
                 f"repositories[{rid}].id",
@@ -6623,6 +6764,110 @@ def _check_rc023_negative_cases(docs: dict[str, dict], report: Report) -> None:
     case, _, registry = mutated()
     del registry["repositories"][0]["id"]
     add("repository id missing", case, rp, "repositories[0].id")
+    # Factory-born entries (ADR-039). The positive shape is proven by
+    # ops/test-register-birth.py; each mutation below must fail closed.
+    factory_entry = {
+        "id": "l9-fixture-node",
+        "coordinate": {
+            "provider": RC023_PROVIDER,
+            "organization": RC023_ORGANIZATION,
+            "repository": "l9-fixture-node",
+        },
+        "lifecycle": "current",
+        "class_ref": RC023_CLASS_ID,
+        "birth_provenance": {
+            "factory": RC023_FACTORY,
+            "receipt_schema": RC023_FACTORY_RECEIPT_SCHEMA,
+            "receipt_digest": "sha256:" + "a" * 64,
+            "root_commit": "b" * 40,
+            "template_sha": "c" * 40,
+            "template_version": "2.1.0",
+            "org_policy_sha": "d" * 40,
+            "birth_profile": "org_seeded_self_governed",
+            "born_at": "2026-11-13T00:00:00Z",
+        },
+    }
+    factory_field = "repositories[l9-fixture-node].birth_provenance"
+    for label, mutate in (
+        (
+            "factory entry names another factory",
+            lambda e: e["birth_provenance"].update(factory="Quantum-L9/l9-fork"),
+        ),
+        (
+            "factory entry receipt digest malformed",
+            lambda e: e["birth_provenance"].update(receipt_digest="a" * 64),
+        ),
+        (
+            "factory entry receipt schema wrong",
+            lambda e: e["birth_provenance"].update(
+                receipt_schema="l9.birth-receipt/v2"
+            ),
+        ),
+        (
+            "factory entry root commit malformed",
+            lambda e: e["birth_provenance"].update(root_commit="HEAD"),
+        ),
+        (
+            "factory entry provenance key missing",
+            lambda e: e["birth_provenance"].pop("template_sha"),
+        ),
+        (
+            "factory entry unknown provenance key",
+            lambda e: e["birth_provenance"].update(operator="igor"),
+        ),
+        (
+            "factory entry provenance not a mapping",
+            lambda e: e.update(birth_provenance="sha256:abc"),
+        ),
+        ("factory entry free-form id", lambda e: e.update(id="fixture")),
+        ("factory entry unknown key", lambda e: e.update(product_admitted=True)),
+    ):
+        case, _, registry = mutated()
+        candidate_entry = copy.deepcopy(factory_entry)
+        mutate(candidate_entry)
+        field_rid = candidate_entry["id"]
+        registry["repositories"].append(candidate_entry)
+        add(label, case, rp, factory_field.replace("l9-fixture-node", field_rid))
+    case, _, registry = mutated()
+    entry(registry, "l9-goose")["birth_provenance"] = copy.deepcopy(
+        factory_entry["birth_provenance"]
+    )
+    add(
+        "pinned entry claims factory provenance",
+        case,
+        rp,
+        "repositories[l9-goose].birth_provenance",
+    )
+    for label, key, value, field_name in (
+        (
+            "factory entry not current",
+            "lifecycle",
+            "retired",
+            "repositories[l9-fixture-node].lifecycle",
+        ),
+        (
+            "factory entry wrong class",
+            "class_ref",
+            "l9.repository-class/external-fork@1",
+            "repositories[l9-fixture-node].class_ref",
+        ),
+    ):
+        case, _, registry = mutated()
+        candidate_entry = copy.deepcopy(factory_entry)
+        candidate_entry[key] = value
+        registry["repositories"].append(candidate_entry)
+        add(label, case, rp, field_name)
+    case, _, registry = mutated()
+    candidate_entry = copy.deepcopy(factory_entry)
+    candidate_entry["id"] = "l9-deploy"
+    candidate_entry["coordinate"]["repository"] = "l9-deploy"
+    registry["repositories"].append(candidate_entry)
+    add(
+        "factory entry re-registers a pinned repository",
+        case,
+        rp,
+        "repositories[l9-deploy].birth_provenance",
+    )
     for label, candidate, case_path, field_name in cases:
         candidate_report = Report()
         try:

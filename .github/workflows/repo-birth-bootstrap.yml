@@ -317,3 +317,190 @@ jobs:
               client_payload,
             });
             core.notice(`dispatched repo_created for ${context.repo.owner}/${repository} (auto-seed-new-repo.yml)`);
+
+  # REGISTER at birth (ADR-039): turn the newborn's attested birth record into
+  # one reviewable repository-registry PR on this repository. The entry is
+  # derived only from the factory's receipt, root commit and integrity
+  # verifier (ops/register-birth.py), never from operator input; the owner's
+  # merge of that exact entry is the admission decision, and this job never
+  # merges. Runs only after a passing, non-dry-run attestation.
+  register:
+    needs: bootstrap
+    if: ${{ success() && inputs.dry_run != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: governance-distribution
+    concurrency:
+      group: birth-registry
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: |
+          pip install --only-binary=:all: "pyyaml==6.0.2"
+
+      - name: Clone the newborn and the factory (full history)
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          TARGET_REPO: ${{ inputs.target_repo || github.event.client_payload.repository || '' }}
+        run: |
+          set -euo pipefail
+          if ! [[ "${TARGET_REPO}" =~ ^[A-Za-z0-9._-]{1,100}$ ]]; then
+            echo "::error::invalid repository name '${TARGET_REPO}'"
+            exit 1
+          fi
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "${GH_TOKEN}" | base64 -w0)"
+          echo "::add-mask::${auth#AUTHORIZATION: basic }"
+          mkdir -p "${RUNNER_TEMP}/birth"
+          # Full clones: the root commit and the factory history are the evidence.
+          git -c "http.https://github.com/.extraheader=${auth}" clone --quiet \
+            "https://github.com/Quantum-L9/${TARGET_REPO}.git" "${RUNNER_TEMP}/birth/newborn"
+          git -c "http.https://github.com/.extraheader=${auth}" clone --quiet \
+            "https://github.com/Quantum-L9/l9-repo-template.git" "${RUNNER_TEMP}/birth/template"
+
+      - name: Verify the birth and render the registration
+        env:
+          TARGET_REPO: ${{ inputs.target_repo || github.event.client_payload.repository || '' }}
+        run: |
+          set -euo pipefail
+          python3 ops/register-birth.py apply \
+            --newborn "${RUNNER_TEMP}/birth/newborn" \
+            --template "${RUNNER_TEMP}/birth/template" \
+            --repository "${TARGET_REPO}" \
+            --checkout "${GITHUB_WORKSPACE}" \
+            --changes-out "${RUNNER_TEMP}/birth/registration.json"
+
+      - name: Open or update the registration PR
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        env:
+          RESULT_PATH: ${{ runner.temp }}/birth/registration.json
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const { execFileSync } = require('child_process');
+            const result = JSON.parse(fs.readFileSync(process.env.RESULT_PATH, 'utf8'));
+            const { owner, repo } = context.repo;
+            const base = process.env.BASE_BRANCH;
+            const entry = result.entry;
+            const target = entry.coordinate.repository;
+            if (result.status === 'present') {
+              core.notice(`${owner}/${target} is already registered on ${base}; nothing to do`);
+              return;
+            }
+            if (result.status !== 'added' || !result.changed_paths.length) {
+              core.setFailed(`unexpected registration result ${JSON.stringify(result.status)}`);
+              return;
+            }
+            const branch = `birth-registry/${target}`;
+            const subject = `chore(registry): register factory-born ${owner}/${target}`;
+            const baseSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+            const baseCommit = await github.rest.git.getCommit({ owner, repo, commit_sha: baseSha });
+
+            let branchSha = null;
+            try {
+              const ref = await github.rest.git.getRef({ owner, repo, ref: `heads/${branch}` });
+              branchSha = ref.data.object.sha;
+            } catch (e) {
+              if (e.status !== 404) throw e;
+            }
+            // Never discard work the registrar did not author: every commit the
+            // branch carries beyond the base must be a registration commit.
+            if (branchSha) {
+              const cmp = await github.rest.repos.compareCommitsWithBasehead({
+                owner, repo, basehead: `${baseSha}...${branchSha}`,
+              });
+              const foreign = cmp.data.commits.filter(
+                (c) => !c.commit.message.startsWith(subject),
+              );
+              if (foreign.length) {
+                core.setFailed(
+                  `${branch} carries ${foreign.length} commit(s) the registrar did not author; ` +
+                  'refusing to rewrite it — resolve that PR by hand',
+                );
+                return;
+              }
+            }
+
+            const tree = await github.rest.git.createTree({
+              owner, repo,
+              base_tree: baseCommit.data.tree.sha,
+              tree: result.changed_paths.map((path) => ({
+                path, mode: '100644', type: 'blob',
+                content: fs.readFileSync(path, 'utf8'),
+              })),
+            });
+            let unchanged = false;
+            if (branchSha) {
+              const head = await github.rest.git.getCommit({ owner, repo, commit_sha: branchSha });
+              unchanged = head.data.tree.sha === tree.data.sha;
+            }
+            if (unchanged) {
+              core.notice(`${branch} already carries this registration`);
+            } else {
+              const prov = entry.birth_provenance;
+              const message = [
+                subject,
+                '',
+                `Entry ${entry.id} (${entry.class_ref}, lifecycle ${entry.lifecycle}),`,
+                `release ${result.release}, from factory receipt ${prov.receipt_digest}`,
+                `(root commit ${prov.root_commit}, template ${prov.template_sha}).`,
+              ].join('\n');
+              // A stale branch is advanced by a merge commit over the current
+              // base, never force-pushed: its tree is the registration
+              // recomputed on base.
+              const commit = await github.rest.git.createCommit({
+                owner, repo, message, tree: tree.data.sha,
+                parents: branchSha ? [branchSha, baseSha] : [baseSha],
+              });
+              if (branchSha) {
+                await github.rest.git.updateRef({
+                  owner, repo, ref: `heads/${branch}`, sha: commit.data.sha, force: false,
+                });
+              } else {
+                await github.rest.git.createRef({
+                  owner, repo, ref: `refs/heads/${branch}`, sha: commit.data.sha,
+                });
+              }
+            }
+
+            const prov = entry.birth_provenance;
+            const body = [
+              `Registers factory-born \`${owner}/${target}\` in \`semantics/repository_registry.yaml\` (ADR-039).`,
+              '',
+              '| Field | Value |',
+              '| --- | --- |',
+              `| id | \`${entry.id}\` |`,
+              `| class_ref | \`${entry.class_ref}\` |`,
+              `| lifecycle | \`${entry.lifecycle}\` |`,
+              ...Object.entries(prov).map(([k, v]) => `| birth_provenance.${k} | \`${v}\` |`),
+              `| release record | \`docs/semantic-foundation/${result.release}/\` |`,
+              '',
+              'Derived only from the newborn\'s committed `.l9/birth-receipt.json`, its root commit and the',
+              'factory\'s `verify_birth_integrity.py --require-receipt` at the template commit the receipt names',
+              '(`ops/register-birth.py`). The semantic validator passed on this tree before the PR was opened.',
+              '',
+              'Registration is repository identity and RepositoryClass assignment only — not product admission.',
+              'Merging this exact entry is the admission decision. This workflow never merges.',
+            ].join('\n');
+            const open = await github.rest.pulls.list({
+              owner, repo, state: 'open', head: `${owner}:${branch}`, base,
+            });
+            if (open.data.length) {
+              await github.rest.pulls.update({ owner, repo, pull_number: open.data[0].number, body });
+              core.notice(`updated ${open.data[0].html_url}`);
+            } else {
+              const pr = await github.rest.pulls.create({
+                owner, repo, head: branch, base, title: subject, body,
+              });
+              core.notice(`opened ${pr.data.html_url}`);
+            }
