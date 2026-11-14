@@ -57,6 +57,7 @@ else
     ops/test-continuous-sync-branch-guard.js \
     ops/test-distribution-triggers.js \
     ops/test-governance-pr-body.js \
+    ops/test-birth-registry-workflow.js \
     ops/test-governance-report.js; do
     if node "$t"; then
       echo "✅ $t"
@@ -67,6 +68,16 @@ else
     fi
   done
   echo ""
+fi
+
+# Factory-born repository registration (ADR-039): the real tool against
+# fixture births and a copy of this tree (needs git and python3 with PyYAML).
+if python3 ops/test-register-birth.py; then
+  echo "✅ ops/test-register-birth.py"
+  PASS=$((PASS+1))
+else
+  echo "❌ ops/test-register-birth.py"
+  FAIL=$((FAIL+1))
 fi
 
 if bash ops/test-sync-org-files.sh; then

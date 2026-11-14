@@ -73,6 +73,33 @@ repository_lifecycle:
     Repository retained for historical resolution but no longer a current
     operational source. Class-defined historical obligations may continue to
     apply.
+factory_born_entries:
+  decision_record: ADR-039
+  identification: >
+    An entry carrying birth_provenance was registered from the factory's
+    attested birth record by ops/register-birth.py, which opens a reviewable
+    pull request; the owner's merge of that exact entry is the admission
+    decision. birth_provenance is evidence of what the factory produced. It
+    confers no authority, does not admit a product, and does not imply a
+    RepositoryClass.
+  id_rule: >
+    The id is the repository name lowercased with every run of '.', '_' and
+    '-' folded to one '-'. It is never typed.
+  lifecycle_at_registration: current
+  class_ref_rule: >
+    The single current admitted RepositoryClass. If the class catalog admits
+    more than one current class, registration fails closed.
+  birth_provenance_fields:
+    factory: Quantum-L9/l9-repo-template
+    receipt_schema: l9.birth-receipt/v1
+    receipt_digest: sha256 digest recorded in the newborn's .l9/birth-receipt.json
+    root_commit: the newborn's single root commit, whose trailers carry the digest
+    template_sha: the factory commit the repository was born from
+    template_version: the factory version recorded at that commit
+    org_policy_sha: the Quantum-L9/.github commit the birth applied
+    birth_profile: the birth profile (policies/repo-classes.yml), not a RepositoryClass
+    born_at: the receipt's birth timestamp
+  pinned_entries_never_carry_birth_provenance: true
 repositories:
   - id: dot-github
     coordinate:
