@@ -43,12 +43,15 @@ updates:
     cooldown:
       default-days: 7
     ignore:
+      - dependency-name: "bandit"
       - dependency-name: "mypy"
       - dependency-name: "pip"
+      - dependency-name: "pip-audit"
       - dependency-name: "pre-commit"
       - dependency-name: "pytest"
       - dependency-name: "ruff"
       - dependency-name: "semgrep"
+      - dependency-name: "uv"
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
     groups:
