@@ -203,9 +203,12 @@ function assertPassesPrGates(body) {
 		);
 		return m ? m[1] : "";
 	};
-	const problem = section("Problem")
-		.replace(/<!--[\s\S]*?-->/g, "")
-		.trim();
+	// The generated body carries no HTML comments, so the Problem text is checked as is.
+	assert.ok(
+		!body.includes("<!" + "--"),
+		"registration body carries no HTML comments",
+	);
+	const problem = section("Problem").trim();
 	assert.ok(problem.length >= 30, "pr-gates: Problem section too short");
 	const risk = [...section("Risk").matchAll(/^\s*-\s*\[([ xX])\]/gm)].filter(
 		(m) => m[1] !== " ",
