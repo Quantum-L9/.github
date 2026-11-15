@@ -47,7 +47,7 @@ const code = text
 		return m ? [m[1]] : [];
 	});
 	assert.deepStrictEqual(
-		events.sort(),
+		events.sort((a, b) => a.localeCompare(b)),
 		["schedule", "workflow_dispatch"],
 		`${FILE}: triggers must be workflow_dispatch and schedule only`,
 	);
