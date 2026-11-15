@@ -78,12 +78,14 @@ jobs:
           base="${RUNNER_TEMP}/admission"
           mkdir -p "${base}"
           clone() {
-            git -c "http.https://github.com/.extraheader=${auth}" clone --quiet "https://github.com/$1.git" "$2"
+            local repo="$1" dest="$2"
+            git -c "http.https://github.com/.extraheader=${auth}" clone --quiet "https://github.com/${repo}.git" "${dest}"
           }
           at() {
-            git -C "$1" -c "http.https://github.com/.extraheader=${auth}" fetch --quiet --depth 1 origin "$2"
-            git -C "$1" checkout --quiet --detach FETCH_HEAD
-            test "$(git -C "$1" rev-parse HEAD)" = "$2" || { echo "::error::$1 is not at $2"; exit 1; }
+            local dir="$1" rev="$2"
+            git -C "${dir}" -c "http.https://github.com/.extraheader=${auth}" fetch --quiet --depth 1 origin "${rev}"
+            git -C "${dir}" checkout --quiet --detach FETCH_HEAD
+            test "$(git -C "${dir}" rev-parse HEAD)" = "${rev}" || { echo "::error::${dir} is not at ${rev}"; exit 1; }
           }
           clone "Quantum-L9/${TARGET_REPO}" "${base}/newborn"
           clone "Quantum-L9/l9-repo-template" "${base}/template"

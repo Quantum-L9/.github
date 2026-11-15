@@ -73,6 +73,40 @@ class AdmissionRefused(RuntimeError):
     """Admission cannot proceed (exit 1)."""
 
 
+def _allowed_roots() -> list[str]:
+    roots = [Path.cwd().resolve(), Path(tempfile.gettempdir()).resolve()]
+    runner_temp = os.environ.get("RUNNER_TEMP")
+    if runner_temp:
+        roots.append(Path(runner_temp).resolve())
+    return [str(r) for r in roots]
+
+
+def _input_path(raw: Path, label: str, *, directory: bool = False) -> Path:
+    """A CLI-supplied path, resolved and confined to the working or temp directory."""
+    resolved = os.path.realpath(raw)
+    if not any(
+        os.path.commonpath([root, resolved]) == root for root in _allowed_roots()
+    ):
+        raise AdmissionInputError(
+            f"{label} must be inside the working directory or the runner temp directory"
+        )
+    target = Path(resolved)
+    if not (target.is_dir() if directory else target.is_file()):
+        raise AdmissionInputError(
+            f"{label} is not an existing {'directory' if directory else 'file'}"
+        )
+    return target
+
+
+def _confined(root: Path, relative: str, label: str) -> Path:
+    """root/relative, refused when it resolves outside root."""
+    base = os.path.realpath(root)
+    target = os.path.realpath(os.path.join(base, relative))
+    if os.path.commonpath([base, target]) != base:
+        raise AdmissionInputError(f"{label} {relative} escapes {base}")
+    return Path(target)
+
+
 def _load_yaml(path: Path, label: str) -> Any:
     try:
         return yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -124,94 +158,46 @@ def ledger_entries(checkout: Path) -> list[dict[str, Any]]:
     return entries
 
 
-def check(
-    *, candidates: list[dict[str, Any]], catalog: Path, admitted: list[dict[str, Any]]
+def _gap(
+    candidate: dict[str, Any], code: str, detail: str, **extra: Any
 ) -> dict[str, Any]:
-    """Every gap of every candidate, and the coordinates of the admissible ones."""
+    return {
+        "conformance_class": candidate.get("conformance_class"),
+        "profile_ref": candidate.get("profile_ref"),
+        "code": code,
+        "detail": detail,
+        **extra,
+    }
+
+
+def _catalog_listing(catalog: Path) -> dict[Any, dict[str, Any]]:
     index = _load_yaml(catalog / CATALOG_INDEX, f"l9-conformance {CATALOG_INDEX}")
-    listed = {
+    return {
         e.get("id"): e
         for e in (index or {}).get("profiles") or []
         if isinstance(e, dict)
     }
-    by_id = {e.get("id"): e for e in admitted if isinstance(e, dict)}
-    gaps: list[dict[str, Any]] = []
-    admissible: list[dict[str, Any]] = []
-    present: list[str] = []
 
-    def gap(candidate: dict[str, Any], code: str, detail: str, **extra: Any) -> None:
+
+def _underspecified_gaps(
+    candidate: dict[str, Any], profile: dict[str, Any]
+) -> list[dict[str, Any]]:
+    gaps = []
+    if not profile.get("membership"):
         gaps.append(
-            {
-                "conformance_class": candidate.get("conformance_class"),
-                "profile_ref": candidate.get("profile_ref"),
-                "code": code,
-                "detail": detail,
-                **extra,
-            }
+            _gap(
+                candidate,
+                "membership_empty",
+                f"{candidate.get('profile_ref')} names no member fixture",
+            )
         )
-
-    for candidate in candidates:
-        cls, ref, scope = (
-            candidate.get("conformance_class"),
-            candidate.get("profile_ref"),
-            candidate.get("scope"),
-        )
-        if not isinstance(ref, str) or not ref:
-            gap(
-                candidate,
-                "identity_undeclared",
-                f"the product declares no profile for class {cls}",
-            )
-            continue
-        entry = listed.get(ref)
-        if entry is None or not isinstance(entry.get("path"), str):
-            gap(
-                candidate,
-                "not_in_catalog",
-                f"{ref} is not in {CATALOG_REPOSITORY} {CATALOG_INDEX}",
-            )
-            continue
-        path = catalog / entry["path"]
-        try:
-            observed = _sha256(path)
-        except OSError as exc:
-            raise AdmissionInputError(
-                f"catalog profile {entry['path']} unreadable: {exc}"
-            ) from exc
-        if observed != entry.get("digest"):
-            gap(
-                candidate,
-                "digest_mismatch",
-                f"{entry['path']} is {observed}, INDEX says {entry.get('digest')}",
-            )
-            continue
-        profile = _load_yaml(path, f"catalog profile {entry['path']}")
-        if not isinstance(profile, dict):
-            raise AdmissionInputError(
-                f"catalog profile {entry['path']} is not a mapping"
-            )
-        if profile.get("id") != ref or profile.get("conformance_class") != cls:
-            gap(
-                candidate,
-                "shape_mismatch",
-                f"{entry['path']} declares {profile.get('id')} / class {profile.get('conformance_class')}",
-            )
-            continue
-        if profile.get("scope") != scope:
-            gap(
-                candidate,
-                "scope_mismatch",
-                f"{entry['path']} scope {profile.get('scope')} is not the product's {scope}",
-            )
-            continue
-        if not profile.get("membership"):
-            gap(candidate, "membership_empty", f"{ref} names no member fixture")
-        unresolved = [u for u in profile.get("unresolved") or [] if isinstance(u, dict)]
-        for unknown in unresolved:
-            gap(
+    for unknown in (u for u in profile.get("unresolved") or [] if isinstance(u, dict)):
+        statement = " ".join(str(unknown.get("statement", "")).split())
+        gaps.append(
+            _gap(
                 candidate,
                 "underspecified",
-                f"{unknown.get('id')} ({unknown.get('kind')}): {' '.join(str(unknown.get('statement', '')).split())}",
+                f"{unknown.get('id')} ({unknown.get('kind')}): {statement}",
                 unknown_id=unknown.get("id"),
                 unknown_kind=unknown.get("kind"),
                 resolution_requires=" ".join(
@@ -219,27 +205,101 @@ def check(
                 )
                 or None,
             )
-        if not profile.get("membership") or unresolved:
+        )
+    return gaps
+
+
+def _evaluate_candidate(
+    candidate: dict[str, Any], catalog: Path, listed: dict[Any, dict[str, Any]]
+) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:
+    """(gaps, coordinate). The coordinate is set only when there are no gaps."""
+    cls, ref, scope = (
+        candidate.get("conformance_class"),
+        candidate.get("profile_ref"),
+        candidate.get("scope"),
+    )
+    if not isinstance(ref, str) or not ref:
+        return [
+            _gap(
+                candidate,
+                "identity_undeclared",
+                f"the product declares no profile for class {cls}",
+            )
+        ], None
+    entry = listed.get(ref)
+    if entry is None or not isinstance(entry.get("path"), str):
+        return [
+            _gap(
+                candidate,
+                "not_in_catalog",
+                f"{ref} is not in {CATALOG_REPOSITORY} {CATALOG_INDEX}",
+            )
+        ], None
+    path = _confined(catalog, entry["path"], "catalog profile")
+    try:
+        observed = _sha256(path)
+    except OSError as exc:
+        raise AdmissionInputError(
+            f"catalog profile {entry['path']} unreadable: {exc}"
+        ) from exc
+    if observed != entry.get("digest"):
+        return [
+            _gap(
+                candidate,
+                "digest_mismatch",
+                f"{entry['path']} is {observed}, INDEX says {entry.get('digest')}",
+            )
+        ], None
+    profile = _load_yaml(path, f"catalog profile {entry['path']}")
+    if not isinstance(profile, dict):
+        raise AdmissionInputError(f"catalog profile {entry['path']} is not a mapping")
+    if profile.get("id") != ref or profile.get("conformance_class") != cls:
+        detail = f"{entry['path']} declares {profile.get('id')} / class {profile.get('conformance_class')}"
+        return [_gap(candidate, "shape_mismatch", detail)], None
+    if profile.get("scope") != scope:
+        detail = (
+            f"{entry['path']} scope {profile.get('scope')} is not the product's {scope}"
+        )
+        return [_gap(candidate, "scope_mismatch", detail)], None
+    gaps = _underspecified_gaps(candidate, profile)
+    if gaps:
+        return gaps, None
+    return [], {
+        "id": ref,
+        "conformance_class": cls,
+        "distribution_repository": CATALOG_REPOSITORY,
+        "distribution_path": entry["path"],
+        "digest": observed,
+    }
+
+
+def check(
+    *, candidates: list[dict[str, Any]], catalog: Path, admitted: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Every gap of every candidate, and the coordinates of the admissible ones."""
+    listed = _catalog_listing(catalog)
+    by_id = {e.get("id"): e for e in admitted if isinstance(e, dict)}
+    gaps: list[dict[str, Any]] = []
+    admissible: list[dict[str, Any]] = []
+    present: list[str] = []
+    for candidate in candidates:
+        found, coordinate = _evaluate_candidate(candidate, catalog, listed)
+        gaps.extend(found)
+        if coordinate is None:
             continue
-        coordinate = {
-            "id": ref,
-            "conformance_class": cls,
-            "distribution_repository": CATALOG_REPOSITORY,
-            "distribution_path": entry["path"],
-            "digest": observed,
-        }
-        prior = by_id.get(ref)
-        if prior is not None:
-            if prior.get("digest") != observed:
-                gap(
+        prior = by_id.get(coordinate["id"])
+        if prior is None:
+            admissible.append(coordinate)
+        elif prior.get("digest") != coordinate["digest"]:
+            gaps.append(
+                _gap(
                     candidate,
                     "admitted_profile_changed",
-                    f"{ref} is admitted at {prior.get('digest')}; a changed body needs a new profile version",
+                    f"{coordinate['id']} is admitted at {prior.get('digest')}; a changed body needs a new profile version",
                 )
-            else:
-                present.append(ref)
-            continue
-        admissible.append(coordinate)
+            )
+        else:
+            present.append(coordinate["id"])
     return {
         "status": "admissible" if not gaps else "refused",
         "gaps": gaps,
@@ -483,6 +543,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if not SHA_RE.match(args.catalog_revision):
             raise AdmissionInputError("--catalog-revision must be a full 40-hex commit")
+        args.requirements = _input_path(args.requirements, "--requirements")
+        args.catalog = _input_path(args.catalog, "--catalog", directory=True)
+        args.checkout = _input_path(args.checkout, "--checkout", directory=True)
         if args.cmd == "check":
             product_ref, candidates = load_candidates(args.requirements)
             report = check(

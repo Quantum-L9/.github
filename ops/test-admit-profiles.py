@@ -226,14 +226,38 @@ class ApplyTests(unittest.TestCase):
 
     def test_apply_refuses_an_underspecified_profile_and_writes_nothing(self) -> None:
         before = (self.checkout / ap.LEDGER_PATH).read_text()
+        requirements = make_requirements(self.tmp, ALL)
+        catalog = make_catalog(self.tmp, unresolved=True)
         with self.assertRaises(ap.AdmissionRefused):
             ap.apply(
-                requirements=make_requirements(self.tmp, ALL),
-                catalog=make_catalog(self.tmp, unresolved=True),
+                requirements=requirements,
+                catalog=catalog,
                 catalog_revision=REVISION,
                 checkout=self.checkout,
             )
         self.assertEqual((self.checkout / ap.LEDGER_PATH).read_text(), before)
+
+    def test_cli_refuses_a_requirements_path_outside_allowed_roots(self) -> None:
+        self.assertEqual(
+            ap.main(
+                [
+                    "check",
+                    "--requirements",
+                    "/etc/passwd",
+                    "--catalog",
+                    str(self.tmp),
+                    "--catalog-revision",
+                    REVISION,
+                    "--checkout",
+                    str(self.checkout),
+                ]
+            ),
+            2,
+        )
+
+    def test_catalog_index_path_cannot_escape_the_catalog(self) -> None:
+        with self.assertRaises(ap.AdmissionInputError):
+            ap._confined(self.tmp, "../../etc/passwd", "catalog profile")
 
 
 if __name__ == "__main__":
