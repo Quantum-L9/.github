@@ -58,6 +58,7 @@ else
     ops/test-distribution-triggers.js \
     ops/test-governance-pr-body.js \
     ops/test-birth-registry-workflow.js \
+    ops/test-secret-drift-workflow.js \
     ops/test-governance-report.js; do
     if node "$t"; then
       echo "✅ $t"

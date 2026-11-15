@@ -400,7 +400,14 @@ jobs:
                   expectedSha: branchSha, commitSha: commit.data.sha,
                 });
                 if (!moved.moved) {
-                  rows.push([n, profile.name, moved.reason]);
+                  // The seed commit exists but the branch is not on it, so
+                  // nothing was seeded for this repo. That is a failure with a
+                  // named reason, never a quiet row (Cursor-Governance #893).
+                  // The branch itself stays untouched: the guarded move refused.
+                  failed.push(n);
+                  const line = `SEED_BRANCH_NOT_MOVED: ${moved.reason}`;
+                  core.error(`${n}: ${line}`);
+                  rows.push([n, profile.name, line]);
                   continue;
                 }
 

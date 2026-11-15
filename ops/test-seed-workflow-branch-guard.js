@@ -1155,7 +1155,23 @@ async function managedRestoreScenarios(run, label) {
 			"someone-else-pushed",
 			`${label}: the moved ref must be untouched`,
 		);
-		console.log(`ok: ${label} — branch that moves mid-run is left alone`);
+		// Cursor-Governance #893: a seed commit was built but the branch could
+		// not be moved onto it, so this run seeded nothing for the repo. That is
+		// a failure with a named reason, never a quiet summary row.
+		const notMoved = r.rows.find((row) => row[0] === "consumer-repo");
+		assert.match(
+			notMoved?.[2] || "",
+			/^SEED_BRANCH_NOT_MOVED: branch .* moved during the run/,
+			`${label}: a rejected move must be reported as SEED_BRANCH_NOT_MOVED`,
+		);
+		assert.strictEqual(
+			r.failures.length,
+			1,
+			`${label}: a rejected move must fail the run, not skip silently`,
+		);
+		console.log(
+			`ok: ${label} — branch that moves mid-run is left alone and fails the run (SEED_BRANCH_NOT_MOVED)`,
+		);
 
 		// 6. Dry run never writes.
 		r = await run({ branch: null, dry: true });
