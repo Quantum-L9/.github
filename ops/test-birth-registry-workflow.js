@@ -161,7 +161,11 @@ async function scenario({
 		await run(
 			github,
 			core,
-			{ repo: { owner: OWNER, repo: REPO } },
+			{
+				repo: { owner: OWNER, repo: REPO },
+				serverUrl: "https://github.com",
+				runId: 4242,
+			},
 			scopedRequire,
 		);
 	} finally {
@@ -190,6 +194,37 @@ async function scenario({
 	};
 }
 
+// The same three rules .github/workflows/pr-gates.yml applies to every PR body
+// (registration PR #250 failed them before the body carried these sections).
+function assertPassesPrGates(body) {
+	const section = (name) => {
+		const m = body.match(
+			new RegExp(String.raw`##\s*${name}([\s\S]*?)(?=\n##\s|$)`, "i"),
+		);
+		return m ? m[1] : "";
+	};
+	// The generated body carries no HTML comments, so the Problem text is checked as is.
+	assert.ok(
+		!body.includes("<!" + "--"),
+		"registration body carries no HTML comments",
+	);
+	const problem = section("Problem").trim();
+	assert.ok(problem.length >= 30, "pr-gates: Problem section too short");
+	const risk = [
+		...section("Risk").matchAll(/^[ \t]*-[ \t]*\[([ xX])\]/gm),
+	].filter((m) => m[1] !== " ");
+	assert.strictEqual(
+		risk.length,
+		1,
+		"pr-gates: exactly one Risk level checked",
+	);
+	assert.match(
+		section("Evidence"),
+		/actions\/runs\/\d+/,
+		"pr-gates: Evidence links a CI run",
+	);
+}
+
 (async () => {
 	// 1. First birth: new branch, one commit on base, one PR.
 	{
@@ -204,6 +239,7 @@ async function scenario({
 			r.find("pulls.create").args.body,
 			/birth_provenance\.receipt_digest/,
 		);
+		assertPassesPrGates(r.find("pulls.create").args.body);
 		assert.ok(!r.names.includes("updateRef"));
 		const tree = r.find("createTree").args;
 		assert.strictEqual(tree.base_tree, "base-tree");

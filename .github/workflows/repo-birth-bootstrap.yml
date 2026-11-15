@@ -491,6 +491,23 @@ jobs:
               '',
               'Registration is repository identity and RepositoryClass assignment only — not product admission.',
               'Merging this exact entry is the admission decision. This workflow never merges.',
+              '',
+              // pr-gates.yml requires these three sections on every PR, including this one.
+              '## Problem',
+              '',
+              `\`${owner}/${target}\` was born by the factory (root commit \`${prov.root_commit}\`) but is not yet a`,
+              'member of `semantics/repository_registry.yaml`; this adds exactly its entry, derived from its birth receipt.',
+              '',
+              '## Risk',
+              '',
+              '- [x] Low — one additive registry entry plus the release record the semantic validator requires',
+              '- [ ] Medium',
+              '- [ ] High',
+              '',
+              '## Evidence',
+              '',
+              `- Registration run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              '- `ops/register-birth.py` verified the birth receipt and the semantic validator passed on this tree before this PR was opened.',
             ].join('\n');
             const open = await github.rest.pulls.list({
               owner, repo, state: 'open', head: `${owner}:${branch}`, base,
