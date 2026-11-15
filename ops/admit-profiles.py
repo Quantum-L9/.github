@@ -73,24 +73,19 @@ class AdmissionRefused(RuntimeError):
     """Admission cannot proceed (exit 1)."""
 
 
-def _allowed_roots() -> list[str]:
-    roots = [Path.cwd().resolve(), Path(tempfile.gettempdir()).resolve()]
-    runner_temp = os.environ.get("RUNNER_TEMP")
-    if runner_temp:
-        roots.append(Path(runner_temp).resolve())
-    return [str(r) for r in roots]
+def _temp_base() -> str:
+    return os.path.realpath(os.environ.get("RUNNER_TEMP") or tempfile.gettempdir())
 
 
-def _input_path(raw: Path, label: str, *, directory: bool = False) -> Path:
-    """A CLI-supplied path, resolved and confined to the working or temp directory."""
-    resolved = os.path.realpath(raw)
-    if not any(
-        os.path.commonpath([root, resolved]) == root for root in _allowed_roots()
-    ):
-        raise AdmissionInputError(
-            f"{label} must be inside the working directory or the runner temp directory"
-        )
-    target = Path(resolved)
+def _input_path(
+    base_dir: str, raw: Path, label: str, *, directory: bool = False
+) -> Path:
+    """A CLI-supplied path, refused unless it resolves inside base_dir."""
+    base = os.path.realpath(base_dir)
+    candidate = os.path.realpath(os.path.join(base, raw))
+    if os.path.commonpath([base, candidate]) != base:
+        raise AdmissionInputError(f"{label} must resolve inside {base}")
+    target = Path(candidate)
     if not (target.is_dir() if directory else target.is_file()):
         raise AdmissionInputError(
             f"{label} is not an existing {'directory' if directory else 'file'}"
@@ -543,9 +538,15 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if not SHA_RE.match(args.catalog_revision):
             raise AdmissionInputError("--catalog-revision must be a full 40-hex commit")
-        args.requirements = _input_path(args.requirements, "--requirements")
-        args.catalog = _input_path(args.catalog, "--catalog", directory=True)
-        args.checkout = _input_path(args.checkout, "--checkout", directory=True)
+        args.requirements = _input_path(
+            _temp_base(), args.requirements, "--requirements"
+        )
+        args.catalog = _input_path(
+            _temp_base(), args.catalog, "--catalog", directory=True
+        )
+        args.checkout = _input_path(
+            os.getcwd(), args.checkout, "--checkout", directory=True
+        )
         if args.cmd == "check":
             product_ref, candidates = load_candidates(args.requirements)
             report = check(
