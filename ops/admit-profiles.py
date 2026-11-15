@@ -93,11 +93,21 @@ def load_candidates(path: Path) -> tuple[str, list[dict[str, Any]]]:
     if not isinstance(doc, dict) or doc.get("schema") != REQUIREMENTS_SCHEMA:
         raise AdmissionInputError(f"birth requirements are not {REQUIREMENTS_SCHEMA}")
     conformance = doc.get("conformance")
-    candidates = conformance.get("admission_candidates") if isinstance(conformance, dict) else None
-    if not isinstance(candidates, list) or not all(isinstance(c, dict) for c in candidates):
-        raise AdmissionInputError("birth requirements carry no admission_candidates list")
+    candidates = (
+        conformance.get("admission_candidates")
+        if isinstance(conformance, dict)
+        else None
+    )
+    if not isinstance(candidates, list) or not all(
+        isinstance(c, dict) for c in candidates
+    ):
+        raise AdmissionInputError(
+            "birth requirements carry no admission_candidates list"
+        )
     if not candidates:
-        raise AdmissionInputError("birth requirements name no conformance class to admit")
+        raise AdmissionInputError(
+            "birth requirements name no conformance class to admit"
+        )
     return str(doc.get("product_ref")), candidates
 
 
@@ -119,7 +129,11 @@ def check(
 ) -> dict[str, Any]:
     """Every gap of every candidate, and the coordinates of the admissible ones."""
     index = _load_yaml(catalog / CATALOG_INDEX, f"l9-conformance {CATALOG_INDEX}")
-    listed = {e.get("id"): e for e in (index or {}).get("profiles") or [] if isinstance(e, dict)}
+    listed = {
+        e.get("id"): e
+        for e in (index or {}).get("profiles") or []
+        if isinstance(e, dict)
+    }
     by_id = {e.get("id"): e for e in admitted if isinstance(e, dict)}
     gaps: list[dict[str, Any]] = []
     admissible: list[dict[str, Any]] = []
@@ -143,28 +157,52 @@ def check(
             candidate.get("scope"),
         )
         if not isinstance(ref, str) or not ref:
-            gap(candidate, "identity_undeclared", f"the product declares no profile for class {cls}")
+            gap(
+                candidate,
+                "identity_undeclared",
+                f"the product declares no profile for class {cls}",
+            )
             continue
         entry = listed.get(ref)
         if entry is None or not isinstance(entry.get("path"), str):
-            gap(candidate, "not_in_catalog", f"{ref} is not in {CATALOG_REPOSITORY} {CATALOG_INDEX}")
+            gap(
+                candidate,
+                "not_in_catalog",
+                f"{ref} is not in {CATALOG_REPOSITORY} {CATALOG_INDEX}",
+            )
             continue
         path = catalog / entry["path"]
         try:
             observed = _sha256(path)
         except OSError as exc:
-            raise AdmissionInputError(f"catalog profile {entry['path']} unreadable: {exc}") from exc
+            raise AdmissionInputError(
+                f"catalog profile {entry['path']} unreadable: {exc}"
+            ) from exc
         if observed != entry.get("digest"):
-            gap(candidate, "digest_mismatch", f"{entry['path']} is {observed}, INDEX says {entry.get('digest')}")
+            gap(
+                candidate,
+                "digest_mismatch",
+                f"{entry['path']} is {observed}, INDEX says {entry.get('digest')}",
+            )
             continue
         profile = _load_yaml(path, f"catalog profile {entry['path']}")
         if not isinstance(profile, dict):
-            raise AdmissionInputError(f"catalog profile {entry['path']} is not a mapping")
+            raise AdmissionInputError(
+                f"catalog profile {entry['path']} is not a mapping"
+            )
         if profile.get("id") != ref or profile.get("conformance_class") != cls:
-            gap(candidate, "shape_mismatch", f"{entry['path']} declares {profile.get('id')} / class {profile.get('conformance_class')}")
+            gap(
+                candidate,
+                "shape_mismatch",
+                f"{entry['path']} declares {profile.get('id')} / class {profile.get('conformance_class')}",
+            )
             continue
         if profile.get("scope") != scope:
-            gap(candidate, "scope_mismatch", f"{entry['path']} scope {profile.get('scope')} is not the product's {scope}")
+            gap(
+                candidate,
+                "scope_mismatch",
+                f"{entry['path']} scope {profile.get('scope')} is not the product's {scope}",
+            )
             continue
         if not profile.get("membership"):
             gap(candidate, "membership_empty", f"{ref} names no member fixture")
@@ -176,7 +214,10 @@ def check(
                 f"{unknown.get('id')} ({unknown.get('kind')}): {' '.join(str(unknown.get('statement', '')).split())}",
                 unknown_id=unknown.get("id"),
                 unknown_kind=unknown.get("kind"),
-                resolution_requires=" ".join(str(unknown.get("resolution_requires", "")).split()) or None,
+                resolution_requires=" ".join(
+                    str(unknown.get("resolution_requires", "")).split()
+                )
+                or None,
             )
         if not profile.get("membership") or unresolved:
             continue
@@ -190,7 +231,11 @@ def check(
         prior = by_id.get(ref)
         if prior is not None:
             if prior.get("digest") != observed:
-                gap(candidate, "admitted_profile_changed", f"{ref} is admitted at {prior.get('digest')}; a changed body needs a new profile version")
+                gap(
+                    candidate,
+                    "admitted_profile_changed",
+                    f"{ref} is admitted at {prior.get('digest')}; a changed body needs a new profile version",
+                )
             else:
                 present.append(ref)
             continue
@@ -204,15 +249,26 @@ def check(
 
 
 def _entry_yaml(entry: dict[str, Any]) -> str:
-    keys = ("id", "conformance_class", "distribution_repository", "distribution_path", "digest")
-    lines = [f"      - id: {entry['id']}"] + [f"        {k}: {entry[k]}" for k in keys[1:]]
+    keys = (
+        "id",
+        "conformance_class",
+        "distribution_repository",
+        "distribution_path",
+        "digest",
+    )
+    lines = [f"      - id: {entry['id']}"] + [
+        f"        {k}: {entry[k]}" for k in keys[1:]
+    ]
     return "\n".join(lines) + "\n"
 
 
 def add_entries(text: str, entries: list[dict[str, Any]]) -> str:
     """Append ledger entries at the end of the admitted_profiles list, formatting preserved."""
     lines = text.splitlines(keepends=True)
-    start = next((i for i, line in enumerate(lines) if line.strip() == "admitted_profiles:"), None)
+    start = next(
+        (i for i, line in enumerate(lines) if line.strip() == "admitted_profiles:"),
+        None,
+    )
     if start is None:
         raise AdmissionInputError(f"{LEDGER_PATH} has no admitted_profiles block")
     indent = len(lines[start]) - len(lines[start].lstrip())
@@ -332,7 +388,12 @@ def cut_release(
         (target / name).write_text("\n".join(lines), encoding="utf-8")
         written.append(f"{RELEASES_PATH}/{version}/{name}")
     inventory = [f"./{p}" for p in sources] + [f"./docs/adr/{p.name}" for p in adrs]
-    inventory += ["./docs/adr/README.md", "./MANIFEST.md", "./README.md", "./RELEASE_VALIDATION.md"]
+    inventory += [
+        "./docs/adr/README.md",
+        "./MANIFEST.md",
+        "./README.md",
+        "./RELEASE_VALIDATION.md",
+    ]
     lines = []
     for rel in sorted(inventory, key=lambda p: p.encode("utf-8")):
         on_disk = target / rel[2:] if rel.count("/") == 1 else root / rel[2:]
@@ -350,15 +411,21 @@ def run_validator(checkout: Path) -> None:
         check=False,
     )
     if proc.returncode != 0:
-        failures = [line for line in proc.stdout.splitlines() if line.startswith("FAIL")]
-        raise AdmissionRefused("semantic validator rejects the tree:\n" + "\n".join(failures[-20:]))
+        failures = [
+            line for line in proc.stdout.splitlines() if line.startswith("FAIL")
+        ]
+        raise AdmissionRefused(
+            "semantic validator rejects the tree:\n" + "\n".join(failures[-20:])
+        )
 
 
 def apply(
     *, requirements: Path, catalog: Path, catalog_revision: str, checkout: Path
 ) -> dict[str, Any]:
     product_ref, candidates = load_candidates(requirements)
-    report = check(candidates=candidates, catalog=catalog, admitted=ledger_entries(checkout))
+    report = check(
+        candidates=candidates, catalog=catalog, admitted=ledger_entries(checkout)
+    )
     report["product_ref"] = product_ref
     if report["status"] != "admissible":
         raise AdmissionRefused(json.dumps(report, indent=2, sort_keys=True))
@@ -369,7 +436,9 @@ def apply(
     ledger.write_text(add_entries(original, report["admissible"]), encoding="utf-8")
     written: list[str] = []
     try:
-        version, written = cut_release(checkout, product_ref, report["admissible"], catalog_revision)
+        version, written = cut_release(
+            checkout, product_ref, report["admissible"], catalog_revision
+        )
         run_validator(checkout)
     except BaseException:
         ledger.write_text(original, encoding="utf-8")
@@ -378,11 +447,19 @@ def apply(
         if written:
             (checkout / written[0]).parent.rmdir()
         raise
-    return {**report, "status": "proposed", "release": version, "changed_paths": [LEDGER_PATH, *written]}
+    return {
+        **report,
+        "status": "proposed",
+        "release": version,
+        "changed_paths": [LEDGER_PATH, *written],
+    }
 
 
 def _changes_out(raw: str) -> Path:
-    base = Path(os.environ.get("RUNNER_TEMP") or tempfile.gettempdir()).resolve() / "admission"
+    base = (
+        Path(os.environ.get("RUNNER_TEMP") or tempfile.gettempdir()).resolve()
+        / "admission"
+    )
     target = Path(raw).resolve()
     if target.parent != base:
         raise AdmissionInputError(f"--changes-out must be a file directly under {base}")
@@ -425,7 +502,9 @@ def main(argv: list[str] | None = None) -> int:
         )
         if target is not None:
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            target.write_text(
+                json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+            )
         print(json.dumps(result, indent=2, sort_keys=True))
         return 0
     except AdmissionInputError as exc:

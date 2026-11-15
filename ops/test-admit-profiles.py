@@ -14,7 +14,9 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
-spec = importlib.util.spec_from_file_location("admit_profiles", ROOT / "ops" / "admit-profiles.py")
+spec = importlib.util.spec_from_file_location(
+    "admit_profiles", ROOT / "ops" / "admit-profiles.py"
+)
 assert spec is not None and spec.loader is not None
 ap = importlib.util.module_from_spec(spec)
 sys.modules["admit_profiles"] = ap
@@ -29,7 +31,9 @@ def profile_id(cls: str) -> str:
     return f"l9.fixture-profile/fixture-{cls}@1"
 
 
-def make_catalog(base: Path, *, unresolved: bool = False, membership: bool = True) -> Path:
+def make_catalog(
+    base: Path, *, unresolved: bool = False, membership: bool = True
+) -> Path:
     cat = base / "l9-conformance"
     (cat / "catalog").mkdir(parents=True)
     entries = []
@@ -54,7 +58,14 @@ def make_catalog(base: Path, *, unresolved: bool = False, membership: bool = Tru
             ]
         (cat / rel).write_text(yaml.safe_dump(body, sort_keys=False))
         digest = "sha256:" + hashlib.sha256((cat / rel).read_bytes()).hexdigest()
-        entries.append({"id": profile_id(cls), "path": rel, "digest": digest, "status": "candidate"})
+        entries.append(
+            {
+                "id": profile_id(cls),
+                "path": rel,
+                "digest": digest,
+                "status": "candidate",
+            }
+        )
     (cat / ap.CATALOG_INDEX).write_text(yaml.safe_dump({"profiles": entries}))
     return cat
 
@@ -97,14 +108,22 @@ class CheckTests(unittest.TestCase):
         report = self._check(make_catalog(self.tmp), ALL)
         self.assertEqual(report["status"], "admissible")
         self.assertEqual([e["id"] for e in report["admissible"]], list(ALL.values()))
-        self.assertEqual(report["admissible"][0]["distribution_repository"], ap.CATALOG_REPOSITORY)
+        self.assertEqual(
+            report["admissible"][0]["distribution_repository"], ap.CATALOG_REPOSITORY
+        )
 
     def test_every_unresolved_entry_is_reported_as_underspecified(self) -> None:
         report = self._check(make_catalog(self.tmp, unresolved=True), ALL)
         self.assertEqual(report["status"], "refused")
         self.assertEqual(
-            [(g["conformance_class"], g["code"], g["unknown_id"]) for g in report["gaps"]],
-            [("core", "underspecified", "U-CORE-1"), ("adapter", "underspecified", "U-ADAPTER-1")],
+            [
+                (g["conformance_class"], g["code"], g["unknown_id"])
+                for g in report["gaps"]
+            ],
+            [
+                ("core", "underspecified", "U-CORE-1"),
+                ("adapter", "underspecified", "U-ADAPTER-1"),
+            ],
         )
         self.assertEqual(report["admissible"], [])
 
@@ -120,7 +139,9 @@ class CheckTests(unittest.TestCase):
         )
 
     def test_empty_membership_is_a_gap(self) -> None:
-        report = self._check(make_catalog(self.tmp, membership=False), {"core": profile_id("core")})
+        report = self._check(
+            make_catalog(self.tmp, membership=False), {"core": profile_id("core")}
+        )
         self.assertEqual([g["code"] for g in report["gaps"]], ["membership_empty"])
 
     def test_an_admitted_profile_at_another_digest_is_never_rewritten(self) -> None:
@@ -129,13 +150,19 @@ class CheckTests(unittest.TestCase):
             {"core": profile_id("core")},
             admitted=[{"id": profile_id("core"), "digest": "sha256:" + "0" * 64}],
         )
-        self.assertEqual([g["code"] for g in report["gaps"]], ["admitted_profile_changed"])
+        self.assertEqual(
+            [g["code"] for g in report["gaps"]], ["admitted_profile_changed"]
+        )
 
     def test_an_identically_admitted_profile_is_present(self) -> None:
         catalog = make_catalog(self.tmp)
         first = self._check(catalog, {"core": profile_id("core")})
-        report = self._check(catalog, {"core": profile_id("core")}, admitted=first["admissible"])
-        self.assertEqual((report["status"], report["present"]), ("admissible", [profile_id("core")]))
+        report = self._check(
+            catalog, {"core": profile_id("core")}, admitted=first["admissible"]
+        )
+        self.assertEqual(
+            (report["status"], report["present"]), ("admissible", [profile_id("core")])
+        )
 
     def test_malformed_requirements_are_unresolved(self) -> None:
         bad = self.tmp / "bad.json"
@@ -146,9 +173,21 @@ class CheckTests(unittest.TestCase):
     def test_cli_exit_codes(self) -> None:
         catalog = make_catalog(self.tmp, unresolved=True)
         args = ["check", "--requirements", str(make_requirements(self.tmp, ALL))]
-        args += ["--catalog", str(catalog), "--catalog-revision", REVISION, "--checkout", str(ROOT)]
+        args += [
+            "--catalog",
+            str(catalog),
+            "--catalog-revision",
+            REVISION,
+            "--checkout",
+            str(ROOT),
+        ]
         self.assertEqual(ap.main(args), 1)
-        self.assertEqual(ap.main([*args[:-4], "--catalog-revision", "short", "--checkout", str(ROOT)]), 2)
+        self.assertEqual(
+            ap.main(
+                [*args[:-4], "--catalog-revision", "short", "--checkout", str(ROOT)]
+            ),
+            2,
+        )
 
 
 class ApplyTests(unittest.TestCase):
@@ -160,7 +199,9 @@ class ApplyTests(unittest.TestCase):
     def tearDown(self) -> None:
         shutil.rmtree(self.tmp, ignore_errors=True)
 
-    def test_apply_adds_the_ledger_entries_and_a_validated_candidate_release(self) -> None:
+    def test_apply_adds_the_ledger_entries_and_a_validated_candidate_release(
+        self,
+    ) -> None:
         catalog = make_catalog(self.tmp)
         result = ap.apply(
             requirements=make_requirements(self.tmp, ALL),
