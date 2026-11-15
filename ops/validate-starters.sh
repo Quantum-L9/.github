@@ -80,6 +80,16 @@ else
   FAIL=$((FAIL+1))
 fi
 
+# Conformance-profile admission at birth (lane K): the real tool against fixture
+# catalogs and a copy of this tree (needs python3 with PyYAML).
+if python3 ops/test-admit-profiles.py; then
+  echo "✅ ops/test-admit-profiles.py"
+  PASS=$((PASS+1))
+else
+  echo "❌ ops/test-admit-profiles.py"
+  FAIL=$((FAIL+1))
+fi
+
 if bash ops/test-sync-org-files.sh; then
   echo "✅ ops/test-sync-org-files.sh"
   PASS=$((PASS+1))
