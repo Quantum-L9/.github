@@ -332,6 +332,23 @@ repositories:
       repository: l9-wip
     lifecycle: current
     class_ref: l9.repository-class/l9@1
+  - id: l9-state
+    coordinate:
+      provider: github
+      organization: Quantum-L9
+      repository: l9-state
+    lifecycle: current
+    class_ref: l9.repository-class/l9@1
+    birth_provenance:
+      factory: Quantum-L9/l9-repo-template
+      receipt_schema: l9.birth-receipt/v1
+      receipt_digest: sha256:dcf1d70fc8390e6729f2f962b595fb35f19535b25171ba2875bd0a45ec0011a0
+      root_commit: 6cbe0fe16231eb9f347c64643dea6362c0e9d838
+      template_sha: 923ae91457ea5fb1d0099bbf2a6b4128a7eb42bb
+      template_version: 2.3.0
+      org_policy_sha: 496842bf029996a75f17fd1533baa79029bc95db
+      birth_profile: org_seeded_self_governed
+      born_at: "2026-11-15T16:14:16+00:00"
 aliases: []
 downstream_obligations:
   resolve_repository_class_against: l9.repository-classes/global@1
