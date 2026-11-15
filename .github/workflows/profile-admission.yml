@@ -1,0 +1,262 @@
+# ADMIT at birth: the conformance profiles one born node requires, as one reviewable admission
+# candidate (campaign L9-NODE-PIPELINE-01 lane K; l9-projection-admission procedure).
+#
+# The factory (Quantum-L9/l9-repo-template) dispatches this workflow at PUBLISH for every birth,
+# beside repo-birth-bootstrap.yml, and waits for it. Its ACTIVATE stage runs conformance only
+# against profiles admitted in semantics/projection_profiles.yaml, so the pipeline order is
+# compile -> admit -> birth -> activate.
+#
+# Nothing here is typed by an operator. The candidates come from the factory-pinned semantic
+# compiler's `birth-closure` run against the newborn (its birth-requirements.json, ADR-0007 there);
+# the profile bodies come from the factory-pinned l9-conformance catalog. ops/admit-profiles.py
+# runs the subject closure and fails closed on any gap (undeclared identity, absent or tampered
+# catalog entry, shape/scope mismatch, empty membership, an `unresolved` Unknown, a changed
+# admitted profile), naming every gap in the job summary. A product that does not require
+# conformance is a no-op success.
+#
+# A passing closure opens one PR carrying the ledger entries and the ADDITIVE SUCCESSOR CANDIDATE
+# release record. The owner's decision on that exact subject (and the merge) is the admission;
+# this workflow never merges.
+#
+# Auth: org secret GH_TOKEN, as repo-birth-bootstrap.yml's register job. No new App or secret.
+name: Profile admission
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_repo:
+        description: "Born repository name (without owner)"
+        type: string
+        required: true
+      repo_class:
+        description: "Accepted for the factory's uniform dispatch; unused"
+        type: string
+        default: ""
+      dry_run:
+        description: "Check only: report the subject closure, open no PR"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  admit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: governance-distribution
+    concurrency:
+      group: profile-admission
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML and jsonschema
+        run: |
+          pip install --only-binary=:all: "pyyaml==6.0.2" "jsonschema==4.23.0"
+
+      - name: Clone the newborn, the factory, and its pinned compiler and catalog
+        id: sources
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          TARGET_REPO: ${{ inputs.target_repo }}
+        run: |
+          set -euo pipefail
+          if ! [[ "${TARGET_REPO}" =~ ^[A-Za-z0-9._-]{1,100}$ ]]; then
+            echo "::error::invalid repository name '${TARGET_REPO}'"
+            exit 1
+          fi
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "${GH_TOKEN}" | base64 -w0)"
+          echo "::add-mask::${auth#AUTHORIZATION: basic }"
+          base="${RUNNER_TEMP}/admission"
+          mkdir -p "${base}"
+          clone() {
+            local repo="$1" dest="$2"
+            git -c "http.https://github.com/.extraheader=${auth}" clone --quiet "https://github.com/${repo}.git" "${dest}"
+          }
+          at() {
+            local dir="$1" rev="$2"
+            git -C "${dir}" -c "http.https://github.com/.extraheader=${auth}" fetch --quiet --depth 1 origin "${rev}"
+            git -C "${dir}" checkout --quiet --detach FETCH_HEAD
+            test "$(git -C "${dir}" rev-parse HEAD)" = "${rev}" || { echo "::error::${dir} is not at ${rev}"; exit 1; }
+          }
+          clone "Quantum-L9/${TARGET_REPO}" "${base}/newborn"
+          clone "Quantum-L9/l9-repo-template" "${base}/template"
+          pin() { python3 -I -c 'import json,sys; d=json.load(open(sys.argv[1])); k=sys.argv[2]; d=d[k] if k else d; print(d["repository"], d["revision"])' "$@"; }
+          read -r engine_repo engine_sha < <(pin "${base}/template/scripts/birth-runner/semantic-compiler.pin.json" "")
+          read -r catalog_repo catalog_sha < <(pin "${base}/template/scripts/birth-runner/activation.pin.json" l9_conformance)
+          clone "${engine_repo}" "${base}/engine"; at "${base}/engine" "${engine_sha}"
+          clone "${catalog_repo}" "${base}/catalog"; at "${base}/catalog" "${catalog_sha}"
+          {
+            echo "root_sha=$(git -C "${base}/newborn" rev-parse HEAD)"
+            echo "catalog_sha=${catalog_sha}"
+            echo "engine_sha=${engine_sha}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Compile the birth requirements (pinned compiler)
+        id: requirements
+        env:
+          ROOT_SHA: ${{ steps.sources.outputs.root_sha }}
+        run: |
+          set -euo pipefail
+          base="${RUNNER_TEMP}/admission"
+          cd "${base}/newborn"
+          if [ ! -f product-topology.yaml ]; then
+            echo "::notice::the newborn declares no product; no conformance profile to admit"
+            echo "required=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          PYTHONPATH="${base}/engine/src" python3 -I -c 'import sys; sys.path.insert(0, sys.argv[1]); from l9_semantic_compiler.cli import main; raise SystemExit(main(sys.argv[2:]))' \
+            "${base}/engine/src" birth-closure \
+            --output-dir "${base}/closure" \
+            --target-binding l9.binding/python-gate-node@1 \
+            --source-revision "${ROOT_SHA}"
+          required="$(python3 -I -c 'import json,sys; print(str(json.load(open(sys.argv[1]))["conformance"]["required"]).lower())' "${base}/closure/birth-requirements.json")"
+          echo "required=${required}" >> "${GITHUB_OUTPUT}"
+
+      - name: Subject closure (fails closed, every gap named)
+        if: steps.requirements.outputs.required == 'true'
+        env:
+          CATALOG_SHA: ${{ steps.sources.outputs.catalog_sha }}
+        run: |
+          set -euo pipefail
+          base="${RUNNER_TEMP}/admission"
+          status=0
+          python3 ops/admit-profiles.py check \
+            --catalog-revision "${CATALOG_SHA}" > "${base}/check.json" || status=$?
+          {
+            echo "### Profile admission subject closure"
+            echo '```json'
+            cat "${base}/check.json"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+          exit "${status}"
+
+      - name: Render the admission candidate
+        if: steps.requirements.outputs.required == 'true' && inputs.dry_run != true
+        env:
+          CATALOG_SHA: ${{ steps.sources.outputs.catalog_sha }}
+        run: |
+          set -euo pipefail
+          python3 ops/admit-profiles.py apply \
+            --catalog-revision "${CATALOG_SHA}" --write-result
+
+      - name: Open or update the admission PR
+        if: steps.requirements.outputs.required == 'true' && inputs.dry_run != true
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        env:
+          RESULT_PATH: ${{ runner.temp }}/admission/admission.json
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+          TARGET_REPO: ${{ inputs.target_repo }}
+          CATALOG_SHA: ${{ steps.sources.outputs.catalog_sha }}
+          ENGINE_SHA: ${{ steps.sources.outputs.engine_sha }}
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const { execFileSync } = require('child_process');
+            const result = JSON.parse(fs.readFileSync(process.env.RESULT_PATH, 'utf8'));
+            const { owner, repo } = context.repo;
+            const base = process.env.BASE_BRANCH;
+            const target = process.env.TARGET_REPO;
+            if (result.status === 'present') {
+              core.notice(`every profile ${owner}/${target} requires is already admitted on ${base}`);
+              return;
+            }
+            if (result.status !== 'proposed' || !result.changed_paths.length) {
+              core.setFailed(`unexpected admission result ${JSON.stringify(result.status)}`);
+              return;
+            }
+            const branch = `profile-admission/${target}`;
+            const subject = `chore(semantics): admission candidate for the conformance profiles ${owner}/${target} requires`;
+            const baseSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+            const baseCommit = await github.rest.git.getCommit({ owner, repo, commit_sha: baseSha });
+            let branchSha = null;
+            try {
+              const ref = await github.rest.git.getRef({ owner, repo, ref: `heads/${branch}` });
+              branchSha = ref.data.object.sha;
+            } catch (e) {
+              if (e.status !== 404) throw e;
+            }
+            if (branchSha) {
+              const cmp = await github.rest.repos.compareCommitsWithBasehead({
+                owner, repo, basehead: `${baseSha}...${branchSha}`,
+              });
+              const foreign = cmp.data.commits.filter((c) => !c.commit.message.startsWith(subject));
+              if (foreign.length) {
+                core.setFailed(`${branch} carries ${foreign.length} commit(s) this workflow did not author; refusing to rewrite it`);
+                return;
+              }
+            }
+            const tree = await github.rest.git.createTree({
+              owner, repo, base_tree: baseCommit.data.tree.sha,
+              tree: result.changed_paths.map((path) => ({
+                path, mode: '100644', type: 'blob', content: fs.readFileSync(path, 'utf8'),
+              })),
+            });
+            let unchanged = false;
+            if (branchSha) {
+              const head = await github.rest.git.getCommit({ owner, repo, commit_sha: branchSha });
+              unchanged = head.data.tree.sha === tree.data.sha;
+            }
+            if (!unchanged) {
+              const message = [
+                subject, '',
+                ...result.admissible.map((e) => `${e.id} (${e.conformance_class}) ${e.digest}`),
+                `release ${result.release}; l9-conformance ${process.env.CATALOG_SHA}; compiler ${process.env.ENGINE_SHA}.`,
+              ].join('\n');
+              // A stale branch advances by a merge commit over the current base, never a force-push.
+              const commit = await github.rest.git.createCommit({
+                owner, repo, message, tree: tree.data.sha,
+                parents: branchSha ? [branchSha, baseSha] : [baseSha],
+              });
+              if (branchSha) {
+                await github.rest.git.updateRef({ owner, repo, ref: `heads/${branch}`, sha: commit.data.sha, force: false });
+              } else {
+                await github.rest.git.createRef({ owner, repo, ref: `refs/heads/${branch}`, sha: commit.data.sha });
+              }
+            }
+            const body = [
+              `Admission candidate for the conformance profiles \`${owner}/${target}\` requires.`,
+              '',
+              '| Profile | Class | Catalog path | Digest |',
+              '| --- | --- | --- | --- |',
+              ...result.admissible.map((e) => `| \`${e.id}\` | ${e.conformance_class} | \`${e.distribution_path}\` | \`${e.digest}\` |`),
+              '',
+              `Release record: \`docs/semantic-foundation/${result.release}/\` (ADDITIVE SUCCESSOR CANDIDATE).`,
+              `Candidates: pinned semantic compiler \`${process.env.ENGINE_SHA}\` \`birth-closure\` on the newborn;`,
+              `bodies: \`Quantum-L9/l9-conformance@${process.env.CATALOG_SHA}\`. \`ops/admit-profiles.py\` passed the subject`,
+              'closure and the semantic validator passed on this tree before this PR was opened.',
+              '',
+              'Admission is the owner\'s explicit decision on this exact subject (L9-ADMISSION-001). This workflow never merges.',
+              '',
+              '## Problem',
+              '',
+              `\`${owner}/${target}\` requires conformance before it is BORN; the factory runs conformance only against`,
+              'profiles admitted in `semantics/projection_profiles.yaml`. This adds exactly the profiles its compiled birth requirements name.',
+              '',
+              '## Risk',
+              '',
+              '- [x] Low — additive ledger entries plus the release record the semantic validator requires',
+              '- [ ] Medium',
+              '- [ ] High',
+              '',
+              '## Evidence',
+              '',
+              `- Admission run: ${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
+            ].join('\n');
+            const open = await github.rest.pulls.list({ owner, repo, state: 'open', head: `${owner}:${branch}`, base });
+            if (open.data.length) {
+              await github.rest.pulls.update({ owner, repo, pull_number: open.data[0].number, body });
+              core.notice(`updated ${open.data[0].html_url}`);
+            } else {
+              const pr = await github.rest.pulls.create({ owner, repo, head: branch, base, title: subject, body });
+              core.notice(`opened ${pr.data.html_url}`);
+            }
