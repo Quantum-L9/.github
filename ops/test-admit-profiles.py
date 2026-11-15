@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import importlib.util
 import json
+import os
 import shutil
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import yaml
 
@@ -171,23 +174,20 @@ class CheckTests(unittest.TestCase):
             ap.load_candidates(bad)
 
     def test_cli_exit_codes(self) -> None:
-        catalog = make_catalog(self.tmp, unresolved=True)
-        args = ["check", "--requirements", str(make_requirements(self.tmp, ALL))]
-        args += [
-            "--catalog",
-            str(catalog),
-            "--catalog-revision",
-            REVISION,
-            "--checkout",
-            str(ROOT),
-        ]
-        self.assertEqual(ap.main(args), 1)
-        self.assertEqual(
-            ap.main(
-                [*args[:-4], "--catalog-revision", "short", "--checkout", str(ROOT)]
-            ),
-            2,
+        runner_temp = self.tmp / "runner"
+        work = runner_temp / "admission"
+        (work / "closure").mkdir(parents=True)
+        shutil.copyfile(
+            make_requirements(self.tmp, ALL),
+            work / "closure" / "birth-requirements.json",
         )
+        shutil.copytree(make_catalog(self.tmp, unresolved=True), work / "catalog")
+        with (
+            mock.patch.dict(os.environ, {"RUNNER_TEMP": str(runner_temp)}),
+            contextlib.chdir(ROOT),
+        ):
+            self.assertEqual(ap.main(["check", "--catalog-revision", REVISION]), 1)
+            self.assertEqual(ap.main(["check", "--catalog-revision", "short"]), 2)
 
 
 class ApplyTests(unittest.TestCase):
@@ -237,23 +237,11 @@ class ApplyTests(unittest.TestCase):
             )
         self.assertEqual((self.checkout / ap.LEDGER_PATH).read_text(), before)
 
-    def test_cli_refuses_a_requirements_path_outside_allowed_roots(self) -> None:
-        self.assertEqual(
-            ap.main(
-                [
-                    "check",
-                    "--requirements",
-                    "/etc/passwd",
-                    "--catalog",
-                    str(self.tmp),
-                    "--catalog-revision",
-                    REVISION,
-                    "--checkout",
-                    str(self.checkout),
-                ]
-            ),
-            2,
-        )
+    def test_cli_reads_only_the_fixed_work_directory(self) -> None:
+        empty = self.tmp / "empty"
+        with mock.patch.dict(os.environ, {"RUNNER_TEMP": str(empty)}):
+            self.assertEqual(ap._work_dir(), empty.resolve() / "admission")
+            self.assertEqual(ap.main(["check", "--catalog-revision", REVISION]), 2)
 
     def test_catalog_index_path_cannot_escape_the_catalog(self) -> None:
         with self.assertRaises(ap.AdmissionInputError):

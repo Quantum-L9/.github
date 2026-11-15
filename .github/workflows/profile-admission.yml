@@ -130,9 +130,7 @@ jobs:
           base="${RUNNER_TEMP}/admission"
           status=0
           python3 ops/admit-profiles.py check \
-            --requirements "${base}/closure/birth-requirements.json" \
-            --catalog "${base}/catalog" --catalog-revision "${CATALOG_SHA}" \
-            --checkout "${GITHUB_WORKSPACE}" > "${base}/check.json" || status=$?
+            --catalog-revision "${CATALOG_SHA}" > "${base}/check.json" || status=$?
           {
             echo "### Profile admission subject closure"
             echo '```json'
@@ -147,12 +145,8 @@ jobs:
           CATALOG_SHA: ${{ steps.sources.outputs.catalog_sha }}
         run: |
           set -euo pipefail
-          base="${RUNNER_TEMP}/admission"
           python3 ops/admit-profiles.py apply \
-            --requirements "${base}/closure/birth-requirements.json" \
-            --catalog "${base}/catalog" --catalog-revision "${CATALOG_SHA}" \
-            --checkout "${GITHUB_WORKSPACE}" \
-            --changes-out "${base}/admission.json"
+            --catalog-revision "${CATALOG_SHA}" --write-result
 
       - name: Open or update the admission PR
         if: steps.requirements.outputs.required == 'true' && inputs.dry_run != true

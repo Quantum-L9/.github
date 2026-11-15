@@ -9,9 +9,14 @@ ADR-0007 there): one per conformance class the product requires, scoped by its
 product kind and archetype. The profile bodies are owned by l9-conformance and
 read from its catalog at an exact revision; nothing here authors or edits one.
 
-    admit-profiles.py check --requirements FILE --catalog DIR --catalog-revision SHA
-    admit-profiles.py apply --requirements FILE --catalog DIR --catalog-revision SHA \
-                            --checkout DIR [--changes-out FILE]
+    admit-profiles.py check --catalog-revision SHA
+    admit-profiles.py apply --catalog-revision SHA [--write-result]
+
+Run from the .github checkout. Inputs are read from one fixed work directory,
+never from paths on the command line: `$RUNNER_TEMP/admission` (the system temp
+directory when RUNNER_TEMP is unset) holds `closure/birth-requirements.json`
+and the catalog checkout `catalog/`; `--write-result` writes `admission.json`
+there.
 
 `check` runs the l9-projection-admission subject closure for these subjects and
 prints a JSON report. A candidate is ADMISSIBLE only when every check holds:
@@ -73,24 +78,12 @@ class AdmissionRefused(RuntimeError):
     """Admission cannot proceed (exit 1)."""
 
 
-def _temp_base() -> str:
-    return os.path.realpath(os.environ.get("RUNNER_TEMP") or tempfile.gettempdir())
-
-
-def _input_path(
-    base_dir: str, raw: Path, label: str, *, directory: bool = False
-) -> Path:
-    """A CLI-supplied path, refused unless it resolves inside base_dir."""
-    base = os.path.realpath(base_dir)
-    candidate = os.path.realpath(os.path.join(base, raw))
-    if os.path.commonpath([base, candidate]) != base:
-        raise AdmissionInputError(f"{label} must resolve inside {base}")
-    target = Path(candidate)
-    if not (target.is_dir() if directory else target.is_file()):
-        raise AdmissionInputError(
-            f"{label} is not an existing {'directory' if directory else 'file'}"
-        )
-    return target
+def _work_dir() -> Path:
+    """The one directory the CLI reads from and writes to."""
+    return (
+        Path(os.environ.get("RUNNER_TEMP") or tempfile.gettempdir()).resolve()
+        / "admission"
+    )
 
 
 def _confined(root: Path, relative: str, label: str) -> Path:
@@ -510,63 +503,40 @@ def apply(
     }
 
 
-def _changes_out(raw: str) -> Path:
-    base = (
-        Path(os.environ.get("RUNNER_TEMP") or tempfile.gettempdir()).resolve()
-        / "admission"
-    )
-    target = Path(raw).resolve()
-    if target.parent != base:
-        raise AdmissionInputError(f"--changes-out must be a file directly under {base}")
-    return target
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="cmd", required=True)
     for name in ("check", "apply"):
         cmd = sub.add_parser(name)
-        cmd.add_argument("--requirements", type=Path, required=True)
-        cmd.add_argument("--catalog", type=Path, required=True)
         cmd.add_argument("--catalog-revision", required=True)
         if name == "apply":
-            cmd.add_argument("--checkout", type=Path, required=True)
-            cmd.add_argument("--changes-out")
-        else:
-            cmd.add_argument("--checkout", type=Path, default=Path("."))
+            cmd.add_argument("--write-result", action="store_true")
     args = parser.parse_args(argv)
+    work = _work_dir()
+    requirements = work / "closure" / "birth-requirements.json"
+    catalog = work / "catalog"
+    checkout = Path.cwd().resolve()
     try:
         if not SHA_RE.match(args.catalog_revision):
             raise AdmissionInputError("--catalog-revision must be a full 40-hex commit")
-        args.requirements = _input_path(
-            _temp_base(), args.requirements, "--requirements"
-        )
-        args.catalog = _input_path(
-            _temp_base(), args.catalog, "--catalog", directory=True
-        )
-        args.checkout = _input_path(
-            os.getcwd(), args.checkout, "--checkout", directory=True
-        )
         if args.cmd == "check":
-            product_ref, candidates = load_candidates(args.requirements)
+            product_ref, candidates = load_candidates(requirements)
             report = check(
                 candidates=candidates,
-                catalog=args.catalog,
-                admitted=ledger_entries(args.checkout.resolve()),
+                catalog=catalog,
+                admitted=ledger_entries(checkout),
             )
             report["product_ref"] = product_ref
             print(json.dumps(report, indent=2, sort_keys=True))
             return 0 if report["status"] == "admissible" else 1
-        target = _changes_out(args.changes_out) if args.changes_out else None
         result = apply(
-            requirements=args.requirements,
-            catalog=args.catalog,
+            requirements=requirements,
+            catalog=catalog,
             catalog_revision=args.catalog_revision,
-            checkout=args.checkout.resolve(),
+            checkout=checkout,
         )
-        if target is not None:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(
+        if args.write_result:
+            (work / "admission.json").write_text(
                 json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
             )
         print(json.dumps(result, indent=2, sort_keys=True))
