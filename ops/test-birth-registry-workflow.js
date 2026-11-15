@@ -199,7 +199,7 @@ async function scenario({
 function assertPassesPrGates(body) {
 	const section = (name) => {
 		const m = body.match(
-			new RegExp(`##\\s*${name}([\\s\\S]*?)(?=\\n##\\s|$)`, "i"),
+			new RegExp(String.raw`##\s*${name}([\s\S]*?)(?=\n##\s|$)`, "i"),
 		);
 		return m ? m[1] : "";
 	};
@@ -210,9 +210,9 @@ function assertPassesPrGates(body) {
 	);
 	const problem = section("Problem").trim();
 	assert.ok(problem.length >= 30, "pr-gates: Problem section too short");
-	const risk = [...section("Risk").matchAll(/^\s*-\s*\[([ xX])\]/gm)].filter(
-		(m) => m[1] !== " ",
-	);
+	const risk = [
+		...section("Risk").matchAll(/^[ \t]*-[ \t]*\[([ xX])\]/gm),
+	].filter((m) => m[1] !== " ");
 	assert.strictEqual(
 		risk.length,
 		1,
