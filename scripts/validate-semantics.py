@@ -5836,6 +5836,17 @@ def check_rc022(docs: dict[str, dict], report: Report) -> None:
 # organization, shape, ProductKind or birth profile, and a future repository
 # needs a new explicit admission (and a new pin) before it is a member. The
 # check governs these two ledgers only (L9-VALIDATION-001).
+#
+# v3.43.0 (ADR-040) makes the registry organization-complete: every repository
+# the organization hosts must be registered. The census pin grows to the 60
+# hand-admitted repositories, golden-repo is pinned retired, every id must be
+# the folding of its repository name (dot-github grandfathered), and the
+# superseding global rules plus the organization_completeness block are pinned.
+# A repository created later is proposed by ops/register-org-repository.py
+# with an `organization_admission` marker and checked by shape, as factory
+# births are (ADR-039). Whether the live organization matches the registry is
+# observed by ops/registry-completeness.js, not here: this check reads no
+# network and stays deterministic.
 RC023_CLASSES_PATH = "semantics/repository_classes.yaml"
 RC023_REGISTRY_PATH = "semantics/repository_registry.yaml"
 RC023_CLASSES_SCHEMA = "l9.repository-classes/v1"
@@ -5956,8 +5967,48 @@ RC023_REPOSITORIES = {
     "l9-repo-template": "l9-repo-template",
     "l9-semantic-compiler-engine": "l9-semantic-compiler-engine",
     "l9-wip": "l9-wip",
+    # v3.43.0 (ADR-040): the registry becomes organization-complete. These are
+    # the 27 repositories the Quantum-L9 organization hosted on 2026-11-17 that
+    # no earlier release registered. Each is admitted as an organization member
+    # only: class l9, no ProductKind, no Node, no constellation participation.
+    # Their ids follow the folding rule (rc023_factory_repository_id).
+    "splitwisely-ai": "SplitWisely.ai",
+    "llm-router": "LLM-Router",
+    "cognitive-engine-graphs": "Cognitive.Engine.Graphs",
+    "enrichment-inference-engine": "Enrichment.Inference.Engine",
+    "constellation-gate": "Constellation.Gate",
+    "gate-sdk": "Gate_SDK",
+    "safehavenrr-site": "safehavenrr-site",
+    "quantum-website-cursor": "Quantum-Website-Cursor",
+    "odoo-enterprise": "odoo-enterprise",
+    "clawdbot": "clawdbot",
+    "ideaos": "IdeaOS",
+    "sm-microbidlocal": "SM-MicroBidLocal",
+    "mack-5-0": "Mack-5.0",
+    "quantum-dashboard": "quantum-dashboard",
+    "sustainabilitysolutions1": "SustainabilitySolutions1",
+    "infisical-config": "infisical-config",
+    "l9-cto": "l9-cto",
+    "platform-state-service": "platform-state-service",
+    "venture-forge-toolbox": "venture-forge-toolbox",
+    "openclaw": "openclaw",
+    "ib-identityos": "IB-IdentityOS",
+    "deckhouseodoo": "DeckhouseOdoo",
+    "emma-v1-0": "emma_v1.0",
+    "governance-active": "Governance-Active",
+    "golden-repo": "golden-repo",
+    "ib-founderos-runtime": "IB-Founderos-Runtime",
+    "deckhouse": "Deckhouse",
 }
-RC023_REPOSITORY_COUNT = 33
+RC023_REPOSITORY_COUNT = 60
+# Pinned lifecycle per pinned id; every pinned id not named here is `current`.
+# golden-repo is archived on GitHub, and an archived repository is registered
+# retired (organization_completeness.archived_repository_lifecycle).
+RC023_REPOSITORY_LIFECYCLES = {"golden-repo": "retired"}
+# Ids registered before the folding rule existed whose repository name does
+# not fold to them. `.github` folds to no valid id at all. Every other entry,
+# pinned, factory-born or organization-admitted, has id == fold(name).
+RC023_GRANDFATHERED_IDS = {"dot-github": ".github"}
 # v3.42.0 (ADR-039): a factory-born entry. The census above stays a pin for the
 # repositories admitted before the factory existed. An entry that carries
 # `birth_provenance` is admitted by the merge of the reviewable PR that
@@ -6074,6 +6125,107 @@ def rc023_factory_entry_problems(entry: object) -> list[str]:
         if key in provenance and not holds(provenance[key]):
             problems.append(f"birth_provenance.{key} {message}")
     return problems
+
+
+# v3.43.0 (ADR-040): an organization-admitted entry. A repository created in
+# the organization after v3.43.0 is proposed by ops/register-org-repository.py
+# from the organization listing; the owner's merge of that exact entry admits
+# it. Like a factory-born entry it is checked by shape, not by a second
+# hand-maintained pin. The marker is evidence of the observation that prompted
+# the proposal and confers no authority (L9-EVIDENCE-001).
+RC023_ORG_ADMISSION_BASIS = "organization_completeness"
+RC023_ORG_ADMISSION_DECISION = "ADR-040"
+RC023_ORG_ADMISSION_KEYS = (
+    "basis",
+    "decision_record",
+    "github_repository_id",
+    "observed_at",
+)
+RC023_ORG_ENTRY_KEYS = (
+    "id",
+    "coordinate",
+    "lifecycle",
+    "class_ref",
+    "organization_admission",
+)
+RC023_ORG_ADMISSION_RULES = (
+    (
+        "basis",
+        lambda v: v == RC023_ORG_ADMISSION_BASIS,
+        f"must be {RC023_ORG_ADMISSION_BASIS}",
+    ),
+    (
+        "decision_record",
+        lambda v: v == RC023_ORG_ADMISSION_DECISION,
+        f"must be {RC023_ORG_ADMISSION_DECISION}",
+    ),
+    (
+        "github_repository_id",
+        lambda v: isinstance(v, int) and not isinstance(v, bool) and v > 0,
+        "must be a positive integer",
+    ),
+    ("observed_at", _rc023_is_text, "must be a non-empty string"),
+)
+
+
+def rc023_org_entry_problems(entry: object) -> list[str]:
+    """Every way an entry fails the organization-admitted shape; empty when it holds.
+
+    Lifecycle, class and duplicate rules are the registry-wide RC-023 checks.
+    """
+    if not isinstance(entry, dict):
+        return ["entry must be a mapping"]
+    problems = [
+        f"unexpected key {key}"
+        for key in sorted(set(entry) - set(RC023_ORG_ENTRY_KEYS))
+    ]
+    coordinate = entry.get("coordinate")
+    repository = coordinate.get("repository") if isinstance(coordinate, dict) else None
+    expected_id = rc023_factory_repository_id(repository)
+    if expected_id is None:
+        problems.append(
+            f"coordinate.repository {repository!r} is not a repository name"
+        )
+    elif entry.get("id") != expected_id:
+        problems.append(f"id must be {expected_id!r} for {repository!r}")
+    marker = entry.get("organization_admission")
+    if not isinstance(marker, dict):
+        return [*problems, "organization_admission must be a mapping"]
+    for key in sorted(set(RC023_ORG_ADMISSION_KEYS) - set(marker)):
+        problems.append(f"organization_admission.{key} is missing")
+    for key in sorted(set(marker) - set(RC023_ORG_ADMISSION_KEYS)):
+        problems.append(f"organization_admission.{key} is not an admission field")
+    for key, holds, message in RC023_ORG_ADMISSION_RULES:
+        if key in marker and not holds(marker[key]):
+            problems.append(f"organization_admission.{key} {message}")
+    return problems
+
+
+# The global rules v3.43.0 pins: the superseded rule must be gone and its
+# successors present and true, so the ledger cannot carry both readings.
+RC023_SUPERSEDED_GLOBAL_RULE = "organization_hosting_does_not_imply_l9_membership"
+RC023_REQUIRED_GLOBAL_RULES = (
+    "every_entry_is_an_explicit_admission_decision",
+    "organization_hosted_repositories_must_be_registered",
+    "membership_is_conferred_by_registry_entry_never_by_organization_hosting",
+    "registry_membership_does_not_imply_product_kind",
+    "registry_membership_does_not_imply_constellation_participation",
+    "unregistered_repository_has_no_implied_l9_membership",
+    "repository_id_is_immutable",
+    "removed_repository_entries_must_be_retained_with_retired_lifecycle",
+)
+RC023_ORG_COMPLETENESS = {
+    "decision_record": RC023_ORG_ADMISSION_DECISION,
+    "scope": {
+        "provider": "github",
+        "organization": "Quantum-L9",
+        "includes_archived_repositories": True,
+        "includes_forked_repositories": True,
+    },
+    "archived_repository_lifecycle": "retired",
+    "pinned_entries_never_carry_organization_admission": True,
+    "organization_admission_and_birth_provenance_are_exclusive": True,
+}
 
 
 def _rc023_fail(
@@ -6260,6 +6412,7 @@ def _evaluate_rc023_registry(docs: dict[str, dict], report: Report) -> None:
         RC023_CLASSES_ARTIFACT_ID,
         report,
     )
+    _evaluate_rc023_completeness_rules(registry, report)
     repositories = registry.get("repositories")
     if not isinstance(repositories, list):
         _rc023_fail(
@@ -6273,7 +6426,10 @@ def _evaluate_rc023_registry(docs: dict[str, dict], report: Report) -> None:
     pinned_count = sum(
         1
         for entry in repositories
-        if not (isinstance(entry, dict) and "birth_provenance" in entry)
+        if not (
+            isinstance(entry, dict)
+            and ("birth_provenance" in entry or "organization_admission" in entry)
+        )
     )
     if pinned_count != RC023_REPOSITORY_COUNT:
         _rc023_fail(
@@ -6281,10 +6437,11 @@ def _evaluate_rc023_registry(docs: dict[str, dict], report: Report) -> None:
             "repositories",
             pinned_count,
             f"exactly {RC023_REPOSITORY_COUNT} pinned repositories are admitted "
-            "(factory-born entries are counted apart)",
+            "(factory-born and organization-admitted entries are counted apart)",
             report,
         )
     factory_ids: set[str] = set()
+    org_ids: set[str] = set()
     seen_ids: dict[str, int] = {}
     seen_coordinates: dict[tuple[str, str, str], int] = {}
     for index, entry in enumerate(repositories):
@@ -6320,7 +6477,34 @@ def _evaluate_rc023_registry(docs: dict[str, dict], report: Report) -> None:
                     f"factory-born entry: {problem}",
                     report,
                 )
+        if "organization_admission" in entry:
+            org_ids.add(rid)
+            if "birth_provenance" in entry:
+                _rc023_fail(
+                    path,
+                    f"{field}.organization_admission",
+                    rid,
+                    "an entry is factory-born or organization-admitted, never both",
+                    report,
+                )
+            if rid in RC023_REPOSITORIES:
+                _rc023_fail(
+                    path,
+                    f"{field}.organization_admission",
+                    rid,
+                    "a pinned repository never carries an organization admission marker",
+                    report,
+                )
+            for problem in rc023_org_entry_problems(entry):
+                _rc023_fail(
+                    path,
+                    f"{field}.organization_admission",
+                    rid,
+                    f"organization-admitted entry: {problem}",
+                    report,
+                )
         coordinate = entry.get("coordinate")
+        _rc023_check_id_fold(path, field, rid, coordinate, report)
         if not isinstance(coordinate, dict):
             _rc023_fail(
                 path,
@@ -6367,12 +6551,14 @@ def _evaluate_rc023_registry(docs: dict[str, dict], report: Report) -> None:
                 f"lifecycle must be one of {list(RC023_LIFECYCLES)}",
                 report,
             )
-        elif lifecycle != "current":
+        elif lifecycle != RC023_REPOSITORY_LIFECYCLES.get(rid, "current"):
             _rc023_fail(
                 path,
                 f"{field}.lifecycle",
                 lifecycle,
-                "every admitted repository is lifecycle current in this release",
+                "lifecycle must be "
+                f"{RC023_REPOSITORY_LIFECYCLES.get(rid, 'current')!r} in this release "
+                "(a lifecycle change is a new admission decision)",
                 report,
             )
         _rc023_expect(
@@ -6387,7 +6573,11 @@ def _evaluate_rc023_registry(docs: dict[str, dict], report: Report) -> None:
                 "repository id is registered more than once",
                 report,
             )
-        if rid not in RC023_REPOSITORIES and rid not in factory_ids:
+        if (
+            rid not in RC023_REPOSITORIES
+            and rid not in factory_ids
+            and rid not in org_ids
+        ):
             _rc023_fail(
                 path,
                 f"repositories[{rid}].id",
@@ -6425,6 +6615,87 @@ def _evaluate_rc023_registry(docs: dict[str, dict], report: Report) -> None:
             "admitted coordinate is missing from the registry",
             report,
         )
+
+
+def _rc023_check_id_fold(
+    path: str, field: str, rid: str, coordinate: object, report: Report
+) -> None:
+    """Every id is the folding of its repository name (ADR-040).
+
+    Memory derives namespace addresses from registry ids, so an id that does
+    not follow from the coordinate is a second, hand-typed identity. The one
+    exception is a grandfathered pre-rule id, which must keep its exact
+    coordinate.
+    """
+    repository = coordinate.get("repository") if isinstance(coordinate, dict) else None
+    if rid in RC023_GRANDFATHERED_IDS:
+        if repository != RC023_GRANDFATHERED_IDS[rid]:
+            _rc023_fail(
+                path,
+                f"{field}.id",
+                rid,
+                f"grandfathered id {rid!r} is reserved for repository "
+                f"{RC023_GRANDFATHERED_IDS[rid]!r}",
+                report,
+            )
+        return
+    expected = rc023_factory_repository_id(repository)
+    if expected != rid:
+        _rc023_fail(
+            path,
+            f"{field}.id",
+            rid,
+            f"id must be the folding of repository {repository!r} "
+            f"({expected!r}); only {sorted(RC023_GRANDFATHERED_IDS)} are grandfathered",
+            report,
+        )
+
+
+def _evaluate_rc023_completeness_rules(registry: dict, report: Report) -> None:
+    """The organization-completeness law v3.43.0 admits (ADR-040), pinned."""
+    path = RC023_REGISTRY_PATH
+    rules = registry.get("global_rules")
+    if not isinstance(rules, dict):
+        _rc023_fail(path, "global_rules", rules, "must be a mapping", report)
+    else:
+        if RC023_SUPERSEDED_GLOBAL_RULE in rules:
+            _rc023_fail(
+                path,
+                f"global_rules.{RC023_SUPERSEDED_GLOBAL_RULE}",
+                rules[RC023_SUPERSEDED_GLOBAL_RULE],
+                "superseded by organization completeness (ADR-040); it must not "
+                "coexist with organization_hosted_repositories_must_be_registered",
+                report,
+            )
+        for key in RC023_REQUIRED_GLOBAL_RULES:
+            _rc023_expect(path, f"global_rules.{key}", rules.get(key), True, report)
+    block = registry.get("organization_completeness")
+    _rc023_pinned(
+        path, "organization_completeness", block, RC023_ORG_COMPLETENESS, report
+    )
+    fields = _mapping(block).get("organization_admission_fields")
+    if not isinstance(fields, dict) or sorted(fields) != sorted(
+        RC023_ORG_ADMISSION_KEYS
+    ):
+        _rc023_fail(
+            path,
+            "organization_completeness.organization_admission_fields",
+            sorted(fields) if isinstance(fields, dict) else fields,
+            f"must name exactly {sorted(RC023_ORG_ADMISSION_KEYS)}",
+            report,
+        )
+    else:
+        for key, expected in (
+            ("basis", RC023_ORG_ADMISSION_BASIS),
+            ("decision_record", RC023_ORG_ADMISSION_DECISION),
+        ):
+            _rc023_expect(
+                path,
+                f"organization_completeness.organization_admission_fields.{key}",
+                fields.get(key),
+                expected,
+                report,
+            )
 
 
 def _evaluate_rc023(docs: dict[str, dict], report: Report) -> None:
@@ -6675,17 +6946,17 @@ def _check_rc023_negative_cases(docs: dict[str, dict], report: Report) -> None:
     case, _, registry = mutated()
     registry["repositories"].append(
         {
-            "id": "gate-sdk",
+            "id": "unadmitted-fixture",
             "coordinate": {
                 "provider": "github",
                 "organization": "Quantum-L9",
-                "repository": "Gate_SDK",
+                "repository": "Unadmitted.Fixture",
             },
             "lifecycle": "current",
             "class_ref": RC023_CLASS_ID,
         }
     )
-    add("extra repository admitted", case, rp, "repositories[gate-sdk].id")
+    add("extra repository admitted", case, rp, "repositories[unadmitted-fixture].id")
     case, _, registry = mutated()
     registry["repositories"].append(
         {
@@ -6758,6 +7029,80 @@ def _check_rc023_negative_cases(docs: dict[str, dict], report: Report) -> None:
     case, _, registry = mutated()
     entry(registry, "l9-wip")["lifecycle"] = "retired"
     add("admitted repository not current", case, rp, "repositories[l9-wip].lifecycle")
+    case, _, registry = mutated()
+    entry(registry, "golden-repo")["lifecycle"] = "current"
+    add(
+        "retired repository made current",
+        case,
+        rp,
+        "repositories[golden-repo].lifecycle",
+    )
+    # Organization completeness law (ADR-040).
+    case, _, registry = mutated()
+    registry["global_rules"][RC023_SUPERSEDED_GLOBAL_RULE] = True
+    add(
+        "superseded hosting rule reintroduced",
+        case,
+        rp,
+        f"global_rules.{RC023_SUPERSEDED_GLOBAL_RULE}",
+    )
+    for key in (
+        "organization_hosted_repositories_must_be_registered",
+        "registry_membership_does_not_imply_constellation_participation",
+        "registry_membership_does_not_imply_product_kind",
+    ):
+        case, _, registry = mutated()
+        registry["global_rules"][key] = False
+        add(f"global rule {key} false", case, rp, f"global_rules.{key}")
+    case, _, registry = mutated()
+    del registry["global_rules"]["every_entry_is_an_explicit_admission_decision"]
+    add(
+        "explicit admission rule dropped",
+        case,
+        rp,
+        "global_rules.every_entry_is_an_explicit_admission_decision",
+    )
+    case, _, registry = mutated()
+    del registry["organization_completeness"]
+    add("completeness block missing", case, rp, "organization_completeness")
+    for label, mutate, field_name in (
+        (
+            "completeness decision record wrong",
+            lambda b: b.update(decision_record="ADR-039"),
+            "organization_completeness.decision_record",
+        ),
+        (
+            "completeness excludes archived repositories",
+            lambda b: b["scope"].update(includes_archived_repositories=False),
+            "organization_completeness.scope",
+        ),
+        (
+            "completeness names another organization",
+            lambda b: b["scope"].update(organization="quantum-l9"),
+            "organization_completeness.scope",
+        ),
+        (
+            "archived lifecycle not retired",
+            lambda b: b.update(archived_repository_lifecycle="current"),
+            "organization_completeness.archived_repository_lifecycle",
+        ),
+        (
+            "admission fields drift",
+            lambda b: b["organization_admission_fields"].pop("observed_at"),
+            "organization_completeness.organization_admission_fields",
+        ),
+        (
+            "admission basis drifts",
+            lambda b: b["organization_admission_fields"].update(basis="hosting"),
+            "organization_completeness.organization_admission_fields.basis",
+        ),
+    ):
+        case, _, registry = mutated()
+        mutate(registry["organization_completeness"])
+        add(label, case, rp, field_name)
+    case, _, registry = mutated()
+    entry(registry, "gate-sdk")["id"] = "gate_sdk"
+    add("id not folded from its name", case, rp, "repositories[gate_sdk].id")
     case, _, registry = mutated()
     registry["repositories"][0] = "dot-github"
     add("repository entry not a mapping", case, rp, "repositories[0]")
@@ -6868,6 +7213,118 @@ def _check_rc023_negative_cases(docs: dict[str, dict], report: Report) -> None:
         rp,
         "repositories[l9-deploy].birth_provenance",
     )
+    # Organization-admitted entries (ADR-040). The positive shape is proven by
+    # ops/test-register-org-repository.py; each mutation must fail closed.
+    org_entry = {
+        "id": "org-fixture-repo",
+        "coordinate": {
+            "provider": RC023_PROVIDER,
+            "organization": RC023_ORGANIZATION,
+            "repository": "Org.Fixture_Repo",
+        },
+        "lifecycle": "current",
+        "class_ref": RC023_CLASS_ID,
+        "organization_admission": {
+            "basis": RC023_ORG_ADMISSION_BASIS,
+            "decision_record": RC023_ORG_ADMISSION_DECISION,
+            "github_repository_id": 123456789,
+            "observed_at": "2026-11-17T00:00:00Z",
+        },
+    }
+    org_field = "repositories[org-fixture-repo].organization_admission"
+    for label, mutate in (
+        (
+            "org entry wrong basis",
+            lambda e: e["organization_admission"].update(basis="hosting"),
+        ),
+        (
+            "org entry wrong decision record",
+            lambda e: e["organization_admission"].update(decision_record="ADR-039"),
+        ),
+        (
+            "org entry repository id not an integer",
+            lambda e: e["organization_admission"].update(github_repository_id="1"),
+        ),
+        (
+            "org entry repository id boolean",
+            lambda e: e["organization_admission"].update(github_repository_id=True),
+        ),
+        (
+            "org entry admission key missing",
+            lambda e: e["organization_admission"].pop("observed_at"),
+        ),
+        (
+            "org entry unknown admission key",
+            lambda e: e["organization_admission"].update(product_kind="node"),
+        ),
+        (
+            "org entry admission not a mapping",
+            lambda e: e.update(organization_admission="ADR-040"),
+        ),
+        ("org entry unknown key", lambda e: e.update(product_kind="node")),
+        (
+            "org entry also claims factory birth",
+            lambda e: e.update(
+                birth_provenance=copy.deepcopy(factory_entry["birth_provenance"])
+            ),
+        ),
+    ):
+        case, _, registry = mutated()
+        candidate_entry = copy.deepcopy(org_entry)
+        mutate(candidate_entry)
+        registry["repositories"].append(candidate_entry)
+        add(label, case, rp, org_field)
+    case, _, registry = mutated()
+    candidate_entry = copy.deepcopy(org_entry)
+    candidate_entry["id"] = "org-fixture"
+    registry["repositories"].append(candidate_entry)
+    add("org entry free-form id", case, rp, "repositories[org-fixture].id")
+    case, _, registry = mutated()
+    candidate_entry = copy.deepcopy(org_entry)
+    candidate_entry["id"] = "dot-github"
+    candidate_entry["coordinate"]["repository"] = "dot-github"
+    registry["repositories"].append(candidate_entry)
+    add("org entry takes a grandfathered id", case, rp, "repositories[dot-github].id")
+    case, _, registry = mutated()
+    entry(registry, "gate-sdk")["organization_admission"] = copy.deepcopy(
+        org_entry["organization_admission"]
+    )
+    add(
+        "pinned entry claims organization admission",
+        case,
+        rp,
+        "repositories[gate-sdk].organization_admission",
+    )
+    case, _, registry = mutated()
+    candidate_entry = copy.deepcopy(org_entry)
+    candidate_entry["id"] = "l9-deploy"
+    candidate_entry["coordinate"]["repository"] = "l9-deploy"
+    registry["repositories"].append(candidate_entry)
+    add(
+        "org entry re-registers a pinned repository",
+        case,
+        rp,
+        "repositories[l9-deploy].organization_admission",
+    )
+    for label, key, value, field_name in (
+        (
+            "org entry not current",
+            "lifecycle",
+            "retired",
+            "repositories[org-fixture-repo].lifecycle",
+        ),
+        (
+            "org entry wrong class",
+            "class_ref",
+            "l9.repository-class/external-fork@1",
+            "repositories[org-fixture-repo].class_ref",
+        ),
+    ):
+        case, _, registry = mutated()
+        candidate_entry = copy.deepcopy(org_entry)
+        candidate_entry[key] = value
+        registry["repositories"].append(candidate_entry)
+        add(label, case, rp, field_name)
     for label, candidate, case_path, field_name in cases:
         candidate_report = Report()
         try:
@@ -6914,9 +7371,12 @@ def check_rc023(docs: dict[str, dict], report: Report) -> None:
             f"obligation naming no profile or compiler receipt); {RC023_VIEW_ID} selects it over current/superseded/retired and "
             f"derives namespace {RC023_NAMESPACE} preserving id, coordinate, lifecycle, "
             f"class_ref with no consumer membership expansion or removal; the registry "
-            f"holds exactly the {RC023_REPOSITORY_COUNT} admitted repositories with "
-            "unique ids and unique case-sensitive github/Quantum-L9 coordinates, every "
-            "one current and assigned that class",
+            f"holds exactly the {RC023_REPOSITORY_COUNT} pinned repositories plus "
+            "shape-checked factory-born and organization-admitted entries, with unique "
+            "ids folded from their names (dot-github grandfathered), unique "
+            "case-sensitive github/Quantum-L9 coordinates and their pinned lifecycles, "
+            "every one assigned that class; the organization-completeness rules "
+            "(ADR-040) supersede organization_hosting_does_not_imply_l9_membership",
         )
         _check_rc023_negative_cases(docs, report)
 
