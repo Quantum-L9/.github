@@ -1,0 +1,91 @@
+document_kind: operator_foundational_doctrine
+doctrine_ref: qap/operator-doctrine
+revision: 1.0.0
+authority:
+  meaning_scope: Operator ideology and core values applicable to L9 and other explicitly bound operator-controlled
+    initiatives; not universal L9 constitutional law.
+  content_owner: Applicable operator / rights-holding authority (exact actor/grant pending)
+  change_control: Only an explicit owner-approved exact revision may change foundational doctrine. Agents may
+    surface conflicts and supporting evidence but may not self-amend it.
+  global_semantics_boundary: Do not modify Quantum-L9/.github/semantics global ledgers by treating operator
+    philosophy as universal law.
+foundational_ideology:
+  status: operator_approved_exact_v1_text
+  central_thesis: 'Durable progress compounds: meaningful achievement should increase the capacity to achieve
+    comparable future outcomes instead of producing isolated bursts of activity.'
+  progress_test: On a defensible comparable baseline, subsequent outcomes should be demonstrably easier, cheaper,
+    faster, more reliable, or more autonomous, without sacrificing necessary quality, integrity or control.
+  flywheel: Verified outcomes and admitted learning strengthen reusable capability; stronger capability reduces
+    repeated effort and opens further authorized opportunities; improvements must be observed, not declared.
+core_values:
+  compounding_leverage:
+    status: operator_approved_exact_v1_text
+    statement: Prefer choices that increase future authorized capacity through reusable capability, validated
+      learning, reduced recurring friction and retained optionality.
+    guardrail: Necessary one-off work, contractual obligations and safety or legal repairs remain valid even
+      without compounding returns. Leverage never overrides governing obligations.
+additional_core_value_candidates:
+  truth_and_evidence:
+    status: proposed_not_operator_adopted
+    statement: Distinguish observed fact, inference, forecast and aspiration; do not upgrade unsupported claims
+      to truth.
+  autonomy_and_accountability:
+    status: proposed_not_operator_adopted
+    statement: Increase independent competence without transferring strategic, legal or financial authority
+      by implication.
+  simplicity_and_irreducibility:
+    status: proposed_not_operator_adopted
+    statement: New complexity should satisfy a current obligation or produce justified compounding benefit.
+  sovereignty_and_independence:
+    status: proposed_not_operator_adopted
+    statement: Protect legitimate ownership, portable capabilities and freedom of strategic action.
+  durable_value_creation:
+    status: proposed_not_operator_adopted
+    statement: Prefer independently verifiable long-term economic and operating benefit to apparent activity
+      or prestige.
+first_principles:
+  status: operator_approved_v1_content
+  comparability: Assess compounding against a relevant baseline and comparable outcomes rather than arbitrary
+    activity volume.
+  bounded_leverage: Compounding is a portfolio/system-level directional preference, not a universal requirement
+    that every task yield a reusable artifact.
+  no_false_optimization: Any faster or cheaper alternative that violates applicable law, authority, privacy,
+    safety or required quality is inadmissible.
+  learning_is_not_authority: Evidence may challenge application of principles but does not authorize an agent
+    to revise the operator Doctrine or a Strategic Intent.
+convictions:
+  status: operator_approved_normative_conviction_not_empirical_fact
+  statement: Capability should accumulate through evidence-governed reuse, and the operator should increasingly
+    direct outcomes rather than repeat routine execution.
+  boundary: Causal product forecasts, market claims, algorithms and estimated financial returns remain testable
+    hypotheses in the Plan or their source-owning domains.
+boundaries:
+  higher_order_law: Applicable law and admitted global governance obligations govern every application of this
+    Doctrine.
+  no_personal_semantics_globalization: Core values remain operator scoped and never become new universal L9
+    invariants by file placement, repetition or model preference.
+  single_authoritative_writer: At most one active, operator-authorized editing surface per adopted Doctrine
+    revision. The temporary proposed home is private Git; a future Memory cutover must be explicit and single
+    writer.
+  no_automatic_downstream_revisions: Revising Doctrine triggers an impact review for bound Strategic Intent
+    and Plans; it does not automatically amend them.
+  availability_not_authority: An agent reading a doctrine, charter or private repository gains no extra permission,
+    legal role or Strategic Authority.
+intent_relationship:
+  dependent_ref: qap/l9-operator-strategic-intent
+  role: Doctrine supplies foundational meaning and constraints; Intent supplies the chosen L9-specific enduring
+    purpose. Intent and Plan must use exact applicable revisions without copying Doctrine values into separate
+    editable sources.
+  dependent_revision: 1.0.0
+storage_proposal:
+  current_candidate_home: Private Quantum-L9/.github/strategy/OPERATOR_DOCTRINE.yaml is the designated temporary
+    operator content owner; its effective state depends on the authorized repository revision, not this file
+    declaration. Git remains the sole writer until an approved atomic Memory cutover.
+  future_home: Only after explicitly approved and verified single-writer Memory cutover; no dual editing or
+    automatic synchronization.
+approval:
+  decision: operator_approved_predecessor_content_for_v1_admission_prep
+  approved_predecessor_zip_sha256: 43ff7370dc9e4f126b6f914babb57990efdc20a927569cff5b0ea91908d04c78
+  target_repository: Quantum-L9/.github
+  effective_as_repository_source_only_after_authorized_adoption: true
+  does_not_admit_global_l9_semantics: true
