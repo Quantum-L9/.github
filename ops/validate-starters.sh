@@ -58,6 +58,8 @@ else
     ops/test-distribution-triggers.js \
     ops/test-governance-pr-body.js \
     ops/test-birth-registry-workflow.js \
+    ops/test-org-admission-workflow.js \
+    ops/test-registry-completeness.js \
     ops/test-secret-drift-workflow.js \
     ops/test-governance-report.js; do
     if node "$t"; then
@@ -78,6 +80,16 @@ if python3 ops/test-register-birth.py; then
   PASS=$((PASS+1))
 else
   echo "❌ ops/test-register-birth.py"
+  FAIL=$((FAIL+1))
+fi
+
+# Organization-repository admission (ADR-040): the real tool against a copy of
+# this tree (needs python3 with PyYAML).
+if python3 ops/test-register-org-repository.py; then
+  echo "✅ ops/test-register-org-repository.py"
+  PASS=$((PASS+1))
+else
+  echo "❌ ops/test-register-org-repository.py"
   FAIL=$((FAIL+1))
 fi
 

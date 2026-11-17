@@ -62,3 +62,14 @@ Receipts are unkeyed. Production is attested by **trusted replay**: a workflow i
 - `l9.projection/coding-agent-execution@1` (no composition profile) — Cursor-Governance `generated/governance/coding_agent_execution/`, verified by the `l9-coding-agent` skill (ADR-020).
 
 Both bundles are cut by one producer driver in the consumer repository and attested by one replay workflow.
+
+## The repository registry is the single membership list (ADR-040)
+
+From v3.43.0 `semantics/repository_registry.yaml` is organization-complete: every repository the Quantum-L9 organization hosts is registered, and `ops/registry-completeness.js` (`registry-completeness.yml`) fails when one is not. It is the only list of organization members. A consumer derives membership from it through the admitted view `l9.repository-view/memory-namespace-l9@1` (`semantics/repository_classes.yaml`) and never keeps a list of its own (`downstream_obligations`).
+
+Membership is organization membership only: it implies no ProductKind, no Node and no constellation participation.
+
+Every registry release changes the view's output, so each consumer re-projects on it (`reproject_on_every_registry_release`). At v3.43.0 two consumers are behind:
+
+- `Quantum-L9/Cursor-Governance` — projection bundle pinned at `.github` `496842b` (33 repositories); refreshes its bundle and memory hints.
+- `Quantum-L9/l9-graphiti-memory` — corpus pinned at `9b27869` (32 repositories); projects the view into per-repository memory write grants. Namespace naming and grants stay the memory plane's.

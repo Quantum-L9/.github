@@ -17,6 +17,10 @@
 # proven green and complete. Restore the `schedule:` block below to re-enable.
 # Birth itself is immediate through repo-birth-bootstrap.yml.
 #
+# Registry admission (ADR-040): a targeted run also runs the `admit` job, which
+# proposes the repository's semantics/repository_registry.yaml entry as a
+# reviewable PR on this repository. See the job's comment.
+#
 # Managed seed files (MANAGED_SEED_PATHS in ops/build-seed-payload.js):
 # `.github/CODEOWNERS` (the org policies/CODEOWNERS, seeded into every class,
 # whether or not a root CODEOWNERS exists) and `.github/dependabot.yml`
@@ -481,3 +485,98 @@ jobs:
                 `${failed.length} repo(s) failed auto-seed: ${failed.join(', ')} — see job summary`,
               );
             }
+
+  # ADMIT to the repository registry (ADR-040). Since v3.43.0 the registry is
+  # organization-complete: every hosted repository must be registered. For a
+  # targeted repository (a repo_created dispatch, or target_repo on dispatch)
+  # this job proposes exactly its entry — folded id, the single admitted
+  # class, lifecycle current, no ProductKind — plus the registry-only release
+  # record, as one reviewable PR on this repository
+  # (ops/register-org-repository.py, ops/org-admission.js). It never merges:
+  # the owner's merge of that exact entry is the admission decision. A
+  # factory-born repository is skipped (repo-birth-bootstrap.yml registers it,
+  # ADR-039), and so is an archived one (admitted by hand, lifecycle retired).
+  # A sweep (no target) admits nothing: registry-completeness.yml reports every
+  # unregistered repository instead. Dry run renders the entry and writes nothing.
+  admit:
+    if: ${{ (inputs.target_repo || github.event.client_payload.repository || '') != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: governance-distribution
+    concurrency:
+      # Admissions and births both cut the next patch release; one at a time.
+      group: org-registry
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: |
+          pip install --only-binary=:all: "pyyaml==6.0.2"
+
+      - name: Observe the repository
+        id: observe
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        env:
+          TARGET_REPO: ${{ inputs.target_repo || github.event.client_payload.repository || '' }}
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const { classifyAdmissionTarget } = require('./ops/org-admission.js');
+            const decision = await classifyAdmissionTarget({ github, name: process.env.TARGET_REPO });
+            core.setOutput('action', decision.action);
+            if (decision.action !== 'admit') {
+              core.notice(`not admitted here: ${decision.reason}`);
+              return;
+            }
+            core.setOutput('github_id', String(decision.githubId));
+            core.setOutput('observed_at', new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'));
+
+      - name: Render and validate the admission
+        if: ${{ steps.observe.outputs.action == 'admit' }}
+        env:
+          TARGET_REPO: ${{ inputs.target_repo || github.event.client_payload.repository || '' }}
+          GITHUB_ID: ${{ steps.observe.outputs.github_id }}
+          OBSERVED_AT: ${{ steps.observe.outputs.observed_at }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          set -euo pipefail
+          if ! [[ "${TARGET_REPO}" =~ ^[A-Za-z0-9._-]{1,100}$ ]]; then
+            echo "::error::invalid repository name '${TARGET_REPO}'"
+            exit 1
+          fi
+          mode=apply
+          if [ "${DRY_RUN}" = "true" ]; then mode=render; fi
+          python3 ops/register-org-repository.py "${mode}" \
+            --repository "${TARGET_REPO}" \
+            --github-id "${GITHUB_ID}" \
+            --observed-at "${OBSERVED_AT}" \
+            --checkout "${GITHUB_WORKSPACE}" \
+            --changes-out "${RUNNER_TEMP}/org-admission/admission.json"
+
+      - name: Open or update the admission PR
+        if: ${{ steps.observe.outputs.action == 'admit' && inputs.dry_run != true }}
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        env:
+          RESULT_PATH: ${{ runner.temp }}/org-admission/admission.json
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const { execFileSync } = require('child_process');
+            const { openAdmissionPr } = require('./ops/org-admission.js');
+            await openAdmissionPr({
+              github, core, context,
+              result: JSON.parse(fs.readFileSync(process.env.RESULT_PATH, 'utf8')),
+              readFile: (p) => fs.readFileSync(p, 'utf8'),
+              baseSha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+              base: process.env.BASE_BRANCH,
+            });
