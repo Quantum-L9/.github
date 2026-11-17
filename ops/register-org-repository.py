@@ -42,6 +42,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -60,6 +61,11 @@ BIRTH_TOOL_PATH = "ops/register-birth.py"
 BASIS = "organization_completeness"
 DECISION_RECORD = "ADR-040"
 CHANGES_OUT_NAME = "admission.json"
+# The command line's only free text, checked before it reaches anything: a
+# GitHub repository name (the shape RC-023 folds into an id) and the UTC
+# second the organization listing returned it (what the workflow emits).
+REPOSITORY_NAME_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}")
+OBSERVED_AT_RE = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
 
 class OrgAdmissionError(RuntimeError):
@@ -413,6 +419,18 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     checkout = Path.cwd().resolve()
     try:
+        name = REPOSITORY_NAME_RE.fullmatch(args.repository)
+        if name is None:
+            raise OrgAdmissionError(
+                f"--repository {args.repository!r} is not a GitHub repository name"
+            )
+        observed = OBSERVED_AT_RE.fullmatch(args.observed_at)
+        if observed is None:
+            raise OrgAdmissionError(
+                f"--observed-at {args.observed_at!r} is not a UTC timestamp "
+                "YYYY-MM-DDTHH:MM:SSZ"
+            )
+        args.repository, args.observed_at = name.group(0), observed.group(0)
         if args.command == "render":
             result: dict[str, Any] = {
                 "status": "rendered",

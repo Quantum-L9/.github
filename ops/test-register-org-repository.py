@@ -129,6 +129,14 @@ class RegisterOrgRepositoryTest(unittest.TestCase):
         try:
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(ro.main(argv), 0)
+            with contextlib.redirect_stderr(io.StringIO()):
+                for flag, bad in (
+                    ("--repository", "bad/name"),
+                    ("--observed-at", "2026-11-17 12:00"),
+                ):
+                    bad_argv = list(argv)
+                    bad_argv[bad_argv.index(flag) + 1] = bad
+                    self.assertEqual(ro.main(bad_argv), 1, flag)
             with (
                 self.assertRaises(SystemExit),
                 contextlib.redirect_stderr(io.StringIO()),
