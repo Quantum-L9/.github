@@ -15,9 +15,13 @@
  */
 const assert = require("node:assert");
 const fs = require("node:fs");
-const os = require("node:os");
 const path = require("node:path");
-const { loadScriptModule, notFound } = require("./workflow-script-harness.js");
+const {
+	assertPassesPrGates,
+	loadScriptModule,
+	makeRegistryPrRunner,
+	scriptIndexAfter,
+} = require("./workflow-script-harness.js");
 
 const root = path.resolve(__dirname, "..");
 const WORKFLOW = path.join(root, ".github/workflows/repo-birth-bootstrap.yml");
@@ -26,21 +30,6 @@ const REPO = ".github";
 const BASE_SHA = "a".repeat(40);
 const BRANCH = "birth-registry/l9-state";
 const SUBJECT = "chore(registry): register factory-born Quantum-L9/l9-state";
-
-// The register job's PR script is the third `script: |` block in the file.
-const scriptIndex = (() => {
-	const lines = fs.readFileSync(WORKFLOW, "utf8").split("\n");
-	const starts = lines.flatMap((l, i) =>
-		/^\s*script:\s*\|\s*$/.test(l) ? [i] : [],
-	);
-	const marker = lines.findIndex((l) =>
-		l.includes("Open or update the registration PR"),
-	);
-	const idx = starts.findIndex((s) => s > marker);
-	assert.ok(marker !== -1 && idx !== -1, "register job script not found");
-	return idx;
-})();
-const run = loadScriptModule(WORKFLOW, "birth-registry-", scriptIndex);
 
 const entry = {
 	id: "l9-state",
@@ -64,166 +53,22 @@ const entry = {
 	},
 };
 
-async function scenario({
-	status = "added",
-	branch = null,
-	openPRs = [],
-	treeMatches = false,
-}) {
-	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "birth-registry-case-"));
-	const changed = [
-		"semantics/repository_registry.yaml",
-		"docs/semantic-foundation/v3.42.1/HASHES.sha256",
-	];
-	for (const rel of changed) {
-		fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
-		fs.writeFileSync(path.join(dir, rel), `content of ${rel}\n`);
-	}
-	const resultPath = path.join(dir, "registration.json");
-	fs.writeFileSync(
-		resultPath,
-		JSON.stringify({
-			status,
-			entry,
-			release: status === "added" ? "v3.42.1" : undefined,
-			changed_paths: status === "added" ? changed : [],
-		}),
-	);
-	const calls = [];
-	const rec = (name, fn) => async (args) => {
-		calls.push({ name, args });
-		return fn(args);
-	};
-	const github = {
-		rest: {
-			git: {
-				getCommit: rec("getCommit", ({ commit_sha }) => ({
-					data: {
-						tree: {
-							sha:
-								commit_sha === BASE_SHA
-									? "base-tree"
-									: treeMatches
-										? "new-tree"
-										: "old-tree",
-						},
-					},
-				})),
-				getRef: rec("getRef", () => {
-					if (!branch) throw notFound("no branch");
-					return { data: { object: { sha: branch.sha } } };
-				}),
-				createTree: rec("createTree", () => ({ data: { sha: "new-tree" } })),
-				createCommit: rec("createCommit", () => ({
-					data: { sha: "f".repeat(40) },
-				})),
-				updateRef: rec("updateRef", () => ({})),
-				createRef: rec("createRef", () => ({})),
-			},
-			repos: {
-				compareCommitsWithBasehead: rec("compare", () => ({
-					data: {
-						commits: (branch?.messages || []).map((message) => ({
-							commit: { message },
-						})),
-					},
-				})),
-			},
-			pulls: {
-				list: rec("pulls.list", () => ({
-					data: openPRs.map((n) => ({ number: n, html_url: `u/${n}` })),
-				})),
-				create: rec("pulls.create", () => ({ data: { html_url: "u/new" } })),
-				update: rec("pulls.update", () => ({})),
-				merge: rec("pulls.merge", () => ({})),
-			},
-		},
-	};
-	const failures = [];
-	const notices = [];
-	const core = {
-		notice: (m) => notices.push(m),
-		setFailed: (m) => failures.push(m),
-		info() {},
-	};
-	const childProcess = { execFileSync: () => `${BASE_SHA}\n` };
-	const scopedRequire = (m) =>
-		m === "child_process" ? childProcess : require(m);
-	const prevCwd = process.cwd();
-	const prevEnv = {
-		RESULT_PATH: process.env.RESULT_PATH,
-		BASE_BRANCH: process.env.BASE_BRANCH,
-	};
-	process.env.RESULT_PATH = resultPath;
-	process.env.BASE_BRANCH = "main";
-	process.chdir(dir);
-	try {
-		await run(
-			github,
-			core,
-			{
-				repo: { owner: OWNER, repo: REPO },
-				serverUrl: "https://github.com",
-				runId: 4242,
-			},
-			scopedRequire,
-		);
-	} finally {
-		process.chdir(prevCwd);
-		for (const [k, v] of Object.entries(prevEnv)) {
-			if (v === undefined) delete process.env[k];
-			else process.env[k] = v;
-		}
-		fs.rmSync(dir, { recursive: true, force: true });
-	}
-	const names = calls.map((c) => c.name);
-	assert.ok(!names.includes("pulls.merge"), "the registrar never merges");
-	for (const c of calls.filter((c) => c.name === "updateRef")) {
-		assert.strictEqual(
-			c.args.force,
-			false,
-			"the registration branch is never force-moved",
-		);
-	}
-	return {
-		calls,
-		names,
-		failures,
-		notices,
-		find: (n) => calls.find((c) => c.name === n),
-	};
-}
-
-// The same three rules .github/workflows/pr-gates.yml applies to every PR body
-// (registration PR #250 failed them before the body carried these sections).
-function assertPassesPrGates(body) {
-	const section = (name) => {
-		const m = body.match(
-			new RegExp(String.raw`##\s*${name}([\s\S]*?)(?=\n##\s|$)`, "i"),
-		);
-		return m ? m[1] : "";
-	};
-	// The generated body carries no HTML comments, so the Problem text is checked as is.
-	assert.ok(
-		!body.includes("<!" + "--"),
-		"registration body carries no HTML comments",
-	);
-	const problem = section("Problem").trim();
-	assert.ok(problem.length >= 30, "pr-gates: Problem section too short");
-	const risk = [
-		...section("Risk").matchAll(/^[ \t]*-[ \t]*\[([ xX])\]/gm),
-	].filter((m) => m[1] !== " ");
-	assert.strictEqual(
-		risk.length,
-		1,
-		"pr-gates: exactly one Risk level checked",
-	);
-	assert.match(
-		section("Evidence"),
-		/actions\/runs\/\d+/,
-		"pr-gates: Evidence links a CI run",
-	);
-}
+// The register job's PR script, run against the shared registry-PR stub.
+const scenario = makeRegistryPrRunner({
+	script: loadScriptModule(
+		WORKFLOW,
+		"birth-registry-",
+		scriptIndexAfter(WORKFLOW, "Open or update the registration PR"),
+	),
+	root,
+	tmpTag: "birth-registry-case-",
+	resultName: "registration.json",
+	entry,
+	release: "v3.42.1",
+	owner: OWNER,
+	repo: REPO,
+	baseSha: BASE_SHA,
+});
 
 (async () => {
 	// 1. First birth: new branch, one commit on base, one PR.

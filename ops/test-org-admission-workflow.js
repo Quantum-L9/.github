@@ -18,9 +18,15 @@
  */
 const assert = require("node:assert");
 const fs = require("node:fs");
-const os = require("node:os");
 const path = require("node:path");
-const { loadScriptModule, notFound } = require("./workflow-script-harness.js");
+const {
+	assertPassesPrGates,
+	loadScriptModule,
+	makeRegistryPrRunner,
+	makeScopedRequire,
+	notFound,
+	scriptIndexAfter,
+} = require("./workflow-script-harness.js");
 
 const root = path.resolve(__dirname, "..");
 const WORKFLOW = path.join(root, ".github/workflows/auto-seed-new-repo.yml");
@@ -31,32 +37,11 @@ const TARGET = "New.Org_Repo";
 const BRANCH = `org-registry/${TARGET}`;
 const SUBJECT = `chore(registry): admit organization repository ${OWNER}/${TARGET}`;
 
-const scriptIndex = (label) => {
-	const lines = fs.readFileSync(WORKFLOW, "utf8").split("\n");
-	const starts = lines.flatMap((l, i) =>
-		/^\s*script:\s*\|\s*$/.test(l) ? [i] : [],
-	);
-	const marker = lines.findIndex((l) => l.includes(label));
-	const idx = starts.findIndex((s) => s > marker);
-	assert.ok(marker !== -1 && idx !== -1, `${label} script not found`);
-	return idx;
-};
 const observe = loadScriptModule(
 	WORKFLOW,
 	"org-admit-observe-",
-	scriptIndex("Observe the repository"),
+	scriptIndexAfter(WORKFLOW, "Observe the repository"),
 );
-const openPr = loadScriptModule(
-	WORKFLOW,
-	"org-admit-pr-",
-	scriptIndex("Open or update the admission PR"),
-);
-const scopedRequire =
-	(overrides = {}) =>
-	(m) => {
-		if (Object.hasOwn(overrides, m)) return overrides[m];
-		return require(m.startsWith(".") ? path.resolve(root, m) : m);
-	};
 
 const entry = {
 	id: "new-org-repo",
@@ -109,7 +94,7 @@ async function runObserve({ repo = {}, receipt = 404, name = TARGET } = {}) {
 	process.chdir(root);
 	let error = null;
 	try {
-		await observe(github, core, {}, scopedRequire());
+		await observe(github, core, {}, makeScopedRequire(root));
 	} catch (e) {
 		error = e;
 	} finally {
@@ -120,163 +105,21 @@ async function runObserve({ repo = {}, receipt = 404, name = TARGET } = {}) {
 	return { calls, outputs, notices, error };
 }
 
-async function runPr({
-	status = "added",
-	branch = null,
-	openPRs = [],
-	treeMatches = false,
-} = {}) {
-	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "org-admission-case-"));
-	const changed = [
-		"semantics/repository_registry.yaml",
-		"docs/semantic-foundation/v3.43.1/HASHES.sha256",
-	];
-	for (const rel of changed) {
-		fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
-		fs.writeFileSync(path.join(dir, rel), `content of ${rel}\n`);
-	}
-	const resultPath = path.join(dir, "admission.json");
-	fs.writeFileSync(
-		resultPath,
-		JSON.stringify({
-			status,
-			entry,
-			release: status === "added" ? "v3.43.1" : undefined,
-			changed_paths: status === "added" ? changed : [],
-		}),
-	);
-	const calls = [];
-	const rec = (n, fn) => async (args) => {
-		calls.push({ name: n, args });
-		return fn(args);
-	};
-	const github = {
-		rest: {
-			git: {
-				getCommit: rec("getCommit", ({ commit_sha }) => ({
-					data: {
-						tree: {
-							sha:
-								commit_sha === BASE_SHA
-									? "base-tree"
-									: treeMatches
-										? "new-tree"
-										: "old-tree",
-						},
-					},
-				})),
-				getRef: rec("getRef", () => {
-					if (!branch) throw notFound("no branch");
-					return { data: { object: { sha: branch.sha } } };
-				}),
-				createTree: rec("createTree", () => ({ data: { sha: "new-tree" } })),
-				createCommit: rec("createCommit", () => ({
-					data: { sha: "f".repeat(40) },
-				})),
-				updateRef: rec("updateRef", () => ({})),
-				createRef: rec("createRef", () => ({})),
-			},
-			repos: {
-				compareCommitsWithBasehead: rec("compare", () => ({
-					data: {
-						commits: (branch?.messages || []).map((message) => ({
-							commit: { message },
-						})),
-					},
-				})),
-			},
-			pulls: {
-				list: rec("pulls.list", () => ({
-					data: openPRs.map((n) => ({ number: n, html_url: `u/${n}` })),
-				})),
-				create: rec("pulls.create", () => ({ data: { html_url: "u/new" } })),
-				update: rec("pulls.update", () => ({})),
-				merge: rec("pulls.merge", () => ({})),
-			},
-		},
-	};
-	const failures = [];
-	const notices = [];
-	const core = {
-		notice: (m) => notices.push(m),
-		setFailed: (m) => failures.push(m),
-		info() {},
-	};
-	const prevEnv = {
-		RESULT_PATH: process.env.RESULT_PATH,
-		BASE_BRANCH: process.env.BASE_BRANCH,
-	};
-	process.env.RESULT_PATH = resultPath;
-	process.env.BASE_BRANCH = "main";
-	const prevCwd = process.cwd();
-	process.chdir(dir);
-	try {
-		await openPr(
-			github,
-			core,
-			{
-				repo: { owner: OWNER, repo: REPO },
-				serverUrl: "https://github.com",
-				runId: 4242,
-			},
-			scopedRequire({ child_process: { execFileSync: () => `${BASE_SHA}\n` } }),
-		);
-	} finally {
-		process.chdir(prevCwd);
-		for (const [k, v] of Object.entries(prevEnv)) {
-			if (v === undefined) delete process.env[k];
-			else process.env[k] = v;
-		}
-		fs.rmSync(dir, { recursive: true, force: true });
-	}
-	const names = calls.map((c) => c.name);
-	assert.ok(!names.includes("pulls.merge"), "the admission job never merges");
-	for (const c of calls.filter((c) => c.name === "updateRef")) {
-		assert.strictEqual(
-			c.args.force,
-			false,
-			"the admission branch is never force-moved",
-		);
-	}
-	return {
-		calls,
-		names,
-		failures,
-		notices,
-		find: (n) => calls.find((c) => c.name === n),
-	};
-}
-
-// The three rules .github/workflows/pr-gates.yml applies to every PR body.
-function assertPassesPrGates(body) {
-	const section = (name) => {
-		const m = body.match(
-			new RegExp(String.raw`##\s*${name}([\s\S]*?)(?=\n##\s|$)`, "i"),
-		);
-		return m ? m[1] : "";
-	};
-	assert.ok(
-		!body.includes("<!" + "--"),
-		"admission body carries no HTML comments",
-	);
-	assert.ok(
-		section("Problem").trim().length >= 30,
-		"pr-gates: Problem section too short",
-	);
-	const risk = [
-		...section("Risk").matchAll(/^[ \t]*-[ \t]*\[([ xX])\]/gm),
-	].filter((m) => m[1] !== " ");
-	assert.strictEqual(
-		risk.length,
-		1,
-		"pr-gates: exactly one Risk level checked",
-	);
-	assert.match(
-		section("Evidence"),
-		/actions\/runs\/\d+/,
-		"pr-gates: Evidence links a CI run",
-	);
-}
+const runPr = makeRegistryPrRunner({
+	script: loadScriptModule(
+		WORKFLOW,
+		"org-admit-pr-",
+		scriptIndexAfter(WORKFLOW, "Open or update the admission PR"),
+	),
+	root,
+	tmpTag: "org-admission-case-",
+	resultName: "admission.json",
+	entry,
+	release: "v3.43.1",
+	owner: OWNER,
+	repo: REPO,
+	baseSha: BASE_SHA,
+});
 
 (async () => {
 	// Observe: an ordinary repository is admitted with its GitHub id.
@@ -429,6 +272,11 @@ function assertPassesPrGates(body) {
 			/if \[ "\$\{DRY_RUN\}" = "true" \]; then mode=render; fi/,
 		);
 		assert.match(job, /python3 ops\/register-org-repository\.py "\$\{mode\}"/);
+		assert.match(
+			job,
+			/--observed-at "\$\{OBSERVED_AT\}" \\\n {12}--write-result\n/,
+			"the CLI carries no file path; the result goes to its one fixed file",
+		);
 		assert.match(
 			job,
 			/if: \$\{\{ steps\.observe\.outputs\.action == 'admit' && inputs\.dry_run != true \}\}/,
