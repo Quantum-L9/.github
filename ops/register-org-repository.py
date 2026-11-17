@@ -10,7 +10,12 @@ so that nobody types it by hand:
 
     register-org-repository.py render --repository NAME --github-id N --observed-at TS
     register-org-repository.py apply  --repository NAME --github-id N --observed-at TS \\
-                                      [--checkout DIR] [--changes-out FILE]
+                                      [--write-result]
+
+Run from the `.github` checkout: the working directory is the tree read and
+written. The command line carries no file path. `--write-result` writes the
+apply result to the one fixed file `$RUNNER_TEMP/org-admission/admission.json`
+(the system temp directory when RUNNER_TEMP is unset).
 
 The entry is fixed by law, never chosen here: id = the folding of the name
 (rc023_factory_repository_id), the single current admitted RepositoryClass,
@@ -352,8 +357,7 @@ def run_validator(checkout: Path) -> None:
         )
 
 
-def apply(args: argparse.Namespace) -> dict[str, Any]:
-    checkout = Path(args.checkout).resolve()
+def apply(args: argparse.Namespace, checkout: Path) -> dict[str, Any]:
     entry = render(args, checkout)
     birth = _birth_tool(checkout)
     registry_file = checkout / REGISTRY_PATH
@@ -402,30 +406,28 @@ def main(argv: list[str] | None = None) -> int:
         "--archived", action="store_true", help="the repository is archived (refused)"
     )
     parser.add_argument(
-        "--checkout", default=".", help="Quantum-L9/.github checkout (default: cwd)"
-    )
-    parser.add_argument(
-        "--changes-out", help="write the apply result as JSON to this file"
+        "--write-result",
+        action="store_true",
+        help="also write the result as JSON to $RUNNER_TEMP/org-admission/admission.json",
     )
     args = parser.parse_args(argv)
+    checkout = Path.cwd().resolve()
     try:
-        if args.changes_out:
-            target = changes_out_target()
-            if Path(args.changes_out).resolve() != target or target.is_symlink():
-                raise OrgAdmissionError(f"--changes-out must be exactly {target}")
         if args.command == "render":
             result: dict[str, Any] = {
                 "status": "rendered",
-                "entry": render(args, Path(args.checkout).resolve()),
+                "entry": render(args, checkout),
             }
         else:
-            result = apply(args)
+            result = apply(args, checkout)
+        out = changes_out_target()
+        if args.write_result and out.is_symlink():
+            raise OrgAdmissionError(f"{out} must not be a symlink")
     except OrgAdmissionError as exc:
         print(f"register-org-repository: REFUSED: {exc}", file=sys.stderr)
         return 1
     text = json.dumps(result, indent=2, sort_keys=True)
-    if args.changes_out:
-        out = changes_out_target()
+    if args.write_result:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(text + "\n", encoding="utf-8")
     print(text)

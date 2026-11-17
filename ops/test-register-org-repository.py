@@ -10,7 +10,11 @@ and that every refusal fails closed without leaving a partial write.
 
 from __future__ import annotations
 
+import contextlib
 import importlib.util
+import io
+import json
+import os
 import shutil
 import sys
 import tempfile
@@ -45,13 +49,11 @@ def copy_dotgithub(base: Path) -> Path:
 
 
 class Args:
-    def __init__(self, checkout: Path, repository: str = REPO, **overrides) -> None:
-        self.checkout = str(checkout)
+    def __init__(self, repository: str = REPO, **overrides) -> None:
         self.repository = repository
         self.github_id = GITHUB_ID
         self.observed_at = OBSERVED_AT
         self.archived = False
-        self.changes_out = None
         for key, value in overrides.items():
             setattr(self, key, value)
 
@@ -97,17 +99,51 @@ class RegisterOrgRepositoryTest(unittest.TestCase):
     # ── rendering ────────────────────────────────────────────────────────
 
     def test_renders_the_entry_the_law_fixes(self) -> None:
-        entry = ro.render(Args(self.checkout), self.checkout)
+        entry = ro.render(Args(), self.checkout)
         self.assertEqual(entry, expected_entry())
         self.assertNotIn("product_kind", entry)
         self.assertEqual(self.validator.rc023_org_entry_problems(entry), [])
 
     def test_rendered_yaml_round_trips_and_quotes_timestamps(self) -> None:
-        entry = ro.render(Args(self.checkout), self.checkout)
+        entry = ro.render(Args(), self.checkout)
         text = ro.render_entry_yaml(self.birth, entry)
         self.assertIn(f'observed_at: "{OBSERVED_AT}"', text)
         self.assertIn(f"github_repository_id: {GITHUB_ID}\n", text)
         self.assertEqual(ro.yaml.safe_load("x:\n" + text)["x"][0], entry)
+
+    def test_cli_reads_the_working_directory_and_writes_one_fixed_result(self) -> None:
+        """The command line carries no path: cwd is the tree, the result file is fixed."""
+        argv = [
+            "render",
+            "--repository",
+            REPO,
+            "--github-id",
+            str(GITHUB_ID),
+            "--observed-at",
+            OBSERVED_AT,
+            "--write-result",
+        ]
+        prev_cwd, prev_temp = os.getcwd(), os.environ.get("RUNNER_TEMP")
+        os.chdir(self.checkout)
+        os.environ["RUNNER_TEMP"] = str(self.case)
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(ro.main(argv), 0)
+            with (
+                self.assertRaises(SystemExit),
+                contextlib.redirect_stderr(io.StringIO()),
+            ):
+                ro.main([*argv, "--changes-out", str(self.case / "x.json")])
+        finally:
+            os.chdir(prev_cwd)
+            if prev_temp is None:
+                os.environ.pop("RUNNER_TEMP", None)
+            else:
+                os.environ["RUNNER_TEMP"] = prev_temp
+        written = json.loads(
+            (self.case / "org-admission" / "admission.json").read_text()
+        )
+        self.assertEqual(written, {"status": "rendered", "entry": expected_entry()})
 
     def test_registry_ids_follow_the_folding_rule(self) -> None:
         """Every registered id is fold(name) except the grandfathered ones."""
@@ -126,7 +162,7 @@ class RegisterOrgRepositoryTest(unittest.TestCase):
     def test_apply_writes_entry_and_release_that_pass_the_validator(self) -> None:
         checkout = copy_dotgithub(self.case)
         major, minor, patch = self.birth.release_versions(checkout)[-1]
-        result = ro.apply(Args(checkout))
+        result = ro.apply(Args(), checkout)
         self.assertEqual(result["status"], "added")
         version = f"v{major}.{minor}.{patch + 1}"
         self.assertEqual(result["release"], version)
@@ -144,7 +180,7 @@ class RegisterOrgRepositoryTest(unittest.TestCase):
         self.assertEqual(registry["repositories"][-1], expected_entry())
         # apply ran the full semantic validator on this tree and kept it only
         # because it passed; a failing tree would have been restored.
-        again = ro.apply(Args(checkout))
+        again = ro.apply(Args(), checkout)
         self.assertEqual(again["status"], "present")
         self.assertEqual(again["changed_paths"], [])
         self.assertEqual(
@@ -160,7 +196,7 @@ class RegisterOrgRepositoryTest(unittest.TestCase):
         registry_before = (checkout / ro.REGISTRY_PATH).read_bytes()
         releases_before = self.birth.release_versions(checkout)
         with self.assertRaises(ro.OrgAdmissionError):
-            ro.apply(Args(checkout, repository, **args_overrides))
+            ro.apply(Args(repository, **args_overrides), checkout)
         self.assertEqual((checkout / ro.REGISTRY_PATH).read_bytes(), registry_before)
         self.assertEqual(self.birth.release_versions(checkout), releases_before)
 
@@ -192,7 +228,7 @@ class RegisterOrgRepositoryTest(unittest.TestCase):
         )
         classes_path.write_text(ro.yaml.safe_dump(classes))
         with self.assertRaises(ro.OrgAdmissionError):
-            ro.render(Args(checkout), checkout)
+            ro.render(Args(), checkout)
 
     def test_validator_rejects_the_entry_without_its_marker(self) -> None:
         """Without organization_admission an extra entry still needs the census pin."""

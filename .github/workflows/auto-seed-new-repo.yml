@@ -558,8 +558,7 @@ jobs:
             --repository "${TARGET_REPO}" \
             --github-id "${GITHUB_ID}" \
             --observed-at "${OBSERVED_AT}" \
-            --checkout "${GITHUB_WORKSPACE}" \
-            --changes-out "${RUNNER_TEMP}/org-admission/admission.json"
+            --write-result
 
       - name: Open or update the admission PR
         if: ${{ steps.observe.outputs.action == 'admit' && inputs.dry_run != true }}
