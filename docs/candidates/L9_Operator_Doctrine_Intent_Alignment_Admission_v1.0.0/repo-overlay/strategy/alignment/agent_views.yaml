@@ -1,0 +1,221 @@
+artifact_kind: operator_alignment_role_views
+version: 1.0.0
+status: operator_approved_view_contract_not_host_enforcement
+profile_ref: qap.operator-alignment/profile@1
+source_integrity:
+  doctrine_ref: qap/operator-doctrine
+  doctrine_revision: 1.0.0
+  intent_ref: qap/l9-operator-strategic-intent
+  intent_revision: 1.0.0
+view_rules:
+  select_only_declared_operator_source_paths: true
+  global_semantics_remain_separately_projected_and_verified: true
+  no_view_grants_permissions: true
+  privileged_views_require_actual_authorized_credential_and_source_access: true
+  coding_agent_receives_delegated_obligations_only: true
+  source_content_must_not_leak_into_restricted_view: true
+  missing_or_unadmitted_required_revision_blocks_runtime_activation: true
+  profile_or_source_digest_change_invalidates_affected_views: true
+  all_generated_previews_are_non_authoritative_and_not_runtime_bundles: true
+views:
+  planner:
+    view_ref: qap.operator-alignment/planner-view@1
+    consumer_role: plan_keeper
+    privileged: true
+    doctrine_paths:
+    - /foundational_ideology
+    - /core_values/compounding_leverage
+    - /first_principles
+    - /boundaries
+    intent_paths:
+    - /content/enduring_purpose
+    - /content/long_term_success
+    - /content/nonnegotiables
+    - /content/tradeoff_doctrine
+    - /content/learning_and_evolution
+    - /relationship_to_strategy
+    external_context:
+    - authorized_exact_strategic_plan_revision
+    - strategic_value_and_relevant_evidence
+    global_profiles:
+    - l9.projection/strategic-planning-context@2
+    - l9.projection/strategic-value@1
+    - l9.projection/governance@1
+    - l9.projection/signals@1
+    decision_questions:
+    - Does the proposed goal or commitment advance the approved L9 Intent?
+    - Does it violate a Doctrine boundary or displace a protected Plan commitment?
+    - Which causal hypotheses are evidence-backed and which are Unknown?
+    cannot:
+    - create_strategic_authority_by_projection
+    - automatically_admit_plan_revisions
+    - silently_amend_doctrine_or_intent
+  meta_planner:
+    view_ref: qap.operator-alignment/meta-planner-view@1
+    consumer_role: strategic_plan_metacognitive_reasoner
+    privileged: true
+    doctrine_paths:
+    - /foundational_ideology
+    - /core_values/compounding_leverage
+    - /first_principles
+    - /boundaries
+    intent_paths:
+    - /content/enduring_purpose
+    - /content/long_term_success
+    - /content/nonnegotiables
+    - /content/tradeoff_doctrine
+    - /relationship_to_strategy
+    external_context:
+    - authorized_exact_strategic_plan_revision
+    - planning_episodes_and_outcome_evidence
+    global_profiles:
+    - l9.projection/strategic-metacognition@2
+    - l9.projection/strategic-value@1
+    - l9.projection/governance@1
+    - l9.projection/evidence-provenance@1
+    decision_questions:
+    - Is reasoning drifting from the operator Doctrine or accepted Strategic Intent?
+    - Has activity been mistaken for realized compounding or economic results?
+    - Which reasoning flaws warrant an advisory reconsideration?
+    cannot:
+    - mutate_the_strategic_plan
+    - supersede_plan_keeper
+    - grant_strategic_authority
+    - silently_revise_doctrine_or_intent
+  cto:
+    view_ref: qap.operator-alignment/cto-view@1
+    consumer_role: technical_coordination_role
+    privileged: true
+    doctrine_paths:
+    - /foundational_ideology
+    - /core_values/compounding_leverage
+    - /first_principles
+    - /boundaries
+    intent_paths:
+    - /content/enduring_purpose
+    - /content/long_term_success
+    - /content/nonnegotiables
+    - /content/tradeoff_doctrine
+    - /content/agent_operating_philosophy
+    external_context:
+    - authorized_plan_closure_relevant_to_current_coordination
+    - technical_contracts_and_evidence
+    global_profiles:
+    - l9.projection/technical-coordination@1
+    - l9.projection/architecture@1
+    - l9.projection/governance@1
+    - l9.projection/strategic-value@1
+    - l9.projection/contracts-conformance@1
+    - l9.projection/capabilities-dependencies@1
+    decision_questions:
+    - Does this technical path increase durable capability without violating constraints?
+    - Can the required result reuse an existing owner and compatible contract?
+    - Is scope or strategic commitment displacement being proposed without authority?
+    cannot:
+    - grant_new_strategic_or_publication_authority
+    - copy_the_full_plan_to_working_agents
+    - expand_frozen_architecture_without_revision
+  architect:
+    view_ref: qap.operator-alignment/architect-view@1
+    consumer_role: l9_architecture_decision_role
+    privileged: true
+    doctrine_paths:
+    - /foundational_ideology
+    - /core_values/compounding_leverage
+    - /first_principles
+    - /boundaries
+    intent_paths:
+    - /content/enduring_purpose
+    - /content/nonnegotiables
+    - /content/tradeoff_doctrine
+    - /content/agent_operating_philosophy
+    external_context:
+    - authorized_strategy_closure_for_architecture_question
+    - current_authoritative_architecture_and_proof
+    global_profiles:
+    - l9.projection/architecture@1
+    - l9.projection/governance@1
+    - l9.projection/evidence-provenance@1
+    - l9.projection/contracts-conformance@1
+    - l9.projection/strategic-value@1
+    decision_questions:
+    - Does the proposed architecture satisfy real obligations at the correct semantic owner?
+    - Would a smaller existing architecture serve the stated intent?
+    - Which alternative preserves ownership, replaceability, and justified compounding?
+    cannot:
+    - admit_global_semantics
+    - substitute_design_preference_for_operator_ideology
+    - authorize_execution_by_view_consumption
+  coding_agent:
+    view_ref: qap.operator-alignment/coding-agent-view@1
+    consumer_role: l9_coding_agent
+    privileged: false
+    doctrine_paths: []
+    intent_paths: []
+    external_context:
+    - verified_bounded_task_contract
+    - applicable_global_coding_execution_projection
+    - target_owned_constraints_and_test_evidence
+    global_profiles:
+    - l9.projection/coding-agent-execution@1
+    - l9.projection/governance@1
+    - l9.projection/contracts-conformance@1
+    decision_questions:
+    - Can I complete the authorized task inside the accepted scope and architecture?
+    - What verified acceptance evidence is required for this task?
+    - Is a protected or out-of-scope change necessary, requiring upstream escalation?
+    cannot:
+    - read_full_operator_doctrine
+    - read_full_operator_strategic_intent
+    - read_full_protected_strategic_plan
+    - acquire_strategic_authority
+    - expand_task_or_publish_without_independent_permission
+    delegated_obligations:
+    - id: bounded_execution
+      summary: Complete only the authorized bounded task under its stated constraints and acceptance criteria.
+      source: intent
+      pointer: /content/agent_operating_philosophy/coding_agents
+      evidence_quote: Receive only bounded task objectives
+      source_value_sha256: e1c27484924be92c5a03790dda17225181a3af144d97d1fbb21480fff5ab1a0d
+      summary_review_state: candidate_requires_operator_review_before_delegation
+    - id: reuse_when_justified
+      summary: Reuse a proven, governed, compatible L9 capability when it satisfies the authorized task; avoid
+        unrelated abstractions.
+      source: intent
+      pointer: /content/tradeoff_doctrine/governed_reuse_before_reinvention
+      evidence_quote: reuse proven, governed, compatible L9 capabilities
+      source_value_sha256: e9269a7f1f8fc827a89e93de57a9169acbbccbc7095284fc668274612384e06f
+      summary_review_state: candidate_requires_operator_review_before_delegation
+    - id: necessary_one_off_allowed
+      summary: Necessary one-off work and mandatory repairs remain valid even without reusable leverage.
+      source: doctrine
+      pointer: /core_values/compounding_leverage/guardrail
+      evidence_quote: Necessary one-off work, contractual obligations and safety or legal repairs
+      source_value_sha256: a1c700252866f4e6fe29e6c50a86004a15e0423f19baa4ee52ba038dbcd23d4c
+      summary_review_state: candidate_requires_operator_review_before_delegation
+    - id: verify_outcome
+      summary: Distinguish implementation, tests, releases, forecasts and verified results; do not misstate
+        activity as success.
+      source: intent
+      pointer: /content/nonnegotiables/truthful_evidence
+      evidence_quote: None may be misrepresented as operating or economic success.
+      source_value_sha256: 7fc0ed32a6c241eb84a09c64172321d201dae4dd04f64ce4f9ed6572320a46ed
+      summary_review_state: candidate_requires_operator_review_before_delegation
+    - id: preserve_governance
+      summary: Reading a source or receiving a generated view never grants extra authority or permissions.
+      source: doctrine
+      pointer: /boundaries/availability_not_authority
+      evidence_quote: gains no extra permission
+      source_value_sha256: b4a8ce1827c87aee1d38179cf5d9e7bd7ccf9ca24567995db23ac33a7e81109f
+      summary_review_state: candidate_requires_operator_review_before_delegation
+    - id: close_without_scope_creep
+      summary: Once authorized acceptance and required closeout are verified, stop; record optional work separately.
+      source: intent
+      pointer: /content/tradeoff_doctrine/completion_boundary
+      evidence_quote: When all accepted conditions and mandatory closeout obligations are verified
+      source_value_sha256: 24f1957e0a789d595c95d05d7e1d7a10c75e92e106a3e9eb46660ce98a71f2c1
+      summary_review_state: candidate_requires_operator_review_before_delegation
+    delegation_rule: Only a privileged authorized upstream coordinator may derive and deliver these scoped
+      obligations through a task contract; the worker does not fetch the operator source files.
+    access_enforcement: Operating host/credentials must deny direct access to the private operator sources
+      and protected plan; prompt text and view filtering are not access control.

@@ -1,0 +1,72 @@
+artifact_kind: operator_scoped_alignment_selection_not_global_l9_profile
+profile_ref: qap.operator-alignment/profile@1
+pack_revision: 1.0.0
+decision_status: operator_approved_source_scoped_design_not_runtime_enforcement
+scope: Quantum AI Partners operator doctrine and L9-specific intent; consumers receive scoped derived context
+semantic_authority:
+  operator_sources_owner: applicable_operator_and_strategic_authority_exact_grant_pending
+  global_semantics_owner: Quantum-L9/.github
+  read_or_projection_is_not_authorization: true
+  no_universal_operator_values: true
+  no_new_global_domain: true
+  source_instance_is_not_a_global_projection_profile: true
+source_instances:
+  doctrine:
+    ref: qap/operator-doctrine
+    revision: 1.0.0
+    path: strategy/OPERATOR_DOCTRINE.yaml
+    sha256: 2b454ee209764461030b39bb766a9adc94b92f4c3b10bb3a6b6188cb44b31f11
+    authority_state: operator_owned_record_requires_verified_effective_adoption
+  intent:
+    ref: qap/l9-operator-strategic-intent
+    revision: 1.0.0
+    path: strategy/operator_strategic_intent.yaml
+    sha256: 86487ee6fc524644fa177b53313ace8a3c23e205ad2589c9ed3c8095ce3593dd
+    authority_state: operator_owned_record_requires_verified_effective_adoption
+    must_reference_doctrine_ref: qap/operator-doctrine
+    must_reference_doctrine_revision: 1.0.0
+selection_policy:
+  privileged_selector_allowlist:
+    doctrine:
+    - /foundational_ideology
+    - /core_values/compounding_leverage
+    - /first_principles
+    - /boundaries
+    intent:
+    - /content/enduring_purpose
+    - /content/long_term_success
+    - /content/nonnegotiables
+    - /content/tradeoff_doctrine
+    - /content/learning_and_evolution
+    - /content/agent_operating_philosophy
+    - /relationship_to_strategy
+  pin_exact_content_digests_and_revisions: true
+  check_doctrine_intent_reference_closure: true
+  verify_operator_approval_for_exact_source_revisions_before_activation: true
+  do_not_treat_proposed_core_values_as_adopted: true
+  do_not_synthesize_new_values_from_agent_reasoning: true
+  separate_registered_global_domains_from_operator_owned_instances: true
+  detect_source_or_profile_change_and_invalidate_affected_views: true
+  do_not_automatically_revise_doctrine_intent_or_plan: true
+  apply_source_specific_conflict_rule_or_block_material_conflicts: true
+  view_transformation_is_read_only_non_authoritative: true
+runtime_boundary:
+  profile_is_not_executable_producer_configuration: true
+  current_global_domain_set_is_closed_v1: true
+  current_global_producer_accepts_registered_global_canonical_sources_only: true
+  privileged_operator_view_renderer_is_a_proposed_owner_scoped_adapter_not_a_new_global_writer: true
+  reuse_existing_verified_global_projection_bundles_unchanged: true
+  compose_only_in_consumer_context_with_source_namespaces_and_provenance: true
+  do_not_emulate_l9_projection_artifact_or_compiler_receipt: true
+  deny_consumer_activation_until_source_authority_and_access_are_verified: true
+  no_host_mode_or_projection_grants_permission: true
+visibility:
+  privileged_roles:
+  - planner
+  - meta_planner
+  - cto
+  - architect
+  coding_agent: upstream_delegated_task_obligations_only
+  projections_never_confer_credential_read_access: true
+  path_scoped_or_secret_scoped_read_permission_must_be_enforced_by_host_or_storage: true
+  private_repository_visibility_alone_is_not_role_scoped: true
