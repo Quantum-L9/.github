@@ -243,6 +243,23 @@ gh api -X PUT orgs/Quantum-L9/actions/permissions \
 governance report names repos whose Actions policy would stop the caller, and
 points here.
 
+### When this repository becomes private
+
+This repository stays public. The steps below are the record for a later
+visibility change. They are not done here.
+
+`uses: Quantum-L9/.github/...` is resolved with the caller's `GITHUB_TOKEN`
+before any secret exists. A private reusable workflow needs this repository's
+Actions access set to repositories in the `Quantum-L9` organization. The
+organization secret `L9_GITHUB_READ_TOKEN` does not authenticate that `uses:`
+lookup.
+
+A later full git clone of a private `.github` can use `L9_GITHUB_READ_TOKEN`
+only when that credential is allowed to read this repository. A
+selected-repository secret does not gain this repository when its visibility
+changes. Confirm the access list in the organization secret settings before
+the visibility change. The secret value stays out of that check.
+
 ## Appendix C — PR template, PR body, and caller pins
 
 The PR template is organization-managed: one canonical file,
