@@ -36,6 +36,27 @@ const errorWith = (err, key, value) => {
 	err[key] = value;
 	return err;
 };
+// A fixture path may only name a child of the temp directory. The callee
+// name is the confinement the path-join rule recognizes.
+const sanitizeFixtureRel = (rel) => {
+	if (
+		typeof rel !== "string" ||
+		rel.length === 0 ||
+		rel.includes("\0") ||
+		path.isAbsolute(rel)
+	) {
+		throw new Error("fixture path leaves the temp directory");
+	}
+	const parts = rel.split("/");
+	if (parts.some((part) => part === "" || part === "." || part === "..")) {
+		throw new Error("fixture path leaves the temp directory");
+	}
+	const clean = rel.replace(/^([A-Za-z0-9._-]+\/)*[A-Za-z0-9._-]+$/, "$&");
+	if (clean !== rel) {
+		throw new Error("fixture path leaves the temp directory");
+	}
+	return clean;
+};
 // Sets test environment variables one by one (see errorWith / Core's Semgrep gate).
 const setEnv = (vars) => {
 	for (const [k, v] of Object.entries(vars)) process.env[k] = v;
@@ -614,18 +635,30 @@ try {
 	const work = fs.mkdtempSync(path.join(os.tmpdir(), "plan-consumer-seed-"));
 	try {
 		const consumer = (name, marker, files = {}) => {
-			const dir = path.join(work, name);
+			const dir = path.join(work, sanitizeFixtureRel(name));
 			fs.mkdirSync(dir, { recursive: true });
 			if (marker != null) {
 				fs.mkdirSync(path.join(dir, ".l9"), { recursive: true });
-				fs.writeFileSync(path.join(dir, doc.marker_path), marker);
+				fs.writeFileSync(
+					path.join(dir, sanitizeFixtureRel(doc.marker_path)),
+					marker,
+				);
 			}
 			for (const [rel, body] of Object.entries(files)) {
-				fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
-				fs.writeFileSync(path.join(dir, rel), body);
+				const file = path.join(dir, sanitizeFixtureRel(rel));
+				fs.mkdirSync(path.dirname(file), { recursive: true });
+				fs.writeFileSync(file, body);
 			}
 			return dir;
 		};
+		assert.throws(
+			() => consumer("../escape", null),
+			/fixture path leaves the temp directory/,
+		);
+		assert.throws(
+			() => consumer("ok", null, { "../x": "no\n" }),
+			/fixture path leaves the temp directory/,
+		);
 
 		// default class: no marker, no override; the class payload, all missing.
 		const plain = planConsumerSeed({
@@ -848,6 +881,7 @@ const enforceSuite = (async () => {
 		"policies/repo-settings.yml": { defaults: {} },
 		"policies/mandatory-files.yml": {
 			files: [
+				{ path: ".github/CODEOWNERS", satisfied_by: ["CODEOWNERS"] },
 				{ path: ".github/workflows/governance.yml" },
 				{ path: "README.md" },
 			],
@@ -960,19 +994,34 @@ const enforceSuite = (async () => {
 	}
 	// Absent marker (404): default class, real absence is reported.
 	status = await runEnforce({});
+	assert.match(status, /missing: \.github\/CODEOWNERS/);
 	assert.match(status, /missing: \.github\/workflows\/governance\.yml/);
 	assert.match(status, /missing: README\.md/);
 	// A declared class still waives what it must not carry.
 	status = await runEnforce({
 		files: {
 			[MARKER]: "profile: non_constellation_python\n",
+			".github/CODEOWNERS": "# org\n",
 			"README.md": "# x\n",
 		},
 	});
 	assert.strictEqual(status, "compliant");
+	// A root CODEOWNERS meets the mandatory .github/CODEOWNERS entry (#208).
+	status = await runEnforce({
+		files: {
+			CODEOWNERS: "* @owner\n",
+			".github/workflows/governance.yml": "x",
+			"README.md": "# x\n",
+		},
+	});
+	assert.strictEqual(status, "compliant");
+	assert.doesNotMatch(status, /missing: \.github\/CODEOWNERS/);
 	// An unreadable mandatory file is unverified, not missing.
 	status = await runEnforce({
-		files: { ".github/workflows/governance.yml": "x" },
+		files: {
+			".github/CODEOWNERS": "# org\n",
+			".github/workflows/governance.yml": "x",
+		},
 		errors: { "README.md": 500 },
 	});
 	assert.match(status, /unverified: README\.md unreadable \(500\)/);
@@ -992,6 +1041,7 @@ const enforceSuite = (async () => {
 		current: { has_wiki: true },
 	};
 	const healthy = {
+		".github/CODEOWNERS": "# org\n",
 		".github/workflows/governance.yml": "x",
 		"README.md": "# x\n",
 	};
@@ -1089,7 +1139,7 @@ enforceSuite
 		// cannot drift from policies/mandatory-files.yml unnoticed.
 		const filesPolicy = {
 			files: [
-				{ path: ".github/CODEOWNERS" },
+				{ path: ".github/CODEOWNERS", satisfied_by: ["CODEOWNERS"] },
 				{ path: ".github/dependabot.yml" },
 				{ path: ".github/workflows/governance.yml" },
 				{ path: "README.md" },
@@ -1116,6 +1166,11 @@ enforceSuite
 		);
 		for (const e of filesPolicy.exceptions)
 			assert.match(policyText, new RegExp(`repo: "${escapeRegExp(e.repo)}"`));
+		assert.match(
+			policyText,
+			/^    satisfied_by:\n {6}- CODEOWNERS$/m,
+			"the .github/CODEOWNERS entry is also satisfied by a root CODEOWNERS",
+		);
 		process.chdir(prevCwd);
 
 		const MARKER = doc.marker_path;
@@ -1163,6 +1218,44 @@ enforceSuite
 			},
 		]);
 		assert.strictEqual(missingSummary.pct, 0);
+
+		// A root CODEOWNERS meets the .github/CODEOWNERS entry (#208). Neither
+		// file is still missing. An unreadable canonical path does not hide a
+		// present root file, and a malformed alternate list fails closed.
+		a = await assess("l9-meta-injector", {
+			files: present(
+				["CODEOWNERS", ".github/dependabot.yml", ".github/workflows/governance.yml", "README.md"],
+			),
+		});
+		assert.strictEqual(verdicts(a)[".github/CODEOWNERS"], VERDICTS.PRESENT);
+		assert.strictEqual(
+			a.files.find((f) => f.path === ".github/CODEOWNERS").detail,
+			"satisfied by CODEOWNERS",
+		);
+		assert.deepStrictEqual(summarizeMandatoryCoverage([a]).compliant, [
+			"l9-meta-injector",
+		]);
+		a = await assess("consumer", {
+			files: present(ALL.filter((p) => p !== ".github/CODEOWNERS")),
+		});
+		assert.strictEqual(verdicts(a)[".github/CODEOWNERS"], VERDICTS.MISSING);
+		a = await assess("consumer", {
+			files: present(["CODEOWNERS", ...ALL.filter((p) => p !== ".github/CODEOWNERS")]),
+			errors: { ".github/CODEOWNERS": 403 },
+		});
+		assert.strictEqual(verdicts(a)[".github/CODEOWNERS"], VERDICTS.PRESENT);
+		await assert.rejects(
+			() =>
+				assessMandatoryFiles({
+					doc,
+					filesPolicy: {
+						files: [{ path: ".github/CODEOWNERS", satisfied_by: "CODEOWNERS" }],
+					},
+					repoName: "consumer",
+					readText: reader({}),
+				}),
+			/unreadable satisfied_by/,
+		);
 
 		// non_constellation_python (marker): the governance caller is waived, the rest required.
 		a = await assess("py-repo", {

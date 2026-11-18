@@ -59,6 +59,8 @@ jobs:
               classForRepo,
               resolveProfile,
               waivesMandatoryFile,
+              readMandatoryEntry,
+              VERDICTS,
             } = require('./ops/repo-class-profile.js');
             const ORG = 'Quantum-L9';
             const DRY = process.env.DRY_RUN === 'true';
@@ -191,14 +193,15 @@ jobs:
                   findings.push(`unresolved repo class: ${decidedClass.error} — mandatory files not assessed`);
                 } else {
                   const profile = resolveProfile(classes, decidedClass.name);
+                  // Same reader as ops/repo-class-profile.js assessMandatoryFiles,
+                  // so a root CODEOWNERS satisfies .github/CODEOWNERS here too.
                   for (const file of (filesPolicy.files || [])) {
                     if (waivesMandatoryFile(profile, file.path)) continue;
-                    try {
-                      if ((await readText(n, file.path)) === null) {
-                        findings.push(`missing: ${file.path}`);
-                      }
-                    } catch (e) {
-                      findings.push(`unverified: ${file.path} unreadable (${e.status || 'error'})`);
+                    const found = await readMandatoryEntry(file, (p) => readText(n, p));
+                    if (found.verdict === VERDICTS.MISSING) {
+                      findings.push(`missing: ${file.path}`);
+                    } else if (found.verdict === VERDICTS.UNOBSERVED) {
+                      findings.push(`unverified: ${file.path} ${found.detail}`);
                     }
                   }
                 }

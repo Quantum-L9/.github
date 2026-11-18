@@ -6,11 +6,13 @@
  * A same-repository pull_request workflow runs from the merge ref, and a
  * workflow_call workflow receives secrets only from its caller. Either file
  * can be changed by a pull request and print a secret it names.
- * policies/governance-caller.yml is that caller, copied into every consumer.
+ * policies/governance-caller.yml is copied into every consumer. It may name the
+ * secret once, as the pass-through to governance-pr.yml, and must not set the
+ * checkout token.
  *
- * The token is allowed on workflows that run from the default branch, and
- * only as the actions/checkout token for Cursor-Governance.
- * persist-credentials stays false, so later steps do not keep the credential.
+ * governance-pr.yml may name the secret once, as the optional checkout token
+ * for callers that pass it. Pull-request jobs restore the composer cache and
+ * do not name the secret. persist-credentials stays false.
  * push, when allowed, is limited to main. A file that also has pull_request
  * or workflow_call is still forbidden from naming the token. Pull-request
  * jobs restore the composer cache that fetch saved; they do not check out
@@ -25,6 +27,10 @@ const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
 const SECRET = "L9_GITHUB_READ_TOKEN";
+const CHECKOUT_TOKEN = `token: \${{ secrets.${SECRET} }}`;
+const PASS_THROUGH = `${SECRET}: \${{ secrets.${SECRET} }}`;
+const GOVERNANCE_PR = ".github/workflows/governance-pr.yml";
+const PR_FILES = ".github/workflows/pr-files.yml";
 const ALLOWED = {
 	".github/workflows/seed-governance.yml": new Set(["workflow_dispatch"]),
 	".github/workflows/continuous-sync.yml": new Set(["workflow_dispatch"]),
@@ -65,16 +71,68 @@ function events(block) {
 }
 
 const caller = read("policies/governance-caller.yml");
-assert.ok(
-	!caller.includes(SECRET),
-	"policies/governance-caller.yml must not name L9_GITHUB_READ_TOKEN",
+assert.strictEqual(
+	caller.split(PASS_THROUGH).length - 1,
+	1,
+	"policies/governance-caller.yml must pass L9_GITHUB_READ_TOKEN by name exactly once",
 );
+assert.ok(
+	!caller.includes(CHECKOUT_TOKEN),
+	"policies/governance-caller.yml must not set the checkout token",
+);
+
+function assertGovernancePr(text) {
+	assert.strictEqual(
+		text.split(CHECKOUT_TOKEN).length - 1,
+		1,
+		`${GOVERNANCE_PR} must set ${CHECKOUT_TOKEN} exactly once`,
+	);
+	const besidesToken = text.replace(CHECKOUT_TOKEN, "");
+	assert.strictEqual(
+		besidesToken.split(SECRET).length - 1,
+		1,
+		`${GOVERNANCE_PR} names ${SECRET} only as the checkout token, plus its workflow_call declaration`,
+	);
+	assert.match(
+		besidesToken,
+		new RegExp(`${SECRET}:\\n\\s+required: false\\b`),
+		`${GOVERNANCE_PR} must declare ${SECRET} optional`,
+	);
+	assert.match(text, /composer_from_cache:/);
+	assert.ok(
+		!besidesToken.includes(PASS_THROUGH),
+		`${GOVERNANCE_PR} must not use the pr-files pass-through line`,
+	);
+	assert.match(text, /persist-credentials: false/);
+}
+
+function assertPrFiles(text) {
+	assert.ok(
+		!text.includes(SECRET),
+		`${PR_FILES} restores the composer cache and must not name ${SECRET}`,
+	);
+}
 
 const workflowDir = path.join(root, ".github", "workflows");
 for (const name of fs.readdirSync(workflowDir)) {
 	if (!name.endsWith(".yml") && !name.endsWith(".yaml")) continue;
 	const rel = path.join(".github", "workflows", name);
 	const text = read(rel);
+	if (rel === GOVERNANCE_PR) {
+		assertGovernancePr(text);
+		continue;
+	}
+	if (rel === PR_FILES) {
+		assertPrFiles(text);
+		continue;
+	}
+	if (rel === ".github/workflows/validate-starters.yml") {
+		assert.ok(
+			!text.includes(SECRET),
+			`${rel} restores the composer cache and must not name ${SECRET}`,
+		);
+		continue;
+	}
 	const found = text.includes(SECRET);
 	const trigger = new Set(events(onBlock(text)));
 	const forbidden = [...trigger].filter((event) => FORBIDDEN_EVENTS.has(event));
@@ -90,6 +148,16 @@ for (const name of fs.readdirSync(workflowDir)) {
 		continue;
 	}
 	assert.ok(found, `${rel} must check out with ${SECRET}`);
+	if (rel === ".github/workflows/continuous-sync.yml") {
+		assert.strictEqual(
+			text.split(CHECKOUT_TOKEN).length - 1,
+			1,
+			`${rel} sets ${CHECKOUT_TOKEN} exactly once`,
+		);
+		assert.match(text, /function passReadToken/);
+		assert.match(text, /persist-credentials: false/);
+		continue;
+	}
 	assert.strictEqual(
 		text.split(SECRET).length - 1,
 		1,
@@ -136,5 +204,5 @@ assert.ok(
 );
 
 console.log(
-	"ok: L9_GITHUB_READ_TOKEN is absent from pull_request, workflow_call, and the governance caller",
+	"ok: L9_GITHUB_READ_TOKEN is the optional governance-pr checkout token, the caller pass-through, or a default-branch checkout",
 );
