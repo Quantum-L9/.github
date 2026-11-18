@@ -26,8 +26,10 @@ registry-only successor release record SC-008 requires, runs the semantic
 validator on the result, and restores the tree unless it passes.
 
 Every refusal fails closed: an invalid name, an already-archived repository
-(admitted by hand with lifecycle retired), an ambiguous class, or a different
-entry already holding the id or coordinate. A factory-born repository is the
+(admitted by hand with lifecycle retired), an ambiguous class, or an identity
+collision (the folded id and the coordinate disagree). The same id and the
+same coordinate are already members: apply leaves that entry, including its
+recorded admission evidence, and writes nothing. A factory-born repository is the
 birth path's to register (ADR-039); the caller skips one that carries a birth
 receipt. Re-running is safe: an identical entry is `present` and nothing is
 written.
@@ -43,6 +45,7 @@ import importlib.util
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -146,10 +149,24 @@ def render_entry_yaml(birth, entry: dict[str, Any]) -> str:
     )
 
 
-def add_entry(birth, registry_text: str, entry: dict[str, Any]) -> tuple[str, str]:
-    """(new text, status): `added`, or `present` for an identical re-run.
+def _same_repository(existing: dict[str, Any], entry: dict[str, Any]) -> bool:
+    coord = existing.get("coordinate")
+    want = entry["coordinate"]
+    return (
+        isinstance(coord, dict)
+        and coord.get("provider") == want["provider"]
+        and coord.get("organization") == want["organization"]
+        and coord.get("repository") == want["repository"]
+    )
 
-    Any other entry sharing the id or the coordinate is a conflict.
+
+def add_entry(birth, registry_text: str, entry: dict[str, Any]) -> tuple[str, str]:
+    """(new text, status): `added`, or `present` when that identity is already registered.
+
+    The same folded id and the same coordinate are one member. The recorded
+    entry is kept, including an older `observed_at`, so a later listing does
+    not open a second admission. The same id with a different coordinate, or
+    the same coordinate with a different id, is a collision.
     """
     doc = yaml.safe_load(registry_text)
     repositories = doc.get("repositories") if isinstance(doc, dict) else None
@@ -159,14 +176,13 @@ def add_entry(birth, registry_text: str, entry: dict[str, Any]) -> tuple[str, st
         if not isinstance(existing, dict):
             continue
         same_id = existing.get("id") == entry["id"]
-        same_coord = existing.get("coordinate") == entry["coordinate"]
-        if same_id or same_coord:
-            if existing == entry:
-                return registry_text, "present"
+        same_repo = _same_repository(existing, entry)
+        if same_id and same_repo:
+            return registry_text, "present"
+        if same_id or same_repo:
+            which = f"id {entry['id']}" if same_id else "/".join(entry["coordinate"].values())
             raise OrgAdmissionError(
-                "registry already holds a different entry for "
-                f"{'id ' + entry['id'] if same_id else '/'.join(entry['coordinate'].values())}"
-                "; refusing a duplicate"
+                f"registry already holds a different identity for {which}; refusing a duplicate"
             )
     marker = "\naliases:"
     if registry_text.count(marker) != 1:
@@ -296,11 +312,17 @@ def cut_release(birth, root: Path, entry: dict[str, Any]) -> tuple[str, list[str
     }
     target.mkdir(parents=True)
     written = []
-    for name, lines in documents.items():
-        (target / name).write_text("\n".join(lines), encoding="utf-8")
-        written.append(f"{RELEASES_PATH}/{version}/{name}")
-    write_hashes(root, target)
-    written.append(f"{RELEASES_PATH}/{version}/HASHES.sha256")
+    try:
+        for name, lines in documents.items():
+            (target / name).write_text("\n".join(lines), encoding="utf-8")
+            written.append(f"{RELEASES_PATH}/{version}/{name}")
+        write_hashes(root, target)
+        written.append(f"{RELEASES_PATH}/{version}/HASHES.sha256")
+    except BaseException:
+        # apply() has not received `written` yet, so a failure here would
+        # otherwise leave the new release directory for the next validation.
+        shutil.rmtree(target)
+        raise
     return version, written
 
 

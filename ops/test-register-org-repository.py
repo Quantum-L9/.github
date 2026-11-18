@@ -191,6 +191,14 @@ class RegisterOrgRepositoryTest(unittest.TestCase):
         again = ro.apply(Args(), checkout)
         self.assertEqual(again["status"], "present")
         self.assertEqual(again["changed_paths"], [])
+        later = ro.apply(Args(observed_at="2026-11-18T00:00:00Z"), checkout)
+        self.assertEqual(later["status"], "present")
+        self.assertEqual(later["changed_paths"], [])
+        kept = ro.yaml.safe_load((checkout / ro.REGISTRY_PATH).read_text())
+        self.assertEqual(
+            kept["repositories"][-1]["organization_admission"]["observed_at"],
+            OBSERVED_AT,
+        )
         self.assertEqual(
             self.birth.release_versions(checkout)[-1], (major, minor, patch + 1)
         )
@@ -220,9 +228,51 @@ class RegisterOrgRepositoryTest(unittest.TestCase):
     def test_non_positive_repository_id_is_refused(self) -> None:
         self.assertRefusedWithoutWrite({"github_id": 0})
 
-    def test_registered_repository_is_a_conflict(self) -> None:
-        """An already-pinned coordinate is never re-proposed as org-admitted."""
-        self.assertRefusedWithoutWrite({}, repository="Gate_SDK")
+    def test_registered_repository_is_left_as_recorded(self) -> None:
+        """An already-pinned coordinate is not proposed again, and its evidence stays."""
+        checkout = self.checkout
+        registry_before = (checkout / ro.REGISTRY_PATH).read_bytes()
+        releases_before = self.birth.release_versions(checkout)
+        result = ro.apply(
+            Args(
+                repository="Gate_SDK",
+                github_id=1,
+                observed_at="2026-11-18T00:00:00Z",
+            ),
+            checkout,
+        )
+        self.assertEqual(result["status"], "present")
+        self.assertEqual(result["changed_paths"], [])
+        self.assertEqual((checkout / ro.REGISTRY_PATH).read_bytes(), registry_before)
+        self.assertEqual(self.birth.release_versions(checkout), releases_before)
+
+    def test_same_fold_with_a_different_coordinate_is_a_collision(self) -> None:
+        self.assertRefusedWithoutWrite({}, repository="gate-sdk")
+
+    def test_leading_mark_folds_and_dot_github_does_not(self) -> None:
+        fold = self.validator.rc023_factory_repository_id
+        self.assertEqual(fold(".tools"), "tools")
+        self.assertEqual(fold("_shared"), "shared")
+        self.assertIsNone(fold(".github"))
+
+    def test_a_failed_release_cut_removes_the_new_directory(self) -> None:
+        checkout = copy_dotgithub(self.case)
+        before = self.birth.release_versions(checkout)
+        registry_before = (self.checkout / ro.REGISTRY_PATH).read_bytes()
+        real = ro.write_hashes
+
+        def boom(root, target):
+            raise ro.OrgAdmissionError("hash failed")
+
+        ro.write_hashes = boom
+        try:
+            with self.assertRaises(ro.OrgAdmissionError):
+                ro.apply(Args(), checkout)
+        finally:
+            ro.write_hashes = real
+        self.assertEqual(self.birth.release_versions(checkout), before)
+        self.assertEqual((checkout / ro.REGISTRY_PATH).read_bytes(), registry_before)
+        self.assertFalse((checkout / ro.RELEASES_PATH / f"v{before[-1][0]}.{before[-1][1]}.{before[-1][2] + 1}").exists())
 
     def test_ambiguous_class_is_refused(self) -> None:
         checkout = copy_dotgithub(self.case)

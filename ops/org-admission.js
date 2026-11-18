@@ -67,10 +67,13 @@ async function classifyAdmissionTarget({ github, name }) {
 		// 404: no receipt. 409: an empty repository, which cannot carry one.
 		if (e.status !== 404 && e.status !== 409) throw e;
 	}
+	if (typeof repo.name !== "string" || repo.name.length === 0)
+		throw new Error(`${ORG}/${name}: GitHub returned no repository name`);
 	return {
 		action: "admit",
 		reason: null,
 		githubId: repo.id,
+		canonicalName: repo.name,
 		defaultBranch: repo.default_branch,
 	};
 }

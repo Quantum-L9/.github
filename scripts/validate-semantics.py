@@ -6038,7 +6038,7 @@ RC023_FACTORY_ENTRY_KEYS = (
     "class_ref",
     "birth_provenance",
 )
-_RC023_REPOSITORY_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}")
+_RC023_REPOSITORY_NAME = re.compile(r"[A-Za-z0-9._-]{1,100}")
 _RC023_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 _RC023_SHA = re.compile(r"[0-9a-f]{40}")
 _RC023_RECEIPT_DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
@@ -6048,10 +6048,15 @@ _RC023_PROFILE = re.compile(r"[a-z0-9][a-z0-9_]*")
 def rc023_factory_repository_id(repository: object) -> str | None:
     """The registry id of a factory-born repository: a function of its name.
 
-    Lowercase, with every run of `.`, `_` and `-` folded to one `-`. None when
-    the name is not a GitHub repository name or yields no such id, so a
-    free-form id can never be proposed.
+    Lowercase, with every run of `.`, `_` and `-` folded to one `-`, then
+    stripped. A leading `.` or `_` is a repository name (`.tools` folds to
+    `tools`, `_shared` to `shared`). `.github` stays None: that coordinate is
+    the grandfathered id `dot-github`, not `github`. None when the name is
+    not a repository name or the fold is not an id, so a free-form id can
+    never be proposed.
     """
+    if repository == ".github":
+        return None
     if not isinstance(repository, str) or not _RC023_REPOSITORY_NAME.fullmatch(
         repository
     ):

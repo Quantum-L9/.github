@@ -66,7 +66,13 @@ async function runObserve({ repo = {}, receipt = 404, name = TARGET } = {}) {
 		rest: {
 			repos: {
 				get: rec("repos.get", () => ({
-					data: { id: 4242, archived: false, default_branch: "main", ...repo },
+					data: {
+						id: 4242,
+						name,
+						archived: false,
+						default_branch: "main",
+						...repo,
+					},
 				})),
 				getContent: rec("getContent", () => {
 					if (receipt === 200) return { data: { type: "file", content: "" } };
@@ -128,6 +134,13 @@ const runPr = makeRegistryPrRunner({
 		assert.strictEqual(r.error, null);
 		assert.strictEqual(r.outputs.action, "admit");
 		assert.strictEqual(r.outputs.github_id, "4242");
+		assert.strictEqual(r.outputs.repository, TARGET);
+		const canonical = await runObserve({
+			name: "new.repo",
+			repo: { name: "New.Repo" },
+		});
+		assert.strictEqual(canonical.outputs.action, "admit");
+		assert.strictEqual(canonical.outputs.repository, "New.Repo");
 		assert.match(
 			r.outputs.observed_at,
 			/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,

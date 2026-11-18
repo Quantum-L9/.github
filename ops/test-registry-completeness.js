@@ -51,6 +51,15 @@ const listing = JSON.parse(
 const observed = listing.repositories;
 const clone = (v) => JSON.parse(JSON.stringify(v));
 
+function historicalRegistry() {
+	const names = new Set(observed.map((repo) => repo.name));
+	const scoped = clone(registry);
+	scoped.repositories = registry.repositories.filter((entry) =>
+		names.has(entry?.coordinate?.repository),
+	);
+	return scoped;
+}
+
 // ── the real registry against the observed organization ─────────────────────
 {
 	assert.strictEqual(
@@ -59,7 +68,7 @@ const clone = (v) => JSON.parse(JSON.stringify(v));
 		"fixture records 61 hosted repositories",
 	);
 	const result = assessRegistryCompleteness({
-		registry,
+		registry: historicalRegistry(),
 		discovered: observed,
 		org: ORG,
 	});
@@ -86,7 +95,11 @@ const clone = (v) => JSON.parse(JSON.stringify(v));
 		...clone(observed),
 		{ name: "Unregistered.Fixture", archived: false },
 	];
-	const result = assessRegistryCompleteness({ registry, discovered, org: ORG });
+	const result = assessRegistryCompleteness({
+		registry: historicalRegistry(),
+		discovered,
+		org: ORG,
+	});
 	assert.strictEqual(result.verdict, VERDICTS.INCOMPLETE);
 	assert.deepStrictEqual(result.unregistered, ["Unregistered.Fixture"]);
 	const md = renderCompletenessReport(result, ORG);
@@ -98,7 +111,11 @@ const clone = (v) => JSON.parse(JSON.stringify(v));
 		{ name: "old-archive", archived: true },
 	];
 	assert.deepStrictEqual(
-		assessRegistryCompleteness({ registry, discovered: archived, org: ORG })
+		assessRegistryCompleteness({
+			registry: historicalRegistry(),
+			discovered: archived,
+			org: ORG,
+		})
 			.unregistered,
 		["old-archive"],
 	);
@@ -112,7 +129,11 @@ const clone = (v) => JSON.parse(JSON.stringify(v));
 	const discovered = clone(observed).map((r) =>
 		r.name === "l9-wip" ? { ...r, archived: true } : r,
 	);
-	const result = assessRegistryCompleteness({ registry, discovered, org: ORG });
+	const result = assessRegistryCompleteness({
+		registry: historicalRegistry(),
+		discovered,
+		org: ORG,
+	});
 	assert.strictEqual(result.verdict, VERDICTS.INCOMPLETE);
 	assert.deepStrictEqual(result.archivedCurrent, ["l9-wip"]);
 
@@ -120,7 +141,7 @@ const clone = (v) => JSON.parse(JSON.stringify(v));
 		r.name === "Gate_SDK" ? { ...r, name: "gate_sdk" } : r,
 	);
 	const drift = assessRegistryCompleteness({
-		registry,
+		registry: historicalRegistry(),
 		discovered: drifted,
 		org: ORG,
 	});
@@ -137,7 +158,11 @@ const clone = (v) => JSON.parse(JSON.stringify(v));
 // ── registered but not listed is reported, not failed ───────────────────────
 {
 	const discovered = clone(observed).filter((r) => r.name !== "l9-goose");
-	const result = assessRegistryCompleteness({ registry, discovered, org: ORG });
+	const result = assessRegistryCompleteness({
+		registry: historicalRegistry(),
+		discovered,
+		org: ORG,
+	});
 	assert.strictEqual(result.verdict, VERDICTS.COMPLETE);
 	assert.deepStrictEqual(result.notHosted, ["l9-goose"]);
 	assert.match(

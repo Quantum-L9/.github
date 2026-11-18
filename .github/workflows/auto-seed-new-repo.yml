@@ -504,8 +504,12 @@ jobs:
     timeout-minutes: 15
     environment: governance-distribution
     concurrency:
-      # Admissions and births both cut the next patch release; one at a time.
-      group: org-registry
+      # One pending run per repository. A shared group keeps a single pending
+      # run, so an admission for C would cancel a pending admission for B.
+      # Two admissions of one repository still share this group. A second
+      # writer of the next patch fails closed because that release directory
+      # already exists.
+      group: org-registry-${{ github.event.client_payload.repository || inputs.target_repo }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -537,12 +541,13 @@ jobs:
               return;
             }
             core.setOutput('github_id', String(decision.githubId));
+            core.setOutput('repository', decision.canonicalName);
             core.setOutput('observed_at', new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'));
 
       - name: Render and validate the admission
         if: ${{ steps.observe.outputs.action == 'admit' }}
         env:
-          TARGET_REPO: ${{ inputs.target_repo || github.event.client_payload.repository || '' }}
+          TARGET_REPO: ${{ steps.observe.outputs.repository }}
           GITHUB_ID: ${{ steps.observe.outputs.github_id }}
           OBSERVED_AT: ${{ steps.observe.outputs.observed_at }}
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
