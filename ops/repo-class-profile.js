@@ -300,6 +300,66 @@ const VERDICTS = Object.freeze({
 const statusOf = (e) => e?.status || "error";
 
 /**
+ * Paths that meet one mandatory entry, canonical path first.
+ * `satisfied_by` names alternates (a root CODEOWNERS meets `.github/CODEOWNERS`).
+ * A missing or malformed list throws: an unreadable alternate is not "no alternate".
+ * @param {{path?: string, satisfied_by?: string[]}} entry
+ * @returns {string[]}
+ */
+function satisfyingPaths(entry) {
+	const canonical = entry?.path;
+	if (typeof canonical !== "string" || !canonical) {
+		throw new Error("mandatory-files entry has no path");
+	}
+	if (entry.satisfied_by === undefined) return [canonical];
+	const extra = entry.satisfied_by;
+	if (
+		!Array.isArray(extra) ||
+		extra.length === 0 ||
+		extra.some((p) => typeof p !== "string" || !p || p === canonical)
+	) {
+		throw new Error(
+			`mandatory-files entry ${canonical} has an unreadable satisfied_by list`,
+		);
+	}
+	return [canonical, ...extra];
+}
+
+/**
+ * Read one mandatory entry. Any present satisfying path meets it. A 404 on
+ * every path is missing. An unreadable path is unobserved only when no
+ * satisfying path is present — a present alternate still meets the entry.
+ * @param {{path: string, satisfied_by?: string[]}} entry
+ * @param {(path: string) => Promise<string|null>} readText
+ */
+async function readMandatoryEntry(entry, readText) {
+	const paths = satisfyingPaths(entry);
+	let unreadable = null;
+	for (const candidate of paths) {
+		try {
+			const text = await readText(candidate);
+			if (text !== null) {
+				return {
+					path: entry.path,
+					verdict: VERDICTS.PRESENT,
+					detail: candidate === entry.path ? "" : `satisfied by ${candidate}`,
+				};
+			}
+		} catch (e) {
+			if (!unreadable) unreadable = statusOf(e);
+		}
+	}
+	if (unreadable) {
+		return {
+			path: entry.path,
+			verdict: VERDICTS.UNOBSERVED,
+			detail: `unreadable (${unreadable})`,
+		};
+	}
+	return { path: entry.path, verdict: VERDICTS.MISSING, detail: "404" };
+}
+
+/**
  * Assess one repository's mandatory files against its class.
  *
  * @param {object} o
@@ -391,20 +451,7 @@ async function assessMandatoryFiles({ doc, filesPolicy, repoName, readText }) {
 			});
 			continue;
 		}
-		try {
-			const text = await readText(f.path);
-			out.push(
-				text === null
-					? { path: f.path, verdict: VERDICTS.MISSING, detail: "404" }
-					: { path: f.path, verdict: VERDICTS.PRESENT, detail: "" },
-			);
-		} catch (e) {
-			out.push({
-				path: f.path,
-				verdict: VERDICTS.UNOBSERVED,
-				detail: `unreadable (${statusOf(e)})`,
-			});
-		}
+		out.push(await readMandatoryEntry(f, readText));
 	}
 	return {
 		repo: repoName,
@@ -561,6 +608,8 @@ module.exports = {
 	resolveProfile,
 	applyProfile,
 	waivesMandatoryFile,
+	satisfyingPaths,
+	readMandatoryEntry,
 	POLICY_OPT_OUT_PATH,
 	VERDICTS,
 	assessMandatoryFiles,

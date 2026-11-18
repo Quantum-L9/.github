@@ -21,6 +21,12 @@ files:
   - path: .github/CODEOWNERS
     source: policies/CODEOWNERS
     mode: managed
+    # GitHub reads .github/CODEOWNERS before a root CODEOWNERS, and the seed
+    # keeps a root file it finds. Either path meets this entry. Waiving the
+    # path for a whole class would also stop requiring it from a repository
+    # that has neither file.
+    satisfied_by:
+      - CODEOWNERS
 
   - path: .github/dependabot.yml
     source: .github/dependabot.yml
