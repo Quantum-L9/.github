@@ -134,6 +134,20 @@ for (const name of fs.readdirSync(workflowDir)) {
 		assertPrFiles(text);
 		continue;
 	}
+	if (rel === ".github/workflows/validate-starters.yml") {
+		assert.strictEqual(
+			text.split(CHECKOUT_TOKEN).length - 1,
+			1,
+			`${rel} must set ${CHECKOUT_TOKEN} exactly once`,
+		);
+		assert.strictEqual(
+			text.split(SECRET).length - 1,
+			1,
+			`${rel} names ${SECRET} only as the composer checkout token`,
+		);
+		assert.match(text, /persist-credentials: false/);
+		continue;
+	}
 	const found = text.includes(SECRET);
 	const trigger = new Set(events(onBlock(text)));
 	const forbidden = [...trigger].filter((event) => FORBIDDEN_EVENTS.has(event));
