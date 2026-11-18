@@ -5,13 +5,12 @@ name: PR files touched
 # Cursor-Governance ops/scripts/compose_pr_body.py, pinned in governance-pr.yml.
 # The body checks stay in pr-gates.yml (strict here), so only the body job runs.
 #
-# pull_request_target runs this file from the default branch. A pull_request
-# workflow runs from the merge ref, so it must not name the read token.
-# The called workflow is this same commit and receives the token only as
-# the composer checkout credential.
+# The composer files come from the cache validate-starters-composer.yml saves
+# on the default branch. This pull_request workflow does not name the read
+# token and does not run as pull_request_target.
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review]
 
 permissions:
@@ -26,5 +25,4 @@ jobs:
     with:
       strict: true
       gates: false
-    secrets:
-      composer_read_token: ${{ secrets.L9_GITHUB_READ_TOKEN }}
+      composer_from_cache: true

@@ -9,12 +9,12 @@
  * policies/governance-caller.yml is that caller, copied into every consumer.
  *
  * The token is allowed on workflows that run from the default branch, and
- * only as the actions/checkout token for Cursor-Governance or as the one
- * secret a pull_request_target caller passes to that checkout.
+ * only as the actions/checkout token for Cursor-Governance.
  * persist-credentials stays false, so later steps do not keep the credential.
- * pull_request_target is the default-branch file. push, when allowed, is
- * limited to main. A file that also has pull_request or workflow_call is
- * still forbidden from naming the token.
+ * push, when allowed, is limited to main. A file that also has pull_request
+ * or workflow_call is still forbidden from naming the token. Pull-request
+ * jobs restore the composer cache that fetch saved; they do not check out
+ * the private repository.
  *
  * Run from the Quantum-L9/.github repo root:
  *   node ops/test-read-token-boundary.js
@@ -25,7 +25,6 @@ const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
 const SECRET = "L9_GITHUB_READ_TOKEN";
-const PASSTHROUGH = `composer_read_token: \${{ secrets.${SECRET} }}`;
 const ALLOWED = {
 	".github/workflows/seed-governance.yml": new Set(["workflow_dispatch"]),
 	".github/workflows/continuous-sync.yml": new Set(["workflow_dispatch"]),
@@ -34,9 +33,7 @@ const ALLOWED = {
 		"repository_dispatch",
 	]),
 	".github/workflows/secret-drift.yml": new Set(["workflow_dispatch", "schedule"]),
-	".github/workflows/pr-files.yml": new Set(["pull_request_target"]),
 	".github/workflows/validate-starters-composer.yml": new Set([
-		"pull_request_target",
 		"push",
 		"workflow_dispatch",
 	]),
@@ -98,20 +95,12 @@ for (const name of fs.readdirSync(workflowDir)) {
 		1,
 		`${rel} names ${SECRET} once`,
 	);
-	// `composer_read_token` ends in `token`, so a substring search would treat
-	// the pass-through as the checkout form.
-	const checkout = new RegExp(
-		`^\\s+token: \\$\\{\\{ secrets\\.${SECRET} \\}\\}$`,
-		"m",
-	).test(text);
-	const passthrough = text.includes(PASSTHROUGH);
-	assert.ok(
-		checkout !== passthrough,
-		`${rel} names ${SECRET} once, as the checkout token or the composer_read_token pass-through`,
+	assert.match(
+		text,
+		/^ *token: \$\{\{ secrets\.L9_GITHUB_READ_TOKEN \}\}$/m,
+		`${rel} must set the checkout token`,
 	);
-	if (checkout) {
-		assert.match(text, /persist-credentials: false/);
-	}
+	assert.match(text, /persist-credentials: false/);
 	for (const event of trigger) {
 		assert.ok(
 			ALLOWED[rel].has(event),
@@ -137,9 +126,13 @@ assert.ok(
 	!suiteJob.includes(SECRET),
 	"the starter suite job must not name the read token",
 );
-assert.match(
-	read(".github/workflows/governance-pr.yml"),
-	/token: \$\{\{ secrets\.composer_read_token \|\| github\.token \}\}/,
+assert.ok(
+	!composerWorkflow.includes("pull_request_target"),
+	"the composer fetch must not run as pull_request_target",
+);
+assert.ok(
+	!composerWorkflow.includes("github.event.pull_request"),
+	"the composer workflow must not check out a pull request",
 );
 
 console.log(

@@ -12,12 +12,11 @@ on:
         type: boolean
         default: true    # pr-files.yml (this repo) runs only the body job;
                          # pr-gates.yml already judges this repo's bodies.
-    secrets:
-      # Passed only by a default-branch caller (pr-files.yml on
-      # pull_request_target). Empty for every other caller, which then
-      # checks out with the job token and cannot read a private repository.
-      composer_read_token:
-        required: false
+      composer_from_cache:
+        type: boolean
+        default: false   # This repo's PR caller restores the composer the
+                         # default-branch fetch saved. Other callers check
+                         # the pin out themselves.
 
 # Read-only by default; the one job that edits the PR body asks for write
 # itself. `gates` reads the event payload and writes only the job summary.
@@ -32,6 +31,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          # Never interpolate an Actions expression into script:. A boolean
+          # input arrives as the string "true" or "false".
+          STRICT: ${{ inputs.strict }}
         with:
           script: |
             const body = context.payload.pull_request.body || '';
@@ -55,7 +58,7 @@ jobs:
 
             if (fail.length) {
               core.summary.addHeading('Governance gates',2).addList(fail).write();
-              if (${{ inputs.strict }}) {
+              if (process.env.STRICT === "true") {
                 core.setFailed(`${fail.length} gate issue(s).`);
               } else {
                 core.notice(`${fail.length} advisory gate finding(s) — not blocking. See job summary.`);
@@ -88,7 +91,22 @@ jobs:
           path: pr
           persist-credentials: false
 
+      # Saved by validate-starters-composer.yml on the default branch. A hit
+      # means this job does not check out the private repository.
+      - name: Restore pinned composer
+        id: composer-cache
+        if: inputs.composer_from_cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: composer/ops/scripts
+          key: l9-composer-5039c379d8ba1263f504cfa527487386205e056c
+      - name: Require the pinned composer
+        if: inputs.composer_from_cache && steps.composer-cache.outputs.cache-hit != 'true'
+        run: |
+          echo "::error::the default branch has not saved the pinned composer cache"
+          exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.composer-cache.outputs.cache-hit != 'true'
         with:
           repository: Quantum-L9/Cursor-Governance
           ref: 5039c379d8ba1263f504cfa527487386205e056c
@@ -98,7 +116,6 @@ jobs:
             ops/scripts/compose_pr_body.py
             ops/scripts/org_dotgithub.py
           sparse-checkout-cone-mode: false
-          token: ${{ secrets.composer_read_token || github.token }}
           persist-credentials: false
 
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0

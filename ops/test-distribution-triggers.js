@@ -45,9 +45,8 @@ const events = (block) =>
 
 /** The indented body of a dispatch input, e.g. `dry_run:` or `mode:`. */
 function input(block, name) {
-	const i = block.findIndex((l) =>
-		new RegExp(String.raw`^ {6}${name}:\s*$`).test(l),
-	);
+	const header = `      ${name}:`;
+	const i = block.findIndex((l) => l === header);
 	assert.ok(i !== -1, `no workflow_dispatch input "${name}"`);
 	const body = [];
 	for (const l of block.slice(i + 1)) {
@@ -387,6 +386,17 @@ function dispatchCallArgs(text) {
 		]) {
 			assert.ok(listed.has(need), `${f}: the composer checkout misses ${need}`);
 		}
+	}
+	const cacheKey = `key: l9-composer-${declared}`;
+	for (const f of [
+		"validate-starters-composer.yml",
+		"validate-starters.yml",
+		"governance-pr.yml",
+	]) {
+		assert.ok(
+			read(`.github/workflows/${f}`).includes(cacheKey),
+			`${f} must save or restore ${cacheKey}`,
+		);
 	}
 	for (const f of [
 		"auto-seed-new-repo.yml",
