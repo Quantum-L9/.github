@@ -81,15 +81,22 @@ process.chdir(root);
 // The template's own deny list, transcribed. If l9-repo-template adds an entry,
 // this list and policies/repo-classes.yml must both grow — the whole point of
 // the contract is that the two repos agree in one direction, upstream to down.
+// Same paths as l9-repo-template scripts/inventory_check.py DENY_CI_DISTRIBUTION.
+// `.github/governance/**` in a class forbid list covers paths under that directory;
+// the exact directory path is listed too, because matchPattern does not treat a
+// bare directory as a prefix.
 const TEMPLATE_DENY_CI_DISTRIBUTION = [
 	".l9/ci-pin",
 	"scripts/sync_ci_from_pack.py",
 	"requirements-consumer-ci.txt",
 	".github/workflows/l9-analysis.yml",
 	".github/workflows/l9-lint-test.yml",
+	".github/workflows/l9-lint-test-node.yml",
 	".github/workflows/on-org-update.yml",
 	".github/workflows/governance.yml",
+	".github/workflows/codeql.yml",
 	".github/governance",
+	".github/codeql/codeql-config.yml",
 ];
 
 try {
@@ -563,6 +570,19 @@ try {
 			matchPattern(selfGoverned.forbid, denied),
 			`self_governed must forbid ${denied}`,
 		);
+	}
+	for (const className of [
+		"self_governed",
+		"org_seeded_self_governed",
+		"non_constellation_python",
+	]) {
+		const profile = resolveProfile(doc, className);
+		for (const denied of TEMPLATE_DENY_CI_DISTRIBUTION) {
+			assert.ok(
+				matchPattern(profile.forbid, denied),
+				`${className} must forbid ${denied}`,
+			);
+		}
 	}
 	// Mandatory-file reporting must not nag a repo for files it may not carry.
 	assert.ok(
