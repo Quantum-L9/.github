@@ -364,7 +364,7 @@ function dispatchCallArgs(text) {
 		"auto-seed-new-repo.yml",
 		"seed-governance.yml",
 		"continuous-sync.yml",
-		"validate-starters.yml",
+		"validate-starters-composer.yml",
 	]) {
 		const text = read(`.github/workflows/${f}`);
 		if (f !== "governance-pr.yml") {

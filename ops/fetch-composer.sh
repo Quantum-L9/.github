@@ -5,8 +5,12 @@
 # renderer — and the module it imports (org_dotgithub.py) at the commit
 # .github/workflows/governance-pr.yml pins, into <dest>/ops/scripts/. The pin is read from that workflow,
 # so there is no second copy of it to drift. Used by ops/validate-starters.sh
-# when SEED_COMPOSER_ROOT is unset; CI checks the same pin out with
-# actions/checkout instead.
+# when SEED_COMPOSER_ROOT is unset. A pull-request check does not run this
+# script: .github/workflows/validate-starters-composer.yml checks the same
+# pin out from the default branch. When L9_GITHUB_READ_TOKEN is set, git
+# receives it as an Authorization header through GIT_CONFIG_*, never in
+# argv or the remote URL. Unset, the fetch stays anonymous and a private
+# repository fails closed.
 set -euo pipefail
 
 dest="${1:?usage: ops/fetch-composer.sh <dest>}"
@@ -29,6 +33,18 @@ mkdir -p "$dest"
 repo="$dest/.git-fetch"
 if [[ ! -d "$repo/.git" ]]; then
   git init -q "$repo"
+fi
+token="${L9_GITHUB_READ_TOKEN:-}"
+unset L9_GITHUB_READ_TOKEN
+export GIT_TERMINAL_PROMPT=0
+if [[ -n "$token" ]]; then
+  basic="$(printf 'x-access-token:%s' "$token" | base64 | tr -d '\n')"
+  unset token
+  count="${GIT_CONFIG_COUNT:-0}"
+  export "GIT_CONFIG_KEY_${count}=http.https://github.com/.extraheader"
+  export "GIT_CONFIG_VALUE_${count}=AUTHORIZATION: basic ${basic}"
+  export GIT_CONFIG_COUNT="$((count + 1))"
+  unset basic
 fi
 git -C "$repo" fetch -q --depth=1 --filter=blob:none \
   https://github.com/Quantum-L9/Cursor-Governance.git "$pin"

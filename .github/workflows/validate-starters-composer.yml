@@ -1,0 +1,86 @@
+name: Validate starters
+
+# The starter suite needs the pinned PR-body composer from private
+# Cursor-Governance. pull_request and workflow_call run a file a pull request
+# can rewrite, so those files do not carry the read token. This file runs
+# from the default branch. The job that names the token checks out no
+# pull-request code and uploads only the two composer files. The suite job
+# downloads those files and never receives the token.
+
+on:
+  pull_request_target:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-starters-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fetch-composer:
+    name: fetch pinned composer
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          repository: Quantum-L9/Cursor-Governance
+          ref: 5039c379d8ba1263f504cfa527487386205e056c
+          path: .cache/composer
+          # compose_pr_body.py imports org_dotgithub at load; both are stdlib-only.
+          sparse-checkout: |
+            ops/scripts/compose_pr_body.py
+            ops/scripts/org_dotgithub.py
+          sparse-checkout-cone-mode: false
+          token: ${{ secrets.L9_GITHUB_READ_TOKEN }}
+          persist-credentials: false
+      - name: Drop the composer git directory
+        run: rm -rf .cache/composer/.git
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: pinned-composer
+          path: .cache/composer/ops/scripts
+          if-no-files-found: error
+          retention-days: 1
+
+  validate:
+    name: validate-starters.sh
+    needs: fetch-composer
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      # ops/test-governance-report.js projects the real repository registry
+      # through the same pinned parser governance-report.yml uses.
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.12"
+      # ops/test-render-coderabbit.js validates the rendered .coderabbit.yaml
+      # against CodeRabbit's published JSON Schema with jsonschema.
+      - name: Install the pinned YAML parser and schema validator
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2" "jsonschema==4.23.0"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: pinned-composer
+          path: .cache/composer/ops/scripts
+      - name: Run ops/validate-starters.sh
+        env:
+          SEED_COMPOSER_ROOT: .cache/composer
+        run: |
+          chmod +x ops/validate-starters.sh
+          ops/validate-starters.sh

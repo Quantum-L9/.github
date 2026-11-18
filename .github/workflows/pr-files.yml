@@ -4,9 +4,14 @@ name: PR files touched
 # consumer gets through governance.yml -> governance-pr.yml. One renderer:
 # Cursor-Governance ops/scripts/compose_pr_body.py, pinned in governance-pr.yml.
 # The body checks stay in pr-gates.yml (strict here), so only the body job runs.
+#
+# pull_request_target runs this file from the default branch. A pull_request
+# workflow runs from the merge ref, so it must not name the read token.
+# The called workflow is this same commit and receives the token only as
+# the composer checkout credential.
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened, edited, ready_for_review]
 
 permissions:
@@ -21,3 +26,5 @@ jobs:
     with:
       strict: true
       gates: false
+    secrets:
+      composer_read_token: ${{ secrets.L9_GITHUB_READ_TOKEN }}
