@@ -78,7 +78,9 @@ class PolicyValidationTests(unittest.TestCase):
 
     def test_invalid_enforcement_state_fails(self) -> None:
         policy = copy.deepcopy(self.policy)
-        policy["invariants"][0]["assurance"] = {"effective_enforcement_state": "magical"}
+        policy["invariants"][0]["assurance"] = {
+            "effective_enforcement_state": "magical"
+        }
         findings = self.validate(policy)
         self.assertIn("ASSURANCE_ENFORCEMENT_STATE_INVALID", self.codes(findings))
 

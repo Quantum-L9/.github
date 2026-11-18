@@ -161,7 +161,9 @@ def assertion_versions(registry: Any, findings: list[Finding]) -> set[tuple[str,
         entry = require_mapping(raw_entry, path, findings)
         assertion_type = entry.get("type")
         version = entry.get("version")
-        if not isinstance(assertion_type, str) or not ASSERTION_TYPE.fullmatch(assertion_type):
+        if not isinstance(assertion_type, str) or not ASSERTION_TYPE.fullmatch(
+            assertion_type
+        ):
             findings.append(
                 Finding(
                     "ASSERTION_TYPE_INVALID",
@@ -286,7 +288,9 @@ def validate_policy(
         path = f"policy.invariants[{index}]"
         invariant = require_mapping(raw_invariant, path, findings)
         invariant_id = invariant.get("id")
-        if not isinstance(invariant_id, str) or not INVARIANT_ID.fullmatch(invariant_id):
+        if not isinstance(invariant_id, str) or not INVARIANT_ID.fullmatch(
+            invariant_id
+        ):
             findings.append(
                 Finding(
                     "INVARIANT_ID_INVALID",
@@ -296,7 +300,10 @@ def validate_policy(
             )
         else:
             invariant_ids.append(invariant_id)
-        if not isinstance(invariant.get("title"), str) or not invariant.get("title", "").strip():
+        if (
+            not isinstance(invariant.get("title"), str)
+            or not invariant.get("title", "").strip()
+        ):
             findings.append(
                 Finding(
                     "INVARIANT_TITLE_MISSING",
