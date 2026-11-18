@@ -1,0 +1,62 @@
+artifact_kind: operator_alignment_consumer_bindings
+revision: 1.0.0
+status: operator_approved_binding_design_not_runtime_active
+authority_snapshot:
+  global_repo: Quantum-L9/.github
+  global_main_sha: dd780b957b301acf5443013708105b7a76e3aa7b
+  host_repo: Quantum-L9/Cursor-Governance
+  host_main_sha: 58e7340f846dfe960a3c58fb4e4f2ef11b221084
+activation_contract:
+  explicit_opt_in_and_identity_resolution: true
+  operator_doctrine_intent_exact_revision_and_digest_required: true
+  governing_global_semantic_bundle_valid_and_source_provenance_verified: true
+  read_access_enforced_outside_prompt_and_outside_projection: true
+  no_automatic_role_permission_change: true
+  no_automatic_consumer_migration: true
+  source_revision_change_causes_targeted_rebind_review: true
+  source_not_admitted_blocks_live_activation: true
+  missing_consumer_entrypoint_blocks_only_that_consumer: true
+bindings:
+  planner:
+    view_ref: qap.operator-alignment/planner-view@1
+    scope: privileged
+    consumer_identity: plan_keeper_semantic_role_not_actor_identity
+    mode: /planner_candidate_not_present_on_inspected_main
+    repo_entrypoint: unresolved
+    status: CANDIDATE_UNRESOLVED
+    blocker: Resolve planner mode entrypoint, host identity, rights and migration from existing planning projection
+  meta_planner:
+    view_ref: qap.operator-alignment/meta-planner-view@1
+    scope: privileged_advisory
+    consumer_identity: strategic_plan_metacognitive_reasoner_semantic_role_not_actor_identity
+    mode: unresolved
+    repo_entrypoint: unresolved
+    status: CANDIDATE_UNRESOLVED
+    blocker: Bind exact consumer entrypoint and preserve advisory-only/no-plan-mutation rights
+  cto:
+    view_ref: qap.operator-alignment/cto-view@1
+    scope: privileged
+    consumer_identity: technical_coordination_role_semantic_role_not_actor_identity
+    mode: /lcto
+    repo_entrypoint: Quantum-L9/Cursor-Governance:commands/lcto.md
+    status: EXISTING_MODE_NEW_VIEW_NOT_BOUND
+    blocker: Do not switch on operator alignment until exact-source admission, compatible renderer, and host
+      access proofs
+  architect:
+    view_ref: qap.operator-alignment/architect-view@1
+    scope: privileged
+    consumer_identity: architecture_role_requires_exact_runtime_identity_resolution
+    mode: /architect
+    repo_entrypoint: Quantum-L9/Cursor-Governance:commands/architect.md
+    status: EXISTING_MODE_NEW_VIEW_NOT_BOUND
+    blocker: Do not switch on operator alignment until exact-source admission, compatible renderer, and host
+      access proofs
+  coding_agent:
+    view_ref: qap.operator-alignment/coding-agent-view@1
+    scope: delegated_task_contract_only
+    consumer_identity: l9_coding_agent_skill_not_host_actor_identity
+    mode: hosted_skill_on_authorized_host
+    repo_entrypoint: Quantum-L9/Cursor-Governance:skills/l9-coding-agent/SKILL.md
+    status: EXISTING_SKILL_NEW_VIEW_NOT_BOUND
+    blocker: Require trusted upstream generation, isolated task delivery, and real access denial to operator/plan
+      sources
