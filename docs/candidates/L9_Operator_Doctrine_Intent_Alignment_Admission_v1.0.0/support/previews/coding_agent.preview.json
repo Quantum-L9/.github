@@ -1,0 +1,59 @@
+{
+  "access_assurance": "not_tested_storage_acl_required",
+  "additional_runtime_context_needed": [
+    "verified_bounded_task_contract",
+    "applicable_global_coding_execution_projection",
+    "target_owned_constraints_and_test_evidence"
+  ],
+  "artifact_kind": "candidate_local_preview_not_producer_projection",
+  "authority_class": "derived_non_authoritative",
+  "can_activate": false,
+  "decision_questions": [
+    "Can I complete the authorized task inside the accepted scope and architecture?",
+    "What verified acceptance evidence is required for this task?",
+    "Is a protected or out-of-scope change necessary, requiring upstream escalation?"
+  ],
+  "delegated_obligations": [
+    {
+      "id": "bounded_execution",
+      "summary": "Complete only the authorized bounded task under its stated constraints and acceptance criteria."
+    },
+    {
+      "id": "reuse_when_justified",
+      "summary": "Reuse a proven, governed, compatible L9 capability when it satisfies the authorized task; avoid unrelated abstractions."
+    },
+    {
+      "id": "necessary_one_off_allowed",
+      "summary": "Necessary one-off work and mandatory repairs remain valid even without reusable leverage."
+    },
+    {
+      "id": "verify_outcome",
+      "summary": "Distinguish implementation, tests, releases, forecasts and verified results; do not misstate activity as success."
+    },
+    {
+      "id": "preserve_governance",
+      "summary": "Reading a source or receiving a generated view never grants extra authority or permissions."
+    },
+    {
+      "id": "close_without_scope_creep",
+      "summary": "Once authorized acceptance and required closeout are verified, stop; record optional work separately."
+    }
+  ],
+  "example_only_no_task_contract_attached": true,
+  "forbidden": [
+    "read_full_operator_doctrine",
+    "read_full_operator_strategic_intent",
+    "read_full_protected_strategic_plan",
+    "acquire_strategic_authority",
+    "expand_task_or_publish_without_independent_permission"
+  ],
+  "global_profile_refs": [
+    "l9.projection/coding-agent-execution@1",
+    "l9.projection/governance@1",
+    "l9.projection/contracts-conformance@1"
+  ],
+  "role": "coding_agent",
+  "runtime_receipt": null,
+  "trusted_upstream_required": true,
+  "view_ref": "qap.operator-alignment/coding-agent-view@1"
+}

@@ -1,0 +1,26 @@
+{
+  "basis": "direct read-only GitHub connector observations, not producer-validated AuthorityResolution",
+  "global_authority": {
+    "repository": "Quantum-L9/.github",
+    "revision": "dd780b957b301acf5443013708105b7a76e3aa7b",
+    "source_paths": [
+      "semantics/authority_model.yaml",
+      "semantics/canonical_sources.yaml",
+      "semantics/strategic_cognition_model.yaml",
+      "semantics/domain_projection_model.yaml",
+      "semantics/domain_consumer_bindings.yaml",
+      "semantics/projection_engine_contract.yaml"
+    ]
+  },
+  "consumer": {
+    "repository": "Quantum-L9/Cursor-Governance",
+    "revision": "58e7340f846dfe960a3c58fb4e4f2ef11b221084"
+  },
+  "scope_conclusions": [
+    "operator Doctrine and Intent are external to global canonical semantics",
+    "global domain set closed v1",
+    "operator-scoped profile is not registered with current producer",
+    "no consumer activation proved"
+  ],
+  "status": "SOURCE_READ_BOUND_NOT_PRODUCER_RECEIPTED"
+}

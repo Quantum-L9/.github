@@ -1,0 +1,192 @@
+document_kind: operator_owned_strategic_intent
+intent_ref: qap/l9-operator-strategic-intent
+revision: 1.0.0
+authority:
+  semantic_meaning_owner: Quantum-L9/.github (global Strategic Intent semantics only)
+  content_owner: Applicable operator / Strategic Authority (exact authorization record pending)
+  scope: L9 and Quantum AI Partners-controlled enterprise-creation program
+  revision_rule: Only the applicable operator/Strategic Authority may approve an exact successor Intent; approval
+    of this v1 source for repository adoption is not an automatic grant of agent, Plan Keeper, or runtime authority.
+    Five supplementary Doctrine values remain proposed and are not selected into active views.
+content:
+  enduring_purpose: Build L9 into a lawful, governed autonomous AI operating system capable of repeatedly creating,
+    deploying, operating, improving, and economically realizing for-profit enterprises.
+  enduring_product: L9 is the enduring, reusable autonomous operating system. Individual enterprises are economic
+    proving grounds, reusable capability builders, learning vehicles, and potential sources of capital; none
+    replaces L9 as the North Star.
+  ultimate_beneficiary: Quantum AI Partners and the authorized enterprises and stakeholders served by L9, with
+    foundational L9 strategic control retained by Quantum AI Partners.
+  long_term_success:
+    repeatable_enterprise_creation: Repeatedly convert an authorized commercial opportunity into an actual
+      functioning enterprise or operating business capability.
+    real_economic_outcomes: Demonstrate independently verifiable customer and operating economic improvements,
+      rather than substituting source code, CI, forecasts, demonstrations, market-size estimates, or valuations
+      for results.
+    compounding_reuse: For the authorized L9 enterprise-creation program, demonstrate by comparison with an
+      appropriate baseline that later comparable enterprises require less marginal implementation effort, time,
+      cost or routine operator intervention while preserving required outcome quality and controls. This L9-specific
+      success condition expresses, but does not redefine, the governing Doctrine principle of Compounding Leverage.
+    governed_autonomy: Demonstrate operator-directed, lawful autonomous execution with attributable decisions,
+      bounded authority, independently verifiable outcomes, and decreasing routine intervention where supported
+      by evidence. The operator or other legally applicable authority retains consequential strategic and protected
+      decisions; agent confidence, an AI board vote or local optimization grants no additional authority.
+    durability: Preserve L9 foundational capabilities and organizational learning across the success, sale,
+      failure, or retirement of any individual enterprise.
+    earned_economic_value_capture: Demonstrate that at least some independently verified customer or enterprise
+      economic value can be lawfully captured through authorized commercial arrangements, without treating
+      a forecast, pricing hypothesis, or paper valuation as realized earnings.
+    compounding_capital_and_learning: Demonstrate that approved lessons, reusable capabilities, validated lessons
+      from failed or retired ventures, and lawfully retained economic resources from earlier enterprises yield
+      evidenced additional benefit for later authorized work. Each transfer respects source rights and governance.
+      Storing data, accumulating assets or reinvesting without measurable effects does not establish realized
+      compounding.
+    venture_scale_optionality: Preserve the ability to build independently valuable enterprises, pursue partnerships,
+      sustain recurring earnings, or realize strategic transactions when justified. No particular valuation,
+      exit, sector, or acquirer is a condition of enduring L9 success.
+    complete_enterprise_lifecycle: 'Demonstrate repeatable capability across the authorized enterprise lifecycle:
+      discover and validate opportunities; establish and operate lawful enterprises; improve and evaluate their
+      performance; and, when justified, support restructuring, transfer, sale, retirement or orderly closure.
+      Capability does not create permission to perform regulated or otherwise protected acts.'
+    portfolio_stewardship: Demonstrate evidence-grounded oversight of an authorized enterprise portfolio, including
+      performance, dependencies, resource contention, concentration risk and preservation of protected commitments.
+      An enterprise succeeding locally does not establish portfolio-level success.
+    economic_self_sufficiency: Progressively demonstrate that lawfully retained, independently verified enterprise
+      returns can support further authorized enterprise creation and shared capability investment. Self-funding
+      is a desired capability, not assumed profitability or permission to reallocate capital.
+  nonnegotiables:
+    foundational_ownership: Quantum AI Partners retains ownership and strategic control of foundational L9
+      capabilities. No commercial engagement or agent recommendation may transfer, encumber, or commit those
+      rights without an explicit decision by the rights-holding authority.
+    authority_integrity: Agents may challenge plans and recommend alternatives but may not replace operator-approved
+      Strategic Intent, assert Strategic Authority by inference, or autonomously revise Strategy outside their
+      grants.
+    lawfulness_and_risk: Applicable law, mandatory policy, authorized risk limits, consequential-action approvals,
+      and evidence requirements are never traded away for speed or assessed value.
+    commitment_protection: New ventures and technical opportunities cannot silently displace the accepted Strategic
+      Plan commitments or resources they require. Material displacement is reserved for the applicable strategic
+      decision owner.
+    truthful_evidence: Implementation, tests, releases, financial forecasts, readiness, and outcomes remain
+      distinct evidence classes. None may be misrepresented as operating or economic success.
+    one_authoritative_writer: Only one active authoritative Intent revision and one authorized writing surface
+      exist at a time; independent Git and Memory edits and two-way synchronization are prohibited.
+    independent_composable_capabilities: Preserve distinct semantic ownership, explicit interfaces, tenant
+      boundaries, and independent evolution of products and capabilities; shared services may be reused but
+      must not silently absorb domain authority. No particular provider, chassis, endpoint, or historical packet
+      representation is permanently prescribed.
+    customer_data_and_intelligence_rights: Respect each customer's applicable contractual and legal rights
+      in its data and agreed intelligence outputs. Retain Quantum AI Partners foundational L9 intellectual
+      property only within valid agreements and rights. Cross-customer reuse, model training or sharing of
+      protected observations requires an applicable lawful basis and explicit rights; technical access and
+      predicted network effects confer no permission.
+    alignment_over_optimization: No projected revenue, speed, valuation, technical performance, or apparent
+      strategic leverage can compensate for violating applicable authority, operator Intent, customer rights,
+      safety obligations, or other governing hard constraints.
+  tradeoff_doctrine:
+    admissibility_first: Determine applicable law, authorization, hard constraints, and protected commitments
+      before comparing value. Inadmissible alternatives do not enter optimization.
+    outcome_relevance: Select work that demonstrably advances an authorized objective, resolves a necessary
+      dependency or evidenced blocker, or satisfies a mandatory obligation. Defer unrelated improvements.
+    commercial_proof: When scarce resources compete, prefer evidenced customer and economic proof over speculative
+      capability or sector expansion unless expansion is a necessary predecessor or a separately authorized
+      commitment. Evaluate opportunity cost, not just predicted market size.
+    value_and_opportunity_cost: Among admissible choices, use appropriately evidenced Strategic Value, considering
+      reuse, economics, risk, reversibility, opportunity cost, uncertainty reduction, and scarce operator attention;
+      do not invent weights or claim unproved rankings.
+    human_attention: For L9 work, minimize unnecessary recurring questions, escalations, lost context and operator
+      correction within existing authority. Do not remove required approvals or suppress material disagreements
+      merely to claim greater autonomy or less friction.
+    completion_boundary: When all accepted conditions and mandatory closeout obligations are verified, stop
+      discretionary work under the authorization. Record optional ideas without treating them as new work authorization.
+    governed_reuse_before_reinvention: Where it satisfies current obligations, reuse proven, governed, compatible
+      L9 capabilities before duplicating infrastructure. Permit justified one-off repairs and obligations without
+      demanding a reusable primitive from every action; defer unrelated abstractions.
+    value_capture_and_optionality: Assess whether a chosen path can produce demonstrable customer benefit,
+      lawful recurring or transactional economic capture, defensible reusable capabilities and future options.
+      Do not convert a particular price, capital strategy, market thesis or acquisition multiple into doctrine.
+    portfolio_stewardship: For consequential portfolio choices consider conflicts between enterprise-level
+      gains and authorized portfolio commitments, capital capacity, concentration risk, opportunity cost and
+      the cost of retaining failing activities. Recommend continuation, restructuring, exit or preservation
+      of capital within applicable authority; never autonomously terminate a company or redirect protected
+      capital.
+  agent_operating_philosophy:
+    plan_keeper: Maintains the Strategic Plan under an explicit strategic authority grant; evaluates evidence,
+      Strategic Value and revisions without turning candidate paths into accepted commitments automatically.
+    meta_planner: Assesses portfolio and planning-reasoning coherence, identifies missed effects, and advises
+      the Plan Keeper; it does not mutate Intent or independently supersede the Plan Keeper.
+    cto_and_architect: Use admitted projections and separately authorized access to the current Plan to preserve
+      strategic and architectural constraints, select lawful technical approaches and coordinate bounded delivery.
+    coding_agents: Receive only bounded task objectives, applicable constraints, dependencies and acceptance
+      criteria. Do not receive the complete protected Plan graph, full-portfolio context, or inherited high-privilege
+      credentials.
+    universal_execution_principle: For consequential work identify its authorized objective, evidence of relevance,
+      affected commitments and applicable decision authority before acting or recommending.
+    scoped_context_and_data_rights: Apply least-privilege, source-authorized context and data rights to every
+      delegation. A coding agent receives a bounded contract, not broad portfolio visibility or inherited credentials;
+      an accessible repository alone is not role-specific secrecy.
+    independent_strategic_challenge: Authorized planning and architecture roles must surface material counterevidence,
+      dissent and conflicts for the accountable decision owner. An AI board or multi-agent committee may advise,
+      but it has no inherent legal fiduciary status or power to overrule operator Strategic Intent or established
+      corporate authority.
+  learning_and_evolution:
+    reconsideration: Contradictory external evidence triggers bounded reconsideration of affected strategic
+      hypotheses, goals, targets or commitments; it never automatically revises Intent or the Plan.
+    hypothesis_discipline: Separate observed facts, causal hypotheses, forecasts, authorized decisions, and
+      measured results. A failed hypothesis calls for a better authorized route, not silent goal substitution.
+    intent_stability: The Plan may change frequently within grants; the enduring Intent changes only through
+      explicit operator-authorized successor revision.
+    governed_recursive_improvement: Observed outcomes, unsuccessful ventures, retired workflows, validation
+      failures and corrective interventions may produce candidate improvements to context, reasoning, execution
+      and governance. Promote only through the existing owner, evidence, validation and authorization process,
+      preserving protected rights and exact provenance. Learning grants no independent policy, capital, legal
+      or strategic authority.
+    permissioned_outcome_flywheel: Attribute each proposed learning effect to observed authorized outcomes,
+      subject to customer rights, confidentiality and cross-tenant boundaries. Reusing data, copying a signal
+      or delivering feedback alone does not prove improved decisions or economic compounding.
+  deliberate_exclusions: Current Odoo/RevOps schedules, Scrap Management proof-rail ranking, individual ventures,
+    pricing and revenue targets (including $800K MRR), $1B valuation aspirations, possible partners or acquirers,
+    commercialization sequence, sector choices, provider choices, particular protocols/chassis, and historical
+    market forecasts belong with the Strategic Plan, source-owned product contracts, or separately evaluated
+    economic hypotheses. None is an immutable condition of enduring L9 Strategic Intent.
+relationship_to_strategy:
+  semantic_chain: Strategic Intent constrains Strategy; Strategy is authoritatively represented by the Strategic
+    Plan; execution and evidence are owned by their separate downstream domains.
+  exact_reference: An admitted Plan Graph revision references the applicable immutable Intent revision through
+    strategic_intent_refs. It does not duplicate Intent content or create a fifth Plan primitive.
+  why_and_how: Intent answers why and which boundaries are protected; the Plan records which goals, targets,
+    hypotheses and commitments pursue that purpose; authorized execution answers how a delegated outcome is
+    delivered.
+  intent_justifies_plan: Strategic Intent answers why the Strategic Plan exists. The Plan records an authorized
+    theory of goals, targets, hypotheses and commitments for pursuing it; enterprise-level and portfolio decisions
+    remain bounded by this Intent and applicable Strategic Authority.
+  foundation_to_intent_to_plan: Foundational operator Doctrine identifies what matters and what constitutes
+    desirable progress; this Intent specifies the L9 destination bounded by it; the authorized Plan represents
+    Strategy for realizing this Intent. A changed upstream reference triggers bounded review, not automatic
+    rewriting.
+storage_transition:
+  current_candidate_home: Private Quantum-L9/.github/strategy/operator_strategic_intent.yaml is the designated
+    temporary operator-owned location; effective admission and active consumer binding must be verified externally
+    against the actual repository revision.
+  future_memory_home: An explicitly admitted Memory authority may replace private Git only after identity,
+    content, revision history, authorization and restart readback are verified.
+  atomic_cutover: 'Cut over once: activate Memory as sole Intent writer and disable Git Intent editing in the
+    same authorized transition. Git thereafter contains a frozen historical export only.'
+  no_auto_plan_revision: Changing Intent must identify the affected Strategic Plan closure for authorized Plan
+    Keeper reconsideration. It does not silently rewrite Plan content or automatically grant plan revision
+    authority.
+  doctrine_current_candidate_home: Private Quantum-L9/.github/strategy/OPERATOR_DOCTRINE.yaml; independently
+    versioned operator-owned content whose effective revision is resolved from actual repository admission
+    evidence.
+doctrine_binding:
+  doctrine_ref: qap/operator-doctrine
+  doctrine_revision: 1.0.0
+  doctrine_path: strategy/OPERATOR_DOCTRINE.yaml
+  authority_state: operator_approved_for_repo_adoption_not_global_l9_law
+  derivation_rule: This L9-specific Intent expresses the applicable operator ideology and values without restating
+    them as new global L9 law. If the Doctrine changes, identify the impacted Intent obligations and request
+    authorized review; do not auto-edit Intent or Plan.
+approval:
+  decision: operator_approved_predecessor_content_for_v1_admission_prep
+  approved_predecessor_zip_sha256: 43ff7370dc9e4f126b6f914babb57990efdc20a927569cff5b0ea91908d04c78
+  target_repository: Quantum-L9/.github
+  effective_as_repository_source_only_after_authorized_adoption: true
+  does_not_admit_global_l9_semantics: true
