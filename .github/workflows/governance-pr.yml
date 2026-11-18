@@ -26,6 +26,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          # Never interpolate an Actions expression into script:. A boolean
+          # input arrives as the string "true" or "false".
+          STRICT: ${{ inputs.strict }}
         with:
           script: |
             const body = context.payload.pull_request.body || '';
@@ -49,7 +53,7 @@ jobs:
 
             if (fail.length) {
               core.summary.addHeading('Governance gates',2).addList(fail).write();
-              if (${{ inputs.strict }}) {
+              if (process.env.STRICT === "true") {
                 core.setFailed(`${fail.length} gate issue(s).`);
               } else {
                 core.notice(`${fail.length} advisory gate finding(s) — not blocking. See job summary.`);
