@@ -1,0 +1,23 @@
+schema: l9.operator-source-contract/v1
+artifact_id: l9.compiler/operator-source@1
+canonical: false
+authority:
+  owner: Quantum-L9/.github
+  scope: l9_operator_scoped_source_contract
+  authority_class: operator_scoped
+purpose: 'Name operator-owned strategy sources for a receipt. This artifact does not
+  admit those sources as global canonical law and does not amend l9.compiler/generic@1.
+
+  '
+not_global_semantic_law: true
+registry_boundary:
+  global_canonical_registry: semantics/canonical_sources.yaml
+  registration_in_global_registry: forbidden
+source_classes:
+  operator_doctrine:
+    operator_artifact: strategy/OPERATOR_DOCTRINE.yaml
+    canonical: false
+    projection_allowed: true
+receipt:
+  schema: l9.operator-source-receipt/v1
+  authority_class: operator_scoped
