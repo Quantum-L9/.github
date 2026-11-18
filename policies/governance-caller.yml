@@ -9,12 +9,14 @@
 # already carry a caller are re-pinned by a manual continuous-sync dispatch
 # (docs/DISTRIBUTION.md). No tag is involved: moving one retargets nothing.
 #
-# Current pin: 02ea092a, the merge of #176 (PR-body refresh `body` job and the
-# `gates` input in governance-pr.yml).
+# Current pin: d632486. That commit checks Cursor-Governance's
+# compose_pr_body.py out with the org secret L9_GITHUB_READ_TOKEN. The pr job
+# passes that secret by name. governance-issue.yml at the same commit is unchanged.
 #
 # SECRETS: a called workflow does NOT inherit caller secrets automatically.
-# Both callees use only GITHUB_TOKEN. Do not add blank `secrets: inherit`.
-# If a callee later needs a real secret, add a named `secrets:` entry.
+# Do not add blank `secrets: inherit`. The pr job passes L9_GITHUB_READ_TOKEN
+# by name so the composer checkout can read the private renderer. The issue
+# job uses only GITHUB_TOKEN.
 #
 # Permission validation runs BEFORE `if:` skip. Both jobs must declare
 # job-level permissions or a partial grant startup_fails on the unused job.
@@ -40,11 +42,13 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: Quantum-L9/.github/.github/workflows/governance-pr.yml@02ea092a098563b27970d21416fabc47dd005fb0  # merge of #176
+    uses: Quantum-L9/.github/.github/workflows/governance-pr.yml@d632486ed5f2d4f7515eb89242b3a7a9123a41cb  # composer read token
+    secrets:
+      L9_GITHUB_READ_TOKEN: ${{ secrets.L9_GITHUB_READ_TOKEN }}
 
   issue:
     if: github.event_name == 'issues'
     permissions:
       contents: read
       issues: write
-    uses: Quantum-L9/.github/.github/workflows/governance-issue.yml@02ea092a098563b27970d21416fabc47dd005fb0  # merge of #176
+    uses: Quantum-L9/.github/.github/workflows/governance-issue.yml@d632486ed5f2d4f7515eb89242b3a7a9123a41cb  # composer read token

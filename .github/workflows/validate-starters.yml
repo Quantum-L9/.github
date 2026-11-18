@@ -47,6 +47,7 @@ jobs:
             ops/scripts/compose_pr_body.py
             ops/scripts/org_dotgithub.py
           sparse-checkout-cone-mode: false
+          token: ${{ secrets.L9_GITHUB_READ_TOKEN }}
           persist-credentials: false
       - name: Run ops/validate-starters.sh
         env:

@@ -190,10 +190,14 @@ Those workflows, and `repo-birth-bootstrap.yml`, run in the
 
 ## Appendix A — secrets and called workflows
 
-`governance-pr.yml` and `governance-issue.yml` use the automatic `GITHUB_TOKEN`
-only. `policies/governance-caller.yml` does not pass `secrets: inherit`. A
-called workflow does not receive the caller's secrets unless the caller passes
-them by name. Prefer a named `secrets:` entry.
+`governance-issue.yml` uses the automatic `GITHUB_TOKEN` only. The body job's
+composer checkout in `governance-pr.yml` uses the named secret
+`L9_GITHUB_READ_TOKEN` to read `Quantum-L9/Cursor-Governance`
+`ops/scripts/compose_pr_body.py`, the one renderer `make pr` uses.
+`policies/governance-caller.yml` and `pr-files.yml` pass that secret by name.
+`continuous-sync.yml` adds the same named pass to a consumer caller when it
+re-pins. A called workflow does not receive the caller's secrets unless the
+caller passes them by name. Do not use `secrets: inherit`.
 
 If a secret is omitted, the callee sees an empty string and fails at the point
 of use.
