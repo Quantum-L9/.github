@@ -1,15 +1,23 @@
 "use strict";
 
 /**
- * L9_GITHUB_READ_TOKEN stays out of every workflow a pull request can rewrite.
+ * L9_GITHUB_READ_TOKEN stays out of every workflow a pull request can rewrite,
+ * except the two body-refresh files that check out Cursor-Governance.
  *
  * A same-repository pull_request workflow runs from the merge ref, and a
  * workflow_call workflow receives secrets only from its caller. Either file
  * can be changed by a pull request and print a secret it names.
- * policies/governance-caller.yml is that caller, copied into every consumer.
+ * policies/governance-caller.yml is that caller, copied into every consumer,
+ * and it must not name the secret.
  *
- * The token is allowed on the four workflows that run only from the default
- * branch, and only as the actions/checkout token for Cursor-Governance.
+ * governance-pr.yml may name the secret once, as the composer checkout token,
+ * with persist-credentials: false. pr-files.yml may name it once, as the
+ * pass-through L9_GITHUB_READ_TOKEN: ${{ secrets.L9_GITHUB_READ_TOKEN }}, and
+ * must not set the checkout token. Every other pull_request or workflow_call
+ * workflow must not name it.
+ *
+ * The token is also allowed on the four workflows that run only from the
+ * default branch, and only as the actions/checkout token for Cursor-Governance.
  * persist-credentials stays false, so later steps do not keep the credential.
  *
  * Run from the Quantum-L9/.github repo root:
@@ -22,6 +30,9 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const SECRET = "L9_GITHUB_READ_TOKEN";
 const CHECKOUT_TOKEN = `token: \${{ secrets.${SECRET} }}`;
+const PASS_THROUGH = `${SECRET}: \${{ secrets.${SECRET} }}`;
+const GOVERNANCE_PR = ".github/workflows/governance-pr.yml";
+const PR_FILES = ".github/workflows/pr-files.yml";
 const ALLOWED = {
 	".github/workflows/seed-governance.yml": new Set(["workflow_dispatch"]),
 	".github/workflows/continuous-sync.yml": new Set(["workflow_dispatch"]),
@@ -63,11 +74,60 @@ assert.ok(
 	"policies/governance-caller.yml must not name L9_GITHUB_READ_TOKEN",
 );
 
+function assertGovernancePr(text) {
+	assert.strictEqual(
+		text.split(CHECKOUT_TOKEN).length - 1,
+		1,
+		`${GOVERNANCE_PR} must set ${CHECKOUT_TOKEN} exactly once`,
+	);
+	const besidesToken = text.replace(CHECKOUT_TOKEN, "");
+	assert.strictEqual(
+		besidesToken.split(SECRET).length - 1,
+		1,
+		`${GOVERNANCE_PR} names ${SECRET} only as the checkout token, plus its workflow_call declaration`,
+	);
+	assert.match(
+		besidesToken,
+		new RegExp(`${SECRET}:\\n\\s+required: true\\b`),
+		`${GOVERNANCE_PR} must declare ${SECRET} required`,
+	);
+	assert.ok(
+		!besidesToken.includes(PASS_THROUGH),
+		`${GOVERNANCE_PR} must not use the pr-files pass-through line`,
+	);
+	assert.match(text, /persist-credentials: false/);
+}
+
+function assertPrFiles(text) {
+	assert.strictEqual(
+		text.split(PASS_THROUGH).length - 1,
+		1,
+		`${PR_FILES} must pass ${SECRET} by name exactly once`,
+	);
+	assert.strictEqual(
+		text.split(SECRET).length - 1,
+		2,
+		`${PR_FILES} names ${SECRET} only on the pass-through line`,
+	);
+	assert.ok(
+		!text.includes(CHECKOUT_TOKEN),
+		`${PR_FILES} must not contain the checkout token line`,
+	);
+}
+
 const workflowDir = path.join(root, ".github", "workflows");
 for (const name of fs.readdirSync(workflowDir)) {
 	if (!name.endsWith(".yml") && !name.endsWith(".yaml")) continue;
 	const rel = path.join(".github", "workflows", name);
 	const text = read(rel);
+	if (rel === GOVERNANCE_PR) {
+		assertGovernancePr(text);
+		continue;
+	}
+	if (rel === PR_FILES) {
+		assertPrFiles(text);
+		continue;
+	}
 	const found = text.includes(SECRET);
 	const trigger = new Set(events(onBlock(text)));
 	const forbidden = [...trigger].filter((event) => FORBIDDEN_EVENTS.has(event));
@@ -99,5 +159,5 @@ for (const name of fs.readdirSync(workflowDir)) {
 }
 
 console.log(
-	"ok: L9_GITHUB_READ_TOKEN is absent from pull_request, workflow_call, and the governance caller",
+	"ok: L9_GITHUB_READ_TOKEN is the composer checkout token, the pr-files pass-through, or a default-branch checkout",
 );
