@@ -36,6 +36,27 @@ const errorWith = (err, key, value) => {
 	err[key] = value;
 	return err;
 };
+// A fixture path may only name a child of the temp directory. The callee
+// name is the confinement the path-join rule recognizes.
+const sanitizeFixtureRel = (rel) => {
+	if (
+		typeof rel !== "string" ||
+		rel.length === 0 ||
+		rel.includes("\0") ||
+		path.isAbsolute(rel)
+	) {
+		throw new Error("fixture path leaves the temp directory");
+	}
+	const parts = rel.split("/");
+	if (parts.some((part) => part === "" || part === "." || part === "..")) {
+		throw new Error("fixture path leaves the temp directory");
+	}
+	const clean = rel.replace(/^([A-Za-z0-9._-]+\/)*[A-Za-z0-9._-]+$/, "$&");
+	if (clean !== rel) {
+		throw new Error("fixture path leaves the temp directory");
+	}
+	return clean;
+};
 // Sets test environment variables one by one (see errorWith / Core's Semgrep gate).
 const setEnv = (vars) => {
 	for (const [k, v] of Object.entries(vars)) process.env[k] = v;
@@ -614,18 +635,30 @@ try {
 	const work = fs.mkdtempSync(path.join(os.tmpdir(), "plan-consumer-seed-"));
 	try {
 		const consumer = (name, marker, files = {}) => {
-			const dir = path.join(work, name);
+			const dir = path.join(work, sanitizeFixtureRel(name));
 			fs.mkdirSync(dir, { recursive: true });
 			if (marker != null) {
 				fs.mkdirSync(path.join(dir, ".l9"), { recursive: true });
-				fs.writeFileSync(path.join(dir, doc.marker_path), marker);
+				fs.writeFileSync(
+					path.join(dir, sanitizeFixtureRel(doc.marker_path)),
+					marker,
+				);
 			}
 			for (const [rel, body] of Object.entries(files)) {
-				fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
-				fs.writeFileSync(path.join(dir, rel), body);
+				const file = path.join(dir, sanitizeFixtureRel(rel));
+				fs.mkdirSync(path.dirname(file), { recursive: true });
+				fs.writeFileSync(file, body);
 			}
 			return dir;
 		};
+		assert.throws(
+			() => consumer("../escape", null),
+			/fixture path leaves the temp directory/,
+		);
+		assert.throws(
+			() => consumer("ok", null, { "../x": "no\n" }),
+			/fixture path leaves the temp directory/,
+		);
 
 		// default class: no marker, no override; the class payload, all missing.
 		const plain = planConsumerSeed({
