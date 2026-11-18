@@ -131,8 +131,8 @@ jobs:
             const PIN_RE = /(Quantum-L9\/\.github\/\.github\/workflows\/governance-(?:pr|issue)\.yml@)([^\s#'"]+)/g;
             const READ_TOKEN_SECRET = 'L9_GITHUB_READ_TOKEN';
             const PR_USES_RE = /^( *)uses: Quantum-L9\/\.github\/\.github\/workflows\/governance-pr\.yml@[^\n]*$/m;
-            // Build the expression without a raw ${{ }} so this workflow file
-            // does not interpolate the secret while the sync script is parsed.
+            // Build the expression from pieces so Actions does not interpolate
+            // the secret while parsing this file.
             function passReadToken(text) {
               if (text.includes(READ_TOKEN_SECRET)) return text;
               const found = text.match(PR_USES_RE);
