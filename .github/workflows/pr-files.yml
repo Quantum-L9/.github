@@ -21,3 +21,5 @@ jobs:
     with:
       strict: true
       gates: false
+    secrets:
+      L9_GITHUB_READ_TOKEN: ${{ secrets.L9_GITHUB_READ_TOKEN }}

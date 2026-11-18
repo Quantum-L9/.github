@@ -460,7 +460,7 @@ function dispatchCallArgs(text) {
 // The pinned commit: the merge of #176 on main, the commit carrying both
 // reusable workflows the caller invokes. Choosing a successor is an operator
 // decision; it changes this constant, the caller and the record together.
-const GOVERNANCE_CALLER_PIN = "02ea092a098563b27970d21416fabc47dd005fb0";
+const GOVERNANCE_CALLER_PIN = "d632486ed5f2d4f7515eb89242b3a7a9123a41cb";
 
 /**
  * The pin record is the one place a re-pin is written; both caller `uses:`
@@ -495,7 +495,7 @@ function checkCallerPin(caller, recordText) {
 	assert.strictEqual(
 		pinned,
 		GOVERNANCE_CALLER_PIN,
-		"caller and record must pin exactly the merge of #176",
+		"caller and record must pin exactly the composer read-token commit",
 	);
 	assert.match(caller, /pull-requests: write/);
 	assert.match(caller, /issues: write/);
