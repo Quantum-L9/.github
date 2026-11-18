@@ -1,0 +1,79 @@
+name: Validate starters
+
+# Fetches the pinned PR-body composer from private Cursor-Governance and
+# saves it for pull-request jobs. Those jobs run on pull_request, from the
+# merge ref, so this file is the one that names the read token: push to main
+# and workflow_dispatch only. It checks out this repository at github.sha,
+# never the pull-request head.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-starters-composer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fetch-composer:
+    name: fetch pinned composer
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          repository: Quantum-L9/Cursor-Governance
+          ref: 5039c379d8ba1263f504cfa527487386205e056c
+          path: .cache/composer
+          # compose_pr_body.py imports org_dotgithub at load; both are stdlib-only.
+          sparse-checkout: |
+            ops/scripts/compose_pr_body.py
+            ops/scripts/org_dotgithub.py
+          sparse-checkout-cone-mode: false
+          token: ${{ secrets.L9_GITHUB_READ_TOKEN }}
+          persist-credentials: false
+      - name: Drop the composer git directory
+        run: rm -rf .cache/composer/.git
+      # A hit on a later push restores the same pin. The post-job save runs
+      # before a job that needs this one starts.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: .cache/composer/ops/scripts
+          key: l9-composer-5039c379d8ba1263f504cfa527487386205e056c
+
+  validate:
+    name: validate-starters.sh
+    needs: fetch-composer
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the pinned YAML parser and schema validator
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2" "jsonschema==4.23.0"
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: .cache/composer/ops/scripts
+          key: l9-composer-5039c379d8ba1263f504cfa527487386205e056c
+      - name: Run ops/validate-starters.sh
+        env:
+          SEED_COMPOSER_ROOT: .cache/composer
+        run: |
+          chmod +x ops/validate-starters.sh
+          ops/validate-starters.sh

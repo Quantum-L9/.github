@@ -161,7 +161,7 @@ const censusOf = (registry, classes = classesDoc(), revision) =>
 	);
 	assert.ok(
 		actionRefs.every((r) =>
-			/^actions\/(checkout|github-script)@[0-9a-f]{40}$/.test(r),
+			/^actions\/(checkout|github-script|cache\/restore)@[0-9a-f]{40}$/.test(r),
 		),
 		actionRefs.join(", "),
 	);
@@ -200,7 +200,11 @@ const censusOf = (registry, classes = classesDoc(), revision) =>
 		"fixture: HEAD and the pinned commit differ",
 	);
 	const onlyHeadActions = {
-		patterns_allowed: ["actions/checkout@*", "actions/github-script@*"],
+		patterns_allowed: [
+			"actions/checkout@*",
+			"actions/github-script@*",
+			"actions/cache/restore@*",
+		],
 		github_owned_allowed: false,
 	};
 	const SELECTED = { enabled: true, allowed_actions: "selected" };
@@ -347,7 +351,7 @@ const censusOf = (registry, classes = classesDoc(), revision) =>
 			SEL,
 			{ patterns_allowed: ["Quantum-L9/*"], github_owned_allowed: false },
 			STATES.BLOCKED,
-			/selected-denied \(actions\/(checkout|github-script)\)/,
+			/selected-denied \(actions\/(cache\/restore|checkout|github-script)\)/,
 		],
 		[
 			SEL,

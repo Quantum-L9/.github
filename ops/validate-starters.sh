@@ -61,6 +61,7 @@ else
     ops/test-org-admission-workflow.js \
     ops/test-registry-completeness.js \
     ops/test-secret-drift-workflow.js \
+    ops/test-fetch-composer.js \
     ops/test-read-token-boundary.js \
     ops/test-governance-report.js; do
     if node "$t"; then

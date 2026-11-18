@@ -322,19 +322,15 @@ function makeBranchStubs({
  * Run the `gates` job of governance-pr.yml — the org PR-body validator every
  * consumer PR is judged by — against one body, in strict mode.
  *
- * The job's script interpolates `${{ inputs.strict }}` into its text, which is
- * not JavaScript until Actions expands it; it is expanded here exactly as the
- * runner would for a strict caller.
+ * The job reads STRICT from the environment. Actions stringifies the boolean
+ * input, so a strict caller sets STRICT=true. This loader does the same.
  *
  * @param {string} root  repo root
  * @returns {(body: string) => Promise<string[]>} the findings; [] = passes
  */
 function loadGovernanceGates(root) {
 	const file = path.join(root, ".github/workflows/governance-pr.yml");
-	const body = extractScript(file, 0)
-		// biome-ignore lint/suspicious/noTemplateCurlyInString: the Actions expression, matched literally
-		.split("${{ inputs.strict }}")
-		.join("true");
+	const body = extractScript(file, 0);
 	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "governance-gates-"));
 	const mod = path.join(dir, "governance-gates.script.js");
 	fs.writeFileSync(
@@ -350,6 +346,8 @@ function loadGovernanceGates(root) {
 	return async (prBody) => {
 		const findings = [];
 		const failures = [];
+		const previousStrict = process.env.STRICT;
+		process.env.STRICT = "true";
 		const summary = {
 			addHeading: () => summary,
 			addList: (items) => {
@@ -359,12 +357,17 @@ function loadGovernanceGates(root) {
 			write: async () => summary,
 		};
 		const core = { setFailed: (m) => failures.push(m), notice() {}, summary };
-		await fn(
-			{},
-			core,
-			{ payload: { pull_request: { body: prBody } } },
-			require,
-		);
+		try {
+			await fn(
+				{},
+				core,
+				{ payload: { pull_request: { body: prBody } } },
+				require,
+			);
+		} finally {
+			if (previousStrict === undefined) delete process.env.STRICT;
+			else process.env.STRICT = previousStrict;
+		}
 		assert.strictEqual(
 			failures.length > 0,
 			findings.length > 0,
