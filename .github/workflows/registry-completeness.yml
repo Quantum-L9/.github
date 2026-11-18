@@ -1,0 +1,112 @@
+# Organization completeness of semantics/repository_registry.yaml (ADR-040).
+#
+# Since v3.43.0 every repository the Quantum-L9 organization hosts, archived
+# and forked ones included, must be registered. This job lists the
+# organization and fails when a hosted repository is not registered under its
+# exact name, or when an archived repository is registered current. It is
+# observational: it never writes the registry and never opens a PR. Admission
+# stays an explicit decision — auto-seed-new-repo.yml's `admit` job proposes
+# the entry, and the owner's merge admits it.
+#
+# An unreadable listing is UNKNOWN and fails the job too: it is never
+# reported as complete.
+#
+# Auth: the org secret GH_TOKEN from the governance-distribution environment,
+# the same one auto-seed-new-repo.yml lists the organization with. The default
+# GITHUB_TOKEN of this repository cannot see the organization's private
+# repositories, so it would under-report. The deterministic logic is proven on
+# every PR by ops/test-registry-completeness.js (validate-starters.yml), so
+# this networked job runs only where that secret is available.
+name: Registry completeness
+
+on:
+  schedule:
+    # Daily, 05:41 UTC.
+    - cron: "41 5 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - semantics/repository_registry.yaml
+      - ops/registry-completeness.js
+      - .github/workflows/registry-completeness.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: registry-completeness
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: governance-distribution
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The registry is read with the pinned parser scripts/validate-semantics.py uses.
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install the pinned YAML parser
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2"
+
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const { execFileSync } = require('child_process');
+            const { pythonYamlParser } = require('./ops/governance-report.js');
+            const {
+              VERDICTS,
+              assessRegistryCompleteness,
+              loadRegistry,
+              renderCompletenessReport,
+            } = require('./ops/registry-completeness.js');
+            const ORG = 'Quantum-L9';
+
+            let registry = null;
+            let reason = null;
+            try {
+              registry = loadRegistry({
+                readBytes: (p) => fs.readFileSync(p),
+                parseYaml: pythonYamlParser(execFileSync),
+                revision: context.sha,
+              });
+            } catch (e) {
+              reason = `registry unreadable: ${e.message}`;
+            }
+
+            let discovered = null;
+            if (registry) {
+              try {
+                discovered = await github.paginate(github.rest.repos.listForOrg, {
+                  org: ORG, type: 'all', per_page: 100,
+                });
+              } catch (e) {
+                reason = `organization listing failed (${e.status || 'error'}): ${e.message}`;
+              }
+            }
+
+            const result = registry
+              ? assessRegistryCompleteness({ registry, discovered, org: ORG })
+              : { verdict: VERDICTS.UNKNOWN, reason, hosted: 0, registered: 0,
+                  unregistered: [], caseDrift: [], archivedCurrent: [], notHosted: [] };
+            if (!result.reason && reason) result.reason = reason;
+            await core.summary.addRaw(renderCompletenessReport(result, ORG)).write();
+            if (result.verdict !== VERDICTS.COMPLETE) {
+              core.setFailed(
+                `registry is ${result.verdict}` +
+                (result.unregistered.length ? `; unregistered: ${result.unregistered.join(', ')}` : '') +
+                (result.caseDrift.length ? `; case drift: ${result.caseDrift.map((d) => d.hosted).join(', ')}` : '') +
+                (result.archivedCurrent.length ? `; archived but current: ${result.archivedCurrent.join(', ')}` : '') +
+                (result.reason ? `; ${result.reason}` : ''),
+              );
+            }

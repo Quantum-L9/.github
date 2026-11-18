@@ -1,0 +1,252 @@
+{
+  "schema": "l9.fixture/org-listing@1",
+  "organization": "Quantum-L9",
+  "observed_at": "2026-11-17",
+  "source": "GitHub search API `org:Quantum-L9 fork:true` (orgs/Quantum-L9/repos is not reachable from the authoring session), cross-checked against the session repository listing; both returned these 61 repositories",
+  "repositories": [
+    {
+      "name": ".github",
+      "archived": false
+    },
+    {
+      "name": "Cognitive.Engine.Graphs",
+      "archived": false
+    },
+    {
+      "name": "Constellation.Gate",
+      "archived": false
+    },
+    {
+      "name": "Cursor-Governance",
+      "archived": false
+    },
+    {
+      "name": "Deckhouse",
+      "archived": false
+    },
+    {
+      "name": "DeckhouseOdoo",
+      "archived": false
+    },
+    {
+      "name": "Enrichment.Inference.Engine",
+      "archived": false
+    },
+    {
+      "name": "Gate_SDK",
+      "archived": false
+    },
+    {
+      "name": "Governance-Active",
+      "archived": false
+    },
+    {
+      "name": "IB-Founderos-Runtime",
+      "archived": false
+    },
+    {
+      "name": "IB-IdentityOS",
+      "archived": false
+    },
+    {
+      "name": "IdeaOS",
+      "archived": false
+    },
+    {
+      "name": "L9-Ops-MCP",
+      "archived": false
+    },
+    {
+      "name": "L9-Prompt-Generator",
+      "archived": false
+    },
+    {
+      "name": "L9_Original_Repo",
+      "archived": false
+    },
+    {
+      "name": "LLM-Router",
+      "archived": false
+    },
+    {
+      "name": "Mack-5.0",
+      "archived": false
+    },
+    {
+      "name": "Quantum-Website-Cursor",
+      "archived": false
+    },
+    {
+      "name": "SEO-Bot",
+      "archived": false
+    },
+    {
+      "name": "SM-MicroBidLocal",
+      "archived": false
+    },
+    {
+      "name": "SplitWisely.ai",
+      "archived": false
+    },
+    {
+      "name": "SustainabilitySolutions1",
+      "archived": false
+    },
+    {
+      "name": "Website-Bot",
+      "archived": false
+    },
+    {
+      "name": "clawdbot",
+      "archived": false
+    },
+    {
+      "name": "emma_v1.0",
+      "archived": false
+    },
+    {
+      "name": "golden-repo",
+      "archived": true
+    },
+    {
+      "name": "igorbot",
+      "archived": false
+    },
+    {
+      "name": "infisical-config",
+      "archived": false
+    },
+    {
+      "name": "l9-assurance",
+      "archived": false
+    },
+    {
+      "name": "l9-ci-core",
+      "archived": false
+    },
+    {
+      "name": "l9-ci-debt-intelligence",
+      "archived": false
+    },
+    {
+      "name": "l9-ci-debt-lsp",
+      "archived": false
+    },
+    {
+      "name": "l9-ci-debt-resolver",
+      "archived": false
+    },
+    {
+      "name": "l9-ci-sdk",
+      "archived": false
+    },
+    {
+      "name": "l9-codegen",
+      "archived": false
+    },
+    {
+      "name": "l9-cognitive-runtime",
+      "archived": false
+    },
+    {
+      "name": "l9-conformance",
+      "archived": false
+    },
+    {
+      "name": "l9-constellation-ingest",
+      "archived": false
+    },
+    {
+      "name": "l9-constellation-topology",
+      "archived": false
+    },
+    {
+      "name": "l9-cto",
+      "archived": false
+    },
+    {
+      "name": "l9-dependency-template",
+      "archived": false
+    },
+    {
+      "name": "l9-deploy",
+      "archived": false
+    },
+    {
+      "name": "l9-devpack-compiler",
+      "archived": false
+    },
+    {
+      "name": "l9-goose",
+      "archived": false
+    },
+    {
+      "name": "l9-graphiti-memory",
+      "archived": false
+    },
+    {
+      "name": "l9-harness",
+      "archived": false
+    },
+    {
+      "name": "l9-meta-injector",
+      "archived": false
+    },
+    {
+      "name": "l9-node-chain-of-search",
+      "archived": false
+    },
+    {
+      "name": "l9-node-template",
+      "archived": false
+    },
+    {
+      "name": "l9-observability-core",
+      "archived": false
+    },
+    {
+      "name": "l9-pr-repair",
+      "archived": false
+    },
+    {
+      "name": "l9-repo-template",
+      "archived": false
+    },
+    {
+      "name": "l9-semantic-compiler-engine",
+      "archived": false
+    },
+    {
+      "name": "l9-state",
+      "archived": false
+    },
+    {
+      "name": "l9-wip",
+      "archived": false
+    },
+    {
+      "name": "odoo-enterprise",
+      "archived": false
+    },
+    {
+      "name": "openclaw",
+      "archived": false
+    },
+    {
+      "name": "platform-state-service",
+      "archived": false
+    },
+    {
+      "name": "quantum-dashboard",
+      "archived": false
+    },
+    {
+      "name": "safehavenrr-site",
+      "archived": false
+    },
+    {
+      "name": "venture-forge-toolbox",
+      "archived": false
+    }
+  ]
+}

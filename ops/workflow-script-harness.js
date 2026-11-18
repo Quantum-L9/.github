@@ -374,6 +374,215 @@ function loadGovernanceGates(root) {
 	};
 }
 
+/**
+ * Index (for loadScriptModule's `nth`) of the first `script: |` block after the
+ * line containing `label` — a step name — so a suite names the step it runs
+ * rather than counting blocks.
+ */
+function scriptIndexAfter(file, label) {
+	const lines = fs.readFileSync(file, "utf8").split("\n");
+	const starts = lines.flatMap((l, i) =>
+		/^\s*script:\s*\|\s*$/.test(l) ? [i] : [],
+	);
+	const marker = lines.findIndex((l) => l.includes(label));
+	const idx = starts.findIndex((s) => s > marker);
+	assert.ok(marker !== -1 && idx !== -1, `${label} script not found`);
+	return idx;
+}
+
+/**
+ * Build the `run()` for a registry PR script — the birth registrar
+ * (repo-birth-bootstrap.yml, ADR-039) and the organization admission
+ * (auto-seed-new-repo.yml, ADR-040) open one PR on this repository the same
+ * way: read a result JSON, commit its changed paths on base (or merge base
+ * into their own stale branch), refuse a branch carrying foreign commits, and
+ * open or update one PR. Every run asserts the two invariants both share:
+ * nothing is merged, and no ref is force-moved.
+ *
+ * @param {object} o
+ * @param {Function} o.script   the loaded script (loadScriptModule)
+ * @param {string} o.root       repo root, for the script's relative requires
+ * @param {string} o.tmpTag     temp-dir prefix
+ * @param {string} o.resultName result file name inside the temp dir
+ * @param {object} o.entry      the registry entry the result carries
+ * @param {string} o.release    the release the result cuts, e.g. "v3.43.1"
+ * @param {string} o.owner
+ * @param {string} o.repo
+ * @param {string} o.baseSha    the base commit `git rev-parse` reports
+ * @returns {(o?: {status?, branch?, openPRs?, treeMatches?}) => Promise<{calls, names, failures, notices, find}>}
+ */
+function makeRegistryPrRunner({
+	script,
+	root,
+	tmpTag,
+	resultName,
+	entry,
+	release,
+	owner,
+	repo,
+	baseSha,
+}) {
+	return async function run({
+		status = "added",
+		branch = null,
+		openPRs = [],
+		treeMatches = false,
+	} = {}) {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), tmpTag));
+		const changed = [
+			"semantics/repository_registry.yaml",
+			`docs/semantic-foundation/${release}/HASHES.sha256`,
+		];
+		for (const rel of changed) {
+			fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
+			fs.writeFileSync(path.join(dir, rel), `content of ${rel}\n`);
+		}
+		const resultPath = path.join(dir, resultName);
+		const added = status === "added";
+		fs.writeFileSync(
+			resultPath,
+			JSON.stringify({
+				status,
+				entry,
+				release: added ? release : undefined,
+				changed_paths: added ? changed : [],
+			}),
+		);
+		const calls = [];
+		const rec = (name, fn) => async (args) => {
+			calls.push({ name, args });
+			return fn(args);
+		};
+		const treeOf = (sha) => {
+			if (sha === baseSha) return "base-tree";
+			return treeMatches ? "new-tree" : "old-tree";
+		};
+		const github = {
+			rest: {
+				git: {
+					getCommit: rec("getCommit", ({ commit_sha }) => ({
+						data: { tree: { sha: treeOf(commit_sha) } },
+					})),
+					getRef: rec("getRef", () => {
+						if (!branch) throw notFound("no branch");
+						return { data: { object: { sha: branch.sha } } };
+					}),
+					createTree: rec("createTree", () => ({ data: { sha: "new-tree" } })),
+					createCommit: rec("createCommit", () => ({
+						data: { sha: "f".repeat(40) },
+					})),
+					updateRef: rec("updateRef", () => ({})),
+					createRef: rec("createRef", () => ({})),
+				},
+				repos: {
+					compareCommitsWithBasehead: rec("compare", () => ({
+						data: {
+							commits: (branch?.messages || []).map((message) => ({
+								commit: { message },
+							})),
+						},
+					})),
+				},
+				pulls: {
+					list: rec("pulls.list", () => ({
+						data: openPRs.map((n) => ({ number: n, html_url: `u/${n}` })),
+					})),
+					create: rec("pulls.create", () => ({ data: { html_url: "u/new" } })),
+					update: rec("pulls.update", () => ({})),
+					merge: rec("pulls.merge", () => ({})),
+				},
+			},
+		};
+		const failures = [];
+		const notices = [];
+		const core = {
+			notice: (m) => notices.push(m),
+			setFailed: (m) => failures.push(m),
+			info() {},
+		};
+		const env = { RESULT_PATH: resultPath, BASE_BRANCH: "main" };
+		const prevEnv = Object.fromEntries(
+			Object.keys(env).map((k) => [k, process.env[k]]),
+		);
+		setEnv(env);
+		const prevCwd = process.cwd();
+		process.chdir(dir);
+		try {
+			await script(
+				github,
+				core,
+				{
+					repo: { owner, repo },
+					serverUrl: "https://github.com",
+					runId: 4242,
+				},
+				makeScopedRequire(root, {
+					child_process: { execFileSync: () => `${baseSha}\n` },
+				}),
+			);
+		} finally {
+			process.chdir(prevCwd);
+			for (const [k, v] of Object.entries(prevEnv)) {
+				if (v === undefined) delete process.env[k];
+				else process.env[k] = v;
+			}
+			fs.rmSync(dir, { recursive: true, force: true });
+		}
+		const names = calls.map((c) => c.name);
+		assert.ok(!names.includes("pulls.merge"), "a registry PR job never merges");
+		for (const c of calls.filter((c) => c.name === "updateRef")) {
+			assert.strictEqual(
+				c.args.force,
+				false,
+				"a registry PR branch is never force-moved",
+			);
+		}
+		return {
+			calls,
+			names,
+			failures,
+			notices,
+			find: (n) => calls.find((c) => c.name === n),
+		};
+	};
+}
+
+/**
+ * The three rules .github/workflows/pr-gates.yml applies to every PR body, for
+ * a generated registry PR body (registration PR #250 failed them before the
+ * body carried these sections). The body carries no HTML comments, so its
+ * Problem text is checked as is.
+ */
+function assertPassesPrGates(body) {
+	const section = (name) => {
+		const m = body.match(
+			new RegExp(String.raw`##\s*${name}([\s\S]*?)(?=\n##\s|$)`, "i"),
+		);
+		return m ? m[1] : "";
+	};
+	assert.ok(
+		!body.includes("<!" + "--"),
+		"the PR body carries no HTML comments",
+	);
+	assert.ok(
+		section("Problem").trim().length >= 30,
+		"pr-gates: Problem section too short",
+	);
+	const risk = [
+		...section("Risk").matchAll(/^[ \t]*-[ \t]*\[([ xX])\]/gm),
+	].filter((m) => m[1] !== " ");
+	assert.strictEqual(
+		risk.length,
+		1,
+		"pr-gates: exactly one Risk level checked",
+	);
+	assert.match(
+		section("Evidence"),
+		/actions\/runs\/\d+/,
+		"pr-gates: Evidence links a CI run",
+	);
+}
+
 module.exports = {
 	makeRenderRecorder,
 	extractScript,
@@ -384,4 +593,7 @@ module.exports = {
 	makeScriptRunner,
 	makeBranchStubs,
 	loadGovernanceGates,
+	scriptIndexAfter,
+	makeRegistryPrRunner,
+	assertPassesPrGates,
 };
