@@ -399,8 +399,16 @@ async function classScenarios() {
 	const marker = (cls) => ({
 		".l9/org-birth-profile.yaml": `profile: ${cls}\n`,
 	});
+	const readTokenPass = (indent) =>
+		`${indent}secrets:\n${indent}  L9_GITHUB_READ_TOKEN: \${{ secrets.L9_GITHUB_READ_TOKEN }}\n`;
+	const withReadToken = (text) =>
+		text.replace(
+			/^( *)uses: Quantum-L9\/\.github\/\.github\/workflows\/governance-pr\.yml@[^\n]*\n/m,
+			(line, indent) => line + readTokenPass(indent),
+		);
 	const strictCaller = (pin) =>
 		`name: Governance\njobs:\n  pr:\n    uses: Quantum-L9/.github/.github/workflows/governance-pr.yml@${pin}  # v1\n    with:\n      strict: true\n  issue:\n    uses: Quantum-L9/.github/.github/workflows/governance-issue.yml@${pin}  # v1\n`;
+	const strictCallerPinned = (pin) => withReadToken(strictCaller(pin));
 
 	// default class: a divergent template is replaced with the canonical bytes.
 	let r = await runClass({
@@ -478,13 +486,13 @@ async function classScenarios() {
 		[CALLER],
 	);
 	const repinned = Buffer.from(r.writes[0].args.content, "base64").toString();
-	assert.strictEqual(repinned, strictCaller(canonicalPin));
+	assert.strictEqual(repinned, strictCallerPinned(canonicalPin));
 	assert.match(repinned, /strict: true/);
 	r = await runClass({
 		files: {
 			...managedOk,
 			[TEMPLATE]: canonicalTemplate,
-			[CALLER]: strictCaller(canonicalPin),
+			[CALLER]: strictCallerPinned(canonicalPin),
 		},
 	});
 	assert.strictEqual(r.status, "CANONICAL_COPY");
@@ -503,7 +511,7 @@ async function classScenarios() {
 		);
 		assert.strictEqual(
 			Buffer.from(r.writes[0].args.content, "base64").toString(),
-			strictCaller(canonicalPin),
+			strictCallerPinned(canonicalPin),
 		);
 	}
 	r = await runClass({
@@ -580,6 +588,12 @@ async function manualModeScenarios() {
 	const old = "3".repeat(40);
 	const callerAt = (pin) =>
 		`name: Governance\njobs:\n  pr:\n    uses: Quantum-L9/.github/.github/workflows/governance-pr.yml@${pin}\n    with:\n      strict: true\n`;
+	const callerAtPinned = (pin) =>
+		callerAt(pin).replace(
+			/^( *)uses: Quantum-L9\/\.github\/\.github\/workflows\/governance-pr\.yml@[^\n]*\n/m,
+			(line, indent) =>
+				`${line}${indent}secrets:\n${indent}  L9_GITHUB_READ_TOKEN: \${{ secrets.L9_GITHUB_READ_TOKEN }}\n`,
+		);
 	// Every kind of drift at once: managed files missing, template divergent,
 	// caller pin stale, plus consumer-owned files the sync must never write.
 	const consumerOwned = {
@@ -667,7 +681,7 @@ async function manualModeScenarios() {
 	).toString();
 	assert.strictEqual(
 		caller,
-		callerAt(canonicalPin),
+		callerAtPinned(canonicalPin),
 		`${label}: caller changed beyond its pin`,
 	);
 	console.log(

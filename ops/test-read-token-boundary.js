@@ -7,8 +7,9 @@
  * A same-repository pull_request workflow runs from the merge ref, and a
  * workflow_call workflow receives secrets only from its caller. Either file
  * can be changed by a pull request and print a secret it names.
- * policies/governance-caller.yml is that caller, copied into every consumer,
- * and it must not name the secret.
+ * policies/governance-caller.yml is copied into every consumer. It may name the
+ * secret once, as the pass-through to governance-pr.yml, and must not set the
+ * checkout token.
  *
  * governance-pr.yml may name the secret once, as the composer checkout token,
  * with persist-credentials: false. pr-files.yml may name it once, as the
@@ -69,9 +70,14 @@ function events(block) {
 }
 
 const caller = read("policies/governance-caller.yml");
+assert.strictEqual(
+	caller.split(PASS_THROUGH).length - 1,
+	1,
+	"policies/governance-caller.yml must pass L9_GITHUB_READ_TOKEN by name exactly once",
+);
 assert.ok(
-	!caller.includes(SECRET),
-	"policies/governance-caller.yml must not name L9_GITHUB_READ_TOKEN",
+	!caller.includes(CHECKOUT_TOKEN),
+	"policies/governance-caller.yml must not set the checkout token",
 );
 
 function assertGovernancePr(text) {
@@ -143,6 +149,16 @@ for (const name of fs.readdirSync(workflowDir)) {
 		continue;
 	}
 	assert.ok(found, `${rel} must check out with ${SECRET}`);
+	if (rel === ".github/workflows/continuous-sync.yml") {
+		assert.strictEqual(
+			text.split(CHECKOUT_TOKEN).length - 1,
+			1,
+			`${rel} sets ${CHECKOUT_TOKEN} exactly once`,
+		);
+		assert.match(text, /function passReadToken/);
+		assert.match(text, /persist-credentials: false/);
+		continue;
+	}
 	assert.strictEqual(
 		text.split(SECRET).length - 1,
 		1,

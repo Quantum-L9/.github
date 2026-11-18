@@ -129,6 +129,18 @@ jobs:
             // Any ref form (full SHA, tag, branch, short SHA): only the
             // canonical full SHA is in sync.
             const PIN_RE = /(Quantum-L9\/\.github\/\.github\/workflows\/governance-(?:pr|issue)\.yml@)([^\s#'"]+)/g;
+            const READ_TOKEN_SECRET = 'L9_GITHUB_READ_TOKEN';
+            const PR_USES_RE = /^( *)uses: Quantum-L9\/\.github\/\.github\/workflows\/governance-pr\.yml@[^\n]*$/m;
+            // Build the expression without a raw ${{ }} so this workflow file
+            // does not interpolate the secret while the sync script is parsed.
+            function passReadToken(text) {
+              if (text.includes(READ_TOKEN_SECRET)) return text;
+              const found = text.match(PR_USES_RE);
+              if (!found) return text;
+              const pad = found[1];
+              const block = pad + 'secrets:\n' + pad + '  ' + READ_TOKEN_SECRET + ': $' + '{{ secrets.' + READ_TOKEN_SECRET + ' }}';
+              return text.replace(PR_USES_RE, (line) => line + '\n' + block);
+            }
             const ALT_NAME = /^pull_request_template(\.md)?$/i;
 
             const classes = loadRepoClasses(fs);
@@ -281,7 +293,7 @@ jobs:
                 if (CALLER in eligible) {
                   const caller = await read(o, n, CALLER, baseSha);
                   if (caller.state === 'present') {
-                    const repinned = caller.text.replace(PIN_RE, (_, head) => `${head}${canonicalPins[/governance-issue\.yml@$/.test(head) ? 'issue' : 'pr'] }`);
+                    const repinned = passReadToken(caller.text.replace(PIN_RE, (_, head) => `${head}${canonicalPins[/governance-issue\.yml@$/.test(head) ? 'issue' : 'pr'] }`));
                     if (!PIN_RE.test(caller.text)) {
                       notes.push('governance caller calls neither governance-pr.yml nor governance-issue.yml (reported, not edited)');
                     } else if (repinned !== caller.text) {
