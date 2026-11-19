@@ -18,6 +18,7 @@ required:
   - assertion_registry_digest
   - released_at
   - approval_reference
+  - signing_or_attestation
   - compatibility
 properties:
   schema_version:
@@ -63,15 +64,28 @@ properties:
     additionalProperties: false
   signing_or_attestation:
     type: object
+    description: >-
+      A release record must name a signature and an in-toto attestation.
+      Those references are not verification. Verification is a separate
+      check against the trust root and fails closed while no signer exists.
+    required:
+      - signature_required
+      - attestation_required
+      - signature_reference
+      - attestation_reference
     properties:
       signature_required:
         type: boolean
+        const: true
       attestation_required:
         type: boolean
+        const: true
       signature_reference:
         type: string
+        minLength: 1
       attestation_reference:
         type: string
+        minLength: 1
     additionalProperties: false
   compatibility:
     type: object

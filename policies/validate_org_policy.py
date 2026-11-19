@@ -537,6 +537,77 @@ def validate_release_schema(schema: Any, findings: list[Finding]) -> None:
                 "release_schema.additionalProperties",
             )
         )
+    required = require_list(
+        schema_map.get("required"),
+        "release_schema.required",
+        findings,
+    )
+    if "signing_or_attestation" not in required:
+        findings.append(
+            Finding(
+                "RELEASE_SIGNATURE_OPTIONAL",
+                "a release record must require signing_or_attestation",
+                "release_schema.required",
+            )
+        )
+    signing = require_mapping(
+        properties.get("signing_or_attestation"),
+        "release_schema.properties.signing_or_attestation",
+        findings,
+    )
+    signing_required = require_list(
+        signing.get("required"),
+        "release_schema.properties.signing_or_attestation.required",
+        findings,
+    )
+    for field in (
+        "signature_required",
+        "attestation_required",
+        "signature_reference",
+        "attestation_reference",
+    ):
+        if field not in signing_required:
+            findings.append(
+                Finding(
+                    "RELEASE_SIGNATURE_FIELD_OPTIONAL",
+                    f"signing_or_attestation must require {field}",
+                    "release_schema.properties.signing_or_attestation.required",
+                )
+            )
+    signing_properties = require_mapping(
+        signing.get("properties"),
+        "release_schema.properties.signing_or_attestation.properties",
+        findings,
+    )
+    for flag in ("signature_required", "attestation_required"):
+        flag_schema = require_mapping(
+            signing_properties.get(flag),
+            f"release_schema.properties.signing_or_attestation.properties.{flag}",
+            findings,
+        )
+        if flag_schema.get("const") is not True:
+            findings.append(
+                Finding(
+                    "RELEASE_SIGNATURE_NOT_REQUIRED",
+                    f"{flag} must be const true; a reference is not verification",
+                    f"release_schema.properties.signing_or_attestation.properties.{flag}",
+                )
+            )
+
+
+def release_proof_status(record: Any) -> str:
+    """Classify a release record. A reference string is never verified."""
+    if not isinstance(record, dict):
+        return "absent"
+    signing = record.get("signing_or_attestation")
+    if not isinstance(signing, dict):
+        return "absent"
+    reference = signing.get("signature_reference") or signing.get(
+        "attestation_reference"
+    )
+    if isinstance(reference, str) and reference.strip():
+        return "unverified"
+    return "absent"
 
 
 def run_validation(root: Path = ROOT) -> list[Finding]:

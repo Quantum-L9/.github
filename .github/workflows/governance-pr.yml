@@ -96,14 +96,16 @@ jobs:
           path: pr
           persist-credentials: false
 
-      # Saved by validate-starters-composer.yml on the default branch. A hit
+      # Saved by validate-starters-composer.yml on the default branch, at
+      # .cache/composer/ops/scripts. The cache version includes that path, so
+      # a different restore path is a miss even when the key exists. A hit
       # means this job does not check out the private repository.
       - name: Restore pinned composer
         id: composer-cache
         if: inputs.composer_from_cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: composer/ops/scripts
+          path: .cache/composer/ops/scripts
           key: l9-composer-5039c379d8ba1263f504cfa527487386205e056c
       - name: Require the pinned composer
         if: inputs.composer_from_cache && steps.composer-cache.outputs.cache-hit != 'true'
@@ -132,7 +134,9 @@ jobs:
             const fs = require('fs');
             const { execFileSync } = require('child_process');
             const number = context.payload.pull_request.number;
-            const composer = 'composer/ops/scripts/compose_pr_body.py';
+            const cached = '.cache/composer/ops/scripts/compose_pr_body.py';
+            const checkedOut = 'composer/ops/scripts/compose_pr_body.py';
+            const composer = fs.existsSync(cached) ? cached : checkedOut;
             const report = async (status, detail) => {
               core.info(`${status}: ${detail}`);
               await core.summary.addHeading('PR body refresh', 2)

@@ -121,6 +121,30 @@ class PolicyValidationTests(unittest.TestCase):
         validator.validate_release_schema(schema, findings)
         self.assertEqual([], findings)
 
+    def test_release_schema_rejects_optional_signature(self) -> None:
+        schema = validator.load_yaml(ROOT / "POLICY_RELEASE.schema.yaml")
+        weakened = copy.deepcopy(schema)
+        weakened["required"] = [
+            item for item in weakened["required"] if item != "signing_or_attestation"
+        ]
+        findings: list[Any] = []
+        validator.validate_release_schema(weakened, findings)
+        self.assertIn("RELEASE_SIGNATURE_OPTIONAL", self.codes(findings))
+
+    def test_signature_reference_is_not_a_verified_release(self) -> None:
+        status = validator.release_proof_status(
+            {
+                "signing_or_attestation": {
+                    "signature_required": True,
+                    "attestation_required": True,
+                    "signature_reference": "cosign:example",
+                    "attestation_reference": "in-toto:example",
+                }
+            }
+        )
+        self.assertEqual("unverified", status)
+        self.assertEqual("absent", validator.release_proof_status({}))
+
 
 if __name__ == "__main__":
     unittest.main()

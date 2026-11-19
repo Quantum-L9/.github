@@ -19,7 +19,7 @@ Source names `Quantum-L9/.github` as the global governance owner and does not na
 | `policies/ORG_INVARIANTS.yaml` | `fdb3a6d45af46f237470671b57873557301f1261679d67c352cda5a81661b59c` |
 | `policies/ASSERTION_TYPES.yaml` | `c9fe11f8886ba5851e6497131f8984d4628008d780bfa2f77529ec759566aa93` |
 | `policies/org-invariants.schema.json` | `ba69d5712d893dce7b43229e88a2656465949c3bbbb01ab6a45f12e0f6ca5832` |
-| `policies/POLICY_RELEASE.schema.yaml` | `35bc73b7020e81d4cb1aee101d48e39748f270896d43d00a2fefd4065decbd2a` |
+| `policies/POLICY_RELEASE.schema.yaml` | `6256b1f82710c0b48220a18b4f1346b263576dfb51c7991dcdda6be7d8b11094` |
 
 ## Reasoned delta from 4.0.0 to 4.1.0
 
@@ -32,4 +32,4 @@ Source names `Quantum-L9/.github` as the global governance owner and does not na
 
 ## Still required of the owner
 
-Bind an admission decision to the exact pull-request head after the decision-record schema exists. No signer or in-toto layout was found on this pin, so lane B cannot publish a signed blocking release from this candidate.
+The release schema now requires a signature reference and an in-toto attestation reference, and both flags are const true. A reference is not verification. Bind an admission decision to the exact pull-request head after the decision-record schema exists. No signer, trust root, or in-toto layout was found on this pin, so lane B cannot publish a signed blocking release from this candidate.
