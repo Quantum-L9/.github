@@ -110,10 +110,10 @@ jobs:
       - name: Require the pinned composer
         if: inputs.composer_from_cache && steps.composer-cache.outputs.cache-hit != 'true'
         run: |
-          echo "::error::the default branch has not saved the pinned composer cache"
+          echo "::error::pinned composer cache miss for key l9-composer-5039c379d8ba1263f504cfa527487386205e056c at path .cache/composer/ops/scripts; a miss includes a path or version mismatch"
           exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: steps.composer-cache.outputs.cache-hit != 'true'
+        if: ${{ !inputs.composer_from_cache }}
         with:
           repository: Quantum-L9/Cursor-Governance
           ref: 5039c379d8ba1263f504cfa527487386205e056c
