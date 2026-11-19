@@ -1,0 +1,4 @@
+schema: l9.org-policy-admission-trust/v1
+# Owner Ed25519 public keys, raw 32 bytes, standard base64.
+# Empty means no claim can verify. Do not put a test key here.
+keys: []
