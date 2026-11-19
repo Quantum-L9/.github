@@ -39,7 +39,21 @@ jobs:
           subject-path: policies/ORG_INVARIANTS.yaml
           predicate-type: https://github.com/Quantum-L9/.github/attestations/quantum-l9.org-governance-policy/v1
           predicate-path: policies/provenance-predicate.json
-      - name: Reject an unadmitted or non-default-branch signature
-        env:
-          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
-        run: python3 policies/verify_release.py --subject policies/ORG_INVARIANTS.yaml --bundle "$BUNDLE"
+
+  release:
+    name: Require an admitted default-branch release
+    needs: attest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      attestations: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Fail unless the default-branch signature and owner admission verify
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: 'cryptography==50.0.2'
+          python3 policies/verify_release.py --subject policies/ORG_INVARIANTS.yaml --require-release
