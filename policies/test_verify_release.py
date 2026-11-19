@@ -153,9 +153,14 @@ class ReleaseVerificationTests(unittest.TestCase):
             repo = Path(raw)
             source, _head, digest, admission, keys = _admitted_history(repo)
             subject = repo / "policies" / "ORG_INVARIANTS.yaml"
-            self.assertEqual(
-                (digest, source), verify.release_binding(subject, admission)
-            )
+            previous = os.getcwd()
+            os.chdir(repo)
+            try:
+                self.assertEqual(
+                    (digest, source), verify.release_binding(subject, admission)
+                )
+            finally:
+                os.chdir(previous)
             self.assertTrue(
                 verify.authenticate_admission(
                     admission,
@@ -178,11 +183,16 @@ class ReleaseVerificationTests(unittest.TestCase):
             circular["subject_commit"] = head
             circular["signature"] = signature
             circular["principal"] = "owner"
-            self.assertIsNone(
-                verify.release_binding(
-                    repo / "policies" / "ORG_INVARIANTS.yaml", circular
+            previous = os.getcwd()
+            os.chdir(repo)
+            try:
+                self.assertIsNone(
+                    verify.release_binding(
+                        repo / "policies" / "ORG_INVARIANTS.yaml", circular
+                    )
                 )
-            )
+            finally:
+                os.chdir(previous)
             self.assertTrue(
                 verify.authenticate_admission(
                     circular,
@@ -198,7 +208,25 @@ class ReleaseVerificationTests(unittest.TestCase):
             _source, _head, _digest, admission, _keys = _admitted_history(repo)
             subject = repo / "policies" / "ORG_INVARIANTS.yaml"
             subject.write_text("changed\n", encoding="utf-8")
-            self.assertIsNone(verify.release_binding(subject, admission))
+            previous = os.getcwd()
+            os.chdir(repo)
+            try:
+                self.assertIsNone(verify.release_binding(subject, admission))
+            finally:
+                os.chdir(previous)
+
+    def test_a_path_outside_the_working_directory_is_refused(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            outside = Path(raw) / "ORG_INVARIANTS.yaml"
+            outside.write_text("policy: candidate\n", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                verify.sha256_file(outside)
+
+    def test_a_commit_argument_cannot_inject_a_git_option(self) -> None:
+        self.assertEqual("", verify.blob_sha256(Path("."), "HEAD", verify.SUBJECT_PATH))
+        self.assertFalse(
+            verify.is_strict_ancestor(Path("."), "--output=/tmp/x", "a" * 40)
+        )
 
     def test_missing_admission_is_rejected(self) -> None:
         status, reason = verify.decide(

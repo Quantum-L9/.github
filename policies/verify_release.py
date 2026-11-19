@@ -17,8 +17,9 @@ from __future__ import annotations
 
 import argparse
 import base64
-import binascii
 import hashlib
+import os
+import re
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -33,9 +34,19 @@ ADMISSION_NAMESPACE = "quantum-l9.org-policy-admission"
 SUBJECT_PATH = "policies/ORG_INVARIANTS.yaml"
 
 
+def safe_path(path: Path) -> str:
+    """Canonical path inside the working directory. Anything else is refused."""
+    resolved = os.path.realpath(path)
+    base_dir = os.path.realpath(os.getcwd())
+    if resolved != base_dir and not resolved.startswith(base_dir + os.sep):
+        raise ValueError(f"path {path!r} is outside the allowed directory")
+    return resolved
+
+
 def sha256_file(path: Path) -> str:
+    resolved = safe_path(path)
     digest = hashlib.sha256()
-    digest.update(path.read_bytes())
+    digest.update(Path(resolved).read_bytes())
     return digest.hexdigest()
 
 
@@ -78,7 +89,7 @@ def signature_verifies(payload: bytes, signature: str, public_key: str) -> bool:
             base64.b64decode(signature),
             payload,
         )
-    except (binascii.Error, ValueError, InvalidSignature):
+    except (ValueError, InvalidSignature):
         return False
     return True
 
@@ -167,11 +178,17 @@ def _verify_with_gh(
     bundle: Path | None,
     source_ref: str | None,
 ) -> bool:
+    try:
+        subject_arg = safe_path(subject)
+    except ValueError:
+        return False
+    if not re.match(r"^[A-Za-z0-9_./-]+$", subject_arg):
+        return False
     command = [
         "gh",
         "attestation",
         "verify",
-        str(subject),
+        subject_arg,
         "--repo",
         "Quantum-L9/.github",
         "--signer-workflow",
@@ -180,8 +197,16 @@ def _verify_with_gh(
         PREDICATE_TYPE,
     ]
     if bundle is not None:
-        command.extend(["--bundle", str(bundle)])
-    if source_ref:
+        try:
+            bundle_arg = safe_path(bundle)
+        except ValueError:
+            return False
+        if not re.match(r"^[A-Za-z0-9_./-]+$", bundle_arg):
+            return False
+        command.extend(["--bundle", bundle_arg])
+    if source_ref is not None:
+        if not re.match(r"^[A-Za-z0-9_./-]+$", source_ref):
+            return False
         command.extend(["--source-ref", source_ref])
     completed = subprocess.run(command, check=False, capture_output=True, text=True)
     return completed.returncode == 0
@@ -198,10 +223,21 @@ def load_mapping(path: Path) -> dict[str, Any] | None:
 
 def blob_sha256(repo: Path, commit: str, path: str) -> str:
     """SHA-256 of ``path`` at ``commit``, or empty when git cannot show it."""
+    commit_match = re.match(r"^[0-9a-f]{40}$", commit)
+    path_match = re.match(r"^[A-Za-z0-9_./-]+$", path)
+    if commit_match is None or path_match is None:
+        return ""
+    try:
+        directory = safe_path(repo)
+    except ValueError:
+        return ""
+    if not re.match(r"^[A-Za-z0-9_./-]+$", directory):
+        return ""
     completed = subprocess.run(
-        ["git", "-C", str(repo), "show", f"{commit}:{path}"],
+        ["git", "show", f"{commit_match.group(0)}:{path_match.group(0)}"],
         check=False,
         capture_output=True,
+        cwd=directory,
     )
     if completed.returncode != 0:
         return ""
@@ -210,20 +246,31 @@ def blob_sha256(repo: Path, commit: str, path: str) -> str:
 
 def is_strict_ancestor(repo: Path, ancestor: str, descendant: str) -> bool:
     """True when ``ancestor`` is in ``descendant`` history and the two differ."""
-    if len(ancestor) != 40 or len(descendant) != 40 or ancestor == descendant:
+    ancestor_match = re.match(r"^[0-9a-f]{40}$", ancestor)
+    descendant_match = re.match(r"^[0-9a-f]{40}$", descendant)
+    if (
+        ancestor_match is None
+        or descendant_match is None
+        or ancestor_match.group(0) == descendant_match.group(0)
+    ):
+        return False
+    try:
+        directory = safe_path(repo)
+    except ValueError:
+        return False
+    if not re.match(r"^[A-Za-z0-9_./-]+$", directory):
         return False
     completed = subprocess.run(
         [
             "git",
-            "-C",
-            str(repo),
             "merge-base",
             "--is-ancestor",
-            ancestor,
-            descendant,
+            ancestor_match.group(0),
+            descendant_match.group(0),
         ],
         check=False,
         capture_output=True,
+        cwd=directory,
     )
     return completed.returncode == 0
 
@@ -257,11 +304,18 @@ def release_binding(
 
 
 def git_head(path: Path) -> str:
+    try:
+        directory = safe_path(path.parent)
+    except ValueError:
+        return ""
+    if not re.match(r"^[A-Za-z0-9_./-]+$", directory):
+        return ""
     completed = subprocess.run(
-        ["git", "-C", str(path.parent), "rev-parse", "HEAD"],
+        ["git", "rev-parse", "HEAD"],
         check=False,
         capture_output=True,
         text=True,
+        cwd=directory,
     )
     value = completed.stdout.strip()
     if completed.returncode != 0 or len(value) != 40:
