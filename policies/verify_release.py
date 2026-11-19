@@ -75,7 +75,10 @@ def decide(
     if statement.get("predicateType") != PREDICATE_TYPE:
         return "fail", "attestation predicate is not the organization-policy predicate"
     if signer_workflow != RELEASE_WORKFLOW:
-        return "fail", "signer workflow is not the organization-policy provenance workflow"
+        return (
+            "fail",
+            "signer workflow is not the organization-policy provenance workflow",
+        )
     if signer_ref != MAIN_REF:
         return "rejected", "signer ref is not refs/heads/main"
     if not admission_binds(admission, subject_sha256):
@@ -113,7 +116,9 @@ def load_admission(path: Path | None) -> dict[str, Any] | None:
     return loaded if isinstance(loaded, dict) else None
 
 
-def evaluate(subject: Path, bundle: Path, admission_path: Path | None) -> tuple[str, str]:
+def evaluate(
+    subject: Path, bundle: Path, admission_path: Path | None
+) -> tuple[str, str]:
     """Trust ``gh attestation verify`` for the signature, then apply admission."""
     signature_verified = _verify_with_gh(subject, bundle, None)
     if not signature_verified:

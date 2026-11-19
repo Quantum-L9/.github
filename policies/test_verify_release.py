@@ -6,7 +6,9 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-SPEC = importlib.util.spec_from_file_location("verify_release", ROOT / "verify_release.py")
+SPEC = importlib.util.spec_from_file_location(
+    "verify_release", ROOT / "verify_release.py"
+)
 assert SPEC is not None
 assert SPEC.loader is not None
 verify = importlib.util.module_from_spec(SPEC)
