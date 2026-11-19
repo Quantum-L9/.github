@@ -1,10 +1,8 @@
 # Release record: BLOCKED
 
-Lane B. Stacked on [Quantum-L9/.github#269](https://github.com/Quantum-L9/.github/pull/269) head `ec3f5c6734530a3a90438a80827ebd8edd876734`.
+Lane B. Stacked on [Quantum-L9/.github#269](https://github.com/Quantum-L9/.github/pull/269) head `fe4084ca80909f2a40e78bf8e5bc89a54753f45b`.
 
-No in-toto layout, cosign, sigstore, or policy-release signer exists on `.github` main `00500268eb24de29a5e647a447d6f992d609f6f5`. This record does not invent one and does not present an unsigned artifact as a blocking release.
-
-Consumers may pin the candidate head above. They must treat a missing signature as critical UNKNOWN, not as a green skip. The owner admission is also still open: `policies/DECISION_RECORD.md` on that head says the decision-record schema is undefined.
+GitHub OIDC can attest the policy bytes. That attestation is not this release. `policies/admission-trust.yaml` on that head has no owner key, and `policies/ADMISSION.yaml` does not exist. This record does not invent a key and does not present a pull-request attestation as a default-branch release.
 
 | Field | Value |
 | --- | --- |
@@ -12,7 +10,7 @@ Consumers may pin the candidate head above. They must treat a missing signature 
 | policy_version | `4.1.0` |
 | canonical_repository | `Quantum-L9/.github` |
 | canonical_path | `policies/ORG_INVARIANTS.yaml` |
-| candidate_head | `ec3f5c6734530a3a90438a80827ebd8edd876734` |
+| candidate_head | `fe4084ca80909f2a40e78bf8e5bc89a54753f45b` |
 | payload_sha256 | `fdb3a6d45af46f237470671b57873557301f1261679d67c352cda5a81661b59c` |
 | status | `BLOCKED` |
-| blocker | no signer or in-toto layout on the source pin |
+| blocker | owner trust root is empty and no default-branch admitted release exists |
