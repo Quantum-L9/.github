@@ -1,0 +1,45 @@
+name: Organization policy provenance
+
+# Signs the policy bytes with the repository's GitHub OIDC identity.
+# A signature from a pull request, or a signature without an owner admission,
+# is not a release. This workflow does not write an admission record.
+
+on:
+  pull_request:
+    paths:
+      - policies/**
+      - .github/workflows/policy-provenance.yml
+  push:
+    branches:
+      - main
+    paths:
+      - policies/**
+      - .github/workflows/policy-provenance.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  attest:
+    name: Attest organization policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/attest@daf44fb950173508f38bd2406030372c1d1162b1 # v3.0.0
+        id: attest
+        with:
+          subject-path: policies/ORG_INVARIANTS.yaml
+          predicate-type: https://github.com/Quantum-L9/.github/attestations/quantum-l9.org-governance-policy/v1
+          predicate-path: policies/provenance-predicate.json
+      - name: Reject an unadmitted or non-default-branch signature
+        env:
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: python3 policies/verify_release.py --subject policies/ORG_INVARIANTS.yaml --bundle "$BUNDLE"

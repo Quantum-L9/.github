@@ -134,9 +134,9 @@ jobs:
             const fs = require('fs');
             const { execFileSync } = require('child_process');
             const number = context.payload.pull_request.number;
-            const cached = '.cache/composer/ops/scripts/compose_pr_body.py';
-            const checkedOut = 'composer/ops/scripts/compose_pr_body.py';
-            const composer = fs.existsSync(cached) ? cached : checkedOut;
+            const cachedComposer = '.cache/composer/ops/scripts/compose_pr_body.py';
+            const checkoutComposer = 'composer/ops/scripts/compose_pr_body.py';
+            const composer = fs.existsSync(cachedComposer) ? cachedComposer : checkoutComposer;
             const report = async (status, detail) => {
               core.info(`${status}: ${detail}`);
               await core.summary.addHeading('PR body refresh', 2)
