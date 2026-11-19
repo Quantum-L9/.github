@@ -86,14 +86,16 @@ def decide(
     return "verified", "signature, default-branch signer, and owner admission match"
 
 
-def _verify_with_gh(subject: Path, bundle: Path, source_ref: str | None) -> bool:
+def _verify_with_gh(
+    subject: Path,
+    bundle: Path | None,
+    source_ref: str | None,
+) -> bool:
     command = [
         "gh",
         "attestation",
         "verify",
         str(subject),
-        "--bundle",
-        str(bundle),
         "--repo",
         "Quantum-L9/.github",
         "--signer-workflow",
@@ -101,6 +103,8 @@ def _verify_with_gh(subject: Path, bundle: Path, source_ref: str | None) -> bool
         "--predicate-type",
         PREDICATE_TYPE,
     ]
+    if bundle is not None:
+        command.extend(["--bundle", str(bundle)])
     if source_ref:
         command.extend(["--source-ref", source_ref])
     completed = subprocess.run(command, check=False, capture_output=True, text=True)
@@ -117,7 +121,9 @@ def load_admission(path: Path | None) -> dict[str, Any] | None:
 
 
 def evaluate(
-    subject: Path, bundle: Path, admission_path: Path | None
+    subject: Path,
+    bundle: Path | None,
+    admission_path: Path | None,
 ) -> tuple[str, str]:
     """Trust ``gh attestation verify`` for the signature, then apply admission."""
     signature_verified = _verify_with_gh(subject, bundle, None)
@@ -142,7 +148,7 @@ def evaluate(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--subject", type=Path, required=True)
-    parser.add_argument("--bundle", type=Path, required=True)
+    parser.add_argument("--bundle", type=Path, default=None)
     parser.add_argument("--admission", type=Path, default=None)
     parser.add_argument(
         "--require-release",
