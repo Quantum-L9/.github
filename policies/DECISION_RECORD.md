@@ -33,3 +33,5 @@ Source names `Quantum-L9/.github` as the global governance owner and does not na
 ## Still required of the owner
 
 The release schema now requires a signature reference and an in-toto attestation reference, and both flags are const true. A reference is not verification. `policy-provenance.yml` can ask GitHub Sigstore to sign the policy bytes. That job records provenance only. Release verification exits 1 unless the signer ref is `refs/heads/main` and `policies/ADMISSION.yaml` carries an Ed25519 signature by a raw public key listed in `policies/admission-trust.yaml`. That trust file is empty. An authority string is not admission. This file does not supply the owner signature.
+
+The signed commit and the admission commit are different. The owner signs the immutable policy source commit. `ADMISSION.yaml` is committed afterwards. Verification checks the signature against that source commit, then proves the source is a strict ancestor of the checkout and that the policy bytes are unchanged. A signature over the checkout HEAD is not a release, because committing the admission changes the commit that signature would have to name.

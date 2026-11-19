@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import importlib.util
+import os
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -144,6 +148,58 @@ class ReleaseVerificationTests(unittest.TestCase):
         self.assertEqual("fail", status)
         self.assertEqual(1, verify.exit_code(status))
 
+    def test_later_admission_commit_proves_the_signed_source(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            repo = Path(raw)
+            source, _head, digest, admission, keys = _admitted_history(repo)
+            subject = repo / "policies" / "ORG_INVARIANTS.yaml"
+            self.assertEqual(
+                (digest, source), verify.release_binding(subject, admission)
+            )
+            self.assertTrue(
+                verify.authenticate_admission(
+                    admission,
+                    subject_sha256=digest,
+                    subject_commit=source,
+                    trust_keys=keys,
+                )
+            )
+
+    def test_signature_over_the_admission_commit_is_not_a_release(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            repo = Path(raw)
+            _source, head, digest, admission, _keys = _admitted_history(repo)
+            private = Ed25519PrivateKey.generate()
+            public = base64.b64encode(private.public_key().public_bytes_raw()).decode()
+            signature = base64.b64encode(
+                private.sign(verify.canonical_admission(digest, head))
+            ).decode()
+            circular = dict(admission)
+            circular["subject_commit"] = head
+            circular["signature"] = signature
+            circular["principal"] = "owner"
+            self.assertIsNone(
+                verify.release_binding(
+                    repo / "policies" / "ORG_INVARIANTS.yaml", circular
+                )
+            )
+            self.assertTrue(
+                verify.authenticate_admission(
+                    circular,
+                    subject_sha256=digest,
+                    subject_commit=head,
+                    trust_keys=[{"principal": "owner", "public_key": public}],
+                )
+            )
+
+    def test_changed_policy_bytes_break_the_source_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            repo = Path(raw)
+            _source, _head, _digest, admission, _keys = _admitted_history(repo)
+            subject = repo / "policies" / "ORG_INVARIANTS.yaml"
+            subject.write_text("changed\n", encoding="utf-8")
+            self.assertIsNone(verify.release_binding(subject, admission))
+
     def test_missing_admission_is_rejected(self) -> None:
         status, reason = verify.decide(
             subject_sha256=DIGEST,
@@ -155,3 +211,53 @@ class ReleaseVerificationTests(unittest.TestCase):
         )
         self.assertEqual("rejected", status)
         self.assertIn("admission", reason)
+
+
+def _git(repo: Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["git", "-C", str(repo), *args],
+        check=True,
+        capture_output=True,
+        text=True,
+        env={
+            **os.environ,
+            "GIT_AUTHOR_NAME": "Release Test",
+            "GIT_AUTHOR_EMAIL": "release-test@example.com",
+            "GIT_COMMITTER_NAME": "Release Test",
+            "GIT_COMMITTER_EMAIL": "release-test@example.com",
+        },
+    )
+    return completed.stdout.strip()
+
+
+def _admitted_history(
+    repo: Path,
+) -> tuple[str, str, str, dict[str, object], list[dict[str, str]]]:
+    """Commit the policy, sign that commit, then commit the admission later."""
+    _git(repo, "init", "-b", "main")
+    policy = repo / "policies"
+    policy.mkdir()
+    subject = policy / "ORG_INVARIANTS.yaml"
+    subject.write_text("policy: candidate\n", encoding="utf-8")
+    _git(repo, "add", "policies/ORG_INVARIANTS.yaml")
+    _git(repo, "commit", "-m", "policy source")
+    source = _git(repo, "rev-parse", "HEAD")
+    digest = hashlib.sha256(subject.read_bytes()).hexdigest()
+    private = Ed25519PrivateKey.generate()
+    public = base64.b64encode(private.public_key().public_bytes_raw()).decode()
+    signature = base64.b64encode(
+        private.sign(verify.canonical_admission(digest, source))
+    ).decode()
+    admission: dict[str, object] = {
+        "admitted": True,
+        "subject_sha256": digest,
+        "subject_commit": source,
+        "principal": "owner",
+        "signature": signature,
+    }
+    (policy / "ADMISSION.yaml").write_text("admitted: true\n", encoding="utf-8")
+    _git(repo, "add", "policies/ADMISSION.yaml")
+    _git(repo, "commit", "-m", "record the admission")
+    head = _git(repo, "rev-parse", "HEAD")
+    keys = [{"principal": "owner", "public_key": public}]
+    return source, head, digest, admission, keys

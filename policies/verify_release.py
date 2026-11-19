@@ -5,6 +5,12 @@ A GitHub Sigstore attestation proves the workflow signed these bytes. It does
 not admit the policy. ``verified`` requires a checked signature, the default
 branch workflow identity, a matching subject, and an owner admission that this
 file does not create.
+
+The signed commit is the immutable policy source named by the admission. The
+checkout HEAD is the later commit that carries ``ADMISSION.yaml``. Those
+commits differ. The signature authenticates the source, and the source must
+be a strict ancestor of HEAD whose policy blob still matches the file being
+checked. Signing HEAD cannot work: adding the admission changes that commit.
 """
 
 from __future__ import annotations
@@ -190,6 +196,66 @@ def load_mapping(path: Path) -> dict[str, Any] | None:
     return loaded if isinstance(loaded, dict) else None
 
 
+def blob_sha256(repo: Path, commit: str, path: str) -> str:
+    """SHA-256 of ``path`` at ``commit``, or empty when git cannot show it."""
+    completed = subprocess.run(
+        ["git", "-C", str(repo), "show", f"{commit}:{path}"],
+        check=False,
+        capture_output=True,
+    )
+    if completed.returncode != 0:
+        return ""
+    return hashlib.sha256(completed.stdout).hexdigest()
+
+
+def is_strict_ancestor(repo: Path, ancestor: str, descendant: str) -> bool:
+    """True when ``ancestor`` is in ``descendant`` history and the two differ."""
+    if len(ancestor) != 40 or len(descendant) != 40 or ancestor == descendant:
+        return False
+    completed = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "merge-base",
+            "--is-ancestor",
+            ancestor,
+            descendant,
+        ],
+        check=False,
+        capture_output=True,
+    )
+    return completed.returncode == 0
+
+
+def release_binding(
+    subject: Path,
+    admission: dict[str, Any] | None,
+) -> tuple[str, str] | None:
+    """Return ``(digest, source_commit)`` when HEAD proves the signed source.
+
+    ``subject_commit`` is not HEAD. HEAD is the commit that added the
+    admission. The source blob and the current file must both hash to the
+    signed digest, and the source must be a strict ancestor of HEAD.
+    """
+    if not isinstance(admission, dict):
+        return None
+    source = admission.get("subject_commit")
+    digest = admission.get("subject_sha256")
+    if not isinstance(source, str) or len(source) != 40:
+        return None
+    if not isinstance(digest, str) or len(digest) != 64:
+        return None
+    repo = subject.parent
+    if sha256_file(subject) != digest:
+        return None
+    if blob_sha256(repo, source, SUBJECT_PATH) != digest:
+        return None
+    if not is_strict_ancestor(repo, source, git_head(subject)):
+        return None
+    return digest, source
+
+
 def git_head(path: Path) -> str:
     completed = subprocess.run(
         ["git", "-C", str(path.parent), "rev-parse", "HEAD"],
@@ -216,13 +282,15 @@ def evaluate(subject: Path, bundle: Path | None) -> tuple[str, str]:
     signature_verified = _verify_with_gh(subject, bundle, None)
     if not signature_verified:
         return "unverified", "signature was not verified"
-    digest = sha256_file(subject)
     on_main = _verify_with_gh(subject, bundle, MAIN_REF)
+    admission = load_mapping(subject.parent / "ADMISSION.yaml")
+    binding = release_binding(subject, admission)
+    digest = binding[0] if binding is not None else sha256_file(subject)
+    source = binding[1] if binding is not None else ""
     statement = {
         "predicateType": PREDICATE_TYPE,
         "subject": [{"digest": {"sha256": digest}}],
     }
-    admission = load_mapping(subject.parent / "ADMISSION.yaml")
     return decide(
         subject_sha256=digest,
         statement=statement,
@@ -232,7 +300,7 @@ def evaluate(subject: Path, bundle: Path | None) -> tuple[str, str]:
         admission_verified=authenticate_admission(
             admission,
             subject_sha256=digest,
-            subject_commit=git_head(subject),
+            subject_commit=source,
             trust_keys=trust_keys(subject),
         ),
     )
