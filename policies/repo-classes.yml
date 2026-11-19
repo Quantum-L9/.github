@@ -75,9 +75,15 @@
         ".github/workflows/l9-analysis.yml",
         ".github/workflows/l9-lint-test.yml",
         ".github/workflows/l9-lint-test-node.yml",
-        ".github/workflows/governance.yml",
         ".github/workflows/on-org-update.yml",
-        ".github/governance/**"
+        ".github/workflows/governance.yml",
+        ".github/workflows/codeql.yml",
+        ".github/governance/**",
+        ".github/governance",
+        ".github/codeql/codeql-config.yml",
+        ".l9/ci-pin",
+        "scripts/sync_ci_from_pack.py",
+        "requirements-consumer-ci.txt"
       ],
       "remote_apply": {
         "labels": true,
@@ -109,9 +115,15 @@
         ".github/workflows/l9-analysis.yml",
         ".github/workflows/l9-lint-test.yml",
         ".github/workflows/l9-lint-test-node.yml",
-        ".github/workflows/governance.yml",
         ".github/workflows/on-org-update.yml",
-        ".github/governance/**"
+        ".github/workflows/governance.yml",
+        ".github/workflows/codeql.yml",
+        ".github/governance/**",
+        ".github/governance",
+        ".github/codeql/codeql-config.yml",
+        ".l9/ci-pin",
+        "scripts/sync_ci_from_pack.py",
+        "requirements-consumer-ci.txt"
       ],
       "remote_apply": {
         "labels": true,
@@ -144,14 +156,17 @@
         ".github/workflows/l9-analysis.yml",
         ".github/workflows/l9-lint-test.yml",
         ".github/workflows/l9-lint-test-node.yml",
-        ".github/workflows/governance.yml",
         ".github/workflows/on-org-update.yml",
+        ".github/workflows/governance.yml",
+        ".github/workflows/codeql.yml",
         ".github/governance/**",
-        "biome.json",
-        ".biomeignore",
+        ".github/governance",
+        ".github/codeql/codeql-config.yml",
         ".l9/ci-pin",
+        "scripts/sync_ci_from_pack.py",
         "requirements-consumer-ci.txt",
-        "scripts/sync_ci_from_pack.py"
+        "biome.json",
+        ".biomeignore"
       ],
       "remote_apply": {
         "labels": true,
