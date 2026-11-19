@@ -1,17 +1,17 @@
 # Coverage record: not PASS
 
-Lane F. Stacked on Quantum-L9/.github#270 head `3e1f58e9342c4b1f98802efe061f1d287f1514f6`.
-Read at 2026-11-18T19:33Z. This record does not change a ruleset. A missing signer, an unexecuted required step, and an admin bypass stay open. None of those is PASS.
+Lane F. Stacked on Quantum-L9/.github#270 head `a846d617d5554a00572412e13e5c70f6135aed7e`.
+Read at 2026-11-19T15:35Z. This record does not change a ruleset. An empty owner trust root, a required step that is not yet on the default branch, and an admin bypass stay open. None of those is PASS.
 
 ## Predecessor dispositions
 
 | Lane | Record | Head | Disposition |
 | --- | --- | --- | --- |
-| A | Quantum-L9/.github#269 | `ec3f5c6734530a3a90438a80827ebd8edd876734` | candidate, admission false |
-| B | Quantum-L9/.github#270 | `3e1f58e9342c4b1f98802efe061f1d287f1514f6` | BLOCKED, no signer or in-toto layout |
-| C | Quantum-L9/Cursor-Governance#1042 | `0000ac871b8cea0b37339ed76fc753cad1ef36ef` | consumer mirror, canonical false |
-| M | Quantum-L9/L9-Ops-MCP#45 | `bccd9bb1d4e87822619929263ed7518fba8d60d4` | mirror pin; signature verification BLOCKED |
-| E | Quantum-L9/l9-ci-core#277 | `01c095c7ea1b8e7cbe053ae6989e577c5dfa3ca6` | fail-closed step is in the file; the pull_request run of Analyze (central Core) (run 44379732178) succeeded without executing it |
+| A | Quantum-L9/.github#269 | `fe4084ca80909f2a40e78bf8e5bc89a54753f45b` | candidate, admission false, trust root empty |
+| B | Quantum-L9/.github#270 | `a846d617d5554a00572412e13e5c70f6135aed7e` | BLOCKED, no owner key and no default-branch release |
+| C | Quantum-L9/Cursor-Governance#1042 | `4abca8c4ac96e822425e03a7139be2e5080bfc42` | merged; report-only pin, not an action denial |
+| M | Quantum-L9/L9-Ops-MCP#45 | `0ab84fa5d10e06aaf149caead725843f729354de` | commit URL fails closed; published base is still the unrelated branch |
+| E | Quantum-L9/l9-ci-core#277 | `7459d6b5958df9456c6664baf0d4bf8df14a4094` | required job calls the pinned verifier; a live pass is still impossible |
 
 ## Live ruleset 21895545
 
