@@ -1541,6 +1541,54 @@ def _check_identity_registry(
         if ids.count(entry_id) > 1:
             report.fail(check, path, entries_key, entry_id, "duplicate identity id")
     canonical_ids = set(ids)
+    # Lifecycle succession (lifecycle.yaml lifecycle_relations.successor_of):
+    # a superseded entry names its successor(s) as <artifact_id>#<id>
+    # coordinates of current entries of this registry; no other entry names a
+    # successor. History is kept: superseded and retired entries stay
+    # addressable and are never removed.
+    # Only ids that passed validation above: a malformed (e.g. list or mapping)
+    # id is already reported and must not crash this map as an unhashable key.
+    status_of = {
+        e["id"]: e.get("status")
+        for e in entries
+        if isinstance(e, dict)
+        and isinstance(e.get("id"), str)
+        and e["id"] in canonical_ids
+    }
+    coordinate_prefix = f"{artifact_id}#"
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            continue
+        refs = entry.get("successor_refs")
+        trail = f"{entries_key}[{index}].successor_refs"
+        if entry.get("status") == "superseded":
+            if (
+                not isinstance(refs, list)
+                or not refs
+                or len(refs) != len(set(map(str, refs)))
+                or any(
+                    not isinstance(r, str)
+                    or not r.startswith(coordinate_prefix)
+                    or status_of.get(r[len(coordinate_prefix) :]) != "current"
+                    for r in refs
+                )
+            ):
+                report.fail(
+                    check,
+                    path,
+                    trail,
+                    refs,
+                    "a superseded identity names its current successor(s) as "
+                    "<artifact_id>#<id> coordinates of this registry",
+                )
+        elif refs is not None:
+            report.fail(
+                check,
+                path,
+                trail,
+                refs,
+                "only a superseded identity names a successor",
+            )
     aliases = ledger.get("aliases")
     alias_keys: list[str] = []
     if aliases is None:
@@ -1580,6 +1628,14 @@ def _check_identity_registry(
                 f"{label}.canonical",
                 target,
                 "alias target does not resolve to a canonical identity id in this registry",
+            )
+        elif status_of.get(target) == "superseded":
+            report.fail(
+                check,
+                path,
+                f"{label}.canonical",
+                target,
+                "an alias canonicalizes to the successor of a superseded identity, not to it",
             )
     for key in sorted(set(alias_keys)):
         if alias_keys.count(key) > 1:
@@ -14404,6 +14460,14 @@ DOMAIN_BINDING_IDS = tuple(
         "simple-plan",
         "claude-code",
     )
+) + (
+    # Successor of claude-code@1 (owner decision 2026-11-20): the claude-code
+    # host has exactly the surfaces claude-code-cli and claude-code-web. The
+    # admitted @1 stays unedited (bindings_are_versioned_and_immutable_once_admitted).
+    "l9.domain-consumer-binding/claude-code@2",
+)
+DOMAIN_BINDING_VERSION = re.compile(
+    r"^(l9\.domain-consumer-binding/[a-z0-9-]+)@([1-9]\d*)$"
 )
 DOMAIN_COMPATIBILITY_CONTRACT = "l9.contract/domain-composition-compatibility@1"
 DOMAIN_PROVENANCE_CONTRACT = "l9.contract/domain-composition-provenance@1"
@@ -14813,13 +14877,13 @@ def _rc034_profiles(
     actors = {
         a.get("id")
         for a in _mapping(docs.get("semantics/actor_registry.yaml")).get("actors") or []
-        if isinstance(a, dict)
+        if isinstance(a, dict) and isinstance(a.get("id"), str)
     }
     surfaces = {
         s.get("id")
         for s in _mapping(docs.get("semantics/surface_registry.yaml")).get("surfaces")
         or []
-        if isinstance(s, dict)
+        if isinstance(s, dict) and isinstance(s.get("id"), str)
     }
     out: dict[str, dict] = {}
     for profile in domain_profiles:
@@ -15229,6 +15293,8 @@ def _rc034_bindings(
         "host_and_hosted_skill_identities_remain_distinct",
         "an_unresolved_consumer_coordinate_stays_explicit_and_blocks_activation",
         "a_binding_switches_no_existing_consumer_profile",
+        "a_successor_binding_names_its_predecessor_version_of_the_same_consumer",
+        "a_host_binding_without_a_successor_names_only_current_surfaces",
     ):
         if global_rules.get(key) is not True:
             _rc034_fail(
@@ -15244,13 +15310,21 @@ def _rc034_bindings(
     actors = {
         a.get("id")
         for a in _mapping(docs.get("semantics/actor_registry.yaml")).get("actors") or []
-        if isinstance(a, dict)
+        if isinstance(a, dict) and isinstance(a.get("id"), str)
     }
     surfaces = {
         s.get("id")
         for s in _mapping(docs.get("semantics/surface_registry.yaml")).get("surfaces")
         or []
+        if isinstance(s, dict) and isinstance(s.get("id"), str)
+    }
+    current_surfaces = {
+        s.get("id")
+        for s in _mapping(docs.get("semantics/surface_registry.yaml")).get("surfaces")
+        or []
         if isinstance(s, dict)
+        and isinstance(s.get("id"), str)
+        and s.get("status") == "current"
     }
     repos = {
         r.get("id")
@@ -15269,13 +15343,58 @@ def _rc034_bindings(
             path,
             "bindings",
             ids,
-            "must declare exactly the six v1 bindings once each",
+            "must declare exactly the six v1 bindings and the claude-code@2 successor once each",
             report,
         )
+    by_id = {str(b.get("id")): b for b in bindings}
+    succeeded = {
+        str(b.get("successor_of"))
+        for b in bindings
+        if b.get("successor_of") is not None
+    }
     for binding in bindings:
         bid = str(binding.get("id"))
         field = f"bindings[{bid}]"
         summary["bindings"] += 1
+        # Versioning: an admitted binding is immutable, so a change is @N+1
+        # naming exactly its @N predecessor of the same consumer; @1 has none.
+        version = DOMAIN_BINDING_VERSION.match(bid)
+        successor_of = binding.get("successor_of")
+        if version is None:
+            _rc034_fail(
+                path,
+                f"{field}.id",
+                bid,
+                "binding id must be l9.domain-consumer-binding/<name>@<N>",
+                report,
+            )
+        elif version.group(2) == "1":
+            if successor_of is not None:
+                _rc034_fail(
+                    path,
+                    f"{field}.successor_of",
+                    successor_of,
+                    "a first binding version names no predecessor",
+                    report,
+                )
+        else:
+            expected = f"{version.group(1)}@{int(version.group(2)) - 1}"
+            predecessor = _mapping(by_id.get(str(successor_of)))
+            if (
+                successor_of != expected
+                or not predecessor
+                or _mapping(predecessor.get("consumer")).get("kind")
+                != _mapping(binding.get("consumer")).get("kind")
+                or _mapping(predecessor.get("consumer")).get("identity")
+                != _mapping(binding.get("consumer")).get("identity")
+            ):
+                _rc034_fail(
+                    path,
+                    f"{field}.successor_of",
+                    successor_of,
+                    f"a successor binding names its declared predecessor {expected} of the same consumer",
+                    report,
+                )
         requires = binding.get("requires") or []
         conditional = [
             c.get("profile")
@@ -15382,6 +15501,16 @@ def _rc034_bindings(
                     f"{field}.consumer.surface_refs",
                     refs,
                     "BINDING-003 a host names canonical SurfaceIdentities",
+                    report,
+                )
+            elif bid not in succeeded and any(
+                str(r).split("#", 1)[1] not in current_surfaces for r in refs
+            ):
+                _rc034_fail(
+                    path,
+                    f"{field}.consumer.surface_refs",
+                    refs,
+                    "BINDING-003 a host binding without a successor names only current SurfaceIdentities",
                     report,
                 )
         if kind == "skill":
@@ -15538,6 +15667,13 @@ def _rc034_negative_cases() -> list[tuple[str, str, str, object]]:
             b
             for b in d[DOMAIN_BINDINGS_PATH]["bindings"]
             if b.get("id") == f"l9.domain-consumer-binding/{name}@1"
+        )
+
+    def binding_version(d: dict, name: str, version: int) -> dict:
+        return next(
+            b
+            for b in d[DOMAIN_BINDINGS_PATH]["bindings"]
+            if b.get("id") == f"l9.domain-consumer-binding/{name}@{version}"
         )
 
     def domain(d: dict, name: str) -> dict:
@@ -15784,6 +15920,44 @@ def _rc034_negative_cases() -> list[tuple[str, str, str, object]]:
             "projection_profiles[l9.projection/strategic-value@1].sources.invariants",
             lambda d: selectors(d, "strategic-value", "invariants").remove(
                 '$.invariants[?(@.id=="L9-SVQ-001")]'
+            ),
+        ),
+        (
+            "D28 successor binding drops its predecessor",
+            B,
+            "bindings[l9.domain-consumer-binding/claude-code@2].successor_of",
+            lambda d: binding_version(d, "claude-code", 2).pop("successor_of"),
+        ),
+        (
+            "D29 successor binding names another consumer's binding",
+            B,
+            "bindings[l9.domain-consumer-binding/claude-code@2].successor_of",
+            lambda d: binding_version(d, "claude-code", 2).update(
+                successor_of="l9.domain-consumer-binding/cursor@1"
+            ),
+        ),
+        (
+            "D30 current host binding names a retired surface",
+            B,
+            "bindings[l9.domain-consumer-binding/claude-code@2].consumer.surface_refs",
+            lambda d: binding_version(d, "claude-code", 2)["consumer"][
+                "surface_refs"
+            ].append("l9.surface-registry/global@1#claude-code-desktop"),
+        ),
+        (
+            "D31 current host binding names a superseded surface",
+            B,
+            "bindings[l9.domain-consumer-binding/claude-code@2].consumer.surface_refs",
+            lambda d: binding_version(d, "claude-code", 2)["consumer"][
+                "surface_refs"
+            ].append("l9.surface-registry/global@1#claude-code-mobile"),
+        ),
+        (
+            "D32 first binding version claims a predecessor",
+            B,
+            "bindings[l9.domain-consumer-binding/cursor@1].successor_of",
+            lambda d: binding(d, "cursor").update(
+                successor_of="l9.domain-consumer-binding/cursor@0"
             ),
         ),
     ]
