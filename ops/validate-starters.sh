@@ -105,6 +105,17 @@ else
   FAIL=$((FAIL+1))
 fi
 
+# GitHub settings as code: the offline validator against this tree, then the
+# suite against copies with one defect each (needs python3 with PyYAML and
+# jsonschema).
+if python3 ops/validate-settings.py && python3 ops/test-validate-settings.py; then
+  echo "✅ ops/validate-settings.py + ops/test-validate-settings.py"
+  PASS=$((PASS+1))
+else
+  echo "❌ ops/validate-settings.py + ops/test-validate-settings.py"
+  FAIL=$((FAIL+1))
+fi
+
 if bash ops/test-sync-org-files.sh; then
   echo "✅ ops/test-sync-org-files.sh"
   PASS=$((PASS+1))
