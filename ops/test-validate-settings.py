@@ -203,6 +203,26 @@ class Refusals(Fixture):
         )
         self.assert_refused("found duplicate key 'visibility'")
 
+    def test_broken_registry_is_one_error_not_a_crash(self) -> None:
+        path = self.root / "semantics" / "repository_registry.yaml"
+        path.write_text("repositories: [unclosed\n", encoding="utf-8")
+        errors = self.errors()
+        self.assertTrue(
+            any(
+                e.startswith("semantics/repository_registry.yaml: invalid YAML")
+                for e in errors
+            ),
+            errors,
+        )
+        self.assertFalse(any("not registered" in e for e in errors), errors)
+
+    def test_broken_policy_is_one_error_not_a_crash(self) -> None:
+        path = self.root / "policies" / "repo-settings.yml"
+        path.write_text(
+            path.read_text(encoding="utf-8") + "defaults: {}\n", encoding="utf-8"
+        )
+        self.assert_refused("policies/repo-settings.yml: invalid YAML")
+
     def test_missing_org(self) -> None:
         (self.root / "settings" / "org.yml").unlink()
         self.assert_refused("settings/org.yml: missing")

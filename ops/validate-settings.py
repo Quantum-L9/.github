@@ -131,12 +131,16 @@ def repository_files(settings: Path) -> list[Path]:
 _UNPARSED = object()
 
 
+def _yaml_error(rel: str, exc: yaml.YAMLError) -> str:
+    return f"{rel}: invalid YAML: {' '.join(str(exc).split())[:300]}"
+
+
 def _parsed(rel: str, path: Path, errors: list[str]) -> Any:
     """Load one declaration, reporting a YAML error (duplicate keys included) as fatal."""
     try:
         return _load_yaml(path)
     except yaml.YAMLError as exc:
-        errors.append(f"{rel}: invalid YAML: {' '.join(str(exc).split())[:300]}")
+        errors.append(_yaml_error(rel, exc))
         return _UNPARSED
 
 
@@ -170,7 +174,7 @@ def _check_identity(
     path: Path,
     repository: str,
     seen: dict[str, str],
-    registered: set[str],
+    registered: set[str] | None,
     errors: list[str],
 ) -> None:
     if repository in seen:
@@ -180,7 +184,7 @@ def _check_identity(
     seen[repository] = path.name
     if path.name != f"{repository}.yml":
         errors.append(f"{rel}: file must be named {repository}.yml")
-    if repository not in registered:
+    if registered is not None and repository not in registered:
         errors.append(
             f"{rel}: {repository} is not registered in semantics/repository_registry.yaml"
         )
@@ -272,7 +276,20 @@ def validate(root: Path, strict_policy: bool = False) -> tuple[list[str], list[s
     files = repository_files(settings)
     if not files:
         errors.append("settings/repos: no repository declarations")
-    registered = registered_repositories(root)
+    # An unreadable registry or policy file is one fatal error, not a traceback;
+    # the checks that need it are skipped rather than reported once per file.
+    registered: set[str] | None
+    try:
+        registered = registered_repositories(root)
+    except yaml.YAMLError as exc:
+        errors.append(_yaml_error("semantics/repository_registry.yaml", exc))
+        registered = None
+    policy_readable = True
+    try:
+        policy_merge_settings(root, "")
+    except yaml.YAMLError as exc:
+        errors.append(_yaml_error("policies/repo-settings.yml", exc))
+        policy_readable = False
     seen: dict[str, str] = {}
     for path in files:
         rel = f"settings/repos/{path.name}"
@@ -283,7 +300,8 @@ def validate(root: Path, strict_policy: bool = False) -> tuple[list[str], list[s
         _check_identity(rel, path, repository, seen, registered, errors)
         _check_unique_names(rel, doc, errors)
         _check_unreadable(rel, doc, errors)
-        _merge_conflicts(root, rel, repository, doc["merge"], conflicts)
+        if policy_readable:
+            _merge_conflicts(root, rel, repository, doc["merge"], conflicts)
     if strict_policy:
         errors.extend(conflicts)
     return errors, conflicts
