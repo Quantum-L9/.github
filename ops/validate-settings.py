@@ -108,39 +108,127 @@ def repository_files(settings: Path) -> list[Path]:
     )
 
 
-def validate(root: Path, strict_policy: bool = False) -> tuple[list[str], list[str]]:
-    """Return (errors, conflicts)."""
-    settings = root / "settings"
-    errors: list[str] = []
-    conflicts: list[str] = []
+def _schema_validators(settings: Path) -> dict[str, Draft202012Validator]:
     schema = json.loads((settings / "settings.schema.json").read_text(encoding="utf-8"))
-    validators = {
+    return {
         kind: Draft202012Validator(
             {"$defs": schema["$defs"], "$ref": f"#/$defs/{kind}"}
         )
         for kind in ("org", "repo")
     }
 
-    def schema_errors(rel: str, doc: Any, kind: str) -> bool:
-        """Validate against one declaration kind; report the most specific cause of each error."""
-        found = sorted(
-            validators[kind].iter_errors(doc), key=lambda e: list(e.absolute_path)
+
+def _schema_errors(
+    validator: Draft202012Validator, rel: str, doc: Any, errors: list[str]
+) -> bool:
+    """Validate one document; report the most specific cause of each error."""
+    found = sorted(validator.iter_errors(doc), key=lambda e: list(e.absolute_path))
+    for error in found:
+        cause = error
+        # Inside a oneOf (value | UNKNOWN), the deepest branch error names the real defect.
+        while cause.context:
+            cause = max(cause.context, key=lambda e: len(e.absolute_path))
+        where = "/".join(str(p) for p in cause.absolute_path) or "<root>"
+        errors.append(f"{rel}: {where}: {cause.message[:300]}")
+    return not found
+
+
+def _check_identity(
+    rel: str,
+    path: Path,
+    repository: str,
+    seen: dict[str, str],
+    registered: set[str],
+    errors: list[str],
+) -> None:
+    if repository in seen:
+        errors.append(
+            f"{rel}: {repository} is already declared by settings/repos/{seen[repository]}"
         )
-        for error in found:
-            cause = error
-            # Inside a oneOf (value | UNKNOWN), the deepest branch error names the real defect.
-            while cause.context:
-                cause = max(cause.context, key=lambda e: len(e.absolute_path))
-            where = "/".join(str(p) for p in cause.absolute_path) or "<root>"
-            errors.append(f"{rel}: {where}: {cause.message[:300]}")
-        return not found
+    seen[repository] = path.name
+    if path.stem != repository:
+        errors.append(f"{rel}: file must be named {repository}.yml")
+    if repository not in registered:
+        errors.append(
+            f"{rel}: {repository} is not registered in semantics/repository_registry.yaml"
+        )
+
+
+def _check_unique_names(rel: str, doc: dict[str, Any], errors: list[str]) -> None:
+    for section in ("environments", "rulesets"):
+        items = doc[section]
+        if not isinstance(items, list):
+            continue
+        names = [item["name"] for item in items]
+        duplicates = sorted({n for n in names if names.count(n) > 1})
+        if duplicates:
+            errors.append(
+                f"{rel}: duplicate {section} name(s): {', '.join(duplicates)}"
+            )
+
+
+def _check_unreadable_list(
+    rel: str, section: str, entry: str, value: list[dict[str, Any]], errors: list[str]
+) -> None:
+    # A section that was unreadable may only carry what was observed some other way;
+    # every field that would need the unreadable endpoint stays UNKNOWN.
+    for item in value:
+        for key, field in item.items():
+            if key not in ("name", "required_secrets") and field != UNKNOWN:
+                errors.append(
+                    f"{rel}: {section}[{item['name']}].{key} is declared but {entry} was unreadable"
+                )
+
+
+def _check_unreadable(rel: str, doc: dict[str, Any], errors: list[str]) -> None:
+    decided = set(doc["observed"].get("decided", []))
+    for entry in doc["observed"].get("unreadable", []):
+        if entry not in UNREADABLE_SECTIONS:
+            errors.append(
+                f"{rel}: observed.unreadable names an unknown section {entry!r}"
+            )
+            continue
+        section, keys = UNREADABLE_SECTIONS[entry]
+        value = doc[section]
+        if value == UNKNOWN:
+            continue
+        if keys is None:
+            _check_unreadable_list(rel, section, entry, value, errors)
+            continue
+        for key in keys:
+            if value.get(key) != UNKNOWN and f"{section}.{key}" not in decided:
+                errors.append(
+                    f"{rel}: {section}.{key} is declared but {entry} was unreadable"
+                )
+
+
+def _merge_conflicts(
+    root: Path, rel: str, repository: str, merge: Any, conflicts: list[str]
+) -> None:
+    if not isinstance(merge, dict):
+        return
+    for key, wanted in sorted(policy_merge_settings(root, repository).items()):
+        declared = merge.get(key, UNKNOWN)
+        if declared != UNKNOWN and declared != wanted:
+            conflicts.append(
+                f"{rel}: merge.{key}={json.dumps(declared)} but policies/repo-settings.yml says {json.dumps(wanted)}"
+            )
+
+
+def validate(root: Path, strict_policy: bool = False) -> tuple[list[str], list[str]]:
+    """Return (errors, conflicts)."""
+    settings = root / "settings"
+    errors: list[str] = []
+    conflicts: list[str] = []
+    validators = _schema_validators(settings)
 
     org_path = settings / "org.yml"
     if not org_path.is_file():
         errors.append("settings/org.yml: missing")
     else:
-        org = _load_yaml(org_path)
-        schema_errors("settings/org.yml", org, "org")
+        _schema_errors(
+            validators["org"], "settings/org.yml", _load_yaml(org_path), errors
+        )
 
     files = repository_files(settings)
     if not files:
@@ -150,63 +238,13 @@ def validate(root: Path, strict_policy: bool = False) -> tuple[list[str], list[s
     for path in files:
         rel = f"settings/repos/{path.name}"
         doc = _load_yaml(path)
-        if not schema_errors(rel, doc, "repo"):
+        if not _schema_errors(validators["repo"], rel, doc, errors):
             continue
         repository = doc["repository"]
-        if repository in seen:
-            errors.append(
-                f"{rel}: {repository} is already declared by settings/repos/{seen[repository]}"
-            )
-        seen[repository] = path.name
-        if path.stem != repository:
-            errors.append(f"{rel}: file must be named {repository}.yml")
-        if repository not in registered:
-            errors.append(
-                f"{rel}: {repository} is not registered in semantics/repository_registry.yaml"
-            )
-        for section in ("environments", "rulesets"):
-            items = doc[section]
-            if isinstance(items, list):
-                names = [item["name"] for item in items]
-                duplicates = sorted({n for n in names if names.count(n) > 1})
-                if duplicates:
-                    errors.append(
-                        f"{rel}: duplicate {section} name(s): {', '.join(duplicates)}"
-                    )
-        decided = set(doc["observed"].get("decided", []))
-        for entry in doc["observed"].get("unreadable", []):
-            if entry not in UNREADABLE_SECTIONS:
-                errors.append(
-                    f"{rel}: observed.unreadable names an unknown section {entry!r}"
-                )
-                continue
-            section, keys = UNREADABLE_SECTIONS[entry]
-            value = doc[section]
-            if value == UNKNOWN:
-                continue
-            if keys is None:
-                # A section that was unreadable may only carry what was observed some other way;
-                # every field that would need the unreadable endpoint stays UNKNOWN.
-                for item in value:
-                    for key, field in item.items():
-                        if key not in ("name", "required_secrets") and field != UNKNOWN:
-                            errors.append(
-                                f"{rel}: {section}[{item['name']}].{key} is declared but {entry} was unreadable"
-                            )
-            else:
-                for key in keys:
-                    if value.get(key) != UNKNOWN and f"{section}.{key}" not in decided:
-                        errors.append(
-                            f"{rel}: {section}.{key} is declared but {entry} was unreadable"
-                        )
-        merge = doc["merge"]
-        if isinstance(merge, dict):
-            for key, wanted in sorted(policy_merge_settings(root, repository).items()):
-                declared = merge.get(key, UNKNOWN)
-                if declared != UNKNOWN and declared != wanted:
-                    conflicts.append(
-                        f"{rel}: merge.{key}={json.dumps(declared)} but policies/repo-settings.yml says {json.dumps(wanted)}"
-                    )
+        _check_identity(rel, path, repository, seen, registered, errors)
+        _check_unique_names(rel, doc, errors)
+        _check_unreadable(rel, doc, errors)
+        _merge_conflicts(root, rel, repository, doc["merge"], conflicts)
     if strict_policy:
         errors.extend(conflicts)
     return errors, conflicts
