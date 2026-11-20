@@ -1,6 +1,6 @@
 8532f86abbea247e94918a9c433d67897db3b29407ba9eaff3a3a277d985b616  ./MANIFEST.md
 b98bbcb1b52362d69af5b900dc0b9ba5a019b938caef58837de7601002262815  ./README.md
-9d115f018ee681171641e6f0eccdf6ca80b3ac5e94f0b4e787a8a2f88a440077  ./RELEASE_VALIDATION.md
+5882f68df9080085e39aab33175dc470578529629f1ee42484081ecd452add02  ./RELEASE_VALIDATION.md
 9ed2313bcc280003101ac6394c99c46254f00ec99bc24c4983aee3d2c54cce29  ./docs/adr/ADR-001-github-global-semantic-authority.md
 da9db13e009a80b8b60969ed37144fc4f7e79d1e88b7d17f1e8efa3d5c09bf17  ./docs/adr/ADR-002-flat-ledgers-single-contract-catalog.md
 4f7d3f67c9eca57978be24e085bf585675d60bff3d1ee096babfc5a91f6ae4bd  ./docs/adr/ADR-003-product-topology-first-class-product-contract.md
@@ -41,7 +41,7 @@ d2fc4cdc2fb4d6691dfa95f9cfcb309fddd5e062d438ba9bda91dc6d461f97b8  ./docs/adr/ADR
 e6688f2b50e15b70b6af9599b23d8d8daf1c348ffb22f73b74fe6f85a69955bf  ./docs/adr/ADR-038-datastore-capability-semantics-and-provider-bindings.md
 ee9d53fb3e8c331b4fa77a7507e4d1f5b38d94676b791924a1815b40617fcd5a  ./docs/adr/ADR-039-factory-born-repository-registration.md
 a8f0fafb0a8000d9e4922ddfb6c8b3ce971b8df84d342bfead3671d9f9d5b289  ./docs/adr/ADR-040-organization-complete-repository-registry.md
-43dc56998d9076946cebc1f5c3563f24d9feacfa9fa407635c0b4bf89d11d312  ./docs/adr/ADR-041-claude-code-surface-correction-and-admission-of-v3.44.0.md
+e5ea987b0ae10484fda609b6d08d5d9e4a98c9528011a13d14d09e00b91bf6f4  ./docs/adr/ADR-041-claude-code-surface-correction-and-admission-of-v3.44.0.md
 0310859c6ba6c08cf94ed1c0a1c6fc5491aadd6799defddb52c2ca7c6da05215  ./docs/adr/README.md
 942f9274770c44a28083645782715b5dd5b81cd2b4dfd0c4abc8cf0421ec5ddf  ./semantics/actor_registry.yaml
 09d7a4f945771bb785340c06bd554d83ef813a9f8674cb542ffdd08bf58c68f4  ./semantics/affected_strategic_closure.schema.yaml
