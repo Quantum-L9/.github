@@ -303,7 +303,12 @@ signature), and as a server-side compare-and-swap on the inspected sha.
 Cursor-Governance `ops/scripts/compose_pr_body.py`: at publication by `make pr`,
 and on every later PR event by the `body` job in `governance-pr.yml`, which
 runs that composer at the commit pinned in the job (`COMPOSER` and the checkout
-`ref`, moved together). Reviewer text outside the regions is never rewritten;
+`ref`, moved together). This repository is private, so the job checks the org
+template out itself, sparse to `.github/pull_request_template.md`, and hands it
+to the composer as a local file (`--template`); the composer, which runs the
+PR's own code, holds no credential and makes no network read, and without that
+checkout the job fails closed. This repository's own PRs compose from the
+template at their own head. Reviewer text outside the regions is never rewritten;
 an unchanged body is never PATCHed; a head no local gate measured is marked
 `STALE` in Evidence, never claimed. On such a head the Protected-root paths are
 remeasured with the repository's own `validate_root_file_protection.py` (or

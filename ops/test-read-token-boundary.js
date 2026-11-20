@@ -10,9 +10,11 @@
  * secret once, as the pass-through to governance-pr.yml, and must not set the
  * checkout token.
  *
- * governance-pr.yml may name the secret once, as the optional checkout token
- * for callers that pass it. Pull-request jobs restore the composer cache and
- * do not name the secret. persist-credentials stays false.
+ * governance-pr.yml may name the secret once as the optional checkout token
+ * for callers that pass it, and once as the token of the sparse org PR
+ * template checkout (falling back to github.token), never in an env: block.
+ * Pull-request jobs restore the composer cache and do not name the secret.
+ * persist-credentials stays false.
  * push, when allowed, is limited to main. A file that also has pull_request
  * or workflow_call is still forbidden from naming the token. Pull-request
  * jobs restore the composer cache that fetch saved; they do not check out
@@ -29,6 +31,9 @@ const root = path.resolve(__dirname, "..");
 const SECRET = "L9_GITHUB_READ_TOKEN";
 const CHECKOUT_TOKEN = `token: \${{ secrets.${SECRET} }}`;
 const PASS_THROUGH = `${SECRET}: \${{ secrets.${SECRET} }}`;
+// Quantum-L9/.github is private: the body job checks the org PR template out
+// with this token and hands the composer a local file, never the token.
+const TEMPLATE_TOKEN = `token: \${{ secrets.${SECRET} || github.token }}`;
 const GOVERNANCE_PR = ".github/workflows/governance-pr.yml";
 const PR_FILES = ".github/workflows/pr-files.yml";
 const ALLOWED = {
@@ -87,7 +92,28 @@ function assertGovernancePr(text) {
 		1,
 		`${GOVERNANCE_PR} must set ${CHECKOUT_TOKEN} exactly once`,
 	);
-	const besidesToken = text.replace(CHECKOUT_TOKEN, "");
+	assert.strictEqual(
+		text.split(TEMPLATE_TOKEN).length - 1,
+		1,
+		`${GOVERNANCE_PR} must set ${TEMPLATE_TOKEN} exactly once (org PR template checkout)`,
+	);
+	const templateStep = text.slice(
+		text.lastIndexOf("- uses: actions/checkout", text.indexOf(TEMPLATE_TOKEN)),
+		text.indexOf("- uses:", text.indexOf(TEMPLATE_TOKEN)),
+	);
+	assert.match(
+		templateStep,
+		/sparse-checkout: \|\n\s+\.github\/pull_request_template\.md\n\s+sparse-checkout-cone-mode: false/,
+		`${GOVERNANCE_PR} org template checkout must be sparse to the template alone`,
+	);
+	assert.match(
+		templateStep,
+		/persist-credentials: false/,
+		`${GOVERNANCE_PR} org template checkout must not persist credentials`,
+	);
+	const besidesToken = text
+		.replace(CHECKOUT_TOKEN, "")
+		.replace(TEMPLATE_TOKEN, "");
 	assert.strictEqual(
 		besidesToken.split(SECRET).length - 1,
 		1,
