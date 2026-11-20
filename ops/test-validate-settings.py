@@ -194,6 +194,15 @@ class Refusals(Fixture):
         self.edit("l9-ci-core", lambda d: d["merge"].pop("allow_merge_commit"))
         self.assert_refused("'allow_merge_commit' is a required property")
 
+    def test_duplicate_yaml_key_is_refused(self) -> None:
+        # Raw text: the dict-based editor cannot keep a duplicate key.
+        path = self.repo_path("l9-ci-core")
+        path.write_text(
+            path.read_text(encoding="utf-8") + "visibility: private\n",
+            encoding="utf-8",
+        )
+        self.assert_refused("found duplicate key 'visibility'")
+
     def test_missing_org(self) -> None:
         (self.root / "settings" / "org.yml").unlink()
         self.assert_refused("settings/org.yml: missing")

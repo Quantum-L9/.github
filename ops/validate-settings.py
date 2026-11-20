@@ -54,9 +54,29 @@ UNREADABLE_SECTIONS = {
 }
 
 
+class DuplicateKeyError(yaml.constructor.ConstructorError):
+    """A mapping repeats a key; PyYAML would otherwise keep the last one silently."""
+
+
+class _StrictLoader(yaml.SafeLoader):
+    def construct_mapping(self, node: yaml.MappingNode, deep: bool = False) -> Any:
+        seen: dict[Any, yaml.Mark] = {}
+        for key_node, _ in node.value:
+            key = self.construct_object(key_node, deep=deep)
+            if key in seen:
+                raise DuplicateKeyError(
+                    "while constructing a mapping",
+                    node.start_mark,
+                    f"found duplicate key {key!r} (first at line {seen[key].line + 1})",
+                    key_node.start_mark,
+                )
+            seen[key] = key_node.start_mark
+        return super().construct_mapping(node, deep=deep)
+
+
 def _load_yaml(path: Path) -> Any:
     with path.open(encoding="utf-8") as handle:
-        return yaml.safe_load(handle)
+        return yaml.load(handle, Loader=_StrictLoader)
 
 
 def registered_repositories(root: Path) -> set[str]:
@@ -106,6 +126,18 @@ def repository_files(settings: Path) -> list[Path]:
     return sorted(
         p for p in directory.iterdir() if p.is_file() and p.suffix in (".yml", ".yaml")
     )
+
+
+_UNPARSED = object()
+
+
+def _parsed(rel: str, path: Path, errors: list[str]) -> Any:
+    """Load one declaration, reporting a YAML error (duplicate keys included) as fatal."""
+    try:
+        return _load_yaml(path)
+    except yaml.YAMLError as exc:
+        errors.append(f"{rel}: invalid YAML: {' '.join(str(exc).split())[:300]}")
+        return _UNPARSED
 
 
 def _schema_validators(settings: Path) -> dict[str, Draft202012Validator]:
@@ -233,9 +265,9 @@ def validate(root: Path, strict_policy: bool = False) -> tuple[list[str], list[s
     if not org_path.is_file():
         errors.append("settings/org.yml: missing")
     else:
-        _schema_errors(
-            validators["org"], "settings/org.yml", _load_yaml(org_path), errors
-        )
+        org = _parsed("settings/org.yml", org_path, errors)
+        if org is not _UNPARSED:
+            _schema_errors(validators["org"], "settings/org.yml", org, errors)
 
     files = repository_files(settings)
     if not files:
@@ -244,8 +276,8 @@ def validate(root: Path, strict_policy: bool = False) -> tuple[list[str], list[s
     seen: dict[str, str] = {}
     for path in files:
         rel = f"settings/repos/{path.name}"
-        doc = _load_yaml(path)
-        if not _schema_errors(validators["repo"], rel, doc, errors):
+        doc = _parsed(rel, path, errors)
+        if doc is _UNPARSED or not _schema_errors(validators["repo"], rel, doc, errors):
             continue
         repository = doc["repository"]
         _check_identity(rel, path, repository, seen, registered, errors)
