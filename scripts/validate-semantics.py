@@ -1546,7 +1546,13 @@ def _check_identity_registry(
     # coordinates of current entries of this registry; no other entry names a
     # successor. History is kept: superseded and retired entries stay
     # addressable and are never removed.
-    status_of = {e.get("id"): e.get("status") for e in entries if isinstance(e, dict)}
+    # Only ids that passed validation above: a malformed (e.g. list or mapping)
+    # id is already reported and must not crash this map as an unhashable key.
+    status_of = {
+        e["id"]: e.get("status")
+        for e in entries
+        if isinstance(e, dict) and isinstance(e.get("id"), str) and e["id"] in canonical_ids
+    }
     coordinate_prefix = f"{artifact_id}#"
     for index, entry in enumerate(entries):
         if not isinstance(entry, dict):
@@ -14459,7 +14465,7 @@ DOMAIN_BINDING_IDS = tuple(
     "l9.domain-consumer-binding/claude-code@2",
 )
 DOMAIN_BINDING_VERSION = re.compile(
-    r"^(l9\.domain-consumer-binding/[a-z0-9-]+)@([1-9][0-9]*)$"
+    r"^(l9\.domain-consumer-binding/[a-z0-9-]+)@([1-9]\d*)$"
 )
 DOMAIN_COMPATIBILITY_CONTRACT = "l9.contract/domain-composition-compatibility@1"
 DOMAIN_PROVENANCE_CONTRACT = "l9.contract/domain-composition-provenance@1"
@@ -14869,13 +14875,13 @@ def _rc034_profiles(
     actors = {
         a.get("id")
         for a in _mapping(docs.get("semantics/actor_registry.yaml")).get("actors") or []
-        if isinstance(a, dict)
+        if isinstance(a, dict) and isinstance(a.get("id"), str)
     }
     surfaces = {
         s.get("id")
         for s in _mapping(docs.get("semantics/surface_registry.yaml")).get("surfaces")
         or []
-        if isinstance(s, dict)
+        if isinstance(s, dict) and isinstance(s.get("id"), str)
     }
     out: dict[str, dict] = {}
     for profile in domain_profiles:
@@ -15302,19 +15308,21 @@ def _rc034_bindings(
     actors = {
         a.get("id")
         for a in _mapping(docs.get("semantics/actor_registry.yaml")).get("actors") or []
-        if isinstance(a, dict)
+        if isinstance(a, dict) and isinstance(a.get("id"), str)
     }
     surfaces = {
         s.get("id")
         for s in _mapping(docs.get("semantics/surface_registry.yaml")).get("surfaces")
         or []
-        if isinstance(s, dict)
+        if isinstance(s, dict) and isinstance(s.get("id"), str)
     }
     current_surfaces = {
         s.get("id")
         for s in _mapping(docs.get("semantics/surface_registry.yaml")).get("surfaces")
         or []
-        if isinstance(s, dict) and s.get("status") == "current"
+        if isinstance(s, dict)
+        and isinstance(s.get("id"), str)
+        and s.get("status") == "current"
     }
     repos = {
         r.get("id")
