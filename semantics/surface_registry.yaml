@@ -49,22 +49,29 @@ surfaces:
   status: current
   description: The Cursor IDE interaction surface.
 - id: claude-code-desktop
-  status: current
-  description: The Claude Code desktop application surface. The same string is a historical ActorIdentity alias in
-    actor_registry.yaml; equal strings do not imply equal identity kinds.
+  status: retired
+  description: Registered in error as a Claude Code desktop application surface. Retired by owner decision on
+    2026-11-20 with no successor; Claude Code has exactly two surfaces, claude-code-cli and claude-code-web. The
+    coordinate stays addressable for historical resolution and admits no new use. The same string is a historical
+    ActorIdentity alias in actor_registry.yaml; equal strings do not imply equal identity kinds.
 - id: claude-code-cli
   status: current
-  description: The Claude Code terminal command-line surface.
+  description: The Claude Code local command-line surface, including the command line run inside an IDE.
 - id: claude-code-ide
-  status: current
-  description: The Claude Code IDE-extension surface.
+  status: retired
+  description: Registered in error as a Claude Code IDE-extension surface. Retired by owner decision on 2026-11-20
+    with no successor; the command line run inside an IDE is claude-code-cli. The coordinate stays addressable for
+    historical resolution and admits no new use.
 - id: claude-code-web
   status: current
-  description: The Claude Code hosted web surface.
+  description: The Claude Code hosted cloud-session surface, whichever client starts the session, a phone included.
 - id: claude-code-mobile
-  status: current
-  description: The Claude Code mobile surface. The same string is a historical ActorIdentity alias in
-    actor_registry.yaml; equal strings do not imply equal identity kinds.
+  status: superseded
+  description: Registered as a separate Claude Code mobile surface. Superseded by owner decision on 2026-11-20 by
+    claude-code-web; a cloud session started from a phone is a Claude Code web session. The same string is a
+    historical ActorIdentity alias in actor_registry.yaml; equal strings do not imply equal identity kinds.
+  successor_refs:
+  - l9.surface-registry/global@1#claude-code-web
 - id: codex-cloud
   status: current
   description: The Codex hosted cloud surface.
@@ -94,12 +101,13 @@ aliases:
   canonical: claude-code-web
   alias_kind: historical_surface_alias
 - alias: claude-mobile
-  canonical: claude-code-mobile
+  canonical: claude-code-web
   alias_kind: historical_surface_alias
 alias_rules:
   alias_kinds:
-    historical_surface_alias: A former or abbreviated SurfaceIdentity value that canonicalizes to one current surface
-      when read as a surface value.
+    historical_surface_alias: A former or abbreviated SurfaceIdentity value that canonicalizes to exactly one canonical
+      surface when read as a surface value. It canonicalizes to a current surface, or to the successor of a superseded
+      one; an alias of a retired surface without a successor keeps that retired coordinate and admits no new use.
   alias_resolves_to_exactly_one_canonical_surface: true
   alias_never_targets_another_alias: true
   alias_never_shadows_a_canonical_surface: true

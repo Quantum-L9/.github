@@ -43,6 +43,8 @@ global_rules:
   consumer_revision_is_bound_by_the_consumer_committed_projection_bundle: true
   runtime_actor_resolution_stays_downstream: true
   a_binding_switches_no_existing_consumer_profile: true
+  a_successor_binding_names_its_predecessor_version_of_the_same_consumer: true
+  a_host_binding_without_a_successor_names_only_current_surfaces: true
 consumer_kinds:
   skill:
     definition: A versioned procedure with an exact entrypoint file in a registered repository.
@@ -240,6 +242,33 @@ bindings:
     - l9.surface-registry/global@1#claude-code-ide
     - l9.surface-registry/global@1#claude-code-web
     - l9.surface-registry/global@1#claude-code-mobile
+  predecessor_profiles: []
+  requires:
+  - l9.projection/governance@1
+  - l9.projection/identity-attribution@1
+  - l9.projection/capabilities-dependencies@1
+  - l9.projection/contracts-conformance@1
+  - l9.projection/evidence-provenance@1
+  conditional:
+  - profile: l9.projection/architecture@1
+    activation: hosted_skill_requirement
+  - profile: l9.projection/strategic-value@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/signals@1
+    activation: explicit_task_requirement
+  authority:
+    binding_grants_permissions: false
+    action_authority: externally_resolved
+  unresolved: []
+- id: l9.domain-consumer-binding/claude-code@2
+  successor_of: l9.domain-consumer-binding/claude-code@1
+  consumer:
+    kind: host
+    identity: claude-code
+    actor_ref: l9.actor-registry/global@1#claude-code
+    surface_refs:
+    - l9.surface-registry/global@1#claude-code-cli
+    - l9.surface-registry/global@1#claude-code-web
   predecessor_profiles: []
   requires:
   - l9.projection/governance@1

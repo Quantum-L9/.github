@@ -59,7 +59,7 @@ actors:
 - id: claude-code
   kind: agent
   status: current
-  description: The one logical Claude Code actor. Desktop, CLI, IDE, web, and mobile are SurfaceIdentity
+  description: The one logical Claude Code actor. Its surfaces, claude-code-cli and claude-code-web, are SurfaceIdentity
     distinctions recorded in surface_registry.yaml, never separate actors.
 - id: codex
   kind: agent
