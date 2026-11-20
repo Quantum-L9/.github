@@ -1,0 +1,43 @@
+# GitHub settings as code for Quantum-L9/l9-ci-core (settings/README.md).
+# Populated from live state at 2026-11-20T16:59:00Z; UNKNOWN = unreadable then, never applied.
+schema: l9.github-settings.repo/v1
+repository: l9-ci-core
+observed:
+  at: '2026-11-20T16:59:00Z'
+  method: GitHub REST, repository-scoped endpoints, read through the agent proxy
+  unreadable:
+  - actions/permissions
+  - environments
+visibility: public
+merge:
+  allow_merge_commit: true
+  allow_squash_merge: true
+  allow_rebase_merge: true
+  allow_auto_merge: false
+  allow_update_branch: true
+  delete_branch_on_merge: true
+  web_commit_signoff_required: false
+  squash_merge_commit_title: COMMIT_OR_PR_TITLE
+  squash_merge_commit_message: COMMIT_MESSAGES
+  merge_commit_title: MERGE_MESSAGE
+  merge_commit_message: PR_TITLE
+actions:
+  access_level: UNKNOWN
+  default_workflow_permissions: UNKNOWN
+  can_approve_pull_request_reviews: UNKNOWN
+environments: UNKNOWN
+rulesets:
+- name: Code Quality Copilot review for default branch
+  target: branch
+  enforcement: disabled
+  conditions:
+    ref_name:
+      exclude: []
+      include:
+      - ~DEFAULT_BRANCH
+  rules:
+  - type: copilot_code_review
+    parameters:
+      review_on_push: true
+      review_draft_pull_requests: true
+  bypass_actors: []

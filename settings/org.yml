@@ -1,0 +1,13 @@
+# GitHub settings as code: organization binding (settings/README.md).
+# The applier is the existing repo-birth App; its credentials live only in the
+# factory's `repo-birth` environment (main-only). No App, secret or environment
+# is created for settings. Organization rulesets stay owned by rulesets/.
+schema: l9.github-settings.org/v1
+organization: Quantum-L9
+applier:
+  app_id: 4831302
+  credential_repository: l9-repo-template
+  environment: repo-birth
+  workflow: .github/workflows/settings-apply.yml
+org_rulesets:
+  owner: rulesets/
