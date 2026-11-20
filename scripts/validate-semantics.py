@@ -1551,7 +1551,9 @@ def _check_identity_registry(
     status_of = {
         e["id"]: e.get("status")
         for e in entries
-        if isinstance(e, dict) and isinstance(e.get("id"), str) and e["id"] in canonical_ids
+        if isinstance(e, dict)
+        and isinstance(e.get("id"), str)
+        and e["id"] in canonical_ids
     }
     coordinate_prefix = f"{artifact_id}#"
     for index, entry in enumerate(entries):
