@@ -176,6 +176,24 @@ class Refusals(Fixture):
             "actions.access_level is declared but actions/permissions was unreadable"
         )
 
+    def test_decided_environment_field_is_exempt(self) -> None:
+        def mutate(d):
+            d["environments"][0]["wait_timer"] = 0
+            d["observed"].setdefault("decided", []).append("environments.wait_timer")
+
+        self.edit("l9-repo-template", mutate)
+        self.assertEqual(self.errors(), [])
+
+    def test_sole_yaml_declaration_is_misnamed(self) -> None:
+        self.repo_path("l9-ci-core").rename(
+            self.root / "settings" / "repos" / "l9-ci-core.yaml"
+        )
+        self.assert_refused("file must be named l9-ci-core.yml")
+
+    def test_every_merge_setting_is_required(self) -> None:
+        self.edit("l9-ci-core", lambda d: d["merge"].pop("allow_merge_commit"))
+        self.assert_refused("'allow_merge_commit' is a required property")
+
     def test_missing_org(self) -> None:
         (self.root / "settings" / "org.yml").unlink()
         self.assert_refused("settings/org.yml: missing")

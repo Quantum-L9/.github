@@ -146,7 +146,7 @@ def _check_identity(
             f"{rel}: {repository} is already declared by settings/repos/{seen[repository]}"
         )
     seen[repository] = path.name
-    if path.stem != repository:
+    if path.name != f"{repository}.yml":
         errors.append(f"{rel}: file must be named {repository}.yml")
     if repository not in registered:
         errors.append(
@@ -168,13 +168,20 @@ def _check_unique_names(rel: str, doc: dict[str, Any], errors: list[str]) -> Non
 
 
 def _check_unreadable_list(
-    rel: str, section: str, entry: str, value: list[dict[str, Any]], errors: list[str]
+    rel: str,
+    section: str,
+    entry: str,
+    value: list[dict[str, Any]],
+    decided: set[str],
+    errors: list[str],
 ) -> None:
     # A section that was unreadable may only carry what was observed some other way;
     # every field that would need the unreadable endpoint stays UNKNOWN.
     for item in value:
         for key, field in item.items():
-            if key not in ("name", "required_secrets") and field != UNKNOWN:
+            if key in ("name", "required_secrets") or field == UNKNOWN:
+                continue
+            if f"{section}.{key}" not in decided:
                 errors.append(
                     f"{rel}: {section}[{item['name']}].{key} is declared but {entry} was unreadable"
                 )
@@ -193,7 +200,7 @@ def _check_unreadable(rel: str, doc: dict[str, Any], errors: list[str]) -> None:
         if value == UNKNOWN:
             continue
         if keys is None:
-            _check_unreadable_list(rel, section, entry, value, errors)
+            _check_unreadable_list(rel, section, entry, value, decided, errors)
             continue
         for key in keys:
             if value.get(key) != UNKNOWN and f"{section}.{key}" not in decided:
