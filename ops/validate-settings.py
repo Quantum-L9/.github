@@ -76,6 +76,39 @@ class _StrictLoader(yaml.SafeLoader):
         super().__init__(stream)
         self._scanned: set[int] = set()
 
+    def _scan_merge_sources(self, value_node: yaml.Node) -> None:
+        """A `<<` value is one mapping or a sequence of mappings; scan each."""
+        if isinstance(value_node, yaml.SequenceNode):
+            sources = value_node.value
+        else:
+            sources = [value_node]
+        for source in sources:
+            if isinstance(source, yaml.MappingNode):
+                self._scan_written_keys(source)
+
+    def _record_key(
+        self,
+        node: yaml.MappingNode,
+        key_node: yaml.Node,
+        seen: dict[Any, yaml.Mark],
+    ) -> None:
+        key = self.construct_object(key_node, deep=True)
+        if not isinstance(key, Hashable):
+            raise yaml.constructor.ConstructorError(
+                "while constructing a mapping",
+                node.start_mark,
+                "found unhashable key",
+                key_node.start_mark,
+            )
+        if key in seen:
+            raise DuplicateKeyError(
+                "while constructing a mapping",
+                node.start_mark,
+                f"found duplicate key {key!r} (first at line {seen[key].line + 1})",
+                key_node.start_mark,
+            )
+        seen[key] = key_node.start_mark
+
     def _scan_written_keys(self, node: yaml.MappingNode) -> None:
         if id(node) in self._scanned:
             return
@@ -83,31 +116,9 @@ class _StrictLoader(yaml.SafeLoader):
         seen: dict[Any, yaml.Mark] = {}
         for key_node, value_node in node.value:
             if key_node.tag == _MERGE_TAG:
-                sources = (
-                    value_node.value
-                    if isinstance(value_node, yaml.SequenceNode)
-                    else [value_node]
-                )
-                for source in sources:
-                    if isinstance(source, yaml.MappingNode):
-                        self._scan_written_keys(source)
-                continue
-            key = self.construct_object(key_node, deep=True)
-            if not isinstance(key, Hashable):
-                raise yaml.constructor.ConstructorError(
-                    "while constructing a mapping",
-                    node.start_mark,
-                    "found unhashable key",
-                    key_node.start_mark,
-                )
-            if key in seen:
-                raise DuplicateKeyError(
-                    "while constructing a mapping",
-                    node.start_mark,
-                    f"found duplicate key {key!r} (first at line {seen[key].line + 1})",
-                    key_node.start_mark,
-                )
-            seen[key] = key_node.start_mark
+                self._scan_merge_sources(value_node)
+            else:
+                self._record_key(node, key_node, seen)
 
     def construct_mapping(self, node: yaml.MappingNode, deep: bool = False) -> Any:
         self._scan_written_keys(node)
