@@ -97,6 +97,7 @@ function makeProcess({
 	next = "NEW BODY",
 	composeError,
 	checkError,
+	templateError,
 }) {
 	const runs = [];
 	const rendered = [];
@@ -105,6 +106,12 @@ function makeProcess({
 		runs.push([cmd, ...args]);
 		if (cmd === "python3") envs.push(opts.env);
 		if (cmd === "git") return `${checkedOut}\n`;
+		if (cmd === "python3" && args[0] === "-c") {
+			// The workflow's template check: validate_template on the local file.
+			if (templateError)
+				throw errorWith(new Error("exit 1"), "stderr", templateError);
+			return "";
+		}
 		if (args.includes("--refresh-body")) {
 			rendered.push(fs.readFileSync("body.md", "utf8"));
 			if (composeError)
@@ -262,6 +269,25 @@ scenario(
 		);
 		assert.strictEqual(r.core.failures.length, 1);
 		assert.match(r.core.failures[0], /org PR template is not checked out/);
+	},
+);
+
+scenario(
+	"an unusable org template fails the job before composing or PATCHing",
+	async () => {
+		const r = await run({
+			proc: { templateError: "missing section: ## Fix" },
+		});
+		const check = r.runs.find((a) => a[0] === "python3" && a[1] === "-c");
+		assert.ok(check, "the template is validated");
+		assert.ok(check.includes(ORG_TEMPLATE), "the local template is checked");
+		assert.ok(
+			!r.runs.some((a) => a.includes("--refresh-body")),
+			"the composer never runs on an unusable template",
+		);
+		assert.strictEqual(r.updates.length, 0);
+		assert.strictEqual(r.core.failures.length, 1);
+		assert.match(r.core.failures[0], /is not usable: missing section/);
 	},
 );
 

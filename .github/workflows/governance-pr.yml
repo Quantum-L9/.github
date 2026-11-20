@@ -190,6 +190,28 @@ jobs:
               return report('SKIPPED_STALE_EVENT', `checked out ${checkedOut}, PR head is ${live.head.sha}; the newer event refreshes it`);
             }
 
+            // The composer validates a template only when it fetches one itself
+            // (--org-owner); a --template file is read as-is. Run its own
+            // validate_template on the local file first, so an empty or broken
+            // template fails here and the body is never PATCHed from it.
+            const VALIDATE_TEMPLATE = [
+              'import importlib.util, pathlib, sys',
+              'composer, template = (pathlib.Path(p) for p in sys.argv[1:3])',
+              'sys.path.insert(0, str(composer.parent))',
+              'spec = importlib.util.spec_from_file_location("compose_pr_body", composer)',
+              'module = importlib.util.module_from_spec(spec)',
+              'sys.modules[spec.name] = module',
+              'spec.loader.exec_module(module)',
+              'errors = module.validate_template(template.read_text(encoding="utf-8"))',
+              'sys.exit("; ".join(errors) if errors else 0)',
+            ].join('\n');
+            try {
+              execFileSync('python3', ['-c', VALIDATE_TEMPLATE, composer, template], { encoding: 'utf8', env });
+            } catch (e) {
+              core.setFailed(`org PR template ${template} is not usable: ${e.stderr || e.message}`);
+              return;
+            }
+
             // Render from the body as it is now. If a reviewer edits it while
             // this runs, render again from their text rather than PATCH over it.
             // PATCH /pulls takes no precondition, so the residual window is the
