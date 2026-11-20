@@ -97,6 +97,7 @@ function makeProcess({
 	next = "NEW BODY",
 	composeError,
 	checkError,
+	templateError,
 }) {
 	const runs = [];
 	const rendered = [];
@@ -105,6 +106,12 @@ function makeProcess({
 		runs.push([cmd, ...args]);
 		if (cmd === "python3") envs.push(opts.env);
 		if (cmd === "git") return `${checkedOut}\n`;
+		if (cmd === "python3" && args[0] === "-c") {
+			// The workflow's template check: validate_template on the local file.
+			if (templateError)
+				throw errorWith(new Error("exit 1"), "stderr", templateError);
+			return "";
+		}
 		if (args.includes("--refresh-body")) {
 			rendered.push(fs.readFileSync("body.md", "utf8"));
 			if (composeError)
@@ -130,13 +137,24 @@ const pr = (over = {}) => ({
 	...over,
 });
 
+// Where the workflow's sparse checkout puts the org PR template, and where the
+// org repository's own PR head carries its template.
+const ORG_TEMPLATE = "org-template/.github/pull_request_template.md";
+const OWN_TEMPLATE = "pr/.github/pull_request_template.md";
+
 async function run({
 	reads = [pr()],
 	updateStatus,
 	strict = "false",
 	proc = {},
+	repo = "consumer",
+	templates = [ORG_TEMPLATE],
 } = {}) {
 	const cwd = fs.mkdtempSync(path.join(os.tmpdir(), "pr-body-job-"));
+	for (const rel of templates) {
+		fs.mkdirSync(path.join(cwd, path.dirname(rel)), { recursive: true });
+		fs.writeFileSync(path.join(cwd, rel), "TEMPLATE\n");
+	}
 	const prev = process.cwd();
 	const planted = {
 		"INPUT_GITHUB-TOKEN": "tok-write",
@@ -160,7 +178,7 @@ async function run({
 	const req = (m) =>
 		m === "child_process" ? { execFileSync: fake.execFileSync } : require(m);
 	const context = {
-		repo: { owner: "Quantum-L9", repo: "consumer" },
+		repo: { owner: "Quantum-L9", repo },
 		payload: { pull_request: { number: 7 } },
 	};
 	try {
@@ -210,14 +228,15 @@ scenario(
 			["--pr-base", BASE],
 		);
 		assert.ok(r.runs.some((a) => a.includes("--check-body")));
-		// The derived sections are recomposed from the org template on a new head.
-		const at = refresh.indexOf("--org-owner");
-		assert.deepStrictEqual(refresh.slice(at, at + 4), [
-			"--org-owner",
-			"Quantum-L9",
-			"--repo-name",
-			"consumer",
+		// The derived sections are recomposed from the org template on a new
+		// head, read from the workflow's local checkout: Quantum-L9/.github is
+		// private and the composer holds no credential, so it never goes online.
+		const at = refresh.indexOf("--template");
+		assert.deepStrictEqual(refresh.slice(at, at + 2), [
+			"--template",
+			ORG_TEMPLATE,
 		]);
+		assert.ok(!refresh.includes("--org-owner"), "no network template read");
 		// The composer runs the PR's own validator: no token reaches it.
 		assert.ok(
 			r.envs.length >= 2,
@@ -235,6 +254,53 @@ scenario(
 				assert.ok(!(k in env), `${k} does not reach the composer`);
 			}
 		}
+		assert.deepStrictEqual(r.core.failures, []);
+	},
+);
+
+scenario(
+	"without the org template checkout the job fails closed before composing",
+	async () => {
+		const r = await run({ templates: [] });
+		assert.strictEqual(r.updates.length, 0);
+		assert.ok(
+			!r.runs.some((a) => a[0] === "python3"),
+			"the composer never runs without its template",
+		);
+		assert.strictEqual(r.core.failures.length, 1);
+		assert.match(r.core.failures[0], /org PR template is not checked out/);
+	},
+);
+
+scenario(
+	"an unusable org template fails the job before composing or PATCHing",
+	async () => {
+		const r = await run({
+			proc: { templateError: "missing section: ## Fix" },
+		});
+		const check = r.runs.find((a) => a[0] === "python3" && a[1] === "-c");
+		assert.ok(check, "the template is validated");
+		assert.ok(check.includes(ORG_TEMPLATE), "the local template is checked");
+		assert.ok(
+			!r.runs.some((a) => a.includes("--refresh-body")),
+			"the composer never runs on an unusable template",
+		);
+		assert.strictEqual(r.updates.length, 0);
+		assert.strictEqual(r.core.failures.length, 1);
+		assert.match(r.core.failures[0], /is not usable: missing section/);
+	},
+);
+
+scenario(
+	"the org repository composes from the template at its own PR head",
+	async () => {
+		const r = await run({ repo: ".github", templates: [OWN_TEMPLATE] });
+		const refresh = r.runs.find((a) => a.includes("--refresh-body"));
+		const at = refresh.indexOf("--template");
+		assert.deepStrictEqual(refresh.slice(at, at + 2), [
+			"--template",
+			OWN_TEMPLATE,
+		]);
 		assert.deepStrictEqual(r.core.failures, []);
 	},
 );
@@ -419,6 +485,11 @@ if (process.env.L9_COMPOSER_CHECKOUT) {
 				"ops/scripts/compose_pr_body.py",
 			);
 			fs.writeFileSync(path.join(cwd, "template.md"), template);
+			// The workflow's sparse org-template checkout, as the body job reads it.
+			fs.mkdirSync(path.join(cwd, path.dirname(ORG_TEMPLATE)), {
+				recursive: true,
+			});
+			fs.writeFileSync(path.join(cwd, ORG_TEMPLATE), template);
 			const first = childProcess.execFileSync(
 				PYTHON,
 				[

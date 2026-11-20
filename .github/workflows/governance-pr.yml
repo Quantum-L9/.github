@@ -125,6 +125,22 @@ jobs:
           sparse-checkout-cone-mode: false
           token: ${{ secrets.L9_GITHUB_READ_TOKEN }}
           persist-credentials: false
+      # Quantum-L9/.github is private. The org PR template the derived sections
+      # are recomposed from is checked out here, sparse to that one file, and
+      # handed to the composer as a local file (--template). The composer runs
+      # this PR's own code, so no credential ever enters its environment and it
+      # makes no network read. github.token covers the org repository itself;
+      # its own PRs compose from their own head and skip this checkout.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.repository != format('{0}/.github', github.repository_owner)
+        with:
+          repository: ${{ github.repository_owner }}/.github
+          path: org-template
+          sparse-checkout: |
+            .github/pull_request_template.md
+          sparse-checkout-cone-mode: false
+          token: ${{ secrets.L9_GITHUB_READ_TOKEN || github.token }}
+          persist-credentials: false
 
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
@@ -146,15 +162,24 @@ jobs:
             // The composer runs this PR's own validate_root_file_protection.py,
             // so it gets an allowlisted environment: not github-script's
             // INPUT_GITHUB-TOKEN (pull-requests: write) or the runner's ACTIONS_*
-            // tokens. It reads the public org template over git (--org-owner).
+            // tokens. It reads the org template from the local checkout above
+            // (--template), never over the network.
             const keep = new Set(['PATH', 'HOME', 'LANG', 'TMPDIR', 'TEMP', 'TMP', 'LD_LIBRARY_PATH', 'pythonLocation']);
             const env = Object.fromEntries(Object.entries(process.env)
               .filter(([k, v]) => (keep.has(k) || k.startsWith('LC_')) && typeof v === 'string'));
             env.GIT_TERMINAL_PROMPT = '0';
-            const owner = context.repo.owner;
             const name = context.repo.repo;
             const run = (args) => execFileSync('python3', [composer, '--workspace', 'pr', ...args],
               { encoding: 'utf8', env, maxBuffer: 64 * 1024 * 1024 });
+            // The org repository composes from the template at its own PR head;
+            // every other repository from the org template checked out above.
+            const template = name === '.github'
+              ? 'pr/.github/pull_request_template.md'
+              : 'org-template/.github/pull_request_template.md';
+            if (!fs.existsSync(template)) {
+              core.setFailed(`org PR template is not checked out at ${template}; the body is not refreshed without it`);
+              return;
+            }
 
             // The event payload can be older than the PR. Read the live PR and
             // refuse to describe a head this job did not check out.
@@ -163,6 +188,28 @@ jobs:
             if (live.state !== 'open') return report('SKIPPED_CLOSED', `PR #${number} is ${live.state}`);
             if (live.head.sha !== checkedOut) {
               return report('SKIPPED_STALE_EVENT', `checked out ${checkedOut}, PR head is ${live.head.sha}; the newer event refreshes it`);
+            }
+
+            // The composer validates a template only when it fetches one itself
+            // (--org-owner); a --template file is read as-is. Run its own
+            // validate_template on the local file first, so an empty or broken
+            // template fails here and the body is never PATCHed from it.
+            const VALIDATE_TEMPLATE = [
+              'import importlib.util, pathlib, sys',
+              'composer, template = (pathlib.Path(p) for p in sys.argv[1:3])',
+              'sys.path.insert(0, str(composer.parent))',
+              'spec = importlib.util.spec_from_file_location("compose_pr_body", composer)',
+              'module = importlib.util.module_from_spec(spec)',
+              'sys.modules[spec.name] = module',
+              'spec.loader.exec_module(module)',
+              'errors = module.validate_template(template.read_text(encoding="utf-8"))',
+              'sys.exit("; ".join(errors) if errors else 0)',
+            ].join('\n');
+            try {
+              execFileSync('python3', ['-c', VALIDATE_TEMPLATE, composer, template], { encoding: 'utf8', env });
+            } catch (e) {
+              core.setFailed(`org PR template ${template} is not usable: ${e.stderr || e.message}`);
+              return;
             }
 
             // Render from the body as it is now. If a reviewer edits it while
@@ -175,10 +222,10 @@ jobs:
             for (let attempt = 1; ; attempt += 1) {
               fs.writeFileSync('body.md', current.body || '');
               try {
-                // --org-owner: the template the derived sections (Type of Change,
+                // --template: the template the derived sections (Type of Change,
                 // Fix, Risk, Gates, Semantic change) are recomposed from on a new head.
                 next = run(['--pr-base', live.base.sha, '--refresh-body', 'body.md', '--remote',
-                  '--org-owner', owner, '--repo-name', name, '--status-file', 'status.json']);
+                  '--template', template, '--status-file', 'status.json']);
               } catch (e) {
                 core.setFailed(`composer failed (${process.env.COMPOSER}): ${e.stderr || e.message}`);
                 return;
