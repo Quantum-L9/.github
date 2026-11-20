@@ -211,6 +211,40 @@ class Refusals(Fixture):
         )
         self.assertEqual(vs._load_yaml(merged)["child"], {"a": 1, "c": 2})
 
+    def test_duplicate_key_inside_a_merge_source_is_refused(self) -> None:
+        inline = self.root / "inline.yml"
+        inline.write_text(
+            "defaults:\n  <<: {allow_merge_commit: false, allow_merge_commit: true}\n",
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(vs.DuplicateKeyError, "allow_merge_commit"):
+            vs._load_yaml(inline)
+        listed = self.root / "listed.yml"
+        listed.write_text(
+            "x:\n  <<: [{a: 1}, {b: 2, b: 3}]\n",
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(vs.DuplicateKeyError, "'b'"):
+            vs._load_yaml(listed)
+
+    def test_reused_merged_mapping_is_not_a_false_duplicate(self) -> None:
+        reused = self.root / "reused.yml"
+        reused.write_text(
+            "defaults: &base\n"
+            "  allow_merge_commit: true\n"
+            "overrides:\n"
+            "  - <<: &override\n"
+            "      <<: *base\n"
+            "      allow_merge_commit: false\n"
+            "      repos: [l9-ci-core]\n"
+            "  - *override\n",
+            encoding="utf-8",
+        )
+        doc = vs._load_yaml(reused)
+        self.assertEqual(
+            [o["allow_merge_commit"] for o in doc["overrides"]], [False, False]
+        )
+
     def test_unhashable_key_is_one_error_and_validation_continues(self) -> None:
         # Files are checked in sorted order: the broken file must come BEFORE the
         # file whose error proves the run continued.

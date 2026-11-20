@@ -59,13 +59,40 @@ class DuplicateKeyError(yaml.constructor.ConstructorError):
     """A mapping repeats a key; PyYAML would otherwise keep the last one silently."""
 
 
+_MERGE_TAG = "tag:yaml.org,2002:merge"
+
+
 class _StrictLoader(yaml.SafeLoader):
-    def construct_mapping(self, node: yaml.MappingNode, deep: bool = False) -> Any:
+    """SafeLoader that refuses a key written twice in one mapping.
+
+    The scan runs on the keys each mapping writes, before SafeConstructor's
+    flatten_mapping inserts inherited `<<` entries into node.value. Every merge
+    source (a mapping, or each mapping of a sequence) is scanned too, and each
+    node is scanned once, so a merged mapping reused through an alias is not
+    re-read after flattening has filled in its inherited keys.
+    """
+
+    def __init__(self, stream: Any) -> None:
+        super().__init__(stream)
+        self._scanned: set[int] = set()
+
+    def _scan_written_keys(self, node: yaml.MappingNode) -> None:
+        if id(node) in self._scanned:
+            return
+        self._scanned.add(id(node))
         seen: dict[Any, yaml.Mark] = {}
-        for key_node, _ in node.value:
-            if key_node.tag == "tag:yaml.org,2002:merge":
-                continue  # SafeConstructor.construct_mapping flattens `<<` merges.
-            key = self.construct_object(key_node, deep=deep)
+        for key_node, value_node in node.value:
+            if key_node.tag == _MERGE_TAG:
+                sources = (
+                    value_node.value
+                    if isinstance(value_node, yaml.SequenceNode)
+                    else [value_node]
+                )
+                for source in sources:
+                    if isinstance(source, yaml.MappingNode):
+                        self._scan_written_keys(source)
+                continue
+            key = self.construct_object(key_node, deep=True)
             if not isinstance(key, Hashable):
                 raise yaml.constructor.ConstructorError(
                     "while constructing a mapping",
@@ -81,6 +108,9 @@ class _StrictLoader(yaml.SafeLoader):
                     key_node.start_mark,
                 )
             seen[key] = key_node.start_mark
+
+    def construct_mapping(self, node: yaml.MappingNode, deep: bool = False) -> Any:
+        self._scan_written_keys(node)
         return super().construct_mapping(node, deep=deep)
 
 
