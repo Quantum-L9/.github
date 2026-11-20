@@ -212,21 +212,25 @@ class Refusals(Fixture):
         self.assertEqual(vs._load_yaml(merged)["child"], {"a": 1, "c": 2})
 
     def test_unhashable_key_is_one_error_and_validation_continues(self) -> None:
-        path = self.repo_path("l9-ci-core")
+        # Files are checked in sorted order: the broken file must come BEFORE the
+        # file whose error proves the run continued.
+        names = [p.stem for p in vs.repository_files(self.root / "settings")]
+        self.assertLess(names.index("Cursor-Governance"), names.index("l9-ci-core"))
+        path = self.repo_path("Cursor-Governance")
         path.write_text(
             path.read_text(encoding="utf-8") + "? [a, b]\n: value\n", encoding="utf-8"
         )
-        self.edit("Cursor-Governance", lambda d: d.update(visibility="secret"))
+        self.edit("l9-ci-core", lambda d: d.update(visibility="secret"))
         errors = self.errors()
         self.assertTrue(
             any(
-                "l9-ci-core.yml: invalid YAML" in e and "unhashable" in e
+                "Cursor-Governance.yml: invalid YAML" in e and "unhashable" in e
                 for e in errors
             ),
             errors,
         )
         self.assertTrue(
-            any(e.startswith("settings/repos/Cursor-Governance.yml") for e in errors),
+            any(e.startswith("settings/repos/l9-ci-core.yml") for e in errors),
             errors,
         )
 
