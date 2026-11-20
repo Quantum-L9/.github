@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Hashable
 from pathlib import Path
 from typing import Any
 
@@ -62,7 +63,16 @@ class _StrictLoader(yaml.SafeLoader):
     def construct_mapping(self, node: yaml.MappingNode, deep: bool = False) -> Any:
         seen: dict[Any, yaml.Mark] = {}
         for key_node, _ in node.value:
+            if key_node.tag == "tag:yaml.org,2002:merge":
+                continue  # SafeConstructor.construct_mapping flattens `<<` merges.
             key = self.construct_object(key_node, deep=deep)
+            if not isinstance(key, Hashable):
+                raise yaml.constructor.ConstructorError(
+                    "while constructing a mapping",
+                    node.start_mark,
+                    "found unhashable key",
+                    key_node.start_mark,
+                )
             if key in seen:
                 raise DuplicateKeyError(
                     "while constructing a mapping",

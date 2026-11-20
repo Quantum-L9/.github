@@ -203,6 +203,33 @@ class Refusals(Fixture):
         )
         self.assert_refused("found duplicate key 'visibility'")
 
+    def test_yaml_merge_key_is_accepted(self) -> None:
+        # `<<` is valid YAML that SafeLoader flattens; the duplicate scan must not refuse it.
+        merged = self.root / "merged.yml"
+        merged.write_text(
+            "base: &b\n  a: 1\nchild:\n  <<: *b\n  c: 2\n", encoding="utf-8"
+        )
+        self.assertEqual(vs._load_yaml(merged)["child"], {"a": 1, "c": 2})
+
+    def test_unhashable_key_is_one_error_and_validation_continues(self) -> None:
+        path = self.repo_path("l9-ci-core")
+        path.write_text(
+            path.read_text(encoding="utf-8") + "? [a, b]\n: value\n", encoding="utf-8"
+        )
+        self.edit("Cursor-Governance", lambda d: d.update(visibility="secret"))
+        errors = self.errors()
+        self.assertTrue(
+            any(
+                "l9-ci-core.yml: invalid YAML" in e and "unhashable" in e
+                for e in errors
+            ),
+            errors,
+        )
+        self.assertTrue(
+            any(e.startswith("settings/repos/Cursor-Governance.yml") for e in errors),
+            errors,
+        )
+
     def test_broken_registry_is_one_error_not_a_crash(self) -> None:
         path = self.root / "semantics" / "repository_registry.yaml"
         path.write_text("repositories: [unclosed\n", encoding="utf-8")
