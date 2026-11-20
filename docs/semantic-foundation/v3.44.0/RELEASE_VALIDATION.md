@@ -1,6 +1,6 @@
 # Release Validation v3.44.0
 
-Release status: **additive successor candidate**. Admission requires the repository owner's explicit decision for this exact subject; no admission is claimed. The predecessor v3.43.0 and its predecessors back to v3.40.0 are themselves candidates.
+Release status: **admitted additive successor** (ADR-041, 2026-11-20). Admission takes effect at the `main` commit that merges the pull request carrying ADR-041.
 
 ## Closure
 
@@ -19,8 +19,10 @@ Release status: **additive successor candidate**. Admission requires the reposit
 
 ## Release integrity
 
-`HASHES.sha256` inventories the final semantic bytes, all ADRs plus the index, and this release's Markdown (`sha256sum` with `./` paths, `LC_ALL=C` order by path). Prior release directories are byte-identical.
+`HASHES.sha256` inventories the final semantic bytes, all ADRs plus the index, and this release's Markdown. It was generated with the v3.21.0 procedure: `sha256sum` with `./` paths, sorted with `LC_ALL=C sort -k2`. Prior release directories are byte-identical.
 
 ## Admission state
 
-Not admitted. The owner decision covers the surface lifecycle changes, the `claude-mobile` alias move, the `claude-code@2` binding, the RC-014 and RC-034 changes, and, because the subject is measured from v3.39.0, the content of the open candidates v3.40.0 to v3.43.0.
+The repository owner admitted v3.44.0 in ADR-041 on 2026-11-20, in governed session `session_017xwbxw5DHxx5UrgJwAxGPS`: "Admit v3.44.0, subject digest sha256:f5e953d0…, semantics tree c971aac". Subject digest `sha256:f5e953d03df1da40b1a6d4bf0bc7067926ee43f957a2b68837630cb87a109143`; approved `semantics/` tree `c971aaca00a5efa3ff4d5860d73329f1b8530d86` at candidate commits `867d376804af80657a29cc7c691bdff742640d12` and `8fb255603be8a66b94a776ad7f50fd61a27b3ff2`, where `check_admission_closure.py --admitted-base v3.39.0 --require released` reported `RELEASED_CANDIDATE`. Because the subject is measured from v3.39.0, the admission covers the content of v3.40.0 to v3.43.0; their release records are not edited.
+
+Post-merge trusted replay on `main` is a separate, later step.

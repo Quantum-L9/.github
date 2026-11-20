@@ -1,6 +1,6 @@
 # Semantic Foundation Manifest v3.44.0
 
-Release status: **ADDITIVE SUCCESSOR CANDIDATE**
+Release status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-041, 2026-11-20)
 
 ## Install surface
 
@@ -125,7 +125,9 @@ The release contains **117** canonical semantic YAML files:
 
 ## Decision records
 
-The release contains **40** accepted ADRs under `docs/adr/` (unchanged; no ADR is added by this candidate).
+The release contains **41** accepted ADRs plus the ADR index under `docs/adr/`.
+
+v3.44.0 adds ADR-041, which admits it.
 
 ## Semantic changes
 

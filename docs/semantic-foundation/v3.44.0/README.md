@@ -1,8 +1,8 @@
 # Semantic Foundation v3.44.0
 
-Status: **ADDITIVE SUCCESSOR CANDIDATE**
+Status: **ADMITTED ADDITIVE SUCCESSOR** (ADR-041, 2026-11-20).
 
-v3.44.0 corrects canonical SurfaceIdentity drift for the `claude-code` actor. By owner decision (operator, 2026-11-20, in a governed Claude Code session) Claude Code has exactly two surfaces: `claude-code-cli`, the local command line including the command line run inside an IDE, and `claude-code-web`, the hosted cloud session whichever client starts it. `claude-code-desktop` and `claude-code-ide` were registered in error and are retired. Mobile is not a separate surface: `claude-code-mobile` is superseded by `claude-code-web`. History is kept; no identity is removed or rewritten. No ADR is added and this candidate does not admit itself.
+v3.44.0 corrects canonical SurfaceIdentity drift for the `claude-code` actor. By owner decision (operator, 2026-11-20, in a governed Claude Code session) Claude Code has exactly two surfaces: `claude-code-cli`, the local command line including the command line run inside an IDE, and `claude-code-web`, the hosted cloud session whichever client starts it. `claude-code-desktop` and `claude-code-ide` were registered in error and are retired. Mobile is not a separate surface: `claude-code-mobile` is superseded by `claude-code-web`. History is kept; no identity is removed or rewritten. ADR-041 records the owner's admission.
 
 Successor to the v3.43.0 candidate.
 
@@ -29,7 +29,7 @@ Because v3.40.0 to v3.43.0 are open candidates, the subject is everything change
 - schemas: `conformance_ir.schema.yaml`, `fixture_ir.schema.yaml`, `harness_surface.schema.yaml` (open candidate v3.40.0);
 - revisions: none. No registry entry of a canonical source, and no invariant, term, contract, source class or schema of this release, is redefined.
 
-Admitting v3.44.0 admits its whole approved `semantics/` tree, so it also admits the open candidates' content. The owner may instead admit v3.40.0 to v3.43.0 first.
+Admitting v3.44.0 admits its whole approved `semantics/` tree, so it also admits the open candidates' content; the owner admitted it with that scope (ADR-041).
 
 ## Downstream
 
