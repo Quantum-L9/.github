@@ -9,13 +9,19 @@
 #                                 PyYAML, jsonschema)
 #   make validate  repo-validate  SHA pins and semantic-foundation closure (no
 #                                 starter suite)
-#   make check     repo-check     static subset: SHA-pin audit
+#   make check     repo-check     static subset: none (the SHA-pin audit runs
+#                                 once, in validate; tracked bytecode is a
+#                                 Core org check)
 #   make test      repo-test      test subset: ops/validate-starters.sh suites,
 #                                 the suite's only run
 #
 # `make validate` no longer runs the starter suite; `make test` runs it once.
-# Core runs all four phases in order, so check re-runs the SHA-pin audit
-# subset of validate there.
+# Core runs all four phases in order, so each check runs in exactly one
+# phase. Tracked Python bytecode is a Core org check, so repo-check does not
+# grow a local guard. The registration tool suites (register-birth, register-org-repository,
+# admit-profiles; ~170s, each re-runs the semantic validator over a copy of the
+# tree) run in .github/workflows/registration-e2e.yml when their inputs change,
+# and nightly: not in the required test phase.
 .PHONY: repo-setup repo-validate repo-check repo-test \
         activate preflight sync-labels sync-labels-all \
         seed-dry seed-apply birth-bootstrap birth-seed \
@@ -40,8 +46,8 @@ repo-setup: ## Check node and git; provide a PyYAML + jsonschema interpreter (.v
 	  .venv/bin/pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2" "jsonschema==4.23.0"; \
 	fi
 
-repo-check: ## Static check: audit this repo for floating action refs
-	@bash ops/audit-sha-pins.sh
+repo-check: ## Static check: SHA-pin audit runs once in repo-validate
+	@echo "repo-check: SHA-pin audit runs once in repo-validate; tracked bytecode is a Core org check"
 
 repo-test: repo-setup ## The starter suite (ops/validate-starters.sh), its only run
 	@$(USE_VENV) bash ops/validate-starters.sh

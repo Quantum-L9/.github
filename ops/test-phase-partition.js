@@ -4,7 +4,9 @@
  * The phase partition of Repo.mk, the repository-owned make-v1 implementation.
  *
  * repo-validate is the SHA-pin and semantic-foundation closure gate; it no
- * longer runs the starter suite. repo-check stays the SHA-pin audit.
+ * longer runs the starter suite. repo-check does not re-run that audit and
+ * does not run a local bytecode guard: tracked bytecode is a Core org check.
+ * The SHA-pin audit runs once, in repo-validate.
  * repo-test runs ops/validate-starters.sh — the suite's only run, so a
  * starter-contract change is exercised exactly once even though Core runs
  * all four phases in order. The root Makefile facade routes validate, check
@@ -73,8 +75,8 @@ function assertPartition(mk, facade) {
 		"repo-test runs the starter suite exactly once",
 	);
 
-	// repo-validate keeps its pins and closure, and repo-check stays the
-	// SHA-pin audit.
+	// repo-validate keeps its pins and closure. repo-check re-runs neither
+	// the SHA-pin audit nor the deleted bytecode guard. The audit runs once.
 	assert.match(
 		phases["repo-validate"],
 		/ops\/audit-sha-pins\.sh/,
@@ -85,11 +87,21 @@ function assertPartition(mk, facade) {
 		/scripts\/validate-semantics\.py/,
 		"repo-validate keeps the semantic-foundation closure",
 	);
-	assert.match(
+	assert.doesNotMatch(
+		phases["repo-check"],
+		/ops\/check-no-bytecode\.sh/,
+		"repo-check must not run the deleted bytecode guard; Core owns that check",
+	);
+	assert.doesNotMatch(
 		phases["repo-check"],
 		/ops\/audit-sha-pins\.sh/,
-		"repo-check stays the SHA-pin audit",
+		"repo-check must not re-run the SHA-pin audit",
 	);
+	const pinRuns = Object.values(phases).reduce(
+		(n, recipe) => n + times(recipe, "ops/audit-sha-pins.sh"),
+		0,
+	);
+	assert.strictEqual(pinRuns, 1, "the SHA-pin audit runs in exactly one phase");
 
 	// The facade routes each make-v1 phase to its repository-owned leaf.
 	assert.match(facade, /^validate: repo-validate ##/m);
@@ -121,13 +133,59 @@ function assertNoWorkflowRunsTheSuite(workflows) {
 	}
 }
 
+/**
+ * The registration tool suites each re-run the semantic validator over a copy
+ * of the tree (~170s together), so they are out of the required test phase.
+ * They must still run somewhere: each one is named by registration-e2e.yml.
+ */
+const REGISTRATION_SUITES = [
+	"ops/test-register-birth.py",
+	"ops/test-register-org-repository.py",
+	"ops/test-admit-profiles.py",
+];
+function assertRegistrationSuitesPlaced(starters, workflows) {
+	const e2e = workflows["registration-e2e.yml"];
+	assert.ok(e2e, "registration-e2e.yml is missing; the registration suites would run nowhere");
+	for (const suite of REGISTRATION_SUITES) {
+		assert.ok(
+			!starters.includes(suite),
+			`${suite} is back in ops/validate-starters.sh, the required test phase`,
+		);
+		assert.ok(e2e.includes(suite), `registration-e2e.yml does not run ${suite}`);
+	}
+}
+
+/**
+ * The SHA-pin audit and the semantic validator run once per pull request,
+ * inside the required Analyze check (repo-validate). A workflow that invoked
+ * either directly would run it a second time beside it.
+ */
+const SINGLE_RUN_INVOCATIONS = [
+	/bash\s+(\.\/)?ops\/audit-sha-pins\.sh/,
+	/python3?\s+(\.\/)?scripts\/validate-semantics\.py/,
+];
+function assertNoWorkflowReRunsAnalyze(workflows) {
+	for (const [name, text] of Object.entries(workflows)) {
+		for (const pattern of SINGLE_RUN_INVOCATIONS) {
+			assert.doesNotMatch(
+				text,
+				pattern,
+				`${name} re-runs ${pattern}; it runs once, in repo-validate`,
+			);
+		}
+	}
+}
+
 const mk = read("Repo.mk");
 const facade = read("Makefile");
+const starters = read("ops/validate-starters.sh");
 
 assertPartition(mk, facade);
 assertNoWorkflowRunsTheSuite(workflowTexts());
+assertRegistrationSuitesPlaced(starters, workflowTexts());
+assertNoWorkflowReRunsAnalyze(workflowTexts());
 console.log(
-	"ok: repo-validate keeps the SHA-pin audit and semantic closure; the starter suite runs exactly once, in repo-test, and no workflow names it",
+	"ok: repo-validate keeps the SHA-pin audit and semantic closure, repo-check re-runs neither, the starter suite runs exactly once, in repo-test, no workflow names it or re-runs the pin audit or semantic validator, and registration-e2e.yml runs the registration suites",
 );
 
 // Negative controls: a partition that moves a phase role must fail.
@@ -153,15 +211,43 @@ assert.throws(
 	"the starter suite out of repo-test is not caught",
 );
 
-const auditGone = mk.replace(
-	"repo-check: ## Static check: audit this repo for floating action refs\n\t@bash ops/audit-sha-pins.sh",
-	"repo-check: ## Static check: audit this repo for floating action refs\n\t@true",
+const guardBack = mk.replace(
+	'\t@echo "repo-check: SHA-pin audit runs once in repo-validate; tracked bytecode is a Core org check"',
+	"\t@bash ops/check-no-bytecode.sh",
 );
-assert.notStrictEqual(auditGone, mk, "negative control did not change its fixture");
+assert.notStrictEqual(guardBack, mk, "negative control did not change its fixture");
 assert.throws(
-	() => assertPartition(auditGone, facade),
+	() => assertPartition(guardBack, facade),
 	assert.AssertionError,
-	"the SHA-pin audit out of repo-check is not caught",
+	"the deleted bytecode guard back in repo-check is not caught",
+);
+
+const pinsTwice = mk.replace(
+	'\t@echo "repo-check: SHA-pin audit runs once in repo-validate; tracked bytecode is a Core org check"',
+	"\t@bash ops/audit-sha-pins.sh",
+);
+assert.notStrictEqual(pinsTwice, mk, "negative control did not change its fixture");
+assert.throws(
+	() => assertPartition(pinsTwice, facade),
+	assert.AssertionError,
+	"the SHA-pin audit run twice is not caught",
+);
+
+assert.throws(
+	() =>
+		assertRegistrationSuitesPlaced(
+			`${starters}\npython3 ops/test-register-birth.py\n`,
+			workflowTexts(),
+		),
+	assert.AssertionError,
+	"a registration suite back in the required test phase is not caught",
+);
+const withoutE2e = { ...workflowTexts() };
+delete withoutE2e["registration-e2e.yml"];
+assert.throws(
+	() => assertRegistrationSuitesPlaced(starters, withoutE2e),
+	assert.AssertionError,
+	"registration suites that run nowhere are not caught",
 );
 
 const semanticsGone = mk.replace(
@@ -194,5 +280,16 @@ assert.throws(
 	assert.AssertionError,
 	"a workflow that runs the starter suite beside repo-test is not caught",
 );
+
+for (const fixture of [
+	"run: bash ops/audit-sha-pins.sh\n",
+	"run: |\n  python3 scripts/validate-semantics.py\n",
+]) {
+	assert.throws(
+		() => assertNoWorkflowReRunsAnalyze({ "fixture.yml": fixture }),
+		assert.AssertionError,
+		`a workflow re-running a repo-validate check is not caught: ${fixture}`,
+	);
+}
 
 console.log("\nall phase partition scenarios passed");

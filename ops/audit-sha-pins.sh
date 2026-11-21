@@ -56,6 +56,9 @@ for dir in "${SEARCH_DIRS[@]}"; do
         continue
       fi
       echo "FAIL: ${f}:${line_no}: floating ref '${ref}' on '${repo}' — pin by full 40-char commit SHA"
+      if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+        echo "::error file=${f#./},line=${line_no},title=floating action ref::'${repo}@${ref}' is not pinned; pin by full 40-char commit SHA"
+      fi
       FAILED=$((FAILED + 1))
     done < "$f"
   done < <(find "$dir" -type f \( -name "*.yml" -o -name "*.yaml" \) -print0)
@@ -63,6 +66,20 @@ done
 
 echo "---"
 echo "Checked ${CHECKED} uses: references."
+# Surface the result beyond the raw log (L9-SIGNAL-001); a no-op off Actions.
+# GITHUB_STEP_SUMMARY alone is not enough: a caller outside Actions can set it.
+if [[ "${GITHUB_ACTIONS:-}" == "true" && -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+  {
+    echo "### SHA-pin audit (ops/audit-sha-pins.sh)"
+    echo
+    if [[ "$FAILED" -gt 0 ]]; then
+      echo "**FAIL**: ${FAILED} floating reference(s) among ${CHECKED} uses: references (each is annotated on its line)."
+    else
+      echo "**PASS**: ${CHECKED} uses: references, all pinned by SHA or a documented frozen Core tag."
+    fi
+    echo
+  } >> "${GITHUB_STEP_SUMMARY}"
+fi
 if [[ "$FAILED" -gt 0 ]]; then
   echo "${FAILED} floating (non-SHA, non-frozen-tag) reference(s) found."
   exit 1

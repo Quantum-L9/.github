@@ -44,4 +44,4 @@ Check:
 - Nothing in `policies/` should install a consumer CI workflow.
 - `policies/mandatory-files.yml` still requires `.github/workflows/governance.yml` from `templates/governance-caller.yml`. That caller is not canonical CI.
 - This repository was excluded from ruleset `21895545` because `org-ci.yml` rejects the repository name `.github` in `build-artifact-manifest`. Decide whether `.github` is a governed CI target or stays outside that ruleset on purpose.
-- Workflows in this repo that lint or validate (`actionlint.yml`, `validate-starters.yml`, `sha-pin-audit.yml`) are either organization-plane checks or work that belongs in `l9-ci-core`. Name which is which.
+- Workflows in this repo that lint or validate (`actionlint.yml`) are either organization-plane checks or work that belongs in `l9-ci-core`. Name which is which. (`validate-starters.yml` and `sha-pin-audit.yml` were removed: the semantic validator and the SHA-pin audit run once, inside the required Analyze check, via `make validate`.)

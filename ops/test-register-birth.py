@@ -229,8 +229,8 @@ class RegisterBirthTest(unittest.TestCase):
         self.assertEqual(
             registry["repositories"][-1], self.expected_entry(newborn, template)
         )
-        # apply already ran the validator; run it once more from here as evidence
-        rb.run_validator(checkout)
+        # apply() ran the validator over the registered tree and raises on any
+        # FAIL, so the status above is that evidence; it is not re-run here.
         # a re-run is a no-op
         again = rb.apply(Args(newborn, template, checkout, False))
         self.assertEqual(again["status"], "present")

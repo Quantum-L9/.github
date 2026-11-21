@@ -19,6 +19,7 @@ import argparse
 import copy
 import hashlib
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -17203,6 +17204,7 @@ def main(argv: list[str]) -> int:
         print(line)
     for line in report.failures:
         print(line)
+    _publish_ci_result(report)
     if report.failures:
         print(
             f"FAIL semantic-foundation closure: {len(report.failures)} unresolved (SC-010 fail-closed)"
@@ -17211,6 +17213,45 @@ def main(argv: list[str]) -> int:
     print("PASS SC-010 no unresolved references")
     print("PASS semantic-foundation closure")
     return 0
+
+
+_FAIL_LINE = re.compile(r"^FAIL (\S+) (\S+) (.*)$")
+_SUMMARY_FAIL_CAP = 50
+
+
+def _publish_ci_result(report: Report) -> None:
+    """On GitHub Actions, surface the result beyond the raw log (L9-SIGNAL-001).
+
+    Each FAIL becomes an ::error annotation on its path, and the job summary
+    gets the pass/fail counts and every FAIL line (capped, with the remainder
+    counted). Writes only the runner's summary file, never the repository, so
+    SC-009 stays observational. A no-op outside Actions.
+    """
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return
+    for line in report.failures:
+        match = _FAIL_LINE.match(line)
+        if match:
+            check, path, rest = match.groups()
+            print(f"::error file={path},title=semantic closure {check}::{rest}")
+        else:
+            print(f"::error title=semantic closure::{line}")
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not summary:
+        return
+    verdict = "FAIL" if report.failures else "PASS"
+    lines = [
+        "### Semantic-foundation closure (scripts/validate-semantics.py)",
+        "",
+        f"**{verdict}**: {len(report.passes)} checks passed, {len(report.failures)} failed.",
+    ]
+    if report.failures:
+        shown = report.failures[:_SUMMARY_FAIL_CAP]
+        lines += ["", "~~~~", *shown, "~~~~"]
+        if len(report.failures) > len(shown):
+            lines.append(f"+{len(report.failures) - len(shown)} more in the job log")
+    with open(summary, "a", encoding="utf-8") as stream:
+        stream.write("\n".join(lines) + "\n\n")
 
 
 if __name__ == "__main__":
