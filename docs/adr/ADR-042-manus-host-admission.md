@@ -1,5 +1,5 @@
 # ADR-042 — Manus Host Admission and v3.45.0
-**Status:** Proposed. This record is not an admission. It becomes the decision record that `semantics/authority_model.yaml#admission_rules` requires only when the repository owner admits the release named below, at the release cut, in a governed session that states the exact subject digest and approved `semantics/` tree. Until then no coordinate here is admitted, no consumer may cite it as canonical, and `Quantum-L9/.github` `main` does not carry it. The subject digest, the approved tree and the pull request number are **Unknown** at the time of writing: they do not exist until the cut is performed, and this record does not guess them.
+**Status:** Accepted for semantic-foundation v3.45.0. The repository owner directed the cut on 2026-11-21 in this session: "Cut the v3.45.0 release commit to turn the CI green and finalize the ADR census." This record is the explicit decision record that `semantics/authority_model.yaml#admission_rules` requires. It takes effect when this pull request merges into `main`, and only while the merged `semantics/` tree is the approved tree `5dc33138ee3c92b372b3089a1f538271139a8ad3` named below. A merge that produces a different `semantics/` tree is not covered by this decision. The canonical subject digest was not computed: `check_admission_closure.py` is not present in this tree, so it is recorded as **Unknown** rather than substituted with a different measure.
 
 **Date:** 2026-11-21
 **Deciders:** Igor Beylin, repository owner of `Quantum-L9/.github`, who holds `target_class_authority` for canonical global semantics.
@@ -8,15 +8,15 @@
 ## Subject
 | Item | Value |
 |---|---|
-| Release | Semantic Foundation **v3.45.0** (provisional number: the next additive successor to v3.44.0). Additive only: one binding and one count correction. |
-| Pull request | Not yet opened. **Unknown** until the branch is pushed. |
-| Approved semantic tree | To be recorded at the cut. **Unknown** at the time of writing. |
-| Subject digest | To be computed at the cut over the subject records named below. **Unknown** at the time of writing. |
+| Release | Semantic Foundation **v3.45.0**, additive successor to v3.44.0. Additive only: one binding and one count correction. |
+| Pull request | Quantum-L9/.github#278, branch `agent/manus/host-admission`, based on `main` at `08b2d072651083011a708c1ffd07497fc0d0e6b3`. |
+| Approved semantic tree | `semantics/` tree `5dc33138ee3c92b372b3089a1f538271139a8ad3`, measured at the cut commit. |
+| Subject digest | **Unknown**: not computed. `check_admission_closure.py` is not present in this tree, so the canonical-JSON subject digest was not produced and is not substituted with a different measure. |
 | Target class and authority | Canonical global semantics. `Quantum-L9/.github` owns them; its repository owner holds `target_class_authority`. |
 | Effective revision | The `main` commit that merges the admission pull request. It is recorded on the merged pull request; it cannot be recorded inside the hashed bytes it admits. |
 | Measured against | `main` at `08b2d072651083011a708c1ffd07497fc0d0e6b3`, the merge of #275 that admitted v3.44.0 (ADR-041). |
 
-Definitions proposed for admission:
+Admitted definitions:
 - `l9.source/domain-consumer-bindings@1` (`semantics/domain_consumer_bindings.yaml`):
   - New binding `l9.domain-consumer-binding/manus@1`. `consumer.kind: host`; `consumer.identity: manus`; `consumer.actor_ref: l9.actor-registry/global@1#manus`; `consumer.surface_refs` exactly `[l9.surface-registry/global@1#manus-cloud]`. No `successor_of`: this is the first binding for this consumer, not a successor to a Manus predecessor.
   - `requires` the five profiles the Claude Code host default requires: `l9.projection/governance@1`, `l9.projection/identity-attribution@1`, `l9.projection/capabilities-dependencies@1`, `l9.projection/contracts-conformance@1`, `l9.projection/evidence-provenance@1`.
@@ -46,7 +46,6 @@ Two constraints shape the fix. First, an admitted binding is not edited; a chang
 - **Capability breadth is unchanged.** This record selects domains, not endpoints. The adapter's Infisical manifest renders one capability (`github.get_repository`, a projection of one of `github.mcp`'s 21 paths) and excludes the other seven registry entries with named reasons. Admission does not widen that, and should not be read as doing so.
 - **Memory is out of scope.** The memory lane is governed by the operating role and groups in `environment/agents/agent_registry.yaml`, owned elsewhere. This record asserts nothing about memory admission.
 - **The release record must be cut before the tree is green.** `docs/semantic-foundation/v3.44.0/HASHES.sha256` pins the pre-edit bytes of the binding catalog, so SC-008 fails until v3.45.0 exists with its own inventory and hashes. That failure is the release gate working, not a defect in the binding.
-- **The release number is provisional.** v3.45.0 is the next additive successor under the current sequence; if the cut is numbered differently, this record and its release directory rename together.
 
 ## Consequences
 - Consumers that select `l9.source/domain-consumer-bindings@1` produce new bytes. `Quantum-L9/Cursor-Governance` then moves `governance/host-bindings/manus.yaml` from `canonical_binding_ref: null` to `l9.domain-consumer-binding/manus@1`, regenerates its canonical identity projection and receipt, and tightens `validate_manus_adapter.py` to require a resolvable binding instead of tolerating null. This record does not mutate that repository.
@@ -59,7 +58,7 @@ Two constraints shape the fix. First, an admitted binding is not edited; a chang
 - A validator run over a byte copy of the authority tree at `08b2d072651083011a708c1ffd07497fc0d0e6b3` with the `manus@1` binding, the count correction and the census edit applied: `RC-034` PASS, reporting "8 domain consumer bindings resolve to those profiles with distinct host and skill identities and no permission grant", one binding blocked for activation and four for migration, and no pre-existing projection or composition profile changed; `RC-034-NEG` PASS with all 33 negative cases failing closed at their intended field; every other rule PASS. The single remaining failure is `SC-008` against `docs/semantic-foundation/v3.44.0/HASHES.sha256`, which the v3.45.0 cut replaces.
 - Shape parity with the admitted `l9.domain-consumer-binding/claude-code@2`: host kind, the same five required profiles, the same three conditional profiles with the same activation conditions, no permission grant, empty `predecessor_profiles`.
 - Existence and status of the coordinates named: `manus` (`kind: agent`, `status: current`) in `semantics/actor_registry.yaml`; `manus-cloud` (`status: current`) in `semantics/surface_registry.yaml`.
-- **Unknown and not guessed:** the pull request number, the approved `semantics/` tree, the subject digest, the merge commit and any CI run identifier. Each is created by the cut or the merge and must be recorded then, not now.
+- **Unknown and not guessed:** the canonical subject digest, the merge commit and any CI run identifier. The pull request and the approved `semantics/` tree are named above; the digest was not computed because its tool is absent from this tree, and the merge commit does not exist until the merge.
 
 ## What admission does not establish
 - Any credential, role, grant, merge, publication, deployment or execution authority. The binding grants no permission and leaves action authority externally resolved.
