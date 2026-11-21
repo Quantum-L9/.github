@@ -43,4 +43,13 @@ else
   echo "❌ tracked bytecode failed without naming the path and the fix:"; echo "${out}"; fail=1
 fi
 
+missing="${work}/does-not-exist"
+if out="$(bash "${check}" "${missing}" 2>&1)"; then
+  echo "❌ a directory git cannot list passed"; fail=1
+elif grep -qF "::error title=bytecode check could not run::" <<<"${out}"; then
+  echo "✅ a directory git cannot list fails closed and says why"
+else
+  echo "❌ a directory git cannot list failed without naming why:"; echo "${out}"; fail=1
+fi
+
 exit "${fail}"

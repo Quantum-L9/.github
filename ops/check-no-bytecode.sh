@@ -14,9 +14,18 @@
 set -euo pipefail
 
 root="${1:-.}"
-mapfile -d '' tracked < <(git -C "${root}" ls-files -z -- '*.pyc' '*.pyo' '*/__pycache__/*' '__pycache__/*')
+# List once into a file and check git's own exit status before reading it: a
+# failed listing (no such directory, not a repository) must fail the check,
+# never read as "no bytecode" (a process substitution would hide the failure).
+listing="$(mktemp)"
+trap 'rm -f -- "${listing}"' EXIT
+if ! git -C "${root}" ls-files -z -- '*.pyc' '*.pyo' '*/__pycache__/*' '__pycache__/*' > "${listing}"; then
+  echo "::error title=bytecode check could not run::git ls-files failed in '${root}'; tracked bytecode cannot be ruled out" >&2
+  exit 2
+fi
+mapfile -d '' tracked < "${listing}"
 
-if [ "${#tracked[@]}" -eq 0 ]; then
+if [[ "${#tracked[@]}" -eq 0 ]]; then
   echo "✅ no Python bytecode is tracked"
   exit 0
 fi
