@@ -62,8 +62,9 @@ ProductTopology
 - ADR-039: Factory-born repository registration
 - ADR-040: Organization-complete repository registry
 - ADR-041: Claude Code Surface Correction and Admission of v3.44.0
+- ADR-042: Manus Host Admission and v3.45.0
 
-ADR-001 through ADR-041 are the global semantic decisions. They live in this
+ADR-001 through ADR-042 are the global semantic decisions. They live in this
 directory because this repository owns that law.
 
 ## Domain decisions

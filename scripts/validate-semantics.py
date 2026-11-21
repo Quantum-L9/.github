@@ -14335,7 +14335,7 @@ def check_rc033(docs: dict[str, dict], report: Report) -> None:
 
 # RC-034 Domain projection architecture v1 (ADR-033 candidate). Eight reusable
 # domain projection profiles (class domain) declared by domain_projection_model.yaml,
-# their compositions and registered source-class payload schemas, six domain consumer
+# their compositions and registered source-class payload schemas, seven domain consumer
 # bindings, and the two domain composition contracts. Rule ids DOMAIN-001..010 are
 # declared by the model, BINDING-001..004 and COMPOSE-001..005 by the binding catalog.
 # Validation is observational: nothing here repairs, admits or activates anything.
@@ -14459,6 +14459,9 @@ DOMAIN_BINDING_IDS = tuple(
         "coding-agent",
         "simple-plan",
         "claude-code",
+        # Manus host admission (owner decision 2026-11-21): the Manus host has
+        # exactly one canonical surface, manus-cloud, and no SessionStart hook.
+        "manus",
     )
 ) + (
     # Successor of claude-code@1 (owner decision 2026-11-20): the claude-code
@@ -15343,7 +15346,7 @@ def _rc034_bindings(
             path,
             "bindings",
             ids,
-            "must declare exactly the six v1 bindings and the claude-code@2 successor once each",
+            "must declare exactly the seven v1 bindings and the claude-code@2 successor once each",
             report,
         )
     by_id = {str(b.get("id")): b for b in bindings}
