@@ -390,7 +390,6 @@ function dispatchCallArgs(text) {
 	const cacheKey = `key: l9-composer-${declared}`;
 	for (const f of [
 		"validate-starters-composer.yml",
-		"validate-starters.yml",
 		"governance-pr.yml",
 	]) {
 		assert.ok(
@@ -398,6 +397,10 @@ function dispatchCallArgs(text) {
 			`${f} must save or restore ${cacheKey}`,
 		);
 	}
+	assert.ok(
+		!read(".github/workflows/validate-starters.yml").includes(cacheKey),
+		"validate-starters.yml consumes no composer cache; repo-test is the suite's only run",
+	);
 	for (const f of [
 		"auto-seed-new-repo.yml",
 		"seed-governance.yml",
