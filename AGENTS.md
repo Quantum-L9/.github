@@ -152,11 +152,11 @@ Central Core runs this repository in required mode, so it carries the exact
 `l9.repo-execution/v2` contract in `.l9/repo-workflow.json`. The root
 `Makefile` is the Core-owned `make-v1` facade, byte-for-byte; do not edit it.
 Everything this repository runs lives in `Repo.mk`: `make setup` checks node
-and git and provides a PyYAML interpreter, `make validate` is the complete
-local gate as before (seed-payload suites, SHA pins, semantic closure),
-`make check` is its SHA-pin audit, and `make test` is its
-`ops/validate-starters.sh` suites. `make validate` stays the one gate to run
-before a change; Core runs all four phases in order.
+and git and provides a PyYAML interpreter, `make validate` is the SHA-pin
+audit and semantic-foundation closure gate and no longer runs the starter
+suite, `make check` stays its SHA-pin audit, and `make test` is its
+`ops/validate-starters.sh` suite — the suite's only run. That partition is
+pinned by `ops/test-phase-partition.js`; Core runs all four phases in order.
 
 ## Repository-owned skill
 

@@ -7,13 +7,15 @@
 #
 #   make setup     repo-setup     the toolchain the gates need (node, git, curl,
 #                                 PyYAML, jsonschema)
-#   make validate  repo-validate  the complete local gate, unchanged: seed
-#                                 payload suites, SHA pins, semantic closure
+#   make validate  repo-validate  SHA pins and semantic-foundation closure (no
+#                                 starter suite)
 #   make check     repo-check     static subset: SHA-pin audit
-#   make test      repo-test      test subset: ops/validate-starters.sh suites
+#   make test      repo-test      test subset: ops/validate-starters.sh suites,
+#                                 the suite's only run
 #
-# `make validate` stays the one complete local gate. Core runs all four phases
-# in order, so check and test re-run subsets of validate there.
+# `make validate` no longer runs the starter suite; `make test` runs it once.
+# Core runs all four phases in order, so check re-runs the SHA-pin audit
+# subset of validate there.
 .PHONY: repo-setup repo-validate repo-check repo-test \
         activate preflight sync-labels sync-labels-all \
         seed-dry seed-apply birth-bootstrap birth-seed \
@@ -41,7 +43,7 @@ repo-setup: ## Check node and git; provide a PyYAML + jsonschema interpreter (.v
 repo-check: ## Static check: audit this repo for floating action refs
 	@bash ops/audit-sha-pins.sh
 
-repo-test: repo-setup ## Test suites: seed payload, birth profiles, workflow and PR-body contracts
+repo-test: repo-setup ## The starter suite (ops/validate-starters.sh), its only run
 	@$(USE_VENV) bash ops/validate-starters.sh
 
 # ─── One-Shot Activation ─────────────────────────────────────────────────────
@@ -52,9 +54,8 @@ activate: ## Run full activation (secret scanning, rulesets, labels, seed, prefl
 preflight: ## Run preflight health check (read-only)
 	@bash scripts/preflight.sh
 
-repo-validate: repo-setup ## Validate seed payload, birth profiles, SHA pins, and semantic-foundation closure
+repo-validate: repo-setup ## Validate SHA pins and semantic-foundation closure (no starter suite)
 	@set -euo pipefail; $(USE_VENV) \
-	bash ops/validate-starters.sh; \
 	bash ops/audit-sha-pins.sh; \
 	if python3 -c 'import yaml' >/dev/null 2>&1; then \
 	  PY=python3; \

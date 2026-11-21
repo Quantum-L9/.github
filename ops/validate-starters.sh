@@ -8,7 +8,9 @@
 # gate, the branch guard inside both seed workflows and continuous-sync
 # (including its class-aware PR-template and caller re-pin management and its
 # Preview / Apply modes), the manual-only trigger contract of the distribution
-# workflows, the governance-pr.yml PR-body refresh job, and the advisory
+# workflows, the Repo.mk phase partition (this suite's only run is repo-test;
+# repo-validate keeps the SHA-pin audit and semantic closure), the
+# governance-pr.yml PR-body refresh job, and the advisory
 # governance-report.yml posture classification (no unverified all-clear) over
 # the registry-derived governed census (needs python3 with PyYAML).
 # Run from the root of the Quantum-L9/.github repo.
@@ -45,6 +47,7 @@ else
     FAIL=$((FAIL+1))
   fi
   for t in \
+    ops/test-phase-partition.js \
     ops/test-build-seed-payload.js \
     ops/test-seed-payload-consumer-gates.js \
     ops/test-render-dependabot.js \
