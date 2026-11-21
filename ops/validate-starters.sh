@@ -103,14 +103,6 @@ else
   FAIL=$((FAIL+1))
 fi
 
-if bash ops/test-check-no-bytecode.sh; then
-  echo "✅ ops/test-check-no-bytecode.sh"
-  PASS=$((PASS+1))
-else
-  echo "❌ ops/test-check-no-bytecode.sh"
-  FAIL=$((FAIL+1))
-fi
-
 if bash ops/test-sync-org-files.sh; then
   echo "✅ ops/test-sync-org-files.sh"
   PASS=$((PASS+1))

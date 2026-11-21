@@ -4,8 +4,9 @@
  * The phase partition of Repo.mk, the repository-owned make-v1 implementation.
  *
  * repo-validate is the SHA-pin and semantic-foundation closure gate; it no
- * longer runs the starter suite. repo-check is the tracked-bytecode guard; the
- * SHA-pin audit runs once, in repo-validate, not again in repo-check.
+ * longer runs the starter suite. repo-check does not re-run that audit and
+ * does not run a local bytecode guard: tracked bytecode is a Core org check.
+ * The SHA-pin audit runs once, in repo-validate.
  * repo-test runs ops/validate-starters.sh — the suite's only run, so a
  * starter-contract change is exercised exactly once even though Core runs
  * all four phases in order. The root Makefile facade routes validate, check
@@ -74,8 +75,8 @@ function assertPartition(mk, facade) {
 		"repo-test runs the starter suite exactly once",
 	);
 
-	// repo-validate keeps its pins and closure; repo-check is the bytecode
-	// guard; the SHA-pin audit runs in exactly one phase.
+	// repo-validate keeps its pins and closure. repo-check re-runs neither
+	// the SHA-pin audit nor the deleted bytecode guard. The audit runs once.
 	assert.match(
 		phases["repo-validate"],
 		/ops\/audit-sha-pins\.sh/,
@@ -86,10 +87,15 @@ function assertPartition(mk, facade) {
 		/scripts\/validate-semantics\.py/,
 		"repo-validate keeps the semantic-foundation closure",
 	);
-	assert.match(
+	assert.doesNotMatch(
 		phases["repo-check"],
 		/ops\/check-no-bytecode\.sh/,
-		"repo-check runs the tracked-bytecode guard",
+		"repo-check must not run the deleted bytecode guard; Core owns that check",
+	);
+	assert.doesNotMatch(
+		phases["repo-check"],
+		/ops\/audit-sha-pins\.sh/,
+		"repo-check must not re-run the SHA-pin audit",
 	);
 	const pinRuns = Object.values(phases).reduce(
 		(n, recipe) => n + times(recipe, "ops/audit-sha-pins.sh"),
@@ -179,7 +185,7 @@ assertNoWorkflowRunsTheSuite(workflowTexts());
 assertRegistrationSuitesPlaced(starters, workflowTexts());
 assertNoWorkflowReRunsAnalyze(workflowTexts());
 console.log(
-	"ok: repo-validate keeps the SHA-pin audit and semantic closure, repo-check is the bytecode guard, the starter suite runs exactly once, in repo-test, no workflow names it or re-runs the pin audit or semantic validator, and registration-e2e.yml runs the registration suites",
+	"ok: repo-validate keeps the SHA-pin audit and semantic closure, repo-check re-runs neither, the starter suite runs exactly once, in repo-test, no workflow names it or re-runs the pin audit or semantic validator, and registration-e2e.yml runs the registration suites",
 );
 
 // Negative controls: a partition that moves a phase role must fail.
@@ -205,20 +211,20 @@ assert.throws(
 	"the starter suite out of repo-test is not caught",
 );
 
-const guardGone = mk.replace(
-	"repo-check: ## Static check: no tracked Python bytecode\n\t@bash ops/check-no-bytecode.sh",
-	"repo-check: ## Static check: no tracked Python bytecode\n\t@true",
+const guardBack = mk.replace(
+	'\t@echo "repo-check: SHA-pin audit runs once in repo-validate; tracked bytecode is a Core org check"',
+	"\t@bash ops/check-no-bytecode.sh",
 );
-assert.notStrictEqual(guardGone, mk, "negative control did not change its fixture");
+assert.notStrictEqual(guardBack, mk, "negative control did not change its fixture");
 assert.throws(
-	() => assertPartition(guardGone, facade),
+	() => assertPartition(guardBack, facade),
 	assert.AssertionError,
-	"the bytecode guard out of repo-check is not caught",
+	"the deleted bytecode guard back in repo-check is not caught",
 );
 
 const pinsTwice = mk.replace(
-	"\t@bash ops/check-no-bytecode.sh",
-	"\t@bash ops/check-no-bytecode.sh && bash ops/audit-sha-pins.sh",
+	'\t@echo "repo-check: SHA-pin audit runs once in repo-validate; tracked bytecode is a Core org check"',
+	"\t@bash ops/audit-sha-pins.sh",
 );
 assert.notStrictEqual(pinsTwice, mk, "negative control did not change its fixture");
 assert.throws(

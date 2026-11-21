@@ -21,7 +21,7 @@ governed_by:
   - l9.contract/domain-composition-compatibility@1
   - l9.contract/domain-composition-provenance@1
 purpose: >-
-  Declare which domain projections each of six named consumers requires, which it activates only under a declared
+  Declare which domain projections each of seven named consumers requires, which it activates only under a declared
   condition, and which composition contracts govern combining them. A domain consumer binding is not a projection
   profile and not a consumer_binding of a product release. It selects meaning and creates none, keeps host, hosted
   skill, actor and authority identities distinct, grants no permission, and leaves every unverified consumer
@@ -73,6 +73,31 @@ composition:
   compatibility_contract: l9.contract/domain-composition-compatibility@1
   provenance_contract: l9.contract/domain-composition-provenance@1
 bindings:
+- id: l9.domain-consumer-binding/manus@1
+  consumer:
+    kind: host
+    identity: manus
+    actor_ref: l9.actor-registry/global@1#manus
+    surface_refs:
+    - l9.surface-registry/global@1#manus-cloud
+  predecessor_profiles: []
+  requires:
+  - l9.projection/governance@1
+  - l9.projection/identity-attribution@1
+  - l9.projection/capabilities-dependencies@1
+  - l9.projection/contracts-conformance@1
+  - l9.projection/evidence-provenance@1
+  conditional:
+  - profile: l9.projection/architecture@1
+    activation: hosted_skill_requirement
+  - profile: l9.projection/strategic-value@1
+    activation: explicit_task_requirement
+  - profile: l9.projection/signals@1
+    activation: explicit_task_requirement
+  authority:
+    binding_grants_permissions: false
+    action_authority: externally_resolved
+  unresolved: []
 - id: l9.domain-consumer-binding/gar@1
   consumer:
     kind: skill
