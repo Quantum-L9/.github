@@ -1,0 +1,69 @@
+name: Registration tool suites
+
+# The registration tools against a copy of this tree: birth registration
+# (ADR-039), organization-repository admission (ADR-040) and conformance-profile
+# admission (lane K). Each suite runs the real tool and the full semantic
+# validator (scripts/validate-semantics.py) over the copied tree, about 170s in
+# all, so they are not part of `make test`, the required check every pull
+# request waits on. They run here, in parallel with it, whenever a pull request
+# changes an input they read, on every push to main, and nightly.
+
+on:
+  pull_request:
+    paths:
+      - "ops/register-birth.py"
+      - "ops/test-register-birth.py"
+      - "ops/register-org-repository.py"
+      - "ops/test-register-org-repository.py"
+      - "ops/admit-profiles.py"
+      - "ops/test-admit-profiles.py"
+      - "scripts/validate-semantics.py"
+      - "scripts/birth-runner/**"
+      - "semantics/**"
+      - "docs/**"
+      - ".github/workflows/registration-e2e.yml"
+  push:
+    branches:
+      - main
+  schedule:
+    # Nightly, outside the top of the hour.
+    - cron: "37 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: registration-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  suite:
+    name: ${{ matrix.suite }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        suite:
+          - ops/test-register-birth.py
+          - ops/test-register-org-repository.py
+          - ops/test-admit-profiles.py
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          # The suites build their own repositories in a temp directory and copy
+          # this tree without .git, so the default shallow checkout suffices.
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the pinned YAML parser and schema validator
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2" "jsonschema==4.23.0"
+      - name: Run ${{ matrix.suite }}
+        env:
+          SUITE: ${{ matrix.suite }}
+        run: |
+          python3 "${SUITE}"

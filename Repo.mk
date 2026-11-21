@@ -7,15 +7,19 @@
 #
 #   make setup     repo-setup     the toolchain the gates need (node, git, curl,
 #                                 PyYAML, jsonschema)
-#   make validate  repo-validate  SHA pins, no tracked Python bytecode, and
-#                                 semantic-foundation closure (no starter suite)
-#   make check     repo-check     static subset: SHA-pin audit
+#   make validate  repo-validate  SHA pins and semantic-foundation closure (no
+#                                 starter suite)
+#   make check     repo-check     static subset: no tracked Python bytecode (the
+#                                 SHA-pin audit runs once, in validate)
 #   make test      repo-test      test subset: ops/validate-starters.sh suites,
 #                                 the suite's only run
 #
 # `make validate` no longer runs the starter suite; `make test` runs it once.
-# Core runs all four phases in order, so check re-runs the SHA-pin audit
-# subset of validate there.
+# Core runs all four phases in order, so each check runs in exactly one
+# phase. The registration tool suites (register-birth, register-org-repository,
+# admit-profiles; ~170s, each re-runs the semantic validator over a copy of the
+# tree) run in .github/workflows/registration-e2e.yml when their inputs change,
+# and nightly: not in the required test phase.
 .PHONY: repo-setup repo-validate repo-check repo-test \
         activate preflight sync-labels sync-labels-all \
         seed-dry seed-apply birth-bootstrap birth-seed \
@@ -40,8 +44,8 @@ repo-setup: ## Check node and git; provide a PyYAML + jsonschema interpreter (.v
 	  .venv/bin/pip install --disable-pip-version-check --only-binary=:all: "pyyaml==6.0.2" "jsonschema==4.23.0"; \
 	fi
 
-repo-check: ## Static check: audit this repo for floating action refs
-	@bash ops/audit-sha-pins.sh
+repo-check: ## Static check: no tracked Python bytecode
+	@bash ops/check-no-bytecode.sh
 
 repo-test: repo-setup ## The starter suite (ops/validate-starters.sh), its only run
 	@$(USE_VENV) bash ops/validate-starters.sh
@@ -57,7 +61,6 @@ preflight: ## Run preflight health check (read-only)
 repo-validate: repo-setup ## Validate SHA pins and semantic-foundation closure (no starter suite)
 	@set -euo pipefail; $(USE_VENV) \
 	bash ops/audit-sha-pins.sh; \
-	bash ops/check-no-bytecode.sh; \
 	if python3 -c 'import yaml' >/dev/null 2>&1; then \
 	  PY=python3; \
 	else \

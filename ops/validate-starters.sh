@@ -78,35 +78,11 @@ else
   echo ""
 fi
 
-# Factory-born repository registration (ADR-039): the real tool against
-# fixture births and a copy of this tree (needs git and python3 with PyYAML).
-if python3 ops/test-register-birth.py; then
-  echo "✅ ops/test-register-birth.py"
-  PASS=$((PASS+1))
-else
-  echo "❌ ops/test-register-birth.py"
-  FAIL=$((FAIL+1))
-fi
-
-# Organization-repository admission (ADR-040): the real tool against a copy of
-# this tree (needs python3 with PyYAML).
-if python3 ops/test-register-org-repository.py; then
-  echo "✅ ops/test-register-org-repository.py"
-  PASS=$((PASS+1))
-else
-  echo "❌ ops/test-register-org-repository.py"
-  FAIL=$((FAIL+1))
-fi
-
-# Conformance-profile admission at birth (lane K): the real tool against fixture
-# catalogs and a copy of this tree (needs python3 with PyYAML).
-if python3 ops/test-admit-profiles.py; then
-  echo "✅ ops/test-admit-profiles.py"
-  PASS=$((PASS+1))
-else
-  echo "❌ ops/test-admit-profiles.py"
-  FAIL=$((FAIL+1))
-fi
+# The registration tool suites (ADR-039 birth registration, ADR-040
+# organization-repository admission, lane K profile admission) run the real
+# tools and the full semantic validator against a copy of this tree (~170s).
+# They run in .github/workflows/registration-e2e.yml when an input they read
+# changes, and nightly; not here, on every pull request's required check.
 
 # GitHub settings as code: the offline validator against this tree, then the
 # suite against copies with one defect each (needs python3 with PyYAML and

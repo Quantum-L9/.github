@@ -4,7 +4,8 @@
  * The phase partition of Repo.mk, the repository-owned make-v1 implementation.
  *
  * repo-validate is the SHA-pin and semantic-foundation closure gate; it no
- * longer runs the starter suite. repo-check stays the SHA-pin audit.
+ * longer runs the starter suite. repo-check is the tracked-bytecode guard; the
+ * SHA-pin audit runs once, in repo-validate, not again in repo-check.
  * repo-test runs ops/validate-starters.sh — the suite's only run, so a
  * starter-contract change is exercised exactly once even though Core runs
  * all four phases in order. The root Makefile facade routes validate, check
@@ -73,8 +74,8 @@ function assertPartition(mk, facade) {
 		"repo-test runs the starter suite exactly once",
 	);
 
-	// repo-validate keeps its pins and closure, and repo-check stays the
-	// SHA-pin audit.
+	// repo-validate keeps its pins and closure; repo-check is the bytecode
+	// guard; the SHA-pin audit runs in exactly one phase.
 	assert.match(
 		phases["repo-validate"],
 		/ops\/audit-sha-pins\.sh/,
@@ -87,9 +88,14 @@ function assertPartition(mk, facade) {
 	);
 	assert.match(
 		phases["repo-check"],
-		/ops\/audit-sha-pins\.sh/,
-		"repo-check stays the SHA-pin audit",
+		/ops\/check-no-bytecode\.sh/,
+		"repo-check runs the tracked-bytecode guard",
 	);
+	const pinRuns = Object.values(phases).reduce(
+		(n, recipe) => n + times(recipe, "ops/audit-sha-pins.sh"),
+		0,
+	);
+	assert.strictEqual(pinRuns, 1, "the SHA-pin audit runs in exactly one phase");
 
 	// The facade routes each make-v1 phase to its repository-owned leaf.
 	assert.match(facade, /^validate: repo-validate ##/m);
@@ -121,13 +127,37 @@ function assertNoWorkflowRunsTheSuite(workflows) {
 	}
 }
 
+/**
+ * The registration tool suites each re-run the semantic validator over a copy
+ * of the tree (~170s together), so they are out of the required test phase.
+ * They must still run somewhere: each one is named by registration-e2e.yml.
+ */
+const REGISTRATION_SUITES = [
+	"ops/test-register-birth.py",
+	"ops/test-register-org-repository.py",
+	"ops/test-admit-profiles.py",
+];
+function assertRegistrationSuitesPlaced(starters, workflows) {
+	const e2e = workflows["registration-e2e.yml"];
+	assert.ok(e2e, "registration-e2e.yml is missing; the registration suites would run nowhere");
+	for (const suite of REGISTRATION_SUITES) {
+		assert.ok(
+			!starters.includes(suite),
+			`${suite} is back in ops/validate-starters.sh, the required test phase`,
+		);
+		assert.ok(e2e.includes(suite), `registration-e2e.yml does not run ${suite}`);
+	}
+}
+
 const mk = read("Repo.mk");
 const facade = read("Makefile");
+const starters = read("ops/validate-starters.sh");
 
 assertPartition(mk, facade);
 assertNoWorkflowRunsTheSuite(workflowTexts());
+assertRegistrationSuitesPlaced(starters, workflowTexts());
 console.log(
-	"ok: repo-validate keeps the SHA-pin audit and semantic closure; the starter suite runs exactly once, in repo-test, and no workflow names it",
+	"ok: repo-validate keeps the SHA-pin audit and semantic closure, repo-check is the bytecode guard, the starter suite runs exactly once, in repo-test, no workflow names it, and registration-e2e.yml runs the registration suites",
 );
 
 // Negative controls: a partition that moves a phase role must fail.
@@ -153,15 +183,43 @@ assert.throws(
 	"the starter suite out of repo-test is not caught",
 );
 
-const auditGone = mk.replace(
-	"repo-check: ## Static check: audit this repo for floating action refs\n\t@bash ops/audit-sha-pins.sh",
-	"repo-check: ## Static check: audit this repo for floating action refs\n\t@true",
+const guardGone = mk.replace(
+	"repo-check: ## Static check: no tracked Python bytecode\n\t@bash ops/check-no-bytecode.sh",
+	"repo-check: ## Static check: no tracked Python bytecode\n\t@true",
 );
-assert.notStrictEqual(auditGone, mk, "negative control did not change its fixture");
+assert.notStrictEqual(guardGone, mk, "negative control did not change its fixture");
 assert.throws(
-	() => assertPartition(auditGone, facade),
+	() => assertPartition(guardGone, facade),
 	assert.AssertionError,
-	"the SHA-pin audit out of repo-check is not caught",
+	"the bytecode guard out of repo-check is not caught",
+);
+
+const pinsTwice = mk.replace(
+	"\t@bash ops/check-no-bytecode.sh",
+	"\t@bash ops/check-no-bytecode.sh && bash ops/audit-sha-pins.sh",
+);
+assert.notStrictEqual(pinsTwice, mk, "negative control did not change its fixture");
+assert.throws(
+	() => assertPartition(pinsTwice, facade),
+	assert.AssertionError,
+	"the SHA-pin audit run twice is not caught",
+);
+
+assert.throws(
+	() =>
+		assertRegistrationSuitesPlaced(
+			`${starters}\npython3 ops/test-register-birth.py\n`,
+			workflowTexts(),
+		),
+	assert.AssertionError,
+	"a registration suite back in the required test phase is not caught",
+);
+const withoutE2e = { ...workflowTexts() };
+delete withoutE2e["registration-e2e.yml"];
+assert.throws(
+	() => assertRegistrationSuitesPlaced(starters, withoutE2e),
+	assert.AssertionError,
+	"registration suites that run nowhere are not caught",
 );
 
 const semanticsGone = mk.replace(
