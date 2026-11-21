@@ -34,6 +34,20 @@ else
   echo "✅ SHA-pin audit: off Actions it fails plainly, without annotations"
 fi
 
+# 2b. A summary path set while Actions is unset must stay untouched.
+summary="${work}/pins-summary-off.md"
+: > "${summary}"
+before="$(wc -c < "${summary}")"
+if out="$(cd "${work}/pins" && env -u GITHUB_ACTIONS GITHUB_STEP_SUMMARY="${summary}" bash "${here}/audit-sha-pins.sh" 2>&1)"; then
+  echo "❌ a floating ref passed when only GITHUB_STEP_SUMMARY was set"; fail=1
+elif grep -qF "::error" <<<"${out}"; then
+  echo "❌ the SHA-pin audit annotated when only GITHUB_STEP_SUMMARY was set"; fail=1
+elif [[ "$(wc -c < "${summary}")" -ne "${before}" ]]; then
+  echo "❌ the SHA-pin audit wrote a summary outside Actions"; cat "${summary}"; fail=1
+else
+  echo "✅ SHA-pin audit: a summary path outside Actions is left untouched"
+fi
+
 # 3. A semantic-closure FAIL: annotated on its path, listed in the summary.
 summary="${work}/semantics-summary.md"
 if out="$(GITHUB_ACTIONS=true GITHUB_STEP_SUMMARY="${summary}" python3 - "${root}/scripts/validate-semantics.py" <<'PY'

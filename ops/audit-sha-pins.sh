@@ -67,7 +67,8 @@ done
 echo "---"
 echo "Checked ${CHECKED} uses: references."
 # Surface the result beyond the raw log (L9-SIGNAL-001); a no-op off Actions.
-if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+# GITHUB_STEP_SUMMARY alone is not enough: a caller outside Actions can set it.
+if [[ "${GITHUB_ACTIONS:-}" == "true" && -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
   {
     echo "### SHA-pin audit (ops/audit-sha-pins.sh)"
     echo
