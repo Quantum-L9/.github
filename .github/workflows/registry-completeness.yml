@@ -15,7 +15,7 @@
 # the same one auto-seed-new-repo.yml lists the organization with. The default
 # GITHUB_TOKEN of this repository cannot see the organization's private
 # repositories, so it would under-report. The deterministic logic is proven on
-# every PR by ops/test-registry-completeness.js (validate-starters.yml), so
+# every PR by ops/test-registry-completeness.js (the `make test` suite), so
 # this networked job runs only where that secret is available.
 name: Registry completeness
 

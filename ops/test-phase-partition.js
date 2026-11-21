@@ -10,6 +10,10 @@
  * all four phases in order. The root Makefile facade routes validate, check
  * and test to those leaves and is never edited here.
  *
+ * The witness also reads .github/workflows: a workflow that invoked the
+ * suite directly would re-run it beside Core's required `test` phase, so the
+ * partition is only pinned if no workflow names it.
+ *
  * Read literally, without executing make, like the other ops/test-*.js
  * suites: the assertion is about the text the runner reads.
  *
@@ -93,12 +97,37 @@ function assertPartition(mk, facade) {
 	assert.match(facade, /^test: repo-test ##/m);
 }
 
+/** Every workflow file, keyed by name, read as the runner reads it. */
+function workflowTexts() {
+	return Object.fromEntries(
+		fs
+			.readdirSync(path.join(root, ".github/workflows"))
+			.filter((name) => name.endsWith(".yml"))
+			.map((name) => [name, read(`.github/workflows/${name}`)]),
+	);
+}
+
+/**
+ * The suite's only run is repo-test. A workflow that invokes it directly
+ * re-runs it beside Core's required `test` phase, which is the duplicate this
+ * partition exists to remove.
+ */
+function assertNoWorkflowRunsTheSuite(workflows) {
+	for (const [name, text] of Object.entries(workflows)) {
+		assert.ok(
+			!text.includes("ops/validate-starters.sh"),
+			`${name} names the starter suite; repo-test is its only run`,
+		);
+	}
+}
+
 const mk = read("Repo.mk");
 const facade = read("Makefile");
 
 assertPartition(mk, facade);
+assertNoWorkflowRunsTheSuite(workflowTexts());
 console.log(
-	"ok: repo-validate keeps the SHA-pin audit and semantic closure; the starter suite runs exactly once, in repo-test",
+	"ok: repo-validate keeps the SHA-pin audit and semantic closure; the starter suite runs exactly once, in repo-test, and no workflow names it",
 );
 
 // Negative controls: a partition that moves a phase role must fail.
@@ -155,6 +184,15 @@ assert.throws(
 	() => assertPartition(mk, facadeMoved),
 	assert.AssertionError,
 	"a facade phase routed to the wrong leaf is not caught",
+);
+
+assert.throws(
+	() =>
+		assertNoWorkflowRunsTheSuite({
+			"fixture.yml": "run: ops/validate-starters.sh\n",
+		}),
+	assert.AssertionError,
+	"a workflow that runs the starter suite beside repo-test is not caught",
 );
 
 console.log("\nall phase partition scenarios passed");

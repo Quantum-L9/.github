@@ -188,11 +188,22 @@ for (const name of fs.readdirSync(workflowDir)) {
 }
 
 const composerWorkflow = read(".github/workflows/validate-starters-composer.yml");
-const suiteJob = composerWorkflow.split(/^ {2}validate:/m)[1];
-assert.ok(suiteJob, "validate-starters-composer.yml has a validate job");
 assert.ok(
-	!suiteJob.includes(SECRET),
-	"the starter suite job must not name the read token",
+	!/^ {2}validate:/m.test(composerWorkflow),
+	"validate-starters-composer.yml runs no suite job; repo-test is its only run",
+);
+// The read token belongs to the default-branch composer fetch alone, so the
+// fetch is the workflow's only job; a second job would inherit its cache and
+// run the suite beside Core's required `test` phase.
+const composerJobs = [
+	...composerWorkflow
+		.slice(composerWorkflow.indexOf("\njobs:\n"))
+		.matchAll(/^ {2}([a-z][a-z0-9-]*):$/gm),
+].map((match) => match[1]);
+assert.deepStrictEqual(
+	composerJobs,
+	["fetch-composer"],
+	"the composer workflow's only job is the fetch",
 );
 assert.ok(
 	!composerWorkflow.includes("pull_request_target"),
