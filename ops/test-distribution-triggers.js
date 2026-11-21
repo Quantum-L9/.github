@@ -397,10 +397,6 @@ function dispatchCallArgs(text) {
 			`${f} must save or restore ${cacheKey}`,
 		);
 	}
-	assert.ok(
-		!read(".github/workflows/validate-starters.yml").includes(cacheKey),
-		"validate-starters.yml consumes no composer cache; repo-test is the suite's only run",
-	);
 	for (const f of [
 		"auto-seed-new-repo.yml",
 		"seed-governance.yml",

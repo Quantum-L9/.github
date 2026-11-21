@@ -149,6 +149,27 @@ function assertRegistrationSuitesPlaced(starters, workflows) {
 	}
 }
 
+/**
+ * The SHA-pin audit and the semantic validator run once per pull request,
+ * inside the required Analyze check (repo-validate). A workflow that invoked
+ * either directly would run it a second time beside it.
+ */
+const SINGLE_RUN_INVOCATIONS = [
+	/bash\s+(\.\/)?ops\/audit-sha-pins\.sh/,
+	/python3?\s+(\.\/)?scripts\/validate-semantics\.py/,
+];
+function assertNoWorkflowReRunsAnalyze(workflows) {
+	for (const [name, text] of Object.entries(workflows)) {
+		for (const pattern of SINGLE_RUN_INVOCATIONS) {
+			assert.doesNotMatch(
+				text,
+				pattern,
+				`${name} re-runs ${pattern}; it runs once, in repo-validate`,
+			);
+		}
+	}
+}
+
 const mk = read("Repo.mk");
 const facade = read("Makefile");
 const starters = read("ops/validate-starters.sh");
@@ -156,8 +177,9 @@ const starters = read("ops/validate-starters.sh");
 assertPartition(mk, facade);
 assertNoWorkflowRunsTheSuite(workflowTexts());
 assertRegistrationSuitesPlaced(starters, workflowTexts());
+assertNoWorkflowReRunsAnalyze(workflowTexts());
 console.log(
-	"ok: repo-validate keeps the SHA-pin audit and semantic closure, repo-check is the bytecode guard, the starter suite runs exactly once, in repo-test, no workflow names it, and registration-e2e.yml runs the registration suites",
+	"ok: repo-validate keeps the SHA-pin audit and semantic closure, repo-check is the bytecode guard, the starter suite runs exactly once, in repo-test, no workflow names it or re-runs the pin audit or semantic validator, and registration-e2e.yml runs the registration suites",
 );
 
 // Negative controls: a partition that moves a phase role must fail.
@@ -252,5 +274,16 @@ assert.throws(
 	assert.AssertionError,
 	"a workflow that runs the starter suite beside repo-test is not caught",
 );
+
+for (const fixture of [
+	"run: bash ops/audit-sha-pins.sh\n",
+	"run: |\n  python3 scripts/validate-semantics.py\n",
+]) {
+	assert.throws(
+		() => assertNoWorkflowReRunsAnalyze({ "fixture.yml": fixture }),
+		assert.AssertionError,
+		`a workflow re-running a repo-validate check is not caught: ${fixture}`,
+	);
+}
 
 console.log("\nall phase partition scenarios passed");

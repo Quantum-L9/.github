@@ -152,13 +152,6 @@ for (const name of fs.readdirSync(workflowDir)) {
 		assertPrFiles(text);
 		continue;
 	}
-	if (rel === ".github/workflows/validate-starters.yml") {
-		assert.ok(
-			!text.includes(SECRET),
-			`${rel} restores the composer cache and must not name ${SECRET}`,
-		);
-		continue;
-	}
 	const found = text.includes(SECRET);
 	const trigger = new Set(events(onBlock(text)));
 	const forbidden = [...trigger].filter((event) => FORBIDDEN_EVENTS.has(event));

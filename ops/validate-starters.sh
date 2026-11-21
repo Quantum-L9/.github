@@ -95,6 +95,14 @@ else
   FAIL=$((FAIL+1))
 fi
 
+if bash ops/test-ci-signal-output.sh; then
+  echo "✅ ops/test-ci-signal-output.sh"
+  PASS=$((PASS+1))
+else
+  echo "❌ ops/test-ci-signal-output.sh"
+  FAIL=$((FAIL+1))
+fi
+
 if bash ops/test-check-no-bytecode.sh; then
   echo "✅ ops/test-check-no-bytecode.sh"
   PASS=$((PASS+1))
