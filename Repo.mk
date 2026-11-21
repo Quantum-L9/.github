@@ -7,8 +7,8 @@
 #
 #   make setup     repo-setup     the toolchain the gates need (node, git, curl,
 #                                 PyYAML, jsonschema)
-#   make validate  repo-validate  SHA pins and semantic-foundation closure (no
-#                                 starter suite)
+#   make validate  repo-validate  SHA pins, no tracked Python bytecode, and
+#                                 semantic-foundation closure (no starter suite)
 #   make check     repo-check     static subset: SHA-pin audit
 #   make test      repo-test      test subset: ops/validate-starters.sh suites,
 #                                 the suite's only run
@@ -57,6 +57,7 @@ preflight: ## Run preflight health check (read-only)
 repo-validate: repo-setup ## Validate SHA pins and semantic-foundation closure (no starter suite)
 	@set -euo pipefail; $(USE_VENV) \
 	bash ops/audit-sha-pins.sh; \
+	bash ops/check-no-bytecode.sh; \
 	if python3 -c 'import yaml' >/dev/null 2>&1; then \
 	  PY=python3; \
 	else \
