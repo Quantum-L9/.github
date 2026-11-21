@@ -23,3 +23,10 @@
 # Central Core stages its SDK and verification evidence here before invoking
 # repository verification (Core Repository Execution V2). Not source.
 .l9/runtime/
+# Python bytecode is a build output: whichever interpreter imports a module
+# rewrites its committed .pyc, so a tracked one dirties every checkout that
+# runs the code (Quantum-L9/.github#278). Enforcement that none is ever
+# tracked is a Core org-wide check, not repository configuration.
+__pycache__/
+*.pyc
+*.pyo
